@@ -1,0 +1,9 @@
+*~
+\#*
+\.\#*
+.emacs.desktop
+.emacs.desktop.lock
+BROWSE
+
+doc/*.html
+doc/*.pdf

@@ -1,0 +1,44 @@
+/** theme-default.css --- Default theme
+ *
+ * Copyright (C) 2014 Diffeo
+ *
+ * Author: Miguel Guedes <miguel@miguelguedes.org>
+ *
+ * Comments:
+ *
+ * 
+ */
+
+/* HTML tags */
+BODY {
+  font: 15px Helvetica, Arial, sans-serif;
+}
+
+
+/* Sorting Desk */
+#wrapper-outer {
+  width: 1000px;
+  background-color: yellow;
+  margin: auto;
+}
+
+#wrapper-items {
+  margin-right: 30px;
+  float: left;
+  border: 1px solid black;
+  border-radius: 10px;
+  width: 483px;
+  min-height: 600px;
+}
+
+#wrapper-bins {
+  float: right;
+  border: 1px solid black;
+  border-radius: 10px;
+  width: 483px;
+  min-height: 600px;
+}
+
+#items, #bins {
+  margin: 10px;
+}
