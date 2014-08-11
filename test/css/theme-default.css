@@ -21,21 +21,19 @@ BODY {
   margin: auto;
 }
 
-#wrapper-items {
-  margin-right: 30px;
-  float: left;
-  border: 1px solid black;
+.wrapper {
+  border: 4px solid #DFDED5;
   border-radius: 10px;
-  width: 483px;
   min-height: 600px;
+  width: 480px;
+}
+
+#wrapper-items {
+  float: left;
 }
 
 #wrapper-bins {
   float: right;
-  border: 1px solid black;
-  border-radius: 10px;
-  width: 483px;
-  min-height: 600px;
 }
 
 #items, #bins {
@@ -63,12 +61,20 @@ BODY {
   font-size: 20px;
   box-shadow: 1px 1px 5px 0px rgba(50, 50, 50, 0.75);
   text-shadow: 1px 1px 2px rgba(150, 150, 150, 1);
+  transition: background-color 75ms, color 100ms;
 }
 
 .bin-primary:hover {
   background-color: #A9BEF3;
   color: #F2F6FF;
   cursor: pointer;
+}
+
+.bin-primary:active {
+  position: relative;
+  top: 3px;
+  left: 3px;
+  box-shadow: none;
 }
 
 .bin-primary-sub {
@@ -84,12 +90,20 @@ BODY {
   font-size: 16px;
   box-shadow: 1px 1px 5px 0px rgba(50, 50, 50, 0.75);
   text-shadow: 1px 1px 1px rgba(150, 150, 150, 1);
+  transition: background-color 75ms, color 100ms;
 }
 
 .bin-primary-sub:hover {
   background-color: #BEDFF7;
   color: #5D8DD4;
   cursor: pointer;
+}
+
+.bin-primary-sub:active {
+  position: relative;
+  top: 2px;
+  left: 2px;
+  box-shadow: none;
 }
 
 .bin-primary-sub.left {
@@ -109,6 +123,7 @@ BODY {
   font-size: 14px;
   box-shadow: 1px 1px 5px 0px rgba(50, 50, 50, 0.75);
   text-shadow: 1px 1px 1px rgba(150, 150, 150, 1);
+  transition: background-color 75ms, color 100ms;
 }
 
 .bin-secondary.left {
@@ -119,4 +134,11 @@ BODY {
   background-color: #EED5B2;
   color: #BE6A42;
   cursor: pointer;
+}
+
+.bin-secondary:active {
+  position: relative;
+  top: 2px;
+  left: 2px;
+  box-shadow: none;
 }
