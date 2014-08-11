@@ -23,7 +23,7 @@ Api.prototype = {
   DELAY_MIN: 200,
   DELAY_MAX: 1500,
   
-  bins_: {
+  bins: {
     10: {
       name: "Primary",
       bins: {
@@ -51,7 +51,7 @@ Api.prototype = {
       isPrimary: false
     }
   },
-  lastId_: 101,                 /* So we may assign ids to secondary bins when
+  lastId: 101,                 /* So we may assign ids to secondary bins when
                                  * creating them. */
     
 
@@ -93,10 +93,10 @@ Api.prototype = {
     var deferred = $.Deferred();
 
     window.setTimeout(function () {
-      if(id in self.bins_) {
+      if(id in self.bins) {
         deferred.resolve( {
           error: null,
-          result: self.bins_[id]
+          result: self.bins[id]
         } );
       } else {
         deferred.resolve( {
@@ -153,9 +153,9 @@ Api.prototype = {
     var deferred = $.Deferred();
 
     window.setTimeout(function () {
-      ++self.lastId_;
+      ++self.lastId;
       
-      self.bins_[self.lastId_] = {
+      self.bins[self.lastId] = {
         name: name,
         bins: [],
         isPrimary: false
@@ -163,7 +163,7 @@ Api.prototype = {
 
       var bin = { };
 
-      bin[self.lastId_] = self.bins_[self.lastId_];
+      bin[self.lastId] = self.bins[self.lastId];
       
       deferred.resolve( {
         error: null,
@@ -185,8 +185,8 @@ Api.prototype = {
 
     window.setTimeout(function () {
       /* Ensure bin exists and is _not_ primary. */
-      if(id in self.bins_) {
-        if(self.bins_[id].isPrimary) {
+      if(id in self.bins) {
+        if(self.bins[id].isPrimary) {
           deferred.resolve( {
             error: "Not secondary bin"
           } );
