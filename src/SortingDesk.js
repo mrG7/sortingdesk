@@ -12,6 +12,8 @@
 var SortingDesk = function(options, callbacks)
 {
   var self = this;
+
+  console.log("Initialising Sorting Desk UI");
   
   this.options = jQuery.extend(true, {}, options);
   this.callbacks = callbacks;
@@ -39,11 +41,13 @@ SortingDesk.prototype = {
   callbacks: null,
   options: null,
   bins: [ ],
+  text: null,
   countSecondary: 0,
 
   initialise: function ()
   {
-    console.log("Sorting Desk UI instantiated");
+    this.text = new ItemsList(this);
+    console.log("Sorting Desk UI initialised");
   },
 
   initialisePrimaryBin: function (bin)
@@ -184,4 +188,15 @@ BinSecondary.prototype = {
 
   getNode: function ()
   { return this.node; }
+};
+
+
+var ItemsList = function (owner)
+{
+  this.owner = owner;
+};
+
+ItemsList.prototype = {
+  owner: null,
+  items: [ ]
 };
