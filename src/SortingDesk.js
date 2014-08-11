@@ -16,6 +16,13 @@ var SortingDesk = function(options, callbacks)
   this.options = jQuery.extend(true, {}, options);
   this.callbacks = callbacks;
 
+  /* This is cumbersome.
+   *
+   * Instead of being given primary and secondary bin ids, there should be an
+   * API function we could call to retrieve ALL bin descriptors in one go.  As
+   * it stands, we are forced to make a call for every bin id.
+   *
+   * In my view, it needs to be redesigned. */
   callbacks.getBinData(options.primaryContentId)
     .done(function(bin) { self.initialisePrimaryBin(bin); });
 };
