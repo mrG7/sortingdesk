@@ -17,42 +17,11 @@ Math.rand = function (min, max)
 };
 
 
-var Api = function () { /* nop */ };
-
-Api.prototype = {
+/* Class containing only static methods and attributes.
+ * Cannot be instantiated.*/
+Api = {
   DELAY_MIN: 200,
-  DELAY_MAX: 1500,
-  
-  bins: {
-    10: {
-      name: "Primary",
-      bins: {
-        11: { statement_text: "Interesting" },
-        12: { statement_text: "Undecided" }
-      },
-      isPrimary: true           /* In my view, this attribute is needed because
-                                 * a primary bin can potentially have NO sub
-                                 * bins, in which case we wouldn't be able to
-                                 * tell secondary bins apart.  In addition, IIRC
-                                 * a more mature version of Sorting Desk will be
-                                 * required to support multiple primary bins.
-                                 * Only other way of discriminating primary from
-                                 * secondary bins would be to, perhaps, keep
-                                 * them in different maps. */
-    },
-    100: {
-      name: "Irrelevant",
-      bins: [],
-      isPrimary: false
-    },
-    101: {
-      name: "Rubbish",
-      bins: [],
-      isPrimary: false
-    }
-  },
-  lastId: 101,                 /* So we may assign ids to secondary bins when
-                                 * creating them. */
+  DELAY_MAX: 750,
     
 
   /* The following method is in contravention of the specs. It returns the
@@ -70,7 +39,7 @@ Api.prototype = {
           { id: 1, text: "text snippet" }
         ]
       } );
-    }, Math.rand(this.DELAY_MIN, this.DELAY_MAX));
+    }, Math.rand(Api.DELAY_MIN, Api.DELAY_MAX));
 
     return deferred.promise();
   },
@@ -93,10 +62,10 @@ Api.prototype = {
     var deferred = $.Deferred();
 
     window.setTimeout(function () {
-      if(id in self.bins) {
+      if(id in ApiData.bins) {
         deferred.resolve( {
           error: null,
-          result: self.bins[id]
+          result: ApiData.bins[id]
         } );
       } else {
         deferred.resolve( {
@@ -104,7 +73,7 @@ Api.prototype = {
           result: null
         } );
       }
-    }, Math.rand(this.DELAY_MIN, this.DELAY_MAX));
+    }, Math.rand(Api.DELAY_MIN, Api.DELAY_MAX));
 
     return deferred.promise();
   },
@@ -121,7 +90,7 @@ Api.prototype = {
     
     window.setTimeout(function () {
       deferred.resolve( { error: null } );
-    }, Math.rand(this.DELAY_MIN, this.DELAY_MAX));
+    }, Math.rand(Api.DELAY_MIN, Api.DELAY_MAX));
 
     return deferred.promise();
   },
@@ -153,9 +122,9 @@ Api.prototype = {
     var deferred = $.Deferred();
 
     window.setTimeout(function () {
-      ++self.lastId;
+      ++ApiData.lastId;
       
-      self.bins[self.lastId] = {
+      ApiData.bins[ApiData.lastId] = {
         name: name,
         bins: [],
         isPrimary: false
@@ -163,13 +132,13 @@ Api.prototype = {
 
       var bin = { };
 
-      bin[self.lastId] = self.bins[self.lastId];
+      bin[ApiData.lastId] = ApiData.bins[ApiData.lastId];
       
       deferred.resolve( {
         error: null,
         result: bin
       } );
-    }, Math.rand(this.DELAY_MIN, this.DELAY_MAX) );
+    }, Math.rand(Api.DELAY_MIN, Api.DELAY_MAX) );
 
     return deferred.promise();
   },
@@ -185,8 +154,8 @@ Api.prototype = {
 
     window.setTimeout(function () {
       /* Ensure bin exists and is _not_ primary. */
-      if(id in self.bins) {
-        if(self.bins[id].isPrimary) {
+      if(id in ApiData.bins) {
+        if(ApiData.bins[id].isPrimary) {
           deferred.resolve( {
             error: "Not secondary bin"
           } );
@@ -197,7 +166,7 @@ Api.prototype = {
           error: "Secondary bin not existent"
         } );
       }
-    }, Math.rand(this.DELAY_MIN, this.DELAY_MAX));
+    }, Math.rand(Api.DELAY_MIN, Api.DELAY_MAX));
 
     return deferred.promise();
   },
@@ -221,4 +190,40 @@ Api.prototype = {
     /* Wrap bin statement_text inside a DIV. */
     return $('<div class="bin-secondary">' + bin.name + '</div>');
   }
+};
+
+
+/* Class containing only static methods and attributes.
+ * Cannot be instantiated. */
+var ApiData = {
+  bins: {
+    1: {
+      name: "Primary",
+      bins: {
+        11: { statement_text: "Interesting" },
+        12: { statement_text: "Undecided" }
+      },
+      isPrimary: true           /* In my view, this attribute is needed because
+                                 * a primary bin can potentially have NO sub
+                                 * bins, in which case we wouldn't be able to
+                                 * tell secondary bins apart.  In addition, IIRC
+                                 * a more mature version of Sorting Desk will be
+                                 * required to support multiple primary bins.
+                                 * Only other way of discriminating primary from
+                                 * secondary bins would be to, perhaps, keep
+                                 * them in different maps. */
+    },
+    100: {
+      name: "Irrelevant",
+      bins: [],
+      isPrimary: false
+    },
+    101: {
+      name: "Rubbish",
+      bins: [],
+      isPrimary: false
+    }
+  },
+  lastId: 101                  /* So we may assign ids to secondary bins when
+                                * creating them. */
 };

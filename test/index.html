@@ -11,15 +11,13 @@
     <script type="text/javascript" src="js/jquery-ui-1.11.0.custom/jquery-ui.min.js"></script>
     <script type="text/javascript" src="../src/SortingDesk.js"></script>
 
-    <!-- API -->
+    <!-- Fake API -->
     <script type="text/javascript" src="js/api-sorting_desk.js"></script>
     
     <!-- Main initialisation logic -->
     <script type="text/javascript">
 
 /* Instantiate fake API */
-var api = new Api();
-
 $(function () {
   g_sortingDesk = new SortingDesk( {
     nodes: {
@@ -27,7 +25,7 @@ $(function () {
       bins: $("#bins")
     },
     primaryContentId: 1,
-    secondaryContentIds: [ 100, 101, 102 ]
+    secondaryContentIds: [ 100, 101 ]
 /*
   Instead of the above, I would personally prefer something along the lines of:
     
@@ -39,15 +37,15 @@ $(function () {
     }
 */
   }, {
-    moreTexts: api.moreTexts,
-    getBinData: api.getBinData,
-    saveBinData: api.saveBinData,
-    addSecondaryBin: api.addSecondaryBin,
-    removeSecondaryBin: api.removeSecondaryBin,
-    renderText: api.renderText,
-    renderPrimaryBin: api.renderPrimaryBin,
-    renderPrimarySubBin: api.renderPrimarySubBin,
-    renderSecondaryBin: api.renderSecondaryBin
+    moreTexts: Api.moreTexts,
+    getBinData: Api.getBinData,
+    saveBinData: Api.saveBinData,
+    addSecondaryBin: Api.addSecondaryBin,
+    removeSecondaryBin: Api.removeSecondaryBin,
+    renderText: Api.renderText,
+    renderPrimaryBin: Api.renderPrimaryBin,
+    renderPrimarySubBin: Api.renderPrimarySubBin,
+    renderSecondaryBin: Api.renderSecondaryBin
   } );
 });
     </script>
