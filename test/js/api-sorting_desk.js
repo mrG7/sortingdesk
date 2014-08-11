@@ -201,7 +201,8 @@ var ApiData = {
       name: "Primary",
       bins: {
         11: { statement_text: "Interesting" },
-        12: { statement_text: "Undecided" }
+        12: { statement_text: "Undecided" },
+        13: { statement_text: "Newsworthy" }
       },
       isPrimary: true           /* In my view, this attribute is needed because
                                  * a primary bin can potentially have NO sub
@@ -222,6 +223,9 @@ var ApiData = {
       name: "Rubbish",
       bins: [],
       isPrimary: false
+    },
+    102: {
+      name: "Keep"
     }
   },
   lastId: 101                  /* So we may assign ids to secondary bins when
