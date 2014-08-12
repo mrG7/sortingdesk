@@ -15,7 +15,7 @@ var SortingDesk = function(options, callbacks)
 
   console.log("Initialising Sorting Desk UI");
   
-  this.options = jQuery.extend(true, {}, options);
+  this.options = jQuery.extend({}, SortingDesk.defaults, options);
   this.callbacks = callbacks;
 
   callbacks.getBinData([ options.primaryContentId ]
@@ -24,6 +24,16 @@ var SortingDesk = function(options, callbacks)
       self.initialise(bins);
     } );
 };
+
+
+/* Do not make the following instantiable. */
+SortingDesk.defaults = {
+  css: {
+    primaryBin: "wrapper-primary-bin",
+    leftmostBin: "left"
+  }
+};
+
 
 SortingDesk.prototype = {
   callbacks: null,
@@ -57,7 +67,7 @@ SortingDesk.prototype = {
       /* Apply appropriate CSS class to leftmost bin. */
       if(count % 2 === 0) {
         this.bins[this.bins.length - 1].getNode()
-          .addClass(this.options.leftmostBin);
+          .addClass(this.options.css.leftmostBin);
       }
       
       ++count;
