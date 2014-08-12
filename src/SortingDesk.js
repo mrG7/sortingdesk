@@ -247,10 +247,15 @@ ItemsList.prototype = {
     for(var i = 0, l = this.items.length; i < l; ++i) {
       if(this.items[i].getContent().content_id == id) {
         this.items[i].getNode()
-          .animate( { height: 'toggle', opacity: 'toggle' },
-                    function () {
-                      $(this).remove();
-                    } );
+          .css('opacity', 0.6)  /* to prevent flicker */
+          .animate( { opacity: 0 },
+                   200,
+                   function () {
+                     $(this).slideUp(150, function () {
+                       $(this).remove();
+                     } );
+                   } );
+
         this.items.splice(i, 1);
         break;
       }
@@ -287,9 +292,12 @@ var TextItem = function (owner, item)
         .css('height', self.node.height() + 'px');
     },
     scope: 'text-items',
-    cursor: 'crosshair',
-    opacity: 0.8,
-    cursorAt: { left: 5 }
+    cursor: 'move',
+    opacity: 0.7,
+    cursorAt: {
+      top: 5,
+      left: 5
+    }
   } );
   
   container.append(this.node);

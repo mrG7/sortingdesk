@@ -37,8 +37,11 @@ BODY {
 
 #items, #bins {
   margin: 10px;
-  overflow: auto;
   height: 600px;
+}
+
+#items {
+  overflow: scroll;
 }
 
 .wrapper-primary-bin {
@@ -151,9 +154,9 @@ BODY {
   border: 2px solid #E0E2B6;
   border-radius: 8px;
   color: #242922;
-  cursor: default;
   text-align: justify;
   font-size: 14px;
+  cursor: default;
 }
 
 .text-item:hover {
@@ -178,10 +181,12 @@ BODY {
 
 .droppable-highlight {
   border-style: dashed;
-  opacity: .8;
 }
 
 .droppable-hover {
   border-style: dotted;
-  opacity: inherit;
+}
+
+.ui-draggable-dragging {
+  cursor: inherit;
 }
