@@ -33,27 +33,33 @@ SortingDesk.prototype = {
 
   initialise: function (bins)
   {
+    /* Firstly process primary bin. */
     if(bins[this.options.primaryContentId].error)
       throw "Failed to retrieve contents of primary bin";
     
     this.bins.push(new BinPrimary(bins[this.options.primaryContentId],
                                   this));
 
+    /* Now, create secondary bins */
     var count = 0;
     
     for(var id in bins) {
       var bin = bins[id];
 
+      /* Report error, if applicable, but do not abort. */
       if(bin.error) {
         console.log("Failed to retrieve contents of secondary bin: ", id);
         continue;
       }
 
       this.bins.push(new BinSecondary(bin, this));
-      
-      if(count % 2 === 0)
-        this.bins[this.bins.length - 1].getNode().addClass('left');
 
+      /* Apply appropriate CSS class to leftmost bin. */
+      if(count % 2 === 0) {
+        this.bins[this.bins.length - 1].getNode()
+          .addClass(this.options.leftmostBin);
+      }
+      
       ++count;
     }
     
