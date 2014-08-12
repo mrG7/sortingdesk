@@ -59,7 +59,7 @@ SortingDesk.prototype = {
       return;
     }
 
-    this.bins.push(new BinPrimary(bin.result, this));
+    this.bins.push(new BinPrimary(bin, this));
   },
 
   initialiseSecondaryBin: function (index, bin)
@@ -72,7 +72,7 @@ SortingDesk.prototype = {
       return;
     }
 
-    this.bins.push(new BinSecondary(bin.result, this));
+    this.bins.push(new BinSecondary(bin, this));
     
     if(this.countSecondary % 2 === 0)
       this.bins[this.bins.length - 1].getNode().addClass('left');

@@ -1,21 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <title>Sorting Desk</title>
-    
-    <link rel="stylesheet" href="css/theme-default.css" media="screen" />
-    <link rel="stylesheet" href="js/jquery-ui-1.11.0.custom/jquery-ui.min.css" media="screen" />
-    
-    <script type="text/javascript" src="js/jquery-2.1.1.min.js"></script>
-    <script type="text/javascript" src="js/jquery-ui-1.11.0.custom/jquery-ui.min.js"></script>
-    <script type="text/javascript" src="../src/SortingDesk.js"></script>
+  <meta charset="utf-8" />
+  <title>Sorting Desk</title>
+  
+  <link rel="stylesheet" href="css/theme-default.css" media="screen" />
+  <link rel="stylesheet" href="js/jquery-ui-1.11.0.custom/jquery-ui.min.css" media="screen" />
+  
+  <script type="text/javascript" src="js/jquery-2.1.1.min.js"></script>
+  <script type="text/javascript" src="js/jquery-ui-1.11.0.custom/jquery-ui.min.js"></script>
 
-    <!-- Fake API -->
-    <script type="text/javascript" src="js/api-sorting_desk.js"></script>
-    
-    <!-- Main initialisation logic -->
-    <script type="text/javascript">
+  <!-- Sorting Desk -->
+  <script type="text/javascript" src="../src/SortingDesk.js"></script>
+
+  <!-- Fake API -->
+  <script type="text/javascript" src="js/api-sorting_desk.js"></script>
+  
+  <!-- Main initialisation logic -->
+  <script type="text/javascript">
 
 /* Instantiate fake API */
 $(function () {
@@ -27,18 +29,8 @@ $(function () {
     css: {
       primaryBin: "wrapper-primary-bin"
     },
-    primaryContentId: 1,
-    secondaryContentIds: [ 100, 101, 102 ]
-/*
-  Instead of the above, I would personally prefer something along the lines of:
-    
-    bins: {
-      primary: 1,
-      secondary: [
-        100, 101, 102
-      ]
-    }
-*/
+    primaryContentId: ApiData.primaryContentId,
+    secondaryContentIds: ApiData.secondaryContentIds
   }, {
     moreTexts: Api.moreTexts,
     getBinData: Api.getBinData,

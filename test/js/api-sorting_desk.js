@@ -44,17 +44,14 @@ Api = {
     return deferred.promise();
   },
 
-  /* The following method is in contravention of the specs. It returns the bin
-   * descriptor inside of a possibly illegal attribute (`result').
-   * 
-   * Returns:
+  /* Returns:
    * {
-   *   error: error_string || null,
-   *   result: null || {
-   *     name: string,
-   *     bins: [],
-   *     isPrimary: boolean
-   *   }
+   *   error: error_string
+   * }
+   *   ||
+   * {
+   *   name: string,
+   *   bins: []
    * }
    */
   getBinData: function (id) {
@@ -62,17 +59,10 @@ Api = {
     var deferred = $.Deferred();
 
     window.setTimeout(function () {
-      if(id in ApiData.bins) {
-        deferred.resolve( {
-          error: null,
-          result: ApiData.bins[id]
-        } );
-      } else {
-        deferred.resolve( {
-          error: "Bin not existent",
-          result: null
-        } );
-      }
+      if(id in ApiData.bins)
+        deferred.resolve(ApiData.bins[id]);
+      else
+        deferred.resolve( { error: "Bin not existent" } );
     }, Math.rand(Api.DELAY_MIN, Api.DELAY_MAX));
 
     return deferred.promise();
@@ -95,27 +85,17 @@ Api = {
     return deferred.promise();
   },
 
-  /* The following method is in contravention of the specs. Specifications
-   * state,
-   * 
-   * "The promise will not be resolved until some user action completes that
-   * selects a new secondary bin to add. (This may include a new UI component
-   * separate from the SortingDesk .)"
-   *
-   * It isn't clear how the secondary bin's name is specified or how its id
-   * received. The following is thus a guess. In addition, it returns the
-   * resulting bin descriptor inside a possibly illegal attribute (`result').
-   *
-   * Returns:
+  /* Returns:
    * {
-   *   error: error_string || null
-   *   result: null || {
-   *     statement_id: {
-   *       name: string,
-   *       bins: []
-   *       isPrimary: false
-   *     }
+   *   error: error_string    ;; presently never returning an error
+   * }
+   *   ||
+   * {
+   *   statement_id: {
+   *     name: string,
+   *     bins: []
    *   }
+   * }
    */
   addSecondaryBin: function (name) {
     var self = this;
@@ -126,18 +106,14 @@ Api = {
       
       ApiData.bins[ApiData.lastId] = {
         name: name,
-        bins: [],
-        isPrimary: false
+        bins: []
       };
 
       var bin = { };
 
       bin[ApiData.lastId] = ApiData.bins[ApiData.lastId];
       
-      deferred.resolve( {
-        error: null,
-        result: bin
-      } );
+      deferred.resolve(bin);
     }, Math.rand(Api.DELAY_MIN, Api.DELAY_MAX) );
 
     return deferred.promise();
@@ -155,17 +131,12 @@ Api = {
     window.setTimeout(function () {
       /* Ensure bin exists and is _not_ primary. */
       if(id in ApiData.bins) {
-        if(ApiData.bins[id].isPrimary) {
-          deferred.resolve( {
-            error: "Not secondary bin"
-          } );
-        } else
+        if(id == ApiData.primaryContentId)
+          deferred.resolve( { error: "Not secondary bin" } );
+        else
           deferred.resolve( { error: null } );
-      } else {
-        deferred.resolve( {
-          error: "Secondary bin not existent"
-        } );
-      }
+      } else
+        deferred.resolve( { error: "Secondary bin not existent" } );
     }, Math.rand(Api.DELAY_MIN, Api.DELAY_MAX));
 
     return deferred.promise();
@@ -173,7 +144,7 @@ Api = {
 
   renderText: function (content) {
     /* Wrap text inside of a SPAN. */
-    return $('<span class="list-item">' + content + '</span>');
+    return $('<div class="list-item">' + content + '</div>');
   },
 
   renderPrimaryBin: function (bin) {
@@ -196,6 +167,8 @@ Api = {
 /* Class containing only static methods and attributes.
  * Cannot be instantiated. */
 var ApiData = {
+  primaryContentId: 1,
+  secondaryContentIds: [ 100, 101, 102 ],
   bins: {
     1: {
       name: "Primary",
@@ -203,69 +176,146 @@ var ApiData = {
         11: { statement_text: "Interesting" },
         12: { statement_text: "Undecided" },
         13: { statement_text: "Newsworthy" }
-      },
-      isPrimary: true           /* In my view, this attribute is needed because
-                                 * a primary bin can potentially have NO sub
-                                 * bins, in which case we wouldn't be able to
-                                 * tell secondary bins apart.  In addition, IIRC
-                                 * a more mature version of Sorting Desk will be
-                                 * required to support multiple primary bins.
-                                 * Only other way of discriminating primary from
-                                 * secondary bins would be to, perhaps, keep
-                                 * them in different maps. */
+      }
     },
     100: {
       name: "Irrelevant",
-      bins: [],
-      isPrimary: false
+      bins: [ ]
     },
     101: {
       name: "Rubbish",
-      bins: [],
-      isPrimary: false
+      bins: [ ]
     },
     102: {
-      name: "Keep"
+      name: "Keep",
+      bins: [ ]
     }
   },
-  lastId: 101,                 /* So we may assign ids to secondary bins when
+  lastId: 102,                 /* So we may assign ids to secondary bins when
                                 * creating them. */
   lastItem: 0,                 /* So we know the last item sent. */
-
   items: [
-    { snippet: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed consecrate." },
-    { snippet: "Lobortis rutrum. Integer mollis et nulla ac varius. Donec condimentum diam quis." },
-    { snippet: "Scelerisque ultrices. Mauris tempor convallis interdum. Pellentesque sagittis." },
-    { snippet: "Libero tellus, vitae accumsan metus bibendum et. Phasellus a mi justo. Fusce." },
-    { snippet: "Hendrerit, nulla sit amet faucibus sodales, orci felis commodo lacus, quis porta." },
-    { snippet: "Libero magna id est. Vivamus cursus nisl in luctus congue. Maecenas eget facilisis elit." },
-    { snippet: "Vestibulum molestie nulla tellus, eu gravida augue venenatis." },
-    { snippet: "Mauris neque nisi, mollis vel dui quis, consequat pulvinar sapien." },
-    { snippet: "Volutpat, urna in tempor placerat, diam mi iaculis massa, at dapibus odio orci" },
-    { snippet: "Sed in euismod risus. Aliquam posuere mi lorem, eu aliquet sapien dignissim in. Iaculis felis vitae dignissim. Maecenas consectetur neque id tellus volutpat," },
-    { snippet: "Eget venenatis metus tempor. Curabitur ornare odio egestas ipsum consectetur." },
-    { snippet: "Eleifend nec id mauris. Morbi vitae lectus non nunc lacinia" },
-    { snippet: "Pellentesque ultrices rutrum ipsum. Phasellus ut neque vel lorem." },
-    { snippet: "Malesuada gravida in in velit. Cras ullamcorper orci a tellus laoreet." },
-    { snippet: "Mauris eget risus at massa facilisis imperdiet sit amet quis lacus." },
-    { snippet: "Bibendum vitae nulla sit amet ultricies. Etiam ac mauris et ipsum pharetra." },
-    { snippet: "Pharetra non eu risus. Praesent porttitor lorem eu erat aliquet vulputate." },
-    { snippet: "Bibendum imperdiet lectus quis pharetra. In dignissim dictum ipsum, vel cursus." },
-    { snippet: "Curabitur sagittis rhoncus dui. Sed faucibus lectus vel metus dignissim." },
-    { snippet: "Vel sollicitudin dolor elementum" },
-    { snippet: "Nunc ligula libero, pretium eu augue vitae, tristique pellentesque massa." },
-    { snippet: "Luctus luctus pulvinar. Duis bibendum hendrerit ligula, feugiat sollicitudin." },
-    { snippet: "Dolor dapibus a. Donec consectetur congue ligula egestas pulvinar. Sed laoreet ullamcorper enim id porta. Praesent scelerisque ornare ullamcorper." },
-    { snippet: "Malesuada fames ac ante ipsum primis in faucibus. Morbi quis leo scelerisque sem bibendum convallis. Etiam semper neque id lorem porttitor tincidunt faucibus porta tincidunt." },
-    { snippet: "Sed placerat, mi et adipiscing condimentum, metus elit facilisis dui, auctor tincidunt erat justo ac tellus. Cras dolor nulla, auctor in nisi a, pretium porttitor enim." },
-    { snippet: "Nunc vehicula et eros ac hendrerit. Donec sagittis tellus vitae diam fringilla volutpat. Ut cursus odio a tellus mollis suscipit." },
-    { snippet: "Pellentesque mattis felis mi, a cursus neque pretium eu. Nullam a vehicula nulla In quis nisi suscipit, ultrices urna non, mattis magna." },
-    { snippet: "Curabitur interdum nibh at lorem suscipit consectetur. Suspendisse dapibus diam nec quam lobortis sagittis." },
-    { snippet: "Nulla auctor rhoncus pulvinar. Ut dignissim, sem et imperdiet rhoncus lectus ligula adipiscing magna, et mattis augue purus venenatis justo." },
-    { snippet: "Proin eu sagittis nunc. Integer ac eros at metus scelerisque rhoncus ac a massa." },
-    { snippet: "Pellentesque sit amet turpis quis libero hendrerit venenatis vitae elementum quam." },
-    { snippet: "Praesent quis tempus elit. Duis sit amet tempus ipsum." },
-    { snippet: "Etiam diam nulla, vestibulum eget lorem vitae, dignissim dapibus dolor." },
-    { snippet: "Nulla facilisi. Nullam massa dolor, lobortis ut pretium non, rutrum vel sem. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Phasellus non mi arcu. Etiam sed libero ut dolor feugiat lacinia." }
+  ],
+  itemsTemplate: [
+    {
+      "cacheId": "H75rMPosXksJ", 
+      "displayLink": "www.cars.com", 
+      "formattedUrl": "www.cars.com/", 
+      "htmlFormattedUrl": "www.<b>cars</b>.com/", 
+      "htmlSnippet": "Use <b>Cars</b>.com to search 2.6 million new &amp; used <b>car</b> listings or get a dealer quote. <br>\nOur easy-to-use online tools put you a step ahead in your next vehicle&nbsp;...", 
+      "htmlTitle": "New <b>Cars</b>, Used <b>Cars</b>, <b>Car</b> Reviews | <b>Cars</b>.com", 
+      "kind": "customsearch#result", 
+      "link": "http://www.cars.com/", 
+      "snippet": "Use Cars.com to search 2.6 million new & used car listings or get a dealer quote. \nOur easy-to-use online tools put you a step ahead in your next vehicle\u00a0...", 
+      "title": "New Cars, Used Cars, Car Reviews | Cars.com"
+    }, 
+    {
+      "cacheId": "-xdXy-yX2fMJ", 
+      "displayLink": "www.imdb.com", 
+      "formattedUrl": "www.imdb.com/title/tt0317219/", 
+      "htmlFormattedUrl": "www.imdb.com/title/tt0317219/", 
+      "htmlSnippet": "A hot-shot race-<b>car</b> named Lightning McQueen gets waylaid in Radiator Springs, <br>\nwhere he finds the true meaning of friendship and family.", 
+      "htmlTitle": "<b>Cars</b> (2006) - IMDb", 
+      "kind": "customsearch#result", 
+      "link": "http://www.imdb.com/title/tt0317219/", 
+      "snippet": "A hot-shot race-car named Lightning McQueen gets waylaid in Radiator Springs, \nwhere he finds the true meaning of friendship and family.", 
+      "title": "Cars (2006) - IMDb"
+    }, 
+    {
+      "cacheId": "1BoR6M9fXwcJ", 
+      "displayLink": "cars.disney.com", 
+      "formattedUrl": "cars.disney.com/", 
+      "htmlFormattedUrl": "<b>cars</b>.disney.com/", 
+      "htmlSnippet": "Welcome to the Disney <b>Cars</b> homepage. Browse movies, watch videos, play <br>\ngames, and meet the characters from Disney&#39;s World of <b>Cars</b>.", 
+      "htmlTitle": "Disney <b>Cars</b>", 
+      "kind": "customsearch#result", 
+      "link": "http://cars.disney.com/", 
+      "snippet": "Welcome to the Disney Cars homepage. Browse movies, watch videos, play \ngames, and meet the characters from Disney's World of Cars.", 
+      "title": "Disney Cars"
+    }, 
+    {
+      "cacheId": "Na8wWAUN5LIJ", 
+      "displayLink": "www.cnet.com", 
+      "formattedUrl": "www.cnet.com/topics/car-tech/", 
+      "htmlFormattedUrl": "www.cnet.com/topics/<b>car</b>-tech/", 
+      "htmlSnippet": "<b>Car</b> Tech reviews and ratings, video reviews, user reviews, <b>Car</b> Tech buying <br>\nguides, prices, and comparisons from CNET.", 
+      "htmlTitle": "<b>Car</b> Tech - CNET", 
+      "kind": "customsearch#result", 
+      "link": "http://www.cnet.com/topics/car-tech/", 
+      "snippet": "Car Tech reviews and ratings, video reviews, user reviews, Car Tech buying \nguides, prices, and comparisons from CNET.", 
+      "title": "Car Tech - CNET"
+    }, 
+    {
+      "cacheId": "iflPmNl879sJ", 
+      "displayLink": "en.wikipedia.org", 
+      "formattedUrl": "en.wikipedia.org/wiki/Cars_(film)", 
+      "htmlFormattedUrl": "en.wikipedia.org/wiki/<b>Cars</b>_(film)", 
+      "htmlSnippet": "<b>Cars</b> is a 2006 American computer-animated comedy-adventure sports film <br>\nproduced by Pixar Animation Studios, and directed and co-written by John <br>\nLasseter&nbsp;...", 
+      "htmlTitle": "<b>Cars</b> (film) - Wikipedia, the free encyclopedia", 
+      "kind": "customsearch#result", 
+      "link": "http://en.wikipedia.org/wiki/Cars_(film)", 
+      "snippet": "Cars is a 2006 American computer-animated comedy-adventure sports film \nproduced by Pixar Animation Studios, and directed and co-written by John \nLasseter\u00a0...", 
+      "title": "Cars (film) - Wikipedia, the free encyclopedia"
+    }, 
+    {
+      "cacheId": "MGjy33JqBtkJ", 
+      "displayLink": "www.caranddriver.com", 
+      "formattedUrl": "www.caranddriver.com/", 
+      "htmlFormattedUrl": "www.<b>car</b>anddriver.com/", 
+      "htmlSnippet": "Research 2014 and 2015 <b>cars</b> on <b>Car</b> and Driver. Our new <b>car</b> reviews and <b>car</b> <br>\nbuying resources help you make informed decisions. <b>Car</b> and Driver <b>car</b> reviews<br>\n&nbsp;...", 
+      "htmlTitle": "<b>Car</b> Reviews - New <b>Cars</b> for 2014 and 2015 at <b>Car</b> and Driver", 
+      "kind": "customsearch#result", 
+      "link": "http://www.caranddriver.com/", 
+      "snippet": "Research 2014 and 2015 cars on Car and Driver. Our new car reviews and car \nbuying resources help you make informed decisions. Car and Driver car reviews\n\u00a0...", 
+      "title": "Car Reviews - New Cars for 2014 and 2015 at Car and Driver"
+    }, 
+    {
+      "cacheId": "QJoGPmN8z8UJ", 
+      "displayLink": "en.wikipedia.org", 
+      "formattedUrl": "en.wikipedia.org/wiki/Automobile", 
+      "htmlFormattedUrl": "en.wikipedia.org/wiki/Automobile", 
+      "htmlSnippet": "An automobile, autocar, motor <b>car</b> or <b>car</b> is a wheeled motor vehicle used for <br>\ntransporting passengers, which also carries its own engine or motor.", 
+      "htmlTitle": "Automobile - Wikipedia, the free encyclopedia", 
+      "kind": "customsearch#result", 
+      "link": "http://en.wikipedia.org/wiki/Automobile", 
+      "snippet": "An automobile, autocar, motor car or car is a wheeled motor vehicle used for \ntransporting passengers, which also carries its own engine or motor.", 
+      "title": "Automobile - Wikipedia, the free encyclopedia"
+    }, 
+    {
+      "cacheId": "grA1uty9HdAJ", 
+      "displayLink": "cars.sfgate.com", 
+      "formattedUrl": "cars.sfgate.com/", 
+      "htmlFormattedUrl": "<b>cars</b>.sfgate.com/", 
+      "htmlSnippet": "Find new and used <b>cars</b> in San Francisco, San Jose, San Mateo, Oakland, and <br>\nthe rest of the Bay Area, <b>car</b> news and research and The San Francisco Auto&nbsp;...", 
+      "htmlTitle": "SFGate Local Marketplace | New and Used <b>Cars</b> in San Francisco <b>...</b>", 
+      "kind": "customsearch#result", 
+      "link": "http://cars.sfgate.com/", 
+      "snippet": "Find new and used cars in San Francisco, San Jose, San Mateo, Oakland, and \nthe rest of the Bay Area, car news and research and The San Francisco Auto\u00a0...", 
+      "title": "SFGate Local Marketplace | New and Used Cars in San Francisco ..."
+    }, 
+    {
+      "cacheId": "8Qk0stVn32QJ", 
+      "displayLink": "en.wikipedia.org", 
+      "formattedUrl": "en.wikipedia.org/wiki/Cars_(song)", 
+      "htmlFormattedUrl": "en.wikipedia.org/wiki/<b>Cars</b>_(song)", 
+      "htmlSnippet": "&quot;<b>Cars</b>&quot; is a 1979 song by UK artist Gary Numan, and was released as a single <br>\nfrom the album The Pleasure Principle. It reached the top of the charts in several<br>\n&nbsp;...", 
+      "htmlTitle": "<b>Cars</b> (song) - Wikipedia, the free encyclopedia", 
+      "kind": "customsearch#result", 
+      "link": "http://en.wikipedia.org/wiki/Cars_(song)", 
+      "snippet": "\"Cars\" is a 1979 song by UK artist Gary Numan, and was released as a single \nfrom the album The Pleasure Principle. It reached the top of the charts in several\n\u00a0...", 
+      "title": "Cars (song) - Wikipedia, the free encyclopedia"
+    }, 
+    {
+      "cacheId": "SOIY5N3zyOUJ", 
+      "displayLink": "trailers.apple.com", 
+      "formattedUrl": "trailers.apple.com/trailers/disney/cars/", 
+      "htmlFormattedUrl": "trailers.apple.com/trailers/disney/<b>cars</b>/", 
+      "htmlSnippet": "Lightning McQueen, a hotshot rookie race <b>car</b> driven to succeed, discovers that <br>\nlife is about the journey, not the finish line, when he finds himself unexpectedly&nbsp;...", 
+      "htmlTitle": "<b>Cars</b> - Movie Trailers - iTunes", 
+      "kind": "customsearch#result", 
+      "link": "http://trailers.apple.com/trailers/disney/cars/", 
+      "snippet": "Lightning McQueen, a hotshot rookie race car driven to succeed, discovers that \nlife is about the journey, not the finish line, when he finds himself unexpectedly\u00a0...", 
+      "title": "Cars - Movie Trailers - iTunes"
+    }
   ]
 };
