@@ -38,10 +38,7 @@ BODY {
 #items, #bins {
   margin: 10px;
   height: 600px;
-}
-
-#items {
-  overflow: scroll;
+  overflow: auto;
 }
 
 .wrapper-primary-bin {
