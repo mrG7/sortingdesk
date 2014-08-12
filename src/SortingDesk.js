@@ -44,6 +44,10 @@ SortingDesk.prototype = {
 
   initialise: function (bins)
   {
+    var height = $(window).height() - 50;
+    this.options.nodes.items.height(height);
+    this.options.nodes.bins.height(height);
+    
     /* Firstly process primary bin. */
     if(bins[this.options.primaryContentId].error)
       throw "Failed to retrieve contents of primary bin";
