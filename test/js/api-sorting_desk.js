@@ -33,12 +33,22 @@ Api = {
       throw "Specified invalid number of items to retrieve";
 
     window.setTimeout(function () {
-      deferred.resolve( {
-        error: null,
-        result: [
-          { id: 1, text: "text snippet" }
-        ]
-      } );
+      var result = [ ],
+          lengthCollection = ApiData.itemsCollection.length;
+      
+      while(num-- > 0) {
+        /* IMPORTANT: clone the object to prevent unexpected behaviour */
+        var item = $.extend(
+          {},
+          ApiData.itemsCollection[ApiData.lastItem % lengthCollection]);
+        
+        item.content_id = ApiData.lastItem;
+
+        result.push(item);
+        ++ApiData.lastItem;
+      }
+      
+      deferred.resolve(result);
     }, Math.rand(Api.DELAY_MIN, Api.DELAY_MAX));
 
     return deferred.promise();
@@ -95,11 +105,9 @@ Api = {
    *   error: error_string    ;; presently never returning an error
    * }
    *   ||
-   * {
-   *   statement_id: {
-   *     name: string,
-   *     bins: []
-   *   }
+   * statement_id: {
+   *   name: string,
+   *   bins: []
    * }
    */
   addSecondaryBin: function (name) {
@@ -147,7 +155,7 @@ Api = {
 
   renderText: function (content) {
     /* Wrap text inside of a SPAN. */
-    return $('<div class="list-item">' + content + '</div>');
+    return $('<div class="text-item">' + content + '</div>');
   },
 
   renderPrimaryBin: function (bin) {
@@ -199,7 +207,7 @@ var ApiData = {
   lastItem: 0,                 /* So we know the last item sent. */
   items: [
   ],
-  itemsTemplate: [
+  itemsCollection: [
     {
       "cacheId": "H75rMPosXksJ", 
       "displayLink": "www.cars.com", 
