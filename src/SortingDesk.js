@@ -241,7 +241,9 @@ ItemsList.prototype = {
     this.controller.invoke("moreTexts", visibleItems)
       .done(function (items) {
         $.each(items, function (index, item) {
-          self.items.push(new TextItem(self, item));
+          window.setTimeout( function () {
+            self.items.push(new TextItem(self, item));
+          }, Math.pow(index, 2) * 1.1);
         } );
       } );
   },
