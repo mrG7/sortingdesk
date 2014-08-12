@@ -54,15 +54,20 @@ Api = {
    *   bins: []
    * }
    */
-  getBinData: function (id) {
-    var self = this;
+  getBinData: function (ids) {
     var deferred = $.Deferred();
 
     window.setTimeout(function () {
-      if(id in ApiData.bins)
-        deferred.resolve(ApiData.bins[id]);
-      else
-        deferred.resolve( { error: "Bin not existent" } );
+      var result = [ ];
+
+      for(var i = 0, l = ids.length, id; id = ids[i], i < l; ++i) {
+        if(id in ApiData.bins)
+          result[id] = ApiData.bins[id];
+        else
+          result[id] = { error: "Bin not existent" };
+      }
+
+      deferred.resolve(result);
     }, Math.rand(Api.DELAY_MIN, Api.DELAY_MAX));
 
     return deferred.promise();
@@ -98,7 +103,6 @@ Api = {
    * }
    */
   addSecondaryBin: function (name) {
-    var self = this;
     var deferred = $.Deferred();
 
     window.setTimeout(function () {
@@ -125,7 +129,6 @@ Api = {
    * }
    */
   removeSecondaryBin: function (id) {
-    var self = this;
     var deferred = $.Deferred();
 
     window.setTimeout(function () {

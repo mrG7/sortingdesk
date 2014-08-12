@@ -18,23 +18,11 @@ var SortingDesk = function(options, callbacks)
   this.options = jQuery.extend(true, {}, options);
   this.callbacks = callbacks;
 
-  /* This is cumbersome.
-   *
-   * Instead of being given primary and secondary bin ids, there should be an
-   * API function we could call to retrieve ALL bin descriptors in one go.  As
-   * it stands, we are forced to make a call for every bin id.
-   *
-   * In my view, it needs to be redesigned. */
-  callbacks.getBinData(options.primaryContentId)
-    .done(function(bin) {
-      self.initialisePrimaryBin(bin);
-
-      /* Retrieve descriptor of first secondary bin. */
-      if(self.options.secondaryContentIds.length > 0) {
-        self.callbacks.getBinData(self.options.secondaryContentIds[0])
-          .done(function (bin) { self.initialiseSecondaryBin(0, bin); });
-      }
-    });
+  callbacks.getBinData([ options.primaryContentId ]
+                       .concat(options.secondaryContentIds))
+    .done(function(bins) {
+      self.initialise(bins);
+    } );
 };
 
 SortingDesk.prototype = {
@@ -42,49 +30,35 @@ SortingDesk.prototype = {
   options: null,
   bins: [ ],
   text: null,
-  countSecondary: 0,
 
-  initialise: function ()
+  initialise: function (bins)
   {
+    if(bins[this.options.primaryContentId].error)
+      throw "Failed to retrieve contents of primary bin";
+    
+    this.bins.push(new BinPrimary(bins[this.options.primaryContentId],
+                                  this));
+
+    var count = 0;
+    
+    for(var id in bins) {
+      var bin = bins[id];
+
+      if(bin.error) {
+        console.log("Failed to retrieve contents of secondary bin: ", id);
+        continue;
+      }
+
+      this.bins.push(new BinSecondary(bin, this));
+      
+      if(count % 2 === 0)
+        this.bins[this.bins.length - 1].getNode().addClass('left');
+
+      ++count;
+    }
+    
     this.text = new ItemsList(this);
     console.log("Sorting Desk UI initialised");
-  },
-
-  initialisePrimaryBin: function (bin)
-  {
-    var self = this;
-    
-    if(bin.error) {
-      console.log("Failed to retrieve contents of primary bin");
-      return;
-    }
-
-    this.bins.push(new BinPrimary(bin, this));
-  },
-
-  initialiseSecondaryBin: function (index, bin)
-  {
-    var self = this;
-    
-    if(bin.error) {
-      console.log("Failed to retrieve contents of secondary bin: ",
-                  this.options.secondaryContentIds[index]);
-      return;
-    }
-
-    this.bins.push(new BinSecondary(bin, this));
-    
-    if(this.countSecondary % 2 === 0)
-      this.bins[this.bins.length - 1].getNode().addClass('left');
-
-    ++this.countSecondary;
-
-    /* Retrieve descriptor of next secondary bin */
-    if(++index < this.options.secondaryContentIds.length) {
-      this.callbacks.getBinData(this.options.secondaryContentIds[index])
-        .done(function (bin) { self.initialiseSecondaryBin(index, bin); });
-    } else
-      this.initialise();
   },
 
   invoke: function ()
