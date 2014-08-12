@@ -232,7 +232,7 @@ ItemsList.prototype = {
 
   check: function ()
   {
-    var visibleItems = this.controller.getOption("visibleItems") * 2;
+    var visibleItems = this.controller.getOption("visibleItems");
     
     if(this.items.length >= visibleItems)
       return;
