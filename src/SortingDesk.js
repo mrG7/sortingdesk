@@ -17,6 +17,11 @@ var SortingDesk = function(options, callbacks)
   
   this.options = jQuery.extend({}, SortingDesk.defaults, options);
   this.callbacks = callbacks;
+  
+  var height = $(window).height() - 50;
+  
+  this.options.nodes.items.height(height);
+  this.options.nodes.bins.height(height);
 
   callbacks.getBinData([ options.primaryContentId ]
                        .concat(options.secondaryContentIds))
@@ -44,10 +49,6 @@ SortingDesk.prototype = {
 
   initialise: function (bins)
   {
-    var height = $(window).height() - 50;
-    this.options.nodes.items.height(height);
-    this.options.nodes.bins.height(height);
-    
     /* Firstly process primary bin. */
     if(bins[this.options.primaryContentId].error)
       throw "Failed to retrieve contents of primary bin";
