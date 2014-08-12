@@ -84,8 +84,8 @@ SortingDesk.prototype = {
     else if(!(arguments[0] in this.callbacks))
       throw "Callback non existent: " + arguments[0];
 
-    var name = arguments[0];
-    return this.callbacks[name].apply(null, [].slice.call(arguments, 1));
+    return this.callbacks[arguments[0]]
+      .apply(null, [].slice.call(arguments, 1));
   },
 
   getOption: function (property)
