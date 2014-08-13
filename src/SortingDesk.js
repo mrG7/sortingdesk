@@ -228,16 +228,21 @@ BinSecondary.prototype = Object.create(Bin.prototype);
 
 var ItemsList = function (controller)
 {
+  var self = this;
+  
   this.controller = controller;
+  this.container = controller.getOption("nodes").items;
   this.items = [ ];
 
   $('body').keyup(function (evt) {
-    console.log(evt.keyCode);
+/*     console.log(evt.keyCode); */
     
     switch(evt.keyCode) {
     case 38:                    /* up */
+      self.selectOffset(-1);
       break;
     case 40:                    /* down */
+      self.selectOffset(1);
       break;
     default:
       return;
@@ -245,6 +250,8 @@ var ItemsList = function (controller)
 
     evt.preventDefault();
     evt.stopPropagation();
+
+    return false;
   } );
   
   this.check();
@@ -252,6 +259,7 @@ var ItemsList = function (controller)
 
 ItemsList.prototype = {
   controller: null,
+  container: null,
   items: null,
 
   check: function ()
@@ -278,21 +286,48 @@ ItemsList.prototype = {
 
   select: function (variant)
   {
-    var container = this.controller.getOption("nodes").items;
-
-    if(variant instanceof TextItem) {
-      container.find('DIV.selected').removeClass('selected');
-      variant.getNode().addClass('selected');
-      
+    if(!this.container.children().length)
       return;
-    } else if(typeof variant == 'undefined') {
-      if(container.find('DIV.selected').length)
+    
+    if(typeof variant == 'undefined') {
+      if(this.container.find('.selected').length)
         return;
 
-      variant = 0;
+      variant = this.container.children().eq(0);
+    } else if(typeof variant == 'number') {
+      if(variant < 0)
+        variant = 0;
+      else if(variant > this.container.children().length - 1)
+        variant = this.container.children().length - 1;
+
+      variant = this.container.children().eq(variant);
+    } else if(variant instanceof TextItem)
+      variant = variant.getNode();
+    
+    this.container.find('.selected').removeClass('selected');
+    variant.addClass('selected');
+    }
+  },
+
+  selectOffset: function (offset)
+  {
+    var index;
+
+    if(!this.container.length)
+      return;
+    else if(!this.container.find('DIV.selected').length) {
+      this.select();
+      return;
     }
 
-    container.find('DIV:eq(' + variant + ')').addClass('selected');
+    index = this.container.find('.selected').prevAll().length + offset;
+
+    if(index < 0)
+      index = 0;
+    else if(index > this.container.children().length - 1)
+      index = this.container.children().length - 1;
+
+    this.select(index);
   },
   
   remove: function (id)
