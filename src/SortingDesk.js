@@ -90,8 +90,6 @@ SortingDesk.prototype = {
     this.list = new ItemsList(this);
 
     $('body').keyup(function (evt) {
-      console.log(evt.keyCode);
-
       /* First process alpha key strokes. */
       if(evt.keyCode >= 65 && evt.keyCode <= 90) {
         var bin = self.getBinByShortcut(evt.keyCode);
