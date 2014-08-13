@@ -167,6 +167,14 @@ BODY {
   color: #7F8368;
 }
 
+.text-item.selected {
+  border: 2px solid #8EB4DA;
+}
+
+.text-item.selected:hover {
+  background-color: inherit;
+}
+
 .droppable {
   border-style: dashed;
 }

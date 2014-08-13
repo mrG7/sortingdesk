@@ -269,13 +269,39 @@ ItemsList.prototype = {
             self.items.push(new TextItem(self, item));
           }, Math.pow(index, 2) * 1.1);
         } );
+
+        window.setTimeout( function () {
+          self.select();
+        }, 10);
       } );
   },
 
+  select: function (obj)
+  {
+    var container = this.controller.getOption("nodes").items;
+
+    if(obj instanceof TextItem) {
+      container.find('DIV.selected').removeClass('selected');
+      obj.getNode().addClass('selected');
+      
+      return;
+    } else if(typeof obj == 'undefined') {
+      if(container.find('DIV.selected').length)
+        return;
+
+      obj = 0;
+    }
+
+    container.find('DIV:eq(' + obj + ')').addClass('selected');
+  },
+  
   remove: function (id)
   {
     for(var i = 0, l = this.items.length; i < l; ++i) {
       if(this.items[i].getContent().content_id == id) {
+        if(this.items[i].getNode().hasClass('selected'))
+          this.select(i == 0 && 1 || 0);
+        
         this.items[i].getNode()
           .css('opacity', 0.6)  /* to prevent flicker */
           .animate( { opacity: 0 },
@@ -334,8 +360,10 @@ var TextItem = function (owner, item)
     },
     scroll: false,
     snap: '.bin',
-    snapMode: 'inner'
-  } );
+    snapMode: 'inner' } )
+    .click(function() {
+      owner.select(self);
+    } );
   
   container.append(this.node);
 };
