@@ -54,11 +54,9 @@ Api = {
     return deferred.promise();
   },
 
-  /* Returns:
-   * {
-   *   error: error_string
-   * }
-   *   ||
+  /* Always resolves for the time being.
+   * 
+   * Returns:
    * {
    *   name: string,
    *   bins: []
@@ -71,9 +69,9 @@ Api = {
       var result = [ ];
 
       for(var i = 0, l = ids.length, id; id = ids[i], i < l; ++i) {
-        if(id in ApiData.bins)
+        if(id in ApiData.bins) {
           result[id] = ApiData.bins[id];
-        else
+        } else
           result[id] = { error: "Bin not existent" };
       }
 
@@ -83,9 +81,7 @@ Api = {
     return deferred.promise();
   },
 
-  /* As discussed by email, we're not saving state.
-   *
-   * (Always) returns:
+  /* (Always) returns:
    * {
    *   error: null
    * }
@@ -131,9 +127,14 @@ Api = {
     return deferred.promise();
   },
 
-  /* Always returns,
+  /* Resolves:
    * {
-   *   error: error_string || null
+   *   error: null
+   * }
+   *
+   * Rejects:
+   * {
+   *   error: string
    * }
    */
   removeSecondaryBin: function (id) {
@@ -143,7 +144,7 @@ Api = {
       /* Ensure bin exists and is _not_ primary. */
       if(id in ApiData.bins) {
         if(id == ApiData.primaryContentId)
-          deferred.resolve( { error: "Not secondary bin" } );
+          deferred.reject( { error: "Not secondary bin" } );
         else
           deferred.resolve( { error: null } );
       } else
