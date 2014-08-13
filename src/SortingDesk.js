@@ -62,7 +62,8 @@ SortingDesk.prototype = {
     delete bins[this.options.primaryContentId];
 
     /* Now, create secondary bins */
-    var count = 0;
+    var count = 0,
+        self = this;
     
     for(var id in bins) {
       var bin = bins[id];
@@ -85,6 +86,24 @@ SortingDesk.prototype = {
     }
     
     this.list = new ItemsList(this);
+
+    $('body').keyup(function (evt) {
+      console.log(evt.keyCode);
+      
+      switch(evt.keyCode) {
+      case 38:                    /* up */
+        self.list.selectOffset(-1);
+        break;
+      case 40:                    /* down */
+        self.list.selectOffset(1);
+        break;
+      default:
+        return;
+      }
+
+      return false;
+    } );
+    
     console.log("Sorting Desk UI initialised");
   },
 
@@ -233,26 +252,6 @@ var ItemsList = function (controller)
   this.controller = controller;
   this.container = controller.getOption("nodes").items;
   this.items = [ ];
-
-  $('body').keyup(function (evt) {
-/*     console.log(evt.keyCode); */
-    
-    switch(evt.keyCode) {
-    case 38:                    /* up */
-      self.selectOffset(-1);
-      break;
-    case 40:                    /* down */
-      self.selectOffset(1);
-      break;
-    default:
-      return;
-    }
-
-    evt.preventDefault();
-    evt.stopPropagation();
-
-    return false;
-  } );
   
   this.check();
 };
@@ -329,7 +328,7 @@ ItemsList.prototype = {
 
     if(!this.container.length)
       return;
-    else if(!this.container.find('DIV.selected').length) {
+    else if(!this.container.find('.selected').length) {
       this.select();
       return;
     }
@@ -413,7 +412,7 @@ var TextItem = function (owner, item)
     scroll: false,
 /*     snap: '.bin',     */
 /*     snapMode: 'inner' */ } )
-    .click(function() {
+    .click(function () {
       owner.select(self);
     } );
   
