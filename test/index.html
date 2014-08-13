@@ -28,7 +28,9 @@ $(function () {
     },
     css: {                      /* This tree is optional: see
                                  * `SortingDesk.defaults' */
-      primaryBin: "wrapper-primary-bin",
+      primaryBinOuterWrapper: "wrapper-primary-bin-outer",
+      primaryBinInnerWrapper: "wrapper-primary-bin-inner",
+      secondaryBinsWrapper: "wrapper-secondary-bin",
       leftmostBin: "left"
     },
     primaryContentId: ApiData.primaryContentId,
@@ -43,7 +45,8 @@ $(function () {
     renderText: Api.renderText,
     renderPrimaryBin: Api.renderPrimaryBin,
     renderPrimarySubBin: Api.renderPrimarySubBin,
-    renderSecondaryBin: Api.renderSecondaryBin
+    renderSecondaryBin: Api.renderSecondaryBin,
+    renderAddButton: Api.renderAddButton
   } );
 
   $(".wrapper").fadeIn();

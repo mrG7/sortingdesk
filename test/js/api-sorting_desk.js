@@ -175,6 +175,10 @@ Api = {
     /* Wrap bin statement_text inside a DIV. */
     return $('<div class="bin-secondary"><div class="bin-shortcut"/>'
              + bin.name + '</div>');
+  },
+
+  renderAddButton: function (caption) {
+    return $('<div>' + caption + '</div>');
   }
 };
 
