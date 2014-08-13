@@ -161,6 +161,18 @@ BODY {
   font-size: 11px;
 }
 
+.bin-primary .bin-shortcut {
+  border-color: #7582C9;
+}
+
+.bin-primary-sub .bin-shortcut {
+  border-color: #6ABEF7;
+}
+
+.bin-secondary .bin-shortcut {
+  border-color: #CEA756;
+}
+
 .text-item {
   margin: 5px;
   padding: 10px;
