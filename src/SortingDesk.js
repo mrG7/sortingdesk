@@ -15,7 +15,7 @@ var SortingDesk = function(options, callbacks)
 
   console.log("Initialising Sorting Desk UI");
   
-  this.options = jQuery.extend({}, SortingDesk.defaults, options);
+  this.options = jQuery.extend(true, SortingDesk.defaults, options);
   this.callbacks = callbacks;
   this.bins = [ ];
   
