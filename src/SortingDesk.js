@@ -230,6 +230,22 @@ var ItemsList = function (controller)
 {
   this.controller = controller;
   this.items = [ ];
+
+  $('body').keyup(function (evt) {
+    console.log(evt.keyCode);
+    
+    switch(evt.keyCode) {
+    case 38:                    /* up */
+      break;
+    case 40:                    /* down */
+      break;
+    default:
+      return;
+    }
+
+    evt.preventDefault();
+    evt.stopPropagation();
+  } );
   
   this.check();
 };
