@@ -351,6 +351,12 @@ ItemsList.prototype = {
     
     this.controller.invoke("moreTexts", visibleItems)
       .done(function (items) {
+        /* The following logic creates an interesting side effect when the user
+         * very quickly sorts items _whilst_ new items (retrieved by a previous
+         * call to `check') are _still_ being added to the UI. The side effect
+         * is that the user ends up with more than `visibleItems' in the
+         * list. Unsure whether to rework this as, perhaps, users who sort items
+         * quickly /need/ more items in the list? */
         $.each(items, function (index, item) {
           window.setTimeout( function () {
             self.items.push(new TextItem(self, item));
