@@ -39,7 +39,8 @@ SortingDesk.defaults = {
     leftmostBin: "left",
     binShortcut: 'bin-shortcut'
   },
-  visibleItems: 20              /* Arbitrary. */
+  visibleItems: 20,             /* Arbitrary. */
+  marginWhileDragging: 10       /*  "     "   */
 };
 
 
@@ -495,8 +496,18 @@ var TextItem = function (owner, item)
         } );
     },
     drag: function (evt, ui) {
-      if(ui.position.left + ui.helper.outerWidth() >= $(window).width())
-        ui.position.left = $(window).width() - ui.helper.outerWidth() - 20;
+      var margin = controller.getOption("marginWhileDragging");
+            
+      if(ui.position.left + ui.helper.outerWidth() >=
+         $(window).width() - margin) {
+        ui.position.left = $(window).width() - ui.helper.outerWidth() - margin;
+      }
+      
+      if(ui.position.top + ui.helper.outerHeight() >=
+         $(window).height() - margin) {
+        ui.position.top =  $(window).height() - ui.helper.outerHeight()
+          - margin;
+      }
     },
     appendTo: 'body',
     scope: 'text-items',
