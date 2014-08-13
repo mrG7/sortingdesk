@@ -141,6 +141,7 @@ var Bin = function (controller, owner, id, bin)
   this.owner = owner;
   this.id = id;
   this.bin = bin;
+  this.subbins = [ ];
 };
 
 Bin.prototype = {
@@ -149,6 +150,7 @@ Bin.prototype = {
   id: null,
   bin: null,
   node: null,
+  subbins: null,
 
   setNode_: function (node, fnOnDrop)
   {
@@ -178,7 +180,10 @@ Bin.prototype = {
   { return this.controller; },
   
   getOwner: function ()
-  { return this.owner; }
+  { return this.owner; },
+
+  getSubbins: function ()
+  { return this.subbins; }
 };
 
 
@@ -210,7 +215,6 @@ var BinPrimary = function (controller, id, bin)
 };
 
 BinPrimary.prototype = Object.create(Bin.prototype);
-BinPrimary.prototype.subbins = [ ];
 BinPrimary.prototype.container = null;
 BinPrimary.prototype.getContainer = function () {
   return this.container;
@@ -345,6 +349,15 @@ ItemsList.prototype = {
   
   remove: function (id)
   {
+    if(typeof id == 'undefined') {
+      var node = this.container.find('.selected');
+
+      if(!node.length)
+        return;
+      
+      id = parseInt(node.attr('id').match(/item-(\d+)/)[1]);
+    }
+    
     for(var i = 0, l = this.items.length; i < l; ++i) {
       if(this.items[i].getContent().content_id == id) {
         if(this.items[i].getNode().hasClass('selected'))
