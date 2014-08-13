@@ -146,7 +146,8 @@ Bin.prototype = {
 
         if(fnOnDrop)
           fnOnDrop(evt, ui);
-      }
+      },
+      tolerance: 'pointer'
     } );
   },
 
@@ -169,7 +170,8 @@ var BinPrimary = function (controller, id, bin)
   controller.getOption("nodes").bins.append(this.container);
   
   this.setNode_($(controller.invoke("renderPrimaryBin", bin))
-                .attr('id', 'bin-' + id));
+                .attr('id', 'bin-' + id)
+                .addClass('bin'));
   
   this.container
     .addClass(controller.getOption("css").primaryBin)
@@ -200,7 +202,8 @@ var BinSub = function (owner, id, bin)
   Bin.call(this, owner.getController(), owner, id, bin);
 
   this.setNode_(this.controller.invoke("renderPrimarySubBin", bin)
-                .attr('id', 'bin-' + id));
+                .attr('id', 'bin-' + id)
+                .addClass('bin'));
   
   owner.getContainer().append(this.node);
 };
@@ -213,7 +216,8 @@ var BinSecondary = function (controller, id, bin)
   Bin.call(this, controller, null, id, bin);
 
   this.setNode_($(controller.getCallbacks().renderSecondaryBin(bin))
-                .attr('id', 'bin-' + id));
+                .attr('id', 'bin-' + id)
+                .addClass('bin'));
   
   controller.getOptions().nodes.bins.append(this.node);
 };
@@ -298,13 +302,20 @@ var TextItem = function (owner, item)
         .css('width', self.node.width() + 'px')
         .css('height', self.node.height() + 'px');
     },
+    drag: function (evt, ui) {
+      if(ui.position.left + ui.helper.outerWidth() >= $(window).width())
+        ui.position.left = $(window).width() - ui.helper.outerWidth() - 20;
+    },
     scope: 'text-items',
     cursor: 'move',
-    opacity: 0.7,
+    opacity: 0.45,
     cursorAt: {
       top: 5,
       left: 5
-    }
+    },
+    scroll: false,
+    snap: '.bin',
+    snapMode: 'inner'
   } );
   
   container.append(this.node);
