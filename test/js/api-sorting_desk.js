@@ -161,17 +161,20 @@ Api = {
 
   renderPrimaryBin: function (bin) {
     /* Wrap bin name inside a DIV. */
-    return $('<div class="bin-primary">' + bin.name + '</div>');
+    return $('<div class="bin-primary"><div class="bin-shortcut"/>'
+             + bin.name + '</div>');
   },
 
   renderPrimarySubBin: function (bin) {
     /* Wrap bin statement_text inside a DIV. */
-    return $('<div class="bin-primary-sub">' + bin.statement_text + '</div>');
+    return $('<div class="bin-primary-sub"><div class="bin-shortcut"/>'
+             + bin.statement_text + '</div>');
   },
 
   renderSecondaryBin: function (bin) {
     /* Wrap bin statement_text inside a DIV. */
-    return $('<div class="bin-secondary">' + bin.name + '</div>');
+    return $('<div class="bin-secondary"><div class="bin-shortcut"/>'
+             + bin.name + '</div>');
   }
 };
 

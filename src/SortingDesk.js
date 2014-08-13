@@ -36,7 +36,8 @@ var SortingDesk = function(options, callbacks)
 SortingDesk.defaults = {
   css: {
     primaryBin: "wrapper-primary-bin",
-    leftmostBin: "left"
+    leftmostBin: "left",
+    binShortcut: 'bin-shortcut'
   },
   visibleItems: 20              /* Arbitrary. */
 };
@@ -47,6 +48,7 @@ SortingDesk.prototype = {
   options: null,
   bins: null,
   list: null,
+  over: null,
 
   initialise: function (bins)
   {
@@ -89,7 +91,23 @@ SortingDesk.prototype = {
 
     $('body').keyup(function (evt) {
       console.log(evt.keyCode);
-      
+
+      /* First process alpha key strokes. */
+      if(evt.keyCode >= 65 && evt.keyCode <= 90) {
+        var bin = self.getBinByShortcut(evt.keyCode);
+
+        if(self.over) {
+          if(!bin)
+            self.over.setShortcut(evt.keyCode);
+        } else {
+          if(bin)
+            self.list.remove();
+        }
+        
+        return false;
+      }
+
+      /* Not alpha. */
       switch(evt.keyCode) {
       case 38:                    /* up */
         self.list.selectOffset(-1);
@@ -107,6 +125,16 @@ SortingDesk.prototype = {
     console.log("Sorting Desk UI initialised");
   },
 
+  onMouseEnter: function (bin)
+  {
+    this.over = bin;
+  },
+
+  onMouseLeave: function ()
+  {
+    this.over = null;
+  },
+
   invoke: function ()
   {
     if(arguments.length < 1)
@@ -116,6 +144,29 @@ SortingDesk.prototype = {
 
     return this.callbacks[arguments[0]]
       .apply(null, [].slice.call(arguments, 1));
+  },
+
+  getBinByShortcut: function (keyCode)
+  {
+    var result = false;
+
+    function recursive_search (obj) {
+      $.each(obj, function (i, item) {
+        if(item.getSubbins())
+          recursive_search(item.getSubbins());
+
+        if(result)
+          return false;
+        else if(item.getShortcut() == keyCode) {
+          result = item;
+          return false;
+        }
+      } );
+    }
+
+    recursive_search(this.bins);
+    
+    return result;
   },
 
   getOption: function (property)
@@ -150,6 +201,7 @@ Bin.prototype = {
   id: null,
   bin: null,
   node: null,
+  shortcut: null,
   subbins: null,
 
   setNode_: function (node, fnOnDrop)
@@ -158,20 +210,36 @@ Bin.prototype = {
     
     this.node = node;
     
-    node.droppable( {
-      scope: 'text-items',
-      activeClass: 'droppable-highlight',
-      hoverClass: 'droppable-hover',
-      drop: function (evt, ui) {
-        self.controller.getItemsList().remove(
-          parseInt(ui.draggable.attr('id').match(/item-(\d+)/)[1]));
+    node
+      .droppable( {
+        scope: 'text-items',
+        activeClass: 'droppable-highlight',
+        hoverClass: 'droppable-hover',
+        drop: function (evt, ui) {
+          self.controller.getItemsList().remove(
+            parseInt(ui.draggable.attr('id').match(/item-(\d+)/)[1]));
 
-        if(fnOnDrop)
-          fnOnDrop(evt, ui);
-      },
-      tolerance: 'pointer'
-    } );
+          if(fnOnDrop)
+            fnOnDrop(evt, ui);
+        },
+        tolerance: 'pointer' } )
+      .mouseenter(function () {
+        self.controller.onMouseEnter(self);
+      } )
+      .mouseleave(function () {
+        self.controller.onMouseLeave();
+      } )
   },
+
+  setShortcut: function (keyCode)
+  {
+    this.shortcut = keyCode;
+    this.node.find('.' + this.controller.getOption('css').binShortcut)
+      .html(String.fromCharCode(keyCode).toLowerCase());
+  },
+
+  getShortcut: function ()
+  { return this.shortcut; },
 
   getNode: function ()
   { return this.node; },
