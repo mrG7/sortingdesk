@@ -61,6 +61,7 @@ BODY {
   color: #5C7CCA;
   border-radius: 8px;
   padding: 15px;
+  margin-right: 2px;
   text-align: center;
   font-size: 20px;
   box-shadow: 1px 1px 5px 0px rgba(50, 50, 50, 0.75);
@@ -92,6 +93,7 @@ BODY {
   text-align: center;
   width: 200px;
   float: right;
+  margin-right: 2px;
   font-size: 16px;
   box-shadow: 1px 1px 5px 0px rgba(50, 50, 50, 0.75);
   text-shadow: 1px 1px 1px rgba(150, 150, 150, 1);
@@ -126,6 +128,7 @@ BODY {
   text-align: center;
   width: 200px;
   float: right;
+  margin-right: 2px;
   font-size: 14px;
   box-shadow: 1px 1px 5px 0px rgba(50, 50, 50, 0.75);
   text-shadow: 1px 1px 1px rgba(150, 150, 150, 1);
