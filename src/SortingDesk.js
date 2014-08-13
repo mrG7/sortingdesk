@@ -336,11 +336,12 @@ ItemsList.prototype = {
   check: function ()
   {
     var visibleItems = this.controller.getOption("visibleItems");
-    
+
     if(this.items.length >= visibleItems)
       return;
     
     var self = this;
+    
     this.controller.invoke("moreTexts", visibleItems)
       .done(function (items) {
         $.each(items, function (index, item) {
@@ -425,26 +426,35 @@ ItemsList.prototype = {
       
       id = parseInt(node.attr('id').match(/item-(\d+)/)[1]);
     }
-    
-    for(var i = 0, l = this.items.length; i < l; ++i) {
-      if(this.items[i].getContent().content_id == id) {
-        if(this.items[i].getNode().hasClass('selected'))
-          this.select(i == 0 && 1 || 0);
-        
-        this.items[i].getNode()
-          .css('opacity', 0.6)  /* to prevent flicker */
-          .animate( { opacity: 0 },
-                   200,
-                   function () {
-                     $(this).slideUp(150, function () {
-                       $(this).remove();
-                     } );
-                   } );
 
-        this.items.splice(i, 1);
-        break;
+    var self = this;
+    
+    $.each(this.items, function (i, item) {
+      if(item.getContent().content_id != id)
+        return true;
+      
+      if(item.isSelected()) {
+        if(i < self.items.length - 1)
+          self.select(self.items[i + 1]);
+        else if(self.items.length)
+          self.select(self.items[i - 1]);
+        else
+          console.log("No more items available");
       }
-    }
+      
+      item.getNode()
+        .css('opacity', 0.6)  /* to prevent flicker */
+        .animate( { opacity: 0 },
+                  200,
+                  function () {
+                    $(this).slideUp(150, function () {
+                      $(this).remove();
+                    } );
+                  } );
+
+      self.items.splice(i, 1);
+      return false;  
+    } );
     
     this.check();
   },
@@ -509,5 +519,8 @@ TextItem.prototype = {
   { return this.content; },
 
   getNode: function ()
-  { return this.node; }
+  { return this.node; },
+
+  isSelected: function ()
+  { return this.node.hasClass('selected'); }
 };
