@@ -125,6 +125,11 @@ SortingDesk.prototype = {
     console.log("Sorting Desk UI initialised");
   },
 
+  onClick: function (bin)
+  {
+    this.list.remove();
+  },
+
   onMouseEnter: function (bin)
   {
     this.over = bin;
@@ -229,6 +234,9 @@ Bin.prototype = {
       .mouseleave(function () {
         self.controller.onMouseLeave();
       } )
+      .click(function () {
+        self.controller.onClick(self);
+      } );
   },
 
   setShortcut: function (keyCode)
