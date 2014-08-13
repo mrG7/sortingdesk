@@ -354,10 +354,10 @@ var TextItem = function (owner, item)
     scope: 'text-items',
     cursor: 'move',
     opacity: 0.45,
-    cursorAt: {
-      top: 5,
-      left: 5
-    },
+/*     cursorAt: { */
+/*       top: 5,   */
+/*       left: 5   */
+/*     },          */
     scroll: false,
     snap: '.bin',
     snapMode: 'inner' } )
