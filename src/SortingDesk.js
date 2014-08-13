@@ -306,6 +306,20 @@ ItemsList.prototype = {
     
     this.container.find('.selected').removeClass('selected');
     variant.addClass('selected');
+
+    /* Ensure text item is _always_ visible at the bottom and top ends of the
+     * containing DIV. */
+    var st = this.container.scrollTop(),
+        ch = this.container.innerHeight(),
+        ipt = variant.position().top,
+        ih = st + ipt + variant.outerHeight();
+
+    if(st + ipt < st)           /* top */
+      this.container.scrollTop(st + ipt);
+    else if(ih > st + ch) {     /* bottom */
+      this.container.scrollTop(st + ipt - ch
+                               + variant.outerHeight()
+                               + parseInt(variant.css('margin')) + 1);
     }
   },
 
