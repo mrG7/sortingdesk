@@ -393,13 +393,16 @@ var TextItem = function (owner, item)
     },
     helper: function () {
       return self.node.clone()
-        .css('width', self.node.width() + 'px')
-        .css('height', self.node.height() + 'px');
+        .css( {
+          width: self.node.width() + 'px',
+          height: self.node.height() + 'px',
+        } );
     },
     drag: function (evt, ui) {
       if(ui.position.left + ui.helper.outerWidth() >= $(window).width())
         ui.position.left = $(window).width() - ui.helper.outerWidth() - 20;
     },
+    appendTo: 'body',
     scope: 'text-items',
     cursor: 'move',
     opacity: 0.45,
@@ -408,8 +411,8 @@ var TextItem = function (owner, item)
 /*       left: 5   */
 /*     },          */
     scroll: false,
-    snap: '.bin',
-    snapMode: 'inner' } )
+/*     snap: '.bin',     */
+/*     snapMode: 'inner' */ } )
     .click(function() {
       owner.select(self);
     } );
