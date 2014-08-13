@@ -17,6 +17,7 @@ var SortingDesk = function(options, callbacks)
   
   this.options = jQuery.extend({}, SortingDesk.defaults, options);
   this.callbacks = callbacks;
+  this.bins = [ ];
   
   var height = $(window).height() - 50;
   
@@ -44,7 +45,7 @@ SortingDesk.defaults = {
 SortingDesk.prototype = {
   callbacks: null,
   options: null,
-  bins: [ ],
+  bins: null,
   list: null,
 
   initialise: function (bins)
@@ -228,12 +229,14 @@ BinSecondary.prototype = Object.create(Bin.prototype);
 var ItemsList = function (controller)
 {
   this.controller = controller;
+  this.items = [ ];
+  
   this.check();
 };
 
 ItemsList.prototype = {
   controller: null,
-  items: [ ],
+  items: null,
 
   check: function ()
   {
