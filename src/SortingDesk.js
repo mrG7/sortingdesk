@@ -276,23 +276,23 @@ ItemsList.prototype = {
       } );
   },
 
-  select: function (obj)
+  select: function (variant)
   {
     var container = this.controller.getOption("nodes").items;
 
-    if(obj instanceof TextItem) {
+    if(variant instanceof TextItem) {
       container.find('DIV.selected').removeClass('selected');
-      obj.getNode().addClass('selected');
+      variant.getNode().addClass('selected');
       
       return;
-    } else if(typeof obj == 'undefined') {
+    } else if(typeof variant == 'undefined') {
       if(container.find('DIV.selected').length)
         return;
 
-      obj = 0;
+      variant = 0;
     }
 
-    container.find('DIV:eq(' + obj + ')').addClass('selected');
+    container.find('DIV:eq(' + variant + ')').addClass('selected');
   },
   
   remove: function (id)
