@@ -163,6 +163,12 @@ BODY {
   transition: background-color 175ms, color 100ms;
 }
 
+.bin-primary,
+.bin-primary-sub,
+.bin-secondary {
+  word-wrap: break-word;
+}
+
 .bin-shortcut {
   position: absolute;
   top: 0px;
