@@ -1,0 +1,26 @@
+2014-08-14  Miguel Guedes  <miguel@miguelguedes.org>
+
+	* src/SortingDesk.js: Separated `bin' and `bin containment'
+	responsibilities. Required quite a bit of work.
+
+	Implemented logic enabling interactive creation of bins. Bins are
+	created by clicking the appropriate 'add' button and waiting for
+	input from the user. If the user moves away from the new bin
+	without entering a description/title, creation of the bin is
+	cancelled. If a description/title has been entered, hitting TAB or
+	ENTER, or moving away from the new bin results in the creation of
+	a new bin.
+
+	Reworked mechanism by which bins are created.  There were serious
+	presentation issues involving bins whose titles/descriptions
+	spanned more than one line.
+
+	Bin animates when an item is assigned via a keyboard shortcut.
+
+	Removed reliance on some hardcoded CSS classes.
+
+	* test/css/theme-default.css: Several clean up/improvements of CSS
+	styling.
+
+
+Copyright (C) 2014 Diffeo
