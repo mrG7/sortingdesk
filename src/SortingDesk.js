@@ -39,8 +39,12 @@ SortingDesk.defaults = {
     primaryBinInnerWrapper: "wrapper-primary-bin-inner",
     secondaryBinsWrapper: "wrapper-secondary-bin",
     leftmostBin: "left",
+    binGeneric: 'bin',
     binShortcut: 'bin-shortcut',
-    binAnimateAssign: 'assign'
+    binAnimateAssign: 'assign',
+    buttonAdd: 'button-add',
+    itemSelected: 'selected',
+    itemDragging: 'dragging'
   },
   visibleItems: 20,             /* Arbitrary. */
   marginWhileDragging: 10,      /*  "     "   */
@@ -100,7 +104,7 @@ SortingDesk.prototype = {
       .append(
         this.callbacks.renderAddButton('+')
           .attr('id', "add-secondary-bin")
-          .addClass("button-add")
+          .addClass(this.options.css.buttonAdd)
           .click(function () {
           } ));
     
@@ -123,7 +127,7 @@ SortingDesk.prototype = {
             bin.getNode().addClass(self.options.css.binAnimateAssign);
             
             window.setTimeout(function () {
-              bin.getNode().removeClass('assign');
+              bin.getNode().removeClass(self.options.css.binAnimateAssign);
             }, self.options.delayAnimateAssign);
             
             self.list.remove();
@@ -293,24 +297,24 @@ var BinPrimary = function (controller, id, bin)
 {
   Bin.call(this, controller, null, id, bin);
   
-  var wrapper = $('<div/>')
-        .addClass(controller.getOption("css").primaryBinOuterWrapper);
+  var options = controller.getOptions(),
+      wrapper = $('<div/>').addClass(options.css.primaryBinOuterWrapper);
 
   this.container = $('<div/>');
   
   this.setNode_($(controller.invoke("renderPrimaryBin", bin))
                 .attr('id', 'bin-' + id)
-                .addClass('bin'));
+                .addClass(options.css.binGeneric));
   
   this.container
-    .addClass(controller.getOption("css").primaryBinInnerWrapper)
+    .addClass(options.css.primaryBinInnerWrapper)
     .append(this.node);
 
   for(var subid in bin.bins) {
     var obj = new BinSub(this, subid, bin.bins[subid]);
     
     if(this.subbins.length % 2 === 0)
-      obj.getNode().addClass("left");
+      obj.getNode().addClass(options.css.leftmostBin);
     
     this.subbins.push(obj);
   }
@@ -320,12 +324,12 @@ var BinPrimary = function (controller, id, bin)
 
   var button = $(controller.invoke("renderAddButton", "+"))
         .attr('id', "add-subbin")
-        .addClass("button-add")
+        .addClass(options.css.buttonAdd)
         .click(function () {
         } );
   
   wrapper.append(button);
-  controller.getOption("nodes").bins.append(wrapper);
+  options.nodes.bins.append(wrapper);
 };
 
 BinPrimary.prototype = Object.create(Bin.prototype);
@@ -341,7 +345,7 @@ var BinSub = function (owner, id, bin)
 
   this.setNode_(this.controller.invoke("renderPrimarySubBin", bin)
                 .attr('id', 'bin-' + id)
-                .addClass('bin'));
+                .addClass(this.controller.getOption('css').binGeneric));
   
   owner.getContainer().append(this.node);
 };
@@ -355,7 +359,7 @@ var BinSecondary = function (controller, id, bin, wrapper)
 
   this.setNode_($(controller.getCallbacks().renderSecondaryBin(bin))
                 .attr('id', 'bin-' + id)
-                .addClass('bin'));
+                .addClass(this.controller.getOption('css').binGeneric));
   
   wrapper.append(this.node);
 };
@@ -410,11 +414,13 @@ ItemsList.prototype = {
 
   select: function (variant)
   {
+    var csel = this.controller.getOption("css").itemSelected;
+    
     if(!this.container.children().length)
       return;
     
     if(typeof variant == 'undefined') {
-      if(this.container.find('.selected').length)
+      if(this.container.find('.' + csel).length)
         return;
 
       variant = this.container.children().eq(0);
@@ -427,9 +433,9 @@ ItemsList.prototype = {
       variant = this.container.children().eq(variant);
     } else if(variant instanceof TextItem)
       variant = variant.getNode();
-    
-    this.container.find('.selected').removeClass('selected');
-    variant.addClass('selected');
+
+    this.container.find('.' + csel).removeClass(csel);
+    variant.addClass(csel);
 
     /* Ensure text item is _always_ visible at the bottom and top ends of the
      * containing DIV. */
@@ -449,16 +455,17 @@ ItemsList.prototype = {
 
   selectOffset: function (offset)
   {
-    var index;
+    var csel = this.controller.getOption("css").itemSelected,
+        index;
 
     if(!this.container.length)
       return;
-    else if(!this.container.find('.selected').length) {
+    else if(!this.container.find('.' + csel).length) {
       this.select();
       return;
     }
 
-    index = this.container.find('.selected').prevAll().length + offset;
+    index = this.container.find('.' + csel).prevAll().length + offset;
 
     if(index < 0)
       index = 0;
@@ -471,7 +478,8 @@ ItemsList.prototype = {
   remove: function (id)
   {
     if(typeof id == 'undefined') {
-      var node = this.container.find('.selected');
+      var node = this.container.find(
+        '.' + this.controller.getOption("css").itemSelected);
 
       if(!node.length)
         return;
@@ -518,8 +526,9 @@ ItemsList.prototype = {
 
 var TextItem = function (owner, item)
 {
-  var controller = owner.getController();
-  var container = controller.getOption("nodes").items;
+  var controller = owner.getController(),
+      container = controller.getOption("nodes").items,
+      cdragging = controller.getOption("css").itemDragging;
 
   this.content = item;
   this.node = controller.invoke("renderText", item.snippet)
@@ -528,10 +537,10 @@ var TextItem = function (owner, item)
   var self = this;
   this.node.draggable( {
     start: function () {
-      self.node.addClass('dragging');
+      self.node.addClass(cdragging);
     },
     stop: function (evt, ui) {
-      self.node.removeClass('dragging');
+      self.node.removeClass(cdragging);
     },
     helper: function () {
       return self.node.clone()
