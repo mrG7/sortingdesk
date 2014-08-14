@@ -37,7 +37,7 @@ BODY {
 }
 
 #items, #bins {
-  margin: 10px;
+  padding: 10px;
   height: 600px;
   overflow: auto;
   position: relative;
