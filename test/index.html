@@ -24,7 +24,8 @@ $(function () {
   g_sortingDesk = new SortingDesk( {
     nodes: {
       items: $("#items"),
-      bins: $("#bins")
+      bins: $("#bins"),
+      binDelete: $("#button-delete")
     },
     css: {                      /* This tree is optional: see
                                  * `SortingDesk.defaults' */
@@ -64,5 +65,6 @@ $(function () {
       </div>
     </div>
   </div>
+  <div id="button-delete">X</div>
 </body>
 </html>
