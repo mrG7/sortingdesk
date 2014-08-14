@@ -1,10 +1,14 @@
 2014-08-14  Miguel Guedes  <miguel@miguelguedes.org>
 
 	* src/SortingDesk.js:
+
 	Created UI interaction logic permitting deletion of all
-	non-primary bins. No bins are actually deleted yet. Will be
-	waiting approval of current implementation before actual bin
-	removal logic is added.
+	non-primary bins. Deletion of bins is done by dragging intended
+	bin. Once dragging is initiated a target with an `X' inside will
+	pop up. Dropping the bin in to the target deletes it. Note,
+	however, that no bins are actually deleted yet. Will be waiting
+	approval of current implementation before actual bin removal logic
+	is added.
 
 	Separated `bin' and `bin containment' responsibilities. Required
 	quite a bit of work.
