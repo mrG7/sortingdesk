@@ -690,6 +690,17 @@ var TextItem = function (owner, item)
 
   var self = this;
   this.node.draggable( {
+    appendTo: 'body',
+    scope: 'text-items',
+    cursor: 'move',
+    opacity: 0.45,
+/*     cursorAt: { */
+/*       top: 5,   */
+/*       left: 5   */
+/*     },          */
+    scroll: false,
+/*     snap: '.bin',     */
+/*     snapMode: 'inner' */
     start: function () {
       self.node.addClass(cdragging);
     },
@@ -705,18 +716,8 @@ var TextItem = function (owner, item)
     },
     drag: function (evt, ui) {
       UiHelper.onDrag(evt, ui, controller.getOption("marginWhileDragging"));
-    },
-    appendTo: 'body',
-    scope: 'text-items',
-    cursor: 'move',
-    opacity: 0.45,
-/*     cursorAt: { */
-/*       top: 5,   */
-/*       left: 5   */
-/*     },          */
-    scroll: false,
-/*     snap: '.bin',     */
-/*     snapMode: 'inner' */ } )
+    }
+  } )
     .click(function () {
       owner.select(self);
     } );
