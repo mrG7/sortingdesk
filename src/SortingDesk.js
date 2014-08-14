@@ -179,6 +179,7 @@ SortingDesk.prototype = {
 };
 
 
+/* Base class of `BinContainerPrimary' and `BinContainerSecondary'. */
 var BinContainer = function (controller)
 {
   this.controller = controller;
