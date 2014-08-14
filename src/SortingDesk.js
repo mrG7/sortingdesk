@@ -748,6 +748,10 @@ var BinAddButton = function (owner, fnRender, fnAdd)
       button = $(controller.invoke("renderAddButton", "+"))
         .addClass(css.buttonAdd)
         .click(function () {
+          /* Do not allow entering into concurrent `add' states. */
+          if(owner.getContainer().find('.' + css.binAdding).length)
+            return;
+          
           var node = fnRender('<input placeholder="Enter bin description" '
                               + 'type="text"/>')
                 .addClass(css.binAdding),
