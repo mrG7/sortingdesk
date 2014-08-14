@@ -121,7 +121,17 @@ SortingDesk.prototype = {
 
       return false;
     } );
-    
+
+    this.options.nodes.binDelete
+      .droppable( {
+        scope: 'delete-bin',
+        hoverClass: 'droppable-hover',
+        tolerance: 'pointer',
+        drop: function (evt, ui) {
+          console.log('dropped');
+        }
+      } );
+
     console.log("Sorting Desk UI initialised");
   },
 
@@ -406,6 +416,40 @@ Bin.prototype = {
       .click(function () {
         self.getController().onClick(self);
       } );
+
+    /* We must defer initialisation of draggable because owning object's `bin'
+     * attribute will have not yet been set. */
+    window.setTimeout(function () {
+      /* Primary bins can't be draggable. */
+      if(self == self.owner.getBin())
+        return;
+      
+      node.draggable( {
+        scope: 'delete-bin',
+        appendTo: 'body',
+        cursor: 'move',
+        scroll: false,
+        opacity: 0.6,
+        helper: function () {
+          return node.clone()
+            .css( {
+              width: self.node.width() + 'px',
+              height: self.node.height() + 'px',
+            } );
+        },
+        start: function () {
+          self.getController().getOption('nodes').binDelete.fadeIn();
+        },
+        stop: function () {
+          self.getController().getOption('nodes').binDelete.fadeOut();
+        },
+        drag: function (evt, ui) {
+          UiHelper.onDrag(
+            evt, ui,
+            self.getController().getOption('marginWhileDragging'));
+        }
+      } );
+    }, 0);
   },
   
   setShortcut: function (keyCode)
@@ -736,6 +780,7 @@ var BinAddButton = function (owner, fnRender, fnAdd)
 
   owner.getContainer().after(button);
 };
+
 
 var UiHelper = {
   onDrag: function (evt, ui, margin)
