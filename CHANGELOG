@@ -1,7 +1,13 @@
 2014-08-14  Miguel Guedes  <miguel@miguelguedes.org>
 
-	* src/SortingDesk.js: Separated `bin' and `bin containment'
-	responsibilities. Required quite a bit of work.
+	* src/SortingDesk.js:
+	Created UI interaction logic permitting deletion of all
+	non-primary bins. No bins are actually deleted yet. Will be
+	waiting approval of current implementation before actual bin
+	removal logic is added.
+
+	Separated `bin' and `bin containment' responsibilities. Required
+	quite a bit of work.
 
 	Implemented logic enabling interactive creation of bins. Bins are
 	created by clicking the appropriate 'add' button and waiting for
@@ -17,7 +23,7 @@
 
 	Bin animates when an item is assigned via a keyboard shortcut.
 
-	Removed reliance on some hardcoded CSS classes.
+	Removed reliance on hardcoded CSS classes.
 
 	* test/css/theme-default.css: Several clean up/improvements of CSS
 	styling.
