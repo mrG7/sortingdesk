@@ -660,18 +660,7 @@ var TextItem = function (owner, item)
         } );
     },
     drag: function (evt, ui) {
-      var margin = controller.getOption("marginWhileDragging");
-            
-      if(ui.position.left + ui.helper.outerWidth() >=
-         $(window).width() - margin) {
-        ui.position.left = $(window).width() - ui.helper.outerWidth() - margin;
-      }
-      
-      if(ui.position.top + ui.helper.outerHeight() >=
-         $(window).height() - margin) {
-        ui.position.top =  $(window).height() - ui.helper.outerHeight()
-          - margin;
-      }
+      UiHelper.onDrag(evt, ui, controller.getOption("marginWhileDragging"));
     },
     appendTo: 'body',
     scope: 'text-items',
@@ -746,4 +735,20 @@ var BinAddButton = function (owner, fnRender, fnAdd)
         } );
 
   owner.getContainer().after(button);
+};
+
+var UiHelper = {
+  onDrag: function (evt, ui, margin)
+  {
+    if(ui.position.left + ui.helper.outerWidth() >=
+       $(window).width() - margin) {
+      ui.position.left = $(window).width() - ui.helper.outerWidth() - margin;
+    }
+
+    if(ui.position.top + ui.helper.outerHeight() >=
+       $(window).height() - margin * 2) {
+      ui.position.top =  $(window).height() - ui.helper.outerHeight()
+        - margin;
+    }
+  }
 };
