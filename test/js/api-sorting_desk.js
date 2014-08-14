@@ -102,6 +102,35 @@ Api = {
    * }
    *   ||
    * statement_id: {
+   *   statement_text: string
+   * }
+   */
+  addPrimarySubBin: function (text) {
+    var deferred = $.Deferred();
+
+    window.setTimeout(function () {
+      ++ApiData.lastId;
+      
+      ApiData.bins[ApiData.primaryContentId].bins[ApiData.lastId] = {
+        statement_text: text
+      };
+
+      var bin = { };
+      bin[ApiData.lastId] = ApiData.bins[ApiData.primaryContentId]
+        .bins[ApiData.lastId];
+      
+      deferred.resolve(bin);
+    }, Math.rand(Api.DELAY_MIN, Api.DELAY_MAX) );
+
+    return deferred.promise();
+  },
+
+  /* Returns:
+   * {
+   *   error: error_string    ;; presently never returning an error
+   * }
+   *   ||
+   * statement_id: {
    *   name: string,
    *   bins: []
    * }
@@ -192,7 +221,7 @@ var ApiData = {
     1: {
       name: "Primary",
       bins: {
-        11: { statement_text: "The quick brown fox. Hess jumped over the lazy dog." },
+        11: { statement_text: "The quick brown fox. He jumped over the lazy dog." },
         12: { statement_text: "The answer is 42." },
         13: { statement_text: "Maybe, but the king of them all is π." }
       }
