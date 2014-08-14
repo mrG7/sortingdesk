@@ -39,10 +39,12 @@ SortingDesk.defaults = {
     primaryBinInnerWrapper: "wrapper-primary-bin-inner",
     secondaryBinsWrapper: "wrapper-secondary-bin",
     leftmostBin: "left",
-    binShortcut: 'bin-shortcut'
+    binShortcut: 'bin-shortcut',
+    binAnimateAssign: 'assign'
   },
   visibleItems: 20,             /* Arbitrary. */
-  marginWhileDragging: 10       /*  "     "   */
+  marginWhileDragging: 10,      /*  "     "   */
+  delayAnimateAssign: 100       /* in milliseconds */
 };
 
 
@@ -113,8 +115,19 @@ SortingDesk.prototype = {
           if(!bin)
             self.over.setShortcut(evt.keyCode);
         } else {
-          if(bin)
+          if(bin) {
+            /* Simulate the effect produced by a mouse click by assigning the
+             * CSS class that contains identical styles to the pseudo-class
+             * :hover, and removing it after the milliseconds specified in
+             * `options.delayAnimateAssign'. */
+            bin.getNode().addClass(self.options.css.binAnimateAssign);
+            
+            window.setTimeout(function () {
+              bin.getNode().removeClass('assign');
+            }, self.options.delayAnimateAssign);
+            
             self.list.remove();
+          }
         }
         
         return false;
