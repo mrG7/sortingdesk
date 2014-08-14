@@ -37,7 +37,8 @@ SortingDesk.defaults = {
   css: {
     primaryBinOuterWrapper: "wrapper-primary-bin-outer",
     primaryBinInnerWrapper: "wrapper-primary-bin-inner",
-    secondaryBinsWrapper: "wrapper-secondary-bin",
+    secondaryBinOuterWrapper: "wrapper-secondary-bin-outer",
+    secondaryBinInnerWrapper: "wrapper-secondary-bin-inner",
     leftmostBin: "left",
     binGeneric: 'bin',
     binShortcut: 'bin-shortcut',
@@ -73,12 +74,8 @@ SortingDesk.prototype = {
     delete bins[this.options.primaryContentId];
 
     /* Now, create secondary bins */
-    var count = 0,
-        self = this,
-        wrapper = $('<div />')
-          .addClass(this.options.css.secondaryBinsWrapper);
-
-    this.options.nodes.bins.append(wrapper);
+    var self = this,
+        placement = new BinPlacement(this);
     
     for(var id in bins) {
       var bin = bins[id];
@@ -89,24 +86,8 @@ SortingDesk.prototype = {
         continue;
       }
 
-      this.bins.push(new BinSecondary(this, id, bin, wrapper));
-
-      /* Apply appropriate CSS class to leftmost bin. */
-      if(count % 2 === 0) {
-        this.bins[this.bins.length - 1].getNode()
-          .addClass(this.options.css.leftmostBin);
-      }
-      
-      ++count;
+      this.bins.push(new BinSecondary(placement, id, bin));
     }
-
-    this.options.nodes.bins.append('<div style="clear:both"/>')
-      .append(
-        this.callbacks.renderAddButton('+')
-          .attr('id', "add-secondary-bin")
-          .addClass(this.options.css.buttonAdd)
-          .click(function () {
-          } ));
     
     this.list = new ItemsList(this);
 
@@ -220,7 +201,7 @@ SortingDesk.prototype = {
 };
 
 
-/* Base class of `BinPrimary', `BinSecondary' and `BinSub'.*/
+/* Base class of `BinPrimary', `BinPlacement', `BinSecondary' and `BinSub'.*/
 var Bin = function (controller, owner, id, bin)
 {
   this.controller = controller;
@@ -235,6 +216,7 @@ Bin.prototype = {
   owner: null,
   id: null,
   bin: null,
+  container: null,
   node: null,
   shortcut: null,
   subbins: null,
@@ -269,6 +251,32 @@ Bin.prototype = {
       } );
   },
 
+  append: function (node)
+  {
+    var place = this.getNewPlacement();
+
+    place.append(node);
+
+    if(place.children().length < 2)
+      node.addClass(this.controller.options.css.leftmostBin);
+  },
+  
+  getNewPlacement: function ()
+  {
+    if(!this.owner.container)
+      throw "No container defined";
+
+    var last = this.owner.container.children().last();
+    
+    if(last.children().length == 1)
+      return last;
+
+    return this.owner.container.append('<div />').children().last();
+  },
+
+  getContainer: function ()
+  { return this.container; },
+  
   setShortcut: function (keyCode)
   {
     this.shortcut = keyCode;
@@ -300,27 +308,16 @@ var BinPrimary = function (controller, id, bin)
   var options = controller.getOptions(),
       wrapper = $('<div/>').addClass(options.css.primaryBinOuterWrapper);
 
-  this.container = $('<div/>');
   
   this.setNode_($(controller.invoke("renderPrimaryBin", bin))
                 .attr('id', 'bin-' + id)
                 .addClass(options.css.binGeneric));
   
-  this.container
-    .addClass(options.css.primaryBinInnerWrapper)
-    .append(this.node);
+  this.container = $('<div/>')
+    .addClass(options.css.primaryBinInnerWrapper);
 
-  for(var subid in bin.bins) {
-    var obj = new BinSub(this, subid, bin.bins[subid]);
-    
-    if(this.subbins.length % 2 === 0)
-      obj.getNode().addClass(options.css.leftmostBin);
-    
-    this.subbins.push(obj);
-  }
-
-  this.container.append('<div style="clear:both"/>');
-  wrapper.append(this.container);
+  for(var subid in bin.bins)
+    this.subbins.push(new BinSub(this, subid, bin.bins[subid]));
 
   var button = $(controller.invoke("renderAddButton", "+"))
         .attr('id', "add-subbin")
@@ -328,15 +325,43 @@ var BinPrimary = function (controller, id, bin)
         .click(function () {
         } );
   
-  wrapper.append(button);
+  wrapper
+    .append(this.node)
+    .append(this.container)
+    .append(button);
+  
   options.nodes.bins.append(wrapper);
 };
 
 BinPrimary.prototype = Object.create(Bin.prototype);
-BinPrimary.prototype.container = null;
-BinPrimary.prototype.getContainer = function () {
-  return this.container;
+
+
+/* This is a bogus bin class whose aim is to provide the same sort of
+ * functionality as `BinPrimary' only for secondary bins. */
+var BinPlacement = function (controller)
+{
+  Bin.call(this, controller);
+  
+  var options = controller.getOptions(),
+      wrapper = $('<div/>').addClass(options.css.secondaryBinOuterWrapper);
+  
+  this.container = $('<div/>')
+    .addClass(options.css.primaryBinInnerWrapper);
+
+  var button = $(controller.invoke("renderAddButton", "+"))
+        .attr('id', "add-subbin")
+        .addClass(options.css.buttonAdd)
+        .click(function () {
+        } );
+  
+  wrapper
+    .append(this.container)
+    .append(button);
+  
+  options.nodes.bins.append(wrapper);
 };
+
+BinPlacement.prototype = Object.create(Bin.prototype);
 
 
 var BinSub = function (owner, id, bin)
@@ -346,22 +371,22 @@ var BinSub = function (owner, id, bin)
   this.setNode_(this.controller.invoke("renderPrimarySubBin", bin)
                 .attr('id', 'bin-' + id)
                 .addClass(this.controller.getOption('css').binGeneric));
-  
-  owner.getContainer().append(this.node);
+
+  this.append(this.node);
 };
 
 BinSub.prototype = Object.create(Bin.prototype);
 
 
-var BinSecondary = function (controller, id, bin, wrapper)
+var BinSecondary = function (owner, id, bin)
 {
-  Bin.call(this, controller, null, id, bin);
+  Bin.call(this, owner.getController(), owner, id, bin);
 
-  this.setNode_($(controller.getCallbacks().renderSecondaryBin(bin))
+  this.setNode_($(this.controller.invoke('renderSecondaryBin', bin))
                 .attr('id', 'bin-' + id)
                 .addClass(this.controller.getOption('css').binGeneric));
   
-  wrapper.append(this.node);
+  this.append(this.node);
 };
 
 BinSecondary.prototype = Object.create(Bin.prototype);
