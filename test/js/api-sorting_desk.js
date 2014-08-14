@@ -192,9 +192,9 @@ var ApiData = {
     1: {
       name: "Primary",
       bins: {
-        11: { statement_text: "Interesting" },
-        12: { statement_text: "Undecided" },
-        13: { statement_text: "Newsworthy" }
+        11: { statement_text: "The quick brown fox. Hess jumped over the lazy dog." },
+        12: { statement_text: "The answer is 42." },
+        13: { statement_text: "Maybe, but the king of them all is π." }
       }
     },
     100: {
