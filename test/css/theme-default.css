@@ -43,14 +43,24 @@ BODY {
   position: relative;
 }
 
+.wrapper-primary-bin-outer,
+.wrapper-secondary-bin-outer {
+  clear: both;
+}
+
 .wrapper-primary-bin-outer {
   padding-bottom: 20px;
   margin-bottom: 20px;
   border-bottom: 2px dashed silver;
+}
+
+.wrapper-primary-bin-inner > DIV,
+.wrapper-secondary-bin-inner > DIV {
   clear: both;
 }
 
-.wrapper-primary-bin:not(:first-child) {
+.wrapper-primary-bin:not(:first-child),
+.wrapper-secondary-bin:not(:first-child) {
   margin-top: 25px !important;
 }
 
