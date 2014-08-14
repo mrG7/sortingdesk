@@ -43,6 +43,7 @@ SortingDesk.defaults = {
     binGeneric: 'bin',
     binShortcut: 'bin-shortcut',
     binAnimateAssign: 'assign',
+    binAdding: 'adding',
     buttonAdd: 'button-add',
     itemSelected: 'selected',
     itemDragging: 'dragging'
@@ -74,21 +75,9 @@ SortingDesk.prototype = {
     delete bins[this.options.primaryContentId];
 
     /* Now, create secondary bins */
-    var self = this,
-        placement = new BinPlacement(this);
+    var self = this;
     
-    for(var id in bins) {
-      var bin = bins[id];
-
-      /* Report error, if applicable, but do not abort. */
-      if(bin.error) {
-        console.log("Failed to retrieve contents of secondary bin: ", id);
-        continue;
-      }
-
-      this.bins.push(new BinSecondary(placement, id, bin));
-    }
-    
+    this.bins.push(new BinPlacement(this, bins));
     this.list = new ItemsList(this);
 
     $('body').keyup(function (evt) {
@@ -260,6 +249,14 @@ Bin.prototype = {
     if(place.children().length < 2)
       node.addClass(this.controller.options.css.leftmostBin);
   },
+
+  remove: function (old)
+  {
+    old.remove();
+
+    old.parent().each(function (i, node) {
+    } );
+  },
   
   getNewPlacement: function ()
   {
@@ -306,9 +303,9 @@ var BinPrimary = function (controller, id, bin)
   Bin.call(this, controller, null, id, bin);
   
   var options = controller.getOptions(),
-      wrapper = $('<div/>').addClass(options.css.primaryBinOuterWrapper);
+      wrapper = $('<div/>').addClass(options.css.primaryBinOuterWrapper),
+      self = this;
 
-  
   this.setNode_($(controller.invoke("renderPrimaryBin", bin))
                 .attr('id', 'bin-' + id)
                 .addClass(options.css.binGeneric));
@@ -318,17 +315,36 @@ var BinPrimary = function (controller, id, bin)
 
   for(var subid in bin.bins)
     this.subbins.push(new BinSub(this, subid, bin.bins[subid]));
-
-  var button = $(controller.invoke("renderAddButton", "+"))
-        .attr('id', "add-subbin")
-        .addClass(options.css.buttonAdd)
-        .click(function () {
-        } );
   
   wrapper
     .append(this.node)
-    .append(this.container)
-    .append(button);
+    .append(this.container);
+
+  new BinAddButton(
+    controller, this,
+    function (input) {
+      return Api.renderPrimarySubBin( { statement_text: input } );
+    },
+    function (text) {
+      var deferred = $.Deferred();
+      
+      Api.addPrimarySubBin(text)
+        .fail(function () {
+          /* TODO: show message box and notify user. */
+          deferred.reject();
+        } )
+        .done(function (bin) {
+          window.setTimeout(function () {
+            /* We rely on the API returning exactly ONE descriptor. */
+            for(var id in bin)
+              self.subbins.push(new BinSub(self, id, bin[id]));
+          }, 0);
+          
+          deferred.resolve();
+        } );
+
+      return deferred.promise();
+    } );
   
   options.nodes.bins.append(wrapper);
 };
@@ -338,26 +354,56 @@ BinPrimary.prototype = Object.create(Bin.prototype);
 
 /* This is a bogus bin class whose aim is to provide the same sort of
  * functionality as `BinPrimary' only for secondary bins. */
-var BinPlacement = function (controller)
+var BinPlacement = function (controller, bins)
 {
   Bin.call(this, controller);
   
-  var options = controller.getOptions(),
+  var self = this,
+      options = controller.getOptions(),
       wrapper = $('<div/>').addClass(options.css.secondaryBinOuterWrapper);
   
-  this.container = $('<div/>')
-    .addClass(options.css.primaryBinInnerWrapper);
+  this.container = $('<div/>').addClass(options.css.primaryBinInnerWrapper);
 
-  var button = $(controller.invoke("renderAddButton", "+"))
-        .attr('id', "add-subbin")
-        .addClass(options.css.buttonAdd)
-        .click(function () {
+  for(var id in bins) {
+    var bin = bins[id];
+
+    /* Report error, if applicable, but do not abort. */
+    if(bin.error) {
+      console.log("Failed to retrieve contents of secondary bin: ", id);
+      continue;
+    }
+
+    this.subbins.push(new BinSecondary(this, id, bin));
+  }
+  
+  wrapper.append(this.container);
+
+  new BinAddButton(
+    controller, this,
+    function (input) {
+      return Api.renderSecondaryBin( { name: input } );
+    },
+    function (text) {
+      var deferred = $.Deferred();
+      
+      Api.addSecondaryBin(text)
+        .fail(function () {
+          /* TODO: show message box and notify user. */
+          deferred.reject();
+        } )
+        .done(function (bin) {
+          window.setTimeout(function () {
+            /* We rely on the API returning exactly ONE descriptor. */
+            for(var id in bin)
+              self.subbins.push(new BinSecondary(self, id, bin[id]));
+          }, 0);
+          
+          deferred.resolve();
         } );
-  
-  wrapper
-    .append(this.container)
-    .append(button);
-  
+
+      return deferred.promise();
+    } );
+
   options.nodes.bins.append(wrapper);
 };
 
@@ -620,3 +666,48 @@ TextItem.prototype = {
   isSelected: function ()
   { return this.node.hasClass('selected'); }
 };
+
+
+var BinAddButton = function (controller, owner, fnRender, fnAdd)
+{
+  Bin.call(this, controller, owner);
+  
+  var self = this,
+      css = controller.getOption('css'),
+      button = $(controller.invoke("renderAddButton", "+"))
+        .addClass(css.buttonAdd)
+        .click(function () {
+          var node = fnRender('<input placeholder="Enter bin description" '
+                              + 'type="text"/>')
+                .addClass(css.binAdding),
+              input = node.find('input');
+
+          node.fadeIn(200);
+          self.append(node);
+
+          input.focus()
+            .blur(function () {
+              if(!this.value) {
+                node.fadeOut(200, function () { self.remove(node); } );
+                return;
+              }
+
+              this.disabled = true;
+
+              fnAdd(this.value)
+                .done(function () { node.remove(); } )
+                .fail(function () { node.removeAttr('disabled'); } );
+            } )
+            .keyup(function (evt) {
+              if(evt.keyCode == 13)
+                this.blur();
+              
+              /* Do not allow event to propagate. */
+              return false;
+            } );
+        } );
+
+  owner.getContainer().after(button);
+};
+
+BinAddButton.prototype = Object.create(Bin.prototype);

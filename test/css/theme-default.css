@@ -78,14 +78,14 @@ BODY {
   transition: background-color 175ms, color 100ms;
 }
 
-.bin-primary:hover {
+.bin-primary:hover:not(.adding) {
   background-color: #A9BEF3;
   color: #F2F6FF;
   cursor: pointer;
   transition: background-color 175ms, color 100ms;
 }
 
-.bin-primary:active, .bin-primary.assign {
+.bin-primary:active:not(.adding), .bin-primary.assign {
   position: relative;
   top: 3px;
   left: 3px;
@@ -103,14 +103,14 @@ BODY {
   font-size: 16px;
 }
 
-.bin-primary-sub:hover {
+.bin-primary-sub:hover:not(.adding) {
   background-color: #BEDFF7;
   color: #5D8DD4;
   cursor: pointer;
   transition: background-color 175ms, color 100ms;
 }
 
-.bin-primary-sub:active, .bin-primary-sub.assign {
+.bin-primary-sub:active:not(.adding), .bin-primary-sub.assign {
   position: relative;
   top: 2px;
   left: 2px;
@@ -136,14 +136,14 @@ BODY {
   float: left !important;
 }
 
-.bin-secondary:hover {
+.bin-secondary:hover:not(.adding) {
   background-color: #EED5B2;
   color: #BE6A42;
   cursor: pointer;
   transition: background-color 175ms, color 100ms;
 }
 
-.bin-secondary:active, .bin-secondary.assign {
+.bin-secondary:active:not(.adding), .bin-secondary.assign {
   position: relative;
   top: 2px;
   left: 2px;
