@@ -649,7 +649,7 @@ var TextItem = function (owner, item)
     start: function () {
       self.node.addClass(cdragging);
     },
-    stop: function (evt, ui) {
+    stop: function () {
       self.node.removeClass(cdragging);
     },
     helper: function () {
