@@ -45,7 +45,6 @@ Api = {
     singleNodes:
     'http://dev5.diffeo.com:10982/namespaces/miguel_sorting_desk/nodes/'
   },
-  primaryNodeId: 'kb_aHR0cHM6Ly9rYi5kaWZmZW8uY29tL2FsX2FocmFt',
     
 
   /* The following method is in contravention of the specs. It returns the
@@ -59,7 +58,7 @@ Api = {
     $.getJSON(Api.endpoints.multipleNodes +
               '?noprof=1&format=jsonp&label=true&order=similar'
               + '&limit=' + Api.MULTIPLE_NODES_LIMIT
-              + '&node_id=' + encodeURIComponent(Api.primaryNodeId)
+              + '&node_id=' + encodeURIComponent(ApiData.primaryContentId)
               + '&callback=?')
       .fail(function () {
         console.log("moreTexts: request failed");
@@ -384,7 +383,7 @@ Api = {
 /* Class containing only static methods and attributes.
  * Cannot be instantiated. */
 var ApiData = {
-  primaryContentId: 1,
+  primaryContentId: 'kb_aHR0cHM6Ly9rYi5kaWZmZW8uY29tL2FsX2FocmFt',
   secondaryContentIds: [ 100, 101, 102 ],
   bins: {
     1: {

@@ -58,9 +58,9 @@ $(function () {
   }
   
   $("#primary-node-id")
-    .val(Api.primaryNodeId)
+    .val(ApiData.primaryContentId)
     .change(function () {
-      Api.primaryNodeId = this.value;
+      ApiData.primaryContentId = this.value;
       instantiateUi();
     } );
 
