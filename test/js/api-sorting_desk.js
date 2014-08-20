@@ -307,7 +307,7 @@ Api = {
         re = /<\s*[bB]\s*[^>]*>/g,
         content = item.text,
         matcho = re.exec(content),
-        matchc = re.exec(content),
+        matchc,
         i, j,
         text;
 
