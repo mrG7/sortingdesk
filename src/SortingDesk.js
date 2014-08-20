@@ -719,29 +719,6 @@ TextItem.prototype = {
         controller = this.owner.getController(),
         cdragging = controller.getOption("css").itemDragging;
 
-    
-    this.node.find('.less').click(function () {
-      var t = controller
-            .invoke("renderText",
-                    self.content.text,
-                    Api.TEXT_VIEW_HIGHLIGHTS);
-      self.node.replaceWith(t);
-      self.node = t;
-      self.setup_();
-      return false;
-    } );
-
-    this.node.find('.more').click(function () {
-      var t = controller
-            .invoke("renderText",
-                    self.content.text,
-                    Api.TEXT_VIEW_UNRESTRICTED);
-      self.node.replaceWith(t);
-      self.node = t;
-      self.setup_();
-      return false;
-    } );
-
     this.node
       .attr('id', this.content.node_id)
       .draggable( {
@@ -776,6 +753,29 @@ TextItem.prototype = {
       .click(function () {
         self.owner.select(self);
       } );
+
+    /* Add logic to less/more links. */
+    this.node.find('.less').click(function () {
+      var t = controller
+            .invoke("renderText",
+                    self.content.text,
+                    Api.TEXT_VIEW_HIGHLIGHTS);
+      self.node.replaceWith(t);
+      self.node = t;
+      self.setup_();
+      return false;
+    } );
+
+    this.node.find('.more').click(function () {
+      var t = controller
+            .invoke("renderText",
+                    self.content.text,
+                    Api.TEXT_VIEW_UNRESTRICTED);
+      self.node.replaceWith(t);
+      self.node = t;
+      self.setup_();
+      return false;
+    } );
   },    
 
   getContent: function ()
