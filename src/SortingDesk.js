@@ -401,7 +401,7 @@ Bin.prototype = {
         hoverClass: 'droppable-hover',
         drop: function (evt, ui) {
           self.getController().getItemsList().remove(
-            parseInt(ui.draggable.attr('id').match(/item-(\d+)/)[1]));
+            ui.draggable.attr('id'));
 
           if(fnOnDrop)
             fnOnDrop(evt, ui);
@@ -638,13 +638,13 @@ ItemsList.prototype = {
       if(!node.length)
         return;
       
-      id = parseInt(node.attr('id').match(/item-(\d+)/)[1]);
+      id = node.attr('id');
     }
 
     var self = this;
     
     $.each(this.items, function (i, item) {
-      if(item.getContent().content_id != id)
+      if(item.getContent().node_id != id)
         return true;
       
       if(item.isSelected()) {
@@ -685,8 +685,8 @@ var TextItem = function (owner, item)
       cdragging = controller.getOption("css").itemDragging;
 
   this.content = item;
-  this.node = controller.invoke("renderText", item.snippet)
-    .attr('id', 'item-' + item.content_id);
+  this.node = controller.invoke("renderText", item.text)
+    .attr('id', item.node_id);
 
   var self = this;
   this.node.draggable( {
