@@ -1,3 +1,19 @@
+2014-08-20  Miguel Guedes  <miguel@miguelguedes.org>
+
+	* test/js/api-sorting_desk.js (Api):
+
+	Implemented multi-view, word-bound text rendering
+	algorithm. Depending on the current view, a "more" or "less" link
+	is displayed which allows for rendering of a condensed or
+	unrestricted view of a text item.
+
+	Component now loads live data from diffeo's RESTful API.
+
+	Added logic for user notification of ongoing AJAX requests.
+
+	A UI control was created that allows for real-time changing of the
+	current primary bin's node id.
+
 2014-08-14  Miguel Guedes  <miguel@miguelguedes.org>
 
 	* src/SortingDesk.js:
