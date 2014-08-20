@@ -8,9 +8,9 @@
 	algorithm. Depending on the current view, a "more" or "less" link
 	is displayed which allows for rendering of a condensed or
 	unrestricted view of a text item. There might be potentially a bug
-	if the boundaries fall on opened tags (e.g. boundary ends after
-	`<b class="foo">'); nothing major though and shouldn't affect
-	rendering in any way.
+	(untested) if the boundaries fall on opened tags (e.g. boundary
+	ends after `<b class="foo">'); nothing major though and shouldn't
+	affect rendering in any way.
 
 	Component now loads live data from diffeo's RESTful API.
 
