@@ -2,9 +2,11 @@
 
 	* test/js/api-sorting_desk.js:
 
-	Retrieve information about primary bin from diffeo's RESTful API.
+	Component is now able to retrieve information about primary bin
+	from diffeo's RESTful API.
 
-	Add a title to every text item in the form of a link.
+	A title was added to every text item in the form of a link
+	(clicking opens a new tab).
 
 	Implemented multi-view, word-bound text rendering
 	algorithm. Depending on the current view, a "more" or "less" link
