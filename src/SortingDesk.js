@@ -696,7 +696,6 @@ ItemsList.prototype = {
 var TextItem = function (owner, item)
 {
   var controller = owner.getController(),
-      container = controller.getOption("nodes").items,
       cdragging = controller.getOption("css").itemDragging;
 
   this.owner = owner;
@@ -706,7 +705,7 @@ var TextItem = function (owner, item)
                                 Api.TEXT_VIEW_HIGHLIGHTS);
 
   this.setup_();
-  container.append(this.node);
+  controller.getOption("nodes").items.append(this.node);
 };
 
 TextItem.prototype = {
@@ -716,13 +715,16 @@ TextItem.prototype = {
   node: null,
 
   setup_: function() {
-    var self = this;
+    var self = this,
+        controller = this.owner.getController(),
+        cdragging = controller.getOption("css").itemDragging;
+
     
     this.node.find('.less').click(function () {
-      var t = self.owner.getController()
-                            .invoke("renderText",
-                                    self.content.text,
-                                    Api.TEXT_VIEW_HIGHLIGHTS);
+      var t = controller
+            .invoke("renderText",
+                    self.content.text,
+                    Api.TEXT_VIEW_HIGHLIGHTS);
       self.node.replaceWith(t);
       self.node = t;
       self.setup_();
@@ -730,10 +732,10 @@ TextItem.prototype = {
     } );
 
     this.node.find('.more').click(function () {
-      var t = self.owner.getController()
-                            .invoke("renderText",
-                                    self.content.text,
-                                    Api.TEXT_VIEW_UNRESTRICTED);
+      var t = controller
+            .invoke("renderText",
+                    self.content.text,
+                    Api.TEXT_VIEW_UNRESTRICTED);
       self.node.replaceWith(t);
       self.node = t;
       self.setup_();
