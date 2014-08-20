@@ -12,7 +12,8 @@
 	Added logic for user notification of ongoing AJAX requests.
 
 	A UI control was created that allows for real-time changing of the
-	current primary bin's node id.
+	current primary bin's node id. Editing the field and exiting it
+	triggers the new primary node id to take effect.
 
 2014-08-14  Miguel Guedes  <miguel@miguelguedes.org>
 
