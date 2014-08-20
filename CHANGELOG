@@ -1,6 +1,8 @@
 2014-08-20  Miguel Guedes  <miguel@miguelguedes.org>
 
-	* test/js/api-sorting_desk.js (Api):
+	* test/js/api-sorting_desk.js:
+
+	Add a title to every text item in the form of a link.
 
 	Implemented multi-view, word-bound text rendering
 	algorithm. Depending on the current view, a "more" or "less" link
