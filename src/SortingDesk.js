@@ -80,8 +80,10 @@ SortingDesk.prototype = {
   initialise: function (bins)
   {
     /* Firstly process primary bin. */
-    if(bins[this.options.primaryContentId].error)
+    if(!(this.options.primaryContentId in bins)
+       || bins[this.options.primaryContentId].error) {
       throw "Failed to retrieve contents of primary bin";
+    }
     
     this.bins.push(new BinContainerPrimary(this,
                                            this.options.primaryContentId,
