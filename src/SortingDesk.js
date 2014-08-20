@@ -29,12 +29,7 @@ var SortingDesk = function(options, callbacks)
   this.options.nodes.items.height(height);
   this.options.nodes.bins.height(height);
 
-  callbacks.getBinData([ options.primaryContentId ]
-                       .concat(options.secondaryContentIds))
-    .done(function(bins) {
-      self.initialise(bins);
-    } );
-
+  /* Setup AJAX UI notification before actually making any requests. */
   if(this.options.nodes.loading) {
     $(document).ajaxStart(function () {
       self.options.nodes.loading.fadeIn();
@@ -44,6 +39,12 @@ var SortingDesk = function(options, callbacks)
       self.options.nodes.loading.fadeOut();
     } );
   }
+
+  callbacks.getBinData([ options.primaryContentId ]
+                       .concat(options.secondaryContentIds))
+    .done(function(bins) {
+      self.initialise(bins);
+    } );
 };
 
 
