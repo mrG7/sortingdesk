@@ -761,7 +761,8 @@ var BinAddButton = function (owner, fnRender, fnAdd)
           node.fadeIn(200);
           owner.append(node);
 
-          input.focus()
+          input
+            .focus()
             .blur(function () {
               if(!this.value) {
                 node.fadeOut(200, function () { owner.remove(node); } );
