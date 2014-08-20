@@ -228,6 +228,10 @@ Api = {
     return deferred.promise();
   },
 
+  /* Initially I thought we might be implementing several views, in which case
+   * we would need either a `switch' (like the one below) or a lookup table to
+   * direct execution to the appropriate function . I believe now two view modes
+   * should be enough and that the `switch' below can be removed. */
   renderText: function (item, view) {
     if(typeof view == 'undefined')
       view = Api.TEXT_VIEW_HIGHLIGHT;
