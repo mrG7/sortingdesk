@@ -29,6 +29,16 @@ var SortingDesk = function(options, callbacks)
     .done(function(bins) {
       self.initialise(bins);
     } );
+
+  if(this.options.nodes.loading) {
+    $(document).ajaxStart(function () {
+      self.options.nodes.loading.fadeIn();
+    } );
+    
+    $(document).ajaxStop(function () {
+      self.options.nodes.loading.fadeOut();
+    } );
+  }
 };
 
 
