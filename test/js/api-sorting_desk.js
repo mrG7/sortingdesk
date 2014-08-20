@@ -16,12 +16,32 @@ Math.rand = function (min, max)
   return Math.floor(Math.random() * (max - min + 1) + min);
 };
 
+/* Extend the Object class and add a method that returns the first available
+ * key in a given object.
+ *
+ * Returns: String || null */
+Object.firstKey = function (obj)
+{
+  var keys = Object.keys(obj);
+
+  return keys.length ? keys[0] : null;
+};
+
 
 /* Class containing only static methods and attributes.
  * Cannot be instantiated.*/
 Api = {
   DELAY_MIN: 200,
   DELAY_MAX: 750,
+  MULTIPLE_NODES_LIMIT: 10,
+  
+  endpoints: {
+    multipleNodes:
+    'http://dev5.diffeo.com:10982/namespaces/miguel_sorting_desk/s2/',
+    singleNodes:
+    'http://dev5.diffeo.com:10982/namespaces/miguel_sorting_desk/nodes/'
+  },
+  primaryNodeId: 'kb_aHR0cHM6Ly9rYi5kaWZmZW8uY29tL2FsX2FocmFt',
     
 
   /* The following method is in contravention of the specs. It returns the
@@ -32,24 +52,45 @@ Api = {
     if(num <= 0)
       throw "Specified invalid number of items to retrieve";
 
-    window.setTimeout(function () {
-      var result = [ ],
-          lengthCollection = ApiData.itemsCollection.length;
-      
-      while(num-- > 0) {
-        /* IMPORTANT: clone the object to prevent unexpected behaviour */
-        var item = $.extend(
-          {},
-          ApiData.itemsCollection[ApiData.lastItem % lengthCollection]);
-        
-        item.content_id = ApiData.lastItem;
+    $.getJSON(Api.endpoints.multipleNodes +
+              '?noprof=1&format=jsonp&label=true&order=similar'
+              + '&limit=' + Api.MULTIPLE_NODES_LIMIT
+              + '&node_id=' + encodeURIComponent(Api.primaryNodeId)
+              + '&callback=?')
+      .fail(function () {
+        console.log("moreTexts: request failed");
+        deferred.reject();
+      } )
+      .done(function (data) {
+        var result = [ ];
 
-        result.push(item);
-        ++ApiData.lastItem;
-      }
-      
-      deferred.resolve(result);
-    }, Math.rand(Api.DELAY_MIN, Api.DELAY_MAX));
+        data.forEach(function (item) {
+          var node = { };
+
+          try {
+            node.node_id = item.node_id;
+            
+            item = item.features;
+            node.name = Object.firstKey(item.NAME);
+
+            if(item.abs_url)
+              node.url = Object.firstKey(item.abs_url);
+            
+            node.text = Object.firstKey(item.sentences);
+
+            if(item.title)
+              node.title = item.title;
+
+            result.push(node);
+          } catch(x) {
+            console.log("Exception triggered whilst processing node:",
+                        x,
+                        item);
+          }
+        } );
+
+        deferred.resolve(result);
+      } );
 
     return deferred.promise();
   },
