@@ -246,11 +246,14 @@ Api = {
   },
 
   renderText_: function (content, view) {
-    if(typeof content != 'string')
-       content.removeClass();
-       
-    return $('<div class="text-item view-' + view + '"/>')
-          .append(content);
+    var node = $('<div class="text-item view-' + view + '"/>');;
+
+    /* Append content and remove all CSS classes from children. */
+    node
+      .append(content)
+      .children().removeClass();
+
+    return node;
   },
 
   renderLessMore: function (less) {
