@@ -35,9 +35,8 @@ Api = {
   DELAY_MAX: 750,
   MULTIPLE_NODES_LIMIT: 10,
 
-  TEXT_VIEW_CONDENSED: 1,
-  TEXT_VIEW_HIGHLIGHTS: 2,
-  TEXT_VIEW_UNRESTRICTED: 3,
+  TEXT_VIEW_HIGHLIGHTS: 1,
+  TEXT_VIEW_UNRESTRICTED: 2,
   TEXT_CONDENSED_LIMIT: 100,
   
   endpoints: {
@@ -239,9 +238,6 @@ Api = {
     case Api.TEXT_VIEW_HIGHLIGHTS:
     default:
       return Api.renderTextHighlights(content);
-/*     case Api.TEXT_VIEW_CONDENSED: */
-/*     default: */
-/*       return Api.renderTextCondensed(content); */
     }      
   },
 
@@ -263,33 +259,65 @@ Api = {
   },
 
   renderTextCondensed: function (content) {
-    var tmp = $('<span>' + content + '</span>'),
-        bold = tmp.eq(0).find('B'),
-        node;
-    
-    if(bold.length)
-      node = Api.renderText_(bold.eq(0), Api.TEXT_VIEW_CONDENSED);
-    else {
-      node = Api.renderText_(
-        content.substring(0, Api.TEXT_CONDENSED_LIMIT) + '...',
-        Api.TEXT_VIEW_CONDENSED);
-    }
+    var node = Api.renderText_(
+      content.substring(
+        0,
+        Api.indexOfWordRight(content, Api.TEXT_CONDENSED_LIMIT))
+        + '&nbsp (...)',
+      Api.TEXT_VIEW_CONDENSED);
     
     node.append(Api.renderLessMore(false));
 
     return node;
   },
 
-  renderTextHighlights: function (content) {
-    var tmp = $('<span>' + content + '</span>'),
-        bold = tmp.eq(0).find('B'),
-        node;
+  indexOfWordLeft: function (string, ndx) {
+    while(ndx >= 0) {
+      if(string.charAt(ndx) == ' ')
+        return ndx + 1;
+      
+      --ndx;
+    }
 
-    if(bold.length)
-      node = Api.renderText_(bold, Api.TEXT_VIEW_HIGHLIGHTS);
-    else
+    return 0;
+  },
+
+  indexOfWordRight: function (string, ndx) {
+    while(ndx < string.length && string.charAt(ndx) != ' ')
+      ++ndx;
+
+    return ndx;
+  },
+
+  renderTextHighlights: function (content) {
+    var node,
+        re = /<\s*[bB]\s*[^>]*>/g,
+        matcho = re.exec(content),
+        matchc = re.exec(content),
+        i, j,
+        text;
+
+    if(!matcho)
       return Api.renderTextCondensed(content);
 
+    /* We (perhaps dangerously) assume that a stranded closing tag </B> will not
+     * exist before the first opening tag <b>. */
+    matchc = /<\s*\/[bB]\s*>/.exec(content);
+    i = matcho.index + matcho[0].length;
+    text = '<b>' + content.substr(
+      i,
+      matchc.index - i) + '</b>';
+
+    i = Api.indexOfWordLeft(content, matcho.index - 150);
+    text = "(...)&nbsp;"
+      + content.substr(i < 0 ? 0 : i, matcho.index - i) + text;
+
+    i = matchc.index + matchc[0].length;
+    j = Api.indexOfWordRight(content, i + 150);
+    text += content.substr(i, j - i)
+      + "&nbsp;(...)";
+    
+    node = Api.renderText_(text, Api.TEXT_VIEW_HIGHLIGHTS);
     node.append(Api.renderLessMore(false));
 
     return node;
