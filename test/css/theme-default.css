@@ -194,7 +194,8 @@ BODY {
 }
 
 .text-item {
-  margin: 5px;
+  position: relative;
+  margin: 15px 5px;
   padding: 10px;
   background-color: #FFFFFA;
   border: 2px solid #E0E2B6;
@@ -210,8 +211,41 @@ BODY {
   padding-left: 10px;
 }
 
-.text-item * {
+.text-item-content {
+}
+
+.text-item-content * {
   display: inline-block;
+}
+
+.text-item:hover {
+  background-color: #F8F8DD;
+  color: #44573C;
+}
+
+.text-item:hover .text-item-title {
+  background-color: #F8F8DD;
+}
+
+.text-item:active {
+  background-color: #FFF5F8;
+  color: #7F8368;
+}
+
+.text-item:active .text-item-title {
+  background-color: #FFF5F8;
+}
+
+.text-item.selected {
+  border: 2px solid #8EB4DA;
+}
+
+.text-item:selected .text-item-title {
+  background-color: #FFF5F8;
+}
+
+.text-item.selected:hover {
+  background-color: inherit;
 }
 
 .more, .less {
@@ -226,22 +260,19 @@ BODY {
   cursor: pointer;
 }
 
-.text-item:hover {
-  background-color: #F8F8DD;
-  color: #44573C;
+A.text-item-title {
+  position: absolute;
+  top: -12px;
+  background-color: white;
+  padding: 2px 8px 2px 8px;
+  display: block;
+  text-decoration: none;
+  color: #2D5C8B;
+  border-radius: 6px;
 }
 
-.text-item:active {
-  background-color: #FFF5F8;
-  color: #7F8368;
-}
-
-.text-item.selected {
-  border: 2px solid #8EB4DA;
-}
-
-.text-item.selected:hover {
-  background-color: inherit;
+A.text-item-title:hover {
+  color: #4A8BCC;
 }
 
 .droppable {

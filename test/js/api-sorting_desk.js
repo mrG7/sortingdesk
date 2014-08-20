@@ -228,27 +228,36 @@ Api = {
     return deferred.promise();
   },
 
-  renderText: function (content, view) {
+  renderText: function (item, view) {
     if(typeof view == 'undefined')
       view = Api.TEXT_VIEW_HIGHLIGHT;
     
     switch(view) {
     case Api.TEXT_VIEW_UNRESTRICTED:
-      return Api.renderTextUnrestricted(content);
+      return Api.renderTextUnrestricted(item);
     case Api.TEXT_VIEW_HIGHLIGHTS:
     default:
-      return Api.renderTextHighlights(content);
+      return Api.renderTextHighlights(item);
     }      
   },
 
-  renderText_: function (content, view) {
-    var node = $('<div class="text-item view-' + view + '"/>');;
+  renderText_: function (item, text, view, less) {
+    var node = $('<div class="text-item view-' + view + '"/>'),
+        content = $('<div class="text-item-content"/>');
+
+    node.append('<a class="text-item-title" target="_blank" '
+                + 'href="' + item.url + '">'
+                + item.name + '</a>');
 
     /* Append content and remove all CSS classes from children. */
-    node
-      .append(content)
-      .children().removeClass();
+    content.append(text);
+    content.children().removeClass();
 
+    if(less !== null)
+      content.append(Api.renderLessMore(less));
+
+    node.append(content);
+    
     return node;
   },
 
@@ -258,15 +267,15 @@ Api = {
       + '<div style="display: block; clear: both" />';
   },
 
-  renderTextCondensed: function (content) {
+  renderTextCondensed: function (item) {
     var node = Api.renderText_(
-      content.substring(
+      item,
+      item.text.substring(
         0,
-        Api.indexOfWordRight(content, Api.TEXT_CONDENSED_LIMIT))
+        Api.indexOfWordRight(item.text, Api.TEXT_CONDENSED_LIMIT))
         + '&nbsp (...)',
-      Api.TEXT_VIEW_CONDENSED);
-    
-    node.append(Api.renderLessMore(false));
+      Api.TEXT_VIEW_CONDENSED,
+      false);
 
     return node;
   },
@@ -289,16 +298,17 @@ Api = {
     return ndx;
   },
 
-  renderTextHighlights: function (content) {
+  renderTextHighlights: function (item) {
     var node,
         re = /<\s*[bB]\s*[^>]*>/g,
+        content = item.text,
         matcho = re.exec(content),
         matchc = re.exec(content),
         i, j,
         text;
 
     if(!matcho)
-      return Api.renderTextCondensed(content);
+      return Api.renderTextCondensed(item);
 
     /* We (perhaps dangerously) assume that a stranded closing tag </B> will not
      * exist before the first opening tag <b>. */
@@ -317,17 +327,20 @@ Api = {
     text += content.substr(i, j - i)
       + "&nbsp;(...)";
     
-    node = Api.renderText_(text, Api.TEXT_VIEW_HIGHLIGHTS);
-    node.append(Api.renderLessMore(false));
-
+    node = Api.renderText_(item,
+                           text,
+                           Api.TEXT_VIEW_HIGHLIGHTS,
+                           false);
+    
     return node;
   },
 
-  renderTextUnrestricted: function (content) {
-    var node = Api.renderText_(content, Api.TEXT_VIEW_UNRESTRICTED);
-
-    if(Api.textCanBeReduced(content))
-      node.append(Api.renderLessMore(true));
+  renderTextUnrestricted: function (item) {
+    var node = Api.renderText_(item,
+                               item.text,
+                               Api.TEXT_VIEW_UNRESTRICTED,
+                               Api.textCanBeReduced(item.text) ? true : null
+                              );
     
     return node;
   },

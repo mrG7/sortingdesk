@@ -701,7 +701,7 @@ var TextItem = function (owner, item)
   this.owner = owner;
   this.content = item;
   this.node = controller.invoke("renderText",
-                                item.text,
+                                item,
                                 Api.TEXT_VIEW_HIGHLIGHTS);
 
   this.setup_();
@@ -758,7 +758,7 @@ TextItem.prototype = {
     this.node.find('.less').click(function () {
       var t = controller
             .invoke("renderText",
-                    self.content.text,
+                    self.content,
                     Api.TEXT_VIEW_HIGHLIGHTS);
       self.node.replaceWith(t);
       self.node = t;
@@ -769,7 +769,7 @@ TextItem.prototype = {
     this.node.find('.more').click(function () {
       var t = controller
             .invoke("renderText",
-                    self.content.text,
+                    self.content,
                     Api.TEXT_VIEW_UNRESTRICTED);
       self.node.replaceWith(t);
       self.node = t;
