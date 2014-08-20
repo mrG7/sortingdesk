@@ -349,6 +349,10 @@ Api = {
     return node;
   },
 
+  /* TODO: following function always returns true but it _might_ be the case
+   * that a text item is too short (in the unrestricted view mode) to actually
+   * allow for a highlights view mode, in which case the 'less' link should not
+   * be displayed. */
   textCanBeReduced: function (content) {
     return true;
   },
