@@ -319,3 +319,13 @@ BODY {
   background-color: rgb(219, 60, 60);
   color: white;
 }
+
+.debug-controls {
+  clear: both;
+  padding: 10px;
+}
+
+#primary-node-id {
+  width: 400px;
+  font-family: "Courier New", Courier, monospace;
+}

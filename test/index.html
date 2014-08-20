@@ -21,42 +21,59 @@
 
 /* Instantiate fake API */
 $(function () {
-  g_sortingDesk = new SortingDesk( {
-    nodes: {
-      items: $("#items"),
-      bins: $("#bins"),
-      binDelete: $("#button-delete"),
-      loading: $("#loading")
-    },
-    css: {                      /* This tree is optional: see
-                                 * `SortingDesk.defaults' */
-      primaryBinOuterWrapper: "wrapper-primary-bin-outer",
-      primaryBinInnerWrapper: "wrapper-primary-bin-inner",
-      secondaryBinsWrapper: "wrapper-secondary-bin",
-      leftmostBin: "left"
-    },
-    primaryContentId: ApiData.primaryContentId,
-    secondaryContentIds: ApiData.secondaryContentIds,
-    visibleItems: 15
-  }, {
-    moreTexts: Api.moreTexts,
-    getBinData: Api.getBinData,
-    saveBinData: Api.saveBinData,
-    addSecondaryBin: Api.addSecondaryBin,
-    removeSecondaryBin: Api.removeSecondaryBin,
-    renderText: Api.renderText,
-    renderPrimaryBin: Api.renderPrimaryBin,
-    renderPrimarySubBin: Api.renderPrimarySubBin,
-    renderSecondaryBin: Api.renderSecondaryBin,
-    renderAddButton: Api.renderAddButton
-  } );
+  function instantiateUi()
+  {
+    $("#items").children().remove();
+    $("#bins").children().remove();
+    
+    g_sortingDesk = new SortingDesk( {
+      nodes: {
+        items: $("#items"),
+        bins: $("#bins"),
+        binDelete: $("#button-delete"),
+        loading: $("#loading")
+      },
+      css: {                      /* This tree is optional: see
+                                   * `SortingDesk.defaults' */
+        primaryBinOuterWrapper: "wrapper-primary-bin-outer",
+        primaryBinInnerWrapper: "wrapper-primary-bin-inner",
+        secondaryBinsWrapper: "wrapper-secondary-bin",
+        leftmostBin: "left"
+      },
+      primaryContentId: ApiData.primaryContentId,
+      secondaryContentIds: ApiData.secondaryContentIds,
+      visibleItems: 15
+    }, {
+      moreTexts: Api.moreTexts,
+      getBinData: Api.getBinData,
+      saveBinData: Api.saveBinData,
+      addSecondaryBin: Api.addSecondaryBin,
+      removeSecondaryBin: Api.removeSecondaryBin,
+      renderText: Api.renderText,
+      renderPrimaryBin: Api.renderPrimaryBin,
+      renderPrimarySubBin: Api.renderPrimarySubBin,
+      renderSecondaryBin: Api.renderSecondaryBin,
+      renderAddButton: Api.renderAddButton
+    } );
+  }
+  
+  $("#primary-node-id")
+    .val(Api.primaryNodeId)
+    .change(function () {
+      Api.primaryNodeId = this.value;
+      instantiateUi();
+    } );
 
   $(".wrapper").fadeIn();
+  instantiateUi();
 });
     </script>
 </head>
 <body>
   <div id="wrapper-outer">
+    <div class="debug-controls">
+      <label for="primary-node-id">Primary node id:&nbsp;<input id="primary-node-id" type="text" /></label>
+    </div>
     <div id="wrapper-bins" class="wrapper">
       <div id="bins">
       </div>

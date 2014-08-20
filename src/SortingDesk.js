@@ -18,8 +18,13 @@ var SortingDesk = function(options, callbacks)
   this.options = jQuery.extend(true, SortingDesk.defaults, options);
   this.callbacks = callbacks;
   this.bins = [ ];
-  
-  var height = $(window).height() - 50;
+
+  /* The value 28 has been hardcoded below, which is the sum of padding * 2 and
+   * border-width * 2 .
+   *
+   * Calculation should be done programmatically.
+   * */
+  var height = $(window).height() - this.options.nodes.items.offset().top - 28;
   
   this.options.nodes.items.height(height);
   this.options.nodes.bins.height(height);
