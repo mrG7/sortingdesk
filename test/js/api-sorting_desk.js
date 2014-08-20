@@ -258,7 +258,8 @@ Api = {
 
   renderLessMore: function (less) {
     var cl = less && 'less' || 'more';
-    return '<div class="less-more ' + cl + '">' + cl + '</div>';
+    return '<div class="less-more ' + cl + '">' + cl + '</div>'
+      + '<div style="display: block; clear: both" />';
   },
 
   renderTextCondensed: function (content) {
