@@ -699,51 +699,82 @@ var TextItem = function (owner, item)
       container = controller.getOption("nodes").items,
       cdragging = controller.getOption("css").itemDragging;
 
+  this.owner = owner;
   this.content = item;
-  this.node = controller.invoke("renderText", item.text)
-    .attr('id', item.node_id);
+  this.node = controller.invoke("renderText",
+                                item.text,
+                                Api.TEXT_VIEW_HIGHLIGHTS);
 
-  var self = this;
-  this.node.draggable( {
-    appendTo: 'body',
-    scope: 'text-items',
-    cursor: 'move',
-    opacity: 0.45,
-/*     cursorAt: { */
-/*       top: 5,   */
-/*       left: 5   */
-/*     },          */
-    scroll: false,
-/*     snap: '.bin',     */
-/*     snapMode: 'inner' */
-    start: function () {
-      self.node.addClass(cdragging);
-    },
-    stop: function () {
-      self.node.removeClass(cdragging);
-    },
-    helper: function () {
-      return self.node.clone()
-        .css( {
-          width: self.node.width() + 'px',
-          height: self.node.height() + 'px',
-        } );
-    },
-    drag: function (evt, ui) {
-      UiHelper.onDrag(evt, ui, controller.getOption("marginWhileDragging"));
-    }
-  } )
-    .click(function () {
-      owner.select(self);
-    } );
-  
+  this.setup_();
   container.append(this.node);
 };
 
 TextItem.prototype = {
+  owner: null,
   content: null,                /* Note: unlike bins, a text item contains its
                                  * own id. (?) */
   node: null,
+
+  setup_: function() {
+    var self = this;
+    
+    this.node.find('.less').click(function () {
+      var t = self.owner.getController()
+                            .invoke("renderText",
+                                    self.content.text,
+                                    Api.TEXT_VIEW_HIGHLIGHTS);
+      self.node.replaceWith(t);
+      self.node = t;
+      self.setup_();
+      return false;
+    } );
+
+    this.node.find('.more').click(function () {
+      var t = self.owner.getController()
+                            .invoke("renderText",
+                                    self.content.text,
+                                    Api.TEXT_VIEW_UNRESTRICTED);
+      self.node.replaceWith(t);
+      self.node = t;
+      self.setup_();
+      return false;
+    } );
+
+    this.node
+      .attr('id', this.content.node_id)
+      .draggable( {
+        appendTo: 'body',
+        scope: 'text-items',
+        cursor: 'move',
+        opacity: 0.45,
+        /*     cursorAt: { */
+        /*       top: 5,   */
+        /*       left: 5   */
+        /*     },          */
+        scroll: false,
+        /*     snap: '.bin',     */
+        /*     snapMode: 'inner' */
+        start: function () {
+          self.node.addClass(cdragging);
+        },
+        stop: function () {
+          self.node.removeClass(cdragging);
+        },
+        helper: function () {
+          return self.node.clone()
+            .css( {
+              width: self.node.width() + 'px',
+              height: self.node.height() + 'px',
+            } );
+        },
+        drag: function (evt, ui) {
+          UiHelper.onDrag(evt, ui, controller.getOption("marginWhileDragging"));
+        }
+      } )
+      .click(function () {
+        self.owner.select(self);
+      } );
+  },    
 
   getContent: function ()
   { return this.content; },

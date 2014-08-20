@@ -34,6 +34,11 @@ Api = {
   DELAY_MIN: 200,
   DELAY_MAX: 750,
   MULTIPLE_NODES_LIMIT: 10,
+
+  TEXT_VIEW_CONDENSED: 1,
+  TEXT_VIEW_HIGHLIGHTS: 2,
+  TEXT_VIEW_UNRESTRICTED: 3,
+  TEXT_CONDENSED_LIMIT: 100,
   
   endpoints: {
     multipleNodes:
@@ -224,9 +229,79 @@ Api = {
     return deferred.promise();
   },
 
-  renderText: function (content) {
-    /* Wrap text inside of a SPAN. */
-    return $('<div class="text-item">' + content + '</div>');
+  renderText: function (content, view) {
+    if(typeof view == 'undefined')
+      view = Api.TEXT_VIEW_HIGHLIGHT;
+    
+    switch(view) {
+    case Api.TEXT_VIEW_UNRESTRICTED:
+      return Api.renderTextUnrestricted(content);
+    case Api.TEXT_VIEW_HIGHLIGHTS:
+    default:
+      return Api.renderTextHighlights(content);
+/*     case Api.TEXT_VIEW_CONDENSED: */
+/*     default: */
+/*       return Api.renderTextCondensed(content); */
+    }      
+  },
+
+  renderText_: function (content, view) {
+    if(typeof content != 'string')
+       content.removeClass();
+       
+    return $('<div class="text-item view-' + view + '"/>')
+          .append(content);
+  },
+
+  renderLessMore: function (less) {
+    var cl = less && 'less' || 'more';
+    return '<div class="less-more ' + cl + '">' + cl + '</div>';
+  },
+
+  renderTextCondensed: function (content) {
+    var tmp = $('<span>' + content + '</span>'),
+        bold = tmp.eq(0).find('B'),
+        node;
+    
+    if(bold.length)
+      node = Api.renderText_(bold.eq(0), Api.TEXT_VIEW_CONDENSED);
+    else {
+      node = Api.renderText_(
+        content.substring(0, Api.TEXT_CONDENSED_LIMIT) + '...',
+        Api.TEXT_VIEW_CONDENSED);
+    }
+    
+    node.append(Api.renderLessMore(false));
+
+    return node;
+  },
+
+  renderTextHighlights: function (content) {
+    var tmp = $('<span>' + content + '</span>'),
+        bold = tmp.eq(0).find('B'),
+        node;
+
+    if(bold.length)
+      node = Api.renderText_(bold, Api.TEXT_VIEW_HIGHLIGHTS);
+    else
+      return Api.renderTextCondensed(content);
+
+    node.append(Api.renderLessMore(false));
+
+    return node;
+  },
+
+  renderTextUnrestricted: function (content) {
+    var node = Api.renderText_(content, Api.TEXT_VIEW_UNRESTRICTED);
+
+    if(Api.textCanBeReduced(content))
+      node.append(Api.renderLessMore(true));
+    
+    return node;
+  },
+
+  textCanBeReduced: function (content) {
+    return true;
   },
 
   renderPrimaryBin: function (bin) {

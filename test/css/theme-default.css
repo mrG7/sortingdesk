@@ -205,6 +205,27 @@ BODY {
   cursor: default;
 }
 
+.text-item B:not(:first-child),
+.text-item STRONG:not(:first-child) {
+  padding-left: 10px;
+}
+
+.text-item * {
+  display: inline-block;
+}
+
+.more, .less {
+  float: right;
+  font-size: 85%;
+  padding-top: 3px;
+  color: #999;
+}
+
+.more:hover, .less:hover {
+  color: #123;
+  cursor: pointer;
+}
+
 .text-item:hover {
   background-color: #F8F8DD;
   color: #44573C;
