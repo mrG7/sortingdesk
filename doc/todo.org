@@ -1,11 +1,17 @@
-* To do items [76%]
+* To do items [68%]
+** TODO =Bin= and =BinContainer= classes take an =id= parameter
+Why? Shouldn't that be in =bin= instead?
 ** TODO [#A] Allow secondary and sub bin names to be edited
 ** TODO [#C] Text items container doesn't have a UI state when it doesn't hold any text items
 Must clearly communicate to the user that there aren't any more text items available.
 ** TODO [#B] Save data by issuing calls to diffeo's API
 
 A webservice is currently being stubbed out.
-** DONE [#B] Skip chars that are part of HTML tags
+** TODO [#B] Do not allow duplicate bins
+** DONE Implement actual deletion of bins
+- State "DONE"       from "IN-PROGRESS" [2014-08-21 Thu 20:54]
+- State "IN-PROGRESS" from "TODO"       [2014-08-21 Thu 19:55]
+** DONE Skip chars that are part of HTML tags
 - State "DONE"       from "TODO"       [2014-08-21 Thu 16:46]
 =TextItemSnippet.highlights= must not count chars that are part of HTML tags towards the limit.
 ** DONE Create a bin when a user drags a text item on a bin add button
