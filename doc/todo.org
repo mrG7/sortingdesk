@@ -1,0 +1,67 @@
+* To do items [54%]
+** TODO Skip chars that are part of HTML tags
+=TextItemSnippet.highlights= must not count chars that are part of HTML tags towards the limit.
+** TODO Allow secondary and sub bin names to be edited
+** TODO Create a bin when a user drags a text item on a bin add button
+** TODO Create logic for =Api.textCanBeReduced=
+Presently always returns =true=.
+** TODO Save data by issuing calls to diffeo's API
+
+A webservice is currently being stubbed out.
+
+** TODO Assess JS and CSS needs of different types of data
+It was stated that "other types come from other sources including Facebook profiles, database records like MusicBrainz, and more", and that "the JS and HTML and CSS for displaying result should become more configurable and pluggable".
+
+*** TODO Write up a draft proposal for the issues in parent topic
+Asked to write it as a long code comment block but might be best done in a
+standalone *editable* text file that doesn't pollute the code and the repository?
+** TODO Text items container doesn't have a UI state when it doesn't hold any text items
+Must clearly communicate to the user that there aren't any more text items available.
+** DONE Engineer algorithm for optimal display of large text items
+- State "DONE"       from "IN-PROGRESS" [2014-08-21 Thu 09:05]
+- State "IN-PROGRESS" from "TODO"       [2014-08-20 Wed 15:33]
+  
+1. perhaps create a very condensed view that shows only the text inside the _first_ bold tag.
+2. another view might be to show only text inside bold tags with perhaps a few words left and right.
+3. include a /more/ button that shows the full text.
+
+According to the layout above, there would a total of 3 different ways a text item could be displayed: condensed => highlights => unrestricted.
+** DONE Fix text item scrolling issues
+- State "DONE"       from "IN-PROGRESS" [2014-08-21 Thu 08:00]
+- State "IN-PROGRESS" from "TODO"       [2014-08-21 Thu 07:42]
+** DONE Hook up to diffeo's API to retrieve bin/text data
+- State "DONE"       from "IN-PROGRESS" [2014-08-21 Thu 07:21]
+- State "IN-PROGRESS" from "TODO"       [2014-08-20 Wed 11:27]
+
+Links:
+
+- [[http://dev5.diffeo.com:10982/namespaces/miguel_sorting_desk/s2/?noprof=1&format=json&label=true&node_id=sid_1395342980-f2b0c629b5462959da7691e877016eef%23c2a8%2B7%2Ccff%2B7%2Cc157%2B7&limit=100&order=similar][Multiple nodes]]
+- [[http://dev5.diffeo.com:10982/namespaces/miguel_sorting_desk/nodes/sid_1395342980-f2b0c629b5462959da7691e877016eef%23c2a8%2B7%2Ccff%2B7%2Cc157%2B7/][Single nodes]]
+
+Some notes:
+
++ Text items can be found in =sentences=.
++ Bins' names are in the =NAME= property.
++ Sub-bins are created through user interaction.
++ Primary bin =node_id= for testing:
+  Default: =kb_aHR0cHM6Ly9rYi5kaWZmZW8uY29tL2FsX2FocmFt=
+  This seems faster: =kb_aHR0cHM6Ly9rYi5kaWZmZW8uY29tL2FsX2FocmFt=
+
+*Main priority* is to have real data exposed in the UI.
+** DONE Retrieve bin data from diffeo's API
+- State "DONE"       from "IN-PROGRESS" [2014-08-20 Wed 19:19]
+- State "IN-PROGRESS" from "TODO"       [2014-08-20 Wed 16:30]
+
+** DONE Incorporate the =NAME= and =abs_url= in every text item
+- State "DONE"       from "TODO"       [2014-08-20 Wed 16:14]
+  
+#+BEGIN_QUOTE
+Inside the "features" object of each result are many smaller objects.  There is an object called "abs_url" that will generally have one value, and you should use this as the URL for displaying a hyperlink in each item in the queue.
+
+The text to use as anchor text in each item should be the longest string in the "NAME" feature followed by the only string in the "title" feature. The "title" feature might not be present.  The NAME feature will always be present.
+#+END_QUOTE
+
+** DONE Allow primary bin's =node id= to be changed
+- State "DONE"       from "TODO"       [2014-08-20 Wed 11:54]
+
+Add an input box in the UI that users can edit.

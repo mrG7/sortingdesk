@@ -1,0 +1,142 @@
+#+TITLE: =libsdui=: Approach
+
+* Synopsis
+
+As previously discussed, =libsdui= [fn:1] aims to be a pure javascript library with the purpose of providing and managing a user interface that a user can interact with to sort a never ending stream of short texts into /bins/.
+
+It will employ an Object Oriented design, to the extent permitted by Javascript, an event driven interaction model and /promises/ for managing asynchronous operations.
+
+* Workflow
+
+** Initialisation
+
+*** Bins
+
+1. Retrieve details about primary bin and its sub-bins, and secondary bins.
+
+2. Assign bin descriptors to an *internal* container (map) directly accessible by a bin's =content_id=. Each descriptor also holds an array of binned text items.
+
+3. Create all bin document nodes using HTML returned by relevant render function.
+   
+   1. Make each bin/sub-bin [[http://api.jqueryui.com/droppable/][droppable]].
+
+   2. Attach a mouse click handler.
+
+   3. Assign an attribute containing the bin's =content_id= so we are able to retrieve bin's descriptor outlined in point 2 above.
+
+*** List of items
+
+1. Populate cache of items ensuring there are a minimum of =number_of_visible_items * 2= items in the cache. This accounts for network latency, should help keep server usage minimal, and ultimately ensures we always have an item to show the user _immediately_ as items are binned.
+
+2. Keep every item in an internal container separate from the UI state. 
+
+3. For each item, create document node using HTML returned by relevant render function.
+
+   1. Make each item [[http://api.jqueryui.com/draggable/][draggable]].
+
+   2. Assign an attribute containing the item's =content_id=.
+
+4. Select first item.
+
+** Event: user clicks on a bin or draggable event triggered on a bin
+
+1. If a text item is currently selected (should *always* be) ensure:
+
+   1. Allow if not previously added to a bin.
+
+   2. Move to a sub-bin if previously added to a primary bin.
+
+      1. Invoke relevant callback to save *old* bin state.
+
+   3. Allow if previously added to a bin but rule 2 above isn't violated.
+
+   4. Invoke relevant callback to save *new* bin state.
+
+*Note*: when an item is added/removed to/from a bin, the internal state of the affected bins (as outlined in Initialisation > Bins > point 2) is updated.
+
+** Event: user clicks on 'add secondary bin'
+
+1. Create document node that will capture bin name and two buttons, one for accepting and another for cancelling input.
+
+   1. Focus on input element.
+
+   2. Attach blur event to automatically cancel input capture; not applicable to when user clicks on /accept/ or /cancel/ buttons.
+
+2. On mouse click event received on /accept/ button:
+
+   1. Invoke relevant callback to request creation of new secondary bin.
+
+      1. If no error returned, render using same logic as used by the _bin initialisation_ sequence.
+
+      2. Otherwise, display error and ask for input again (goto 1.1 above).
+
+   *Note:* It isn't clear how the =addSecondaryBin= method works. Please explain.
+
+** Event: user clicks on 'add sub-bin'
+
+Pretty much the same overall logic above applies, only it seems there is no callback for creation of sub-bins. Maybe missing?
+
+* Classes
+
+A *proposed* list of classes I am fairly certain I will be using follows. The list is by no means exhaustive and thus does not reflect all the classes that will likely be used, and is (also likely) subject to change.
+
+Also of note is that I may have diverged somewhat from the programmatic interface alluded to in the attached =DragAndDropSorterUI= file, in the sense that you seem to favour a more procedural design. Let me know what isn't admissible where applicable.
+
+** =SortingDesk=
+
+Main class responsible for initialising state and kicking everything into gear.
+
+Expects to receive references to two nodes upon instantiation, contained in an =options= associative array, namely the containers for: 
+
++ the never-ending list of items.
++ the bins.
+
+In addition, requires an associative array containing information about:
+
++ the primary bin, specifying its =id=, =title= and a further associative array, which may be empty, listing its secondary bins (including, again, =id= and =title= per bin).
++ the secondary bins, each item specifying =id= and =title=.
+  
+Does not do any styling and thus assumes appropriate CSS styling is in place.
+
+** =ListOfValues= [fn:6]
+
+Holds =n= [fn:3] items of text.
+  
+Tracks 'mouse up' events to initiate drag'n'drop. Keeps track of the currently active item and a keyboard interface for easy, convenient and fast navigation in the list; does so by listening to appropriate keyboard events.
+
+Does not do any styling and thus assumes appropriate CSS styling is in place.
+
+** =Bin=
+
+Represents a bin. Due to Javascript's limitations it is not practical to make use of inheritance [fn:2], although ideally we'd want there to be a =BinPrimary= and =BinSecondary= specialised classes.
+  
+Does not do any styling and thus assumes appropriate CSS styling is in place.
+
+Tracks 'mouse down' events enabling it to either terminate ongoing drag'n'drop (if in progress) and/or assign currently active text item to bin (user may not have started drag'n'drop and may have simply clicked on a bin). Assignment of the currently active item of text (retrievable by querying =ListOfValues= instance) is done by notifying owning =SortingDesk= instance, which then contacts the API responsible for data storage.
+
+** =DialogEditBinPrimary=
+
+Creates a dialog box (overlay) allowing the user to edit a primary bin. [fn:5]
+
+Its name and the names of any existing sub-bins may be changed. [fn:4] New sub-bins may be added. Existing sub-bins may be removed. [fn:4]
+
+** =DialogEditBinSecondary=
+
+Creates a dialog box (overlay) allowing the user to edit a secondary bin.  [fn:4]
+
+Only its name may be changed.
+
+* Footnotes
+
+[fn:1] =lib= because it is meant to be used as a importable library, =sd= stands for /Sorting Desk/, and =ui= is an acronym for /User Interface/. Please let me know if you have a different name in mind.
+
+[fn:2] Given that time constrain is a concern, I am not able to say at this time whether I will be able to use prototypical inheritance. Assume I won't for the time being.
+
+[fn:3] First iteration will not impose a limit to the number of items held but I would personally suggest forcing a limit at some point to prevent annoyances (e.g. scrolling would become difficult; might lead to a state of anxiety; user feeling overwhelmed; perhaps even issues affecting garbage collection and thus performance)
+
+[fn:4] Will not be implemented in the first iteration.
+
+[fn:5] Only the addition operation will be implemented in the first iteration.
+
+[fn:6] What is meant by [[http://docs.oracle.com/cd/E16162_01/web.1112/e16181/af_lov.htm][ListOfValues]] [oracle.com].
+
