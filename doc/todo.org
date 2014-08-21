@@ -1,27 +1,15 @@
-* To do items [69%]
+* To do items [76%]
 ** TODO [#A] Allow secondary and sub bin names to be edited
-** TODO [#B] Skip chars that are part of HTML tags
-=TextItemSnippet.highlights= must not count chars that are part of HTML tags towards the limit.
 ** TODO [#C] Text items container doesn't have a UI state when it doesn't hold any text items
 Must clearly communicate to the user that there aren't any more text items available.
 ** TODO [#B] Save data by issuing calls to diffeo's API
 
 A webservice is currently being stubbed out.
+** DONE [#B] Skip chars that are part of HTML tags
+- State "DONE"       from "TODO"       [2014-08-21 Thu 16:46]
+=TextItemSnippet.highlights= must not count chars that are part of HTML tags towards the limit.
 ** DONE Create a bin when a user drags a text item on a bin add button
 - State "DONE"       from "TODO"       [2014-08-21 Thu 15:09]
-** CANCELED Assess JS and CSS needs of different types of data
-- State "CANCELED"   from "TODO"       [2014-08-21 Thu 15:07] \\
-  #BEGIN_QUOTE
-  No need.  What you have is great.  We may want to revisit it later with several other features.
-  #END_QUOTE
-  
-It was stated that "other types come from other sources including Facebook profiles, database records like MusicBrainz, and more", and that "the JS and HTML and CSS for displaying result should become more configurable and pluggable".
-
-*** CANCELED Write up a draft proposal for the issues in parent topic
-- State "CANCELED"   from "TODO"       [2014-08-21 Thu 15:09] \\
-  See above.
-Asked to write it as a long code comment block but might be best done in a
-standalone *editable* text file that doesn't pollute the code and the repository?
 ** DONE Create logic for =Api.textCanBeReduced=
 - State "DONE"       from "TODO"       [2014-08-21 Thu 15:07]
 Presently always returns =true=.
@@ -73,3 +61,16 @@ The text to use as anchor text in each item should be the longest string in the 
 - State "DONE"       from "TODO"       [2014-08-20 Wed 11:54]
 
 Add an input box in the UI that users can edit.
+** CANCELED Assess JS and CSS needs of different types of data
+- State "CANCELED"   from "TODO"       [2014-08-21 Thu 15:07] \\
+  #BEGIN_QUOTE
+  No need.  What you have is great.  We may want to revisit it later with several other features.
+  #END_QUOTE
+  
+It was stated that "other types come from other sources including Facebook profiles, database records like MusicBrainz, and more", and that "the JS and HTML and CSS for displaying result should become more configurable and pluggable".
+
+*** CANCELED Write up a draft proposal for the issues in parent topic
+- State "CANCELED"   from "TODO"       [2014-08-21 Thu 15:09] \\
+  See above.
+Asked to write it as a long code comment block but might be best done in a
+standalone *editable* text file that doesn't pollute the code and the repository?
