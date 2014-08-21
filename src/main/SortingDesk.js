@@ -257,14 +257,18 @@ BinContainer.prototype = {
   {
     var result = null;
 
+    /* Always first check to see if a primary bin is defined in `this.bin' and,
+     * if so, its shortcut. */
     if(this.bin && this.bin.getShortcut() == keyCode)
       return this.bin;
-    
-    $.each(this.subbins, function (i, bin) {
+
+    this.subbins.some(function (bin) {
       if(bin.getShortcut() == keyCode) {
         result = bin;
         return false;
       }
+
+      return true;
     } );
 
     return result;
