@@ -24,6 +24,9 @@
 	tags and produces snippets with roughly equal number of chars to
 	the left and right of the highlighted text.
 
+	Implement actual deletion of bin elements from UI. Bin containers
+	are now reorganised whenever a bin is deleted.
+
 	Created subdirectory `doc' for project-related generic document
 	files.
 
