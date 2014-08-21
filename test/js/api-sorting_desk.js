@@ -37,7 +37,8 @@ Api = {
 
   TEXT_VIEW_HIGHLIGHTS: 1,
   TEXT_VIEW_UNRESTRICTED: 2,
-  TEXT_CONDENSED_LIMIT: 100,
+  TEXT_CONDENSED_CHARS: 100,
+  TEXT_HIGHLIGHTS_CHARS: 150,
   
   endpoints: {
     multipleNodes:
@@ -327,71 +328,21 @@ Api = {
   },
 
   renderTextCondensed: function (item) {
-    var node = Api.renderText_(
+    return Api.renderText_(
       item,
-      item.text.substring(
-        0,
-        Api.indexOfWordRight(item.text, Api.TEXT_CONDENSED_LIMIT))
-        + '&nbsp (...)',
+      new TextItemSnippet(item.text).condense(Api.TEXT_CONDENSED_CHARS),
       Api.TEXT_VIEW_CONDENSED,
       false);
-
-    return node;
-  },
-
-  indexOfWordLeft: function (string, ndx) {
-    while(ndx >= 0) {
-      if(string.charAt(ndx) == ' ')
-        return ndx + 1;
-      
-      --ndx;
-    }
-
-    return 0;
-  },
-
-  indexOfWordRight: function (string, ndx) {
-    while(ndx < string.length && string.charAt(ndx) != ' ')
-      ++ndx;
-
-    return ndx;
   },
 
   renderTextHighlights: function (item) {
-    var node,
-        re = /<\s*[bB]\s*[^>]*>/g,
-        content = item.text,
-        matcho = re.exec(content),
-        matchc,
-        i, j,
-        text;
-
-    if(!matcho)
-      return Api.renderTextCondensed(item);
-
-    /* We (perhaps dangerously) assume that a stranded closing tag </B> will not
-     * exist before the first opening tag <b>. */
-    matchc = /<\s*\/[bB]\s*>/.exec(content);
-    i = matcho.index + matcho[0].length;
-    text = '<b>' + content.substr(
-      i,
-      matchc.index - i) + '</b>';
-
-    i = Api.indexOfWordLeft(content, matcho.index - 150);
-    text = "(...)&nbsp;"
-      + content.substr(i < 0 ? 0 : i, matcho.index - i) + text;
-
-    i = matchc.index + matchc[0].length;
-    j = Api.indexOfWordRight(content, i + 150);
-    text += content.substr(i, j - i)
-      + "&nbsp;(...)";
-    
-    node = Api.renderText_(item,
-                           text,
-                           Api.TEXT_VIEW_HIGHLIGHTS,
-                           false);
-    
-    return node;
+    return Api.renderText_(
+      item,
+      new TextItemSnippet(item.text).highlights(
+        Api.TEXT_HIGHLIGHTS_CHARS,
+        Api.TEXT_HIGHLIGHTS_CHARS),
+      Api.TEXT_VIEW_HIGHLIGHTS,
+      false);
   },
 
   renderTextUnrestricted: function (item) {
@@ -457,4 +408,80 @@ var ApiData = {
   },
   lastId: 102                  /* So we may assign ids to secondary bins when
                                 * creating them. */
+};
+
+
+var TextItemSnippet = function (text)
+{
+  this.text = text;
+};
+
+TextItemSnippet.prototype = {
+  text: null,
+  
+  highlights: function (left, right) {
+    var re = /<\s*[bB]\s*[^>]*>/g,
+        matcho = re.exec(this.text),
+        matchc,
+        i, j,
+        highlight,
+        result;
+
+    if(!matcho)
+      return this.condense(left + right);
+    
+    /* We (perhaps dangerously) assume that a stranded closing tag </B> will not
+     * exist before the first opening tag <b>. */
+    matchc = /<\s*\/[bB]\s*>/.exec(this.text);
+    i = matcho.index + matcho[0].length;
+    highlight = '<b>' + this.text.substr(
+      i,
+      matchc.index - i) + '</b>';
+
+    i = this.indexOfWordLeft(matcho.index - left);
+
+    /* Prepend ellipsis at beginning of result if index not at beginning of
+     * string. */
+    result = (i > 0 ? "[...]&nbsp;" : '')
+      + this.text.substr(i < 0 ? 0 : i, matcho.index - i) + highlight;
+
+    i = matchc.index + matchc[0].length;
+    j = this.indexOfWordRight(i + right);
+
+    result += this.text.substr(i, j - i);
+
+    /* Append ellipsis at end of result if index not at end of string. */
+    if(j < this.text.length - 1)
+      result += "&nbsp;[...]";
+
+    return result;
+  },
+
+  condense: function (right) {
+    var i = this.indexOfWordRight(right),
+        result = this.text.substring(0, i);
+
+    if(i < this.text.length - 1)
+      result += '&nbsp;[...]';
+
+    return result;
+  },
+
+  indexOfWordLeft: function (ndx) {
+    while(ndx >= 0) {
+      if(this.text.charAt(ndx) == ' ')
+        return ndx + 1;
+      
+      --ndx;
+    }
+
+    return 0;
+  },
+
+  indexOfWordRight: function (ndx) {
+    while(ndx < this.text.length && this.text.charAt(ndx) != ' ')
+      ++ndx;
+
+    return ndx;
+  }
 };
