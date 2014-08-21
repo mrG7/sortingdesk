@@ -65,7 +65,7 @@ SortingDesk.defaults = {
     itemDragging: 'dragging'
   },
   visibleItems: 20,             /* Arbitrary. */
-  marginWhileDragging: 10,      /*  "     "   */
+  marginWhileDragging: 5,       /*  "     "   */
   delayAnimateAssign: 100       /* in milliseconds */
 };
 
@@ -756,6 +756,7 @@ TextItem.prototype = {
             .css( {
               width: self.node.width() + 'px',
               height: self.node.height() + 'px',
+              margin: 0
             } );
         },
         drag: function (evt, ui) {
@@ -864,7 +865,7 @@ var UiHelper = {
     }
 
     if(ui.position.top + ui.helper.outerHeight() >=
-       $(window).height() - margin * 2) {
+       $(window).height() - margin) {
       ui.position.top =  $(window).height() - ui.helper.outerHeight()
         - margin;
     }
