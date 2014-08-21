@@ -346,13 +346,14 @@ Api = {
   },
 
   renderTextUnrestricted: function (item) {
-    var node = Api.renderText_(item,
-                               item.text,
-                               Api.TEXT_VIEW_UNRESTRICTED,
-                               Api.textCanBeReduced(item.text) ? true : null
-                              );
-    
-    return node;
+    return Api.renderText_(
+      item,
+      item.text,
+      Api.TEXT_VIEW_UNRESTRICTED,
+      new TextItemSnippet(item.text).canTextBeReduced(
+        Api.TEXT_HIGHLIGHTS_CHARS,
+        Api.TEXT_HIGHLIGHTS_CHARS)
+        ? true : null);
   },
 
   /* TODO: following function always returns true but it _might_ be the case
@@ -483,5 +484,10 @@ TextItemSnippet.prototype = {
       ++ndx;
 
     return ndx;
+  },
+
+  canTextBeReduced: function (left, right) {
+    var reduced = this.highlights(left, right);
+    return reduced.length < this.text.length;
   }
 };
