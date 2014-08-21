@@ -441,7 +441,7 @@ TextItemSnippet.prototype = {
     var re = /<\s*[bB]\s*[^>]*>/g,
         matcho = re.exec(this.text),
         matchc,
-        i, j,
+        i, j, skip,
         highlight,
         result;
 
@@ -450,28 +450,51 @@ TextItemSnippet.prototype = {
     
     /* We (perhaps dangerously) assume that a stranded closing tag </B> will not
      * exist before the first opening tag <b>. */
-    matchc = /<\s*\/[bB]\s*>/.exec(this.text);
-    i = matcho.index + matcho[0].length;
-    highlight = '<b>' + this.text.substr(
-      i,
-      matchc.index - i) + '</b>';
+    matchc = /<\s*\/[bB]\s*>/.exec(this.text); /* find end of B tag */
 
+    /* Skip tag, position and extract actual text inside B tag. Use semantic
+     * STRONG rather than B tag. */
+    i = matcho.index + matcho[0].length;
+    highlight = '<STRONG>' + this.text.substr(
+      i,
+      matchc.index - i) + '</STRONG>';
+
+    /* Move `left' chars to the left of current position and align to word
+     * boundary.
+     *
+     * Note: the assumption is that the browser will be smart enough (and modern
+     * ones are) to drop any closed but unopened tags between `i' and
+     * `matcho.index'. */
     i = this.indexOfWordLeft(matcho.index - left);
 
     /* Prepend ellipsis at beginning of result if index not at beginning of
-     * string. */
+     * string and add text to left of highlight as well as highlight itself.. */
     result = (i > 0 ? "[...]&nbsp;" : '')
       + this.text.substr(i < 0 ? 0 : i, matcho.index - i) + highlight;
 
+    /* Set index to the right of the closing B tag and skip at most `right'
+     * chars, taking care not to count chars that are part of any HTML tags
+     * towards the `right' chars limit. Align to word boundary and add text. */
     i = matchc.index + matchc[0].length;
-    j = this.indexOfWordRight(i + right);
-
+    skip = this.skip(i, right);
+    j = this.indexOfWordRight(skip.index);
+    
     result += this.text.substr(i, j - i);
 
+    /* Close stranded opened tags.
+     *
+     * Note: probably not necessary but since we know about the non-closed tags,
+     * why not close them anyway? */
+    j = skip.tags.length;
+    
+    while(j--)
+      result += '</' + skip.tags[j] + '>';
+    
     /* Append ellipsis at end of result if index not at end of string. */
     if(j < this.text.length - 1)
       result += "&nbsp;[...]";
 
+    /* And Bob's your uncle. */
     return result;
   },
 
@@ -483,6 +506,41 @@ TextItemSnippet.prototype = {
       result += '&nbsp;[...]';
 
     return result;
+  },
+
+  skip: function (ndx, count) {
+    var tags = [ ];
+
+    while(ndx < this.text.length && count) {
+      var ch = this.text.charAt(ndx);
+
+      if(ch == '<') {
+        var result = this.extractTag(ndx);
+
+        ndx = result.index;
+
+        if(result.tag)
+          tags.push(result.tag);
+        else
+          tags.pop();
+      } else {
+        ++ndx;
+        --count;
+      }
+    }
+
+    return { index: ndx, tags: tags };
+  },
+
+  extractTag: function (ndx) {
+    var match = /<\s*(\/)?\s*([a-zA-Z]+)\s*[^>]*>/.exec(this.text.substr(ndx));
+
+    if(match) {
+      return { index: match.index + ndx + match[0].length,
+               tag: match[1] ? null : match[2] };
+    }
+    
+    return { index: ndx };
   },
 
   indexOfWordLeft: function (ndx) {
