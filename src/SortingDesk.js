@@ -766,6 +766,7 @@ TextItem.prototype = {
       self.node.replaceWith(t);
       self.node = t;
       self.setup_();
+      self.owner.select(self);
       return false;
     } );
 
@@ -777,6 +778,7 @@ TextItem.prototype = {
       self.node.replaceWith(t);
       self.node = t;
       self.setup_();
+      self.owner.select(self);
       return false;
     } );
   },    
