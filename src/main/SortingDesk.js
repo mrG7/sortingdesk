@@ -148,7 +148,18 @@ SortingDesk.prototype = {
         hoverClass: 'droppable-hover',
         tolerance: 'pointer',
         drop: function (evt, ui) {
-          console.log('dropped');
+          var id = ui.draggable.attr('id');
+          
+          self.bins.some(function (bin) {
+            var subbin = bin.getBinById(id);
+            
+            if(subbin) {
+              bin.remove(subbin);
+              return true;
+            }
+
+            return false;
+          } );
         }
       } );
 
@@ -234,9 +245,41 @@ BinContainer.prototype = {
   
   remove: function (old)
   {
-    old.remove();
+    var self = this;
+    
+    if(old instanceof Bin)
+      old = old.getNode();
+    
+    old.fadeOut(100, function () {
+      /* Remove node and reorganise bin container. */
+      old.remove(); 
 
-    old.parent().each(function (i, node) {
+      self.container.find('>DIV').each(function (i, node) {
+        node = $(node);
+
+        var children = node.children();
+
+        /* Remove empty wrapper. */
+        if(!children.length) {
+          node.remove();
+          return;
+        }
+
+        /* At this point, wrapper's children == 1 || 2. Move one bin into
+         * wrapper above if there is room for one more bin. Otherwise, ensure
+         * bin is leftmost. */
+        if(node.prev().length && node.prev().children().length < 2) {
+          node.prev().children().addClass('left');
+          
+          children.eq(0)
+            .appendTo(node.prev())
+            .removeClass('left');
+
+          /* Re-compute children. */
+          node.children().addClass('left');
+        } else if(children.length == 1)
+          children.addClass('left'); /* Ensure it's leftmost. */
+      } );
     } );
   },
   
@@ -265,10 +308,28 @@ BinContainer.prototype = {
     this.subbins.some(function (bin) {
       if(bin.getShortcut() == keyCode) {
         result = bin;
-        return false;
+        return true;
       }
 
-      return true;
+      return false;
+    } );
+
+    return result;
+  },
+
+  getBinById: function (id)
+  {
+    var result = null;
+    
+    /* Primary bins cannot be deleted (or can they?) so don't check
+     * `this.bin'. */
+    this.subbins.some(function (bin) {
+      if(bin.getId() == id) {
+        result = bin;
+        return true;
+      }
+
+      return false;
     } );
 
     return result;
@@ -487,6 +548,9 @@ Bin.prototype = {
   getShortcut: function ()
   { return this.shortcut; },
 
+  getId: function ()
+  { return this.id; },
+  
   getNode: function ()
   { return this.node; },
   
@@ -505,7 +569,7 @@ var BinPrimary = function (owner, id, bin)
   Bin.call(this, owner, id, bin);
   
   this.setNode_(controller.invoke("renderPrimaryBin", bin)
-                .attr('id', 'bin-' + id)
+                .attr('id', id)
                 .addClass(controller.getOption('css').binGeneric));
   
   owner.append(this.node);
@@ -521,7 +585,7 @@ var BinSub = function (owner, id, bin)
   Bin.call(this, owner, id, bin);
 
   this.setNode_(controller.invoke("renderPrimarySubBin", bin)
-                .attr('id', 'bin-' + id)
+                .attr('id', id)
                 .addClass(controller.getOption('css').binGeneric));
 
   owner.append(this.node);
@@ -537,7 +601,7 @@ var BinSecondary = function (owner, id, bin)
   Bin.call(this, owner, id, bin);
   
   this.setNode_($(controller.invoke('renderSecondaryBin', bin))
-                .attr('id', 'bin-' + id)
+                .attr('id', id)
                 .addClass(controller.getOption('css').binGeneric));
   
   owner.append(this.node);
