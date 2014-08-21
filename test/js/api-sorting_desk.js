@@ -45,11 +45,20 @@ Api = {
     singleNode:
     'http://dev5.diffeo.com:10982/namespaces/miguel_sorting_desk/nodes/'
   },
+
+  processing: { },
     
 
   /* The following method is in contravention of the specs. It returns the
    * text items inside of a possibly illegal attribute (`result'). */
   moreTexts: function (num) {
+    if(Api.processing.moreTexts) {
+      console.log("moreTexts: request ongoing: ignoring new request");
+      return null;
+    }
+
+    Api.processing.moreTexts = true;
+    
     var deferred = $.Deferred();
 
     if(num <= 0)
@@ -92,7 +101,9 @@ Api = {
           }
         } );
 
-        deferred.resolve(result);
+        deferred.resolve(result); } )
+      .always(function () {
+        Api.processing.moreTexts = false;
       } );
 
     return deferred.promise();
@@ -107,6 +118,13 @@ Api = {
    * }
    */
   getBinData: function (ids) {
+    if(Api.processing.getBinData) {
+      console.log("moreTexts: request ongoing: ignoring new request");
+      return null;
+    }
+
+    Api.processing.getBinData = true;
+    
     var deferred = $.Deferred(),
         received = 0,
         result = { };
@@ -118,8 +136,13 @@ Api = {
        * the `done' callback below. */
       result[data.node_id] = { name: Object.firstKey(data.features.NAME) };
       
-      if(++received == ids.length)
+      if(++received == ids.length) {
         deferred.resolve(result);
+
+        /* TODO: stick this line inside the `always' callback when removing this
+         * block. */
+        Api.processing.getBinData = false;
+      }
     };
     
     ids.forEach(function (id) {
