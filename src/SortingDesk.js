@@ -622,7 +622,8 @@ ItemsList.prototype = {
     } else if(ih > st + ch) {   /* bottom */
       this.container.scrollTop(st + ipt - ch
                                + variant.outerHeight()
-                               + parseInt(variant.css('margin')) + 1);
+                               + parseInt(variant.css('marginBottom'))
+                               + parseInt(variant.css('paddingBottom')));
     }
   },
 
