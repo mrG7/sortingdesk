@@ -4,3 +4,4 @@
 .emacs.desktop
 .emacs.desktop.lock
 BROWSE
+doc/*.pdf
