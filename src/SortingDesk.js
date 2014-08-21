@@ -592,10 +592,18 @@ ItemsList.prototype = {
       return;
     
     if(typeof variant == 'undefined') {
-      if(this.container.find('.' + csel).length)
-        return;
+      variant = this.container.find('.' + csel);
 
-      variant = this.container.children().eq(0);
+      if(variant.length == 0)
+        variant = this.container.children().eq(0);
+      else if(variant.length > 1) {
+        /* We should never reach here. */
+        console.log("WARNING! Multiple text items selected:", variant.length);
+        variant.removeClass(csel);
+
+        variant = variant.eq(0);
+        variant.addClass(csel);
+      }
     } else if(typeof variant == 'number') {
       if(variant < 0)
         variant = 0;
@@ -683,6 +691,7 @@ ItemsList.prototype = {
                   function () {
                     $(this).slideUp(150, function () {
                       $(this).remove();
+                      self.select();
                     } );
                   } );
 
@@ -752,6 +761,11 @@ TextItem.prototype = {
             } );
         },
         drag: function (evt, ui) {
+          /* Firstly select item being dragged to ensure correct item position
+           * in container. */
+          self.owner.select(self);
+
+          /* Clone text item node. */
           UiHelper.onDrag(evt, ui, controller.getOption("marginWhileDragging"));
         }
       } )
