@@ -319,8 +319,8 @@ var BinContainerPrimary = function (controller, id, bin)
         .done(function (bin) {
           window.setTimeout(function () {
             /* We rely on the API returning exactly ONE descriptor. */
-            for(var id in bin)
-              self.subbins.push(new BinSub(self, id, bin[id]));
+            var id = Object.firstKey(bin);
+            self.subbins.push(new BinSub(self, id, bin[id]));
           }, 0);
           
           deferred.resolve();
