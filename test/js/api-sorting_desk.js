@@ -311,11 +311,16 @@ Api = {
 
   renderText_: function (item, text, view, less) {
     var node = $('<div class="text-item view-' + view + '"/>'),
-        content = $('<div class="text-item-content"/>');
+        content = $('<div class="text-item-content"/>'),
+        anchor = item.name;
+
+    /* Append title if existent. */
+    if(item.title)
+      anchor += '&ndash; ' + item.title;
 
     node.append('<a class="text-item-title" target="_blank" '
                 + 'href="' + item.url + '">'
-                + item.name + '</a>');
+                + anchor + '</a>');
 
     /* Append content and remove all CSS classes from children. */
     content.append(text);
