@@ -567,20 +567,21 @@ ItemsList.prototype = {
         promise = this.controller.invoke("moreTexts", visibleItems);
 
     /* Check that our request for more text items hasn't been refused. */
-    if(promise) {
-      promise
-        .done(function (items) {
-          $.each(items, function (index, item) {
-            window.setTimeout( function () {
-              self.items.push(new TextItem(self, item));
-            }, Math.pow(index, 2) * 1.1);
-          } );
-
+    if(!promise)
+      return;
+    
+    promise
+      .done(function (items) {
+        $.each(items, function (index, item) {
           window.setTimeout( function () {
-            self.select();
-          }, 10);
+            self.items.push(new TextItem(self, item));
+          }, Math.pow(index, 2) * 1.1);
         } );
-    }
+
+        window.setTimeout( function () {
+          self.select();
+        }, 10);
+      } );
   },
 
   select: function (variant)
