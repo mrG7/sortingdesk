@@ -286,11 +286,11 @@ A.text-item-title:hover {
 }
 
 .droppable-highlight {
-  border-style: dashed;
+  border-style: dashed !important;
 }
 
 .droppable-hover {
-  border-style: dotted;
+  border-style: dotted !important;
 }
 
 .ui-draggable-dragging {

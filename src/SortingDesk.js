@@ -702,6 +702,22 @@ ItemsList.prototype = {
     this.check();
   },
 
+  getById: function (id)
+  {
+    var result = null;
+    
+    this.items.some(function (item) {
+      if(item.getContent().node_id == id) {
+        result = item;
+        return true;
+      }
+
+      return false;
+    } );
+
+    return result;
+  },
+
   getController: function ()
   { return this.controller; }
 };
@@ -813,48 +829,98 @@ TextItem.prototype = {
 
 var BinAddButton = function (owner, fnRender, fnAdd)
 {
+  this.owner = owner;
+  this.fnRender = fnRender;
+  this.fnAdd = fnAdd;
+  
   var self = this,
       controller = owner.getController(),
       css = controller.getOption('css'),
       button = $(controller.invoke("renderAddButton", "+"))
         .addClass(css.buttonAdd)
+        .droppable( {
+          scope: 'text-items',
+          activeClass: 'droppable-highlight',
+          hoverClass: 'droppable-hover',
+          drop: function (evt, ui) {
+            self.onAdd(ui.draggable.attr('id'));
+          },
+          tolerance: 'pointer' } )
         .click(function () {
-          /* Do not allow entering into concurrent `add' states. */
-          if(owner.getContainer().find('.' + css.binAdding).length)
-            return;
-          
-          var node = fnRender('<input placeholder="Enter bin description" '
-                              + 'type="text"/>')
-                .addClass(css.binAdding),
-              input = node.find('input');
-
-          node.fadeIn(200);
-          owner.append(node);
-
-          input
-            .focus()
-            .blur(function () {
-              if(!this.value) {
-                node.fadeOut(200, function () { owner.remove(node); } );
-                return;
-              }
-
-              this.disabled = true;
-
-              fnAdd(this.value)
-                .done(function () { node.remove(); } )
-                .fail(function () { node.removeAttr('disabled'); } );
-            } )
-            .keyup(function (evt) {
-              if(evt.keyCode == 13)
-                this.blur();
-              
-              /* Do not allow event to propagate. */
-              return false;
-            } );
+          self.onAdd();
         } );
 
   owner.getContainer().after(button);
+};
+
+BinAddButton.prototype = {
+  owner: null,
+  fnRender: null,
+  fnAdd: null,
+  
+  onAdd: function (id) {
+    var css = this.owner.controller.getOption('css');
+    
+    /* Do not allow entering into concurrent `add' states. */
+    if(this.owner.getContainer()
+       .find('.' + this.owner.controller.getOption('css').binAdding).length) {
+      return;
+    }
+
+    var nodeContent = id ? 'Please wait...'
+          : ('<input placeholder="Enter bin description" '
+             + 'type="text"/>'),
+        node = this.fnRender(nodeContent)
+          .addClass(css.binAdding)
+          .fadeIn(200);
+
+    this.owner.append(node);
+    
+    if(!id) {
+      this.onAddManual(node);
+      return;
+    }
+
+    var item = this.owner.getController().getItemsList()
+          .getById(id);
+
+    if(!item) {
+      node.remove();
+      throw "onAdd: failed to retrieve text item: " + id;
+    }
+
+    this.fnAdd(new TextItemSnippet(item.getContent().text)
+                 .highlights(50, 50),
+               id)
+      .always(function () { node.remove(); } );
+  },
+
+  onAddManual: function (node, input) {
+    var self = this,
+        input = node.find('input');
+
+    input
+      .focus()
+      .blur(function () {
+        if(!this.value) {
+          node.fadeOut(200, function () { self.owner.remove(node); } );
+          return;
+        }
+
+        this.disabled = true;
+
+        self.fnAdd(this.value)
+          .done(function () { node.remove(); } )
+          .fail(function () { node.removeAttr('disabled'); } );
+      } )
+      .keyup(function (evt) {
+        if(evt.keyCode == 13)
+          this.blur();
+        
+        /* Do not allow event to propagate. */
+        return false;
+      } );
+  }    
 };
 
 
