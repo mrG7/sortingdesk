@@ -60,7 +60,7 @@ $(function () {
   $("#primary-node-id")
     .val(ApiData.primaryContentId)
     .change(function () {
-      ApiData.primaryContentId = this.value;
+      ApiData.setPrimaryContentId(this.value);
       instantiateUi();
     } );
 

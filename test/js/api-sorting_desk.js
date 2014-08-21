@@ -160,8 +160,8 @@ Api = {
       var found = false;
 
       for(var bid in ApiData.bins) {
-        if(bid != id)
-          continue;
+        if(bid != id || bid == ApiData.primaryContentId) /* The hacks continue: */
+          continue;                                      /* ignore primary bin. */
 
         var bin = ApiData.bins[bid],
             name = { };
@@ -391,7 +391,8 @@ Api = {
 /* Class containing only static methods and attributes.
  * Cannot be instantiated. */
 var ApiData = {
-  primaryContentId: 'kb_aHR0cHM6Ly9rYi5kaWZmZW8uY29tL2FsX2FocmFt',
+  defaultPrimaryContentId: 'kb_aHR0cHM6Ly9rYi5kaWZmZW8uY29tL2FsX2FocmFt',
+  primaryContentId: null,
   secondaryContentIds: [ 100, 101, 102 ],
   bins: {
     100: {
@@ -407,9 +408,20 @@ var ApiData = {
       bins: [ ]
     }
   },
-  lastId: 102                  /* So we may assign ids to secondary bins when
+  lastId: 102,                 /* So we may assign ids to secondary bins when
                                 * creating them. */
+
+  setPrimaryContentId: function (id) {
+    ApiData.primaryContentId = id;
+    
+    ApiData.bins[id] = {
+      name: null,              /* this can be ignored as we only need `bins' */
+      bins: [ ]
+    };
+  }    
 };
+
+ApiData.setPrimaryContentId(ApiData.defaultPrimaryContentId);
 
 
 var TextItemSnippet = function (text)
