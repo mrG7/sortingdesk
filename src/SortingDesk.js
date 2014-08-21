@@ -66,7 +66,9 @@ SortingDesk.defaults = {
   },
   visibleItems: 20,             /* Arbitrary. */
   marginWhileDragging: 5,       /*  "     "   */
-  delayAnimateAssign: 100       /* in milliseconds */
+  delayAnimateAssign: 100,      /* in milliseconds */
+  binCharsLeft: 25,
+  binCharsRight: 25
 };
 
 
@@ -859,11 +861,11 @@ BinAddButton.prototype = {
   fnAdd: null,
   
   onAdd: function (id) {
-    var css = this.owner.controller.getOption('css');
+    var controller = this.owner.controller;
     
     /* Do not allow entering into concurrent `add' states. */
     if(this.owner.getContainer()
-       .find('.' + this.owner.controller.getOption('css').binAdding).length) {
+       .find('.' + controller.getOption('css').binAdding).length) {
       return;
     }
 
@@ -871,7 +873,7 @@ BinAddButton.prototype = {
           : ('<input placeholder="Enter bin description" '
              + 'type="text"/>'),
         node = this.fnRender(nodeContent)
-          .addClass(css.binAdding)
+          .addClass(controller.getOption('css').binAdding)
           .fadeIn(200);
 
     this.owner.append(node);
@@ -890,7 +892,8 @@ BinAddButton.prototype = {
     }
 
     this.fnAdd(new TextItemSnippet(item.getContent().text)
-                 .highlights(50, 50),
+               .highlights(controller.getOption('binCharsLeft'),
+                           controller.getOption('binCharsRight')),
                id)
       .always(function () { node.remove(); } );
   },
