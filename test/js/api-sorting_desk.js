@@ -25,6 +25,14 @@ Object.firstKey = function (obj)
   var keys = Object.keys(obj);
 
   return keys.length ? keys[0] : null;
+
+  /* Another faster option of achieving this is to iterate once:
+   * 
+   *   for(var id in obj)
+   *     return id;
+   * 
+   *   return null;
+   */
 };
 
 
