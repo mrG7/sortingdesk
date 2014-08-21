@@ -611,14 +611,15 @@ ItemsList.prototype = {
 
     /* Ensure text item is _always_ visible at the bottom and top ends of the
      * containing DIV. */
-    var st = this.container.scrollTop(),
-        ch = this.container.innerHeight(),
-        ipt = variant.position().top,
-        ih = st + ipt + variant.outerHeight();
+    var st = this.container.scrollTop(),       /* scrolling (position) top */
+        ch = this.container.innerHeight(),     /* container height */
+        ipt = variant.position().top,          /* item position top */
+        ih = st + ipt + variant.outerHeight(); /* item height */
 
-    if(st + ipt < st)           /* top */
+    if(st + ipt < st            /* top */
+       || variant.outerHeight() > ch) {
       this.container.scrollTop(st + ipt);
-    else if(ih > st + ch) {     /* bottom */
+    } else if(ih > st + ch) {   /* bottom */
       this.container.scrollTop(st + ipt - ch
                                + variant.outerHeight()
                                + parseInt(variant.css('margin')) + 1);
