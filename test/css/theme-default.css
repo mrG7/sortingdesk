@@ -159,7 +159,7 @@ BODY {
   float: right;
   
   box-shadow: 1px 1px 5px 0px rgba(50, 50, 50, 0.75);
-  text-shadow: 1px 1px 1px rgba(150, 150, 150, 1);
+/*   text-shadow: 1px 1px 1px rgba(150, 150, 150, 1); */
   transition: background-color 175ms, color 100ms;
 }
 
