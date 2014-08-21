@@ -112,8 +112,6 @@ Api = {
         result = { };
     
     function onLoaded_(data) {
-      console.log(data);
-      
       result[data.node_id] = { name: Object.firstKey(data.features.NAME) };
       
       if(++received == ids.length)
