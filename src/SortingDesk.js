@@ -453,6 +453,7 @@ Bin.prototype = {
             .css( {
               width: self.node.width() + 'px',
               height: self.node.height() + 'px',
+              margin: 0
             } );
         },
         start: function () {
