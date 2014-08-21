@@ -110,8 +110,12 @@ Api = {
     var deferred = $.Deferred(),
         received = 0,
         result = { };
-    
+
+    /* Following function is a hack given that we're "loading" bin data both
+     * from our local fake data store and diffeo's RESTful API service. */
     function onLoaded_(data) {
+      /* Before removing this hack-function, remember to copy this line into
+       * the `done' callback below. */
       result[data.node_id] = { name: Object.firstKey(data.features.NAME) };
       
       if(++received == ids.length)
@@ -119,9 +123,10 @@ Api = {
     };
     
     ids.forEach(function (id) {
-      var found = false;
       /* TODO: we are checking to see if the id is in our local bin
        * repository. MUST remove this time wasting crap ASAP. */
+      var found = false;
+
       for(var bid in ApiData.bins) {
         if(bid != id)
           continue;
@@ -136,12 +141,13 @@ Api = {
         break;
       }
 
-      if(found)
+      if(found)                 /* TODO: remove with block above */
         return false;
-      
+
+      /* Issue request to diffeo's RESTful API service. */
       $.getJSON(Api.endpoints.singleNode + id + '?format=jsonp&callback=?')
         .fail(function () {
-          console.log("getBinData: request failed");
+          console.log("getBinData: request failed:", id);
           deferred.reject();
         } )
         .done(function (data) {
