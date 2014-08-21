@@ -5,8 +5,7 @@
 	Several improvements to UI interaction made: text item node now
 	forcibly selected when more/less link clicked; text item node is
 	aligned to top if its height is larger than container; correct
-	spacing ensured at bottom when repositioning; enhanced and
-	modularised text item snippet generator class; other minor
+	spacing ensured at bottom when repositioning; other minor
 	enhancements.
 
 	A few bugs, most of which introduced recently, were also fixed,
@@ -14,17 +13,21 @@
 	vertical flicker when dragging items; enforce a single API request
 	per kind; other minor bugs.
 
-	Data about (presently only the) primary bin is now retrieved from
-	server.
-
 	Added UI notification when one or more AJAX requests are taking
 	place.
 
 	Implemented creation of secondary or sub bins via dragging and
 	dropping of text items onto a 'bin add' button.
 
+	Finalised text rendering algorithm. Component is now fully modular
+	and much smarter. In particular, it is now able to skip over HTML
+	tags and produces snippets with roughly equal number of chars to
+	the left and right of the highlighted text.
+
 	Created subdirectory `doc' for project-related generic document
 	files.
+
+	Reorganised source files into individual subdirectories.
 
 	Various improvements to code.
 
