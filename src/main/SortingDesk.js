@@ -151,10 +151,28 @@ SortingDesk.prototype = {
           var id = ui.draggable.attr('id');
           
           self.bins.some(function (bin) {
-            var subbin = bin.getBinById(id);
+            var target = bin.getBinById(id);
             
-            if(subbin) {
-              bin.remove(subbin);
+            if(target) {
+              /* It doesn't matter if the API request succeeds or not for the
+               * bin is always deleted. The only case (that I am aware of) where
+               * the API request would fail is if the bin didn't exist
+               * server-side, in which case it should be deleted from the UI
+               * too. So, always delete, BUT, if the request fails show the user
+               * a notification; for what purpose, I don't know. */
+              bin.remove(target);
+
+              var fn = self.callbacks[
+                target.isSecondaryBin()
+                  ? 'removeSecondaryBin'
+                  : 'removePrimarySubBin'];
+
+              fn(target.getId())
+                .fail(function (result) {
+                  console.log("bin-remove:", result.error);
+                  /* TODO: notification not implemented yet. */
+                } );
+              
               return true;
             }
 
@@ -338,8 +356,11 @@ BinContainer.prototype = {
   getController: function ()
   { return this.controller; },
 
-  getBin: function ()
+  getPrimaryBin: function ()
   { return this.bin; },
+
+  hasPrimaryBin: function ()
+  { return !!this.bin; },
   
   getSubbins: function ()
   { return this.subbins; },
@@ -506,7 +527,7 @@ Bin.prototype = {
      * attribute will have not yet been set. */
     window.setTimeout(function () {
       /* Primary bins can't be draggable. */
-      if(self == self.owner.getBin())
+      if(self == self.owner.getPrimaryBin())
         return;
       
       node.draggable( {
@@ -550,6 +571,9 @@ Bin.prototype = {
 
   getId: function ()
   { return this.id; },
+
+  isSecondaryBin: function ()
+  { return !this.owner.hasPrimaryBin(); },
   
   getNode: function ()
   { return this.node; },
