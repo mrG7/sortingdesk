@@ -1,18 +1,19 @@
-* To do items [68%]
+* To do items [61%]
 ** TODO Invoke API to process bin removal
 ** TODO =Bin= and =BinContainer= classes take an =id= parameter
 Why? Shouldn't that be in =bin= instead?
 ** TODO [#A] Allow secondary and sub bin names to be edited
-** TODO [#C] Text items container doesn't have a UI state when it doesn't hold any text items
-Must clearly communicate to the user that there aren't any more text items available.
 ** TODO [#B] Save data by issuing calls to diffeo's API
-
-A webservice is currently being stubbed out.
-** TODO [#B] Do not allow duplicate bins
 ** TODO Implement user notifications
 A mechanism for displaying notifications to the user is needed for the purpose
 of providing feedback, in particular in the cases when a user action is invalid
 and results in an error.
+** TODO [#C] Text items container doesn't have a UI state when it doesn't hold any text items
+Must clearly communicate to the user that there aren't any more text items available.
+** WAIT [#B] Do not allow duplicate bins
+- State "WAIT"       from "TODO"       [2014-08-22 Fri 12:44] \\
+  Specifications aren't clear as to how bins that are based on existing text items
+  are created.
 ** DONE Implement actual deletion of bins
 - State "DONE"       from "IN-PROGRESS" [2014-08-21 Thu 20:54]
 - State "IN-PROGRESS" from "TODO"       [2014-08-21 Thu 19:55]
