@@ -1,6 +1,6 @@
 * To do items [72%]
-** TODO [#B] Save data by issuing calls to diffeo's API
-** TODO Implement user notifications
+** TODO [#A] Save data by issuing calls to diffeo's API
+** TODO [#C] Implement user notifications
 A mechanism for displaying notifications to the user is needed for the purpose
 of providing feedback, in particular in the cases when a user action is invalid
 and results in an error.
