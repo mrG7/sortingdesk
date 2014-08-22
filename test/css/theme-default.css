@@ -372,6 +372,14 @@ A.text-item-title:hover {
   color: white;
 }
 
+#notification {
+  display: none;
+  width: 600px;
+  position: absolute;
+  left: 50%;
+  margin-left: -300px;
+}
+
 .debug-controls {
   clear: both;
   padding: 10px;
