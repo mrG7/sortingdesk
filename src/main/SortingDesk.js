@@ -377,8 +377,8 @@ var BinContainerPrimary = function (controller, id, bin)
     },
     function (id, text) {
       var deferred = $.Deferred();
-      
-      Api.addPrimarySubBin(id, text)
+
+      controller.invoke('addPrimarySubBin', text)
         .fail(function () {
           /* TODO: show message box and notify user. */
           deferred.reject();
@@ -431,10 +431,10 @@ var BinContainerSecondary = function (controller, bins)
     function (input) {
       return Api.renderSecondaryBin( { name: input } );
     },
-    function (text) {
+    function (id, text) {
       var deferred = $.Deferred();
       
-      Api.addSecondaryBin(text)
+      controller.invoke('addSecondaryBin', text)
         .fail(function () {
           /* TODO: show message box and notify user. */
           deferred.reject();
