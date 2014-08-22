@@ -275,6 +275,24 @@ Api = {
    *   error: string
    * }
    */
+  removePrimarySubBin: function (id) {
+    var deferred = $.Deferred();
+
+    window.setTimeout(function () {
+      /* Ensure bin exists and is a child of the primary one. */
+      if(!ApiData.bins[ApiData.primaryContentId].bins.some(function (bin, bid) {
+        return bid == bid;
+      } )) {
+        deferred.reject( { error: "Not sub-bin" } );
+      } else {
+        delete ApiData.bins[ApiData.primaryContentId].bins[id];
+        deferred.resolve( { error: null } );
+      }
+    }, Math.rand(Api.DELAY_MIN, Api.DELAY_MAX));
+
+    return deferred.promise();
+  },
+
   removeSecondaryBin: function (id) {
     var deferred = $.Deferred();
 
