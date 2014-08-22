@@ -293,6 +293,16 @@ Api = {
     return deferred.promise();
   },
 
+  /* Resolves:
+   * {
+   *   error: null
+   * }
+   *
+   * Rejects:
+   * {
+   *   error: string
+   * }
+   */
   removeSecondaryBin: function (id) {
     var deferred = $.Deferred();
 
