@@ -128,7 +128,7 @@ Api = {
    */
   getBinData: function (ids) {
     if(Api.processing.getBinData) {
-      console.log("moreTexts: request ongoing: ignoring new request");
+      console.log("getBinData: request ongoing: ignoring new request");
       return null;
     }
 
