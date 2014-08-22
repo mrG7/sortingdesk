@@ -314,6 +314,7 @@ Api = {
         else
           deferred.resolve( { error: null } );
       } else
+        delete ApiData.bins[id];
         deferred.resolve( { error: "Secondary bin not existent" } );
     }, Math.rand(Api.DELAY_MIN, Api.DELAY_MAX));
 
