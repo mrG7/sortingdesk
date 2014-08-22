@@ -1,5 +1,4 @@
 * To do items [72%]
-** TODO [#A] Allow secondary and sub bin names to be edited
 ** TODO [#B] Save data by issuing calls to diffeo's API
 ** TODO Implement user notifications
 A mechanism for displaying notifications to the user is needed for the purpose
@@ -7,6 +6,9 @@ of providing feedback, in particular in the cases when a user action is invalid
 and results in an error.
 ** TODO [#C] Text items container doesn't have a UI state when it doesn't hold any text items
 Must clearly communicate to the user that there aren't any more text items available.
+** WAIT [#A] Allow secondary and sub bin names to be edited
+- State "WAIT"       from "TODO"       [2014-08-22 Fri 13:24] \\
+  Not proceeding with this until it's clear whether bins based on existing text items are even editable.
 ** WAIT [#B] Do not allow duplicate bins
 - State "WAIT"       from "TODO"       [2014-08-22 Fri 12:44] \\
   Specifications aren't clear as to how bins that are based on existing text items
