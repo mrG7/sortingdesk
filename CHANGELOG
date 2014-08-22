@@ -1,3 +1,27 @@
+2014-08-22  Miguel Guedes  <miguel@miguelguedes.org>
+
+	* all:
+
+	Added initial foundation for a user notification mechanism.
+
+	Minor improvements to code.
+
+	* src/main/SortingDesk.js:
+
+	The appropriate bin removal callback is now invoked when a bin is
+	removed.
+
+	Added initial support for bin ids to be passed to API bin addition
+	callbacks when a user creates a bin based on an existing text
+	item.
+
+	* test/js/api-sorting_desk.js (Api):
+
+	Created missing API method `removePrimarySubBin'.
+
+	Fixed `removeSecondaryBin' actually not deleting bin from fake
+	data repository.
+
 2014-08-21  Miguel Guedes  <miguel@miguelguedes.org>
 
 	* all:
