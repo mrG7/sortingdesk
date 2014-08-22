@@ -375,10 +375,10 @@ var BinContainerPrimary = function (controller, id, bin)
     function (input) {
       return Api.renderPrimarySubBin( { statement_text: input } );
     },
-    function (text) {
+    function (id, text) {
       var deferred = $.Deferred();
       
-      Api.addPrimarySubBin(text)
+      Api.addPrimarySubBin(id, text)
         .fail(function () {
           /* TODO: show message box and notify user. */
           deferred.reject();
@@ -959,10 +959,10 @@ BinAddButton.prototype = {
       throw "onAdd: failed to retrieve text item: " + id;
     }
 
-    this.fnAdd(new TextItemSnippet(item.getContent().text)
+    this.fnAdd(id,
+               new TextItemSnippet(item.getContent().text)
                .highlights(controller.getOption('binCharsLeft'),
-                           controller.getOption('binCharsRight')),
-               id)
+                           controller.getOption('binCharsRight')))
       .always(function () { node.remove(); } );
   },
 
@@ -980,7 +980,7 @@ BinAddButton.prototype = {
 
         this.disabled = true;
 
-        self.fnAdd(this.value)
+        self.fnAdd(null, this.value)
           .done(function () { node.remove(); } )
           .fail(function () { node.removeAttr('disabled'); } );
       } )
