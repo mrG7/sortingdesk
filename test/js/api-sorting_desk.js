@@ -22,17 +22,9 @@ Math.rand = function (min, max)
  * Returns: String || null */
 Object.firstKey = function (obj)
 {
-  var keys = Object.keys(obj);
-
-  return keys.length ? keys[0] : null;
-
-  /* Another faster option of achieving this is to iterate once:
-   * 
-   *   for(var id in obj)
-   *     return id;
-   * 
-   *   return null;
-   */
+   for(var id in obj)
+     return id;
+   return null;
 };
 
 
@@ -42,21 +34,34 @@ Api = {
   DELAY_MIN: 200,
   DELAY_MAX: 750,
   MULTIPLE_NODES_LIMIT: 10,
+  SCHEME: '//',
+  BASE: 'demo.diffeo.com:8080',
+  NAMESPACE: 'miguel_sorting_desk',
+  RANKER: 'similar',
 
   TEXT_VIEW_HIGHLIGHTS: 1,
   TEXT_VIEW_UNRESTRICTED: 2,
   TEXT_CONDENSED_CHARS: 100,
   TEXT_HIGHLIGHTS_CHARS: 150,
-  
-  endpoints: {
-    multipleNodes:
-    'http://dev5.diffeo.com:10982/namespaces/miguel_sorting_desk/s2/',
-    singleNode:
-    'http://dev5.diffeo.com:10982/namespaces/miguel_sorting_desk/nodes/'
-  },
 
   processing: { },
-    
+
+  // Given the name of an endpoint (e.g., 's2' or 'nodes'), a dictionary of
+  // query parameters and an optional boolean `jsonp` (to craft a JSONP URL),
+  // returns a properly encoded URL.
+  //
+  // Note that this uses jQuery "traditional" style, so with array data, you'll
+  // get `key=a&key=b` instead of `key[]=a&key[]=b`.
+  url: function(endpoint, params, jsonp) {
+    params = params || {};
+    var url = this.SCHEME + this.BASE + '/namespaces/';
+    url += encodeURIComponent(this.NAMESPACE);
+    url += '/' + encodeURIComponent(endpoint) + '/?';
+    if (jsonp) {
+      url += 'callback=?&format=jsonp&';
+    }
+    return url + $.param(params, true);
+  },
 
   /* The following method is in contravention of the specs. It returns the
    * text items inside of a possibly illegal attribute (`result'). */
@@ -73,11 +78,12 @@ Api = {
     if(num <= 0)
       throw "Specified invalid number of items to retrieve";
 
-    $.getJSON(Api.endpoints.multipleNodes +
-              '?noprof=1&format=jsonp&label=true&order=similar'
-              + '&limit=' + Api.MULTIPLE_NODES_LIMIT
-              + '&node_id=' + encodeURIComponent(ApiData.primaryContentId)
-              + '&callback=?')
+    var params = {
+      noprof: '1', label: true, order: Api.RANKER,
+      limit: Api.MULTIPLE_NODES_LIMIT,
+      node_id: ApiData.primaryContentId,
+    }
+    $.getJSON(Api.url('s2', params, true))
       .fail(function () {
         console.log("moreTexts: request failed");
         deferred.reject();
@@ -177,7 +183,7 @@ Api = {
         return false;
 
       /* Issue request to diffeo's RESTful API service. */
-      $.getJSON(Api.endpoints.singleNode + id + '?format=jsonp&callback=?')
+      $.getJSON(Api.url('nodes/' + id, {}, true))
         .fail(function () {
           console.log("getBinData: request failed:", id);
           deferred.reject();
