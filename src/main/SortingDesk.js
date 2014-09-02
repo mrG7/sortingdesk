@@ -40,11 +40,12 @@ var SortingDesk = function(options, callbacks)
     } );
   }
 
-  callbacks.getBinData([ options.primaryContentId ]
-                       .concat(options.secondaryContentIds))
+  var promise = callbacks.getBinData([ options.primaryContentId ]
+                         .concat(options.secondaryContentIds));
+  self.loadingPromise(promise)
     .done(function(bins) {
       self.initialise(bins);
-    } );
+    });
 };
 
 
@@ -182,6 +183,18 @@ SortingDesk.prototype = {
       } );
 
     console.log("Sorting Desk UI initialised");
+  },
+
+  loadingPromise: function(promise) {
+    var self = this;
+
+    if (!self.options.nodes.loading) {
+      return promise;
+    }
+    self.options.nodes.loading.fadeIn();
+    return promise.always(function() {
+      self.options.nodes.loading.fadeOut();
+    });
   },
 
   onClick: function (bin)
@@ -664,7 +677,7 @@ ItemsList.prototype = {
     if(!promise)
       return;
     
-    promise
+    self.controller.loadingPromise(promise)
       .done(function (items) {
         $.each(items, function (index, item) {
           window.setTimeout( function () {
