@@ -55,6 +55,11 @@ Api = {
   url: function(endpoint, params, jsonp) {
     params = params || {};
     var url = this.SCHEME + this.BASE + '/namespaces/';
+
+    /* Prepend protocol if using SortingDesk locally. */
+    if(!/^http[s]*:/.test(window.location.protocol))
+      url = 'http:' + url;
+    
     url += encodeURIComponent(this.NAMESPACE);
     url += '/' + encodeURIComponent(endpoint) + '/?';
     if (jsonp) {
