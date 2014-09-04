@@ -80,7 +80,8 @@ Api = {
       noprof: '1', label: true, order: Api.RANKER,
       limit: Api.MULTIPLE_NODES_LIMIT,
       node_id: ApiData.primaryContentId,
-    }
+    };
+    
     $.getJSON(Api.url('s2', params, true))
       .fail(function () {
         console.log("moreTexts: request failed");
