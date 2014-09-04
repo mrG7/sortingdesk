@@ -1017,9 +1017,10 @@ BinAddButton.prototype = {
 
         this.disabled = true;
 
+        /* TODO: do not use an `alert'. */
         self.fnAdd(null, this.value)
-          .done(function () { node.remove(); } )
-          .fail(function () { node.removeAttr('disabled'); } );
+          .fail(function () { alert("Failed to create a sub-bin."); } )
+          .always(function () { node.remove(); } );
       } )
       .keyup(function (evt) {
         if(evt.keyCode == 13)
