@@ -25,9 +25,8 @@ var SortingDesk = function(options, callbacks)
    * Calculation should be done programmatically.
    * */
   var height = $(window).height() - this.options.nodes.items.offset().top - 28;
-  
+
   this.options.nodes.items.height(height);
-  this.options.nodes.bins.height(height);
 
   /* Setup AJAX UI notification before actually making any requests. */
   if(this.options.nodes.loading) {
@@ -40,12 +39,19 @@ var SortingDesk = function(options, callbacks)
     } );
   }
 
-  var promise = callbacks.getBinData([ options.primaryContentId ]
-                         .concat(options.secondaryContentIds));
-  self.loadingPromise(promise)
-    .done(function(bins) {
-      self.initialise(bins);
-    });
+  /* Do not request bin data if a bins HTML container wasn't given. */
+  if(this.options.nodes.bins) {
+    this.options.nodes.bins.height(height);
+  
+    var promise = callbacks.getBinData(
+      [ options.primaryContentId ].concat(options.secondaryContentIds));
+    
+    self.loadingPromise(promise)
+      .done(function(bins) {
+        self.initialise(bins);
+      });
+  } else
+    self.initialise();
 };
 
 
@@ -82,23 +88,28 @@ SortingDesk.prototype = {
 
   initialise: function (bins)
   {
-    /* Firstly process primary bin. */
-    if(!(this.options.primaryContentId in bins)
-       || bins[this.options.primaryContentId].error) {
-      throw "Failed to retrieve contents of primary bin";
+    /* Do not create any process any bins if a bin HTML container doesn't
+     * exist. */
+    if(this.options.nodes.bins) {
+      /* Firstly process primary bin. */
+      if(!(this.options.primaryContentId in bins)
+         || bins[this.options.primaryContentId].error) {
+        throw "Failed to retrieve contents of primary bin";
+      }
+      
+      this.bins.push(new BinContainerPrimary(this,
+                                             this.options.primaryContentId,
+                                             bins[this.options.primaryContentId]));
+
+      /* Delete to avoid repetition below. */
+      delete bins[this.options.primaryContentId];
+
+      /* Now create secondary bins */
+      var self = this;
+      
+      this.bins.push(new BinContainerSecondary(this, bins));
     }
     
-    this.bins.push(new BinContainerPrimary(this,
-                                           this.options.primaryContentId,
-                                           bins[this.options.primaryContentId]));
-
-    /* Delete to avoid repetition below. */
-    delete bins[this.options.primaryContentId];
-
-    /* Now, create secondary bins */
-    var self = this;
-    
-    this.bins.push(new BinContainerSecondary(this, bins));
     this.list = new ItemsList(this);
 
     $('body').keyup(function (evt) {
