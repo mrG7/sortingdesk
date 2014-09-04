@@ -1,18 +1,15 @@
-* To do items [72%]
+* To do items [73%]
+** TODO Allow a text item to be sorted into a non-bin container (dismiss)
 ** TODO [#A] Save data by issuing calls to diffeo's API
+** TODO [#C] Text items container doesn't have a UI state when it doesn't hold any text items
+Must clearly communicate to the user that there aren't any more text items available.
 ** TODO [#C] Implement user notifications
 A mechanism for displaying notifications to the user is needed for the purpose
 of providing feedback, in particular in the cases when a user action is invalid
 and results in an error.
-** TODO [#C] Text items container doesn't have a UI state when it doesn't hold any text items
-Must clearly communicate to the user that there aren't any more text items available.
 ** WAIT [#A] Allow secondary and sub bin names to be edited
 - State "WAIT"       from "TODO"       [2014-08-22 Fri 13:24] \\
   Not proceeding with this until it's clear whether bins based on existing text items are even editable.
-** WAIT [#B] Do not allow duplicate bins
-- State "WAIT"       from "TODO"       [2014-08-22 Fri 12:44] \\
-  Specifications aren't clear as to how bins that are based on existing text items
-  are created.
 ** DONE Invoke API to process bin removal
 - State "DONE"       from "TODO"       [2014-08-22 Fri 13:20]
 ** DONE Implement actual deletion of bins
@@ -74,6 +71,12 @@ The text to use as anchor text in each item should be the longest string in the 
 - State "DONE"       from "TODO"       [2014-08-20 Wed 11:54]
 
 Add an input box in the UI that users can edit.
+** CANCELED [#B] Do not allow duplicate bins
+- State "CANCELED"   from "WAIT"       [2014-09-04 Thu 13:02] \\
+  Most likely can't be done reliably.
+- State "WAIT"       from "TODO"       [2014-08-22 Fri 12:44] \\
+  Specifications aren't clear as to how bins that are based on existing text items
+  are created.
 ** CANCELED =Bin= and =BinContainer= classes take an =id= parameter
 - State "CANCELED"   from "TODO"       [2014-08-22 Fri 13:22] \\
   The structure of a bin is awkward with the object itself not actually having a property representing its id. The object is instead pointed to by a key that itself is the id. There's no other way but to keep the id separate, unless we chose to implement different semantics, which I'm not happy about.
