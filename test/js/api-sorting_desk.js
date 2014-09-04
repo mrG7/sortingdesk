@@ -63,8 +63,6 @@ Api = {
     return url + $.param(params, true);
   },
 
-  /* The following method is in contravention of the specs. It returns the
-   * text items inside of a possibly illegal attribute (`result'). */
   moreTexts: function (num) {
     if(Api.processing.moreTexts) {
       console.log("moreTexts: request ongoing: ignoring new request");
