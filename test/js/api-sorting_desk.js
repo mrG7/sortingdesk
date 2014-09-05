@@ -336,10 +336,7 @@ Api = {
    * direct execution to the appropriate function . I believe now two view modes
    * should be enough and that the `switch' below can be removed. */
   renderText: function (item, view) {
-    if(typeof view == 'undefined')
-      view = Api.TEXT_VIEW_HIGHLIGHT;
-    
-    switch(view) {
+    switch(view || Api.TEXT_VIEW_HIGHLIGHT) {
     case Api.TEXT_VIEW_UNRESTRICTED:
       return Api.renderTextUnrestricted(item);
     case Api.TEXT_VIEW_HIGHLIGHTS:
