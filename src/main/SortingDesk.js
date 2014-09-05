@@ -167,24 +167,24 @@ SortingDesk.prototype = {
 
         switch(scope) {
         case 'bin':
-          self.bins.some(function (bin) {
-            var target = bin.getBinById(id);
-            
-            if(target) {
+          self.bins.some(function (container) {
+            var bin = container.getBinById(id);
+
+            if(bin) {
               /* It doesn't matter if the API request succeeds or not for the
                * bin is always deleted. The only case (that I am aware of) where
                * the API request would fail is if the bin didn't exist
                * server-side, in which case it should be deleted from the UI
                * too. So, always delete, BUT, if the request fails show the user
                * a notification; for what purpose, I don't know. */
-              bin.remove(target);
+              container.remove(bin);
 
               var fn = self.callbacks[
-                target.isSecondaryBin()
+                bin.isSecondaryBin()
                   ? 'removeSecondaryBin'
                   : 'removePrimarySubBin'];
 
-              fn(target.getId())
+              fn(bin.getId())
                 .fail(function (result) {
                   console.log("bin-remove:", result.error);
                   /* TODO: notification not implemented yet. */
