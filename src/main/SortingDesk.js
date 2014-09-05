@@ -46,7 +46,8 @@ SortingDesk.defaults = {
     binAdding: 'adding',
     buttonAdd: 'button-add',
     itemSelected: 'selected',
-    itemDragging: 'dragging'
+    itemDragging: 'dragging',
+    droppableHover: 'droppable-hover'
   },
   visibleItems: 20,             /* Arbitrary. */
   delayAnimateAssign: 100,      /* in milliseconds */
@@ -144,13 +145,15 @@ SortingDesk.prototype = {
       dragenter: function (e) {
         if(UiHelper.draggedElementIsScope(e = e.originalEvent,
                                           [ 'bin', 'text-item' ])) {
-          self.options.nodes.binDelete.addClass('droppable-hover');
+          self.options.nodes.binDelete.addClass(
+            self.options.css.droppableHover);
         }
       },
       dragleave: function (e) {
         if(UiHelper.draggedElementIsScope(e = e.originalEvent,
                                           [ 'bin', 'text-item' ])) {
-          self.options.nodes.binDelete.removeClass('droppable-hover');
+          self.options.nodes.binDelete.removeClass(
+            self.options.css.droppableHover);
         }
       },        
       drop: function (e) {
@@ -161,7 +164,8 @@ SortingDesk.prototype = {
         
         e.stopPropagation();
         
-        self.options.nodes.binDelete.removeClass('droppable-hover');
+        self.options.nodes.binDelete.removeClass(
+          self.options.css.droppableHover);
         
         var id = e.dataTransfer.getData('text/plain'),
             scope = UiHelper.getDraggedElementScope(e);
@@ -551,12 +555,16 @@ Bin.prototype = {
           e.dropEffect = 'move';
         },
         dragenter: function (e) {
-          if(UiHelper.draggedElementIsScope(e, 'text-item'))
-            self.node.addClass('droppable-hover');
+          if(UiHelper.draggedElementIsScope(e, 'text-item')) {
+            self.node.addClass(self.owner.getController()
+                               .getOption('css').droppableHover);
+          }
         },
         dragleave: function (e) {
-          if(UiHelper.draggedElementIsScope(e, 'text-item'))
-            self.node.removeClass('droppable-hover');
+          if(UiHelper.draggedElementIsScope(e, 'text-item')) {
+            self.node.removeClass(self.owner.getController()
+                                  .getOption('css').droppableHover);
+          }
         },
         drop: function (e) {
           if(!UiHelper.draggedElementIsScope(e = e.originalEvent, 'text-item'))
@@ -564,7 +572,9 @@ Bin.prototype = {
           
           e.stopPropagation();
           
-          self.node.removeClass('droppable-hover');
+          self.node.removeClass(self.owner.getController()
+                                .getOption('css').droppableHover);
+          
           self.getController().getItemsList().remove(
             e.dataTransfer.getData('text/plain'));
         },
@@ -975,12 +985,16 @@ var BinAddButton = function (owner, fnRender, fnAdd)
             e.dropEffect = 'move';
           },
           dragenter: function (e) {
-            if(UiHelper.draggedElementIsScope(e, 'text-item'))
-              button.addClass('droppable-hover');
+            if(UiHelper.draggedElementIsScope(e, 'text-item')) {
+              button.addClass(owner.getController().getOption('css')
+                              .droppableHover);
+            }
           },
           dragleave: function (e) {
-            if(UiHelper.draggedElementIsScope(e, 'text-item'))
-              button.removeClass('droppable-hover');
+            if(UiHelper.draggedElementIsScope(e, 'text-item')) {
+              button.removeClass(owner.getController().getOption('css')
+                                 .droppableHover);
+            }
           },
           drop: function (e) {
             if(!UiHelper.draggedElementIsScope(e = e.originalEvent,
@@ -989,7 +1003,8 @@ var BinAddButton = function (owner, fnRender, fnAdd)
             }
             
             self.onAdd(e.dataTransfer.getData('text/plain'));
-            button.removeClass('droppable-hover');
+            button.removeClass(owner.getController().getOption('css')
+                               .droppableHover);
           },
           click: function () {
             self.onAdd();
