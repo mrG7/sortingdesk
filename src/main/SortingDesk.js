@@ -49,7 +49,6 @@ SortingDesk.defaults = {
     itemDragging: 'dragging'
   },
   visibleItems: 20,             /* Arbitrary. */
-  marginWhileDragging: 5,       /*  "     "   */
   delayAnimateAssign: 100,      /* in milliseconds */
   binCharsLeft: 25,
   binCharsRight: 25
