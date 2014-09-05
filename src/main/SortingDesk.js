@@ -134,19 +134,22 @@ SortingDesk.prototype = {
     
     this.options.nodes.binDelete.on( {
       dragover: function (e) {
-        if(!UiHelper.draggedElementIsScope(e = e.originalEvent,
-                                           [ 'bin', 'text-item' ])) {
-           return;
+        if(UiHelper.draggedElementIsScope(e = e.originalEvent,
+                                          [ 'bin', 'text-item' ])) {
+          self.options.nodes.binDelete.addClass(
+            self.options.css.droppableHover);
+          e.dataTransfer.dropEffect = 'move';
+
+          return false;
         }
-        
-        e.preventDefault();
-        e.dataTransfer.dropEffect = 'move';
       },
       dragenter: function (e) {
         if(UiHelper.draggedElementIsScope(e = e.originalEvent,
                                           [ 'bin', 'text-item' ])) {
           self.options.nodes.binDelete.addClass(
             self.options.css.droppableHover);
+
+          return false;
         }
       },
       dragleave: function (e) {
@@ -154,6 +157,8 @@ SortingDesk.prototype = {
                                           [ 'bin', 'text-item' ])) {
           self.options.nodes.binDelete.removeClass(
             self.options.css.droppableHover);
+
+          return false;
         }
       },        
       drop: function (e) {
@@ -161,8 +166,6 @@ SortingDesk.prototype = {
                                            [ 'bin', 'text-item' ])) {
           return;
         }
-        
-        e.stopPropagation();
         
         self.options.nodes.binDelete.removeClass(
           self.options.css.droppableHover);
@@ -211,6 +214,8 @@ SortingDesk.prototype = {
           console.log("Unknown scope:", scope);
           break;
         }
+
+        return false;
       }
     } );
     
@@ -548,35 +553,38 @@ Bin.prototype = {
       .attr('data-scope', 'bin')
       .on( {
         dragover: function (e) {
-          if(!UiHelper.draggedElementIsScope(e = e.originalEvent, 'text-item'))
-             return;
-          
-          e.preventDefault();
-          e.dropEffect = 'move';
+          if(UiHelper.draggedElementIsScope(e = e.originalEvent, 'text-item')) {
+            e.dropEffect = 'move';
+            return false;
+          }
         },
         dragenter: function (e) {
           if(UiHelper.draggedElementIsScope(e, 'text-item')) {
             self.node.addClass(self.owner.getController()
                                .getOption('css').droppableHover);
+
+            return false;
           }
         },
         dragleave: function (e) {
           if(UiHelper.draggedElementIsScope(e, 'text-item')) {
             self.node.removeClass(self.owner.getController()
                                   .getOption('css').droppableHover);
+
+            return false;
           }
         },
         drop: function (e) {
           if(!UiHelper.draggedElementIsScope(e = e.originalEvent, 'text-item'))
             return;
           
-          e.stopPropagation();
-          
           self.node.removeClass(self.owner.getController()
                                 .getOption('css').droppableHover);
           
           self.getController().getItemsList().remove(
             e.dataTransfer.getData('text/plain'));
+
+          return false;
         },
         mouseenter: function () {
           self.getController().onMouseEnter(self);
@@ -913,7 +921,7 @@ TextItem.prototype = {
 
           /* Activate deletion/dismissal button. */
           self.owner.getController().getOption('nodes').binDelete.fadeIn();
-          
+
           d.setData('text/plain', this.id);
           d.effectAllowed = 'move';
         },
@@ -978,33 +986,36 @@ var BinAddButton = function (owner, fnRender, fnAdd)
         .addClass(css.buttonAdd)
         .on( {
           dragover: function (e) {
-            if(!UiHelper.draggedElementIsScope(e = e.originalEvent, 'text-item'))
-              return;
-
-            e.preventDefault();
-            e.dropEffect = 'move';
+            if(UiHelper.draggedElementIsScope(e = e.originalEvent,
+                                              'text-item')) {
+              e.dropEffect = 'move';
+              return false;
+            }
           },
           dragenter: function (e) {
             if(UiHelper.draggedElementIsScope(e, 'text-item')) {
               button.addClass(owner.getController().getOption('css')
                               .droppableHover);
+
+              return false;
             }
           },
           dragleave: function (e) {
             if(UiHelper.draggedElementIsScope(e, 'text-item')) {
               button.removeClass(owner.getController().getOption('css')
                                  .droppableHover);
+              return false;
             }
           },
           drop: function (e) {
-            if(!UiHelper.draggedElementIsScope(e = e.originalEvent,
-                                               'text-item')) {
-              return;
+            if(UiHelper.draggedElementIsScope(e = e.originalEvent,
+                                              'text-item')) {
+              self.onAdd(e.dataTransfer.getData('text/plain'));
+              button.removeClass(owner.getController().getOption('css')
+                                 .droppableHover);
+
+              return false;
             }
-            
-            self.onAdd(e.dataTransfer.getData('text/plain'));
-            button.removeClass(owner.getController().getOption('css')
-                               .droppableHover);
           },
           click: function () {
             self.onAdd();
