@@ -133,58 +133,80 @@ SortingDesk.prototype = {
     
     this.options.nodes.binDelete.on( {
       dragover: function (e) {
-        if(!UiHelper.draggedElementIsScope(e = e.originalEvent, 'bin'))
+        if(!UiHelper.draggedElementIsScope(e = e.originalEvent,
+                                           [ 'bin', 'text-item' ])) {
            return;
+        }
         
         e.preventDefault();
         e.dataTransfer.dropEffect = 'move';
       },
       dragenter: function (e) {
-        if(UiHelper.draggedElementIsScope(e = e.originalEvent, 'bin'))
-           self.options.nodes.binDelete.addClass('droppable-hover');
+        if(UiHelper.draggedElementIsScope(e = e.originalEvent,
+                                          [ 'bin', 'text-item' ])) {
+          self.options.nodes.binDelete.addClass('droppable-hover');
+        }
       },
       dragleave: function (e) {
-        if(UiHelper.draggedElementIsScope(e = e.originalEvent, 'bin'))
-           self.options.nodes.binDelete.removeClass('droppable-hover');
+        if(UiHelper.draggedElementIsScope(e = e.originalEvent,
+                                          [ 'bin', 'text-item' ])) {
+          self.options.nodes.binDelete.removeClass('droppable-hover');
+        }
       },        
       drop: function (e) {
-        if(!UiHelper.draggedElementIsScope(e = e.originalEvent, 'bin'))
+        if(!UiHelper.draggedElementIsScope(e = e.originalEvent,
+                                           [ 'bin', 'text-item' ])) {
           return;
+        }
         
         e.stopPropagation();
         
         self.options.nodes.binDelete.removeClass('droppable-hover');
         
-        var id = e.dataTransfer.getData('text/plain');
+        var id = e.dataTransfer.getData('text/plain'),
+            scope = UiHelper.getDraggedElementScope(e);
 
-        self.bins.some(function (bin) {
-          var target = bin.getBinById(id);
-          
-          if(target) {
-            /* It doesn't matter if the API request succeeds or not for the
-             * bin is always deleted. The only case (that I am aware of) where
-             * the API request would fail is if the bin didn't exist
-             * server-side, in which case it should be deleted from the UI
-             * too. So, always delete, BUT, if the request fails show the user
-             * a notification; for what purpose, I don't know. */
-            bin.remove(target);
-
-            var fn = self.callbacks[
-              target.isSecondaryBin()
-                ? 'removeSecondaryBin'
-                : 'removePrimarySubBin'];
-
-            fn(target.getId())
-              .fail(function (result) {
-                console.log("bin-remove:", result.error);
-                /* TODO: notification not implemented yet. */
-              } );
+        switch(scope) {
+        case 'bin':
+          self.bins.some(function (bin) {
+            var target = bin.getBinById(id);
             
-            return true;
-          }
+            if(target) {
+              /* It doesn't matter if the API request succeeds or not for the
+               * bin is always deleted. The only case (that I am aware of) where
+               * the API request would fail is if the bin didn't exist
+               * server-side, in which case it should be deleted from the UI
+               * too. So, always delete, BUT, if the request fails show the user
+               * a notification; for what purpose, I don't know. */
+              bin.remove(target);
 
-          return false;
-        } );
+              var fn = self.callbacks[
+                target.isSecondaryBin()
+                  ? 'removeSecondaryBin'
+                  : 'removePrimarySubBin'];
+
+              fn(target.getId())
+                .fail(function (result) {
+                  console.log("bin-remove:", result.error);
+                  /* TODO: notification not implemented yet. */
+                } );
+              
+              return true;
+            }
+
+            return false;
+          } );
+
+          break;
+
+        case 'text-item':
+          self.list.remove(id);
+          break;
+
+        default:
+          console.log("Unknown scope:", scope);
+          break;
+        }
       }
     } );
     
@@ -867,12 +889,18 @@ TextItem.prototype = {
            * in container. */
           self.owner.select(self);
           self.node.addClass(cdragging);
+
+          /* Activate deletion/dismissal button. */
+          self.owner.getController().getOption('nodes').binDelete.fadeIn();
           
           d.setData('text/plain', this.id);
           d.effectAllowed = 'move';
         },
         dragend: function () {
           self.node.removeClass(cdragging);
+
+          /* Deactivate deletion/dismissal button. */
+          self.owner.getController().getOption('nodes').binDelete.fadeOut();
         },
         click: function () {
           self.owner.select(self);
