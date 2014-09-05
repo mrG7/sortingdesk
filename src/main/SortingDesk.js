@@ -64,6 +64,8 @@ SortingDesk.prototype = {
 
   initialise: function (bins)
   {
+    var self = this;
+    
     /* Do not create any process any bins if a bin HTML container doesn't
      * exist. */
     if(this.options.nodes.bins) {
@@ -81,13 +83,12 @@ SortingDesk.prototype = {
       delete bins[this.options.primaryContentId];
 
       /* Now create secondary bins */
-      var self = this;
       
       this.bins.push(new BinContainerSecondary(this, bins));
     }
     
     this.list = new ItemsList(this);
-
+    
     $('body').keyup(function (evt) {
       /* First process alpha key strokes. */
       if(evt.keyCode >= 65 && evt.keyCode <= 90) {
