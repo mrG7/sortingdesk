@@ -19,6 +19,10 @@ var SortingDesk = function(options, callbacks)
   this.callbacks = callbacks;
   this.bins = [ ];
 
+  /* Check whether user's browser is IE. */
+  if(!$.browser)
+    $.browser = { msie: !!window.navigator.userAgent.indexOf('MSIE ') };
+  
   /* Do not request bin data if a bins HTML container wasn't given. */
   if(this.options.nodes.bins) {
     var promise = callbacks.getBinData(
@@ -138,20 +142,23 @@ SortingDesk.prototype = {
                                           [ 'bin', 'text-item' ])) {
           self.options.nodes.binDelete.addClass(
             self.options.css.droppableHover);
+          
           e.dataTransfer.dropEffect = 'move';
-
           return false;
         }
+
+        if($.browser.msie) return false;
       },
       dragleave: function (e) {
         if(UiHelper.draggedElementIsScope(e = e.originalEvent,
                                           [ 'bin', 'text-item' ])) {
           self.options.nodes.binDelete.removeClass(
             self.options.css.droppableHover);
-
           return false;
         }
-      },        
+
+        if($.browser.msie) return false;
+      },
       drop: function (e) {
         if(!UiHelper.draggedElementIsScope(e = e.originalEvent,
                                            [ 'bin', 'text-item' ])) {
@@ -551,6 +558,8 @@ Bin.prototype = {
             e.dropEffect = 'move';
             return false;
           }
+          
+          if($.browser.msie) return false;
         },
         dragleave: function (e) {
           if(UiHelper.draggedElementIsScope(e, 'text-item')) {
@@ -559,6 +568,8 @@ Bin.prototype = {
 
             return false;
           }
+          
+          if($.browser.msie) return false;
         },
         drop: function (e) {
           if(!UiHelper.draggedElementIsScope(e = e.originalEvent, 'text-item'))
@@ -969,9 +980,12 @@ var BinAddButton = function (owner, fnRender, fnAdd)
                                               'text-item')) {
               button.addClass(owner.getController().getOption('css')
                               .droppableHover);
+              
               e.dropEffect = 'move';
               return false;
             }
+            
+            if($.browser.msie) return false;
           },
           dragleave: function (e) {
             if(UiHelper.draggedElementIsScope(e, 'text-item')) {
@@ -980,7 +994,7 @@ var BinAddButton = function (owner, fnRender, fnAdd)
               return false;
             }
             
-            if($.browser.msie) return true;
+            if($.browser.msie) return false;
           },
           drop: function (e) {
             if(UiHelper.draggedElementIsScope(e = e.originalEvent,
