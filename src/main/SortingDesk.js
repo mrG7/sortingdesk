@@ -130,46 +130,64 @@ SortingDesk.prototype = {
 
       return false;
     } );
+    
+    this.options.nodes.binDelete.on( {
+      dragover: function (e) {
+        if(!UiHelper.draggedElementIsScope(e = e.originalEvent, 'bin'))
+           return;
+        
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+      },
+      dragenter: function (e) {
+        if(UiHelper.draggedElementIsScope(e = e.originalEvent, 'bin'))
+           self.options.nodes.binDelete.addClass('droppable-hover');
+      },
+      dragleave: function (e) {
+        if(UiHelper.draggedElementIsScope(e = e.originalEvent, 'bin'))
+           self.options.nodes.binDelete.removeClass('droppable-hover');
+      },        
+      drop: function (e) {
+        if(!UiHelper.draggedElementIsScope(e = e.originalEvent, 'bin'))
+          return;
+        
+        e.stopPropagation();
+        
+        self.options.nodes.binDelete.removeClass('droppable-hover');
+        
+        var id = e.dataTransfer.getData('text/plain');
 
-    this.options.nodes.binDelete
-      .droppable( {
-        scope: 'delete-bin',
-        hoverClass: 'droppable-hover',
-        tolerance: 'pointer',
-        drop: function (evt, ui) {
-          var id = ui.draggable.attr('id');
+        self.bins.some(function (bin) {
+          var target = bin.getBinById(id);
           
-          self.bins.some(function (bin) {
-            var target = bin.getBinById(id);
+          if(target) {
+            /* It doesn't matter if the API request succeeds or not for the
+             * bin is always deleted. The only case (that I am aware of) where
+             * the API request would fail is if the bin didn't exist
+             * server-side, in which case it should be deleted from the UI
+             * too. So, always delete, BUT, if the request fails show the user
+             * a notification; for what purpose, I don't know. */
+            bin.remove(target);
+
+            var fn = self.callbacks[
+              target.isSecondaryBin()
+                ? 'removeSecondaryBin'
+                : 'removePrimarySubBin'];
+
+            fn(target.getId())
+              .fail(function (result) {
+                console.log("bin-remove:", result.error);
+                /* TODO: notification not implemented yet. */
+              } );
             
-            if(target) {
-              /* It doesn't matter if the API request succeeds or not for the
-               * bin is always deleted. The only case (that I am aware of) where
-               * the API request would fail is if the bin didn't exist
-               * server-side, in which case it should be deleted from the UI
-               * too. So, always delete, BUT, if the request fails show the user
-               * a notification; for what purpose, I don't know. */
-              bin.remove(target);
+            return true;
+          }
 
-              var fn = self.callbacks[
-                target.isSecondaryBin()
-                  ? 'removeSecondaryBin'
-                  : 'removePrimarySubBin'];
-
-              fn(target.getId())
-                .fail(function (result) {
-                  console.log("bin-remove:", result.error);
-                  /* TODO: notification not implemented yet. */
-                } );
-              
-              return true;
-            }
-
-            return false;
-          } );
-        }
-      } );
-
+          return false;
+        } );
+      }
+    } );
+    
     console.log("Sorting Desk UI initialised");
   },
 
@@ -490,61 +508,65 @@ Bin.prototype = {
     this.node = node;
 
     node
-      .droppable( {
-        scope: 'text-items',
-        activeClass: 'droppable-highlight',
-        hoverClass: 'droppable-hover',
-        drop: function (evt, ui) {
+      .attr('data-scope', 'bin')
+      .on( {
+        dragover: function (e) {
+          if(!UiHelper.draggedElementIsScope(e = e.originalEvent, 'text-item'))
+             return;
+          
+          e.preventDefault();
+          e.dropEffect = 'move';
+        },
+        dragenter: function (e) {
+          if(UiHelper.draggedElementIsScope(e, 'text-item'))
+            self.node.addClass('droppable-hover');
+        },
+        dragleave: function (e) {
+          if(UiHelper.draggedElementIsScope(e, 'text-item'))
+            self.node.removeClass('droppable-hover');
+        },
+        drop: function (e) {
+          if(!UiHelper.draggedElementIsScope(e = e.originalEvent, 'text-item'))
+            return;
+          
+          e.stopPropagation();
+          
+          self.node.removeClass('droppable-hover');
           self.getController().getItemsList().remove(
-            ui.draggable.attr('id'));
-
-          if(fnOnDrop)
-            fnOnDrop(evt, ui);
+            e.dataTransfer.getData('text/plain'));
         },
-        tolerance: 'pointer' } )
-      .mouseenter(function () {
-        self.getController().onMouseEnter(self);
-      } )
-      .mouseleave(function () {
-        self.getController().onMouseLeave();
-      } )
-      .click(function () {
-        self.getController().onClick(self);
-      } );
-
-    /* We must defer initialisation of draggable because owning object's `bin'
-     * attribute will have not yet been set. */
-    window.setTimeout(function () {
-      /* Primary bins can't be draggable. */
-      if(self == self.owner.getPrimaryBin())
-        return;
-      
-      node.draggable( {
-        scope: 'delete-bin',
-        appendTo: 'body',
-        cursor: 'move',
-        scroll: false,
-        opacity: 0.6,
-        helper: function () {
-          return node.clone()
-            .css( {
-              width: self.node.width() + 'px',
-              height: self.node.height() + 'px',
-              margin: 0
-            } );
+        mouseenter: function () {
+          self.getController().onMouseEnter(self);
         },
-        start: function () {
-          self.getController().getOption('nodes').binDelete.fadeIn();
+        mouseleave: function () {
+          self.getController().onMouseLeave();
         },
-        stop: function () {
-          self.getController().getOption('nodes').binDelete.fadeOut();
-        },
-        drag: function (evt, ui) {
-          UiHelper.onDrag(
-            evt, ui,
-            self.getController().getOption('marginWhileDragging'));
+        click: function () {
+          self.getController().onClick(self);
         }
       } );
+
+    /* We must defer initialisation of D'n'D because owning object's `bin'
+     * attribute will have not yet been set. */
+    window.setTimeout(function () {
+      /* Primary bins aren't draggable. */
+      if(self == self.owner.getPrimaryBin())
+        return;
+
+      node.on( {
+        dragstart: function (e) {
+          var d = e.originalEvent.dataTransfer;
+
+          self.getController().getOption('nodes').binDelete.fadeIn();
+          
+          d.setData('text/plain', this.id);
+          d.effectAllowed = 'move';
+        },
+        dragend: function (e) {
+          self.getController().getOption('nodes').binDelete.fadeOut();
+        }
+      } )
+      .prop('draggable', true);
     }, 0);
   },
   
@@ -832,44 +854,29 @@ TextItem.prototype = {
         cdragging = controller.getOption("css").itemDragging;
 
     this.node
-      .attr('id', this.content.node_id)
-      .draggable( {
-        appendTo: 'body',
-        scope: 'text-items',
-        cursor: 'move',
-        opacity: 0.45,
-        /*     cursorAt: { */
-        /*       top: 5,   */
-        /*       left: 5   */
-        /*     },          */
-        scroll: false,
-        /*     snap: '.bin',     */
-        /*     snapMode: 'inner' */
-        start: function () {
-          self.node.addClass(cdragging);
-        },
-        stop: function () {
-          self.node.removeClass(cdragging);
-        },
-        helper: function () {
-          return self.node.clone()
-            .css( {
-              width: self.node.width() + 'px',
-              height: self.node.height() + 'px',
-              margin: 0
-            } );
-        },
-        drag: function (evt, ui) {
+      .prop('draggable', true)
+      .attr( {
+        id: this.content.node_id,
+        "data-scope": "text-item"
+      } )
+      .on( {
+        dragstart: function (e) {
+          var d = e.originalEvent.dataTransfer;
+          
           /* Firstly select item being dragged to ensure correct item position
            * in container. */
           self.owner.select(self);
-
-          /* Clone text item node. */
-          UiHelper.onDrag(evt, ui, controller.getOption("marginWhileDragging"));
+          self.node.addClass(cdragging);
+          
+          d.setData('text/plain', this.id);
+          d.effectAllowed = 'move';
+        },
+        dragend: function () {
+          self.node.removeClass(cdragging);
+        },
+        click: function () {
+          self.owner.select(self);
         }
-      } )
-      .click(function () {
-        self.owner.select(self);
       } );
 
     /* Add logic to less/more links. */
@@ -920,16 +927,34 @@ var BinAddButton = function (owner, fnRender, fnAdd)
       css = controller.getOption('css'),
       button = $(controller.invoke("renderAddButton", "+"))
         .addClass(css.buttonAdd)
-        .droppable( {
-          scope: 'text-items',
-          activeClass: 'droppable-highlight',
-          hoverClass: 'droppable-hover',
-          drop: function (evt, ui) {
-            self.onAdd(ui.draggable.attr('id'));
+        .on( {
+          dragover: function (e) {
+            if(!UiHelper.draggedElementIsScope(e = e.originalEvent, 'text-item'))
+              return;
+
+            e.preventDefault();
+            e.dropEffect = 'move';
           },
-          tolerance: 'pointer' } )
-        .click(function () {
-          self.onAdd();
+          dragenter: function (e) {
+            if(UiHelper.draggedElementIsScope(e, 'text-item'))
+              button.addClass('droppable-hover');
+          },
+          dragleave: function (e) {
+            if(UiHelper.draggedElementIsScope(e, 'text-item'))
+              button.removeClass('droppable-hover');
+          },
+          drop: function (e) {
+            if(!UiHelper.draggedElementIsScope(e = e.originalEvent,
+                                               'text-item')) {
+              return;
+            }
+            
+            self.onAdd(e.dataTransfer.getData('text/plain'));
+            button.removeClass('droppable-hover');
+          },
+          click: function () {
+            self.onAdd();
+          }
         } );
 
   owner.getContainer().after(button);
@@ -1009,17 +1034,16 @@ BinAddButton.prototype = {
 
 
 var UiHelper = {
-  onDrag: function (evt, ui, margin)
+  draggedElementIsScope: function (event, scope)
   {
-    if(ui.position.left + ui.helper.outerWidth() >=
-       $(window).width() - margin) {
-      ui.position.left = $(window).width() - ui.helper.outerWidth() - margin;
+    if(!event.dataTransfer) {
+      event = event.originalEvent;
+
+      if(!event.dataTransfer)
+        return false;
     }
 
-    if(ui.position.top + ui.helper.outerHeight() >=
-       $(window).height() - margin) {
-      ui.position.top =  $(window).height() - ui.helper.outerHeight()
-        - margin;
-    }
+    return document.getElementById(event.dataTransfer.getData('text/plain'))
+      .getAttribute('data-scope') == scope;
   }
 };
