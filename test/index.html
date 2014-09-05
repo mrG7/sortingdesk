@@ -21,9 +21,14 @@
 
 $(function () {
   var nitems = $("#items"),
-      nbins = $("#bins");
+      nbins = $("#bins"),
+      nloading = $("#loading");
 
   $(".wrapper").fadeIn();
+
+  /* Setup AJAX UI notification before actually making any requests. */
+  $(document).ajaxStart(function () { nloading.fadeIn(); } );
+  $(document).ajaxStop(function () { nloading.fadeOut(); } );
   
   var height = $(window).height() - nitems.offset().top - 28;
   
@@ -44,8 +49,7 @@ $(function () {
       nodes: {
         items: nitems,
         bins: nbins,
-        binDelete: $("#button-delete"),
-        loading: $("#loading")
+        binDelete: $("#button-delete")
       },
       css: {                      /* This tree is optional: see
                                    * `SortingDesk.defaults' */

@@ -19,26 +19,14 @@ var SortingDesk = function(options, callbacks)
   this.callbacks = callbacks;
   this.bins = [ ];
 
-  /* Setup AJAX UI notification before actually making any requests. */
-  if(this.options.nodes.loading) {
-    $(document).ajaxStart(function () {
-      self.options.nodes.loading.fadeIn();
-    } );
-    
-    $(document).ajaxStop(function () {
-      self.options.nodes.loading.fadeOut();
-    } );
-  }
-
   /* Do not request bin data if a bins HTML container wasn't given. */
   if(this.options.nodes.bins) {
     var promise = callbacks.getBinData(
       [ options.primaryContentId ].concat(options.secondaryContentIds));
     
-    self.loadingPromise(promise)
-      .done(function(bins) {
-        self.initialise(bins);
-      });
+    promise.done(function(bins) {
+      self.initialise(bins);
+    });
   } else
     self.initialise();
 };
@@ -183,18 +171,6 @@ SortingDesk.prototype = {
       } );
 
     console.log("Sorting Desk UI initialised");
-  },
-
-  loadingPromise: function(promise) {
-    var self = this;
-
-    if (!self.options.nodes.loading) {
-      return promise;
-    }
-    self.options.nodes.loading.fadeIn();
-    return promise.always(function() {
-      self.options.nodes.loading.fadeOut();
-    });
   },
 
   onClick: function (bin)
@@ -677,18 +653,17 @@ ItemsList.prototype = {
     if(!promise)
       return;
     
-    self.controller.loadingPromise(promise)
-      .done(function (items) {
-        $.each(items, function (index, item) {
-          window.setTimeout( function () {
-            self.items.push(new TextItem(self, item));
-          }, Math.pow(index, 2) * 1.1);
-        } );
-
+    promise.done(function (items) {
+      $.each(items, function (index, item) {
         window.setTimeout( function () {
-          self.select();
-        }, 10);
+          self.items.push(new TextItem(self, item));
+        }, Math.pow(index, 2) * 1.1);
       } );
+
+      window.setTimeout( function () {
+        self.select();
+      }, 10);
+    } );
   },
 
   select: function (variant)
