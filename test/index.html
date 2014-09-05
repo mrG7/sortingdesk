@@ -40,6 +40,13 @@ $(function () {
     .height(height)
     .children().remove();
   
+  $("#primary-node-id")
+    .val(ApiData.primaryContentId)
+    .change(function () {
+      ApiData.setPrimaryContentId(this.value);
+      instantiateUi();
+    } );
+  
   function instantiateUi()
   {
     nitems.children().remove();
@@ -76,13 +83,6 @@ $(function () {
       renderAddButton: Api.renderAddButton
     } );
   }
-  
-  $("#primary-node-id")
-    .val(ApiData.primaryContentId)
-    .change(function () {
-      ApiData.setPrimaryContentId(this.value);
-      instantiateUi();
-    } );
   
   instantiateUi();
 });
