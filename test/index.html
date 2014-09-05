@@ -54,7 +54,9 @@ $(function () {
       nodes: {
         items: nitems,
         bins: nbins,
-        binDelete: $("#button-delete")
+        binDelete: $("#button-delete") /* Also used for 'dimissing' text items
+                                        * that aren't/can't/won't be sorted into
+                                        * a bin */
       },
       css: {                      /* This tree is optional: see
                                    * `SortingDesk.defaults' */
