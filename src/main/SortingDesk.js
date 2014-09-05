@@ -1049,5 +1049,15 @@ var UiHelper = {
     return (scope instanceof Array ? scope : [ scope ]).some(function (sc) {
       return node.getAttribute('data-scope') == sc;
     } );
+  },
+
+  getDraggedElementScope: function (event)
+  {
+    if(!event.dataTransfer)
+      event = event.originalEvent;
+
+    return event.dataTransfer
+      && document.getElementById(event.dataTransfer.getData('text/plain'))
+           .getAttribute('data-scope');
   }
 };
