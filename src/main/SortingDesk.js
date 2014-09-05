@@ -1088,7 +1088,6 @@ var UiHelper = {
         return false;
     }
 
-    console.log(event.dataTransfer.getData('text/plain'));
     var node = document.getElementById(
           event.dataTransfer.getData('text/plain'));
     
