@@ -143,15 +143,6 @@ SortingDesk.prototype = {
           return false;
         }
       },
-      dragenter: function (e) {
-        if(UiHelper.draggedElementIsScope(e = e.originalEvent,
-                                          [ 'bin', 'text-item' ])) {
-          self.options.nodes.binDelete.addClass(
-            self.options.css.droppableHover);
-
-          return false;
-        }
-      },
       dragleave: function (e) {
         if(UiHelper.draggedElementIsScope(e = e.originalEvent,
                                           [ 'bin', 'text-item' ])) {
@@ -554,15 +545,10 @@ Bin.prototype = {
       .on( {
         dragover: function (e) {
           if(UiHelper.draggedElementIsScope(e = e.originalEvent, 'text-item')) {
-            e.dropEffect = 'move';
-            return false;
-          }
-        },
-        dragenter: function (e) {
-          if(UiHelper.draggedElementIsScope(e, 'text-item')) {
             self.node.addClass(self.owner.getController()
                                .getOption('css').droppableHover);
-
+            
+            e.dropEffect = 'move';
             return false;
           }
         },
@@ -988,15 +974,9 @@ var BinAddButton = function (owner, fnRender, fnAdd)
           dragover: function (e) {
             if(UiHelper.draggedElementIsScope(e = e.originalEvent,
                                               'text-item')) {
-              e.dropEffect = 'move';
-              return false;
-            }
-          },
-          dragenter: function (e) {
-            if(UiHelper.draggedElementIsScope(e, 'text-item')) {
               button.addClass(owner.getController().getOption('css')
                               .droppableHover);
-
+              e.dropEffect = 'move';
               return false;
             }
           },
@@ -1108,6 +1088,7 @@ var UiHelper = {
         return false;
     }
 
+    console.log(event.dataTransfer.getData('text/plain'));
     var node = document.getElementById(
           event.dataTransfer.getData('text/plain'));
     
