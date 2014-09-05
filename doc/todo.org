@@ -1,7 +1,7 @@
 * To do items [72%]
 ** TODO [#C] Text items container doesn't have a UI state when it doesn't hold any text items
 Must clearly communicate to the user that there aren't any more text items available.
-** TODO [#A] Implement jasmin (unit) tests
+** TODO [#A] Implement jasmine (unit) tests
 Similar to the tests found on: =git@devhub.diffeo.com:streamboard.git=
 
 ** TODO [#A] Allow secondary and sub bin names to be edited

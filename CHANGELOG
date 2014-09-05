@@ -1,3 +1,28 @@
+2014-09-05  Miguel Guedes  <miguel@miguelguedes.org>
+
+	* src/main/SortingDesk.js:
+
+	Removed reliance on hard-coded CSS classes.
+
+	When removing a bin, it wasn't actually deleted from the internal
+	data container. That's now been fixed.
+
+	Text items can now be sorted into the button that was previously
+	used to delete bins. Text items can, therefore, now be removed
+	without being sorted into a specific bin.
+
+	Component now fully uses HTML5 drag and drop. Reliance on jQuery's
+	UI plugin has been dropped and the plugin removed from the
+	repository.
+
+	Changes were made to ensure that Sorting Desk can still function
+	without a `bins' (HTML) container.
+
+	Removed responsibilities for several UI related aspects. These are
+	now the sole responsibility of the caller.
+
+	Several improvements and minor fixes.
+
 2014-08-22  Miguel Guedes  <miguel@miguelguedes.org>
 
 	* all:
