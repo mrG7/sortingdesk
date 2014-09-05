@@ -161,7 +161,7 @@ SortingDesk.prototype = {
         self.options.nodes.binDelete.removeClass(
           self.options.css.droppableHover);
         
-        var id = e.dataTransfer.getData('text/plain'),
+        var id = e.dataTransfer.getData('Text'),
             scope = UiHelper.getDraggedElementScope(e);
 
         switch(scope) {
@@ -568,7 +568,7 @@ Bin.prototype = {
                                 .getOption('css').droppableHover);
           
           self.getController().getItemsList().remove(
-            e.dataTransfer.getData('text/plain'));
+            e.dataTransfer.getData('Text'));
 
           return false;
         },
@@ -592,12 +592,8 @@ Bin.prototype = {
 
       node.on( {
         dragstart: function (e) {
-          var d = e.originalEvent.dataTransfer;
-
           self.getController().getOption('nodes').binDelete.fadeIn();
-          
-          d.setData('text/plain', this.id);
-          d.effectAllowed = 'move';
+          e.originalEvent.dataTransfer.setData('Text', this.id);
         },
         dragend: function (e) {
           self.getController().getOption('nodes').binDelete.fadeOut();
@@ -898,8 +894,6 @@ TextItem.prototype = {
       } )
       .on( {
         dragstart: function (e) {
-          var d = e.originalEvent.dataTransfer;
-          
           /* Firstly select item being dragged to ensure correct item position
            * in container. */
           self.owner.select(self);
@@ -908,8 +902,7 @@ TextItem.prototype = {
           /* Activate deletion/dismissal button. */
           self.owner.getController().getOption('nodes').binDelete.fadeIn();
 
-          d.setData('text/plain', this.id);
-          d.effectAllowed = 'move';
+          e.originalEvent.dataTransfer.setData('Text', this.id);
         },
         dragend: function () {
           self.node.removeClass(cdragging);
@@ -986,15 +979,15 @@ var BinAddButton = function (owner, fnRender, fnAdd)
                                  .droppableHover);
               return false;
             }
+            
+            if($.browser.msie) return true;
           },
           drop: function (e) {
             if(UiHelper.draggedElementIsScope(e = e.originalEvent,
                                               'text-item')) {
-              self.onAdd(e.dataTransfer.getData('text/plain'));
+              self.onAdd(e.dataTransfer.getData('Text'));
               button.removeClass(owner.getController().getOption('css')
                                  .droppableHover);
-
-              return false;
             }
           },
           click: function () {
@@ -1088,9 +1081,14 @@ var UiHelper = {
         return false;
     }
 
-    var node = document.getElementById(
-          event.dataTransfer.getData('text/plain'));
+    var data = event.dataTransfer.getData('Text'),
+        node;
+
+    if(!data)
+      return false;
     
+    node = document.getElementById(data);
+
     return (scope instanceof Array ? scope : [ scope ]).some(function (sc) {
       return node.getAttribute('data-scope') == sc;
     } );
@@ -1102,7 +1100,7 @@ var UiHelper = {
       event = event.originalEvent;
 
     return event.dataTransfer
-      && document.getElementById(event.dataTransfer.getData('text/plain'))
+      && document.getElementById(event.dataTransfer.getData('Text'))
            .getAttribute('data-scope');
   }
 };
