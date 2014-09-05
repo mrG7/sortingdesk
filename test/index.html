@@ -19,17 +19,31 @@
   <!-- Main initialisation logic -->
   <script type="text/javascript">
 
-/* Instantiate fake API */
 $(function () {
+  var nitems = $("#items"),
+      nbins = $("#bins");
+
+  $(".wrapper").fadeIn();
+  
+  var height = $(window).height() - nitems.offset().top - 28;
+  
+  nitems
+    .height(height)
+    .children().remove();
+  
+  nbins
+    .height(height)
+    .children().remove();
+  
   function instantiateUi()
   {
-    $("#items").children().remove();
-    $("#bins").children().remove();
+    nitems.children().remove();
+    nbins.children().remove();
     
     g_sortingDesk = new SortingDesk( {
       nodes: {
-        items: $("#items"),
-        bins: $("#bins"),
+        items: nitems,
+        bins: nbins,
         binDelete: $("#button-delete"),
         loading: $("#loading")
       },
@@ -65,8 +79,7 @@ $(function () {
       ApiData.setPrimaryContentId(this.value);
       instantiateUi();
     } );
-
-  $(".wrapper").fadeIn();
+  
   instantiateUi();
 });
     </script>

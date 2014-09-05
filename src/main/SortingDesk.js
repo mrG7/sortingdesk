@@ -19,15 +19,6 @@ var SortingDesk = function(options, callbacks)
   this.callbacks = callbacks;
   this.bins = [ ];
 
-  /* The value 28 has been hardcoded below, which is the sum of padding * 2 and
-   * border-width * 2 .
-   *
-   * Calculation should be done programmatically.
-   * */
-  var height = $(window).height() - this.options.nodes.items.offset().top - 28;
-
-  this.options.nodes.items.height(height);
-
   /* Setup AJAX UI notification before actually making any requests. */
   if(this.options.nodes.loading) {
     $(document).ajaxStart(function () {
@@ -41,8 +32,6 @@ var SortingDesk = function(options, callbacks)
 
   /* Do not request bin data if a bins HTML container wasn't given. */
   if(this.options.nodes.bins) {
-    this.options.nodes.bins.height(height);
-  
     var promise = callbacks.getBinData(
       [ options.primaryContentId ].concat(options.secondaryContentIds));
     
