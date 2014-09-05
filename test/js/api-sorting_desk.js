@@ -424,7 +424,7 @@ Api = {
   },
 
   renderAddButton: function (caption) {
-    return $('<div>' + caption + '</div>');
+    return $('<div><span>' + caption + '</span></div>');
   }
 };
 
