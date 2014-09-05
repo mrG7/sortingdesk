@@ -1,9 +1,5 @@
-* To do items [65%]
-** TODO [#C] Several draggable/droppable nodes use hard-coded CSS classes
-Make it configurable.
-** TODO [#B] Prefix text-items' and bins' node ids
+* To do items [68%]
 ** TODO [#A] Allow a text item to be sorted into a non-bin container (dismiss)
-** TODO [#C] BUG: A bin's shortcut is still active after it is deleted
 ** TODO [#A] Save data by issuing calls to diffeo's API
 ** TODO [#C] Text items container doesn't have a UI state when it doesn't hold any text items
 Must clearly communicate to the user that there aren't any more text items available.
@@ -11,9 +7,17 @@ Must clearly communicate to the user that there aren't any more text items avail
 A mechanism for displaying notifications to the user is needed for the purpose
 of providing feedback, in particular in the cases when a user action is invalid
 and results in an error.
-** WAIT [#A] Allow secondary and sub bin names to be edited
+** TODO [#A] Implement jasmin (unit) tests
+Similar to the tests found on: =git@devhub.diffeo.com:streamboard.git=
+
+** TODO [#A] Allow secondary and sub bin names to be edited
+- State "TODO"       from "WAIT"       [2014-09-05 Fri 10:42]
 - State "WAIT"       from "TODO"       [2014-08-22 Fri 13:24] \\
   Not proceeding with this until it's clear whether bins based on existing text items are even editable.
+
+** WAIT [#B] Prefix text-items' and bins' node ids
+- State "WAIT"       from "TODO"       [2014-09-05 Fri 10:41] \\
+  Currently waiting to hear from support as to whether ids are guaranteed to always be unique.
 ** DONE [#A] Implement HTML5 drag and drop
 - State "DONE"       from "TODO"       [2014-09-05 Fri 10:26]
 ** DONE Invoke API to process bin removal
@@ -100,3 +104,8 @@ It was stated that "other types come from other sources including Facebook profi
   See above.
 Asked to write it as a long code comment block but might be best done in a
 standalone *editable* text file that doesn't pollute the code and the repository?
+
+* Bugs [%]
+** TODO [#C A bin's shortcut is still active after it is deleted
+** TODO [#C] Several draggable/droppable nodes use hard-coded CSS classes
+Make it configurable
