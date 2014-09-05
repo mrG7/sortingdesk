@@ -8,6 +8,8 @@ Similar to the tests found on: =git@devhub.diffeo.com:streamboard.git=
 - State "TODO"       from "WAIT"       [2014-09-05 Fri 10:42]
 - State "WAIT"       from "TODO"       [2014-08-22 Fri 13:24] \\
   Not proceeding with this until it's clear whether bins based on existing text items are even editable.
+** TODO Allow text items to be dismissed via the keyboard
+** TODO Show an 'X' on each text item to allow it to be deleted on mouse click
 ** WAIT [#A] Save data by issuing calls to diffeo's API
 - State "WAIT"       from "TODO"       [2014-09-05 Fri 11:53] \\
   Waiting to hear from support.
