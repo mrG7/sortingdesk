@@ -1,5 +1,6 @@
 * To do items [73%]
 ** TODO Allow a text item to be sorted into a non-bin container (dismiss)
+** TODO A bin's shortcut is still active after it is deleted
 ** TODO [#A] Save data by issuing calls to diffeo's API
 ** TODO [#C] Text items container doesn't have a UI state when it doesn't hold any text items
 Must clearly communicate to the user that there aren't any more text items available.
