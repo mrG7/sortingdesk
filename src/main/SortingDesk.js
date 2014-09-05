@@ -289,16 +289,27 @@ BinContainer.prototype = {
       node.addClass(this.controller.options.css.leftmostBin);
   },
   
-  remove: function (old)
+  remove: function (bin)
   {
-    var self = this;
+    var self = this,
+        node = bin.getNode();
+
+    /* Remove bin from containment first making sure it isn't primary. */
+    if(this.bin == bin)
+      throw "Unable to delete primary bin";
     
-    if(old instanceof Bin)
-      old = old.getNode();
+    this.subbins.some(function (subbin, ndx) {
+      if(subbin == bin) {
+        self.subbins.splice(ndx, 1);
+        return true;
+      }
+
+      return false;
+    } );
     
-    old.fadeOut(100, function () {
+    node.fadeOut(100, function () {
       /* Remove node and reorganise bin container. */
-      old.remove(); 
+      node.remove(); 
 
       self.container.find('>DIV').each(function (i, node) {
         node = $(node);
