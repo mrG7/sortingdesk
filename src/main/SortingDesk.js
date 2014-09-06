@@ -136,41 +136,11 @@ SortingDesk.prototype = {
       return false;
     } );
     
-    this.options.nodes.binDelete.on( {
-      dragover: function (e) {
-        if(UiHelper.draggedElementIsScope(e = e.originalEvent,
-                                          [ 'bin', 'text-item' ])) {
-          self.options.nodes.binDelete.addClass(
-            self.options.css.droppableHover);
-          
-          e.dataTransfer.dropEffect = 'move';
-          return false;
-        }
+    new Droppable(this.options.nodes.binDelete, {
+      classHover: self.options.css.droppableHover,
+      scopes: [ 'bin', 'text-item' ],
 
-        if($.browser.msie) return false;
-      },
-      dragleave: function (e) {
-        if(UiHelper.draggedElementIsScope(e = e.originalEvent,
-                                          [ 'bin', 'text-item' ])) {
-          self.options.nodes.binDelete.removeClass(
-            self.options.css.droppableHover);
-          return false;
-        }
-
-        if($.browser.msie) return false;
-      },
-      drop: function (e) {
-        if(!UiHelper.draggedElementIsScope(e = e.originalEvent,
-                                           [ 'bin', 'text-item' ])) {
-          return;
-        }
-        
-        self.options.nodes.binDelete.removeClass(
-          self.options.css.droppableHover);
-        
-        var id = e.dataTransfer.getData('Text'),
-            scope = UiHelper.getDraggedElementScope(e);
-
+      drop: function (e, id, scope) {
         switch(scope) {
         case 'bin':
           self.bins.some(function (container) {
@@ -544,45 +514,10 @@ Bin.prototype = {
   setNode_: function (node)
   {
     var self = this;
-    
-    this.node = node;
 
     node
       .attr('data-scope', 'bin')
       .on( {
-        dragover: function (e) {
-          if(UiHelper.draggedElementIsScope(e = e.originalEvent, 'text-item')) {
-            self.node.addClass(self.owner.getController()
-                               .getOption('css').droppableHover);
-            
-            e.dropEffect = 'move';
-            return false;
-          }
-          
-          if($.browser.msie) return false;
-        },
-        dragleave: function (e) {
-          if(UiHelper.draggedElementIsScope(e, 'text-item')) {
-            self.node.removeClass(self.owner.getController()
-                                  .getOption('css').droppableHover);
-
-            return false;
-          }
-          
-          if($.browser.msie) return false;
-        },
-        drop: function (e) {
-          if(!UiHelper.draggedElementIsScope(e = e.originalEvent, 'text-item'))
-            return;
-          
-          self.node.removeClass(self.owner.getController()
-                                .getOption('css').droppableHover);
-          
-          self.getController().getItemsList().remove(
-            e.dataTransfer.getData('Text'));
-
-          return false;
-        },
         mouseenter: function () {
           self.getController().onMouseEnter(self);
         },
@@ -594,6 +529,16 @@ Bin.prototype = {
         }
       } );
 
+    new Droppable(this.node = node, {
+      classHover: self.owner.getController().getOption('css').droppableHover,
+      scopes: [ 'text-item' ],
+      
+      drop: function (e) {
+        self.getController().getItemsList().remove(
+          e.dataTransfer.getData('Text'));
+      }
+    } );
+
     /* We must defer initialisation of D'n'D because owning object's `bin'
      * attribute will have not yet been set. */
     window.setTimeout(function () {
@@ -601,16 +546,15 @@ Bin.prototype = {
       if(self == self.owner.getPrimaryBin())
         return;
 
-      node.on( {
+      new Draggable(node, {
         dragstart: function (e) {
           self.getController().getOption('nodes').binDelete.fadeIn();
-          e.originalEvent.dataTransfer.setData('Text', this.id);
         },
+        
         dragend: function (e) {
           self.getController().getOption('nodes').binDelete.fadeOut();
         }
-      } )
-      .prop('draggable', true);
+      } );
     }, 0);
   },
   
@@ -894,37 +838,36 @@ TextItem.prototype = {
 
   setup_: function() {
     var self = this,
-        controller = this.owner.getController(),
-        cdragging = controller.getOption("css").itemDragging;
+        controller = this.owner.getController();
 
     this.node
-      .prop('draggable', true)
       .attr( {
         id: this.content.node_id,
         "data-scope": "text-item"
       } )
       .on( {
-        dragstart: function (e) {
-          /* Firstly select item being dragged to ensure correct item position
-           * in container. */
-          self.owner.select(self);
-          self.node.addClass(cdragging);
-
-          /* Activate deletion/dismissal button. */
-          self.owner.getController().getOption('nodes').binDelete.fadeIn();
-
-          e.originalEvent.dataTransfer.setData('Text', this.id);
-        },
-        dragend: function () {
-          self.node.removeClass(cdragging);
-
-          /* Deactivate deletion/dismissal button. */
-          self.owner.getController().getOption('nodes').binDelete.fadeOut();
-        },
         click: function () {
           self.owner.select(self);
         }
       } );
+
+    new Draggable(this.node, {
+      classDragging: controller.getOption("css").itemDragging,
+      
+      dragstart: function (e) {
+        /* Firstly select item being dragged to ensure correct item position
+         * in container. */
+        self.owner.select(self);
+
+        /* Activate deletion/dismissal button. */
+        self.owner.getController().getOption('nodes').binDelete.fadeIn();
+      },
+      
+      dragend: function () {
+        /* Deactivate deletion/dismissal button. */
+        self.owner.getController().getOption('nodes').binDelete.fadeOut();
+      }
+    } );
 
     /* Add logic to less/more links. */
     this.node.find('.less').click(function () {
@@ -975,41 +918,19 @@ var BinAddButton = function (owner, fnRender, fnAdd)
       button = $(controller.invoke("renderAddButton", "+"))
         .addClass(css.buttonAdd)
         .on( {
-          dragover: function (e) {
-            if(UiHelper.draggedElementIsScope(e = e.originalEvent,
-                                              'text-item')) {
-              button.addClass(owner.getController().getOption('css')
-                              .droppableHover);
-              
-              e.dropEffect = 'move';
-              return false;
-            }
-            
-            if($.browser.msie) return false;
-          },
-          dragleave: function (e) {
-            if(UiHelper.draggedElementIsScope(e, 'text-item')) {
-              button.removeClass(owner.getController().getOption('css')
-                                 .droppableHover);
-              return false;
-            }
-            
-            if($.browser.msie) return false;
-          },
-          drop: function (e) {
-            if(UiHelper.draggedElementIsScope(e = e.originalEvent,
-                                              'text-item')) {
-              self.onAdd(e.dataTransfer.getData('Text'));
-              button.removeClass(owner.getController().getOption('css')
-                                 .droppableHover);
-            }
-
-            return false;
-          },
           click: function () {
             self.onAdd();
           }
-        } );
+        } );          
+
+  new Droppable(button, {
+    classHover: owner.getController().getOption('css').droppableHover,
+    scopes: [ 'text-item' ],
+    
+    drop: function (e, id) {
+      self.onAdd(id);
+    }
+  } );
 
   owner.getContainer().after(button);
 };
@@ -1087,36 +1008,126 @@ BinAddButton.prototype = {
 };
 
 
-var UiHelper = {
-  draggedElementIsScope: function (event, scope)
-  {
-    if(!event.dataTransfer) {
-      event = event.originalEvent;
+/* The name space `DragDropManager' and classes `Draggable' and `Droppable' would
+ * be best written as (two) jQuery extensions. I chose not to do it as it would
+ * take me additional time; the clock is always ticking. */
+var DragDropManager = {
+  activeNode: null,
 
-      if(!event.dataTransfer)
-        return false;
-    }
-
-    var data = event.dataTransfer.getData('Text'),
-        node;
-
-    if(!data)
-      return false;
-    
-    node = document.getElementById(data);
-
-    return (scope instanceof Array ? scope : [ scope ]).some(function (sc) {
-      return node.getAttribute('data-scope') == sc;
-    } );
+  onDragStart: function (event) {
+    DragDropManager.activeNode = (event.originalEvent || event).target;
   },
 
-  getDraggedElementScope: function (event)
+  onDragEnd: function (event) {
+    if(DragDropManager.activeNode == (event.originalEvent || event).target) {
+      DragDropManager.activeNode = null;
+    }
+  },
+  
+  isScope: function (event, scopes)
   {
-    if(!event.dataTransfer)
-      event = event.originalEvent;
+    if(!DragDropManager.activeNode)
+      return false;
 
-    return event.dataTransfer
-      && document.getElementById(event.dataTransfer.getData('Text'))
-           .getAttribute('data-scope');
+    return (scopes instanceof Array ? scopes : [ scopes ])
+      .some(function (scope) {
+        return DragDropManager.activeNode.getAttribute('data-scope') == scope;
+      } );
+  },
+
+  getScope: function (event)
+  {
+    return DragDropManager.activeNode
+      ? DragDropManager.activeNode.getAttribute('data-scope')
+      : null;
   }
+};
+
+
+var Draggable = function (node, options)
+{
+  var self = this;
+
+  node.on( {
+    dragstart: function (e) {
+      e.originalEvent.dataTransfer.setData('Text', this.id);
+
+      if(options.classDragging)
+        node.addClass(options.classDragging);
+
+      DragDropManager.onDragStart(e);
+
+      if(options.dragstart)
+        options.dragstart();
+    },
+    
+    dragend: function (e) {
+      if(options.classDragging)
+        node.removeClass(options.classDragging);
+
+      DragDropManager.onDragEnd(e);
+      
+      if(options.dragend)
+        options.dragend();
+    }
+  } ).prop('draggable', true);
+};
+
+
+var Droppable = function (node, options)
+{
+  var self = this;
+
+  node.on( {
+    dragover: function (e) {
+      if(DragDropManager.isScope(e = e.originalEvent, options.scopes)) {
+        /* Drag and drop has a tendency to suffer from flicker in the sense that
+         * the `dragleave' event is fired while the pointer is on a valid drop
+         * target but the `dragenter' event ISN'T fired again, causing the
+         * element to lose its special styling -- given by `options.classHover'
+         * -- and its `dropEffect'. We then need re-set everything in the
+         * `dragover' event. */
+        if(options.classHover)
+          node.addClass(options.classHover);
+
+        e.dropEffect = 'move';
+        return false;
+      }
+    },
+    
+    dragenter: function (e) {
+      /* IE requires the following special measure or the primary bin won't
+       * accept text-items drops. INSANE. */
+      if(DragDropManager.isScope(e = e.originalEvent, options.scopes)) {
+        e.dropEffect = 'move';
+      
+        return false;
+      }
+    },
+    
+    dragleave: function (e) {
+      if(DragDropManager.isScope(e = e.originalEvent, options.scopes)) {
+        if(options.classHover)
+          node.removeClass(options.classHover);
+
+        return false;
+      }
+    },
+    
+    drop: function (e) {
+      if(!DragDropManager.isScope(e = e.originalEvent, options.scopes))
+        return;
+
+      if(options.classHover)
+        node.removeClass(options.classHover);
+
+      if(options.drop) {
+        options.drop(e,
+                     e.dataTransfer.getData('Text'),
+                     DragDropManager.getScope());
+      }
+      
+      return false;
+    }
+  } );
 };
