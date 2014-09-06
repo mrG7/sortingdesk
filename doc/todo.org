@@ -119,9 +119,11 @@ It was stated that "other types come from other sources including Facebook profi
 Asked to write it as a long code comment block but might be best done in a
 standalone *editable* text file that doesn't pollute the code and the repository?
 
-* Bugs [66%]
-** TODO [#A] IE only: text items cannot be dropped onto primary bin
-** TODO Fix error thrown when manual bin add cancelled
+* Bugs [100%]
+** DONE [#A] IE only: text items cannot be dropped onto primary bin
+- State "DONE"       from "TODO"       [2014-09-06 Sat 10:41]
+** DONE Fix error thrown when manual bin add cancelled
+- State "DONE"       from "TODO"       [2014-09-06 Sat 10:41]
 ** DONE [#C] Several draggable/droppable nodes use hard-coded CSS classes
 - State "DONE"       from "TODO"       [2014-09-05 Fri 11:52]
 Make it configurable
