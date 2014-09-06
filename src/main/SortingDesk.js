@@ -53,6 +53,10 @@ SortingDesk.defaults = {
     itemDragging: 'dragging',
     droppableHover: 'droppable-hover'
   },
+  keyboard: {
+    listUp: 38,                 /* up */
+    listDown: 40,               /* down */
+  },
   visibleItems: 20,             /* Arbitrary. */
   delayAnimateAssign: 100,      /* in milliseconds */
   binCharsLeft: 25,
@@ -123,10 +127,10 @@ SortingDesk.prototype = {
 
       /* Not alpha. */
       switch(evt.keyCode) {
-      case 38:                    /* up */
+      case self.options.keyboard.listUp:
         self.list.selectOffset(-1);
         break;
-      case 40:                    /* down */
+      case self.options.keyboard.listDown:
         self.list.selectOffset(1);
         break;
       default:
