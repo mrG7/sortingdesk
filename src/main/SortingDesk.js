@@ -143,7 +143,6 @@ SortingDesk.prototype = {
         break;
         
       default:
-        console.log(evt.keyCode);
         return;
       }
 
