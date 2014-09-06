@@ -1003,6 +1003,8 @@ var BinAddButton = function (owner, fnRender, fnAdd)
               button.removeClass(owner.getController().getOption('css')
                                  .droppableHover);
             }
+
+            return false;
           },
           click: function () {
             self.onAdd();
