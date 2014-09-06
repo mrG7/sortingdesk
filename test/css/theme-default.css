@@ -275,6 +275,35 @@ A.text-item-title:hover {
   color: #4A8BCC;
 }
 
+.text-item:hover .text-item-close,
+.text-item.selected .text-item-close {
+  display: block;
+}
+
+.text-item-close {
+  position: absolute;
+  top: -8px;
+  right: -6px;
+  background-color: white;
+  padding: 5px 4px 5px 5px;
+  display: none;
+  text-decoration: none;
+  color: grey;
+  border: 1px solid silver;
+  border-radius: 12px;
+  line-height: 7px;
+  box-shadow: 1px 1px 1px 0px rgba(50, 50, 50, 0.75);
+}
+
+.text-item-close:hover {
+  color: black;
+  background-color: #ddd;
+}
+
+.text-item-close:active {
+  background-color: #eee;
+}
+
 .droppable {
   border-style: dashed;
 }

@@ -858,10 +858,11 @@ TextItem.prototype = {
         id: this.content.node_id,
         "data-scope": "text-item"
       } )
-      .on( {
-        click: function () {
-          self.owner.select(self);
-        }
+      .click(function () {
+        self.owner.select(self);
+      } )
+      .find('.text-item-close').click(function () {
+        self.owner.remove(self.content.node_id);
       } );
 
     new Draggable(this.node, {

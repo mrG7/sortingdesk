@@ -358,6 +358,8 @@ Api = {
                 + 'href="' + item.url + '">'
                 + anchor + '</a>');
 
+    node.append('<a class="text-item-close" href="#">x</a>');
+
     /* Append content and remove all CSS classes from children. */
     content.append(text);
     content.children().removeClass();
