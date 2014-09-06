@@ -1,4 +1,4 @@
-* To do items [65%]
+* To do items [74%]
 ** TODO [#C] Text items container doesn't have a UI state when it doesn't hold any text items
 Must clearly communicate to the user that there aren't any more text items available.
 ** TODO [#A] Implement jasmine (unit) tests
@@ -8,9 +8,6 @@ Similar to the tests found on: =git@devhub.diffeo.com:streamboard.git=
 - State "TODO"       from "WAIT"       [2014-09-05 Fri 10:42]
 - State "WAIT"       from "TODO"       [2014-08-22 Fri 13:24] \\
   Not proceeding with this until it's clear whether bins based on existing text items are even editable.
-** TODO Allow text items to be dismissed via the keyboard
-** TODO Show an 'X' on each text item to allow it to be dismissed on mouse click
-** TODO Enable dismissal of text items via a configurable keystroke
 ** WAIT [#A] Save data by issuing calls to diffeo's API
 - State "WAIT"       from "TODO"       [2014-09-05 Fri 11:53] \\
   Waiting to hear from support.
@@ -24,6 +21,12 @@ and results in an error.
 ** WAIT [#B] Prefix text-items' and bins' node ids
 - State "WAIT"       from "TODO"       [2014-09-05 Fri 10:41] \\
   Currently waiting to hear from support as to whether ids are guaranteed to always be unique.
+** DONE Show an 'X' on each text item to allow it to be dismissed on mouse click
+- State "DONE"       from "TODO"       [2014-09-06 Sat 10:11]
+** DONE Enable dismissal of text items via a configurable keystroke
+- State "DONE"       from "TODO"       [2014-09-06 Sat 09:46]
+** DONE Allow text item navigation keystrokes to be configurable
+- State "DONE"       from "TODO"       [2014-09-06 Sat 09:38]
 ** DONE Create drag and drop infrastructure
 - State "DONE"       from "TODO"       [2014-09-06 Sat 09:23]
 Must be compatible with IE.
