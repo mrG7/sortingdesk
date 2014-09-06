@@ -1,6 +1,4 @@
-* To do items [64%]
-** TODO Create drag and drop infrastructure
-Must be compatible with IE.
+* To do items [65%]
 ** TODO [#C] Text items container doesn't have a UI state when it doesn't hold any text items
 Must clearly communicate to the user that there aren't any more text items available.
 ** TODO [#A] Implement jasmine (unit) tests
@@ -26,6 +24,9 @@ and results in an error.
 ** WAIT [#B] Prefix text-items' and bins' node ids
 - State "WAIT"       from "TODO"       [2014-09-05 Fri 10:41] \\
   Currently waiting to hear from support as to whether ids are guaranteed to always be unique.
+** DONE Create drag and drop infrastructure
+- State "DONE"       from "TODO"       [2014-09-06 Sat 09:23]
+Must be compatible with IE.
 ** DONE [#A] Allow a text item to be sorted into a non-bin container (dismiss)
 - State "DONE"       from "TODO"       [2014-09-05 Fri 11:08]
 ** DONE [#A] Implement HTML5 drag and drop
@@ -117,6 +118,7 @@ standalone *editable* text file that doesn't pollute the code and the repository
 
 * Bugs [66%]
 ** TODO [#A] IE only: text items cannot be dropped onto primary bin
+** TODO Fix error thrown when manual bin add cancelled
 ** DONE [#C] Several draggable/droppable nodes use hard-coded CSS classes
 - State "DONE"       from "TODO"       [2014-09-05 Fri 11:52]
 Make it configurable
