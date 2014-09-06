@@ -21,7 +21,7 @@ var SortingDesk = function(options, callbacks)
 
   /* Check whether user's browser is IE. */
   if(!$.browser)
-    $.browser = { msie: !!window.navigator.userAgent.indexOf('MSIE ') };
+    $.browser = { msie: window.navigator.userAgent.indexOf('MSIE ') >= 0 };
   
   /* Do not request bin data if a bins HTML container wasn't given. */
   if(this.options.nodes.bins) {
