@@ -986,7 +986,7 @@ BinAddButton.prototype = {
       .focus()
       .blur(function () {
         if(!this.value) {
-          node.fadeOut(200, function () { self.owner.remove(node); } );
+          node.fadeOut(200, function () { node.remove(); } );
           return;
         }
 
