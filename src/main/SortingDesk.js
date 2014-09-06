@@ -56,6 +56,7 @@ SortingDesk.defaults = {
   keyboard: {
     listUp: 38,                 /* up */
     listDown: 40,               /* down */
+    listDismiss: 46             /* delete  */
   },
   visibleItems: 20,             /* Arbitrary. */
   delayAnimateAssign: 100,      /* in milliseconds */
@@ -124,7 +125,7 @@ SortingDesk.prototype = {
         
         return false;
       }
-
+      
       /* Not alpha. */
       switch(evt.keyCode) {
       case self.options.keyboard.listUp:
@@ -133,7 +134,16 @@ SortingDesk.prototype = {
       case self.options.keyboard.listDown:
         self.list.selectOffset(1);
         break;
+      case self.options.keyboard.listDismiss:
+        self.options.nodes.binDelete.fadeIn(150, function () {
+          self.options.nodes.binDelete.fadeOut(100);
+        } );
+        
+        self.list.remove();
+        break;
+        
       default:
+        console.log(evt.keyCode);
         return;
       }
 
