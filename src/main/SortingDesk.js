@@ -541,7 +541,7 @@ Bin.prototype = {
   node: null,
   shortcut: null,
 
-  setNode_: function (node, fnOnDrop)
+  setNode_: function (node)
   {
     var self = this;
     
