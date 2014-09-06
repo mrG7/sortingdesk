@@ -317,13 +317,18 @@ A.text-item-title:hover {
   line-height: 25px;
 }
 
-/* Gecko renders the 'add' button's caption differently. */
+/* Gecko renders the 'add' button's caption differently.
+
+   NOTE: currently disabled because I have only been able to observe the visual
+   defect (that this rule is supposed to fix) on Linux. Works fine on Windows.
+   
 @-moz-document url-prefix() {
   .button-add SPAN {
     position: relative;
     top: -3px;
   }
 }
+*/
 
 .button-add:hover {
 /*  color: #67B285; */
