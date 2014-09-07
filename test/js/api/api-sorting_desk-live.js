@@ -459,7 +459,7 @@ var ApiData = {
     
     ApiData.bins[id] = {
       name: null,              /* this can be ignored as we only need `bins' */
-      bins: [ ]
+      bins: { }
     };
   }    
 };
