@@ -280,6 +280,11 @@ A.text-item-title:hover {
   display: block;
 }
 
+.text-item.dragging:hover .text-item-close,
+.text-item.selected.dragging .text-item-close {
+  display: none;
+}
+
 .text-item-close {
   position: absolute;
   top: -8px;
