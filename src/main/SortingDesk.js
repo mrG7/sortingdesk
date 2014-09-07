@@ -869,6 +869,7 @@ TextItem.prototype = {
       } )
       .find('.text-item-close').click(function () {
         self.owner.remove(self.content.node_id);
+        return false;
       } );
 
     new Draggable(this.node, {
