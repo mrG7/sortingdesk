@@ -50,7 +50,7 @@ $(function () {
 
   /* Load data retrieved from loaded JSON file. */
   primaryContentId = g_descriptor.primaryBin.node_id;
-  secondaryContentIds = Api.initialise(secondaryBins, g_descriptor);
+  secondaryContentIds = Api.initialise(g_descriptor, secondaryBins);
   g_descriptor = null;
   
   function instantiateUi()

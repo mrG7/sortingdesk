@@ -47,7 +47,7 @@ var Api = {
                                 * creating them. */
   processing: { },
 
-  initialise: function (secondaryBins, descriptor) {
+  initialise: function (descriptor, secondaryBins) {
     var secondaryContentIds = [ ];
     
     Api.bins = { };
