@@ -27,6 +27,9 @@ var SortingDesk = function(options, callbacks)
   if(this.options.nodes.bins) {
     var promise = callbacks.getBinData(
       [ options.primaryContentId ].concat(options.secondaryContentIds));
+
+    if(!promise)
+      throw "Another `getBinData' request is ongoing";
     
     promise
       .done(function(bins) {

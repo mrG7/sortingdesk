@@ -43,8 +43,32 @@ var Api = {
   TEXT_VIEW_UNRESTRICTED: 2,
   TEXT_CONDENSED_CHARS: 100,
   TEXT_HIGHLIGHTS_CHARS: 150,
+  
+  primaryContentId: null,
+  lastId: 102,                 /* So we may assign ids to secondary bins when
+                                * creating them. */
 
   processing: { },
+
+  initialise: function (primaryContentId, secondaryBins)
+  {
+    var secondaryContentIds = [ ];
+
+    Api.bins = { };
+    Api.bins[Api.primaryContentId = primaryContentId] = {
+      name: null,               /* It doesn't really matter if this is null */
+      bins: { }
+    }
+
+    secondaryBins.forEach(function (bin) {
+      secondaryContentIds.push(bin.node_id);
+      Api.bins[bin.node_id] = {
+        name: Object.firstKey(bin.features.NAME)
+      };
+    } );
+
+    return secondaryContentIds;
+  },
 
   // Given the name of an endpoint (e.g., 's2' or 'nodes'), a dictionary of
   // query parameters and an optional boolean `jsonp` (to craft a JSONP URL),
@@ -84,7 +108,7 @@ var Api = {
     var params = {
       noprof: '1', label: true, order: Api.RANKER,
       limit: Api.MULTIPLE_NODES_LIMIT,
-      node_id: ApiData.primaryContentId,
+      node_id: Api.primaryContentId,
     };
     
     $.getJSON(Api.url('s2', params, true))
@@ -169,11 +193,11 @@ var Api = {
        * repository. MUST remove this time wasting crap ASAP. */
       var found = false;
 
-      for(var bid in ApiData.bins) {
-        if(bid != id || bid == ApiData.primaryContentId) /* The hacks continue: */
-          continue;                                      /* ignore primary bin. */
+      for(var bid in Api.bins) {
+        if(bid != id || bid == Api.primaryContentId) /* The hacks continue: */
+          continue;                                  /* ignore primary bin. */
 
-        var bin = ApiData.bins[bid],
+        var bin = Api.bins[bid],
             name = { };
         
         name[bin.name] = 0;
@@ -190,6 +214,7 @@ var Api = {
       $.getJSON(Api.url('nodes/' + id, {}, true))
         .fail(function () {
           console.log("getBinData: request failed:", id);
+          Api.processing.getBinData = false;
           deferred.reject();
         } )
         .done(function (data) {
@@ -228,16 +253,15 @@ var Api = {
     var deferred = $.Deferred();
 
     window.setTimeout(function () {
-      ++ApiData.lastId;
+      ++Api.lastId;
       
-      ApiData.bins[ApiData.primaryContentId].bins[ApiData.lastId] = {
+      Api.bins[Api.primaryContentId].bins[Api.lastId] = {
         statement_text: text
       };
 
       var bin = { };
-      bin[ApiData.lastId] = ApiData.bins[ApiData.primaryContentId]
-        .bins[ApiData.lastId];
       
+      bin[Api.lastId] = Api.bins[Api.primaryContentId].bins[Api.lastId];
       deferred.resolve(bin);
     }, Math.rand(Api.DELAY_MIN, Api.DELAY_MAX) );
 
@@ -258,16 +282,16 @@ var Api = {
     var deferred = $.Deferred();
 
     window.setTimeout(function () {
-      ++ApiData.lastId;
+      ++Api.lastId;
       
-      ApiData.bins[ApiData.lastId] = {
+      Api.bins[Api.lastId] = {
         name: name,
         bins: []
       };
 
       var bin = { };
 
-      bin[ApiData.lastId] = ApiData.bins[ApiData.lastId];
+      bin[Api.lastId] = Api.bins[Api.lastId];
       
       deferred.resolve(bin);
     }, Math.rand(Api.DELAY_MIN, Api.DELAY_MAX) );
@@ -292,7 +316,7 @@ var Api = {
       var found = false;
       
       /* Ensure bin exists and is a child of the primary one. */
-      for(var bid in ApiData.bins[ApiData.primaryContentId].bins) {
+      for(var bid in Api.bins[Api.primaryContentId].bins) {
         if(bid == id) {
           found = true;
           break;
@@ -302,7 +326,7 @@ var Api = {
       if(!found)
         deferred.reject( { error: "Not sub-bin" } );
       else {
-        delete ApiData.bins[ApiData.primaryContentId].bins[id];
+        delete Api.bins[Api.primaryContentId].bins[id];
         deferred.resolve( { error: null } );
       }
     }, Math.rand(Api.DELAY_MIN, Api.DELAY_MAX));
@@ -325,13 +349,13 @@ var Api = {
 
     window.setTimeout(function () {
       /* Ensure bin exists and is _not_ primary. */
-      if(id in ApiData.bins) {
-        if(id == ApiData.primaryContentId)
+      if(id in Api.bins) {
+        if(id == Api.primaryContentId)
           deferred.reject( { error: "Not secondary bin" } );
         else
           deferred.resolve( { error: null } );
       } else
-        delete ApiData.bins[id];
+        delete Api.bins[id];
         deferred.resolve( { error: "Secondary bin not existent" } );
     }, Math.rand(Api.DELAY_MIN, Api.DELAY_MAX));
 
@@ -436,42 +460,6 @@ var Api = {
     return $('<div><span>' + caption + '</span></div>');
   }
 };
-
-
-/* Class containing only static methods and attributes.
- * Cannot be instantiated. */
-var ApiData = {
-  defaultPrimaryContentId: 'kb_aHR0cHM6Ly9rYi5kaWZmZW8uY29tL2FsX2FocmFt',
-  primaryContentId: null,
-  secondaryContentIds: [ 100, 101, 102 ],
-  bins: {
-    100: {
-      name: "Irrelevant",
-      bins: [ ]
-    },
-    101: {
-      name: "Rubbish",
-      bins: [ ]
-    },
-    102: {
-      name: "Keep",
-      bins: [ ]
-    }
-  },
-  lastId: 102,                 /* So we may assign ids to secondary bins when
-                                * creating them. */
-
-  setPrimaryContentId: function (id) {
-    ApiData.primaryContentId = id;
-    
-    ApiData.bins[id] = {
-      name: null,              /* this can be ignored as we only need `bins' */
-      bins: { }
-    };
-  }    
-};
-
-ApiData.setPrimaryContentId(ApiData.defaultPrimaryContentId);
 
 
 var TextItemSnippet = function (text)
