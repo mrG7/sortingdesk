@@ -1,4 +1,9 @@
-* To do items [74%]
+* To do items [78%]
+** TODO [#B] Prefix text-items' and bins' node ids
+- State "TODO"       from "WAIT"       [2014-09-07 Sun 08:16]
+- State "WAIT"       from "TODO"       [2014-09-05 Fri 10:41] \\
+  Currently waiting to hear from support as to whether ids are guaranteed to always be unique.
+** TODO Encode bin and text-item ids
 ** TODO [#C] Text items container doesn't have a UI state when it doesn't hold any text items
 Must clearly communicate to the user that there aren't any more text items available.
 ** TODO [#A] Implement jasmine (unit) tests
@@ -8,7 +13,8 @@ Similar to the tests found on: =git@devhub.diffeo.com:streamboard.git=
 - State "TODO"       from "WAIT"       [2014-09-05 Fri 10:42]
 - State "WAIT"       from "TODO"       [2014-08-22 Fri 13:24] \\
   Not proceeding with this until it's clear whether bins based on existing text items are even editable.
-** WAIT [#A] Save data by issuing calls to diffeo's API
+** DONE [#A] Save data by issuing calls to diffeo's API
+- State "DONE"       from "WAIT"       [2014-09-07 Sun 10:47]
 - State "WAIT"       from "TODO"       [2014-09-05 Fri 11:53] \\
   Waiting to hear from support.
 ** WAIT [#C] Implement user notifications
@@ -17,10 +23,8 @@ Similar to the tests found on: =git@devhub.diffeo.com:streamboard.git=
 A mechanism for displaying notifications to the user is needed for the purpose
 of providing feedback, in particular in the cases when a user action is invalid
 and results in an error.
-
-** WAIT [#B] Prefix text-items' and bins' node ids
-- State "WAIT"       from "TODO"       [2014-09-05 Fri 10:41] \\
-  Currently waiting to hear from support as to whether ids are guaranteed to always be unique.
+** DONE Create API that uses mock data
+- State "DONE"       from "TODO"       [2014-09-07 Sun 10:47]
 ** DONE Show an 'X' on each text item to allow it to be dismissed on mouse click
 - State "DONE"       from "TODO"       [2014-09-06 Sat 10:11]
 ** DONE Enable dismissal of text items via a configurable keystroke
@@ -120,6 +124,8 @@ Asked to write it as a long code comment block but might be best done in a
 standalone *editable* text file that doesn't pollute the code and the repository?
 
 * Bugs [100%]
+** DONE =removePrimarySubBin=: comparing =bid= to itself
+- State "DONE"       from "TODO"       [2014-09-07 Sun 10:47]
 ** DONE [#A] IE only: text items cannot be dropped onto primary bin
 - State "DONE"       from "TODO"       [2014-09-06 Sat 10:41]
 ** DONE Fix error thrown when manual bin add cancelled
