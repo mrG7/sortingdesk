@@ -1071,7 +1071,8 @@ var Draggable = function (node, options)
 
   node.on( {
     dragstart: function (e) {
-      e.originalEvent.dataTransfer.setData('Text', this.id);
+      e = e.originalEvent;
+      e.dataTransfer.setData('Text', this.id);
 
       if(options.classDragging)
         node.addClass(options.classDragging);
@@ -1079,17 +1080,19 @@ var Draggable = function (node, options)
       DragDropManager.onDragStart(e);
 
       if(options.dragstart)
-        options.dragstart();
+        options.dragstart(e);
     },
     
     dragend: function (e) {
+      e = e.originalEvent;
+      
       if(options.classDragging)
         node.removeClass(options.classDragging);
 
       DragDropManager.onDragEnd(e);
       
       if(options.dragend)
-        options.dragend();
+        options.dragend(e);
     }
   } ).prop('draggable', true);
 };
