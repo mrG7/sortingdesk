@@ -1029,9 +1029,6 @@ BinAddButton.prototype = {
 };
 
 
-/* The name space `DragDropManager' and classes `Draggable' and `Droppable' would
- * be best written as (two) jQuery extensions. I chose not to do it as it would
- * take me additional time; the clock is always ticking. */
 var DragDropManager = {
   activeNode: null,
 
