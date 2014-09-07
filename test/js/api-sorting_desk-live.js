@@ -1,4 +1,4 @@
-/** api-sorting_desk.js --- Sorting Desk's fake API
+/** api-sorting_desk-live.js --- Sorting Desk's live API
  *
  * Copyright (C) 2014 Diffeo
  *
