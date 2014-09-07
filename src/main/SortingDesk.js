@@ -28,9 +28,12 @@ var SortingDesk = function(options, callbacks)
     var promise = callbacks.getBinData(
       [ options.primaryContentId ].concat(options.secondaryContentIds));
     
-    promise.done(function(bins) {
-      self.initialise(bins);
-    });
+    promise
+      .done(function(bins) {
+        self.initialise(bins);
+      } ).fail(function () {
+        console.log("Failed to initialise Sorting Desk UI");
+      } );
   } else
     self.initialise();
 };
