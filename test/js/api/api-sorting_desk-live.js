@@ -45,7 +45,7 @@ var Api = {
   TEXT_HIGHLIGHTS_CHARS: 150,
   
   primaryContentId: null,
-  lastId: 102,                 /* So we may assign ids to secondary bins when
+  lastId: 0,                   /* So we may assign ids to secondary bins when
                                 * creating them. */
 
   processing: { },
@@ -65,6 +65,9 @@ var Api = {
       Api.bins[bin.node_id] = {
         name: Object.firstKey(bin.features.NAME)
       };
+
+      if(typeof bin.node_id == 'number' && Api.lastId < bin.node_id)
+        Api.lastId = bin.node_id;
     } );
 
     return secondaryContentIds;
