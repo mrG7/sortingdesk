@@ -289,12 +289,19 @@ var Api = {
     var deferred = $.Deferred();
 
     window.setTimeout(function () {
+      var found = false;
+      
       /* Ensure bin exists and is a child of the primary one. */
-      if(!ApiData.bins[ApiData.primaryContentId].bins.some(function (bin, bid) {
-        return bid == bid;
-      } )) {
+      for(var bid in ApiData.bins[ApiData.primaryContentId].bins) {
+        if(bid == id) {
+          found = true;
+          break;
+        }
+      }
+
+      if(!found)
         deferred.reject( { error: "Not sub-bin" } );
-      } else {
+      else {
         delete ApiData.bins[ApiData.primaryContentId].bins[id];
         deferred.resolve( { error: null } );
       }
