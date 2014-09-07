@@ -30,7 +30,7 @@ Object.firstKey = function (obj)
 
 /* Class containing only static methods and attributes.
  * Cannot be instantiated.*/
-Api = {
+var Api = {
   DELAY_MIN: 200,
   DELAY_MAX: 750,
   MULTIPLE_NODES_LIMIT: 10,
