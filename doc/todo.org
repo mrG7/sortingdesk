@@ -13,16 +13,17 @@ Similar to the tests found on: =git@devhub.diffeo.com:streamboard.git=
 - State "TODO"       from "WAIT"       [2014-09-05 Fri 10:42]
 - State "WAIT"       from "TODO"       [2014-08-22 Fri 13:24] \\
   Not proceeding with this until it's clear whether bins based on existing text items are even editable.
-** DONE [#A] Save data by issuing calls to diffeo's API
-- State "DONE"       from "WAIT"       [2014-09-07 Sun 10:47]
-- State "WAIT"       from "TODO"       [2014-09-05 Fri 11:53] \\
-  Waiting to hear from support.
+** TODO Ensure component is fault proof when faced with absent elements
 ** WAIT [#C] Implement user notifications
 - State "WAIT"       from "TODO"       [2014-09-05 Fri 11:21] \\
   Need further information.
 A mechanism for displaying notifications to the user is needed for the purpose
 of providing feedback, in particular in the cases when a user action is invalid
 and results in an error.
+** DONE [#A] Save data by issuing calls to diffeo's API
+- State "DONE"       from "WAIT"       [2014-09-07 Sun 10:47]
+- State "WAIT"       from "TODO"       [2014-09-05 Fri 11:53] \\
+  Waiting to hear from support.
 ** DONE Create API that uses mock data
 - State "DONE"       from "TODO"       [2014-09-07 Sun 10:47]
 ** DONE Show an 'X' on each text item to allow it to be dismissed on mouse click
