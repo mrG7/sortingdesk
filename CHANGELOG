@@ -1,3 +1,16 @@
+2014-09-06  Miguel Guedes  <miguel@miguelguedes.org>
+
+	* src/main/SortingDesk.js:
+
+	Simplified and standardised HTML5 drag and drop, which now
+	works in all major browsers.
+
+	There are now two APIs, one using live data from Diffeo's servers
+	and another making use of mock data. The mock API can be easily
+	configurable to use a custom data set.
+
+	Several minor improvements.
+
 2014-09-05  Miguel Guedes  <miguel@miguelguedes.org>
 
 	* src/main/SortingDesk.js:
