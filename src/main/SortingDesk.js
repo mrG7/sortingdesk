@@ -445,7 +445,8 @@ var BinContainerPrimary = function (controller, id, bin)
   new BinAddButton(
     this,
     function (input) {
-      return Api.renderPrimarySubBin( { statement_text: input } );
+      return controller.invoke('renderPrimarySubBin',
+                               { statement_text: input } );
     },
     function (id, text) {
       var deferred = $.Deferred();
@@ -501,7 +502,8 @@ var BinContainerSecondary = function (controller, bins)
   new BinAddButton(
     this,
     function (input) {
-      return Api.renderSecondaryBin( { name: input } );
+      return controller.invoke('renderSecondaryBin',
+                               { name: input } );
     },
     function (id, text) {
       var deferred = $.Deferred();
