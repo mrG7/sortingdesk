@@ -1,3 +1,20 @@
+2014-09-09  Miguel Guedes  <miguel@miguelguedes.org>
+
+	* test:
+
+	Added infrastructure that will allow us to deploy unit tests.
+
+	* all:
+
+	Reorganised directory structure.
+
+	Component is now able to operate without the bin delete button.
+
+	Renamed the `test' directory to `examples' to make way for the
+	actual unit tests.
+
+	Other minor improvements.
+
 2014-09-06  Miguel Guedes  <miguel@miguelguedes.org>
 
 	* src/main/SortingDesk.js:
