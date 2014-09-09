@@ -84,6 +84,7 @@ SortingDesk.defaults = {
 
 
 SortingDesk.prototype = {
+  initialised: false,
   callbacks: null,
   options: null,
   bins: null,
@@ -220,7 +221,8 @@ SortingDesk.prototype = {
         return false;
       }
     } );
-    
+
+    this.initialised = true;
     console.log("Sorting Desk UI initialised");
   },
 
