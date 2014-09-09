@@ -42,7 +42,19 @@ var SortingDesk = function(options, callbacks)
 };
 
 
-/* Do not make the following instantiable. */
+/*
+ * In addition to the properties below in `SortingDesk.defaults', which are
+ * obviously optional, the following options are also accepted:
+ *
+ * nodes: {
+ *   items: jQuery-element,           ; mandatory
+ *   bins: jQuery-element,            ; optional
+ *   binDelete: jQuery-element        ; optional
+ * },
+ * primaryContentId: string,          ; mandatory
+ * secondaryContentIds: array<string> ; mandatory
+ * 
+ */
 SortingDesk.defaults = {
   css: {
     primaryBinOuterWrapper: "wrapper-primary-bin-outer",
