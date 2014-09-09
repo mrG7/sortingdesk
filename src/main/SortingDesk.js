@@ -858,6 +858,9 @@ var TextItem = function (owner, item)
 
   this.owner = owner;
   this.content = item;
+
+  /* TODO: using property from `Api' namespace that it shouldn't be aware
+   * of. */
   this.node = controller.invoke("renderText",
                                 item,
                                 Api.TEXT_VIEW_HIGHLIGHTS);
@@ -876,6 +879,7 @@ TextItem.prototype = {
     var self = this,
         controller = this.owner.getController();
 
+    /* TODO: `find' call below expects a `text-item-close' class. */
     this.node
       .attr( {
         id: this.content.node_id,
@@ -908,6 +912,9 @@ TextItem.prototype = {
     } );
 
     /* Add logic to less/more links. */
+    /* TODO: `find' expecting `less' CSS class.
+     * TODO: using property from `Api' namespace that it shouldn't be aware
+     * of. */
     this.node.find('.less').click(function () {
       var t = controller
             .invoke("renderText",
@@ -920,6 +927,9 @@ TextItem.prototype = {
       return false;
     } );
 
+    /* TODO: `find' expecting `more' CSS class.
+     * TODO: using property from `Api' namespace that it shouldn't be aware
+     * of. */
     this.node.find('.more').click(function () {
       var t = controller
             .invoke("renderText",
