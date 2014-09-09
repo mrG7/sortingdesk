@@ -93,6 +93,9 @@ SortingDesk.prototype = {
   initialise: function (bins)
   {
     var self = this;
+
+    if(!this.options.nodes.binDelete)
+      this.options.nodes.binDelete = $();
     
     /* Do not create any process any bins if a bin HTML container doesn't
      * exist. */
