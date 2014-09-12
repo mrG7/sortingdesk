@@ -39,31 +39,35 @@ describe('Interface', function () {
         renderAddButton: Api.renderAddButton
       };
 
+  afterEach(function () {
+    sortingDesk.reset();
+  } );
+  
   it('should initialise without the bins container', function (done) {
-    sortingDesk = new SortingDesk(
+    sortingDesk = SortingDesk.instantiate(
       $.extend(true, { }, options, { nodes: { bins: null } }),
       callbacks);
     
     setTimeout(function () {
-      expect(sortingDesk.initialised).toBe(true);
+      expect(sortingDesk.isInitialised()).toBe(true);
       done();
     }, DELAY);
   } );
 
   it('should initialise without the delete button', function (done) {
-    sortingDesk = new SortingDesk(
+    sortingDesk = SortingDesk.instantiate(
       $.extend(true, { }, options, { nodes: { binDelete: null } }),
       callbacks);
     
     setTimeout(function () {
-      expect(sortingDesk.initialised).toBe(true);
+      expect(sortingDesk.isInitialised()).toBe(true);
       done();
     }, DELAY);
   } );
 
   it('should initialise without both the bins container and the delete button',
      function (done) {
-       sortingDesk = new SortingDesk(
+       sortingDesk = SortingDesk.instantiate(
          $.extend(true, { }, options, { nodes: {
            bins: null,
            binDelete: null
@@ -71,7 +75,7 @@ describe('Interface', function () {
          callbacks);
        
        setTimeout(function () {
-         expect(sortingDesk.initialised).toBe(true);
+         expect(sortingDesk.isInitialised()).toBe(true);
          done();
        }, DELAY);
      } );

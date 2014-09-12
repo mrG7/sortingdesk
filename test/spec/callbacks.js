@@ -44,8 +44,12 @@ describe('Callbacks', function () {
     result = false;
   } );
 
+  afterEach(function () {
+    sortingDesk.reset();
+  } );
+
   it("invokes `getBinData' correctly whilst initialising", function (done) {
-    sortingDesk = new SortingDesk(
+    sortingDesk = SortingDesk.instantiate(
       options,
       $.extend(true, { }, callbacks, {
         getBinData: function (ids) {
@@ -61,7 +65,7 @@ describe('Callbacks', function () {
   } );
 
   it("invokes `moreTexts' to retrieve list of items", function (done) {
-    sortingDesk = new SortingDesk(
+    sortingDesk = SortingDesk.instantiate(
       options,
       $.extend(true, { }, callbacks, {
         moreTexts: function (num) {
