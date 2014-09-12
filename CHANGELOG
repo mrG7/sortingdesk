@@ -2,7 +2,8 @@
 
 	* test:
 
-	Added infrastructure that will allow us to deploy unit tests.
+	Added infrastructure allowing for the deployment of unit
+	tests. Handful of initial unit tests also added.
 
 	* all:
 
