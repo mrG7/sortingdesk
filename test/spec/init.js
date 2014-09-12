@@ -1,9 +1,6 @@
 /* Configure API. */
 Api.DELAY_MIN = Api.DELAY_MAX = 0;
 
-/* Constants */
-var DELAY = 10;
-
 /* Variables */
 var g_sortingDesk = null,
     g_secondaryBins = [
@@ -38,6 +35,10 @@ var g_sortingDesk = null,
       renderAddButton: Api.renderAddButton
     },
     reset = true;
+
+/* Constants */
+var DELAY = 10,
+    DELAY_ITEMS = Math.pow(g_options.visibleItems, 2) * 1.1 + 10;
 
 
 function setup() {
