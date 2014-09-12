@@ -1,7 +1,7 @@
 describe('Interface', function () {
   setup();
   
-  it('should initialise without the bins container', function (done) {
+  it('initialises without the bins container', function (done) {
     run($.extend(true, { }, g_options, { nodes: { bins: null } }),
         g_callbacks,
         function () {
@@ -10,7 +10,7 @@ describe('Interface', function () {
         done);
   } );
 
-  it('should initialise without the delete button', function (done) {
+  it('initialises without the delete button', function (done) {
     run($.extend(true, { }, g_options, { nodes: { binDelete: null } }),
         g_callbacks,
         function () {
@@ -19,7 +19,7 @@ describe('Interface', function () {
         done);
   } );
 
-  it('should initialise without both the bins container and the delete button',
+  it('initialises without both the bins container and the delete button',
      function (done) {
        run($.extend(true, { }, g_options, {
          nodes: {
@@ -33,7 +33,7 @@ describe('Interface', function () {
            done);
      } );
 
-  it("should fail to initialise without an `items' node", function (done) {
+  it("fails to initialise without an `items' node", function (done) {
     runNoInstantiation(
       function () {
         expect(function () {

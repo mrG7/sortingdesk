@@ -1,13 +1,13 @@
 describe('Instance', function () {
   setup();
   
-  it('should initialise itself', function (done) {
+  it('initialises itself', function (done) {
     run(g_options, g_callbacks, function () {
       expect(g_sortingDesk.isInitialised()).toBe(true);
     }, done);
   } );
 
-  it('should initialise only once', function (done) {
+  it('initialises only once', function (done) {
     run(g_options, g_callbacks, function () {
       expect(function () {
         SortingDesk.instantiate( g_options, g_callbacks);
@@ -15,7 +15,7 @@ describe('Instance', function () {
     }, done);
   } );
 
-  it('should reset itself correctly', function (done) {
+  it('resets itself correctly', function (done) {
     run(g_options, g_callbacks, function () {
       g_sortingDesk.reset()
         .done(function () {
@@ -29,7 +29,7 @@ describe('Instance', function () {
     /* Even though we clearly wouldn't need to use `setTimeout', we need to wrap
      * tests in this section inside setTimeout because we're making use of it in
      * the preceding tests; tests are executed out of order otherwise. */
-    it("shouldn't attempt to process `remove' when not initialised",
+    it("doesn't process `remove' when not initialised",
        function (done) {
          runNoInstantiation(function () {
            expect(function () { g_sortingDesk.remove(1); })
@@ -37,7 +37,7 @@ describe('Instance', function () {
          }, done);
        } );
 
-    it("shouldn't attempt to process `getById' when not initialised",
+    it("doesn't process `getById' when not initialised",
        function (done) {
          runNoInstantiation(function () {
            expect(function () { g_sortingDesk.getById(1); })
