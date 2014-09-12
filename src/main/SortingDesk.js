@@ -1089,6 +1089,9 @@ var SortingDesk = (function () {
    * 
    * @return  {TextItem}  Returns the text item if found, or null if not. */
   var getById = function (id) {
+    var item = list.getById(id);
+
+    return item && item.getContent();
   };
 
   /**
