@@ -45,6 +45,7 @@ var Api = {
   items: null,
   lastId: 0,                   /* So we may assign ids to secondary bins when
                                 * creating them. */
+  lastItemId: 0,
   processing: { },
 
   initialise: function (descriptor, secondaryBins) {
@@ -85,13 +86,19 @@ var Api = {
 
     if(num <= 0)
       throw "Specified invalid number of items to retrieve";
+    else if(!Api.items.length)
+      throw "Items container is empty";
 
     window.setTimeout(function () {
       var result = [ ];
 
-      Api.items.forEach(function (item) {
-        var node = { };
-
+      while(num-- > 0) {
+        if(Api.lastItemId >= Api.items.length)
+          Api.lastItemId = 0;
+        
+        var node = { },
+            item = Api.items[Api.lastItemId++];
+        
         try {
           node.node_id = item.node_id;
           
@@ -112,7 +119,7 @@ var Api = {
                       x,
                       item);
         }
-      } );
+      };
       
       Api.processing.moreTexts = false;
       deferred.resolve(result);
