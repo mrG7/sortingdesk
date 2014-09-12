@@ -521,6 +521,12 @@ var SortingDesk = (function () {
 
     select: function (variant)
     {
+      /* Fail silently if not initialised anymore. This might happen if, for
+       * example, the `reset' method was invoked but the component is still
+       * loading text items. */
+      if(!initialised)
+        return;
+      
       var csel = options.css.itemSelected;
       
       if(!this.container.children().length)
@@ -659,6 +665,12 @@ var SortingDesk = (function () {
    * */
   var TextItem = function (owner, item)
   {
+    /* Fail silently if not initialised anymore. This might happen if, for
+     * example, the `reset' method was invoked but the component is still
+     * loading text items. */
+    if(!initialised)
+      return;
+    
     var cdragging = options.css.itemDragging;
 
     this.owner = owner;
