@@ -1087,24 +1087,24 @@ var SortingDesk = (function () {
         deferred.reject();
       } );
     } else {
-      if(options.nodes.items)
-        options.nodes.items.children().remove();
-
-      if(options.nodes.bins)
-        options.nodes.items.children().remove();
-
-      callbacks = bins = list = null;    
-      initialised = false;
-
       var interval = window.setInterval(function () {
-        if(!requests_.length) {
-          console.log("Hooks cleared");
-          
-          options = null;
+        if(requests_.length)
+          return;
+        
+        if(options.nodes.items)
+          options.nodes.items.children().remove();
+
+        if(options.nodes.bins)
+          options.nodes.items.children().remove();
+
+        options = callbacks = bins = list = null;    
+        initialised = false;
+        
+        window.clearInterval(interval);
+        window.setTimeout(function () {
+          console.log("Sorting Desk UI reset");
           deferred.resolve();
-          
-          window.clearInterval(interval);
-        }
+        });
       }, 10);
     }
     
