@@ -43,13 +43,15 @@ var DELAY = 10,
 
 function setup() {
   afterEach(function () {
-    g_sortingDesk
-      && g_sortingDesk.isInitialised
-      && g_sortingDesk.isInitialised()
-      && g_sortingDesk.reset()
-      .done(function () {
-        reset = true;
-      } );
+    if(g_sortingDesk
+       && g_sortingDesk.isInitialised
+       && g_sortingDesk.isInitialised()) {
+      g_sortingDesk.reset()
+        .done(function () {
+          reset = true;
+        } );
+    } else
+      reset = true;
   } );
 }
 
