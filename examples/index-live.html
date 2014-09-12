@@ -18,7 +18,8 @@
   <script type="text/javascript">
 
 $(function () {
-  var nitems = $("#items"),
+  var sortingDesk,
+      nitems = $("#items"),
       nbins = $("#bins"),
       nloading = $("#loading"),
       height,
@@ -58,10 +59,12 @@ $(function () {
   
   function instantiateUi()
   {
-    nitems.children().remove();
-    nbins.children().remove();
+    if(sortingDesk && !sortingDesk.reset()) {
+      console.log("Failed to reset Sorting Desk");
+      return;
+    }
     
-    g_sortingDesk = SortingDesk.instantiate( {
+    sortingDesk = SortingDesk.instantiate( {
       nodes: {
         items: nitems,
         bins: nbins,

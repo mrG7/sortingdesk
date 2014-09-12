@@ -1012,7 +1012,7 @@ var SortingDesk = (function () {
   var instantiate = function (opts, cbs) {
     /* SortingDesk is a singleton; disallow attempts at multiple
      * instantiation. */
-    if(options)
+    if(options || initialised)
       throw "Sorting Desk has already been instantiated";
 
     console.log("Initialising Sorting Desk UI");
@@ -1039,9 +1039,26 @@ var SortingDesk = (function () {
       initialise_();
 
     return {
+      reset: reset,
       remove: remove,
       getById: getById
     };
+  };
+
+  var reset = function () {
+    if(!options)
+      return false;
+
+    if(options.nodes.items)
+      options.nodes.items.children().remove();
+
+    if(options.nodes.bins)
+      options.nodes.items.children().remove();
+
+    callbacks = options = bins = list = null;    
+    initialised = false;
+
+    return true;
   };
 
   /**
