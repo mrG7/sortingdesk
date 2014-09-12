@@ -1078,6 +1078,9 @@ var SortingDesk = (function () {
    *                      otherwise.
    * */
   var remove = function (id) {
+    if(initialised)
+      throw "Sorting Desk not initialised";
+    
     return false;
   };
 
@@ -1089,6 +1092,9 @@ var SortingDesk = (function () {
    * 
    * @return  {TextItem}  Returns the text item if found, or null if not. */
   var getById = function (id) {
+    if(initialised)
+      throw "Sorting Desk not initialised";
+    
     var item = list.getById(id);
 
     /* Return the actual data and not our object. */
