@@ -58,6 +58,7 @@ function run(options, callbacks, condition, done) {
       return;
 
     window.clearInterval(interval);
+
     g_sortingDesk = SortingDesk.instantiate(options, callbacks);
 
     interval = window.setInterval(function () {
@@ -65,8 +66,6 @@ function run(options, callbacks, condition, done) {
         return;
       
       window.clearInterval(interval);
-
-      console.log("running condition");
       condition();
       
       if(done)
