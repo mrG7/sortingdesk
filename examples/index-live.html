@@ -61,7 +61,7 @@ $(function () {
     nitems.children().remove();
     nbins.children().remove();
     
-    g_sortingDesk = new SortingDesk( {
+    g_sortingDesk = SortingDesk.instantiate( {
       nodes: {
         items: nitems,
         bins: nbins,
