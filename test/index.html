@@ -28,7 +28,8 @@
   <!-- Test spec files -->
   <script type="text/javascript">
   require( [ "spec/init.js" ], function () {
-    require( [ "spec/interface.js",
+    require( [ "spec/instance.js",
+               "spec/interface.js",
                "spec/callbacks.js" ], function () {
                  jasmine.getEnv().execute();
                } );
