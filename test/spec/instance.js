@@ -24,6 +24,20 @@ describe('Instance', function () {
         } );
     } );
   } );
+
+  it('resets rejects promise when no instance active', function (done) {
+    runNoInstantiation(function () {
+      g_sortingDesk.reset()
+        .fail(function () {
+          expect(true).toBe(true);
+          done();
+        } )
+        .done(function () {
+          expect(false).toBe(true);
+          done();
+        } );
+    } );
+  } );
   
   describe('Public methods', function () {
     /* Even though we clearly wouldn't need to use `setTimeout', we need to wrap
