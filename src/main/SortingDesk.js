@@ -1305,14 +1305,22 @@ var SortingDesk = (function () {
           .apply(null, [].slice.call(arguments, 1));
 
     if('always' in result) {
-      requests_.push(result);
+      onRequestStart_(result);
       
       result.always(function () {
-        requests_.splice(requests_.indexOf(result), 1);
+        onRequestStop_(result);
       } );
     }
 
     return result;
+  };
+
+  var onRequestStart_ = function (id) {
+    requests_.push(id);
+  };
+
+  var onRequestStop_ = function (id) {
+    requests_.splice(requests_.indexOf(id), 1);
   };
 
   var getBinByShortcut_ = function (keyCode) {
