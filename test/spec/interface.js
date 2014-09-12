@@ -1,6 +1,6 @@
 describe('Interface', function () {
   setup();
-  
+
   it('initialises without the bins container', function (done) {
     run($.extend(true, { }, g_options, { nodes: { bins: null } }),
         g_callbacks,
@@ -44,4 +44,20 @@ describe('Interface', function () {
       },
       done);
   } );
+
+  it('initialises with expected number of items', function (done) {
+    var items = $('<div />');
+    
+    run($.extend(true, { }, g_options, { nodes: { items: items } }),
+        g_callbacks,
+        function () {
+          window.setTimeout(function () {
+            items.children().each(function () { console.log(this.tagName); } );
+            expect(items.children().length).toBe(g_options.visibleItems);
+            done();
+          }, DELAY_ITEMS);
+        } );
+  } );
+  
+  
 } );
