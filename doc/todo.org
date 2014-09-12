@@ -1,8 +1,11 @@
-* To do items [75%]
-** TODO [#A] Employ Module pattern
+* To do items [76%]
 ** IN-PROGRESS [#A] Write jasmine (unit) tests
 - State "IN-PROGRESS" from "TODO"       [2014-09-12 Fri 09:54]
 Similar to the tests found on: =git@devhub.diffeo.com:streamboard.git=
+** IN-PROGRESS Ensure component is fault proof when faced with absent elements
+- State "IN-PROGRESS" from "WAIT"       [2014-09-12 Fri 21:17]
+- State "WAIT"       from "TODO"       [2014-09-09 Tue 18:05] \\
+  Unsure what other elements it needs to be fault tolerant for.
 ** TODO [#B] Prefix text-items' and bins' node ids
 - State "TODO"       from "WAIT"       [2014-09-07 Sun 08:16]
 - State "WAIT"       from "TODO"       [2014-09-05 Fri 10:41] \\
@@ -14,15 +17,14 @@ Similar to the tests found on: =git@devhub.diffeo.com:streamboard.git=
   Not proceeding with this until it's clear whether bins based on existing text items are even editable.
 ** TODO [#C] Text items container doesn't have a UI state when it doesn't hold any text items
 Must clearly communicate to the user that there aren't any more text items available.
-** WAIT Ensure component is fault proof when faced with absent elements
-- State "WAIT"       from "TODO"       [2014-09-09 Tue 18:05] \\
-  Unsure what other elements it needs to be fault tolerant for.
 ** WAIT [#C] Implement user notifications
 - State "WAIT"       from "TODO"       [2014-09-05 Fri 11:21] \\
   Need further information.
 A mechanism for displaying notifications to the user is needed for the purpose
 of providing feedback, in particular in the cases when a user action is invalid
 and results in an error.
+** DONE [#A] Employ Module pattern
+- State "DONE"       from "TODO"       [2014-09-12 Fri 21:17]
 ** DONE [#A] Save data by issuing calls to diffeo's API
 - State "DONE"       from "WAIT"       [2014-09-07 Sun 10:47]
 - State "WAIT"       from "TODO"       [2014-09-05 Fri 11:53] \\
