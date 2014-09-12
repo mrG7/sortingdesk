@@ -1039,6 +1039,7 @@ var SortingDesk = (function () {
       initialise_();
 
     return {
+      isInitialised: isInitialised,
       reset: reset,
       remove: remove,
       getById: getById
@@ -1088,6 +1089,17 @@ var SortingDesk = (function () {
    * 
    * @return  {TextItem}  Returns the text item if found, or null if not. */
   var getById = function (id) {
+  };
+
+  /**
+   * Returns a boolean value indicating whether Sorting Desk has been
+   * initialised and is ready to be used.
+   *
+   * @returns {Boolean}   Returns true if Sorting Desk has been successful
+   *                      initialised, false otherwise.
+   * */
+  var isInitialised = function () {
+    return initialised;
   };
 
 
