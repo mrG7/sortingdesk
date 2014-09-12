@@ -508,7 +508,9 @@ var SortingDesk = (function () {
         return;
       
       promise.done(function (items) {
-        $.each(items, function (index, item) {
+        onRequestStart_('check-items');
+
+        items.forEach(function (item, index) {
           window.setTimeout( function () {
             self.items.push(new TextItem(self, item));
           }, Math.pow(index, 2) * 1.1);
@@ -517,6 +519,12 @@ var SortingDesk = (function () {
         window.setTimeout( function () {
           self.select();
         }, 10);
+
+        /* Ensure event is fired after the last item is added. */
+        window.setTimeout( function () {
+          onRequestStop_('check-items');
+        }, Math.pow(items.length - 1, 2) * 1.1 + 10);
+
       } );
     },
 
