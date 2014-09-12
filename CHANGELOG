@@ -1,3 +1,17 @@
+2014-09-12  Miguel Guedes  <miguel@miguelguedes.org>
+
+	* all:
+
+	Reworked code so it employs the Module design pattern.
+
+	Added jsdoc comments where applicable.
+
+	Created a basic makefile for generation of documentation from the
+	code. Minification of javascript is not yet performed as a
+	minification tool needs to be first selected.
+
+	Various minor improvements.
+
 2014-09-09  Miguel Guedes  <miguel@miguelguedes.org>
 
 	* test:
