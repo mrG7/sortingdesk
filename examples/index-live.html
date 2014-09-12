@@ -52,45 +52,56 @@
     $("#primary-node-id")
       .val(primaryContentId)
       .change(function () {
+        var promise;
+        
         secondaryContentIds = Api.initialise(primaryContentId = this.value,
                                              secondaryBins);
 
-        if(sortingDesk && !sortingDesk.reset()) {
-          console.log("Failed to reset Sorting Desk");
-          return;
+        if(!sortingDesk) {
+          promise = $.Deferred();
+          window.setTimeout(function () { promise.resolve(); }, 0);
+        } else {
+          promise = sortingDesk.reset();
+
+          if(!promise) {
+            throw "Failed to reset Sorting Desk's state";
+            return;
+          }
         }
-        
-        sortingDesk = SortingDesk.instantiate( {
-          nodes: {
-            items: nitems,
-            bins: nbins,
-            binDelete: $("#button-delete") /* Also used for 'dimissing' text
-                                            * items that aren't/can't/won't be
-                                            * sorted into a bin */
-          },
-          css: {                      /* This tree is optional: see
-                                       * `SortingDesk.defaults' */
-            primaryBinOuterWrapper: "wrapper-primary-bin-outer",
-            primaryBinInnerWrapper: "wrapper-primary-bin-inner",
-            secondaryBinsWrapper: "wrapper-secondary-bin",
-            leftmostBin: "left"
-          },
-          primaryContentId: primaryContentId,
-          secondaryContentIds: secondaryContentIds,
-          visibleItems: 15
-        }, {
-          moreTexts: Api.moreTexts,
-          getBinData: Api.getBinData,
-          saveBinData: Api.saveBinData,
-          addPrimarySubBin: Api.addPrimarySubBin,
-          addSecondaryBin: Api.addSecondaryBin,
-          removePrimarySubBin: Api.removePrimarySubBin,
-          removeSecondaryBin: Api.removeSecondaryBin,
-          renderText: Api.renderText,
-          renderPrimaryBin: Api.renderPrimaryBin,
-          renderPrimarySubBin: Api.renderPrimarySubBin,
-          renderSecondaryBin: Api.renderSecondaryBin,
-          renderAddButton: Api.renderAddButton
+
+        promise.done(function () {
+          sortingDesk = SortingDesk.instantiate( {
+            nodes: {
+              items: nitems,
+              bins: nbins,
+              binDelete: $("#button-delete") /* Also used for 'dimissing' text
+                                              * items that aren't/can't/won't be
+                                              * sorted into a bin */
+            },
+            css: {                      /* This tree is optional: see
+                                         * `SortingDesk.defaults' */
+              primaryBinOuterWrapper: "wrapper-primary-bin-outer",
+              primaryBinInnerWrapper: "wrapper-primary-bin-inner",
+              secondaryBinsWrapper: "wrapper-secondary-bin",
+              leftmostBin: "left"
+            },
+            primaryContentId: primaryContentId,
+            secondaryContentIds: secondaryContentIds,
+            visibleItems: 15
+          }, {
+            moreTexts: Api.moreTexts,
+            getBinData: Api.getBinData,
+            saveBinData: Api.saveBinData,
+            addPrimarySubBin: Api.addPrimarySubBin,
+            addSecondaryBin: Api.addSecondaryBin,
+            removePrimarySubBin: Api.removePrimarySubBin,
+            removeSecondaryBin: Api.removeSecondaryBin,
+            renderText: Api.renderText,
+            renderPrimaryBin: Api.renderPrimaryBin,
+            renderPrimarySubBin: Api.renderPrimarySubBin,
+            renderSecondaryBin: Api.renderSecondaryBin,
+            renderAddButton: Api.renderAddButton
+          } );
         } );
       } )
       .change();                  /* Force instantiation. */
