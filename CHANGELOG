@@ -11,6 +11,13 @@
 	code. Minification of javascript is not yet performed as a
 	minification tool needs to be first selected.
 
+	Reworked code so as to allow tests to be executed empirically and
+	in a fail proof fashion. This required several changes to be made,
+	some of which to plug bizarre executions flows that became
+	apparent due to the async nature of the tests employed.
+
+	Wrote additional tests.
+
 	Various minor improvements.
 
 2014-09-09  Miguel Guedes  <miguel@miguelguedes.org>
