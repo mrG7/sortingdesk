@@ -1027,6 +1027,12 @@ var SortingDesk = (function () {
      * instantiation. */
     if(options || initialised)
       throw "Sorting Desk has already been instantiated";
+    else if(!opts)
+      throw "No options given: some are mandatory";
+    else if(!opts.nodes)
+      throw "No nodes options given: `items' required";
+    else if(!opts.nodes.items)
+      throw "Missing `items' nodes option";
 
     console.log("Initialising Sorting Desk UI");
     
