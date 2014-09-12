@@ -1,5 +1,7 @@
 * To do items [75%]
-** TODO [#A] Implement jasmine (unit) tests
+** TODO [#A] Employ Module pattern
+** IN-PROGRESS [#A] Write jasmine (unit) tests
+- State "IN-PROGRESS" from "TODO"       [2014-09-12 Fri 09:54]
 Similar to the tests found on: =git@devhub.diffeo.com:streamboard.git=
 ** TODO [#B] Prefix text-items' and bins' node ids
 - State "TODO"       from "WAIT"       [2014-09-07 Sun 08:16]
