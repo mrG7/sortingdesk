@@ -52,24 +52,10 @@
     $("#primary-node-id")
       .val(primaryContentId)
       .change(function () {
-        var promise;
-        
         secondaryContentIds = Api.initialise(primaryContentId = this.value,
                                              secondaryBins);
 
-        if(!sortingDesk) {
-          promise = $.Deferred();
-          window.setTimeout(function () { promise.resolve(); }, 0);
-        } else {
-          promise = sortingDesk.reset();
-
-          if(!promise) {
-            throw "Failed to reset Sorting Desk's state";
-            return;
-          }
-        }
-
-        promise.done(function () {
+        sortingDesk.reset().always(function () {
           sortingDesk = SortingDesk.instantiate( {
             nodes: {
               items: nitems,

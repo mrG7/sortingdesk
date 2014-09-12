@@ -1072,29 +1072,33 @@ var SortingDesk = (function () {
    * @returns {Boolean}   Returns status of operation: true if succeeded, false
    *                      otherwise.*/
   var reset = function () {
-    if(!options)
-      return false;
+    var deferred = $.Deferred();
+    
+    if(!options) {
+      window.setTimeout(function () {
+        deferred.reject();
+      } );
+    } else {
+      if(options.nodes.items)
+        options.nodes.items.children().remove();
 
-    if(options.nodes.items)
-      options.nodes.items.children().remove();
+      if(options.nodes.bins)
+        options.nodes.items.children().remove();
 
-    if(options.nodes.bins)
-      options.nodes.items.children().remove();
+      callbacks = bins = list = null;    
+      initialised = false;
 
-    callbacks = bins = list = null;    
-    initialised = false;
-
-    var deferred = $.Deferred(),
-        interval = window.setInterval(function () {
-          if(!requests_.length) {
-            console.log("Hooks cleared");
-            
-            options = null;
-            deferred.resolve();
-            
-            window.clearInterval(interval);
-          }
-        }, 10);
+      var interval = window.setInterval(function () {
+        if(!requests_.length) {
+          console.log("Hooks cleared");
+          
+          options = null;
+          deferred.resolve();
+          
+          window.clearInterval(interval);
+        }
+      }, 10);
+    }
     
     return deferred.promise();
   };
