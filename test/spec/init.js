@@ -2,7 +2,7 @@
 Api.DELAY_MIN = Api.DELAY_MAX = 0;
 
 /* Constants */
-var DELAY = 50;
+var DELAY = 10;
 
 /* Variables */
 var g_sortingDesk = null,
@@ -21,7 +21,7 @@ var g_sortingDesk = null,
       },
       primaryContentId: g_primaryContentId,
       secondaryContentIds: g_secondaryContentIds,
-      visibleItems: 15
+      visibleItems: 5
     },
     g_callbacks = {
       moreTexts: Api.moreTexts,
@@ -36,4 +36,54 @@ var g_sortingDesk = null,
       renderPrimarySubBin: Api.renderPrimarySubBin,
       renderSecondaryBin: Api.renderSecondaryBin,
       renderAddButton: Api.renderAddButton
-    };
+    },
+    reset = true;
+
+
+function setup() {
+  afterEach(function () {
+    g_sortingDesk
+      && g_sortingDesk.isInitialised
+      && g_sortingDesk.isInitialised()
+      && g_sortingDesk.reset()
+      .done(function () {
+        reset = true;
+      } );
+  } );
+}
+
+function run(options, callbacks, condition, done) {
+  var interval = window.setInterval(function () {
+    if(!reset)
+      return;
+
+    window.clearInterval(interval);
+    g_sortingDesk = SortingDesk.instantiate(options, callbacks);
+
+    interval = window.setInterval(function () {
+      if(!g_sortingDesk.isInitialised())
+        return;
+      
+      window.clearInterval(interval);
+
+      console.log("running condition");
+      condition();
+      
+      if(done)
+        done();
+    }, DELAY);
+  }, DELAY);
+}
+
+function runNoInstantiation(condition, done) {
+  var interval = window.setInterval(function () {
+    if(!reset)
+      return;
+
+    window.clearInterval(interval);
+    condition();
+      
+    if(done)
+      done();
+  }, DELAY);
+}
