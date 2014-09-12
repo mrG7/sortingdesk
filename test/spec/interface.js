@@ -2,7 +2,7 @@ describe('Interface', function () {
   /* Configure API. */
   Api.DELAY_MIN = Api.DELAY_MAX = 0;
 
-  /* Macros */
+  /* Constants */
   var DELAY = 100;
         
   /* Variables */

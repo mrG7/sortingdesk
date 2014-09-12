@@ -2,8 +2,8 @@ describe('Callbacks', function () {
   /* Configure API. */
   Api.DELAY_MIN = Api.DELAY_MAX = 0;
 
-  /* Macros */
-  var DELAY = 100;
+  /* Constants */
+  var DELAY = 25;
         
   /* Variables */
   var sortingDesk = null,
