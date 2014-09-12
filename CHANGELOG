@@ -2,7 +2,8 @@
 
 	* all:
 
-	Reworked code so it employs the Module design pattern.
+	Reworked code so it employs the Module design pattern. Added a few
+	public methods for clients to use.
 
 	Added jsdoc comments where applicable.
 
