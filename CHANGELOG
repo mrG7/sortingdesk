@@ -16,6 +16,8 @@
 	some of which to plug bizarre executions flows that became
 	apparent due to the async nature of the tests employed.
 
+	Create base infrastructure for reliable deployment of unit tests.
+
 	Wrote additional tests.
 
 	Various minor improvements.
