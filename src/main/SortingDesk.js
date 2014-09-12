@@ -1045,6 +1045,12 @@ var SortingDesk = (function () {
     };
   };
 
+  /**
+   * Resets the component to a virgin state. Removes all nodes contained by
+   * `options.nodes.items' and `options.nodes.bins', if any.
+   *
+   * @returns {Boolean}   Returns status of operation: true if succeeded, false
+   *                      otherwise.*/
   var reset = function () {
     if(!options)
       return false;
