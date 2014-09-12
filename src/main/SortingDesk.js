@@ -35,7 +35,8 @@ var SortingDesk = (function () {
    *  Accessible only to module-scope methods. Class instance methods are
    *  forbidden from accessing these attributes.
    * ---------------------------------------------------------------------- */
-  var over_ = null;
+  var over_ = null,
+      hooks_ = [ ];
 
   /* ----------------------------------------------------------------------
    *  Default options
@@ -1074,10 +1075,22 @@ var SortingDesk = (function () {
     if(options.nodes.bins)
       options.nodes.items.children().remove();
 
-    callbacks = options = bins = list = null;    
+    callbacks = bins = list = null;    
     initialised = false;
 
-    return true;
+    var deferred = $.Deferred(),
+        interval = window.setInterval(function () {
+          if(!hooks_.length) {
+            console.log("Hooks cleared");
+            
+            options = null;
+            deferred.resolve();
+            
+            window.clearInterval(interval);
+          }
+        }, 10);
+    
+    return deferred.promise();
   };
 
   /**
@@ -1278,8 +1291,18 @@ var SortingDesk = (function () {
     else if(!(arguments[0] in callbacks))
       throw "Callback non existent: " + arguments[0];
 
-    return callbacks[arguments[0]]
-      .apply(null, [].slice.call(arguments, 1));
+    var result = callbacks[arguments[0]]
+          .apply(null, [].slice.call(arguments, 1));
+
+    if('always' in result) {
+      hooks_.push(result);
+      
+      result.always(function () {
+        hooks_.splice(hooks_.indexOf(result));
+      } );
+    }
+
+    return result;
   };
 
   var getBinByShortcut_ = function (keyCode) {
