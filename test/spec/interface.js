@@ -32,4 +32,16 @@ describe('Interface', function () {
            },
            done);
      } );
+
+  it("should fail to initialise without an `items' node", function (done) {
+    runNoInstantiation(
+      function () {
+        expect(function () {
+          SortingDesk.instantiate($.extend(true, { }, g_options,
+                                           { nodes: { items: null } }),
+                                  g_callbacks);
+        } ).toThrow("Missing `items' nodes option");
+      },
+      done);
+  } );
 } );
