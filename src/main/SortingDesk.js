@@ -36,7 +36,7 @@ var SortingDesk = (function () {
    *  forbidden from accessing these attributes.
    * ---------------------------------------------------------------------- */
   var over_ = null,
-      hooks_ = [ ];
+      requests_ = [ ];
 
   /* ----------------------------------------------------------------------
    *  Default options
@@ -1086,7 +1086,7 @@ var SortingDesk = (function () {
 
     var deferred = $.Deferred(),
         interval = window.setInterval(function () {
-          if(!hooks_.length) {
+          if(!requests_.length) {
             console.log("Hooks cleared");
             
             options = null;
@@ -1301,10 +1301,10 @@ var SortingDesk = (function () {
           .apply(null, [].slice.call(arguments, 1));
 
     if('always' in result) {
-      hooks_.push(result);
+      requests_.push(result);
       
       result.always(function () {
-        hooks_.splice(hooks_.indexOf(result));
+        requests_.splice(requests_.indexOf(result), 1);
       } );
     }
 
