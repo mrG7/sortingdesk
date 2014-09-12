@@ -54,51 +54,46 @@ $(function () {
     .change(function () {
       secondaryContentIds = Api.initialise(primaryContentId = this.value,
                                            secondaryBins);
-      instantiateUi();
-    } );
-  
-  function instantiateUi()
-  {
-    if(sortingDesk && !sortingDesk.reset()) {
-      console.log("Failed to reset Sorting Desk");
-      return;
-    }
-    
-    sortingDesk = SortingDesk.instantiate( {
-      nodes: {
-        items: nitems,
-        bins: nbins,
-        binDelete: $("#button-delete") /* Also used for 'dimissing' text items
-                                        * that aren't/can't/won't be sorted into
-                                        * a bin */
-      },
-      css: {                      /* This tree is optional: see
-                                   * `SortingDesk.defaults' */
-        primaryBinOuterWrapper: "wrapper-primary-bin-outer",
-        primaryBinInnerWrapper: "wrapper-primary-bin-inner",
-        secondaryBinsWrapper: "wrapper-secondary-bin",
-        leftmostBin: "left"
-      },
-      primaryContentId: primaryContentId,
-      secondaryContentIds: secondaryContentIds,
-      visibleItems: 15
-    }, {
-      moreTexts: Api.moreTexts,
-      getBinData: Api.getBinData,
-      saveBinData: Api.saveBinData,
-      addPrimarySubBin: Api.addPrimarySubBin,
-      addSecondaryBin: Api.addSecondaryBin,
-      removePrimarySubBin: Api.removePrimarySubBin,
-      removeSecondaryBin: Api.removeSecondaryBin,
-      renderText: Api.renderText,
-      renderPrimaryBin: Api.renderPrimaryBin,
-      renderPrimarySubBin: Api.renderPrimarySubBin,
-      renderSecondaryBin: Api.renderSecondaryBin,
-      renderAddButton: Api.renderAddButton
-    } );
-  }
-  
-  instantiateUi();
+
+      if(sortingDesk && !sortingDesk.reset()) {
+        console.log("Failed to reset Sorting Desk");
+        return;
+      }
+      
+      sortingDesk = SortingDesk.instantiate( {
+        nodes: {
+          items: nitems,
+          bins: nbins,
+          binDelete: $("#button-delete") /* Also used for 'dimissing' text items
+                                          * that aren't/can't/won't be sorted into
+                                          * a bin */
+        },
+        css: {                      /* This tree is optional: see
+                                     * `SortingDesk.defaults' */
+          primaryBinOuterWrapper: "wrapper-primary-bin-outer",
+          primaryBinInnerWrapper: "wrapper-primary-bin-inner",
+          secondaryBinsWrapper: "wrapper-secondary-bin",
+          leftmostBin: "left"
+        },
+        primaryContentId: primaryContentId,
+        secondaryContentIds: secondaryContentIds,
+        visibleItems: 15
+      }, {
+        moreTexts: Api.moreTexts,
+        getBinData: Api.getBinData,
+        saveBinData: Api.saveBinData,
+        addPrimarySubBin: Api.addPrimarySubBin,
+        addSecondaryBin: Api.addSecondaryBin,
+        removePrimarySubBin: Api.removePrimarySubBin,
+        removeSecondaryBin: Api.removeSecondaryBin,
+        renderText: Api.renderText,
+        renderPrimaryBin: Api.renderPrimaryBin,
+        renderPrimarySubBin: Api.renderPrimarySubBin,
+        renderSecondaryBin: Api.renderSecondaryBin,
+        renderAddButton: Api.renderAddButton
+      } );
+    } )
+    .change();                  /* Force instantiation. */
 });
     </script>
 </head>
