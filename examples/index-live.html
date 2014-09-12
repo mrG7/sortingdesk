@@ -17,8 +17,8 @@
   <!-- Main initialisation logic -->
   <script type="text/javascript">
 
-$(function () {
-  var sortingDesk,
+  $(function () {
+    var sortingDesk,
       nitems = $("#items"),
       nbins = $("#bins"),
       nloading = $("#loading"),
@@ -31,70 +31,70 @@ $(function () {
       primaryContentId = 'kb_aHR0cHM6Ly9rYi5kaWZmZW8uY29tL2FsX2FocmFt',
       secondaryContentIds;
 
-  $(".wrapper").fadeIn();
+    $(".wrapper").fadeIn();
 
-  /* Setup AJAX UI notification before actually making any requests. */
-  $(document).ajaxStart(function () { nloading.fadeIn(); } );
-  $(document).ajaxStop(function () { nloading.fadeOut(); } );
-  
-  height = $(window).height() - nitems.offset().top - 28;
-  
-  nitems
-    .height(height)
-    .children().remove();
-  
-  nbins
-    .height(height)
-    .children().remove();
+    /* Setup AJAX UI notification before actually making any requests. */
+    $(document).ajaxStart(function () { nloading.fadeIn(); } );
+    $(document).ajaxStop(function () { nloading.fadeOut(); } );
+    
+    height = $(window).height() - nitems.offset().top - 28;
+    
+    nitems
+      .height(height)
+      .children().remove();
+    
+    nbins
+      .height(height)
+      .children().remove();
 
-  secondaryContentIds = Api.initialise(primaryContentId, secondaryBins);
-  
-  $("#primary-node-id")
-    .val(primaryContentId)
-    .change(function () {
-      secondaryContentIds = Api.initialise(primaryContentId = this.value,
-                                           secondaryBins);
+    secondaryContentIds = Api.initialise(primaryContentId, secondaryBins);
+    
+    $("#primary-node-id")
+      .val(primaryContentId)
+      .change(function () {
+        secondaryContentIds = Api.initialise(primaryContentId = this.value,
+                                             secondaryBins);
 
-      if(sortingDesk && !sortingDesk.reset()) {
-        console.log("Failed to reset Sorting Desk");
-        return;
-      }
-      
-      sortingDesk = SortingDesk.instantiate( {
-        nodes: {
-          items: nitems,
-          bins: nbins,
-          binDelete: $("#button-delete") /* Also used for 'dimissing' text items
-                                          * that aren't/can't/won't be sorted into
-                                          * a bin */
-        },
-        css: {                      /* This tree is optional: see
-                                     * `SortingDesk.defaults' */
-          primaryBinOuterWrapper: "wrapper-primary-bin-outer",
-          primaryBinInnerWrapper: "wrapper-primary-bin-inner",
-          secondaryBinsWrapper: "wrapper-secondary-bin",
-          leftmostBin: "left"
-        },
-        primaryContentId: primaryContentId,
-        secondaryContentIds: secondaryContentIds,
-        visibleItems: 15
-      }, {
-        moreTexts: Api.moreTexts,
-        getBinData: Api.getBinData,
-        saveBinData: Api.saveBinData,
-        addPrimarySubBin: Api.addPrimarySubBin,
-        addSecondaryBin: Api.addSecondaryBin,
-        removePrimarySubBin: Api.removePrimarySubBin,
-        removeSecondaryBin: Api.removeSecondaryBin,
-        renderText: Api.renderText,
-        renderPrimaryBin: Api.renderPrimaryBin,
-        renderPrimarySubBin: Api.renderPrimarySubBin,
-        renderSecondaryBin: Api.renderSecondaryBin,
-        renderAddButton: Api.renderAddButton
-      } );
-    } )
-    .change();                  /* Force instantiation. */
-});
+        if(sortingDesk && !sortingDesk.reset()) {
+          console.log("Failed to reset Sorting Desk");
+          return;
+        }
+        
+        sortingDesk = SortingDesk.instantiate( {
+          nodes: {
+            items: nitems,
+            bins: nbins,
+            binDelete: $("#button-delete") /* Also used for 'dimissing' text
+                                            * items that aren't/can't/won't be
+                                            * sorted into a bin */
+          },
+          css: {                      /* This tree is optional: see
+                                       * `SortingDesk.defaults' */
+            primaryBinOuterWrapper: "wrapper-primary-bin-outer",
+            primaryBinInnerWrapper: "wrapper-primary-bin-inner",
+            secondaryBinsWrapper: "wrapper-secondary-bin",
+            leftmostBin: "left"
+          },
+          primaryContentId: primaryContentId,
+          secondaryContentIds: secondaryContentIds,
+          visibleItems: 15
+        }, {
+          moreTexts: Api.moreTexts,
+          getBinData: Api.getBinData,
+          saveBinData: Api.saveBinData,
+          addPrimarySubBin: Api.addPrimarySubBin,
+          addSecondaryBin: Api.addSecondaryBin,
+          removePrimarySubBin: Api.removePrimarySubBin,
+          removeSecondaryBin: Api.removeSecondaryBin,
+          renderText: Api.renderText,
+          renderPrimaryBin: Api.renderPrimaryBin,
+          renderPrimarySubBin: Api.renderPrimarySubBin,
+          renderSecondaryBin: Api.renderSecondaryBin,
+          renderAddButton: Api.renderAddButton
+        } );
+      } )
+      .change();                  /* Force instantiation. */
+  });
     </script>
 </head>
 <body>

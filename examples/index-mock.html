@@ -18,47 +18,42 @@
   <!-- Main initialisation logic -->
   <script type="text/javascript">
 
-$(function () {
-  var nitems = $("#items"),
-      nbins = $("#bins"),
-      nloading = $("#loading"),
-      height,
-      secondaryBins = [
-        { node_id: 100, features: { NAME: { "Irrelevant": 0 } } },
-        { node_id: 101, features: { NAME: { "Rubbish": 0 } } },
-        { node_id: 102, features: { NAME: { "Keep": 0 } } }
-      ],
-      primaryContentId,
-      secondaryContentIds;
-  
+  $(function () {
+    var sortingDesk,
+        nitems = $("#items"),
+        nbins = $("#bins"),
+        nloading = $("#loading"),
+        height,
+        secondaryBins = [
+          { node_id: 100, features: { NAME: { "Irrelevant": 0 } } },
+          { node_id: 101, features: { NAME: { "Rubbish": 0 } } },
+          { node_id: 102, features: { NAME: { "Keep": 0 } } }
+        ],
+        primaryContentId,
+        secondaryContentIds;
 
-  $(".wrapper").fadeIn();
+    $(".wrapper").fadeIn();
 
-  /* Setup AJAX UI notification before actually making any requests. */
-  $(document).ajaxStart(function () { nloading.fadeIn(); } );
-  $(document).ajaxStop(function () { nloading.fadeOut(); } );
-  
-  height = $(window).height() - nitems.offset().top - 28;
-  
-  nitems
-    .height(height)
-    .children().remove();
-  
-  nbins
-    .height(height)
-    .children().remove();
-
-  /* Load data retrieved from loaded JSON file. */
-  primaryContentId = g_descriptor.primaryBin.node_id;
-  secondaryContentIds = Api.initialise(g_descriptor, secondaryBins);
-  g_descriptor = null;
-  
-  function instantiateUi()
-  {
-    nitems.children().remove();
-    nbins.children().remove();
+    /* Setup AJAX UI notification before actually making any requests. */
+    $(document).ajaxStart(function () { nloading.fadeIn(); } );
+    $(document).ajaxStop(function () { nloading.fadeOut(); } );
     
-    g_sortingDesk = SortingDesk.instantiate( {
+    height = $(window).height() - nitems.offset().top - 28;
+    
+    nitems
+      .height(height)
+      .children().remove();
+    
+    nbins
+      .height(height)
+      .children().remove();
+
+    /* Load data retrieved from loaded JSON file. */
+    primaryContentId = g_descriptor.primaryBin.node_id;
+    secondaryContentIds = Api.initialise(g_descriptor, secondaryBins);
+    g_descriptor = null;
+    
+    sortingDesk = SortingDesk.instantiate( {
       nodes: {
         items: nitems,
         bins: nbins,
@@ -90,10 +85,7 @@ $(function () {
       renderSecondaryBin: Api.renderSecondaryBin,
       renderAddButton: Api.renderAddButton
     } );
-  }
-  
-  instantiateUi();
-});
+   });
     </script>
 </head>
 <body>
