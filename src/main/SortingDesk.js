@@ -1091,6 +1091,7 @@ var SortingDesk = (function () {
   var getById = function (id) {
     var item = list.getById(id);
 
+    /* Return the actual data and not our object. */
     return item && item.getContent();
   };
 
