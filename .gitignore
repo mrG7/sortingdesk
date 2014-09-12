@@ -6,3 +6,4 @@
 BROWSE
 doc/*.pdf
 .*.swp
+out/
