@@ -19,6 +19,7 @@ help:
 
 build:
 	echo "Minification of javascript files not yet implemented"
+	test -d "$(DIR_OUTPUT)/src" || mkdir -p "$(DIR_OUTPUT_SRC)"
 
 man:
 	test -d "$(DIR_OUTPUT_DOC)" || mkdir -p "$(DIR_OUTPUT_DOC)"
