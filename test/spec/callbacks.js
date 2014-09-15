@@ -15,6 +15,23 @@ describe('Callbacks', function () {
         done);
   } );
 
+  it("invokes `renderAddButton' correctly whilst initialising", function (done) {
+    result = 0;
+    
+    run(g_options,
+        $.extend(true, { }, g_callbacks, {
+          renderAddButton: function (caption) {
+            if(caption && caption.length > 0)
+              ++result;
+            return Api.renderAddButton(caption);
+          }
+        } ),
+        function () {
+          expect(result).toBe(2);
+        },
+        done);
+  } );
+  
   it("invokes `moreTexts' to retrieve list of items", function (done) {
     run(g_options,
         $.extend(true, { }, g_callbacks, {
