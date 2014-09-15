@@ -45,5 +45,21 @@ describe('Callbacks', function () {
         },
         done);
   } );
+  
+  it("invokes `renderPrimaryBin' to render one primary bin", function (done) {
+    result = 0;
+    
+    run(g_options,
+        $.extend(true, { }, g_callbacks, {
+          renderPrimaryBin: function (bin) {
+            ++result ;
+            return Api.renderPrimaryBin(bin);
+          }
+        } ),
+        function () {
+          expect(result).toBe(1);
+        },
+        done);
+  } );
 
 } );
