@@ -46,13 +46,12 @@ describe('Interface', function () {
   } );
 
   it('initialises with expected number of items', function (done) {
-    var items = $('<div />');
-    
-    run($.extend(true, { }, g_options, { nodes: { items: items } }),
+    run(g_options,
         g_callbacks,
         function () {
           window.setTimeout(function () {
-            expect(items.children().length).toBe(g_options.visibleItems);
+            expect(g_options.nodes.items.children().length)
+              .toBe(g_options.visibleItems);
             done();
           }, DELAY_ITEMS);
         } );
@@ -101,5 +100,5 @@ describe('Interface', function () {
           }, 10);
         } );
   } );
-  
+
 } );
