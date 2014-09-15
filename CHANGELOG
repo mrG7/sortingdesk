@@ -1,9 +1,5 @@
 2014-09-15  Miguel Guedes  <miguel@miguelguedes.org>
 
-	* src/main/SortingDesk.js:
-
-	Added check to ensure `reset' isn't called multiple times.
-
 	* all:
 
 	Add support for RequireJs. `SortingDesk.js',
@@ -15,6 +11,14 @@
 	links now used to point to them.
 
 	Several minor improvements and fixes.
+
+	* tests/:
+
+	Wrote additional tests.
+
+	* src/main/SortingDesk.js:
+
+	Added check to ensure `reset' isn't called multiple times.
 
 2014-09-12  Miguel Guedes  <miguel@miguelguedes.org>
 
