@@ -52,7 +52,6 @@ describe('Interface', function () {
         g_callbacks,
         function () {
           window.setTimeout(function () {
-            items.children().each(function () { console.log(this.tagName); } );
             expect(items.children().length).toBe(g_options.visibleItems);
             done();
           }, DELAY_ITEMS);
