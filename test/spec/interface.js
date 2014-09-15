@@ -80,4 +80,26 @@ describe('Interface', function () {
         } );
   } );
   
+  it("creates a secondary bin when add button clicked on", function (done) {
+    var caption = "Foo bar baz secondary";
+    
+    run(g_options,
+        g_callbacks,
+        function () {
+          g_options.nodes.bins.find('.button-add:nth(1)').click();
+          
+          window.setTimeout(function () {
+            g_options.nodes.bins.find('.bin-secondary:last-child INPUT')
+              .val(caption)
+              .blur();
+
+            window.setTimeout(function () {
+              expect(g_options.nodes.bins.find('.bin-secondary').last().text())
+                .toBe(caption);
+              done();
+            }, 10);
+          }, 10);
+        } );
+  } );
+  
 } );
