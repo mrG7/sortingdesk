@@ -126,4 +126,30 @@ describe('Callbacks', function () {
         } );
   } );
 
+  it("invokes `addSecondaryBin' correctly", function (done) {
+    var caption = "Foo bar baz secondary";
+    
+    run(g_options,
+        $.extend(true, { }, g_callbacks, {
+          addSecondaryBin: function (text) {
+            result = text == caption;
+            return Api.addPrimarySubBin(text);
+          }
+        } ),
+        function () {
+          g_options.nodes.bins.find('.button-add:nth(1)').click();
+          
+          window.setTimeout(function () {
+            g_options.nodes.bins.find('.bin-secondary INPUT')
+              .val(caption)
+              .blur();
+
+            window.setTimeout(function () {
+              expect(result).toBe(true);
+              done();
+            }, 10 );
+          }, 10);
+        } );
+  } );
+
 } );
