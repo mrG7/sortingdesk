@@ -82,4 +82,22 @@ describe('Callbacks', function () {
            done);
      } );
   
+  it("invokes `renderSecondaryBin' when initialising to render correct number of"
+     + " secondary bins",
+     function (done) {
+       result = 0;
+       
+       run(g_options,
+           $.extend(true, { }, g_callbacks, {
+             renderSecondaryBin: function (bin) {
+               ++result ;
+               return Api.renderSecondaryBin(bin);
+             }
+           } ),
+           function () {
+             expect(result).toBe(g_secondaryContentIds.length);
+           },
+           done);
+     } );
+
 } );
