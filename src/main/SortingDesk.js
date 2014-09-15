@@ -1087,6 +1087,9 @@ var SortingDesk = (function () {
         deferred.reject();
       } );
     } else {
+      /* Detach `keyup' event right away. */
+      $('body').unbind('keyup', onKeyUp_);
+      
       var interval = window.setInterval(function () {
         if(requests_.length)
           return;
@@ -1187,55 +1190,7 @@ var SortingDesk = (function () {
     
     list = new ItemsList();
     
-    $('body').keyup(function (evt) {
-      /* First process alpha key strokes. */
-      if(evt.keyCode >= 65 && evt.keyCode <= 90) {
-        var bin = getBinByShortcut_(evt.keyCode);
-
-        if(over_) {
-          if(!bin)
-            over_.setShortcut(evt.keyCode);
-        } else {
-          if(bin) {
-            /* Simulate the effect produced by a mouse click by assigning the
-             * CSS class that contains identical styles to the pseudo-class
-             * :hover, and removing it after the milliseconds specified in
-             * `options.delayAnimateAssign'. */
-            bin.getNode().addClass(options.css.binAnimateAssign);
-            
-            window.setTimeout(function () {
-              bin.getNode().removeClass(options.css.binAnimateAssign);
-            }, options.delayAnimateAssign);
-            
-            list.remove();
-          }
-        }
-        
-        return false;
-      }
-      
-      /* Not alpha. */
-      switch(evt.keyCode) {
-      case options.keyboard.listUp:
-        list.selectOffset(-1);
-        break;
-      case options.keyboard.listDown:
-        list.selectOffset(1);
-        break;
-      case options.keyboard.listDismiss:
-        options.nodes.binDelete.fadeIn(150, function () {
-          options.nodes.binDelete.fadeOut(100);
-        } );
-        
-        list.remove();
-        break;
-        
-      default:
-        return;
-      }
-
-      return false;
-    } );
+    $('body').bind('keyup', onKeyUp_);
     
     new Droppable(options.nodes.binDelete, {
       classHover: options.css.droppableHover,
@@ -1289,6 +1244,56 @@ var SortingDesk = (function () {
 
     initialised = true;
     console.log("Sorting Desk UI initialised");
+  };
+
+  var onKeyUp_ = function (evt) {
+    /* First process alpha key strokes. */
+    if(evt.keyCode >= 65 && evt.keyCode <= 90) {
+      var bin = getBinByShortcut_(evt.keyCode);
+
+      if(over_) {
+        if(!bin)
+          over_.setShortcut(evt.keyCode);
+      } else {
+        if(bin) {
+          /* Simulate the effect produced by a mouse click by assigning the
+           * CSS class that contains identical styles to the pseudo-class
+           * :hover, and removing it after the milliseconds specified in
+           * `options.delayAnimateAssign'. */
+          bin.getNode().addClass(options.css.binAnimateAssign);
+          
+          window.setTimeout(function () {
+            bin.getNode().removeClass(options.css.binAnimateAssign);
+          }, options.delayAnimateAssign);
+          
+          list.remove();
+        }
+      }
+      
+      return false;
+    }
+    
+    /* Not alpha. */
+    switch(evt.keyCode) {
+    case options.keyboard.listUp:
+      list.selectOffset(-1);
+      break;
+    case options.keyboard.listDown:
+      list.selectOffset(1);
+      break;
+    case options.keyboard.listDismiss:
+      options.nodes.binDelete.fadeIn(150, function () {
+        options.nodes.binDelete.fadeOut(100);
+      } );
+      
+      list.remove();
+      break;
+      
+    default:
+      return;
+    }
+
+    return false;
   };
 
   var onClick_ = function (bin) {
