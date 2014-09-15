@@ -62,4 +62,24 @@ describe('Callbacks', function () {
         done);
   } );
 
+  /* TODO: not testing initialisation of primary sub bins since there are
+   * none at initialisation time. */
+  it("invokes `renderPrimarySubBin' when initialising to render zero primary"
+     + " sub-bins",
+     function (done) {
+       result = 0;
+       
+       run(g_options,
+           $.extend(true, { }, g_callbacks, {
+             renderPrimarySubBin: function (bin) {
+               ++result ;
+               return Api.renderPrimarySubBin(bin);
+             }
+           } ),
+           function () {
+             expect(result).toBe(0);
+           },
+           done);
+     } );
+  
 } );
