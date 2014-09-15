@@ -1330,7 +1330,7 @@ var SortingDesk = (function () {
     var result = callbacks[arguments[0]]
           .apply(null, [].slice.call(arguments, 1));
 
-    if('always' in result) {
+    if(result && 'always' in result) {
       onRequestStart_(result);
       
       result.always(function () {
