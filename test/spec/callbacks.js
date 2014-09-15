@@ -1,6 +1,4 @@
 describe('Callbacks', function () {
-  var result = false;
-
   setup();
 
   it("invokes `getBinData' correctly whilst initialising", function (done) {

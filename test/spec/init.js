@@ -57,7 +57,9 @@ var g_sortingDesk = null,
       renderSecondaryBin: Api.renderSecondaryBin,
       renderAddButton: Api.renderAddButton
     },
-    reset = true;
+    reset = true,
+    result = false;
+    
 
 /* Constants */
 var DELAY = 10,
@@ -75,6 +77,8 @@ function setup() {
         } );
     } else
       reset = true;
+
+    result = false;
   } );
 }
 
