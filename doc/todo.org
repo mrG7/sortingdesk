@@ -1,4 +1,4 @@
-* To do items [76%]
+* To do items [77%]
 ** IN-PROGRESS [#A] Write jasmine (unit) tests
 - State "IN-PROGRESS" from "TODO"       [2014-09-12 Fri 09:54]
 Similar to the tests found on: =git@devhub.diffeo.com:streamboard.git=
@@ -23,6 +23,8 @@ Must clearly communicate to the user that there aren't any more text items avail
 A mechanism for displaying notifications to the user is needed for the purpose
 of providing feedback, in particular in the cases when a user action is invalid
 and results in an error.
+** DONE Make Sorting Desk compatible with RequireJs
+- State "DONE"       from "TODO"       [2014-09-15 Mon 18:01]
 ** DONE [#A] Employ Module pattern
 - State "DONE"       from "TODO"       [2014-09-12 Fri 21:17]
 ** DONE [#A] Save data by issuing calls to diffeo's API
@@ -130,6 +132,8 @@ Asked to write it as a long code comment block but might be best done in a
 standalone *editable* text file that doesn't pollute the code and the repository?
 
 * Bugs [100%]
+** DONE Release keyboard event on reset
+- State "DONE"       from "TODO"       [2014-09-15 Mon 17:18]
 ** DONE =removePrimarySubBin=: comparing =bid= to itself
 - State "DONE"       from "TODO"       [2014-09-07 Sun 10:47]
 ** DONE [#A] IE only: text items cannot be dropped onto primary bin
