@@ -58,7 +58,7 @@ describe('Interface', function () {
         } );
   } );
   
-  it("creates primary sub bin", function (done) {
+  it("creates a primary sub bin when add button clicked on", function (done) {
     var caption = "Foo bar baz primary";
     
     run(g_options,
