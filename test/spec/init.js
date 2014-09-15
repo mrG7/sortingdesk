@@ -12,9 +12,9 @@ var g_sortingDesk = null,
     g_secondaryContentIds = Api.initialise(g_descriptor, g_secondaryBins),
     g_options = {
       nodes: {
-        items: $(),
-        bins: $(),
-        binDelete: $()
+        items: $('<div />'),
+        bins: $('<div />'),
+        binDelete: $('<div />')
       },
       primaryContentId: g_primaryContentId,
       secondaryContentIds: g_secondaryContentIds,
