@@ -25,7 +25,7 @@ describe('Instance', function () {
     } );
   } );
 
-  it('resets rejects promise when no instance active', function (done) {
+  it("`reset' rejects promise when no instance active", function (done) {
     runNoInstantiation(function () {
       g_sortingDesk.reset()
         .fail(function () {
