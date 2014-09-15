@@ -70,7 +70,7 @@ var Api = {
     Api.bins[Api.primaryContentId = primaryContentId] = {
       name: null,               /* It doesn't really matter if this is null */
       bins: { }
-    }
+    };
 
     secondaryBins.forEach(function (bin) {
       secondaryContentIds.push(bin.node_id);
