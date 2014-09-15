@@ -11,7 +11,7 @@
 /* Compatibility with RequireJs. */
 if(typeof define === "function" && define.amd) {
   define("SortingDesk", [ "jQuery", "API-SortingDesk" ], function() {
-    return Api;
+    return SortingDesk;
   });
 }
 
