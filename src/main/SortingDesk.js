@@ -25,6 +25,7 @@ var SortingDesk = (function () {
    *        is meant attributes accessible externally.
    * ---------------------------------------------------------------------- */
   var initialised = false,
+      resetting = false,
       callbacks,
       options,
       bins,
@@ -1082,11 +1083,13 @@ var SortingDesk = (function () {
   var reset = function () {
     var deferred = $.Deferred();
     
-    if(!options) {
+    if(!options || resetting) {
       window.setTimeout(function () {
         deferred.reject();
       } );
     } else {
+      resetting = true;
+      
       /* Detach `keyup' event right away. */
       $('body').unbind('keyup', onKeyUp_);
       
@@ -1106,6 +1109,7 @@ var SortingDesk = (function () {
         window.clearInterval(interval);
         window.setTimeout(function () {
           console.log("Sorting Desk UI reset");
+          resetting = false;
           deferred.resolve();
         });
       }, 10);
