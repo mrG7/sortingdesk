@@ -7,6 +7,15 @@
  * 
  */
 
+
+/* Compatibility with RequireJs. */
+if(typeof define === "function" && define.amd) {
+  define("SortingDesk", [ "jQuery", "API-SortingDesk" ], function() {
+    return Api;
+  });
+}
+
+
 /**
  * Main class of the Sorting Desk component. Responsible for initialising the
  * state of the component.

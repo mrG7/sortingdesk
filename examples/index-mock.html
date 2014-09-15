@@ -5,20 +5,24 @@
   <title>Sorting Desk - Offline</title>
   
   <link rel="stylesheet" href="css/theme-default.css" media="screen" />
-  
-  <script type="text/javascript" src="lib/jquery-2.1.1.min.js"></script>
 
-  <!-- Sorting Desk -->
-  <script type="text/javascript" src="../src/main/SortingDesk.js"></script>
-
-  <!-- API -->
-  <script type="text/javascript" src="js/api/api-sorting_desk-mock.js"></script>
-  <script type="text/javascript" src="js/api/data/al_ahram.json"></script>
+  <!-- Libraries -->
+  <script type="text/javascript" src="lib/require-2.1.14.min.js"></script>
   
   <!-- Main initialisation logic -->
   <script type="text/javascript">
 
-  $(function () {
+  require.config( {
+    baseUrl: '../',
+    paths: {
+      "SortingDesk": "src/main/SortingDesk",
+      "API-SortingDesk": "src/api/api-sorting_desk-mock",
+      "API-Data": "src/api/data/al_ahram.json?",
+      "jQuery": "lib/jquery-2.1.1.min"
+    }
+  } );
+                
+  require( [ "SortingDesk" ], function () {
     var sortingDesk,
         nitems = $("#items"),
         nbins = $("#bins"),

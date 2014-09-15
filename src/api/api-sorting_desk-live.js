@@ -10,6 +10,18 @@
  */
 
 
+/* Compatibility with RequireJs. */
+if(typeof define === "function" && define.amd) {
+  define("API-SortingDesk", [ "jQuery" ], function() {
+    return Api;
+  } );
+}
+
+
+if(typeof Api !== 'undefined')
+  throw "Symbol API already defined";
+  
+
 /* Declare random number generator and assign it to Math static class */
 Math.rand = function (min, max)
 {

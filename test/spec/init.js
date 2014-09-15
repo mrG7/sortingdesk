@@ -85,7 +85,7 @@ function runNoInstantiation(condition, done) {
 
     window.clearInterval(interval);
     condition();
-      
+    
     if(done)
       done();
   }, DELAY);
