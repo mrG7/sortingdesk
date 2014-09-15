@@ -46,6 +46,31 @@ describe('Callbacks', function () {
         done);
   } );
   
+  it("invokes `moreTexts' to retrieve list of items when number of items below"
+     + " `visibleItems'",
+     function (done) {
+       result = 0;
+       
+       run(g_options,
+           $.extend(true, { }, g_callbacks, {
+             moreTexts: function (num) {
+               result += num;
+               return Api.moreTexts(num);
+             }
+           } ),
+           function () {
+             window.setTimeout(function () {
+               g_options.nodes.items.find('DIV:nth(0) .text-item-close')
+                 .click();
+
+               window.setTimeout(function () {
+                 expect(result).toBe(g_options.visibleItems * 2);
+                 done();
+               }, DELAY_ITEMS);
+             }, DELAY_ITEMS);
+           } );
+     } );
+  
   it("invokes `renderPrimaryBin' to render one primary bin", function (done) {
     result = 0;
     
