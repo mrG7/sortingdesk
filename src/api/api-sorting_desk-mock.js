@@ -10,6 +10,15 @@
  */
 
 
+/* Compatibility with RequireJs. */
+if(typeof define === "function" && define.amd) {
+  define("api-sorting_desk-mock", [], function() {
+    console.log("RequireJs inclusion");
+    return Api;
+  });
+}
+
+
 /* Declare random number generator and assign it to Math static class */
 Math.rand = function (min, max)
 {
