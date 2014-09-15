@@ -1110,7 +1110,7 @@ var SortingDesk = (function () {
           options.nodes.items.children().remove();
 
         if(options.nodes.bins)
-          options.nodes.items.children().remove();
+          options.nodes.bins.children().remove();
 
         options = callbacks = bins = list = null;    
         initialised = false;
