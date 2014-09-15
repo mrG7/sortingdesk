@@ -1,3 +1,21 @@
+2014-09-15  Miguel Guedes  <miguel@miguelguedes.org>
+
+	* src/main/SortingDesk.js:
+
+	Added check to ensure `reset' isn't called multiple times.
+
+	* all:
+
+	Add support for RequireJs. `SortingDesk.js',
+	`api-sorting_desk-mock.js' (and its fake data), and the unit tests
+	can now be entirely loaded via RequireJs. Compatibility with
+	traditional declarative loading method retained.
+
+	Moved external libraries into a single location, with symbolic
+	links now used to point to them.
+
+	Several minor improvements and fixes.
+
 2014-09-12  Miguel Guedes  <miguel@miguelguedes.org>
 
 	* all:
