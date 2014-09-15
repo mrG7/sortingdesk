@@ -58,5 +58,26 @@ describe('Interface', function () {
         } );
   } );
   
+  it("creates primary sub bin", function (done) {
+    var caption = "Foo bar baz primary";
+    
+    run(g_options,
+        g_callbacks,
+        function () {
+          g_options.nodes.bins.find('.button-add:nth(0)').click();
+          
+          window.setTimeout(function () {
+            g_options.nodes.bins.find('.bin-primary-sub INPUT')
+              .val(caption)
+              .blur();
+
+            window.setTimeout(function () {
+              expect(g_options.nodes.bins.find('.bin-primary-sub').last().text())
+                .toBe(caption);
+              done();
+            }, 10);
+          }, 10);
+        } );
+  } );
   
 } );
