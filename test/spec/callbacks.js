@@ -71,6 +71,44 @@ describe('Callbacks', function () {
            } );
      } );
   
+  it("doesn't invoke `moreTexts' to retrieve list of items when number of items"
+     + " above `visibleItems'",
+     function (done) {
+       result = 0;
+       
+       run(g_options,
+           $.extend(true, { }, g_callbacks, {
+             moreTexts: function (num) {
+               var promise = Api.moreTexts(num);
+
+               if(promise)
+                 result += num;
+               
+               return promise;
+             }
+           } ),
+           function () {
+             window.setTimeout(function () {
+               /* Delete `visibleItems' - 1. This should force only *one*
+                * update. */
+               for(var i = 0; i < g_options.visibleItems - 1; ++i) {
+                 g_options.nodes.items.find('>DIV:nth(' + i + ') .text-item-close')
+                   .click();
+               }
+
+               window.setTimeout(function () {
+                 /* Expect initial `visibleItems' + one forced update.  */
+                 expect(result).toBe(g_options.visibleItems * 2);
+
+                 /* Also expect number of items in UI to be consistent. */
+                 expect(g_options.nodes.items.children().length)
+                   .toBe(g_options.visibleItems * 2 - g_options.visibleItems + 1);
+                 done();
+               }, DELAY_ITEM_DELETED);
+             }, DELAY_ITEMS);
+           } );
+     } );
+  
   it("invokes `renderPrimaryBin' to render one primary bin", function (done) {
     result = 0;
     
