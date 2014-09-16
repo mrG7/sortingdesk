@@ -95,7 +95,7 @@ describe('Interface', function () {
           g_options.nodes.bins.find('.button-add:nth(1)').click();
           
           window.setTimeout(function () {
-            g_options.nodes.bins.find('.bin-secondary:last-child INPUT')
+            g_options.nodes.bins.find('.bin-secondary INPUT')
               .val(caption)
               .blur();
 
