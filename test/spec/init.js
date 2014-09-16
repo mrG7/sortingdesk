@@ -1,3 +1,14 @@
+/**
+ * @file Test specification common logic.
+ * @copyright 2014 Diffeo
+ * @author Miguel Guedes <miguel@miguelguedes.org>
+ *
+ * Comments:
+ *
+ * 
+ */
+
+
 /* Configure API. */
 Api.DELAY_MIN = Api.DELAY_MAX = 0;
 

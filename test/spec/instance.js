@@ -1,3 +1,14 @@
+/**
+ * @file Test specification: instance.
+ * @copyright 2014 Diffeo
+ * @author Miguel Guedes <miguel@miguelguedes.org>
+ *
+ * Comments:
+ *
+ * 
+ */
+
+
 describe('Instance', function () {
   setup();
   

@@ -1,3 +1,14 @@
+/**
+ * @file Test specification: interface.
+ * @copyright 2014 Diffeo
+ * @author Miguel Guedes <miguel@miguelguedes.org>
+ *
+ * Comments:
+ *
+ * 
+ */
+
+
 describe('Interface', function () {
   setup();
 
