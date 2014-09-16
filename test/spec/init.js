@@ -77,7 +77,8 @@ var DELAY = 10,
     DELAY_ITEMS = Math.pow(g_options.visibleItems, 2) * 1.1 + 10,
     DELAY_ITEM_DELETED = 260,
     DELAY_BUTTON_ADD = 25,
-    DELAY_ITEM_DRAGGED = 25;
+    DELAY_ITEM_DRAGGED = 25,
+    DELAY_ITEM_DROPPED = 250;
 
 
 function setup() {
@@ -170,6 +171,7 @@ var DraggingEvent = function (node)
   this.data = { };
   
   this.event.originalEvent = {
+    target: node.get(0),
     dataTransfer: {
       setData: function (domain, value) {
         if(domain) {
@@ -199,5 +201,23 @@ DraggingEvent.prototype = {
 
   trigger: function () {
     this.node.trigger(this.event);
+  },
+
+  drop: function (node) {
+    var self = this,
+        event = $.Event('drop');
+    
+    event.originalEvent = {
+      dataTransfer: {
+        getData: function (domain) {
+          if(domain)
+            return self.data[domain.toLowerCase()];
+
+          return null;
+        }
+      }
+    };
+
+    node.trigger(event);
   }
 };
