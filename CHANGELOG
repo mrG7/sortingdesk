@@ -1,3 +1,15 @@
+2014-09-16  Miguel Guedes  <miguel@miguelguedes.org>
+
+	* jasmine:
+
+	Move jasmine into `lib' directory.
+
+	* tests:
+
+	Fix jasmine instantiating its UI twice. Also fixed an issue
+	causing `setup' not to be available to test specs due to `init.js'
+	being loaded after one or more specs.
+
 2014-09-15  Miguel Guedes  <miguel@miguelguedes.org>
 
 	* all:
@@ -12,7 +24,7 @@
 
 	Several minor improvements and fixes.
 
-	* tests/:
+	* tests:
 
 	Wrote additional tests.
 
