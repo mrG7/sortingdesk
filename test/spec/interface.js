@@ -107,7 +107,7 @@ describe('Interface', function () {
            g_callbacks,
            function () {
              window.setTimeout(function () {
-               g_options.nodes.items.find('DIV:nth(0) .text-item-close')
+               g_options.nodes.items.find('>DIV:nth(0) .text-item-close')
                  .click();
 
                window.setTimeout(function () {
