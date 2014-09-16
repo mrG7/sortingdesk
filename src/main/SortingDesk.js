@@ -1113,10 +1113,8 @@ var SortingDesk = (function () {
           options.nodes.bins.children().remove();
 
         /* Detach events from bin/text item delete button. */
-        if(options.nodes.binDelete) {
-          var n = options.nodes.binDelete;
-          n.dragover = n.dragenter = n.dragleave = n.drop = null;
-        }
+        if(options.nodes.binDelete)
+          options.nodes.binDelete.off();
         
         options = callbacks = bins = list = null;    
         initialised = false;
