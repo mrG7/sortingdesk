@@ -1,11 +1,4 @@
 * To do items [77%]
-** IN-PROGRESS [#A] Write jasmine (unit) tests
-- State "IN-PROGRESS" from "TODO"       [2014-09-12 Fri 09:54]
-Similar to the tests found on: =git@devhub.diffeo.com:streamboard.git=
-** IN-PROGRESS Ensure component is fault proof when faced with absent elements
-- State "IN-PROGRESS" from "WAIT"       [2014-09-12 Fri 21:17]
-- State "WAIT"       from "TODO"       [2014-09-09 Tue 18:05] \\
-  Unsure what other elements it needs to be fault tolerant for.
 ** TODO [#B] Prefix text-items' and bins' node ids
 - State "TODO"       from "WAIT"       [2014-09-07 Sun 08:16]
 - State "WAIT"       from "TODO"       [2014-09-05 Fri 10:41] \\
@@ -17,6 +10,13 @@ Similar to the tests found on: =git@devhub.diffeo.com:streamboard.git=
   Not proceeding with this until it's clear whether bins based on existing text items are even editable.
 ** TODO [#C] Text items container doesn't have a UI state when it doesn't hold any text items
 Must clearly communicate to the user that there aren't any more text items available.
+** IN-PROGRESS [#A] Write jasmine (unit) tests
+- State "IN-PROGRESS" from "TODO"       [2014-09-12 Fri 09:54]
+Similar to the tests found on: =git@devhub.diffeo.com:streamboard.git=
+** IN-PROGRESS Ensure component is fault proof when faced with absent elements
+- State "IN-PROGRESS" from "WAIT"       [2014-09-12 Fri 21:17]
+- State "WAIT"       from "TODO"       [2014-09-09 Tue 18:05] \\
+  Unsure what other elements it needs to be fault tolerant for.
 ** WAIT [#C] Implement user notifications
 - State "WAIT"       from "TODO"       [2014-09-05 Fri 11:21] \\
   Need further information.
@@ -131,7 +131,14 @@ It was stated that "other types come from other sources including Facebook profi
 Asked to write it as a long code comment block but might be best done in a
 standalone *editable* text file that doesn't pollute the code and the repository?
 
-* Bugs [100%]
+* Bugs [88%]
+** TODO Tests involving adding of bins sometimes fail
+Failure occurs due to too small a delay.
+** DONE Jasmine isn't working well with RequireJs
+- State "DONE"       from "TODO"       [2014-09-16 Tue 11:40]
+It presently instantiates its UI twice.
+** DONE `setup' sometimes isn't available to tests
+- State "DONE"       from "TODO"       [2014-09-16 Tue 11:40]
 ** DONE Release keyboard event on reset
 - State "DONE"       from "TODO"       [2014-09-15 Mon 17:18]
 ** DONE =removePrimarySubBin=: comparing =bid= to itself
