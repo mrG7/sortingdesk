@@ -110,6 +110,39 @@ describe('Callbacks', function () {
            } );
      } );
   
+  it("`moreTexts' doesn't process concurrent requests",
+     function (done) {
+       result = 0;
+       
+       run(g_options,
+           $.extend(true, { }, g_callbacks, {
+             moreTexts: function (num) {
+               var promise = Api.moreTexts(num);
+
+               if(promise)
+                 ++ result;
+               
+               return promise;
+             }
+           } ),
+           function () {
+             window.setTimeout(function () {
+               /* Delete `visibleItems' - 1. This should force only *one*
+                * update. */
+               for(var i = 0; i < g_options.visibleItems - 1; ++i) {
+                 g_options.nodes.items.find('>DIV:nth(' + i + ') .text-item-close')
+                   .click();
+               }
+
+               window.setTimeout(function () {
+                 /* Only two moreTexts requests should have been processed. */
+                 expect(result).toBe(2);
+                 done();
+               }, DELAY_ITEM_DELETED);
+             }, DELAY_ITEMS);
+           } );
+     } );
+  
   it("invokes `renderPrimaryBin' to render one primary bin", function (done) {
     result = 0;
     
