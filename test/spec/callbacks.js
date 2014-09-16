@@ -52,24 +52,23 @@ describe('Callbacks', function () {
      function (done) {
        result = 0;
        
-       run(g_options,
-           $.extend(true, { }, g_callbacks, {
-             moreTexts: function (num) {
-               result += num;
-               return Api.moreTexts(num);
-             }
-           } ),
-           function () {
-             window.setTimeout(function () {
-               g_options.nodes.items.find('DIV:nth(0) .text-item-close')
-                 .click();
+       runAfterItemsRendered(
+         g_options,
+         $.extend(true, { }, g_callbacks, {
+           moreTexts: function (num) {
+             result += num;
+             return Api.moreTexts(num);
+           }
+         } ),
+         function () {
+           g_options.nodes.items.find('DIV:nth(0) .text-item-close')
+             .click();
 
-               window.setTimeout(function () {
-                 expect(result).toBe(g_options.visibleItems * 2);
-                 done();
-               }, DELAY_ITEMS);
-             }, DELAY_ITEMS);
-           } );
+           window.setTimeout(function () {
+             expect(result).toBe(g_options.visibleItems * 2);
+             done();
+           }, DELAY_ITEMS);
+         } );
      } );
   
   it("doesn't invoke `moreTexts' to retrieve list of items when number of items"
@@ -77,7 +76,7 @@ describe('Callbacks', function () {
      function (done) {
        result = 0;
        
-       run(g_options,
+       runAfterItemsRendered(g_options,
            $.extend(true, { }, g_callbacks, {
              moreTexts: function (num) {
                var promise = Api.moreTexts(num);
@@ -89,24 +88,22 @@ describe('Callbacks', function () {
              }
            } ),
            function () {
+             /* Delete `visibleItems' - 1. This should force only *one*
+              * update. */
+             for(var i = 0; i < g_options.visibleItems - 1; ++i) {
+               g_options.nodes.items.find('>DIV:nth(' + i + ') .text-item-close')
+                 .click();
+             }
+
              window.setTimeout(function () {
-               /* Delete `visibleItems' - 1. This should force only *one*
-                * update. */
-               for(var i = 0; i < g_options.visibleItems - 1; ++i) {
-                 g_options.nodes.items.find('>DIV:nth(' + i + ') .text-item-close')
-                   .click();
-               }
+               /* Expect initial `visibleItems' + one forced update.  */
+               expect(result).toBe(g_options.visibleItems * 2);
 
-               window.setTimeout(function () {
-                 /* Expect initial `visibleItems' + one forced update.  */
-                 expect(result).toBe(g_options.visibleItems * 2);
-
-                 /* Also expect number of items in UI to be consistent. */
-                 expect(g_options.nodes.items.children().length)
-                   .toBe(g_options.visibleItems * 2 - g_options.visibleItems + 1);
-                 done();
-               }, DELAY_ITEM_DELETED);
-             }, DELAY_ITEMS);
+               /* Also expect number of items in UI to be consistent. */
+               expect(g_options.nodes.items.children().length)
+                 .toBe(g_options.visibleItems * 2 - g_options.visibleItems + 1);
+               done();
+             }, DELAY_ITEM_DELETED);
            } );
      } );
   
@@ -114,7 +111,7 @@ describe('Callbacks', function () {
      function (done) {
        result = 0;
        
-       run(g_options,
+       runAfterItemsRendered(g_options,
            $.extend(true, { }, g_callbacks, {
              moreTexts: function (num) {
                var promise = Api.moreTexts(num);
@@ -126,20 +123,18 @@ describe('Callbacks', function () {
              }
            } ),
            function () {
-             window.setTimeout(function () {
-               /* Delete `visibleItems' - 1. This should force only *one*
-                * update. */
-               for(var i = 0; i < g_options.visibleItems - 1; ++i) {
-                 g_options.nodes.items.find('>DIV:nth(' + i + ') .text-item-close')
-                   .click();
-               }
+             /* Delete `visibleItems' - 1. This should force only *one*
+              * update. */
+             for(var i = 0; i < g_options.visibleItems - 1; ++i) {
+               g_options.nodes.items.find('>DIV:nth(' + i + ') .text-item-close')
+                 .click();
+             }
 
-               window.setTimeout(function () {
-                 /* Only two moreTexts requests should have been processed. */
-                 expect(result).toBe(2);
-                 done();
-               }, DELAY_ITEM_DELETED);
-             }, DELAY_ITEMS);
+             window.setTimeout(function () {
+               /* Only two moreTexts requests should have been processed. */
+               expect(result).toBe(2);
+               done();
+             }, DELAY_ITEM_DELETED);
            } );
      } );
   

@@ -46,15 +46,11 @@ describe('Interface', function () {
   } );
 
   it('initialises with expected number of items', function (done) {
-    run(g_options,
-        g_callbacks,
-        function () {
-          window.setTimeout(function () {
-            expect(g_options.nodes.items.children().length)
-              .toBe(g_options.visibleItems);
-            done();
-          }, DELAY_ITEMS);
-        } );
+    runAfterItemsRendered(g_options, g_callbacks, function () {
+      expect(g_options.nodes.items.children().length)
+        .toBe(g_options.visibleItems);
+      done();
+    } );
   } );
   
   it("creates a primary sub bin when add button clicked on", function (done) {
@@ -103,19 +99,17 @@ describe('Interface', function () {
 
   it('correctly deletes a text item when its close button is clicked on',
      function (done) {
-       run(g_options,
+       runAfterItemsRendered(g_options,
            g_callbacks,
            function () {
-             window.setTimeout(function () {
-               g_options.nodes.items.find('>DIV:nth(0) .text-item-close')
-                 .click();
+             g_options.nodes.items.find('>DIV:nth(0) .text-item-close')
+               .click();
 
-               window.setTimeout(function () {
-                 expect(g_options.nodes.items.children().length)
-                   .toBe(g_options.visibleItems * 2 - 1);
-                 done();
-               }, DELAY_ITEM_DELETED);
-             }, DELAY_ITEMS);
+             window.setTimeout(function () {
+               expect(g_options.nodes.items.children().length)
+                 .toBe(g_options.visibleItems * 2 - 1);
+               done();
+             }, DELAY_ITEM_DELETED);
            } );
      } );
 
