@@ -147,8 +147,8 @@ describe('Interface', function () {
        runAfterItemsRendered(g_options,
            g_callbacks,
            function () {
-             var node = g_options.nodes.items.find('DIV:nth(0)'),
-                 dragging = new DraggingEvent(node);
+             var dragging = new DraggingEvent(
+               g_options.nodes.items.find('DIV:nth(0)'));
 
              dragging.trigger();
 
