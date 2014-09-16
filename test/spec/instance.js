@@ -40,9 +40,6 @@ describe('Instance', function () {
   } );
   
   describe('Public methods', function () {
-    /* Even though we clearly wouldn't need to use `setTimeout', we need to wrap
-     * tests in this section inside setTimeout because we're making use of it in
-     * the preceding tests; tests are executed out of order otherwise. */
     it("doesn't process `remove' when not initialised",
        function (done) {
          runNoInstantiation(function () {
