@@ -120,3 +120,29 @@ function runNoInstantiation(condition, done) {
       done();
   }, DELAY);
 }
+
+function runAfterItemsRendered(options, callbacks, condition, done) {
+  var interval = window.setInterval(function () {
+    if(!reset)
+      return;
+
+    window.clearInterval(interval);
+
+    g_sortingDesk = SortingDesk.instantiate(options, callbacks);
+    reset = false;
+
+    interval = window.setInterval(function () {
+      if(!g_sortingDesk.isInitialised())
+        return;
+      
+      window.clearInterval(interval);
+
+      window.setTimeout(function () {
+        condition();
+      }, DELAY_ITEMS);
+      
+      if(done)
+        done();
+    }, DELAY);
+  }, DELAY);
+}
