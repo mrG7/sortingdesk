@@ -146,3 +146,47 @@ function runAfterItemsRendered(options, callbacks, condition, done) {
     }, DELAY);
   }, DELAY);
 }
+
+
+/* Class DraggingEvent
+ * ---------------------------------------------------------------------- */
+var DraggingEvent = function (node)
+{
+  var self = this;
+  
+  this.node = node;
+  this.event = $.Event('dragstart');
+  this.data = { };
+  
+  this.event.originalEvent = {
+    dataTransfer: {
+      setData: function (domain, value) {
+        if(domain) {
+          domain = domain.toLowerCase();
+          
+          if(typeof value === 'undefined' || value === null)
+            delete self.data[domain];
+          else
+            self.data[domain] = value;
+        }
+      },
+
+      getData: function (domain) {
+        if(domain)
+          return self.data[domain.toLowerCase()];
+
+        return null;
+      }
+    }
+  };
+};
+
+DraggingEvent.prototype = {
+  node: null,
+  event: null,
+  data: null,
+
+  trigger: function () {
+    this.node.trigger(this.event);
+  }
+};
