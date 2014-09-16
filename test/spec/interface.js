@@ -74,8 +74,8 @@ describe('Interface', function () {
               expect(g_options.nodes.bins.find('.bin-primary-sub').last().text())
                 .toBe(caption);
               done();
-            }, 10);
-          }, 10);
+            }, DELAY_BUTTON_ADD);
+          }, DELAY_BUTTON_ADD);
         } );
   } );
   
@@ -96,8 +96,8 @@ describe('Interface', function () {
               expect(g_options.nodes.bins.find('.bin-secondary').last().text())
                 .toBe(caption);
               done();
-            }, 10);
-          }, 10);
+            }, DELAY_BUTTON_ADD);
+          }, DELAY_BUTTON_ADD);
         } );
   } );
 
