@@ -164,5 +164,45 @@ describe('Interface', function () {
              }, DELAY_ITEM_DRAGGED);
            } );
      } );
-  
+
+  it('primary sub bin is deleted when dropped on to delete button',
+     function (done) {
+       var caption = "Foo bar baz primary";
+    
+       runAfterItemsRendered(
+         g_options,
+         g_callbacks,
+         function () {
+           g_options.nodes.bins.find('.button-add:nth(0)').click();
+           
+           window.setTimeout(function () {
+             g_options.nodes.bins.find('.bin-primary-sub INPUT')
+               .val(caption)
+               .blur();
+             
+             window.setTimeout(function () {
+               expect(g_options.nodes.bins.find('.bin-primary-sub').last().text())
+                 .toBe(caption);
+
+               var dragging = new DraggingEvent(
+                 g_options.nodes.bins.find('.bin-primary-sub').last());
+
+               dragging.trigger();
+
+               window.setTimeout(function () {
+                 dragging.drop(g_options.nodes.binDelete);
+
+                 window.setTimeout(function () {
+                   expect(g_options.nodes.bins.find('.bin-primary-sub').length)
+                     .toBe(0);
+                   
+                   done();
+                 }, DELAY_BIN_DROPPED);
+               }, DELAY_BIN_DRAGGED);
+             }, DELAY_BUTTON_ADD);
+           }, DELAY_BUTTON_ADD);
+           
+         } );
+     } );
+
 } );
