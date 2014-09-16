@@ -131,8 +131,13 @@ It was stated that "other types come from other sources including Facebook profi
 Asked to write it as a long code comment block but might be best done in a
 standalone *editable* text file that doesn't pollute the code and the repository?
 
-* Bugs [88%]
-** TODO Tests involving adding of bins sometimes fail
+* Bugs [90%]
+** TODO When items' DIV is selected, scrolling with keyboard both selects next item as well as scroll the DIV contents
+Scrolling on the items' DIV container must be suppressed.
+
+Note that this might not be possible.
+** DONE Tests involving adding of bins sometimes fail
+- State "DONE"       from "TODO"       [2014-09-16 Tue 11:47]
 Failure occurs due to too small a delay.
 ** DONE Jasmine isn't working well with RequireJs
 - State "DONE"       from "TODO"       [2014-09-16 Tue 11:40]
