@@ -113,4 +113,22 @@ describe('Interface', function () {
            } );
      } );
 
+  it('bin delete/text item dismiss button is displayed when text item is'
+     + ' dragged',
+     function (done) {
+       runAfterItemsRendered(g_options,
+           g_callbacks,
+           function () {
+             var node = g_options.nodes.items.find('DIV:nth(0)');
+
+             new DraggingEvent(node).trigger();
+             
+             window.setTimeout(function () {
+               expect(g_options.nodes.binDelete.css('display'))
+                 .toBe('block');
+               done();
+             }, DELAY_ITEM_DRAGGED);
+           } );
+     } );
+  
 } );
