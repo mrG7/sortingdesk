@@ -10,6 +10,13 @@
 	causing `setup' not to be available to test specs due to `init.js'
 	being loaded after one or more specs.
 
+	Wrote additional tests. Of note is support for testing of HTML5
+	drag and drop events.
+
+	* all:
+
+	Several minor improvements and fixes, as usual.
+
 2014-09-15  Miguel Guedes  <miguel@miguelguedes.org>
 
 	* all:
