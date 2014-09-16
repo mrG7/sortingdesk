@@ -1,4 +1,6 @@
 * To do items [77%]
+** TODO Allow duration of special effects to be configurable
+E.g. fade in/out of elements.
 ** TODO [#B] Prefix text-items' and bins' node ids
 - State "TODO"       from "WAIT"       [2014-09-07 Sun 08:16]
 - State "WAIT"       from "TODO"       [2014-09-05 Fri 10:41] \\
@@ -136,6 +138,7 @@ standalone *editable* text file that doesn't pollute the code and the repository
 Scrolling on the items' DIV container must be suppressed.
 
 Note that this might not be possible.
+** TODO Detach event from bin/text item delete
 ** DONE Tests involving adding of bins sometimes fail
 - State "DONE"       from "TODO"       [2014-09-16 Tue 11:47]
 Failure occurs due to too small a delay.
