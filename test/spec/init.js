@@ -64,7 +64,8 @@ var g_sortingDesk = null,
 /* Constants */
 var DELAY = 10,
     DELAY_ITEMS = Math.pow(g_options.visibleItems, 2) * 1.1 + 10,
-    DELAY_ITEM_DELETED = 260;
+    DELAY_ITEM_DELETED = 260,
+    DELAY_BUTTON_ADD = 25;
 
 
 function setup() {

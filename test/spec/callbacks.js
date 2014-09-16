@@ -184,8 +184,8 @@ describe('Callbacks', function () {
             window.setTimeout(function () {
               expect(result).toBe(true);
               done();
-            }, 10 );
-          }, 10);
+            }, DELAY_BUTTON_ADD);
+          }, DELAY_BUTTON_ADD);
         } );
   } );
 
@@ -210,8 +210,8 @@ describe('Callbacks', function () {
             window.setTimeout(function () {
               expect(result).toBe(true);
               done();
-            }, 10 );
-          }, 10);
+            }, DELAY_BUTTON_ADD);
+          }, DELAY_BUTTON_ADD);
         } );
   } );
 
