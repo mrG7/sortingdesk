@@ -141,5 +141,28 @@ describe('Interface', function () {
              }, DELAY_ITEM_DRAGGED);
            } );
      } );
+
+  it('text item is dismissed when dropped on to dismissal button',
+     function (done) {
+       runAfterItemsRendered(g_options,
+           g_callbacks,
+           function () {
+             var node = g_options.nodes.items.find('DIV:nth(0)'),
+                 dragging = new DraggingEvent(node);
+
+             dragging.trigger();
+
+             window.setTimeout(function () {
+               dragging.drop(g_options.nodes.binDelete);
+
+               window.setTimeout(function () {
+                 expect(g_options.nodes.items.children().length)
+                   .toBe(g_options.visibleItems * 2 - 1);
+                 
+                 done();
+               }, DELAY_ITEM_DROPPED);
+             }, DELAY_ITEM_DRAGGED);
+           } );
+     } );
   
 } );
