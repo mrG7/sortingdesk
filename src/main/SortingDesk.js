@@ -1162,7 +1162,7 @@ var SortingDesk = (function () {
     if(!initialised)
       throw "Sorting Desk not initialised";
     
-    return false;
+    return list.remove(id);
   };
 
   /**
