@@ -240,7 +240,7 @@ var SortingDesk = (function () {
    * */
   var BinContainerPrimary = function (id, bin)
   {
-    BinContainer.call(this, null, id, bin);
+    BinContainer.call(this);
     
     var wrapper = $('<div/>').addClass(options.css.primaryBinOuterWrapper),
         self = this;
