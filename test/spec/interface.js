@@ -120,7 +120,7 @@ describe('Interface', function () {
                expect(g_options.nodes.items.children().length)
                  .toBe(g_options.visibleItems * 2 - 1);
                done();
-             }, DELAY_ITEM_DELETED);
+             }, DELAY_ITEMS);
            } );
      } );
 
