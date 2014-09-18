@@ -82,6 +82,24 @@ describe('Instance', function () {
          } );
        } );
     
+    it("`remove' doesn't remove any items when given invalid id",
+       function (done) {
+         runAfterItemsRendered(g_options, g_callbacks, function () {
+           var id = g_options.nodes.items.children().get(1).id + "_";
+           
+           expect(g_options.nodes.items.find("[id='" + id + "']").length).toBe(0);
+           expect(g_sortingDesk.remove(decodeURIComponent(id))).toBe(false);
+
+           window.setTimeout(function () {
+             expect(g_options.nodes.items.find("[id='" + id +
+                                               "']").length).toBe(0);
+             expect(g_options.nodes.items.children().length)
+               .toBe(g_options.visibleItems);
+             done();
+           }, DELAY_ITEM_DELETED);
+         } );
+       } );
+    
     it("`getById' returns correct text item",
        function (done) {
          runAfterItemsRendered(g_options, g_callbacks, function () {
