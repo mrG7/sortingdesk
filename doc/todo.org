@@ -1,13 +1,8 @@
-* To do items [77%]
-** TODO Allow duration of special effects to be configurable
-E.g. fade in/out of elements.
-
-This would allow for configurability on the client side and would have the added benefit of allowing tests to run FASTER while being more deterministic.
+* To do items [84%]
 ** TODO [#B] Prefix text-items' and bins' node ids
 - State "TODO"       from "WAIT"       [2014-09-07 Sun 08:16]
 - State "WAIT"       from "TODO"       [2014-09-05 Fri 10:41] \\
   Currently waiting to hear from support as to whether ids are guaranteed to always be unique.
-** TODO Encode bin and text-item ids
 ** TODO [#A] Allow secondary and sub bin names to be edited
 - State "TODO"       from "WAIT"       [2014-09-05 Fri 10:42]
 - State "WAIT"       from "TODO"       [2014-08-22 Fri 13:24] \\
@@ -17,16 +12,26 @@ Must clearly communicate to the user that there aren't any more text items avail
 ** IN-PROGRESS [#A] Write jasmine (unit) tests
 - State "IN-PROGRESS" from "TODO"       [2014-09-12 Fri 09:54]
 Similar to the tests found on: =git@devhub.diffeo.com:streamboard.git=
-** IN-PROGRESS Ensure component is fault proof when faced with absent elements
-- State "IN-PROGRESS" from "WAIT"       [2014-09-12 Fri 21:17]
-- State "WAIT"       from "TODO"       [2014-09-09 Tue 18:05] \\
-  Unsure what other elements it needs to be fault tolerant for.
 ** WAIT [#C] Implement user notifications
 - State "WAIT"       from "TODO"       [2014-09-05 Fri 11:21] \\
   Need further information.
 A mechanism for displaying notifications to the user is needed for the purpose
 of providing feedback, in particular in the cases when a user action is invalid
 and results in an error.
+** DONE Ensure component is fault proof when faced with absent elements
+- State "DONE"       from "IN-PROGRESS" [2014-09-18 Thu 12:09]
+- State "IN-PROGRESS" from "WAIT"       [2014-09-12 Fri 21:17]
+- State "WAIT"       from "TODO"       [2014-09-09 Tue 18:05] \\
+  Unsure what other elements it needs to be fault tolerant for.
+** DONE Implement public method `remove'
+- State "DONE"       from "TODO"       [2014-09-18 Thu 12:09]
+** DONE Allow duration of special effects to be configurable
+- State "DONE"       from "TODO"       [2014-09-18 Thu 12:09]
+E.g. fade in/out of elements.
+
+This would allow for configurability on the client side and would have the added benefit of allowing tests to run FASTER while being more deterministic.
+** DONE Encode bin and text-item ids
+- State "DONE"       from "TODO"       [2014-09-18 Thu 08:10]
 ** DONE Make Sorting Desk compatible with RequireJs
 - State "DONE"       from "TODO"       [2014-09-15 Mon 18:01]
 ** DONE [#A] Employ Module pattern
