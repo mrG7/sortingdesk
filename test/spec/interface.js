@@ -209,6 +209,51 @@ describe('Interface', function () {
          } );
      } );
 
+  it("primary sub bin is not deleted when dropped on to element other than "
+     + " delete button",
+     function (done) {
+       var caption = "Foo bar baz primary";
+    
+       runAfterItemsRendered(
+         g_options,
+         g_callbacks,
+         function () {
+           /* Expect there to be no primary sub bins. */
+           expect(g_options.nodes.bins.find('.bin-primary-sub').length)
+             .toBe(0);
+             
+           g_options.nodes.bins.find('.button-add:nth(0)').click();
+           
+           window.setTimeout(function () {
+             g_options.nodes.bins.find('.bin-primary-sub INPUT')
+               .val(caption)
+               .blur();
+             
+             window.setTimeout(function () {
+               expect(g_options.nodes.bins.find('.bin-primary-sub').last().text())
+                 .toBe(caption);
+
+               var dragging = new DraggingEvent(
+                 g_options.nodes.bins.find('.bin-primary-sub').last());
+
+               dragging.trigger();
+
+               window.setTimeout(function () {
+                 dragging.drop($('body'));
+
+                 window.setTimeout(function () {
+                   expect(g_options.nodes.bins.find('.bin-primary-sub').length)
+                     .toBe(1);
+                   
+                   done();
+                 }, DELAY_BIN_DROPPED);
+               }, DELAY_BIN_DRAGGED);
+             }, DELAY_BUTTON_ADD);
+           }, DELAY_BUTTON_ADD);
+           
+         } );
+     } );
+
   it('secondary bin is deleted when dropped on to delete button',
      function (done) {
        runAfterItemsRendered(g_options,
