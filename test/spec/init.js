@@ -30,29 +30,6 @@ var g_sortingDesk = null,
       primaryContentId: g_primaryContentId,
       secondaryContentIds: g_secondaryContentIds,
       visibleItems: 5,
-      css: {
-        primaryBinOuterWrapper: "wrapper-primary-bin-outer",
-        primaryBinInnerWrapper: "wrapper-primary-bin-inner",
-        secondaryBinOuterWrapper: "wrapper-secondary-bin-outer",
-        secondaryBinInnerWrapper: "wrapper-secondary-bin-inner",
-        leftmostBin: "left",
-        binGeneric: 'bin',
-        binShortcut: 'bin-shortcut',
-        binAnimateAssign: 'assign',
-        binAdding: 'adding',
-        buttonAdd: 'button-add',
-        itemSelected: 'selected',
-        itemDragging: 'dragging',
-        droppableHover: 'droppable-hover'
-      },
-      keyboard: {
-        listUp: 38,
-        listDown: 40,
-        listDismiss: 46
-      },
-      delayAnimateAssign: 100,
-      binCharsLeft: 25,
-      binCharsRight: 25
     },
     g_callbacks = {
       moreTexts: Api.moreTexts,
