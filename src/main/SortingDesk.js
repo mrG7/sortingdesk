@@ -625,7 +625,7 @@ var SortingDesk = (function () {
         if(!node.length)
           return;
         
-        id = node.attr('id');
+        id = decodeURIComponent(node.attr('id'));
       }
 
       var self = this;
