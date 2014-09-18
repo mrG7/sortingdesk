@@ -277,4 +277,28 @@ describe('Interface', function () {
            } );
      } );
 
+  it("secondary bin is not deleted when dropped on to element other than "
+     + "delete button",
+     function (done) {
+       runAfterItemsRendered(g_options,
+           g_callbacks,
+           function () {
+             var node = g_options.nodes.bins.find('.bin-secondary').last(),
+                 dragging = new DraggingEvent(node);
+
+             dragging.trigger();
+
+             window.setTimeout(function () {
+               dragging.drop($("body"));
+
+               window.setTimeout(function () {
+                 expect(g_options.nodes.bins.find('.bin-secondary').length)
+                   .toBe(g_secondaryContentIds.length);
+                 
+                 done();
+               }, DELAY_BIN_DROPPED);
+             }, DELAY_BIN_DRAGGED);
+           } );
+     } );
+
 } );
