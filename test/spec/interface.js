@@ -210,7 +210,7 @@ describe('Interface', function () {
      } );
 
   it("primary sub bin is not deleted when dropped on to element other than "
-     + " delete button",
+     + "delete button",
      function (done) {
        var caption = "Foo bar baz primary";
     
