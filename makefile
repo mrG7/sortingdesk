@@ -27,7 +27,7 @@ man:
 
 clean:
 	echo Removing output directory
-	rm -vf "$(DIR_OUTPUT)"
+	rm -vfr "$(DIR_OUTPUT)"
 	echo Deleting extraneous files
 	find \( -name '*~' -or -name '\#*' -or -name '.\#*' \) -delete -print
 
