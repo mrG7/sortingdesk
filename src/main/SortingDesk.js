@@ -656,7 +656,7 @@ var SortingDesk = (function () {
         item.getNode()
           .css('opacity', 0.6)  /* to prevent flicker */
           .animate( { opacity: 0 },
-                    200,
+                    options.delays.textItemFade,
                     function () {
                       $(this).slideUp(
                         options.delays.slideItemUp,
