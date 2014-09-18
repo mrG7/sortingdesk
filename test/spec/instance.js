@@ -73,7 +73,7 @@ describe('Instance', function () {
            var id = g_options.nodes.items.children().get(1).id;
            
            expect(g_options.nodes.items.find("[id='" + id + "']").length).toBe(1);
-           expect(g_sortingDesk.remove(id)).toBe(true);
+           expect(g_sortingDesk.remove(decodeURIComponent(id))).toBe(true);
 
            window.setTimeout(function () {
              expect(g_options.nodes.items.find("[id='" + id + "']").length).toBe(0);
