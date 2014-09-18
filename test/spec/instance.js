@@ -81,6 +81,15 @@ describe('Instance', function () {
            }, DELAY_ITEM_DELETED);
          } );
        } );
+    
+    it("`getById' returns correct text item",
+       function (done) {
+         runAfterItemsRendered(g_options, g_callbacks, function () {
+           expect(g_sortingDesk.getById(decodeURIComponent(
+             g_options.nodes.items.children().get(1).id))).not.toBe(null);
+           done();
+         } );
+       } );
 
   } );
 } );
