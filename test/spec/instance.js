@@ -90,6 +90,16 @@ describe('Instance', function () {
            done();
          } );
        } );
+    
+    it("`getById' fails to return a text item from invalid id",
+       function (done) {
+         runAfterItemsRendered(g_options, g_callbacks, function () {
+           expect(g_sortingDesk.getById(decodeURIComponent(
+             g_options.nodes.items.children().get(1).id + '_')))
+             .toBe(null);
+           done();
+         } );
+       } );
 
   } );
 } );
