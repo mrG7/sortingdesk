@@ -173,6 +173,10 @@ describe('Interface', function () {
          g_options,
          g_callbacks,
          function () {
+           /* Expect there to be no primary sub bins. */
+           expect(g_options.nodes.bins.find('.bin-primary-sub').length)
+             .toBe(0);
+             
            g_options.nodes.bins.find('.button-add:nth(0)').click();
            
            window.setTimeout(function () {
