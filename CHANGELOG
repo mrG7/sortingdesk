@@ -1,3 +1,20 @@
+2014-09-18  Miguel Guedes  <miguel@miguelguedes.org>
+
+	* test:
+
+	Wrote additional tests. There are a total of 35 tests.
+
+	* src/main/SortingDesk.js:
+
+	Duration of special effects can now be customised.
+
+	Text items' and bins' ids are now escaped as they may potentially
+	contain characters that may cause errors.
+
+	* all:
+
+	Various minor improvements and fixes.
+
 2014-09-16  Miguel Guedes  <miguel@miguelguedes.org>
 
 	* jasmine:
