@@ -81,13 +81,20 @@ var SortingDesk = (function () {
       itemDragging: 'dragging',
       droppableHover: 'droppable-hover'
     },
-    keyboard: {                   /* Contains scan codes. */
-      listUp: 38,                 /* up                   */
-      listDown: 40,               /* down                 */
-      listDismiss: 46             /* delete               */
+    keyboard: {                 /* Contains scan codes. */
+      listUp: 38,               /* up                   */
+      listDown: 40,             /* down                 */
+      listDismiss: 46           /* delete               */
     },
-    visibleItems: 20,             /* Arbitrary.           */
-    delayAnimateAssign: 100,      /* milliseconds         */
+    delays: {                   /* In milliseconds.     */
+      animateAssign: 100,
+      binRemoval: 200,          /* Bin is removed from container. */
+      deleteButtonShow: 150,    /* Time taken to fade in delete button. */
+      deleteButtonHide: 300,    /* Time to fade out delete button. */
+      slideItemUp: 150,         /* Slide up length of deleted text item. */
+      addBinShow: 200           /* Fade in of temporary bin when adding. */
+    },
+    visibleItems: 20,           /* Arbitrary.           */
     binCharsLeft: 25,
     binCharsRight: 25
   };
@@ -136,7 +143,7 @@ var SortingDesk = (function () {
         return false;
       } );
       
-      node.fadeOut(100, function () {
+      node.fadeOut(options.delays.binRemoval, function () {
         /* Remove node and reorganise bin container. */
         node.remove(); 
 
@@ -406,11 +413,11 @@ var SortingDesk = (function () {
 
         new Draggable(node, {
           dragstart: function (e) {
-            options.nodes.binDelete.fadeIn();
+            onActivateDeleteButton_();
           },
           
           dragend: function (e) {
-            options.nodes.binDelete.fadeOut();
+            onDeactivateDeleteButton_();
           }
         } );
       }, 0);
@@ -648,10 +655,12 @@ var SortingDesk = (function () {
           .animate( { opacity: 0 },
                     200,
                     function () {
-                      $(this).slideUp(150, function () {
-                        $(this).remove();
-                        self.select();
-                      } );
+                      $(this).slideUp(
+                        options.delays.slideItemUp,
+                        function () {
+                          $(this).remove();
+                          self.select();
+                        } );
                     } );
 
         self.items.splice(i, 1);
@@ -735,12 +744,12 @@ var SortingDesk = (function () {
           self.owner.select(self);
 
           /* Activate deletion/dismissal button. */
-          options.nodes.binDelete.fadeIn();
+          onActivateDeleteButton_();
         },
         
         dragend: function () {
           /* Deactivate deletion/dismissal button. */
-          options.nodes.binDelete.fadeOut();
+          onDeactivateDeleteButton_();
         }
       } );
 
@@ -832,7 +841,7 @@ var SortingDesk = (function () {
                + 'type="text"/>'),
           node = this.fnRender(nodeContent)
             .addClass(options.css.binAdding)
-            .fadeIn(200);
+            .fadeIn(options.delays.addBinShow);
 
       this.owner.append(node);
       
@@ -862,7 +871,8 @@ var SortingDesk = (function () {
         .focus()
         .blur(function () {
           if(!this.value) {
-            node.fadeOut(200, function () { node.remove(); } );
+            node.fadeOut(options.delays.addBinShow,
+                         function () { node.remove(); } );
             return;
           }
 
@@ -1276,12 +1286,12 @@ var SortingDesk = (function () {
           /* Simulate the effect produced by a mouse click by assigning the
            * CSS class that contains identical styles to the pseudo-class
            * :hover, and removing it after the milliseconds specified in
-           * `options.delayAnimateAssign'. */
+           * `options.delay.animateAssign'. */
           bin.getNode().addClass(options.css.binAnimateAssign);
           
           window.setTimeout(function () {
             bin.getNode().removeClass(options.css.binAnimateAssign);
-          }, options.delayAnimateAssign);
+          }, options.delay.animateAssign);
           
           list.remove();
         }
@@ -1299,10 +1309,7 @@ var SortingDesk = (function () {
       list.selectOffset(1);
       break;
     case options.keyboard.listDismiss:
-      options.nodes.binDelete.fadeIn(150, function () {
-        options.nodes.binDelete.fadeOut(100);
-      } );
-      
+      onActivateDeleteButton_(onDeactivateDeleteButton_);
       list.remove();
       break;
       
@@ -1364,7 +1371,16 @@ var SortingDesk = (function () {
     return result;
   };
   
+  var onActivateDeleteButton_ = function (fn) {
+    options.nodes.binDelete.fadeIn(options.delays.deleteButtonShow,
+                                   typeof fn == 'function' ? fn : null);
+  };
 
+  var onDeactivateDeleteButton_ = function () {
+    options.nodes.binDelete.fadeOut(options.delays.deleteButtonHide);
+  };
+  
+  
   /* ----------------------------------------------------------------------
    *  Module initialisation
    * ---------------------------------------------------------------------- */
