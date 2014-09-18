@@ -29,6 +29,6 @@ clean:
 	echo Removing output directory
 	rm -vfr "$(DIR_OUTPUT)"
 	echo Deleting extraneous files
-	find \( -name '*~' -or -name '\#*' -or -name '.\#*' \) -delete -print
+	find -type f \( -name '*~' -or -name '\#*' -or -name '.\#*' \) -exec rm -fv {} +
 
 .SILENT:
