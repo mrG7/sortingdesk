@@ -638,7 +638,8 @@ var SortingDesk = (function () {
         id = decodeURIComponent(node.attr('id'));
       }
 
-      var self = this;
+      var self = this,
+          result = false;
       
       $.each(this.items, function (i, item) {
         if(item.getContent().node_id != id)
@@ -667,10 +668,14 @@ var SortingDesk = (function () {
                     } );
 
         self.items.splice(i, 1);
+        result = true;
+        
         return false;  
       } );
       
       this.check();
+
+      return result;
     },
 
     getById: function (id)
