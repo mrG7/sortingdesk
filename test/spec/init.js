@@ -30,6 +30,15 @@ var g_sortingDesk = null,
       primaryContentId: g_primaryContentId,
       secondaryContentIds: g_secondaryContentIds,
       visibleItems: 5,
+      delays: {
+        animateAssign: 0,
+        binRemoval: 0,
+        deleteButtonShow: 0,
+        deleteButtonHide: 0,
+        slideItemUp: 0,
+        addBinShow: 0,
+        textItemFade: 0
+      }
     },
     g_callbacks = {
       moreTexts: Api.moreTexts,
