@@ -87,12 +87,15 @@ var SortingDesk = (function () {
       listDismiss: 46           /* delete               */
     },
     delays: {                   /* In milliseconds.     */
-      animateAssign: 100,
+      animateAssign: 75,        /* Duration of assignment of text item via
+                                 * shortcut. */
       binRemoval: 200,          /* Bin is removed from container. */
       deleteButtonShow: 150,    /* Time taken to fade in delete button. */
       deleteButtonHide: 300,    /* Time to fade out delete button. */
       slideItemUp: 150,         /* Slide up length of deleted text item. */
-      addBinShow: 200           /* Fade in of temporary bin when adding. */
+      addBinShow: 200,          /* Fade in of temporary bin when adding. */
+      textItemFade: 100         /* Fade out duration of text item after
+                                 * assignment. */
     },
     visibleItems: 20,           /* Arbitrary.           */
     binCharsLeft: 25,
