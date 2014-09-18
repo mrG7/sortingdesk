@@ -1294,7 +1294,7 @@ var SortingDesk = (function () {
           
           window.setTimeout(function () {
             bin.getNode().removeClass(options.css.binAnimateAssign);
-          }, options.delay.animateAssign);
+          }, options.delays.animateAssign);
           
           list.remove();
         }
