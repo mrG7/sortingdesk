@@ -372,7 +372,10 @@ var SortingDesk = (function () {
       var self = this;
 
       node
-        .attr('data-scope', 'bin')
+        .attr( {
+          'data-scope': 'bin',
+          'id': encodeURIComponent(this.id)
+        } )
         .on( {
           mouseenter: function () {
             onMouseEnter_(self);
@@ -445,7 +448,6 @@ var SortingDesk = (function () {
     Bin.call(this, owner, id, bin);
     
     this.setNode_(invoke_("renderPrimaryBin", bin)
-                  .attr('id', id)
                   .addClass(options.css.binGeneric));
     
     owner.append(this.node);
@@ -462,7 +464,6 @@ var SortingDesk = (function () {
     Bin.call(this, owner, id, bin);
 
     this.setNode_(invoke_("renderPrimarySubBin", bin)
-                  .attr('id', id)
                   .addClass(options.css.binGeneric));
 
     owner.append(this.node);
@@ -479,7 +480,6 @@ var SortingDesk = (function () {
     Bin.call(this, owner, id, bin);
     
     this.setNode_($(invoke_('renderSecondaryBin', bin))
-                  .attr('id', id)
                   .addClass(options.css.binGeneric));
     
     owner.append(this.node);
