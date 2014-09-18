@@ -393,7 +393,7 @@ var SortingDesk = (function () {
         scopes: [ 'text-item' ],
         
         drop: function (e) {
-          list.remove(e.dataTransfer.getData('Text'));
+          list.remove(decodeURIComponent(e.dataTransfer.getData('Text')));
         }
       } );
 
@@ -715,14 +715,14 @@ var SortingDesk = (function () {
       /* TODO: `find' call below expects a `text-item-close' class. */
       this.node
         .attr( {
-          id: this.content.node_id,
+          id: encodeURIComponent(this.content.node_id),
           "data-scope": "text-item"
         } )
         .click(function () {
           self.owner.select(self);
         } )
         .find('.text-item-close').click(function () {
-          self.owner.remove(self.content.node_id);
+          self.owner.remove(decodeURIComponent(self.content.node_id));
           return false;
         } );
 
@@ -808,7 +808,7 @@ var SortingDesk = (function () {
       scopes: [ 'text-item' ],
       
       drop: function (e, id) {
-        self.onAdd(id);
+        self.onAdd(decodeURIComponent(id));
       }
     } );
 
@@ -1217,7 +1217,7 @@ var SortingDesk = (function () {
         switch(scope) {
         case 'bin':
           bins.some(function (container) {
-            var bin = container.getBinById(id);
+            var bin = container.getBinById(decodeURIComponent(id));
 
             if(bin) {
               /* It doesn't matter if the API request succeeds or not for the
@@ -1247,7 +1247,7 @@ var SortingDesk = (function () {
           break;
 
         case 'text-item':
-          list.remove(id);
+          list.remove(decodeURIComponent(id));
           break;
 
         default:
