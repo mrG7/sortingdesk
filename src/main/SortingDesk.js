@@ -1235,7 +1235,7 @@ var SortingDesk = (function () {
               fn(bin.getId())
                 .fail(function (result) {
                   console.log("bin-remove:", result.error);
-                  /* TODO: notification not implemented yet. */
+                  /* TODO: user notification not implemented yet. */
                 } );
               
               return true;
