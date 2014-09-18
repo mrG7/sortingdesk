@@ -55,14 +55,17 @@ var Api = {
   primaryContentId: null,
   bins: null,
   items: null,
-  lastId: 0,                   /* So we may assign ids to secondary bins when
+  lastId: null,                /* So we may assign ids to secondary bins when
                                 * creating them. */
-  lastItemId: 0,
-  processing: { },
+  lastItemId: null,
+  processing: null,
 
   initialise: function (descriptor, secondaryBins) {
     var secondaryContentIds = [ ];
     
+    Api.lastId = 0;
+    Api.lastItemId = 0;
+    Api.processing = { };
     Api.bins = { };
     
     Api.primaryContentId = descriptor.primaryBin.node_id;
