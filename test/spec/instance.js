@@ -66,5 +66,21 @@ describe('Instance', function () {
              .toThrow("Sorting Desk not initialised");
          }, done);
        } );
+    
+    it("`remove' removes the correct text item",
+       function (done) {
+         runAfterItemsRendered(g_options, g_callbacks, function () {
+           var id = g_options.nodes.items.children().get(1).id;
+           
+           expect(g_options.nodes.items.find("[id='" + id + "']").length).toBe(1);
+           expect(g_sortingDesk.remove(id)).toBe(true);
+
+           window.setTimeout(function () {
+             expect(g_options.nodes.items.find("[id='" + id + "']").length).toBe(0);
+             done();
+           }, DELAY_ITEM_DELETED);
+         } );
+       } );
+
   } );
 } );
