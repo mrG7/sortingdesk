@@ -138,6 +138,7 @@ var Api = {
           var node = { };
 
           try {
+            node.raw = item;
             node.node_id = item.node_id;
             
             item = item.features;

@@ -115,6 +115,7 @@ var Api = {
             item = Api.items[Api.lastItemId++];
         
         try {
+          node.raw = item;
           node.node_id = item.node_id;
           
           item = item.features;
