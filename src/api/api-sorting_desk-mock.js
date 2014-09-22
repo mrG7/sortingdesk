@@ -68,11 +68,13 @@ var Api = {
     Api.processing = { };
     Api.bins = { };
     
-    Api.primaryContentId = descriptor.primaryBin.node_id;
-    Api.bins[Api.primaryContentId] = {
-      name: Object.firstKey(descriptor.primaryBin.features.NAME),
-      bins: [ ]
-    };
+    if (descriptor.primaryBin) {
+      Api.primaryContentId = descriptor.primaryBin.node_id;
+      Api.bins[Api.primaryContentId] = {
+        name: Object.firstKey(descriptor.primaryBin.features.NAME),
+        bins: [ ]
+      };
+    }
 
     secondaryBins.forEach(function (bin) {
       secondaryContentIds.push(bin.node_id);
