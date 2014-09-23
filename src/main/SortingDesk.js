@@ -629,16 +629,19 @@ var SortingDesk = (function () {
 
       this.select(index);
     },
+
+    curItem: function() {
+      var node = this.container.find('.' + options.css.itemSelected);
+      if(!node.length)
+        return null;
+      id = decodeURIComponent(node.attr('id'));
+      return this.getById(id).content;
+    },
     
     remove: function (id)
     {
       if(typeof id == 'undefined') {
-        var node = this.container.find('.' + options.css.itemSelected);
-
-        if(!node.length)
-          return;
-        
-        id = decodeURIComponent(node.attr('id'));
+        id = this.curItem().node_id;
       }
 
       var self = this,
@@ -1314,9 +1317,7 @@ var SortingDesk = (function () {
             bin.getNode().removeClass(options.css.binAnimateAssign);
           }, options.delays.animateAssign);
           
-          var node = list.container.find('.' + options.css.itemSelected);
-          var id = decodeURIComponent(node.attr('id'));
-          invoke_("textDroppedInBin", list.getById(id), bin);
+          invoke_("textDroppedInBin", list.curItem(), bin);
           list.remove();
         }
       }
@@ -1334,6 +1335,7 @@ var SortingDesk = (function () {
       break;
     case options.keyboard.listDismiss:
       onActivateDeleteButton_(onDeactivateDeleteButton_);
+      invoke_("textDismissed", list.curItem());
       list.remove();
       break;
       
@@ -1345,6 +1347,7 @@ var SortingDesk = (function () {
   };
 
   var onClick_ = function (bin) {
+    invoke_("textDroppedInBin", list.curItem(), bin);
     list.remove();
   };
 
