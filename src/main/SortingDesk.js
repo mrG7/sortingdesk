@@ -403,7 +403,10 @@ var SortingDesk = (function () {
         scopes: [ 'text-item' ],
         
         drop: function (e) {
-          list.remove(decodeURIComponent(e.dataTransfer.getData('Text')));
+          var id = decodeURIComponent(e.dataTransfer.getData('Text'));
+          var item = getById(id);
+          list.remove(decodeURIComponent(item.node_id));
+          invoke_("textDroppedInBin", item, self);
         }
       } );
 
@@ -740,6 +743,7 @@ var SortingDesk = (function () {
         } )
         .find('.text-item-close').click(function () {
           self.owner.remove(decodeURIComponent(self.content.node_id));
+          invoke_("textDismissed", self.content);
           return false;
         } );
 
@@ -1272,7 +1276,9 @@ var SortingDesk = (function () {
           break;
 
         case 'text-item':
+          var item = list.getById(id);
           list.remove(decodeURIComponent(id));
+          invoke_("textDismissed", item);
           break;
 
         default:
