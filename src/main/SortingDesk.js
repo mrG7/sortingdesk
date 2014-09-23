@@ -405,8 +405,8 @@ var SortingDesk = (function () {
         drop: function (e) {
           var id = decodeURIComponent(e.dataTransfer.getData('Text'));
           var item = getById(id);
-          list.remove(decodeURIComponent(item.node_id));
           invoke_("textDroppedInBin", item, self);
+          list.remove(decodeURIComponent(item.node_id));
         }
       } );
 
@@ -742,8 +742,8 @@ var SortingDesk = (function () {
           self.owner.select(self);
         } )
         .find('.text-item-close').click(function () {
-          self.owner.remove(decodeURIComponent(self.content.node_id));
           invoke_("textDismissed", self.content);
+          self.owner.remove(decodeURIComponent(self.content.node_id));
           return false;
         } );
 
@@ -1277,8 +1277,8 @@ var SortingDesk = (function () {
 
         case 'text-item':
           var item = list.getById(id);
-          list.remove(decodeURIComponent(id));
           invoke_("textDismissed", item);
+          list.remove(decodeURIComponent(id));
           break;
 
         default:
