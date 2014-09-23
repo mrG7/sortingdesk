@@ -112,7 +112,7 @@ describe('Callbacks', function () {
 
                /* Also expect number of items in UI to be consistent. */
                expect(g_options.nodes.items.children().length)
-                 .toBe(g_options.visibleItems * 2 - g_options.visibleItems + 1);
+                 .toBe(g_options.visibleItems);
                done();
              }, DELAY_ITEM_DELETED);
            } );
