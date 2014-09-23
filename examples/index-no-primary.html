@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Sorting Desk - Offline</title>
+  
+  <link rel="stylesheet" href="css/theme-default.css" media="screen" />
+
+  <!-- Libraries -->
+  <script type="text/javascript" src="lib/require-2.1.14.min.js"></script>
+  
+  <!-- Main initialisation logic -->
+  <script type="text/javascript">
+
+  require.config( {
+    baseUrl: '../',
+    paths: {
+      "SortingDesk": "src/main/SortingDesk",
+      "API-SortingDesk": "src/api/api-sorting_desk-mock",
+      "API-Data": "src/api/data/al_ahram.json?",
+      "jQuery": "lib/jquery-2.1.1.min"
+    }
+  } );
+                
+  require( [ "SortingDesk" ], function () {
+    var sortingDesk,
+        nitems = $("#items"),
+        nbins = $("#bins"),
+        nloading = $("#loading"),
+        height,
+        secondaryBins = [
+          { node_id: '#100', features: { NAME: { "Irrelevant": 0 } } },
+          { node_id: '^1$0#1', features: { NAME: { "Rubbish": 0 } } },
+          { node_id: '1_0%%^&#2', features: { NAME: { "Keep": 0 } } }
+        ],
+        secondaryContentIds;
+
+    $(".wrapper").fadeIn();
+
+    /* Setup AJAX UI notification before actually making any requests. */
+    $(document).ajaxStart(function () { nloading.fadeIn(); } );
+    $(document).ajaxStop(function () { nloading.fadeOut(); } );
+    
+    height = $(window).height() - nitems.offset().top - 28;
+    
+    nitems
+      .height(height)
+      .children().remove();
+    
+    nbins
+      .height(height)
+      .children().remove();
+
+    /* Load data retrieved from loaded JSON file. */
+    secondaryContentIds = Api.initialise(g_descriptor, secondaryBins);
+    g_descriptor = null;
+    
+    sortingDesk = SortingDesk.instantiate( {
+      nodes: {
+        items: nitems,
+        bins: nbins,
+        binDelete: $("#button-delete") /* Also used for 'dimissing' text items
+                                        * that aren't/can't/won't be sorted into
+                                        * a bin */
+      },
+      css: {                      /* This tree is optional: see
+                                   * `SortingDesk.defaults' */
+        secondaryBinsWrapper: "wrapper-secondary-bin",
+        leftmostBin: "left"
+      },
+      secondaryContentIds: secondaryContentIds,
+      visibleItems: 15
+    }, {
+      moreTexts: Api.moreTexts,
+      getBinData: Api.getBinData,
+      saveBinData: Api.saveBinData,
+      addPrimarySubBin: Api.addPrimarySubBin,
+      addSecondaryBin: Api.addSecondaryBin,
+      removePrimarySubBin: Api.removePrimarySubBin,
+      removeSecondaryBin: Api.removeSecondaryBin,
+      renderText: Api.renderText,
+      renderPrimaryBin: Api.renderPrimaryBin,
+      renderPrimarySubBin: Api.renderPrimarySubBin,
+      renderSecondaryBin: Api.renderSecondaryBin,
+      renderAddButton: Api.renderAddButton
+    } );
+   });
+    </script>
+</head>
+<body>
+  <div id="wrapper-outer">
+    <div id="wrapper-bins" class="wrapper">
+      <div id="bins">
+      </div>
+    </div>
+    <div id="wrapper-items" class="wrapper">
+      <div id="items">
+      </div>
+    </div>
+  </div>
+  <div id="button-delete">X</div>
+  <div id="loading">Loading...</div>
+  <div id="notification"></div>
+</body>
+</html>

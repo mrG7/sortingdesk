@@ -1078,8 +1078,12 @@ var SortingDesk = (function () {
     
     /* Do not request bin data if a bins HTML container wasn't given. */
     if(options.nodes.bins) {
+      var ids = [];
+      if (typeof options.primaryContentId != 'undefined') {
+        ids = [options.primaryContentId];
+      }
       var promise = callbacks.getBinData(
-        [ options.primaryContentId ].concat(options.secondaryContentIds));
+        ids.concat(options.secondaryContentIds));
 
       if(!promise)
         throw "Another `getBinData' request is ongoing";
@@ -1090,8 +1094,9 @@ var SortingDesk = (function () {
         } ).fail(function () {
           console.log("Failed to initialise Sorting Desk UI");
         } );
-    } else
+    } else {
       initialise_();
+    }
 
     return {
       isInitialised: isInitialised,
@@ -1206,17 +1211,19 @@ var SortingDesk = (function () {
      * exist. */
     if(options.nodes.bins) {
       /* Firstly process primary bin. */
-      if(!(options.primaryContentId in initialiseBins)
-         || initialiseBins[options.primaryContentId].error) {
-        throw "Failed to retrieve contents of primary bin";
-      }
+      if (typeof options.primaryContentId != 'undefined') {
+        if(!(options.primaryContentId in initialiseBins)
+           || initialiseBins[options.primaryContentId].error) {
+          throw "Failed to retrieve contents of primary bin";
+        }
       
-      bins.push(new BinContainerPrimary(
-        options.primaryContentId,
-        initialiseBins[options.primaryContentId]));
+        bins.push(new BinContainerPrimary(
+          options.primaryContentId,
+          initialiseBins[options.primaryContentId]));
 
-      /* Delete to avoid repetition below. */
-      delete initialiseBins[options.primaryContentId];
+        /* Delete to avoid repetition below. */
+        delete initialiseBins[options.primaryContentId];
+      }
 
       /* Now create secondary bins */
       
