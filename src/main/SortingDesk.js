@@ -1314,6 +1314,10 @@ var SortingDesk = (function () {
             bin.getNode().removeClass(options.css.binAnimateAssign);
           }, options.delays.animateAssign);
           
+          var node = list.container.find('.' + options.css.itemSelected);
+          var id = decodeURIComponent(node.attr('id'));
+          console.log(list.getById(id));
+          invoke_("textDroppedInBin", list.getById(id));
           list.remove();
         }
       }
