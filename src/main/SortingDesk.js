@@ -643,7 +643,12 @@ var SortingDesk = (function () {
     remove: function (id)
     {
       if(typeof id == 'undefined') {
-        id = this.curItem().node_id;
+        var cur = this.curItem();
+        if (!cur) {
+          this.check();
+          return null;
+        }
+        id = cur.node_id;
       }
 
       var self = this,
