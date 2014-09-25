@@ -634,8 +634,10 @@ var SortingDesk = (function () {
       var node = this.container.find('.' + options.css.itemSelected);
       if(!node.length)
         return null;
-      id = decodeURIComponent(node.attr('id'));
-      return this.getById(id).content;
+      var item = this.getById(decodeURIComponent(node.attr('id')));
+      if (!item)
+        return null;
+      return item.content;
     },
     
     remove: function (id)
