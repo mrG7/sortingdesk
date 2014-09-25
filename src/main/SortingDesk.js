@@ -1116,7 +1116,8 @@ var SortingDesk = (function () {
       isInitialised: isInitialised,
       reset: reset,
       remove: remove,
-      getById: getById
+      getById: getById,
+      getBinByNodeId: getBinByNodeId
     };
   };
 
@@ -1210,6 +1211,15 @@ var SortingDesk = (function () {
    * */
   var isInitialised = function () {
     return initialised;
+  };
+
+  var getBinByNodeId = function(id) {
+    for (var i = 0; i < bins.length; i++) {
+      var b = bins[i].getBinById(id);
+      if (b)
+        return b;
+    }
+    return null;
   };
 
 
@@ -1419,7 +1429,7 @@ var SortingDesk = (function () {
    *  Module initialisation
    * ---------------------------------------------------------------------- */
   return {
-    instantiate: instantiate
+    instantiate: instantiate,
   };
 
 } )();
