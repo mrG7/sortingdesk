@@ -1,6 +1,5 @@
-* To do items [74%]
+* To do items [70%]
 ** TODO Remove reliance on CSS classes except for those necessary
-** TODO Simplify initialisation of Sorting Desk
 ** TODO Simplify use of CSS
 ** TODO End `render' prefixed callbacks and expect constructors instead
 ** TODO All bins are born equal
@@ -18,8 +17,12 @@ Must clearly communicate to the user that there aren't any more text items avail
 ** TODO Move responsibility for loading notifications entirely to the client
 Use a callback for this purpose.
 ** TODO Allow keyboard shortcuts to be assigned programmatically
-** DONE Allow Sorting Desk to be instantiated multiple times
-- State "DONE"       from "TODO"       [2014-09-30 Tue 18:47]
+** IN-PROGRESS Simplify initialisation of Sorting Desk
+- State "IN-PROGRESS" from "TODO"       [2014-09-30 Tue 18:54]
+Allow the following forms:
+
+1) new SortingDesk( options, callbacks );
+2) new SortingDesk( $("#items"), callbacks );
 ** IN-PROGRESS [#A] Write jasmine (unit) tests
 - State "IN-PROGRESS" from "TODO"       [2014-09-12 Fri 09:54]
 Similar to the tests found on: =git@devhub.diffeo.com:streamboard.git=
@@ -29,6 +32,8 @@ Similar to the tests found on: =git@devhub.diffeo.com:streamboard.git=
 A mechanism for displaying notifications to the user is needed for the purpose
 of providing feedback, in particular in the cases when a user action is invalid
 and results in an error.
+** DONE Allow Sorting Desk to be instantiated multiple times
+- State "DONE"       from "TODO"       [2014-09-30 Tue 18:47]
 ** DONE Ensure component is fault proof when faced with absent elements
 - State "DONE"       from "IN-PROGRESS" [2014-09-18 Thu 12:09]
 - State "IN-PROGRESS" from "WAIT"       [2014-09-12 Fri 21:17]
