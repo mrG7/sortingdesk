@@ -1,4 +1,4 @@
-/** theme-default.css --- Default theme
+/** theme-default.css --- Default theme used by examples
  *
  * Copyright (C) 2014 Diffeo
  *
@@ -9,13 +9,12 @@
  * 
  */
 
+
 /* HTML tags */
 BODY {
   font: 15px Arial, sans-serif;
 }
 
-
-/* Sorting Desk */
 #wrapper-outer {
   width: 1000px;
   margin: auto;
@@ -36,13 +35,47 @@ BODY {
   float: right;
 }
 
+#wrapper-items,
+#wrapper-bins {
+  overflow: auto;
+  height: 95vh;
+}
+
 #items, #bins {
   padding: 10px;
-  height: 600px;
   overflow: auto;
   position: relative;
 }
 
+#loading {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 5px 10px 5px 10px;
+  display: none;
+  background-color: rgb(219, 60, 60);
+  color: white;
+}
+
+#notification {
+  display: none;
+  width: 600px;
+  position: absolute;
+  left: 50%;
+  margin-left: -300px;
+}
+
+.debug-controls {
+  clear: both;
+  padding: 10px;
+}
+
+#primary-node-id {
+  width: 400px;
+  font-family: "Courier New", Courier, monospace;
+}
+
+/* Sorting Desk */
 .wrapper-primary-bin-outer,
 .wrapper-secondary-bin-outer {
   clear: both;
@@ -191,236 +224,4 @@ BODY {
 
 .bin-secondary .bin-shortcut {
   border-color: #CEA756;
-}
-
-.text-item {
-  position: relative;
-  margin: 15px 5px;
-  padding: 10px;
-  background-color: #FFFFFA;
-  border: 2px solid #E0E2B6;
-  border-radius: 8px;
-  color: #242922;
-  text-align: justify;
-  font-size: 14px;
-  cursor: default;
-}
-
-.text-item B:not(:first-child),
-.text-item STRONG:not(:first-child) {
-  padding-left: 10px;
-}
-
-.text-item-content {
-}
-
-.text-item-content * {
-  display: inline-block;
-}
-
-.text-item:hover {
-  background-color: #F8F8DD;
-  color: #44573C;
-}
-
-.text-item:hover .text-item-title {
-  background-color: #F8F8DD;
-}
-
-.text-item:active {
-  background-color: #FFF5F8;
-  color: #7F8368;
-}
-
-.text-item:active .text-item-title {
-  background-color: #FFF5F8;
-}
-
-.text-item.selected {
-  border: 2px solid #8EB4DA;
-}
-
-.text-item:selected .text-item-title {
-  background-color: #FFF5F8;
-}
-
-.text-item.selected:hover {
-  background-color: inherit;
-}
-
-.more, .less {
-  float: right;
-  font-size: 85%;
-  padding-top: 3px;
-  color: #999;
-}
-
-.more:hover, .less:hover {
-  color: #123;
-  cursor: pointer;
-}
-
-A.text-item-title {
-  position: absolute;
-  top: -12px;
-  background-color: white;
-  padding: 2px 8px 2px 8px;
-  display: block;
-  text-decoration: none;
-  color: #2D5C8B;
-  border-radius: 6px;
-}
-
-A.text-item-title:hover {
-  color: #4A8BCC;
-}
-
-.text-item:hover .text-item-close,
-.text-item.selected .text-item-close {
-  display: block;
-}
-
-.text-item.dragging:hover .text-item-close,
-.text-item.selected.dragging .text-item-close {
-  display: none;
-}
-
-.text-item-close {
-  position: absolute;
-  top: -8px;
-  right: -6px;
-  background-color: white;
-  padding: 5px 4px 5px 5px;
-  display: none;
-  text-decoration: none;
-  color: grey;
-  border: 1px solid silver;
-  border-radius: 12px;
-  line-height: 7px;
-  box-shadow: 1px 1px 1px 0px rgba(50, 50, 50, 0.75);
-}
-
-.text-item-close:hover {
-  color: black;
-  background-color: #ddd;
-}
-
-.text-item-close:active {
-  background-color: #eee;
-}
-
-.droppable {
-  border-style: dashed;
-}
-
-.text-item.dragging {
-  border-color: #eee !important;
-  color: silver !important;
-  background-color: inherit !important;
-}
-
-.droppable-highlight {
-  border-style: dashed !important;
-}
-
-.droppable-hover {
-  border-style: dotted !important;
-}
-
-.ui-draggable-dragging {
-  cursor: inherit;
-}
-
-.button-add {
-  position: relative;
-  border: 2px solid #A2C5A6;
-  background-color: #ECF8EA;
-  clear: both;
-  padding: 5px;
-  margin: 15px auto 0 auto;
-  font-size: 25px;
-  color: green;
-  font-weight: bold;
-  width: 28px;
-  text-align: center;
-  border-radius: 19px;
-  box-shadow: 1px 1px 2px 0px rgba(50, 50, 50, 0.75);
-  text-shadow: 1px 1px 2px rgba(150, 150, 150, 1);
-  transition: background-color 175ms, color 100ms;
-  cursor: pointer;
-  line-height: 25px;
-}
-
-.button-add:hover {
-/*  color: #67B285; */
-  background-color: #DEF3DA;
-  transition: background-color 175ms, color 100ms;
-}
-
-.button-add:active {
-  top: 1px;
-  left: 1px;
-  box-shadow: none;
-  transition: background-color 175ms, color 100ms;
-}
-
-#button-delete {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  margin-top: -29px;
-  margin-left: -29px;
-  border: 2px solid #C5A2A2;
-  background-color: #F8EAEA;
-  clear: both;
-  font-size: 20px;
-  color: #900;
-  padding: 15px 6px 15px 6px;
-  width: 40px;
-  text-align: center;
-  border-radius: 30px;
-  box-shadow: 1px 1px 2px 0px rgba(50, 50, 50, 0.75);
-  text-shadow: 1px 1px 2px rgba(150, 150, 150, 1);
-  transition: background-color 175ms, color 100ms;
-  cursor: pointer;
-  display: none;
-}
-
-#button-delete:hover {
-  background-color: #F3DADA;
-  transition: background-color 175ms, color 100ms;
-}
-
-#button-delete.droppable-hover {
-  background-color: #C04343;
-  border-color: #7A4747;
-  color: #FFF5F5;
-}
-
-#loading {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  padding: 5px 10px 5px 10px;
-  display: none;
-  background-color: rgb(219, 60, 60);
-  color: white;
-}
-
-#notification {
-  display: none;
-  width: 600px;
-  position: absolute;
-  left: 50%;
-  margin-left: -300px;
-}
-
-.debug-controls {
-  clear: both;
-  padding: 10px;
-}
-
-#primary-node-id {
-  width: 400px;
-  font-family: "Courier New", Courier, monospace;
 }
