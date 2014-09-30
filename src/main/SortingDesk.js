@@ -23,11 +23,9 @@ if(typeof define === "function" && define.amd) {
 
 
 /**
- * Main class of the Sorting Desk component. Responsible for initialising the
- * state of the component.
- * 
- * @author Miguel Guedes <miguel@miguelguedes.org>
- * @class
+ * The Sorting Desk module.
+ *
+ * @returns a "class" constructor that creates a Sorting Desk instance.
  * */
 var SortingDesk = (function () {
 
