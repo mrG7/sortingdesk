@@ -1,4 +1,10 @@
-* To do items [84%]
+* To do items [74%]
+** TODO Remove reliance on CSS classes except for those necessary
+** TODO Simplify initialisation of Sorting Desk
+** TODO Simplify use of CSS
+** TODO End `render' prefixed callbacks and expect constructors instead
+** TODO All bins are born equal
+End bin strata.
 ** TODO [#B] Prefix text-items' and bins' node ids
 - State "TODO"       from "WAIT"       [2014-09-07 Sun 08:16]
 - State "WAIT"       from "TODO"       [2014-09-05 Fri 10:41] \\
@@ -9,6 +15,11 @@
   Not proceeding with this until it's clear whether bins based on existing text items are even editable.
 ** TODO [#C] Text items container doesn't have a UI state when it doesn't hold any text items
 Must clearly communicate to the user that there aren't any more text items available.
+** TODO Move responsibility for loading notifications entirely to the client
+Use a callback for this purpose.
+** TODO Allow keyboard shortcuts to be assigned programmatically
+** DONE Allow Sorting Desk to be instantiated multiple times
+- State "DONE"       from "TODO"       [2014-09-30 Tue 18:47]
 ** IN-PROGRESS [#A] Write jasmine (unit) tests
 - State "IN-PROGRESS" from "TODO"       [2014-09-12 Fri 09:54]
 Similar to the tests found on: =git@devhub.diffeo.com:streamboard.git=
@@ -140,11 +151,13 @@ It was stated that "other types come from other sources including Facebook profi
 Asked to write it as a long code comment block but might be best done in a
 standalone *editable* text file that doesn't pollute the code and the repository?
 
-* Bugs [90%]
+* Bugs [91%]
 ** TODO When items' DIV is selected, scrolling with keyboard both selects next item as well as scroll the DIV contents
 Scrolling on the items' DIV container must be suppressed.
 
 Note that this might not be possible.
+** DONE Fix failing tests
+- State "DONE"       from "TODO"       [2014-09-30 Tue 18:31]
 ** DONE Detach event from bin/text item delete
 - State "DONE"       from "TODO"       [2014-09-16 Tue 19:32]
 It is currently broken.
