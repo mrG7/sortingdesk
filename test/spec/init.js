@@ -141,12 +141,12 @@ function runAfterItemsRendered(options, callbacks, condition, done) {
     interval = window.setInterval(function () {
       if(!g_sortingDesk.isInitialised())
         return;
+      else if(g_options.nodes.items.children().length < g_options.visibleItems)
+        return;
       
       window.clearInterval(interval);
 
-      window.setTimeout(function () {
-        condition();
-      }, DELAY_ITEMS);
+      condition();
       
       if(done)
         done();
