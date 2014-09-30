@@ -38,15 +38,13 @@
     $(document).ajaxStart(function () { nloading.fadeIn(); } );
     $(document).ajaxStop(function () { nloading.fadeOut(); } );
     
-    height = $(window).height() - nitems.offset().top - 28;
+    height = $(window).height() - nitems.offset().top - 10;
     
-    nitems
-      .height(height)
-      .children().remove();
+    nitems.parent().height(height);
+    nitems.children().remove();
     
-    nbins
-      .height(height)
-      .children().remove();
+    nbins.parent().height(height);
+    nbins.children().remove();
 
     secondaryContentIds = Api.initialise(primaryContentId, secondaryBins);
     
@@ -73,13 +71,6 @@
               binDelete: $("#button-delete") /* Also used for 'dimissing' text
                                               * items that aren't/can't/won't be
                                               * sorted into a bin */
-            },
-            css: {                      /* This tree is optional: see
-                                         * `SortingDesk.defaults' */
-              primaryBinOuterWrapper: "wrapper-primary-bin-outer",
-              primaryBinInnerWrapper: "wrapper-primary-bin-inner",
-              secondaryBinsWrapper: "wrapper-secondary-bin",
-              leftmostBin: "left"
             },
             primaryContentId: primaryContentId,
             secondaryContentIds: secondaryContentIds,
