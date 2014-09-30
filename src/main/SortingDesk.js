@@ -917,7 +917,7 @@ var SortingDesk = (function () {
           .always(function () { node.remove(); } );
       },
 
-      onAddManual: function (node, input) {
+      onAddManual: function (node) {
         var self = this,
             input = node.find('input');
 
