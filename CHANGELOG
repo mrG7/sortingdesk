@@ -1,10 +1,19 @@
 2014-09-30  Miguel Guedes  <miguel@miguelguedes.org>
 
+	* all:
+
+	Begin moving styling specific to Sorting Desk into own CSS source
+	file.
+
 	* src/main/SortingDesk.js:
 
 	Allow component to be instantiated multiple times.
 
 	Begin simplifying component instantiation.
+
+	Ensure code falls within the 80 columns limit.
+
+	Minor improvements and fixes to code.
 
 	* test:
 
