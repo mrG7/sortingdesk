@@ -1,0 +1,15 @@
+.hacked-iframe {
+    width: 100%;
+    height: 30em;
+}
+
+.profile-image {
+    font-size: 300%;
+    width: 1em;
+    text-align: center;
+}
+
+.profile-image img {
+    max-width: 1em;
+    max-height: 1em;
+}
