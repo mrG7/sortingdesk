@@ -8,6 +8,10 @@
  */
 
 
+/*global $ */
+/*jshint laxbreak:true */
+
+
 /* Compatibility with RequireJs. */
 if(typeof define === "function" && define.amd) {
   define("SortingDesk", [ "jQuery", "API-SortingDesk" ], function() {

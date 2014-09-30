@@ -10,6 +10,8 @@
 
 /*global g_descriptor, SortingDesk, Api */
 /*global afterEach */
+/*jshint laxbreak:true */
+
 
 /* Configure API. */
 Api.DELAY_MIN = Api.DELAY_MAX = 0;

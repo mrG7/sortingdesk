@@ -14,6 +14,7 @@
  *global DELAY_ITEM_DROPPED, DELAY_BIN_DRAGGED, DELAY_BIN_DROPPED
  *global g_options, g_callbacks, g_secondaryContentIds
  *global describe, it, expect */
+/*jshint laxbreak:true */
 
 
 describe('Interface', function () {
