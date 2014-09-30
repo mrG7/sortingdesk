@@ -48,9 +48,9 @@ describe('Interface', function () {
     runNoInstantiation(
       function () {
         expect(function () {
-          SortingDesk.instantiate($.extend(true, { }, g_options,
-                                           { nodes: { items: null } }),
-                                  g_callbacks);
+          new SortingDesk($.extend(true, { }, g_options,
+                                   { nodes: { items: null } }),
+                          g_callbacks);
         } ).toThrow("Missing `items' nodes option");
       },
       done);
