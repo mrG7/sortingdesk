@@ -362,7 +362,7 @@ var SortingDesk = (function () {
     BinContainerPrimary.prototype = Object.create(BinContainer.prototype);
 
 
-    /*
+    /**
      * @class
      * */
     var BinContainerSecondary = function (bins)
@@ -978,6 +978,9 @@ var SortingDesk = (function () {
     };
 
 
+    /**
+     * @class@
+     * */
     var DragDropManager = {
       activeNode: null,
 
@@ -1011,6 +1014,9 @@ var SortingDesk = (function () {
     };
 
 
+    /**
+     * @class@
+     * */
     var Draggable = function (node, options)
     {
       var self = this;
@@ -1044,6 +1050,9 @@ var SortingDesk = (function () {
     };
 
 
+    /**
+     * @class@
+     * */
     var Droppable = function (node, options)
     {
       var self = this;
