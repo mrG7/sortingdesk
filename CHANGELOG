@@ -1,3 +1,17 @@
+2014-09-30  Miguel Guedes  <miguel@miguelguedes.org>
+
+	* src/main/SortingDesk.js:
+
+	Allow component to be instantiated multiple times.
+
+	Begin simplifying component instantiation.
+
+	* test:
+
+	Adjust tests to reflect new instantiation requirements.
+
+	Fix failing tests.
+
 2014-09-18  Miguel Guedes  <miguel@miguelguedes.org>
 
 	* test:
