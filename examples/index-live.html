@@ -83,22 +83,7 @@
             primaryContentId: primaryContentId,
             secondaryContentIds: secondaryContentIds,
             visibleItems: 15
-          }, {
-            moreTexts: Api.moreTexts,
-            getBinData: Api.getBinData,
-            saveBinData: Api.saveBinData,
-            addPrimarySubBin: Api.addPrimarySubBin,
-            addSecondaryBin: Api.addSecondaryBin,
-            removePrimarySubBin: Api.removePrimarySubBin,
-            removeSecondaryBin: Api.removeSecondaryBin,
-            textDismissed: Api.textDismissed,
-            textDroppedInBin: Api.textDroppedInBin,
-            renderText: Api.renderText,
-            renderPrimaryBin: Api.renderPrimaryBin,
-            renderPrimarySubBin: Api.renderPrimarySubBin,
-            renderSecondaryBin: Api.renderSecondaryBin,
-            renderAddButton: Api.renderAddButton
-          } );
+          }, Api);
         } );
       } )
       .change();                  /* Force instantiation. */
