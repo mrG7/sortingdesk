@@ -128,42 +128,6 @@ var SortingDesk = (function () {
     var over_ = null,
         requests_ = [ ];
 
-    
-   if(!opts)
-      throw "No options given: some are mandatory";
-    else if(!opts.nodes)
-      throw "No nodes options given: `items' required";
-    else if(!opts.nodes.items)
-      throw "Missing `items' nodes option";
-
-    console.log("Initialising Sorting Desk UI");
-    
-    options = $.extend(true, defaults_, opts);
-    callbacks = cbs;
-    bins = [ ];
-    
-    /* Do not request bin data if a bins HTML container wasn't given. */
-    if(options.nodes.bins) {
-      var ids = [];
-      if (typeof options.primaryContentId != 'undefined') {
-        ids = [options.primaryContentId];
-      }
-      var promise = callbacks.getBinData(
-        ids.concat(options.secondaryContentIds));
-
-      if(!promise)
-        throw "Another `getBinData' request is ongoing";
-      
-      promise
-        .done(function(resultBins) {
-          initialise_(resultBins);
-        } ).fail(function () {
-          console.log("Failed to initialise Sorting Desk UI");
-        } );
-    } else {
-      initialise_();
-    }
-
 
     /**
      * Base class of `BinContainerPrimary' and `BinContainerSecondary'.
@@ -1414,6 +1378,46 @@ var SortingDesk = (function () {
       options.nodes.binDelete.fadeOut(options.delays.deleteButtonHide);
     };
 
+
+    /* ----------------------------------------------------------------------
+     * Instantiation logic
+     * ---------------------------------------------------------------------- */
+    if(!opts)
+      throw "No options given: some are mandatory";
+    else if(!opts.nodes)
+      throw "No nodes options given: `items' required";
+    else if(!opts.nodes.items)
+      throw "Missing `items' nodes option";
+
+    console.log("Initialising Sorting Desk UI");
+    
+    options = $.extend(true, defaults_, opts);
+    callbacks = cbs;
+    bins = [ ];
+    
+    /* Do not request bin data if a bins HTML container wasn't given. */
+    if(options.nodes.bins) {
+      var ids = [];
+      if (typeof options.primaryContentId != 'undefined') {
+        ids = [options.primaryContentId];
+      }
+      var promise = callbacks.getBinData(
+        ids.concat(options.secondaryContentIds));
+
+      if(!promise)
+        throw "Another `getBinData' request is ongoing";
+      
+      promise
+        .done(function(resultBins) {
+          initialise_(resultBins);
+        } ).fail(function () {
+          console.log("Failed to initialise Sorting Desk UI");
+        } );
+    } else {
+      initialise_();
+    }
+
+    
     /* We can't return anything from within the constructor. The only way to
      * return the public interface to the instance is by requiring a reference
      * to an object which we fill with references to public functions. */
