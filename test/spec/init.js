@@ -97,6 +97,7 @@ function run(options, callbacks, condition, done) {
 
     window.clearInterval(interval);
 
+    Api.lastItemId = 0;
     g_sortingDesk = new SortingDesk(options, callbacks);
     reset = false;
 
@@ -133,6 +134,7 @@ function runAfterItemsRendered(options, callbacks, condition, done) {
 
     window.clearInterval(interval);
 
+    Api.lastItemId = 0;
     g_sortingDesk = new SortingDesk(options, callbacks);
     reset = false;
 
