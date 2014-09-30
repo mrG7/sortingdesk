@@ -57,7 +57,7 @@
     secondaryContentIds = Api.initialise(g_descriptor, secondaryBins);
     g_descriptor = null;
     
-    sortingDesk = SortingDesk.instantiate( {
+    sortingDesk = new SortingDesk( {
       nodes: {
         items: nitems,
         bins: nbins,
