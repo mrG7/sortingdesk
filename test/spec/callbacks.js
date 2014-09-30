@@ -63,7 +63,7 @@ describe('Callbacks', function () {
              expect(result).toBe(true);
            },
            done);
-     } ); 
+     } );
  
   it("invokes `moreTexts' to retrieve list of items when number of items below"
      + " `visibleItems'",
@@ -93,7 +93,7 @@ describe('Callbacks', function () {
      + " above `visibleItems'",
      function (done) {
        result = 0;
-       
+
        runAfterItemsRendered(g_options,
            $.extend(true, { }, g_callbacks, {
              moreTexts: function (num) {
@@ -106,22 +106,30 @@ describe('Callbacks', function () {
              }
            } ),
            function () {
-             /* Delete `visibleItems' - 1. This should force only *one*
-              * update. */
-             for(var i = 0; i < g_options.visibleItems - 1; ++i) {
-               g_options.nodes.items.find('>DIV:nth(' + i + ') .text-item-close')
-                 .click();
-             }
+             var count = 0,
+                 interval = window.setInterval(function () {
+                   /* Delete `visibleItems' - 1. This should force only *one*
+                    * update. */
+                   g_options.nodes.items
+                     .find('>DIV:nth(0) .text-item-close')
+                     .click();
 
-             window.setTimeout(function () {
-               /* Expect initial `visibleItems' + one forced update.  */
-               expect(result).toBe(g_options.visibleItems * 2);
+                   if(++count < 4)
+                     return;
 
-               /* Also expect number of items in UI to be consistent. */
-               expect(g_options.nodes.items.children().length)
-                 .toBe(g_options.visibleItems);
-               done();
-             }, DELAY_ITEM_DELETED);
+                   window.clearInterval(interval);
+                   
+                   window.setTimeout(function () {
+                     /* Expect initial `visibleItems' + one forced update. */
+                     expect(result).toBe(g_options.visibleItems * 2);
+                     
+                     /* Also expect number of items in UI to be consistent. */
+                     expect(g_options.nodes.items.children().length)
+                       .toBe(g_options.visibleItems + 1);
+
+                     done();
+                   }, DELAY_ITEM_DELETED);
+                 }, 25);
            } );
      } );
   
