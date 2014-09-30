@@ -8,6 +8,8 @@
  * 
  */
 
+/*global g_descriptor, SortingDesk, Api */
+/*global afterEach */
 
 /* Configure API. */
 Api.DELAY_MIN = Api.DELAY_MAX = 0;
@@ -75,7 +77,8 @@ function setup() {
   afterEach(function () {
     if(g_sortingDesk
        && g_sortingDesk.isInitialised
-       && g_sortingDesk.isInitialised()) {
+       && g_sortingDesk.isInitialised())
+    {
       g_sortingDesk.reset()
         .done(function () {
           reset = true;
