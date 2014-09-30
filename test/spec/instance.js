@@ -25,12 +25,23 @@ describe('Instance', function () {
     }, done);
   } );
 
-  it('initialises only once', function (done) {
+  it('initialises more than once', function (done) {
     run(g_options, g_callbacks, function () {
-      expect(function () {
-        SortingDesk.instantiate( g_options, g_callbacks);
-      } ).toThrow("Sorting Desk has already been instantiated");
-    }, done);
+      var instance = g_sortingDesk;
+
+      reset = true;
+      
+      run({ nodes: { items: $() } }, g_callbacks,
+          function () {
+            expect(g_sortingDesk.isInitialised()).toBe(true);
+          },
+          function () {
+            g_sortingDesk.reset();
+            g_sortingDesk = instance;
+            
+            done();
+          } );
+    });
   } );
 
   it('resets itself correctly', function (done) {
