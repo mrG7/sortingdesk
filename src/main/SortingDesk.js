@@ -192,8 +192,8 @@ var SortingDesk = (function () {
             }
 
             /* At this point, wrapper's children == 1 || 2. Move one bin into
-             * wrapper above if there is room for one more bin. Otherwise, ensure
-             * bin is leftmost. */
+             * wrapper above if there is room for one more bin. Otherwise,
+             * ensure bin is leftmost. */
             if(node.prev().length && node.prev().children().length < 2) {
               node.prev().children().addClass('left');
               
@@ -226,8 +226,8 @@ var SortingDesk = (function () {
       {
         var result = null;
 
-        /* Always first check to see if a primary bin is defined in `this.bin' and,
-         * if so, its shortcut. */
+        /* Always first check to see if a primary bin is defined in `this.bin'
+         * and, if so, its shortcut. */
         if(this.bin && this.bin.getShortcut() == keyCode)
           return this.bin;
 
@@ -601,7 +601,9 @@ var SortingDesk = (function () {
             variant = this.container.children().eq(0);
           else if(variant.length > 1) {
             /* We should never reach here. */
-            console.log("WARNING! Multiple text items selected:", variant.length);
+            console.log("WARNING! Multiple text items selected:",
+                        variant.length);
+            
             variant.removeClass(csel);
 
             variant = variant.eq(0);
@@ -620,9 +622,9 @@ var SortingDesk = (function () {
         this.container.find('.' + csel).removeClass(csel);
         variant.addClass(csel);
 
-        /* Ensure text item is _always_ visible at the bottom and top ends of the
-         * containing DIV. */
-        var st = this.container.scrollTop(),       /* scrolling (position) top */
+        /* Ensure text item is _always_ visible at the bottom and top ends of
+         * the containing DIV. */
+        var st = this.container.scrollTop(),       /* scrolling top */
             ch = this.container.innerHeight(),     /* container height */
             ipt = variant.position().top,          /* item position top */
             ih = st + ipt + variant.outerHeight(); /* item height */
@@ -765,8 +767,8 @@ var SortingDesk = (function () {
 
     TextItem.prototype = {
       owner: null,
-      content: null,                /* Note: unlike bins, a text item contains its
-                                     * own id. (?) */
+      content: null,                /* Note: unlike bins, a text item contains
+                                     * its own id. (?) */
       node: null,
 
       setup_: function() {
