@@ -65,7 +65,7 @@
           promise = sortingDesk.reset();
 
         promise.always(function () {
-          sortingDesk = SortingDesk.instantiate( {
+          sortingDesk = new SortingDesk( {
             nodes: {
               items: nitems,
               bins: nbins,
