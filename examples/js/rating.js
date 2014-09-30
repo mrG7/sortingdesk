@@ -157,7 +157,7 @@ var makeModel = function makeModel() {
             promise.resolve();
         }
         promise.done(function() {
-            _sortingDesk = SortingDesk.instantiate({
+            _sortingDesk = new SortingDesk({
                 nodes: {
                     items: $('#items'),
                     bins: $('#bins'),
