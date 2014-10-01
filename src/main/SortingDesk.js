@@ -378,7 +378,7 @@ var SortingDesk = (function () {
 
           items.forEach(function (item, index) {
             window.setTimeout( function () {
-              self.items.push(new TextItem(self, item));
+              self.items.push(new TextItemGeneric(self, item));
             }, Math.pow(index, 2) * 1.1);
           } );
 
@@ -559,21 +559,8 @@ var SortingDesk = (function () {
      * */
     var TextItem = function (owner, item)
     {
-      /* Fail silently if not initialised anymore. This might happen if, for
-       * example, the `reset' method was invoked but the component is still
-       * loading text items. */
-      if(!initialised)
-        return;
-      
-      var cdragging = options.css.itemDragging;
-
       this.owner = owner;
       this.content = item;
-
-      this.node = invoke_("renderText", item, TEXT_VIEW_HIGHLIGHTS);
-
-      this.setup_();
-      options.nodes.items.append(this.node);
     };
 
     TextItem.prototype = {
@@ -582,7 +569,39 @@ var SortingDesk = (function () {
                                      * its own id. (?) */
       node: null,
 
-      setup_: function() {
+      getContent: function ()
+      { return this.content; },
+
+      getNode: function ()
+      { return this.node; },
+
+      isSelected: function ()
+      { return this.node.hasClass('sd-selected'); }
+    };
+    
+    
+    /**
+     * @class
+     * */
+    var TextItemGeneric = function (owner, item)
+    {
+      /* Fail silently if not initialised anymore. This might happen if, for
+       * example, the `reset' method was invoked but the component is still
+       * loading text items. */
+      if(!initialised)
+        return;
+
+      TextItem.call(this, owner, item);
+
+      this.node = renderTextItem_(item, TEXT_VIEW_HIGHLIGHTS);
+
+      this.initialise();
+      options.nodes.items.append(this.node);
+    };
+
+    TextItemGeneric.prototype = Object.create(TextItem.prototype);
+    
+    TextItemGeneric.prototype.initialise = function() {
         var self = this;
 
         /* TODO: `find' call below expects a `text-item-close' class. */
@@ -642,16 +661,6 @@ var SortingDesk = (function () {
           
           return false;
         } );
-      },    
-
-      getContent: function ()
-      { return this.content; },
-
-      getNode: function ()
-      { return this.node; },
-
-      isSelected: function ()
-      { return this.node.hasClass('selected'); }
     };
 
 
