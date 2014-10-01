@@ -1,4 +1,7 @@
-* To do items [75%]
+* To do items [70%]
+** TODO Review `Instance' and break it up into smaller components
+** TODO Rename `list' to `items'
+** TODO Rename `container' to `bins'
 ** TODO Remove hardcoded `less' and `more' CSS classes
 ** TODO End `render' prefixed callbacks and expect constructors instead
 ** TODO [#B] Prefix text-items' and bins' node ids
@@ -12,7 +15,7 @@
 ** TODO [#C] Text items container doesn't have a UI state when it doesn't hold any text items
 Must clearly communicate to the user that there aren't any more text items available.
 ** TODO Allow keyboard shortcuts to be assigned programmatically
-** TODO Resolve all TODO items
+** TODO Resolve all annotated TODO items
 ** IN-PROGRESS All bins are born equal
 - State "IN-PROGRESS" from "TODO"       [2014-10-01 Wed 10:36]
 End bin strata.
@@ -33,6 +36,8 @@ Similar to the tests found on: =git@devhub.diffeo.com:streamboard.git=
 A mechanism for displaying notifications to the user is needed for the purpose
 of providing feedback, in particular in the cases when a user action is invalid
 and results in an error.
+** DONE Migrate to a full OO design
+- State "DONE"       from "TODO"       [2014-10-01 Wed 18:18]
 ** DONE Move responsibility for loading notifications entirely to the client
 - State "DONE"       from "IN-PROGRESS" [2014-10-01 Wed 12:18]
 Use a callback for this purpose.
