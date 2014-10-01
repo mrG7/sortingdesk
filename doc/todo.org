@@ -1,14 +1,10 @@
-* To do items [70%]
-** TODO Remove reliance on CSS classes except for those necessary
-** TODO Simplify use of CSS
+* To do items [74%]
 ** TODO End `render' prefixed callbacks and expect constructors instead
-** TODO All bins are born equal
-End bin strata.
 ** TODO [#B] Prefix text-items' and bins' node ids
 - State "TODO"       from "WAIT"       [2014-09-07 Sun 08:16]
 - State "WAIT"       from "TODO"       [2014-09-05 Fri 10:41] \\
   Currently waiting to hear from support as to whether ids are guaranteed to always be unique.
-** TODO [#A] Allow secondary and sub bin names to be edited
+** TODO [#A] Allow bin statements to be edited
 - State "TODO"       from "WAIT"       [2014-09-05 Fri 10:42]
 - State "WAIT"       from "TODO"       [2014-08-22 Fri 13:24] \\
   Not proceeding with this until it's clear whether bins based on existing text items are even editable.
@@ -17,12 +13,18 @@ Must clearly communicate to the user that there aren't any more text items avail
 ** TODO Move responsibility for loading notifications entirely to the client
 Use a callback for this purpose.
 ** TODO Allow keyboard shortcuts to be assigned programmatically
+** TODO Resolve all TODO items
+** IN-PROGRESS All bins are born equal
+- State "IN-PROGRESS" from "TODO"       [2014-10-01 Wed 10:36]
+End bin strata.
 ** IN-PROGRESS Simplify initialisation of Sorting Desk
 - State "IN-PROGRESS" from "TODO"       [2014-09-30 Tue 18:54]
 Allow the following forms:
 
 1) new SortingDesk( options, callbacks );
 2) new SortingDesk( $("#items"), callbacks );
+
+Require `moreTexts' callback to be present. Require `getBinData' callback if `contentIds' given.
 ** IN-PROGRESS [#A] Write jasmine (unit) tests
 - State "IN-PROGRESS" from "TODO"       [2014-09-12 Fri 09:54]
 Similar to the tests found on: =git@devhub.diffeo.com:streamboard.git=
@@ -32,6 +34,12 @@ Similar to the tests found on: =git@devhub.diffeo.com:streamboard.git=
 A mechanism for displaying notifications to the user is needed for the purpose
 of providing feedback, in particular in the cases when a user action is invalid
 and results in an error.
+** DONE Rename `binDelete' to `buttonDelete'
+- State "DONE"       from "TODO"       [2014-10-01 Wed 10:37]
+** DONE Remove reliance on CSS classes except for those necessary
+- State "DONE"       from "TODO"       [2014-10-01 Wed 10:37]
+** DONE Simplify use of CSS
+- State "DONE"       from "TODO"       [2014-10-01 Wed 10:37]
 ** DONE Allow Sorting Desk to be instantiated multiple times
 - State "DONE"       from "TODO"       [2014-09-30 Tue 18:47]
 ** DONE Ensure component is fault proof when faced with absent elements
@@ -156,11 +164,13 @@ It was stated that "other types come from other sources including Facebook profi
 Asked to write it as a long code comment block but might be best done in a
 standalone *editable* text file that doesn't pollute the code and the repository?
 
-* Bugs [91%]
+* Bugs [92%]
 ** TODO When items' DIV is selected, scrolling with keyboard both selects next item as well as scroll the DIV contents
 Scrolling on the items' DIV container must be suppressed.
 
 Note that this might not be possible.
+** DONE `buttonDelete' not hidden after a bin is deleted
+- State "DONE"       from "TODO"       [2014-10-01 Wed 10:37]
 ** DONE Fix failing tests
 - State "DONE"       from "TODO"       [2014-09-30 Tue 18:31]
 ** DONE Detach event from bin/text item delete
