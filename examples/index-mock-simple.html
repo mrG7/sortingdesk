@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Sorting Desk - Offline</title>
+  
+  <link rel="stylesheet" href="css/theme-default.css" media="screen" />
+  <link rel="stylesheet" href="../src/main/css/SortingDesk.css" media="screen" />
+
+  <!-- Libraries -->
+  <script type="text/javascript" src="lib/require-2.1.14.min.js"></script>
+  
+  <!-- Main initialisation logic -->
+  <script type="text/javascript">
+
+  require.config( {
+    baseUrl: '../',
+    paths: {
+      "SortingDesk": "src/main/SortingDesk",
+      "API-SortingDesk": "src/api/api-sorting_desk-mock",
+      "API-Data": "src/api/data/al_ahram.json?",
+      "jQuery": "lib/jquery-2.1.1.min"
+    }
+  } );
+                
+  require( [ "SortingDesk" ], function () {
+    $(".wrapper").fadeIn();
+
+    Api.initialise(g_descriptor);
+    new SortingDesk($("#items"), Api);
+  });
+  </script>
+</head>
+<body>
+  <div id="wrapper-outer">
+    <div id="wrapper-items" class="wrapper single">
+      <div id="items">
+      </div>
+    </div>
+  </div>
+</body>
+</html>
