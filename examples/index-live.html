@@ -24,13 +24,11 @@
       nbins = $("#bins"),
       nloading = $("#loading"),
       height,
-      secondaryBins = [
+      bins = [
         { node_id: 100, features: { NAME: { "Irrelevant": 0 } } },
         { node_id: 101, features: { NAME: { "Rubbish": 0 } } },
         { node_id: 102, features: { NAME: { "Keep": 0 } } }
-      ],
-      primaryContentId = 'kb_aHR0cHM6Ly9rYi5kaWZmZW8uY29tL2FsX2FocmFt',
-      secondaryContentIds;
+      ];
 
     $(".wrapper").fadeIn();
 
@@ -46,15 +44,11 @@
     nbins.parent().height(height);
     nbins.children().remove();
 
-    secondaryContentIds = Api.initialise(primaryContentId, secondaryBins);
-    
-    $("#primary-node-id")
-      .val(primaryContentId)
-      .change(function () {
-        var promise;
-        
-        secondaryContentIds = Api.initialise(primaryContentId = this.value,
-                                             secondaryBins);
+//     $("#primary-node-id")
+//       .val(primaryContentId)
+//       .change(function () {
+        var promise,
+            ids = Api.initialise(bins);
 
         if(!sortingDesk) {
           var deferred = $.Deferred();
@@ -72,21 +66,20 @@
                                               * items that aren't/can't/won't be
                                               * sorted into a bin */
             },
-            primaryContentId: primaryContentId,
-            secondaryContentIds: secondaryContentIds,
+            contentIds: ids,
             visibleItems: 15
           }, Api);
         } );
-      } )
-      .change();                  /* Force instantiation. */
+//       } )
+//       .change();                  /* Force instantiation. */
   });
     </script>
 </head>
 <body>
   <div id="wrapper-outer">
-    <div class="debug-controls">
-      <label for="primary-node-id">Primary node id:&nbsp;<input id="primary-node-id" type="text" /></label>
-    </div>
+<!--     <div class="debug-controls"> -->
+<!--       <label for="primary-node-id">Primary node id:&nbsp;<input id="primary-node-id" type="text" /></label> -->
+<!--     </div> -->
     <div id="wrapper-bins" class="wrapper">
       <div id="bins">
       </div>
@@ -96,7 +89,7 @@
       </div>
     </div>
   </div>
-  <div id="button-delete">X</div>
+  <div id="button-delete" class="sd-button-delete">X</div>
   <div id="loading">Loading...</div>
   <div id="notification"></div>
 </body>

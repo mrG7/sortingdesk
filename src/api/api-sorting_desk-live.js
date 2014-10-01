@@ -56,24 +56,19 @@ var Api = {
   TEXT_CONDENSED_CHARS: 100,
   TEXT_HIGHLIGHTS_CHARS: 150,
   
-  primaryContentId: null,
   lastId: 0,                   /* So we may assign ids to secondary bins when
                                 * creating them. */
 
   processing: { },
 
-  initialise: function (primaryContentId, secondaryBins)
+  initialise: function (bins)
   {
-    var secondaryContentIds = [ ];
+    var ids = [ ];
 
     Api.bins = { };
-    Api.bins[Api.primaryContentId = primaryContentId] = {
-      name: null,               /* It doesn't really matter if this is null */
-      bins: { }
-    };
 
-    secondaryBins.forEach(function (bin) {
-      secondaryContentIds.push(bin.node_id);
+    bins.forEach(function (bin) {
+      ids.push(bin.node_id);
       Api.bins[bin.node_id] = {
         name: Object.firstKey(bin.features.NAME)
       };
@@ -82,7 +77,7 @@ var Api = {
         Api.lastId = bin.node_id;
     } );
 
-    return secondaryContentIds;
+    return ids;
   },
 
   // Given the name of an endpoint (e.g., 's2' or 'nodes'), a dictionary of
@@ -210,8 +205,8 @@ var Api = {
       var found = false;
 
       for(var bid in Api.bins) {
-        if(bid != id || bid == Api.primaryContentId) /* The hacks continue: */
-          continue;                                  /* ignore primary bin. */
+        if(bid != id)
+          continue;
 
         var bin = Api.bins[bid],
             name = { };
@@ -338,7 +333,7 @@ var Api = {
     window.setTimeout(function () {
       var found = false;
       
-      /* Ensure bin exists and is a child of the primary one. */
+      /* Ensure bin exists. */
       for(var i in Api.bins) {
         var bin = Api.bins[i];
 
@@ -443,21 +438,15 @@ var Api = {
         ? true : null);
   },
 
-  renderPrimaryBin: function (bin) {
+  renderBin: function (bin) {
     /* Wrap bin name inside a DIV. */
-    return $('<div class="bin-primary"><div class="bin-shortcut"/>'
+    return $('<div class="sd-bin"><div class="sd-bin-shortcut"/>'
              + bin.name + '</div>');
   },
 
-  renderPrimarySubBin: function (bin) {
+  renderSubBin: function (bin) {
     /* Wrap bin statement_text inside a DIV. */
-    return $('<div class="bin-primary-sub"><div class="bin-shortcut"/>'
-             + bin.statement_text + '</div>');
-  },
-
-  renderSecondaryBin: function (bin) {
-    /* Wrap bin statement_text inside a DIV. */
-    return $('<div class="bin-secondary"><div class="bin-shortcut"/>'
+    return $('<div class="sd-bin-sub"><div class="sd-bin-shortcut"/>'
              + bin.name + '</div>');
   },
 

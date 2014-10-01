@@ -58,18 +58,14 @@ var Api = {
 
   processing: { },
 
-  initialise: function (primaryContentId, secondaryBins)
+  initialise: function (bins)
   {
-    var secondaryContentIds = [ ];
+    var ids = [ ];
 
     Api.bins = { };
-    Api.bins[Api.primaryContentId = primaryContentId] = {
-      name: null,               /* It doesn't really matter if this is null */
-      bins: { }
-    };
 
-    secondaryBins.forEach(function (bin) {
-      secondaryContentIds.push(bin.node_id);
+    bins.forEach(function (bin) {
+      ids.push(bin.node_id);
       Api.bins[bin.node_id] = {
         name: Object.firstKey(bin.features.NAME)
       };
@@ -78,7 +74,7 @@ var Api = {
         Api.lastId = bin.node_id;
     } );
 
-    return secondaryContentIds;
+    return ids;
   },
 
   // Given the name of an endpoint (e.g., 's2' or 'nodes'), a dictionary of
@@ -314,27 +310,36 @@ var Api = {
    *   error: string
    * }
    */
-  removePrimarySubBin: function (id) {
-      var deferred = $.Deferred();
+  removeBin: function (id) {
+    var deferred = $.Deferred();
 
+    window.setTimeout(function () {
       var found = false;
       
-      /* Ensure bin exists and is a child of the primary one. */
-      for(var bid in Api.bins[Api.primaryContentId].bins) {
-        if(bid == id) {
-          found = true;
+      /* Ensure bin exists. */
+      for(var i in Api.bins) {
+        var bin = Api.bins[i];
+
+        if(i == id) {
+          delete Api.bins[j];
+          deferred.resolve( { error: null } );
           break;
+        }
+        
+        for(var j in bin.bins) {
+          if(j == id) {
+            delete bin.bins[j];
+            deferred.resolve( { error: null } );
+            break;
+          }
         }
       }
 
       if(!found)
-        deferred.reject( { error: "Not sub-bin" } );
-      else {
-        delete Api.bins[Api.primaryContentId].bins[id];
-        deferred.resolve( { error: null } );
-      }
+        deferred.reject( { error: "Not a bin" } );
+    }, Math.rand(Api.DELAY_MIN, Api.DELAY_MAX));
 
-      return deferred.promise();
+    return deferred.promise();
   },
 
   textDismissed: function(item) {},
@@ -351,32 +356,6 @@ var Api = {
                                processData: false })
           .done(function() { console.log('posted label successfully'); })
           .fail(function() { console.log('did not post label'); });
-  },
-
-  /* Resolves:
-   * {
-   *   error: null
-   * }
-   *
-   * Rejects:
-   * {
-   *   error: string
-   * }
-   */
-  removeSecondaryBin: function (id) {
-      var deferred = $.Deferred();
-
-      /* Ensure bin exists and is _not_ primary. */
-      if(id in Api.bins) {
-        if(id == Api.primaryContentId)
-          deferred.reject( { error: "Not secondary bin" } );
-        else
-          deferred.resolve( { error: null } );
-      } else
-        delete Api.bins[id];
-        deferred.resolve( { error: "Secondary bin not existent" } );
-
-      return deferred.promise();
   },
 
   /* Initially I thought we might be implementing several views, in which case
@@ -457,6 +436,7 @@ var Api = {
         ? true : null);
   },
 
+  /* TODO: Unified bin model in place. Rework me! */
   renderPrimaryBin: function (bin) {
       var node = $('<div>')
           .addClass('panel-heading')
@@ -465,6 +445,7 @@ var Api = {
       return node;
   },
 
+  /* TODO: Unified bin model in place. Rework me! */
   renderPrimarySubBin: function (bin) {
       var node = $('<div>').addClass('panel panel-default');
       var body = $('<div>')
@@ -475,6 +456,7 @@ var Api = {
       return node;
   },
 
+  /* TODO: Unified bin model in place. Rework me! */
   renderSecondaryBin: function (bin) {
       var div = $('<div>').addClass('btn-group');
       var node = $('<button>')

@@ -278,7 +278,7 @@ var Api = {
     window.setTimeout(function () {
       var found = false;
       
-      /* Ensure bin exists and is a child of the primary one. */
+      /* Ensure bin exists. */
       for(var i in Api.bins) {
         var bin = Api.bins[i];
 

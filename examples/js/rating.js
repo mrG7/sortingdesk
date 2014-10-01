@@ -134,21 +134,29 @@ var makeModel = function makeModel() {
     var _entity = ko.observable(null);
     var _search = ko.observable(null);
 
-    var _secondaryContentIds = null;
+    var _contentIds = null;
     var _sortingDesk = null;
 
     var selectEntity = function selectEntity(e) {
         _entity(e);
         _search(null);
 
-        // This turns on SortingDesk
-        var secondaryBins = [
+      // This turns on SortingDesk
+      
+      /* TODO: Haven't been able to test this out yet but it seems the entity
+       * `e', constructed by `makeEntity' is not in the format expected by the
+       * API (api-sorting_desk-rating) and thus instantiation will probably not
+       * take place.
+       * 
+       *  - Miguel */
+      var bins = [
+            e, 
             { node_id: 1, features: { NAME: { "Vital": 0 } } },
             { node_id: 2, features: { NAME: { "Coreferent": 0 } } },
             { node_id: 3, features: { NAME: { "Unknown": 0 } } },
             { node_id: 4, features: { NAME: { "Not Coreferent": 0 } } },
         ];
-        _secondaryContentIds = Api.initialise(e.contentId(), secondaryBins);
+        _contentIds = Api.initialise(bins);
         var promise;
         if (_sortingDesk) {
             promise = _sortingDesk.reset();
@@ -161,18 +169,14 @@ var makeModel = function makeModel() {
                 nodes: {
                     items: $('#items'),
                     bins: $('#bins'),
-                    binDelete: $('#button-delete'),
+                    buttonDelete: $('#button-delete')
                 },
                 css: {
-                    primaryBinOuterWrapper: 'panel panel-default',
-                    primaryBinInnerWrapper: 'panel-body',
-                    secondaryBinInnerWrapper: 'btn-group btn-group-justified',
                     itemSelected: 'panel-primary',
-                    droppableHover: 'active',
+                    droppableHover: 'active'
                 },
-                primaryContentId: e.contentId(),
-                secondaryContentIds: _secondaryContentIds,
-                visibleItems: 15,
+                contentIds: _contentIds,
+                visibleItems: 15
             }, Api);
         });
     };
@@ -180,10 +184,14 @@ var makeModel = function makeModel() {
         _entity(null);
         _search(entitySearch(selectEntity));
 
-        _secondaryContentIds = null;
+        _contentIds = null;
         if (_sortingDesk) {
+            /* TODO: not checking the SortingDesk instance isn't reset correctly
+             * could potentially lead to `selectEntity' above being called
+             * *whilst* the reset is still taking place. Unlikely though. */        
             _sortingDesk.reset();
         }
+      
         _sortingDesk = null;
     };
 
