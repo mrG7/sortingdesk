@@ -952,7 +952,7 @@ var SortingDesk = (function () {
      * @param   {String}    id
      * 
      * @return  {TextItem}  Returns the text item if found, or null if not. */
-    var getById = function (id) {
+    var getTextById = function (id) {
       if(!initialised)
         throw "Sorting Desk not initialised";
       
@@ -973,7 +973,12 @@ var SortingDesk = (function () {
       return initialised;
     };
 
-    var getBinByNodeId = function(id) {
+    /**
+     * Looks up a bin, given its id, and returns it. Returns null if not found.
+     *
+     * @returns {Boolean}   Returns the bin if found, or null if not.
+     * */
+    var getBinById = function(id) {
       return container.getBinById(id);
     };
 
@@ -1207,8 +1212,8 @@ var SortingDesk = (function () {
       isInitialised: isInitialised,
       reset: reset,
       remove: remove,
-      getById: getById,
-      getBinByNodeId: getBinByNodeId
+      getTextById: getTextById,
+      getBinById: getBinById
     } );
   };
 
