@@ -1,3 +1,17 @@
+2014-10-01  Miguel Guedes  <miguel@miguelguedes.org>
+
+	* css:
+
+	Preprend `sd' to CSS classes required by Sorting Desk.
+
+	* src/main/SortingDesk.js:
+
+	Employ unified bin model.
+
+	* all:
+
+	Usual minor improvements and fixes to code.
+
 2014-09-30  Miguel Guedes  <miguel@miguelguedes.org>
 
 	* all:
