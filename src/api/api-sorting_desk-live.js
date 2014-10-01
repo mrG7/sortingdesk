@@ -262,39 +262,11 @@ var Api = {
    * }
    *   ||
    * statement_id: {
-   *   statement_text: string
-   * }
-   */
-  addPrimarySubBin: function (text) {
-    var deferred = $.Deferred();
-
-    window.setTimeout(function () {
-      ++Api.lastId;
-      
-      Api.bins[Api.primaryContentId].bins[Api.lastId] = {
-        statement_text: text
-      };
-
-      var bin = { };
-      
-      bin[Api.lastId] = Api.bins[Api.primaryContentId].bins[Api.lastId];
-      deferred.resolve(bin);
-    }, Math.rand(Api.DELAY_MIN, Api.DELAY_MAX) );
-
-    return deferred.promise();
-  },
-
-  /* Returns:
-   * {
-   *   error: error_string    ;; presently never returning an error
-   * }
-   *   ||
-   * statement_id: {
    *   name: string,
    *   bins: []
    * }
    */
-  addSecondaryBin: function (name) {
+  addBin: function (name) {
     var deferred = $.Deferred();
 
     window.setTimeout(function () {
@@ -302,14 +274,49 @@ var Api = {
       
       Api.bins[Api.lastId] = {
         name: name,
-        bins: []
+        bins: { }
       };
 
-      var bin = { };
-
-      bin[Api.lastId] = Api.bins[Api.lastId];
+      var result = { };
+      result[Api.lastId] = Api.bins[Api.lastId];
       
-      deferred.resolve(bin);
+      deferred.resolve(result);
+    }, Math.rand(Api.DELAY_MIN, Api.DELAY_MAX) );
+
+    return deferred.promise();
+  },
+
+  /* Returns:
+   * {
+   *   error: error_string
+   * }
+   *   ||
+   * statement_id: {
+   *   statement_text: string
+   * }
+   */
+  addSubBin: function (contentId, text) {
+    var deferred = $.Deferred();
+
+    window.setTimeout(function () {
+      if(! (contentId in Api.bins)) {
+        deferred.reject( {
+          error: "Non-existent parent content id given"
+        } );
+
+        return;
+      }
+      
+      ++Api.lastId;
+      
+      Api.bins[contentId].bins[Api.lastId] = {
+        name: text
+      };
+
+      var result = { };
+      result[Api.lastId] = Api.bins[contentId].bins[Api.lastId];
+      
+      deferred.resolve(result);
     }, Math.rand(Api.DELAY_MIN, Api.DELAY_MAX) );
 
     return deferred.promise();
@@ -325,26 +332,33 @@ var Api = {
    *   error: string
    * }
    */
-  removePrimarySubBin: function (id) {
+  removeBin: function (id) {
     var deferred = $.Deferred();
 
     window.setTimeout(function () {
       var found = false;
       
       /* Ensure bin exists and is a child of the primary one. */
-      for(var bid in Api.bins[Api.primaryContentId].bins) {
-        if(bid == id) {
-          found = true;
+      for(var i in Api.bins) {
+        var bin = Api.bins[i];
+
+        if(i == id) {
+          delete Api.bins[j];
+          deferred.resolve( { error: null } );
           break;
+        }
+        
+        for(var j in bin.bins) {
+          if(j == id) {
+            delete bin.bins[j];
+            deferred.resolve( { error: null } );
+            break;
+          }
         }
       }
 
       if(!found)
-        deferred.reject( { error: "Not sub-bin" } );
-      else {
-        delete Api.bins[Api.primaryContentId].bins[id];
-        deferred.resolve( { error: null } );
-      }
+        deferred.reject( { error: "Not a bin" } );
     }, Math.rand(Api.DELAY_MIN, Api.DELAY_MAX));
 
     return deferred.promise();
@@ -352,34 +366,6 @@ var Api = {
 
   textDismissed: function(item) {},
   textDroppedInBin: function(item, bin) {},
-
-  /* Resolves:
-   * {
-   *   error: null
-   * }
-   *
-   * Rejects:
-   * {
-   *   error: string
-   * }
-   */
-  removeSecondaryBin: function (id) {
-    var deferred = $.Deferred();
-
-    window.setTimeout(function () {
-      /* Ensure bin exists and is _not_ primary. */
-      if(id in Api.bins) {
-        if(id == Api.primaryContentId)
-          deferred.reject( { error: "Not secondary bin" } );
-        else
-          deferred.resolve( { error: null } );
-      } else
-        delete Api.bins[id];
-        deferred.resolve( { error: "Secondary bin not existent" } );
-    }, Math.rand(Api.DELAY_MIN, Api.DELAY_MAX));
-
-    return deferred.promise();
-  },
 
   /* Initially I thought we might be implementing several views, in which case
    * we would need either a `switch' (like the one below) or a lookup table to
