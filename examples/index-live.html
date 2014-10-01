@@ -28,13 +28,10 @@
         { node_id: 100, features: { NAME: { "Irrelevant": 0 } } },
         { node_id: 101, features: { NAME: { "Rubbish": 0 } } },
         { node_id: 102, features: { NAME: { "Keep": 0 } } }
-      ];
+      ],
+      requests = 0;
 
     $(".wrapper").fadeIn();
-
-    /* Setup AJAX UI notification before actually making any requests. */
-    $(document).ajaxStart(function () { nloading.fadeIn(); } );
-    $(document).ajaxStop(function () { nloading.fadeOut(); } );
     
     height = $(window).height() - nitems.offset().top - 10;
     
@@ -68,7 +65,14 @@
             },
             contentIds: ids,
             visibleItems: 15
-          }, Api);
+          }, $.extend(Api, {
+            onRequestStart: function () {
+              if(requests ++ == 0) nloading.stop().fadeIn();
+            },
+            onRequestStop: function () {
+              if(--requests == 0) nloading.stop().fadeOut();
+            }
+          } ) );
         } );
 //       } )
 //       .change();                  /* Force instantiation. */
@@ -91,6 +95,5 @@
   </div>
   <div id="button-delete" class="sd-button-delete">X</div>
   <div id="loading">Loading...</div>
-  <div id="notification"></div>
 </body>
 </html>

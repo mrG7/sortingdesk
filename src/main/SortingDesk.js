@@ -103,6 +103,8 @@ var SortingDesk = (function () {
    *                                  a bin.
    * @param   cbs.renderBin           Render a primary bin.
    * @param   cbs.renderAddButton     Render an add button.
+   * @param   cbs.onRequestStart      Executed after request initiated.
+   * @param   cbs.onRequestStop       Executed after request finished.
    * */
   var Instance = function (opts, cbs, interface) {
 
@@ -1291,10 +1293,18 @@ var SortingDesk = (function () {
 
     var onRequestStart_ = function (id) {
       requests_.push(id);
+
+      /* Trigger callback. */
+      if("onRequestStart" in callbacks)
+        callbacks.onRequestStart(id);
     };
 
     var onRequestStop_ = function (id) {
       requests_.splice(requests_.indexOf(id), 1);
+
+      /* Trigger callback. */
+      if("onRequestStop" in callbacks)
+        callbacks.onRequestStop(id);
     };
 
     var getBinByShortcut_ = function (keyCode) {

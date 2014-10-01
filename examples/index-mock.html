@@ -24,18 +24,15 @@
   } );
                 
   require( [ "SortingDesk" ], function () {
-    var nloading = $("#loading"),
+    var loading = $("#loading"),
         contentIds = [
           { node_id: '#100', features: { NAME: { "Irrelevant": 0 } } },
           { node_id: '^1$0#1', features: { NAME: { "Rubbish": 0 } } },
           { node_id: '1_0%%^&#2', features: { NAME: { "Keep": 0 } } }
-        ];
+        ],
+        requests = 0;
 
     $(".wrapper").fadeIn();
-
-    /* Setup AJAX UI notification before actually making any requests. */
-    $(document).ajaxStart(function () { nloading.fadeIn(); } );
-    $(document).ajaxStop(function () { nloading.fadeOut(); } );
 
     new SortingDesk( {
       nodes: {
@@ -45,7 +42,10 @@
       },
       contentIds: Api.initialise(g_descriptor, contentIds),
       visibleItems: 15
-    }, Api);
+    }, $.extend(Api, {
+      onRequestStart: function () { if(!requests++) loading.stop().fadeIn(); },
+      onRequestStop: function () { if(!--requests) loading.stop().fadeOut(); }
+    } ) );
     
     g_descriptor = null;
     
@@ -66,6 +66,5 @@
   </div>
   <div id="button-delete" class="sd-button-delete">X</div>
   <div id="loading">Loading...</div>
-  <div id="notification"></div>
 </body>
 </html>
