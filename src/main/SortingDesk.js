@@ -1445,7 +1445,6 @@ var SortingDesk = (function () {
         } );
     } else
       initialise_();
-
     
     /* We can't return anything from within the constructor. The only way to
      * return the public interface to the instance is by requiring a reference
