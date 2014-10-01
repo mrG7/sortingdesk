@@ -299,9 +299,10 @@ var SortingDesk = (function () {
           
           drop: function (e) {
             var id = decodeURIComponent(e.dataTransfer.getData('Text'));
-            var item = getById(id);
+            var item = list.getById(id);
+
             invoke_("textDroppedInBin", item, self);
-            list.remove(decodeURIComponent(item.node_id));
+            list.remove(decodeURIComponent(item.getContent().node_id));
           }
         } );
 
