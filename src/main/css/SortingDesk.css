@@ -51,7 +51,7 @@
   background-color: #FFF5F8;
 }
 
-.text-item.selected {
+.text-item.sd-selected {
   border: 2px solid #8EB4DA;
 }
 
@@ -59,7 +59,7 @@
   background-color: #FFF5F8;
 }
 
-.text-item.selected:hover {
+.text-item.sd-selected:hover {
   background-color: inherit;
 }
 
@@ -91,12 +91,12 @@ A.text-item-title:hover {
 }
 
 .text-item:hover .text-item-close,
-.text-item.selected .text-item-close {
+.text-item.sd-selected .text-item-close {
   display: block;
 }
 
-.text-item.dragging:hover .text-item-close,
-.text-item.selected.dragging .text-item-close {
+.text-item.sd-dragging:hover .text-item-close,
+.text-item.sd-selected.sd-dragging .text-item-close {
   display: none;
 }
 
@@ -124,28 +124,28 @@ A.text-item-title:hover {
   background-color: #eee;
 }
 
-.text-item.dragging {
+.text-item.sd-dragging {
   border-color: #eee !important;
   color: silver !important;
   background-color: inherit !important;
 }
 
 /* Droppable elements */
-.droppable {
+.sd-droppable {
   border-style: dashed;
 }
 
-.droppable-highlight {
+.sd-droppable-highlight {
   border-style: dashed !important;
 }
 
-.droppable-hover {
+.sd-droppable-hover {
   border-style: dotted !important;
 }
 
 
 /* Button: add */
-.button-add {
+.sd-button-add {
   position: relative;
   border: 2px solid #A2C5A6;
   background-color: #ECF8EA;
@@ -165,13 +165,13 @@ A.text-item-title:hover {
   line-height: 25px;
 }
 
-.button-add:hover {
+.sd-button-add:hover {
 /*  color: #67B285; */
   background-color: #DEF3DA;
   transition: background-color 175ms, color 100ms;
 }
 
-.button-add:active {
+.sd-button-add:active {
   top: 1px;
   left: 1px;
   box-shadow: none;
@@ -179,7 +179,7 @@ A.text-item-title:hover {
 }
 
 /* Button: delete */
-#button-delete {
+.sd-button-delete {
   position: fixed;
   top: 50%;
   left: 50%;
@@ -201,12 +201,12 @@ A.text-item-title:hover {
   display: none;
 }
 
-#button-delete:hover {
+.sd-button-delete:hover {
   background-color: #F3DADA;
   transition: background-color 175ms, color 100ms;
 }
 
-#button-delete.droppable-hover {
+.sd-button-delete.droppable-hover {
   background-color: #C04343;
   border-color: #7A4747;
   color: #FFF5F5;

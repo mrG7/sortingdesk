@@ -48,19 +48,14 @@ var SortingDesk = (function () {
    */
   var defaults_ = {
     css: {
-      primaryBinOuterWrapper: "wrapper-primary-bin-outer",
-      primaryBinInnerWrapper: "wrapper-primary-bin-inner",
-      secondaryBinOuterWrapper: "wrapper-secondary-bin-outer",
-      secondaryBinInnerWrapper: "wrapper-secondary-bin-inner",
-      leftmostBin: "left",
-      binGeneric: 'bin',
-      binShortcut: 'bin-shortcut',
-      binAnimateAssign: 'assign',
-      binAdding: 'adding',
-      buttonAdd: 'button-add',
-      itemSelected: 'selected',
-      itemDragging: 'dragging',
-      droppableHover: 'droppable-hover'
+      binGeneric: 'sd-bin',
+      binShortcut: 'sd-bin-shortcut',
+      binAnimateAssign: 'sd-assign',
+      binAdding: 'sd-adding',
+      buttonAdd: 'sd-button-add',
+      itemSelected: 'sd-selected',
+      itemDragging: 'sd-dragging',
+      droppableHover: 'sd-droppable-hover'
     },
     keyboard: {                 /* Contains scan codes. */
       listUp: 38,               /* up                   */
