@@ -46,11 +46,6 @@ var Api = {
   BASE: 'demo.diffeo.com:8080',
   NAMESPACE: 'miguel_sorting_desk',
   RANKER: 'similar',
-
-  TEXT_VIEW_HIGHLIGHTS: 1,
-  TEXT_VIEW_UNRESTRICTED: 2,
-  TEXT_CONDENSED_CHARS: 100,
-  TEXT_HIGHLIGHTS_CHARS: 150,
   
   primaryContentId: null,
   lastId: 0,                   /* So we may assign ids to secondary bins when
@@ -356,84 +351,6 @@ var Api = {
                                processData: false })
           .done(function() { console.log('posted label successfully'); })
           .fail(function() { console.log('did not post label'); });
-  },
-
-  /* Initially I thought we might be implementing several views, in which case
-   * we would need either a `switch' (like the one below) or a lookup table to
-   * direct execution to the appropriate function . I believe now two view modes
-   * should be enough and that the `switch' below can be removed. */
-  renderText: function (item, view) {
-    switch(view || Api.TEXT_VIEW_HIGHLIGHT) {
-    case Api.TEXT_VIEW_UNRESTRICTED:
-      return Api.renderTextUnrestricted(item);
-    case Api.TEXT_VIEW_HIGHLIGHTS:
-    default:
-      return Api.renderTextHighlights(item);
-    }      
-  },
-
-  renderText_: function (item, text, view, less) {
-      var node = $('<div>')
-          .addClass('panel panel-default');
-
-      var anchor = item.name;
-      if (item.title) {
-          anchor += '&ndash; ' + item.title;
-      }
-
-      var heading = $('<div>')
-          .addClass('panel-heading')
-          .text(anchor);
-      // Close button in heading?  class="text-item-close"?
-      var body = $('<div>')
-          .addClass('panel-body')
-          .append(text);
-      body.children().removeClass();
-
-      if (less) {
-          body.append(Api.renderLessMore(less));
-      }
-
-      node.append(heading);
-      node.append(body);
-      return node;
-  },
-
-  renderLessMore: function (less) {
-      var cl = less && 'less' || 'more';
-      return $('<div>')
-          .addClass('less-more')
-          .addClass(cl)
-          .text(cl);
-  },
-
-  renderTextCondensed: function (item) {
-    return Api.renderText_(
-      item,
-      new TextItemSnippet(item.text).condense(Api.TEXT_CONDENSED_CHARS),
-      Api.TEXT_VIEW_CONDENSED,
-      false);
-  },
-
-  renderTextHighlights: function (item) {
-    return Api.renderText_(
-      item,
-      new TextItemSnippet(item.text).highlights(
-        Api.TEXT_HIGHLIGHTS_CHARS,
-        Api.TEXT_HIGHLIGHTS_CHARS),
-      Api.TEXT_VIEW_HIGHLIGHTS,
-      false);
-  },
-
-  renderTextUnrestricted: function (item) {
-    return Api.renderText_(
-      item,
-      item.text,
-      Api.TEXT_VIEW_UNRESTRICTED,
-      new TextItemSnippet(item.text).canTextBeReduced(
-        Api.TEXT_HIGHLIGHTS_CHARS,
-        Api.TEXT_HIGHLIGHTS_CHARS)
-        ? true : null);
   },
 
   /* TODO: Unified bin model in place. Rework me! */

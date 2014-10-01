@@ -30,6 +30,15 @@ if(typeof define === "function" && define.amd) {
 var SortingDesk = (function () {
 
   /* ----------------------------------------------------------------------
+   *  Contants
+   * ---------------------------------------------------------------------- */
+  var TEXT_VIEW_HIGHLIGHTS = 1,
+      TEXT_VIEW_UNRESTRICTED = 2,
+      TEXT_CONDENSED_CHARS = 100,
+      TEXT_HIGHLIGHTS_CHARS = 150;
+
+  
+  /* ----------------------------------------------------------------------
    *  Default options
    *  Private attribute.
    * ----------------------------------------------------------------------
@@ -556,9 +565,7 @@ var SortingDesk = (function () {
       this.owner = owner;
       this.content = item;
 
-      /* TODO: using property from `Api' namespace that it shouldn't be aware
-       * of. */
-      this.node = invoke_("renderText", item, Api.TEXT_VIEW_HIGHLIGHTS);
+      this.node = invoke_("renderText", item, TEXT_VIEW_HIGHLIGHTS);
 
       this.setup_();
       options.nodes.items.append(this.node);
@@ -607,11 +614,9 @@ var SortingDesk = (function () {
         } );
 
         /* Add logic to less/more links. */
-        /* TODO: `find' expecting `less' CSS class.
-         * TODO: using property from `Api' namespace that it shouldn't be aware
-         * of. */
+        /* TODO: `find' expecting `less' CSS class. */
         this.node.find('.less').click(function () {
-          var t =invoke_("renderText", self.content, Api.TEXT_VIEW_HIGHLIGHTS);
+          var t =invoke_("renderText", self.content, TEXT_VIEW_HIGHLIGHTS);
           
           self.node.replaceWith(t);
           self.node = t;
@@ -621,11 +626,9 @@ var SortingDesk = (function () {
           return false;
         } );
 
-        /* TODO: `find' expecting `more' CSS class.
-         * TODO: using property from `Api' namespace that it shouldn't be aware
-         * of. */
+        /* TODO: `find' expecting `more' CSS class. */
         this.node.find('.more').click(function () {
-          var t = invoke_("renderText", self.content, Api.TEXT_VIEW_UNRESTRICTED);
+          var t = invoke_("renderText", self.content, TEXT_VIEW_UNRESTRICTED);
           
           self.node.replaceWith(t);
           self.node = t;
@@ -710,7 +713,6 @@ var SortingDesk = (function () {
           throw "onAdd: failed to retrieve text item: " + id;
         }
 
-        /* TODO: `TextItemSnippet' is defined outside of `SortingDesk'. */
         this.fnAdd(id,
                    new TextItemSnippet(item.getContent().text)
                    .highlights(options.binCharsLeft, options.binCharsRight))
@@ -881,6 +883,151 @@ var SortingDesk = (function () {
       } );
     };
 
+
+    /**
+     * @class
+     * */
+    var TextItemSnippet = function (text)
+    {
+      this.text = text;
+    };
+
+    TextItemSnippet.prototype = {
+      text: null,
+      
+      highlights: function (left, right) {
+        var re = /<\s*[bB]\s*[^>]*>/g,
+            matcho = re.exec(this.text),
+            matchc,
+            i, j, skip,
+            highlight,
+            result;
+
+        if(!matcho)
+          return this.condense(left + right);
+        
+        /* We (perhaps dangerously) assume that a stranded closing tag </B> will
+         * not exist before the first opening tag <b>. */
+        matchc = /<\s*\/[bB]\s*>/.exec(this.text); /* find end of B tag */
+
+        /* Skip tag, position and extract actual text inside B tag. Use semantic
+         * STRONG rather than B tag. */
+        i = matcho.index + matcho[0].length;
+        highlight = '<STRONG>' + this.text.substr(
+          i,
+          matchc.index - i) + '</STRONG>';
+
+        /* Move `left' chars to the left of current position and align to word
+         * boundary.
+         *
+         * Note: the assumption is that the browser will be smart enough (and
+         * modern ones are) to drop any closed but unopened tags between `i' and
+         * `matcho.index'. */
+        i = this.indexOfWordLeft(matcho.index - left);
+
+        /* Prepend ellipsis at beginning of result if index not at beginning of
+         * string and add text to left of highlight as well as highlight
+         * itself.. */
+        result = (i > 0 ? "[...]&nbsp;" : '')
+          + this.text.substr(i < 0 ? 0 : i, matcho.index - i) + highlight;
+
+        /* Set index to the right of the closing B tag and skip at most `right'
+         * chars, taking care not to count chars that are part of any HTML tags
+         * towards the `right' chars limit. Align to word boundary and add
+         * text. */
+        i = matchc.index + matchc[0].length;
+        skip = this.skip(i, right);
+        j = this.indexOfWordRight(skip.index);
+        
+        result += this.text.substr(i, j - i);
+
+        /* Close stranded opened tags.
+         *
+         * Note: probably not necessary but since we know about the non-closed
+         * tags, why not close them anyway? */
+        j = skip.tags.length;
+        
+        while(j--)
+          result += '</' + skip.tags[j] + '>';
+        
+        /* Append ellipsis at end of result if index not at end of string. */
+        if(j < this.text.length - 1)
+          result += "&nbsp;[...]";
+
+        /* And Bob's your uncle. */
+        return result;
+      },
+
+      condense: function (right) {
+        var i = this.indexOfWordRight(right),
+            result = this.text.substring(0, i);
+
+        if(i < this.text.length - 1)
+          result += '&nbsp;[...]';
+
+        return result;
+      },
+
+      skip: function (ndx, count) {
+        var tags = [ ];
+
+        while(ndx < this.text.length && count) {
+          var ch = this.text.charAt(ndx);
+
+          if(ch == '<') {
+            var result = this.extractTag(ndx);
+
+            ndx = result.index;
+
+            if(result.tag)
+              tags.push(result.tag);
+            else
+              tags.pop();
+          } else {
+            ++ndx;
+            --count;
+          }
+        }
+
+        return { index: ndx, tags: tags };
+      },
+
+      extractTag: function (ndx) {
+        var match = /<\s*(\/)?\s*([a-zA-Z]+)\s*[^>]*>/.exec(this.text.substr(ndx));
+
+        if(match) {
+          return { index: match.index + ndx + match[0].length,
+                   tag: match[1] ? null : match[2] };
+        }
+        
+        return { index: ndx };
+      },
+
+      indexOfWordLeft: function (ndx) {
+        while(ndx >= 0) {
+          if(this.text.charAt(ndx) == ' ')
+            return ndx + 1;
+          
+          --ndx;
+        }
+
+        return 0;
+      },
+
+      indexOfWordRight: function (ndx) {
+        while(ndx < this.text.length && this.text.charAt(ndx) != ' ')
+          ++ndx;
+
+        return ndx;
+      },
+
+      canTextBeReduced: function (left, right) {
+        var reduced = this.highlights(left, right);
+        return reduced.length < this.text.length;
+      }
+    };
+
+    
     /**
      * Resets the component to a virgin state. Removes all nodes contained by
      * `options.nodes.items' and `options.nodes.bins', if any.
@@ -1164,6 +1311,70 @@ var SortingDesk = (function () {
       options.nodes.buttonDelete.fadeOut(options.delays.deleteButtonHide);
     };
 
+    var renderTextItem_ = function (item, view) {
+      switch(view || TEXT_VIEW_HIGHLIGHTS) {
+      case TEXT_VIEW_UNRESTRICTED:
+        return renderTextItemUnrestricted_(item);
+      case TEXT_VIEW_HIGHLIGHTS:
+      default:
+        return renderTextItemHighlights_(item);
+      }      
+    };
+
+    var renderTextItemHtml_ = function (item, text, view, less) {
+      var node = $('<div class="text-item view-' + view + '"/>'),
+          content = $('<div class="text-item-content"/>'),
+          anchor = item.name;
+
+      /* Append title if existent. */
+      if(item.title)
+        anchor += '&ndash; ' + item.title;
+
+      node.append('<a class="text-item-title" target="_blank" '
+                  + 'href="' + item.url + '">'
+                  + anchor + '</a>');
+
+      node.append('<a class="text-item-close" href="#">x</a>');
+
+      /* Append content and remove all CSS classes from children. */
+      content.append(text);
+      content.children().removeClass();
+
+      if(less !== null)
+        content.append(renderLessMore_(less));
+
+      node.append(content);
+      
+      return node;
+    };
+
+    var renderLessMore_ = function (less) {
+      var cl = less && 'less' || 'more';
+      return '<div class="less-more ' + cl + '">' + cl + '</div>'
+        + '<div style="display: block; clear: both" />';
+    };
+
+    var renderTextItemHighlights_ = function (item) {
+      return renderTextItemHtml_(
+        item,
+        new TextItemSnippet(item.text).highlights(
+          TEXT_HIGHLIGHTS_CHARS,
+          TEXT_HIGHLIGHTS_CHARS),
+        TEXT_VIEW_HIGHLIGHTS,
+        false);
+    };
+
+    var renderTextItemUnrestricted_ = function (item) {
+      return renderTextItemHtml_(
+        item,
+        item.text,
+        TEXT_VIEW_UNRESTRICTED,
+        new TextItemSnippet(item.text).canTextBeReduced(
+          TEXT_HIGHLIGHTS_CHARS,
+          TEXT_HIGHLIGHTS_CHARS)
+          ? true : null);
+    };
+    
 
     /* ----------------------------------------------------------------------
      * Instantiation logic
@@ -1181,6 +1392,22 @@ var SortingDesk = (function () {
     else if(!opts.nodes.items)
       throw "Missing `items' nodes option";
 
+    /* Allow a function to be passed in instead of an object containing
+     * callbacks. In the case that a function is passed in, it is assumed to be
+     * the `moreTexts' callback. */
+    if(cbs instanceof Function) {
+      cbs = {
+        moreTexts: cbs
+      };
+    } else if(!cbs)
+      throw "No callbacks given: some are mandatory";
+    else if(!cbs.moreTexts)
+      throw "Mandatory `moreTexts' callback missing";
+
+    /* Use default implementation of `renderText' if one not specified. */
+    if(! ("renderText" in cbs))
+      cbs.renderText = renderTextItem_;
+    
     console.log("Initialising Sorting Desk UI");
     
     options = $.extend(true, defaults_, opts);
