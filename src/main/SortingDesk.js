@@ -1379,6 +1379,10 @@ var SortingDesk = (function () {
     /* ----------------------------------------------------------------------
      * Instantiation logic
      * ---------------------------------------------------------------------- */
+    
+    /* Allow a jQuery element to be passed in instead of an object containing
+     * options. In the case that a jQuery element is detected, it is assumed to
+     * be the `nodes.items' element. */
     if(!opts)
       throw "No options given: some are mandatory";
     else if(opts instanceof jQuery) {
