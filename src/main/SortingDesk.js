@@ -1165,7 +1165,13 @@ var SortingDesk = (function () {
      * ---------------------------------------------------------------------- */
     if(!opts)
       throw "No options given: some are mandatory";
-    else if(!opts.nodes)
+    else if(opts instanceof jQuery) {
+      opts = {
+        nodes: {
+          items: opts
+        }
+      };
+    } else if(!opts.nodes)
       throw "No nodes options given: `items' required";
     else if(!opts.nodes.items)
       throw "Missing `items' nodes option";
