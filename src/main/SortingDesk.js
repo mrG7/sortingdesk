@@ -1399,12 +1399,12 @@ var SortingDesk = (function () {
     /* Allow a function to be passed in instead of an object containing
      * callbacks. In the case that a function is passed in, it is assumed to be
      * the `moreTexts' callback. */
-    if(cbs instanceof Function) {
+    if(!cbs)
+      throw "No callbacks given: some are mandatory";
+    else if(cbs instanceof Function) {
       cbs = {
         moreTexts: cbs
       };
-    } else if(!cbs)
-      throw "No callbacks given: some are mandatory";
     else if(!cbs.moreTexts)
       throw "Mandatory `moreTexts' callback missing";
 
