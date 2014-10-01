@@ -1045,6 +1045,8 @@ var SortingDesk = (function () {
             break;
           }
 
+          onDeactivateDeleteButton_();
+
           return false;
         }
       } );
