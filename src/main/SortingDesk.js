@@ -1405,7 +1405,7 @@ var SortingDesk = (function () {
       cbs = {
         moreTexts: cbs
       };
-    else if(!cbs.moreTexts)
+    } else if(!cbs.moreTexts)
       throw "Mandatory `moreTexts' callback missing";
 
     /* Use default implementation of `renderText' if one not specified. */
