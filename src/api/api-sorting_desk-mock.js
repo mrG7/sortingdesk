@@ -60,24 +60,16 @@ var Api = {
   lastItemId: null,
   processing: null,
 
-  initialise: function (descriptor, secondaryBins) {
-    var secondaryContentIds = [ ];
+  initialise: function (descriptor, bins) {
+    var ids = [ ];
     
     Api.lastId = 0;
     Api.lastItemId = 0;
     Api.processing = { };
     Api.bins = { };
-    
-    if (descriptor.primaryBin) {
-      Api.primaryContentId = descriptor.primaryBin.node_id;
-      Api.bins[Api.primaryContentId] = {
-        name: Object.firstKey(descriptor.primaryBin.features.NAME),
-        bins: [ ]
-      };
-    }
 
-    secondaryBins.forEach(function (bin) {
-      secondaryContentIds.push(bin.node_id);
+    bins.forEach(function (bin) {
+      ids.push(bin.node_id);
       Api.bins[bin.node_id] = {
         name: Object.firstKey(bin.features.NAME)
       };
@@ -88,7 +80,7 @@ var Api = {
 
     Api.items = descriptor.items;
 
-    return secondaryContentIds;
+    return ids;
   },
 
   moreTexts: function (num) {
