@@ -10,7 +10,7 @@
  */
 
 
-/*global $ */
+/*global $, define */
 /*jshint laxbreak:true */
 
 
