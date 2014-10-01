@@ -99,10 +99,6 @@ var SortingDesk = (function () {
    * @param   cbs.saveBinData         Save bin state.
    * @param   cbs.addBin              Add a bin.
    * @param   cbs.addSubBin           Add a sub bin.
-   * @param   cbs.renderText          Render text inside a text item element or
-   *                                  a bin.
-   * @param   cbs.renderBin           Render a primary bin.
-   * @param   cbs.renderAddButton     Render an add button.
    * @param   cbs.onRequestStart      Executed after request initiated.
    * @param   cbs.onRequestStop       Executed after request finished.
    * */
@@ -159,7 +155,7 @@ var SortingDesk = (function () {
               window.setTimeout(function () {
                 /* We rely on the API returning exactly ONE descriptor. */
                 var id = Object.firstKey(bin);
-                new Bin(self, id, bin[id]);
+                new BinGeneric(id, bin[id]);
               }, 0);
               
               deferred.resolve();
@@ -255,24 +251,19 @@ var SortingDesk = (function () {
     /**
      * @class
      * */
-    var Bin = function (container, id, bin)
+    var Bin = function (id, bin)
     {
-      this.owner = container;
       this.id = id;
       this.bin = bin;
-      
-      this.setNode_(invoke_("renderBin", bin));
-      container.add(this);
     };
-
+    
     Bin.prototype = {
-      owner: null,
       id: null,
       bin: null,
       node: null,
       shortcut: null,
 
-      setNode_: function (node)
+      initialise: function (node)
       {
         var self = this;
 
@@ -335,11 +326,22 @@ var SortingDesk = (function () {
       { return this.id; },
       
       getNode: function ()
-      { return this.node; },
-      
-      getOwner: function ()
-      { return this.owner; }
+      { return this.node; }
     };
+
+
+    /**
+     * @class
+     * */
+    var BinGeneric = function (id, bin)
+    {
+      Bin.call(this, id, bin);
+      
+      this.initialise(renderBin_(bin));
+      container.add(this);
+    };
+
+    BinGeneric.prototype = Object.create(Bin.prototype);
 
 
     /**
@@ -1154,7 +1156,7 @@ var SortingDesk = (function () {
             continue;
           }
 
-          new Bin(container, id, bin);
+          new BinGeneric(id, bin);
         }
       }
       
