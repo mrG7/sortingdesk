@@ -40,7 +40,7 @@ var SortingDesk = (function () {
    * nodes: {
    *   items: jQuery-element,           ; mandatory
    *   bins: jQuery-element,            ; optional
-   *   binDelete: jQuery-element        ; optional
+   *   buttonDelete: jQuery-element     ; optional
    * },
    * contentIds: array<string>          ; optional
    * 
@@ -911,8 +911,8 @@ var SortingDesk = (function () {
             options.nodes.bins.children().remove();
 
           /* Detach events from bin/text item delete button. */
-          if(options.nodes.binDelete)
-            options.nodes.binDelete.off();
+          if(options.nodes.buttonDelete)
+            options.nodes.buttonDelete.off();
           
           options = callbacks = bins = list = null;    
           initialised = false;
@@ -983,8 +983,8 @@ var SortingDesk = (function () {
      *  Accessible module-wide but not externally.
      * ---------------------------------------------------------------------- */
     var initialise_ = function (bins) {
-      if(!options.nodes.binDelete)
-        options.nodes.binDelete = $();
+      if(!options.nodes.buttonDelete)
+        options.nodes.buttonDelete = $();
       
       /* Do not create bin container or process any bins if a bin HTML container
        * wasn't given OR the bins' data result array wasn't received. */
@@ -1007,7 +1007,7 @@ var SortingDesk = (function () {
       
       $('body').bind('keyup', onKeyUp_);
       
-      new Droppable(options.nodes.binDelete, {
+      new Droppable(options.nodes.buttonDelete, {
         classHover: options.css.droppableHover,
         scopes: [ 'bin', 'text-item' ],
 
@@ -1149,12 +1149,12 @@ var SortingDesk = (function () {
     };
     
     var onActivateDeleteButton_ = function (fn) {
-      options.nodes.binDelete.fadeIn(options.delays.deleteButtonShow,
-                                     typeof fn == 'function' ? fn : null);
+      options.nodes.buttonDelete.fadeIn(options.delays.deleteButtonShow,
+                                        typeof fn == 'function' ? fn : null);
     };
 
     var onDeactivateDeleteButton_ = function () {
-      options.nodes.binDelete.fadeOut(options.delays.deleteButtonHide);
+      options.nodes.buttonDelete.fadeOut(options.delays.deleteButtonHide);
     };
 
 
