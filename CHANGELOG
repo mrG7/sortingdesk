@@ -22,11 +22,23 @@
 	rendering is now offered by default if a custom callback function
 	isn't specified.
 
+	Server requests and general load events are now triggered via a
+	callback. Similarly, a callback is invoked after the request has
+	terminated.
+
+	Created derivable `Bin' and `TextItem' classes. These need further
+	work before they can be specialised outside of Sorting Desk.
+
+	Reverted to a design close to Object Oriented. This change
+	retains the Module pattern and full UMD compliance but does away
+	with the Revealing Module pattern in order to enable
+	specialisation of generic classes by clients.
+
 	* examples:
 
-	Created a test illustrating simple instantiation of Sorting Desk.
+	Created an example illustrating simple instantiation of Sorting Desk.
 
-	Simplified instantiation of the component.
+	Simplified instantiation of the component in all examples.
 
 2014-09-30  Miguel Guedes  <miguel@miguelguedes.org>
 
