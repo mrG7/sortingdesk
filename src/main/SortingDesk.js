@@ -1066,7 +1066,7 @@ var SortingDesk = (function () {
           if(options.nodes.buttonDelete)
             options.nodes.buttonDelete.off();
           
-          options = callbacks = container = list = null;    
+          options = callbacks = container = list = null;
           initialised = false;
           
           window.clearInterval(interval);
