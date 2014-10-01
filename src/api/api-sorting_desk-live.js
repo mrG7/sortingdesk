@@ -67,7 +67,7 @@ var Api = {
 
     Api.bins = { };
 
-    bins.forEach(function (bin) {
+    bins instanceof Array && bins.forEach(function (bin) {
       ids.push(bin.node_id);
       Api.bins[bin.node_id] = {
         name: Object.firstKey(bin.features.NAME)
