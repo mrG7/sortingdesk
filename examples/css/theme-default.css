@@ -29,6 +29,11 @@ BODY {
   display: none;
 }
 
+#wrapper-outer .wrapper.single {
+  margin: auto;
+  float: none;
+}
+
 #wrapper-items {
   float: left;
 }
