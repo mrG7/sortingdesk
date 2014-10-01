@@ -10,9 +10,12 @@
 
 	* src/main/SortingDesk.js:
 
-	Employ unified bin model.
+	Sorting Desk now employs a unified bin model, whereby there is no
+	distinction between bins.
 
-	* tests:
+	Simplified use of CSS.
+
+	* examples:
 
 	Created a test illustrating simple instantiation of Sorting Desk.
 
