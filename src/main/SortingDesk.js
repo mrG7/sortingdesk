@@ -665,7 +665,7 @@ var SortingDesk = (function () {
       this.fnAdd = fnAdd;
       
       var self = this,
-          button = $(invoke_("renderAddButton", "+"))
+          button = $(renderAddButton_("+"))
             .addClass(options.css.buttonAdd)
             .on( {
               click: function () {
@@ -1386,6 +1386,22 @@ var SortingDesk = (function () {
           TEXT_HIGHLIGHTS_CHARS,
           TEXT_HIGHLIGHTS_CHARS)
           ? true : null);
+    };
+
+    var renderBin_ = function (bin) {
+      /* Wrap bin name inside a DIV. */
+      return $('<div class="sd-bin"><div class="sd-bin-shortcut"/>'
+               + bin.name + '</div>');
+    };
+
+    var renderSubBin_ = function (bin) {
+      /* Wrap bin statement_text inside a DIV. */
+      return $('<div class="sd-bin-sub"><div class="sd-bin-shortcut"/>'
+               + bin.name + '</div>');
+    };
+
+    var renderAddButton_ = function (caption) {
+      return $('<div><span>' + caption + '</span></div>');
     };
     
 

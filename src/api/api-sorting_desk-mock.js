@@ -300,21 +300,5 @@ var Api = {
   },
 
   textDismissed: function(item) {},
-  textDroppedInBin: function(item, bin) {},
-
-  renderBin: function (bin) {
-    /* Wrap bin name inside a DIV. */
-    return $('<div class="sd-bin"><div class="sd-bin-shortcut"/>'
-             + bin.name + '</div>');
-  },
-
-  renderSubBin: function (bin) {
-    /* Wrap bin statement_text inside a DIV. */
-    return $('<div class="sd-bin-sub"><div class="sd-bin-shortcut"/>'
-             + bin.name + '</div>');
-  },
-
-  renderAddButton: function (caption) {
-    return $('<div><span>' + caption + '</span></div>');
-  }
+  textDroppedInBin: function(item, bin) {}
 };
