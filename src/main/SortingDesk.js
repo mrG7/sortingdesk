@@ -42,8 +42,7 @@ var SortingDesk = (function () {
    *   bins: jQuery-element,            ; optional
    *   binDelete: jQuery-element        ; optional
    * },
-   * primaryContentId: string,          ; mandatory
-   * secondaryContentIds: array<string> ; mandatory
+   * contentIds: array<string>          ; optional
    * 
    */
   var defaults_ = {
@@ -89,18 +88,12 @@ var SortingDesk = (function () {
    * @param   cbs.moreText            Retrieve additional text items.
    * @param   cbs.getBinData          Get data about bins.
    * @param   cbs.saveBinData         Save bin state.
-   * @param   cbs.addPrimarySubBin    Add a sub bin.
-   * @param   cbs.addSecondaryBin     Add a secondary bin.
-   * @param   cbs.removePrimarySubBin Process removal of a sub bin.
-   * @param   cbs.removeSecondaryBin  Remove a secondary bin.
+   * @param   cbs.addBin              Add a bin.
+   * @param   cbs.addSubBin           Add a sub bin.
    * @param   cbs.renderText          Render text inside a text item element or
    *                                  a bin.
-   * @param   cbs.renderPrimaryBin    Render a primary bin.
-   * @param   cbs.renderPrimarySubBin Render a sub bin.
-   * @param   cbs.renderSecondaryBin  Render a secondary bin.
+   * @param   cbs.renderBin           Render a primary bin.
    * @param   cbs.renderAddButton     Render an add button.
-   * 
-   * @returns {Object}    Returns a map containing available public methods.
    * */
   var Instance = function (opts, cbs, interface) {
 
@@ -116,7 +109,7 @@ var SortingDesk = (function () {
         resetting = false,
         callbacks,
         options,
-        bins,
+        container,
         list;
 
     /* ----------------------------------------------------------------------
@@ -129,28 +122,63 @@ var SortingDesk = (function () {
 
 
     /**
-     * Base class of `BinContainerPrimary' and `BinContainerSecondary'.
-     *
      * @class
      * */
     var BinContainer = function ()
     {
-      this.subbins = [ ];
+      var self = this;
+
+      this.bins = [ ];
+
+      new BinAddButton(
+        this,
+        function (input) {
+          return invoke_('renderBin', { name: input } );
+        },
+        function (id, text) {
+          var deferred = $.Deferred();
+
+          invoke_('addBin', text)
+            .fail(function () {
+              /* TODO: show message box and notify user. */
+              console.log("Failed to add bin:", id, text);
+              deferred.reject();
+            } )
+            .done(function (bin) {
+              window.setTimeout(function () {
+                /* We rely on the API returning exactly ONE descriptor. */
+                var id = Object.firstKey(bin);
+                new Bin(self, id, bin[id]);
+              }, 0);
+              
+              deferred.resolve();
+            } );
+
+          return deferred.promise();
+        } );
     };
 
     BinContainer.prototype = {
-      bin: null,                    /* Applies only to primary bins */
-      subbins: null,
-      container: null,
+      bins: null,
 
+      add: function (bin)
+      {
+        var id = bin.getId();
+
+        /* Ensure a bin with the same id isn't already contained. */
+        this.bins.forEach(function (ib) {
+          if(ib.getId() == id)
+            throw "Bin is already contained: " + id;
+        } );
+
+        /* Contain bin and append its HTML node. */
+        this.append(bin.getNode());
+        this.bins.push(bin);
+      },
+      
       append: function (node)
       {
-        var place = this.getNewPlacement();
-
-        place.append(node);
-
-        if(place.children().length < 2)
-          node.addClass(options.css.leftmostBin);
+        options.nodes.bins.append(node);
       },
       
       remove: function (bin)
@@ -158,75 +186,23 @@ var SortingDesk = (function () {
         var self = this,
             node = bin.getNode();
 
-        /* Remove bin from containment first making sure it isn't primary. */
-        if(this.bin == bin)
-          throw "Unable to delete primary bin";
-        
-        this.subbins.some(function (subbin, ndx) {
-          if(subbin == bin) {
-            self.subbins.splice(ndx, 1);
+        this.bins.some(function (ib, ndx) {
+          if(ib == bin) {
+            self.bins.splice(ndx, 1);
             return true;
           }
 
           return false;
         } );
         
-        node.fadeOut(options.delays.binRemoval, function () {
-          /* Remove node and reorganise bin container. */
-          node.remove(); 
-
-          self.container.find('>DIV').each(function (i, node) {
-            node = $(node);
-
-            var children = node.children();
-
-            /* Remove empty wrapper. */
-            if(!children.length) {
-              node.remove();
-              return;
-            }
-
-            /* At this point, wrapper's children == 1 || 2. Move one bin into
-             * wrapper above if there is room for one more bin. Otherwise,
-             * ensure bin is leftmost. */
-            if(node.prev().length && node.prev().children().length < 2) {
-              node.prev().children().addClass('left');
-              
-              children.eq(0)
-                .appendTo(node.prev())
-                .removeClass('left');
-
-              /* Re-compute children. */
-              node.children().addClass('left');
-            } else if(children.length == 1)
-              children.addClass('left'); /* Ensure it's leftmost. */
-          } );
-        } );
-      },
-      
-      getNewPlacement: function ()
-      {
-        if(!this.container)
-          throw "No container defined";
-
-        var last = this.container.children().last();
-        
-        if(last.children().length == 1)
-          return last;
-
-        return this.container.append('<div />').children().last();
+        node.remove(); 
       },
 
       getBinByShortcut: function (keyCode)
       {
         var result = null;
 
-        /* Always first check to see if a primary bin is defined in `this.bin'
-         * and, if so, its shortcut. */
-        if(this.bin && this.bin.getShortcut() == keyCode)
-          return this.bin;
-
-        this.subbins.some(function (bin) {
+        this.bins.some(function (bin) {
           if(bin.getShortcut() == keyCode) {
             result = bin;
             return true;
@@ -242,9 +218,7 @@ var SortingDesk = (function () {
       {
         var result = null;
         
-        /* Primary bins cannot be deleted (or can they?) so don't check
-         * `this.bin'. */
-        this.subbins.some(function (bin) {
+        this.bins.some(function (bin) {
           if(bin.getId() == id) {
             result = bin;
             return true;
@@ -255,144 +229,29 @@ var SortingDesk = (function () {
 
         return result;
       },
-
-      getPrimaryBin: function ()
-      { return this.bin; },
-
-      hasPrimaryBin: function ()
-      { return !!this.bin; },
       
-      getSubbins: function ()
-      { return this.subbins; },
-      
+      getBins: function ()
+      { return this.bins; },
+
+      /* This method is here because it isn't clear at this time whether more
+       * than one bin container will exist going forward. Presently that's not
+       * the case and hence it simply returns `options.nodes.bins'. */
       getContainer: function ()
-      { return this.container; }
+      { return options.nodes.bins; }
     };
 
 
     /**
      * @class
      * */
-    var BinContainerPrimary = function (id, bin)
+    var Bin = function (container, id, bin)
     {
-      BinContainer.call(this);
-      
-      var wrapper = $('<div/>').addClass(options.css.primaryBinOuterWrapper),
-          self = this;
-
-      this.container = wrapper;
-      this.bin = new BinPrimary(this, id, bin);
-      
-      this.container = $('<div/>')
-        .addClass(options.css.primaryBinInnerWrapper);
-
-      for(var subid in bin.bins)
-        this.subbins.push(new BinSub(this, subid, bin.bins[subid]));
-      
-      wrapper
-        .append(this.node)
-        .append(this.container);
-
-      new BinAddButton(
-        this,
-        function (input) {
-          return invoke_('renderPrimarySubBin', { statement_text: input } );
-        },
-        function (id, text) {
-          var deferred = $.Deferred();
-
-          invoke_('addPrimarySubBin', text)
-            .fail(function () {
-              /* TODO: show message box and notify user. */
-              deferred.reject();
-            } )
-            .done(function (bin) {
-              window.setTimeout(function () {
-                /* We rely on the API returning exactly ONE descriptor. */
-                var id = Object.firstKey(bin);
-                self.subbins.push(new BinSub(self, id, bin[id]));
-              }, 0);
-              
-              deferred.resolve();
-            } );
-
-          return deferred.promise();
-        } );
-      
-      options.nodes.bins.append(wrapper);
-    };
-
-    BinContainerPrimary.prototype = Object.create(BinContainer.prototype);
-
-
-    /**
-     * @class
-     * */
-    var BinContainerSecondary = function (bins)
-    {
-      BinContainer.call(this);
-      
-      var self = this,
-          wrapper = $('<div/>').addClass(options.css.secondaryBinOuterWrapper);
-      
-      this.container = $('<div/>').addClass(options.css.secondaryBinInnerWrapper);
-
-      for(var id in bins) {
-        var bin = bins[id];
-
-        /* Report error, if applicable, but do not abort. */
-        if(bin.error) {
-          console.log("Failed to retrieve contents of secondary bin: ", id);
-          continue;
-        }
-
-        this.subbins.push(new BinSecondary(this, id, bin));
-      }
-      
-      wrapper.append(this.container);
-
-      new BinAddButton(
-        this,
-        function (input) {
-          return invoke_('renderSecondaryBin', { name: input } );
-        },
-        function (id, text) {
-          var deferred = $.Deferred();
-          
-          invoke_('addSecondaryBin', text)
-            .fail(function () {
-              /* TODO: show message box and notify user. */
-              deferred.reject();
-            } )
-            .done(function (bin) {
-              window.setTimeout(function () {
-                /* We rely on the API returning exactly ONE descriptor. */
-                for(var id in bin)
-                  self.subbins.push(new BinSecondary(self, id, bin[id]));
-              }, 0);
-              
-              deferred.resolve();
-            } );
-
-          return deferred.promise();
-        } );
-
-      options.nodes.bins.append(wrapper);
-    };
-
-    BinContainerSecondary.prototype = Object.create(BinContainer.prototype);
-
-
-    /**
-     * Base class of `BinPrimary', `BinSecondary' and `BinSub'.
-     *
-     * @class
-     * */
-    var Bin = function (owner, id, bin)
-    {
-      this.owner = owner;
+      this.owner = container;
       this.id = id;
       this.bin = bin;
+      
+      this.setNode_(invoke_("renderBin", bin));
+      container.add(this);
     };
 
     Bin.prototype = {
@@ -438,10 +297,6 @@ var SortingDesk = (function () {
         /* We must defer initialisation of D'n'D because owning object's `bin'
          * attribute will have not yet been set. */
         window.setTimeout(function () {
-          /* Primary bins aren't draggable. */
-          if(self == self.owner.getPrimaryBin())
-            return;
-
           new Draggable(node, {
             dragstart: function (e) {
               onActivateDeleteButton_();
@@ -466,9 +321,6 @@ var SortingDesk = (function () {
 
       getId: function ()
       { return this.id; },
-
-      isSecondaryBin: function ()
-      { return !this.owner.hasPrimaryBin(); },
       
       getNode: function ()
       { return this.node; },
@@ -476,54 +328,6 @@ var SortingDesk = (function () {
       getOwner: function ()
       { return this.owner; }
     };
-
-
-    /**
-     * @class
-     * */
-    var BinPrimary = function (owner, id, bin)
-    {
-      Bin.call(this, owner, id, bin);
-      
-      this.setNode_(invoke_("renderPrimaryBin", bin)
-                    .addClass(options.css.binGeneric));
-      
-      owner.append(this.node);
-    };
-
-    BinPrimary.prototype = Object.create(Bin.prototype);
-
-
-    /**
-     * @class
-     * */
-    var BinSub = function (owner, id, bin)
-    {
-      Bin.call(this, owner, id, bin);
-
-      this.setNode_(invoke_("renderPrimarySubBin", bin)
-                    .addClass(options.css.binGeneric));
-
-      owner.append(this.node);
-    };
-
-    BinSub.prototype = Object.create(Bin.prototype);
-
-
-    /**
-     * @class
-     * */
-    var BinSecondary = function (owner, id, bin)
-    {
-      Bin.call(this, owner, id, bin);
-      
-      this.setNode_($(invoke_('renderSecondaryBin', bin))
-                    .addClass(options.css.binGeneric));
-      
-      owner.append(this.node);
-    };
-
-    BinSecondary.prototype = Object.create(Bin.prototype);
 
 
     /**
@@ -618,7 +422,7 @@ var SortingDesk = (function () {
         variant.addClass(csel);
 
         /* Ensure text item is _always_ visible at the bottom and top ends of
-         * the containing DIV. */
+         * the containing node. */
         var st = this.container.scrollTop(),       /* scrolling top */
             ch = this.container.innerHeight(),     /* container height */
             ipt = variant.position().top,          /* item position top */
@@ -906,6 +710,7 @@ var SortingDesk = (function () {
           throw "onAdd: failed to retrieve text item: " + id;
         }
 
+        /* TODO: `TextItemSnippet' is defined outside of `SortingDesk'. */
         this.fnAdd(id,
                    new TextItemSnippet(item.getContent().text)
                    .highlights(options.binCharsLeft, options.binCharsRight))
@@ -1169,12 +974,7 @@ var SortingDesk = (function () {
     };
 
     var getBinByNodeId = function(id) {
-      for (var i = 0; i < bins.length; i++) {
-        var b = bins[i].getBinById(id);
-        if (b)
-          return b;
-      }
-      return null;
+      return container.getBinById(id);
     };
 
 
@@ -1182,31 +982,25 @@ var SortingDesk = (function () {
      *  Private interface
      *  Accessible module-wide but not externally.
      * ---------------------------------------------------------------------- */
-    var initialise_ = function (initialiseBins) {
+    var initialise_ = function (bins) {
       if(!options.nodes.binDelete)
         options.nodes.binDelete = $();
       
-      /* Do not create any process any bins if a bin HTML container doesn't
-       * exist. */
-      if(options.nodes.bins) {
-        /* Firstly process primary bin. */
-        if (typeof options.primaryContentId != 'undefined') {
-          if(!(options.primaryContentId in initialiseBins)
-             || initialiseBins[options.primaryContentId].error) {
-            throw "Failed to retrieve contents of primary bin";
-          }
+      /* Do not create bin container or process any bins if a bin HTML container
+       * wasn't given OR the bins' data result array wasn't received. */
+      if(options.nodes.bins && bins) {
+        container = new BinContainer();
+
+        for(var id in bins) {
+          var bin = bins[id];
           
-          bins.push(new BinContainerPrimary(
-            options.primaryContentId,
-            initialiseBins[options.primaryContentId]));
+          if(bin.error) {
+            console.log("Failed to load bin:", id, bin.error);
+            continue;
+          }
 
-          /* Delete to avoid repetition below. */
-          delete initialiseBins[options.primaryContentId];
+          new Bin(container, id, bin);
         }
-
-        /* Now create secondary bins */
-        
-        bins.push(new BinContainerSecondary(initialiseBins));
       }
       
       list = new ItemsList();
@@ -1220,33 +1014,23 @@ var SortingDesk = (function () {
         drop: function (e, id, scope) {
           switch(scope) {
           case 'bin':
-            bins.some(function (container) {
-              var bin = container.getBinById(decodeURIComponent(id));
+            var bin = container.getBinById(decodeURIComponent(id));
 
-              if(bin) {
-                /* It doesn't matter if the API request succeeds or not for the
-                 * bin is always deleted. The only case (that I am aware of) where
-                 * the API request would fail is if the bin didn't exist
-                 * server-side, in which case it should be deleted from the UI
-                 * too. So, always delete, BUT, if the request fails show the user
-                 * a notification; for what purpose, I don't know. */
-                container.remove(bin);
+            if(bin) {
+              /* It doesn't matter if the API request succeeds or not for the
+               * bin is always deleted. The only case (that I am aware of) where
+               * the API request would fail is if the bin didn't exist
+               * server-side, in which case it should be deleted from the UI
+               * too. So, always delete, BUT, if the request fails show the user
+               * a notification; for what purpose, I don't know. */
+              container.remove(bin);
 
-                var fn = callbacks[ bin.isSecondaryBin()
-                                    ? 'removeSecondaryBin'
-                                    : 'removePrimarySubBin' ];
-
-                fn(bin.getId())
-                  .fail(function (result) {
-                    console.log("bin-remove:", result.error);
-                    /* TODO: user notification not implemented yet. */
-                  } );
-                
-                return true;
-              }
-
-              return false;
-            } );
+              invoke_('removeBin', bin.getId())
+                .fail(function (result) {
+                  console.log("bin-remove:", result.error);
+                  /* TODO: user notification not implemented yet. */
+                } );
+            }
 
             break;
 
@@ -1360,14 +1144,8 @@ var SortingDesk = (function () {
     };
 
     var getBinByShortcut_ = function (keyCode) {
-      var result = false;
-
-      $.each(bins, function (i, bin) {
-        if( (result = bin.getBinByShortcut(keyCode)) )
-          return false;
-      } );
-
-      return result;
+      var result;
+      return (result = container.getBinByShortcut(keyCode)) ? result : null;
     };
     
     var onActivateDeleteButton_ = function (fn) {
@@ -1394,29 +1172,24 @@ var SortingDesk = (function () {
     
     options = $.extend(true, defaults_, opts);
     callbacks = cbs;
-    bins = [ ];
     
-    /* Do not request bin data if a bins HTML container wasn't given. */
-    if(options.nodes.bins) {
-      var ids = [];
-      if (typeof options.primaryContentId != 'undefined') {
-        ids = [options.primaryContentId];
-      }
-      var promise = callbacks.getBinData(
-        ids.concat(options.secondaryContentIds));
+    /* Do not request bin data if a bins HTML container (`options.nodes.bins')
+     * wasn't given OR content ids (`options.nodes.contentIds') were not
+     * specified. */
+    if(options.nodes.bins && options.contentIds) {
+      var promise = callbacks.getBinData(options.contentIds);
 
       if(!promise)
         throw "Another `getBinData' request is ongoing";
       
       promise
-        .done(function(resultBins) {
-          initialise_(resultBins);
+        .done(function(result) {
+          initialise_(result);
         } ).fail(function () {
           console.log("Failed to initialise Sorting Desk UI");
         } );
-    } else {
+    } else
       initialise_();
-    }
 
     
     /* We can't return anything from within the constructor. The only way to

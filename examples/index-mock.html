@@ -24,17 +24,12 @@
   } );
                 
   require( [ "SortingDesk" ], function () {
-    var sortingDesk,
-        nitems = $("#items"),
-        nbins = $("#bins"),
-        nloading = $("#loading"),
-        secondaryBins = [
+    var nloading = $("#loading"),
+        contentIds = [
           { node_id: '#100', features: { NAME: { "Irrelevant": 0 } } },
           { node_id: '^1$0#1', features: { NAME: { "Rubbish": 0 } } },
           { node_id: '1_0%%^&#2', features: { NAME: { "Keep": 0 } } }
-        ],
-        primaryContentId,
-        secondaryContentIds;
+        ];
 
     $(".wrapper").fadeIn();
 
@@ -42,24 +37,22 @@
     $(document).ajaxStart(function () { nloading.fadeIn(); } );
     $(document).ajaxStop(function () { nloading.fadeOut(); } );
 
-    /* Load data retrieved from loaded JSON file. */
-    primaryContentId = g_descriptor.primaryBin.node_id;
-    secondaryContentIds = Api.initialise(g_descriptor, secondaryBins);
-    g_descriptor = null;
-    
-    sortingDesk = new SortingDesk( {
+    new SortingDesk( {
       nodes: {
-        items: nitems,
-        bins: nbins,
+        items: $("#items"),
+        bins: $("#bins"),
         binDelete: $("#button-delete") /* Also used for 'dismissing' text items
                                         * that aren't/can't/won't be sorted into
                                         * a bin */
       },
-      primaryContentId: primaryContentId,
-      secondaryContentIds: secondaryContentIds,
+      contentIds: Api.initialise(g_descriptor, contentIds),
       visibleItems: 15
     }, Api);
-   });
+    
+    g_descriptor = null;
+    
+  });
+
     </script>
 </head>
 <body>
@@ -73,7 +66,7 @@
       </div>
     </div>
   </div>
-  <div id="button-delete">X</div>
+  <div id="button-delete" class="sd-button-delete">X</div>
   <div id="loading">Loading...</div>
   <div id="notification"></div>
 </body>
