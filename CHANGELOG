@@ -6,18 +6,27 @@
 
 	* css:
 
-	Pre-pend `sd' to CSS classes required by Sorting Desk.
+	Pre-pend `sd' to CSS classes required or expected by Sorting Desk.
 
 	* src/main/SortingDesk.js:
 
 	Sorting Desk now employs a unified bin model, whereby there is no
-	distinction between bins.
+	distinction between bins. Although there is no difference in bin
+	types, a bin may still be parent to one or more bins -- not
+	implemented yet, although infrastructure already has been laid
+	down for this purpose.
 
 	Simplified use of CSS.
+
+	Integrated text rendering and snippeting into component. Text
+	rendering is now offered by default if a custom callback function
+	isn't specified.
 
 	* examples:
 
 	Created a test illustrating simple instantiation of Sorting Desk.
+
+	Simplified instantiation of the component.
 
 2014-09-30  Miguel Guedes  <miguel@miguelguedes.org>
 
