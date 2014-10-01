@@ -1,4 +1,5 @@
-* To do items [74%]
+* To do items [75%]
+** TODO Remove hardcoded `less' and `more' CSS classes
 ** TODO End `render' prefixed callbacks and expect constructors instead
 ** TODO [#B] Prefix text-items' and bins' node ids
 - State "TODO"       from "WAIT"       [2014-09-07 Sun 08:16]
@@ -10,8 +11,6 @@
   Not proceeding with this until it's clear whether bins based on existing text items are even editable.
 ** TODO [#C] Text items container doesn't have a UI state when it doesn't hold any text items
 Must clearly communicate to the user that there aren't any more text items available.
-** TODO Move responsibility for loading notifications entirely to the client
-Use a callback for this purpose.
 ** TODO Allow keyboard shortcuts to be assigned programmatically
 ** TODO Resolve all TODO items
 ** IN-PROGRESS All bins are born equal
@@ -34,6 +33,9 @@ Similar to the tests found on: =git@devhub.diffeo.com:streamboard.git=
 A mechanism for displaying notifications to the user is needed for the purpose
 of providing feedback, in particular in the cases when a user action is invalid
 and results in an error.
+** DONE Move responsibility for loading notifications entirely to the client
+- State "DONE"       from "IN-PROGRESS" [2014-10-01 Wed 12:18]
+Use a callback for this purpose.
 ** DONE Rename `binDelete' to `buttonDelete'
 - State "DONE"       from "TODO"       [2014-10-01 Wed 10:37]
 ** DONE Remove reliance on CSS classes except for those necessary
