@@ -1509,15 +1509,15 @@ var SortingDesk = (function () {
    * */
   var TextItemSnippet = function (text)
   {
-    this.text = text;
+    this.text_ = text;
   };
 
   TextItemSnippet.prototype = {
-    text: null,
+    text_: null,
     
     highlights: function (left, right) {
       var re = /<\s*[bB]\s*[^>]*>/g,
-          matcho = re.exec(this.text),
+          matcho = re.exec(this.text_),
           matchc,
           i, j, skip,
           highlight,
@@ -1528,12 +1528,12 @@ var SortingDesk = (function () {
       
       /* We (perhaps dangerously) assume that a stranded closing tag </B> will
        * not exist before the first opening tag <b>. */
-      matchc = /<\s*\/[bB]\s*>/.exec(this.text); /* find end of B tag */
+      matchc = /<\s*\/[bB]\s*>/.exec(this.text_); /* find end of B tag */
 
       /* Skip tag, position and extract actual text inside B tag. Use semantic
        * STRONG rather than B tag. */
       i = matcho.index + matcho[0].length;
-      highlight = '<STRONG>' + this.text.substr(
+      highlight = '<STRONG>' + this.text_.substr(
         i,
         matchc.index - i) + '</STRONG>';
 
@@ -1549,7 +1549,7 @@ var SortingDesk = (function () {
        * string and add text to left of highlight as well as highlight
        * itself.. */
       result = (i > 0 ? "[...]&nbsp;" : '')
-        + this.text.substr(i < 0 ? 0 : i, matcho.index - i) + highlight;
+        + this.text_.substr(i < 0 ? 0 : i, matcho.index - i) + highlight;
 
       /* Set index to the right of the closing B tag and skip at most `right'
        * chars, taking care not to count chars that are part of any HTML tags
@@ -1559,7 +1559,7 @@ var SortingDesk = (function () {
       skip = this.skip(i, right);
       j = this.indexOfWordRight(skip.index);
       
-      result += this.text.substr(i, j - i);
+      result += this.text_.substr(i, j - i);
 
       /* Close stranded opened tags.
        *
@@ -1571,7 +1571,7 @@ var SortingDesk = (function () {
         result += '</' + skip.tags[j] + '>';
       
       /* Append ellipsis at end of result if index not at end of string. */
-      if(j < this.text.length - 1)
+      if(j < this.text_.length - 1)
         result += "&nbsp;[...]";
 
       /* And Bob's your uncle. */
@@ -1580,9 +1580,9 @@ var SortingDesk = (function () {
 
     condense: function (right) {
       var i = this.indexOfWordRight(right),
-          result = this.text.substring(0, i);
+          result = this.text_.substring(0, i);
 
-      if(i < this.text.length - 1)
+      if(i < this.text_.length - 1)
         result += '&nbsp;[...]';
 
       return result;
@@ -1591,8 +1591,8 @@ var SortingDesk = (function () {
     skip: function (ndx, count) {
       var tags = [ ];
 
-      while(ndx < this.text.length && count) {
-        var ch = this.text.charAt(ndx);
+      while(ndx < this.text_.length && count) {
+        var ch = this.text_.charAt(ndx);
 
         if(ch == '<') {
           var result = this.extractTag(ndx);
@@ -1613,7 +1613,8 @@ var SortingDesk = (function () {
     },
 
     extractTag: function (ndx) {
-      var match = /<\s*(\/)?\s*([a-zA-Z]+)\s*[^>]*>/.exec(this.text.substr(ndx));
+      var match = /<\s*(\/)?\s*([a-zA-Z]+)\s*[^>]*>/.exec(
+        this.text_.substr(ndx));
 
       if(match) {
         return { index: match.index + ndx + match[0].length,
@@ -1625,7 +1626,7 @@ var SortingDesk = (function () {
 
     indexOfWordLeft: function (ndx) {
       while(ndx >= 0) {
-        if(this.text.charAt(ndx) == ' ')
+        if(this.text_.charAt(ndx) == ' ')
           return ndx + 1;
         
         --ndx;
@@ -1635,7 +1636,7 @@ var SortingDesk = (function () {
     },
 
     indexOfWordRight: function (ndx) {
-      while(ndx < this.text.length && this.text.charAt(ndx) != ' ')
+      while(ndx < this.text_.length && this.text_.charAt(ndx) != ' ')
         ++ndx;
 
       return ndx;
@@ -1643,7 +1644,7 @@ var SortingDesk = (function () {
 
     canTextBeReduced: function (left, right) {
       var reduced = this.highlights(left, right);
-      return reduced.length < this.text.length;
+      return reduced.length < this.text_.length;
     }
   };
 
