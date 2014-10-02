@@ -530,8 +530,15 @@ var SortingDesk = (function () {
   {
     Controller.call(this, owner);
     
-    this.bins = [ ];
+    this.bins_ = [ ];
     this.hover_ = null;
+
+    /* Define getters. */
+    this.__defineGetter__("bins", function () { return this.bins_; } );
+    this.__defineGetter__("hover", function () { return this.hover_; } );
+    this.__defineGetter__("node", function () {
+      return this.owner_.options.nodes.bins;
+    } );
   };
 
   ControllerBins.prototype = Object.create(Controller.prototype);
@@ -574,40 +581,40 @@ var SortingDesk = (function () {
     var id = bin.getId();
 
     /* Ensure a bin with the same id isn't already contained. */
-    this.bins.forEach(function (ib) {
+    this.bins_.forEach(function (ib) {
       if(ib.getId() == id)
         throw "Bin is already contained: " + id;
     } );
 
     /* Contain bin and append its HTML node. */
     this.append(bin.getNode());
-    this.bins.push(bin);
+    this.bins_.push(bin);
   };
     
   ControllerBins.prototype.append = function (node)
   {
     /* Add bin node to the very top of the container if aren't any yet,
      * otherwise insert it after the last contained bin. */
-    if(!this.bins.length)
+    if(!this.bins_.length)
       this.owner_.options.nodes.bins.prepend(node);
     else
-      this.bins[this.bins.length - 1].getNode().after(node);
+      this.bins_[this.bins_.length - 1].getNode().after(node);
   };
 
   ControllerBins.prototype.indexOf = function (bin)
   {
-    return this.bins.indexOf(bin);
+    return this.bins_.indexOf(bin);
   };
 
   ControllerBins.prototype.removeAt = function (index)
   {
     var bin;
 
-    if(index < 0 || index >= this.bins.length)
+    if(index < 0 || index >= this.bins_.length)
       throw "Invalid bin index";
 
-    bin = this.bins[index];
-    this.bins.splice(index, 1);
+    bin = this.bins_[index];
+    this.bins_.splice(index, 1);
     
     bin.getNode().remove(); 
   };
@@ -616,7 +623,7 @@ var SortingDesk = (function () {
   {
     var result = null;
 
-    this.bins.some(function (bin) {
+    this.bins_.some(function (bin) {
       if(bin.getShortcut() == keyCode) {
         result = bin;
         return true;
@@ -632,7 +639,7 @@ var SortingDesk = (function () {
   {
     var result = null;
     
-    this.bins.some(function (bin) {
+    this.bins_.some(function (bin) {
       if(bin.getId() == id) {
         result = bin;
         return true;
@@ -643,18 +650,6 @@ var SortingDesk = (function () {
 
     return result;
   };
-    
-  ControllerBins.prototype.getBins = function ()
-  { return this.bins; };
-
-  ControllerBins.prototype.getHover = function ()
-  { return this.hover_; };
-    
-  /* TODO: This method is here because it isn't clear at this time whether more
-   * than one bin container will exist going forward. Presently that's not the
-   * case and hence it simply returns `options_.nodes.bins'. */
-  ControllerBins.prototype.getContainer = function ()
-  { return this.owner_.options.nodes.bins; };
 
   ControllerBins.prototype.onClick_ = function (bin)
   {
@@ -1294,7 +1289,7 @@ var SortingDesk = (function () {
       }
     } );
 
-    owner.getContainer().append(button);
+    owner.node.append(button);
   };
 
   BinAddButton.prototype = Object.create(Drawable.prototype);
@@ -1310,7 +1305,7 @@ var SortingDesk = (function () {
         options = parentOwner.options;
     
     /* Do not allow entering into concurrent `add' states. */
-    if(this.owner_.getContainer().find('.' + options.css.binAdding).length)
+    if(this.owner_.node.find('.' + options.css.binAdding).length)
       return;
 
     var nodeContent = id ? 'Please wait...'
