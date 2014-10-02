@@ -1467,8 +1467,7 @@ var SortingDesk = (function () {
       },
       
       dragenter: function (e) {
-        /* IE requires the following special measure or the primary bin won't
-         * accept text-items drops. INSANE. */
+        /* IE requires the following special measure. */
         if(DragDropManager.isScope(e = e.originalEvent, options.scopes)) {
           e.dropEffect = 'move';
           
