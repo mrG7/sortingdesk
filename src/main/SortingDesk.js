@@ -356,10 +356,11 @@ var SortingDesk = (function () {
     },
     
     onKeyUp_: function (evt) {
+      var self = this;
+      
       /* First process alpha key strokes. */
       if(evt.keyCode >= 65 && evt.keyCode <= 90) {
-        var self = this,
-            bin = this.getBinByShortcut_(evt.keyCode);
+        var bin = this.getBinByShortcut_(evt.keyCode);
 
         if(this.over_) {
           if(!bin)
@@ -396,8 +397,6 @@ var SortingDesk = (function () {
         this.list.selectOffset(1);
         break;
       case this.options_.keyboard.listDismiss:
-        var self = this;
-        
         this.onActivateDeleteButton_(function () {
           self.onDeactivateDeleteButton_();
         } );
