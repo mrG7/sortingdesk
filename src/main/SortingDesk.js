@@ -156,6 +156,7 @@ var SortingDesk = (function () {
     callbacks_: null,
     options_: null,
     /* Controllers */
+    callbacks_: null,
     requests_: null,
     dismiss_: null,
     keyboard_: null,
@@ -229,6 +230,9 @@ var SortingDesk = (function () {
     get options ()
     { return this.options_; },
 
+    get callbacks ()
+    { return this.callbacks_; },
+
     get requests ()
     { return this.requests_; },
 
@@ -244,15 +248,16 @@ var SortingDesk = (function () {
     initialise_: function (bins)
     {
       var self = this;
+
+      (this.callbacks_ = new ControllerCallbacks(this, this.callbacks_))
+        .initialise();
+      
+      (this.requests_ = new ControllerRequests(this))
+        .initialise();
       
       if(!this.options_.nodes.buttonDismiss)
         this.options_.nodes.buttonDismiss = $();
 
-      /* Note: we are passing a reference to the `callbacks_' map because it is
-       * not accessible outside of `Instance'. */
-      (this.requests_ = new ControllerRequests(this, this.callbacks_))
-        .initialise();
-      
       (this.dismiss_ = new ControllerButtonDismiss(this))
         .initialise();
       
@@ -283,29 +288,6 @@ var SortingDesk = (function () {
       this.initialised_ = true;
       console.log("Sorting Desk UI initialised");
     },
-
-    invoke: function ()
-    {
-      if(arguments.length < 1)
-        throw "Callback name required";
-      else if(!(arguments[0] in this.callbacks_))
-        throw "Callback non existent: " + arguments[0];
-
-      var result = this.callbacks_[arguments[0]]
-            .apply(null, [].slice.call(arguments, 1));
-
-      if(result && 'always' in result) {
-        var self = this;
-        
-        this.requests_.begin(result);
-        
-        result.always(function () {
-          self.requests_.end(result);
-        } );
-      }
-
-      return result;
-    }
   };
 
 
@@ -360,7 +342,60 @@ var SortingDesk = (function () {
   /**
    * @class@
    * */
-  var ControllerRequests = function (owner, callbacks)
+  var ControllerCallbacks = function (owner, callbacks)
+  {
+    /* invoke super constructor. */
+    Controller.call(this, owner);
+
+    /* Set initial state. */
+    this.callbacks_ = callbacks;
+  };
+
+  ControllerCallbacks.prototype = Object.create(Controller.prototype);
+
+  ControllerCallbacks.prototype.initialise = function () { };
+  
+  ControllerCallbacks.prototype.exists = function (callback)
+  { return callback in this.callbacks_; };
+
+  ControllerCallbacks.prototype.invoke = function ()
+  {
+    var result = this.call_.apply(this, arguments);
+    
+    if(result && 'always' in result) {
+      var self = this;
+      
+      this.owner_.requests.begin(result);
+      
+      result.always(function () {
+        self.owner_.requests.end(result);
+      } );
+    }
+
+    return result;
+  };
+
+  ControllerCallbacks.prototype.passThrough = function ()
+  {
+    return this.call_.apply(this, arguments);
+  };
+
+  ControllerCallbacks.prototype.call_ = function ()
+  {
+    if(arguments.length < 1)
+      throw "Callback name required";
+    else if(!(arguments[0] in this.callbacks_))
+      throw "Callback non existent: " + arguments[0];
+
+    return this.callbacks_[arguments[0]]
+      .apply(null, [].slice.call(arguments, 1));
+  };
+  
+
+  /**
+   * @class@
+   * */
+  var ControllerRequests = function (owner)
   {
     /* invoke super constructor. */
     Controller.call(this, owner);
@@ -368,7 +403,6 @@ var SortingDesk = (function () {
     /* Set initial state. */
     this.requests_ = { };
     this.count_ = 0;
-    this.callbacks_ = callbacks;
 
     /* Define getters. */
     this.__defineGetter__("count", function () { return this.count_; } );
@@ -388,8 +422,8 @@ var SortingDesk = (function () {
     ++this.count_;
       
     /* Trigger callback. */
-    if("onRequestStart" in this.callbacks_)
-      this.callbacks_.onRequestStart(id);
+    if(this.owner_.callbacks.exists("onRequestStart"))
+      this.owner_.callbacks.passThrough("onRequestStart", id);
   };
 
   ControllerRequests.prototype.end = function (id)
@@ -409,8 +443,8 @@ var SortingDesk = (function () {
       console.log("WARNING: unknown request ended:", id);
 
     /* Trigger callback. */
-    if("onRequestStop" in this.callbacks_)
-      this.callbacks_.onRequestStop(id);
+    if(this.owner_.callbacks.exists("onRequestStop"))
+      this.owner_.callbacks.passThrough("onRequestStop", id);
   };
   
   
@@ -451,7 +485,7 @@ var SortingDesk = (function () {
              * a notification; for what purpose, I don't know. */
             self.owner_.bins.removeAt(self.owner_.bins.indexOf(bin));
 
-            self.owner_.invoke('removeBin', bin.id)
+            self.owner_.callbacks.invoke('removeBin', bin.id)
               .fail(function (result) {
                 console.log("bin-remove:", result.error);
                 /* TODO: user notification not implemented yet. */
@@ -463,7 +497,7 @@ var SortingDesk = (function () {
         case 'text-item':
           var item = self.owner_.items.getById(id);
 
-          self.owner_.invoke("textDismissed", item);
+          self.owner_.callbacks.invoke("textDismissed", item);
           self.owner_.items.remove(decodeURIComponent(id));
           
           break;
@@ -543,9 +577,9 @@ var SortingDesk = (function () {
             bin.node.removeClass(options.css.binAnimateAssign);
           }, options.delays.animateAssign);
           
-          this.owner_.invoke("textDroppedInBin",
-                             this.owner_.items.current(),
-                             bin);
+          this.owner_.callbacks.invoke("textDroppedInBin",
+                                       this.owner_.items.current(),
+                                       bin);
           this.owner_.items.remove();
         }
       }
@@ -566,7 +600,8 @@ var SortingDesk = (function () {
         self.owner_.dismiss.deactivate();
       } );
       
-      this.owner_.invoke("textDismissed", this.owner_.items.current());
+      this.owner_.callbacks.invoke("textDismissed",
+                                   this.owner_.items.current());
       this.owner_.items.remove();
       
       break;
@@ -612,7 +647,7 @@ var SortingDesk = (function () {
       function (id, text) {
         var deferred = $.Deferred();
 
-        self.owner_.invoke('addBin', text)
+        self.owner_.callbacks.invoke('addBin', text)
           .fail(function () {
             /* TODO: show message box and notify user. */
             console.log("Failed to add bin:", id, text);
@@ -709,7 +744,8 @@ var SortingDesk = (function () {
 
   ControllerBins.prototype.onClick_ = function (bin)
   {
-    this.owner_.invoke("textDroppedInBin", this.owner_.items.current(), bin);
+    this.owner_.callbacks.invoke("textDroppedInBin",
+                                 this.owner_.items.current(), bin);
     this.owner_.items.remove();
   };
 
@@ -771,9 +807,8 @@ var SortingDesk = (function () {
         var id = decodeURIComponent(e.dataTransfer.getData('Text')),
             item = parentOwner.items.getById(id);
 
-        parentOwner.invoke("textDroppedInBin", item, self);
-        parentOwner.items.remove(
-          decodeURIComponent(item.content.node_id));
+        parentOwner.callbacks.invoke("textDroppedInBin", item, self);
+        parentOwner.items.remove(decodeURIComponent(item.content.node_id));
       }
     } );
 
@@ -912,7 +947,7 @@ var SortingDesk = (function () {
       return;
     
     var self = this,
-        promise = this.owner_.invoke(
+        promise = this.owner_.callbacks.invoke(
           "moreTexts",
           this.owner_.options.visibleItems);
 
@@ -1146,7 +1181,7 @@ var SortingDesk = (function () {
 
     this.getNodeClose()
       .click(function () {
-        parentOwner.invoke("textDismissed", self.content_);
+        parentOwner.callbacks.invoke("textDismissed", self.content_);
         self.owner_.remove(decodeURIComponent(self.content_.node_id));
         return false;
       } );
