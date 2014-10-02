@@ -849,8 +849,8 @@ var SortingDesk = (function () {
     /* Invoke super constructor. */
     Controller.call(this, owner);
     
-    this.container = this.owner_.options.nodes.items;
-    this.items = [ ];
+    this.node_ = this.owner_.options.nodes.items;
+    this.items_ = [ ];
   };
 
   ControllerItems.prototype = Object.create(Controller.prototype);
@@ -860,7 +860,7 @@ var SortingDesk = (function () {
   
   ControllerItems.prototype.check = function ()
   {
-    if(this.items.length >= this.owner_.options.visibleItems)
+    if(this.items_.length >= this.owner_.options.visibleItems)
       return;
     
     var self = this,
@@ -877,7 +877,7 @@ var SortingDesk = (function () {
 
       items.forEach(function (item, index) {
         window.setTimeout( function () {
-          self.items.push(new TextItemGeneric(self, item));
+          self.items_.push(new TextItemGeneric(self, item));
         }, Math.pow(index, 2) * 1.1);
       } );
 
@@ -903,14 +903,14 @@ var SortingDesk = (function () {
     
     var csel = this.owner_.options.css.itemSelected;
     
-    if(!this.container.children().length)
+    if(!this.node_.children().length)
       return;
     
     if(typeof variant == 'undefined') {
-      variant = this.container.find('.' + csel);
+      variant = this.node_.find('.' + csel);
 
       if(variant.length == 0)
-        variant = this.container.children().eq(0);
+        variant = this.node_.children().eq(0);
       else if(variant.length > 1) {
         /* We should never reach here. */
         console.log("WARNING! Multiple text items selected:",
@@ -924,14 +924,14 @@ var SortingDesk = (function () {
     } else if(typeof variant == 'number') {
       if(variant < 0)
         variant = 0;
-      else if(variant > this.container.children().length - 1)
-        variant = this.container.children().length - 1;
+      else if(variant > this.node_.children().length - 1)
+        variant = this.node_.children().length - 1;
 
-      variant = this.container.children().eq(variant);
+      variant = this.node_.children().eq(variant);
     } else if(variant instanceof TextItem)
       variant = variant.getNode();
 
-    this.container.find('.' + csel).removeClass(csel);
+    this.node_.find('.' + csel).removeClass(csel);
     variant.addClass(csel);
 
     /* WARNING: the present implementation requires knowledge of the list
@@ -944,19 +944,19 @@ var SortingDesk = (function () {
     
     /* Ensure text item is _always_ visible at the bottom and top ends of
      * the containing node. */
-    var st = this.container.scrollTop(),       /* scrolling top */
-        ch = this.container.innerHeight(),     /* container height */
+    var st = this.node_.scrollTop(),           /* scrolling top */
+        ch = this.node_.innerHeight(),         /* container height */
         ipt = variant.position().top,          /* item position top */
         ih = st + ipt + variant.outerHeight(); /* item height */
 
     if(st + ipt < st            /* top */
        || variant.outerHeight() > ch) {
-      this.container.scrollTop(st + ipt);
+      this.node_.scrollTop(st + ipt);
     } else if(ih > st + ch) {   /* bottom */
-      this.container.scrollTop(st + ipt - ch
-                               + variant.outerHeight()
-                               + parseInt(variant.css('marginBottom'))
-                               + parseInt(variant.css('paddingBottom')));
+      this.node_.scrollTop(st + ipt - ch
+                           + variant.outerHeight()
+                           + parseInt(variant.css('marginBottom'))
+                           + parseInt(variant.css('paddingBottom')));
     }
   };
 
@@ -965,26 +965,26 @@ var SortingDesk = (function () {
     var csel = this.owner_.options.css.itemSelected,
         index;
 
-    if(!this.container.length)
+    if(!this.node_.length)
       return;
-    else if(!this.container.find('.' + csel).length) {
+    else if(!this.node_.find('.' + csel).length) {
       this.select();
       return;
     }
 
-    index = this.container.find('.' + csel).prevAll().length + offset;
+    index = this.node_.find('.' + csel).prevAll().length + offset;
 
     if(index < 0)
       index = 0;
-    else if(index > this.container.children().length - 1)
-      index = this.container.children().length - 1;
+    else if(index > this.node_.children().length - 1)
+      index = this.node_.children().length - 1;
 
     this.select(index);
   };
 
   ControllerItems.prototype.current = function()
   {
-    var node = this.container.find(
+    var node = this.node_.find(
       '.' + this.owner_.options.css.itemSelected);
     
     if(!node.length)
@@ -1010,15 +1010,15 @@ var SortingDesk = (function () {
     var self = this,
         result = false;
     
-    $.each(this.items, function (i, item) {
+    $.each(this.items_, function (i, item) {
       if(item.getContent().node_id != id)
         return true;
       
       if(item.isSelected()) {
-        if(i < self.items.length - 1)
-          self.select(self.items[i + 1]);
-        else if(self.items.length)
-          self.select(self.items[i - 1]);
+        if(i < self.items_.length - 1)
+          self.select(self.items_[i + 1]);
+        else if(self.items_.length)
+          self.select(self.items_[i - 1]);
         else
           console.log("No more items available");
       }
@@ -1036,7 +1036,7 @@ var SortingDesk = (function () {
                       } );
                   } );
 
-      self.items.splice(i, 1);
+      self.items_.splice(i, 1);
       result = true;
       
       return false;  
@@ -1051,7 +1051,7 @@ var SortingDesk = (function () {
   {
     var result = null;
     
-    this.items.some(function (item) {
+    this.items_.some(function (item) {
       if(item.getContent().node_id == id) {
         result = item;
         return true;
