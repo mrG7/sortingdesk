@@ -470,9 +470,9 @@ var SortingDesk = (function () {
     if(evt.keyCode >= 65 && evt.keyCode <= 90) {
       var bin = controllers.bins.getBinByShortcut(evt.keyCode);
 
-      if(controllers.bins.getHover()) {
+      if(controllers.bins.hover) {
         if(!bin)
-          controllers.bins.getHover().setShortcut(evt.keyCode);
+          controllers.bins.hover.setShortcut(evt.keyCode);
       } else {
         if(bin) {
           /* TODO: The following animation should be decoupled. */
