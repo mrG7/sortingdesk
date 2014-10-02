@@ -1075,17 +1075,6 @@ var SortingDesk = (function () {
           parentOwner.onDeactivateDeleteButton_();
         }
       } );
-
-      /* Add logic to less/more links. */
-      this.getNodeLess().click(function () {
-        self.replaceNode(self.render(TEXT_VIEW_HIGHLIGHTS));
-        return false;
-      } );
-
-      this.getNodeMore().click(function () {
-        self.replaceNode(self.render(TEXT_VIEW_UNRESTRICTED));
-        return false;
-      } );
     },
 
     replaceNode: function (newNode) {
@@ -1145,6 +1134,25 @@ var SortingDesk = (function () {
   /* Prototype */
   TextItemGeneric.prototype = Object.create(TextItem.prototype);
 
+  TextItemGeneric.prototype.initialise = function ()
+  {
+    var self = this;
+
+    /* Call overrided method. */
+    TextItem.prototype.initialise.call(this);
+
+    /* Add logic to less/more links. */
+    this.getNodeLess().click(function () {
+      self.replaceNode(self.render(TextItemGeneric.VIEW_HIGHLIGHTS));
+      return false;
+    } );
+
+    this.getNodeMore().click(function () {
+      self.replaceNode(self.render(TextItemGeneric.VIEW_UNRESTRICTED));
+      return false;
+    } );
+  };
+  
   TextItemGeneric.prototype.render = function (view)
   {
     switch(view || TextItemGeneric.VIEW_HIGHLIGHTS) {
