@@ -129,8 +129,6 @@ var SortingDesk = (function () {
     
     this.options_ = $.extend(true, defaults_, opts);
     this.callbacks_ = cbs;
-    this.requests_ = [ ];
-    this.controllers_ = { };
     
     /* Do not request bin data if a bins HTML container (`options_.nodes.bins')
      * wasn't given OR content ids (`options_.nodes.contentIds') were not
@@ -157,9 +155,12 @@ var SortingDesk = (function () {
     resetting_: false,
     callbacks_: null,
     options_: null,
-    controllers_: null,
+    /* Controllers */
     requests_: null,
-
+    dismiss_: null,
+    keyboard_: null,
+    bins_: null,
+    items_: null,
     
     /**
      * Resets the component to a virgin state. Removes all nodes contained by
@@ -197,8 +198,9 @@ var SortingDesk = (function () {
           if(this.options_.nodes.buttonDismiss)
             this.options_.nodes.buttonDismiss.off();
           
-          this.options_ = this.callbacks_ = this.controllers_.bins
-            = this.controllers_.items = null;
+          this.options_ = this.callbacks_ = null;
+          this.requests_ = this.dismiss_ = this.keyboard_ = null;
+          this.bins_ = this.items_ = null;
           
           this.initialised_ = false;
           
@@ -227,8 +229,17 @@ var SortingDesk = (function () {
     get options ()
     { return this.options_; },
 
-    get controllers ()
-    { return this.controllers_; },
+    get requests ()
+    { return this.requests_; },
+
+    get dismiss ()
+    { return this.dismiss_; },
+
+    get bins ()
+    { return this.bins_; },
+
+    get items ()
+    { return this.items_; },
 
     initialise_: function (bins)
     {
@@ -239,17 +250,16 @@ var SortingDesk = (function () {
 
       /* Note: we are passing a reference to the `callbacks_' map because it is
        * not accessible outside of `Instance'. */
-      (this.controllers_.requests = new ControllerRequests(this,
-                                                           this.callbacks_))
+      (this.requests_ = new ControllerRequests(this, this.callbacks_))
         .initialise();
       
-      (this.controllers_.dismiss = new ControllerButtonDismiss(this))
+      (this.dismiss_ = new ControllerButtonDismiss(this))
         .initialise();
       
       /* Do not create bin container or process any bins if a bin HTML container
        * wasn't given OR the bins' data result array wasn't received. */
       if(this.options_.nodes.bins && bins) {
-        (this.controllers_.bins = new ControllerBins(this))
+        (this.bins_ = new ControllerBins(this))
           .initialise();
 
         for(var id in bins) {
@@ -260,14 +270,14 @@ var SortingDesk = (function () {
             continue;
           }
           
-          new BinGeneric(this.controllers_.bins, id, bin).add();
+          new BinGeneric(this.bins_, id, bin).add();
         }
       }
       
-      (this.controllers_.items = new ControllerItems(this))
+      (this.items_ = new ControllerItems(this))
         .initialise();
 
-      (this.controllers_.keyboard = new ControllerKeyboard(this))
+      (this.keyboard_ = new ControllerKeyboard(this))
         .initialise();
 
       this.initialised_ = true;
@@ -287,10 +297,10 @@ var SortingDesk = (function () {
       if(result && 'always' in result) {
         var self = this;
         
-        this.controllers_.requests.begin(result);
+        this.requests_.begin(result);
         
         result.always(function () {
-          self.controllers_.requests.end(result);
+          self.requests_.end(result);
         } );
       }
 
@@ -428,13 +438,9 @@ var SortingDesk = (function () {
       scopes: [ 'bin', 'text-item' ],
 
       drop: function (e, id, scope) {
-        var controller;
-        
         switch(scope) {
         case 'bin':
-          controller = self.owner_.controllers.bins;
-          
-          var bin = controller.getById(decodeURIComponent(id));
+          var bin = self.owner_.bins.getById(decodeURIComponent(id));
 
           if(bin) {
             /* It doesn't matter if the API request succeeds or not for the
@@ -443,7 +449,7 @@ var SortingDesk = (function () {
              * server-side, in which case it should be deleted from the UI
              * too. So, always delete, BUT, if the request fails show the user
              * a notification; for what purpose, I don't know. */
-            controller.removeAt(controller.indexOf(bin));
+            self.owner_.bins.removeAt(self.owner_.bins.indexOf(bin));
 
             self.owner_.invoke('removeBin', bin.id)
               .fail(function (result) {
@@ -455,12 +461,10 @@ var SortingDesk = (function () {
           break;
 
         case 'text-item':
-          controller = self.owner_.controllers.items;
-
-          var item = controller.getById(id);
+          var item = self.owner_.items.getById(id);
 
           self.owner_.invoke("textDismissed", item);
-          controller.remove(decodeURIComponent(id));
+          self.owner_.items.remove(decodeURIComponent(id));
           
           break;
 
@@ -516,16 +520,15 @@ var SortingDesk = (function () {
   ControllerKeyboard.prototype.onKeyUp_ = function (evt)
   {
     var self = this,
-        controllers = this.owner_.controllers,
         options = this.owner_.options;
     
     /* First process alpha key strokes. */
     if(evt.keyCode >= 65 && evt.keyCode <= 90) {
-      var bin = controllers.bins.getByShortcut(evt.keyCode);
+      var bin = this.owner_.bins.getByShortcut(evt.keyCode);
 
-      if(controllers.bins.hover) {
+      if(this.owner_.bins.hover) {
         if(!bin)
-          controllers.bins.hover.setShortcut(evt.keyCode);
+          this.owner_.bins.hover.setShortcut(evt.keyCode);
       } else {
         if(bin) {
           /* TODO: The following animation should be decoupled. */
@@ -541,9 +544,9 @@ var SortingDesk = (function () {
           }, options.delays.animateAssign);
           
           this.owner_.invoke("textDroppedInBin",
-                             controllers.items.current(),
+                             this.owner_.items.current(),
                              bin);
-          controllers.items.remove();
+          this.owner_.items.remove();
         }
       }
       
@@ -553,18 +556,18 @@ var SortingDesk = (function () {
     /* Not alpha. */
     switch(evt.keyCode) {
     case options.keyboard.listUp:
-      controllers.items.selectOffset(-1);
+      this.owner_.items.selectOffset(-1);
       break;
     case options.keyboard.listDown:
-      controllers.items.selectOffset(1);
+      this.owner_.items.selectOffset(1);
       break;
     case options.keyboard.listDismiss:
-      controllers.dismiss.activate(function () {
-        controllers.dismiss.deactivate();
+      this.owner_.dismiss.activate(function () {
+        self.owner_.dismiss.deactivate();
       } );
       
-      this.owner_.invoke("textDismissed", controllers.items.current());
-      controllers.items.remove();
+      this.owner_.invoke("textDismissed", this.owner_.items.current());
+      this.owner_.items.remove();
       
       break;
       
@@ -706,10 +709,8 @@ var SortingDesk = (function () {
 
   ControllerBins.prototype.onClick_ = function (bin)
   {
-    var items = this.owner_.controllers.items;
-    
-    this.owner_.invoke("textDroppedInBin", items.current(), bin);
-    items.remove();
+    this.owner_.invoke("textDroppedInBin", this.owner_.items.current(), bin);
+    this.owner_.items.remove();
   };
 
   ControllerBins.prototype.onMouseEnter_ = function (bin)
@@ -768,10 +769,10 @@ var SortingDesk = (function () {
       
       drop: function (e) {
         var id = decodeURIComponent(e.dataTransfer.getData('Text')),
-            item = parentOwner.controllers.items.getById(id);
+            item = parentOwner.items.getById(id);
 
         parentOwner.invoke("textDroppedInBin", item, self);
-        parentOwner.controllers.items.remove(
+        parentOwner.items.remove(
           decodeURIComponent(item.content.node_id));
       }
     } );
@@ -781,11 +782,11 @@ var SortingDesk = (function () {
     window.setTimeout(function () {
       new Draggable(self.node_, {
         dragstart: function (e) {
-          parentOwner.controllers.dismiss.activate();
+          parentOwner.dismiss.activate();
         },
         
         dragend: function (e) {
-          parentOwner.controllers.dismiss.deactivate();
+          parentOwner.dismiss.deactivate();
         }
       } );
     }, 0);
@@ -920,7 +921,7 @@ var SortingDesk = (function () {
       return;
     
     promise.done(function (items) {
-      self.owner_.controllers.requests.begin('check-items');
+      self.owner_.requests.begin('check-items');
 
       items.forEach(function (item, index) {
         window.setTimeout( function () {
@@ -934,7 +935,7 @@ var SortingDesk = (function () {
 
       /* Ensure event is fired after the last item is added. */
       window.setTimeout( function () {
-        self.owner_.controllers.requests.end('check-items');
+        self.owner_.requests.end('check-items');
       }, Math.pow(items.length - 1, 2) * 1.1 + 10);
 
     } );
@@ -1159,12 +1160,12 @@ var SortingDesk = (function () {
         self.owner_.select(self);
 
         /* Activate deletion/dismissal button. */
-        parentOwner.controllers.dismiss.activate();
+        parentOwner.dismiss.activate();
       },
       
       dragend: function () {
         /* Deactivate deletion/dismissal button. */
-        parentOwner.controllers.dismiss.deactivate();
+        parentOwner.dismiss.deactivate();
       }
     } );
   };
@@ -1371,7 +1372,7 @@ var SortingDesk = (function () {
       return;
     }
 
-    var item = parentOwner.controllers.items.getById(id);
+    var item = parentOwner.items.getById(id);
 
     if(!item) {
       node.remove();
