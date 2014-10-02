@@ -381,14 +381,6 @@ var SortingDesk = (function () {
       /* Trigger callback. */
       if("onRequestStop" in this.callbacks_)
         this.callbacks_.onRequestStop(id);
-    },
-
-    getBinByShortcut_: function (keyCode) {
-      var result;
-      
-      return (result = this.controllers_.bins.getBinByShortcut(keyCode))
-        ? result
-        : null;
     }
   };
 
