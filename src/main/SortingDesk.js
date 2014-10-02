@@ -369,7 +369,8 @@ var SortingDesk = (function () {
     onKeyUp_: function (evt) {
       /* First process alpha key strokes. */
       if(evt.keyCode >= 65 && evt.keyCode <= 90) {
-        var bin = this.getBinByShortcut_(evt.keyCode);
+        var self = this,
+            bin = this.getBinByShortcut_(evt.keyCode);
 
         if(this.over_) {
           if(!bin)
@@ -383,7 +384,7 @@ var SortingDesk = (function () {
             bin.getNode().addClass(this.options.css.binAnimateAssign);
             
             window.setTimeout(function () {
-              bin.getNode().removeClass(this.options.css.binAnimateAssign);
+              bin.getNode().removeClass(self.options.css.binAnimateAssign);
             }, this.options.delays.animateAssign);
             
             this.invoke_("textDroppedInBin", this.list.current(), bin);
