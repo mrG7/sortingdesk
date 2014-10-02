@@ -315,7 +315,7 @@ var SortingDesk = (function () {
   };
 
   Owned.prototype = {
-    getOwner: function ()
+    get owner ()
     { return this.owner_; }
   };    
   
@@ -689,7 +689,7 @@ var SortingDesk = (function () {
   BinBase.prototype.initialise = function ()
   {
     var self = this,
-        parentOwner = self.owner_.getOwner();
+        parentOwner = self.owner_.owner;
 
     (this.node = this.render())
       .attr( {
@@ -762,7 +762,7 @@ var SortingDesk = (function () {
   /* overridable */ BinBase.prototype.getNodeShortcut = function ()
   {
     return this.node.find(
-      '.'+ this.owner_.getOwner().options.css.binShortcut);
+      '.'+ this.owner_.owner.options.css.binShortcut);
   };
 
 
@@ -1082,7 +1082,7 @@ var SortingDesk = (function () {
   TextItem.prototype.initialise = function()
   {
     var self = this,
-        parentOwner = this.owner_.getOwner();
+        parentOwner = this.owner_.owner;
 
     this.node
       .attr( {
@@ -1157,7 +1157,7 @@ var SortingDesk = (function () {
     /* Fail silently if not initialised anymore. This might happen if, for
      * example, the `reset' method was invoked but the component is still
      * loading text items. */
-    if(!owner.getOwner().isInitialised)
+    if(!owner.owner.isInitialised)
       return;
 
     TextItem.call(this, owner, item);
@@ -1165,7 +1165,7 @@ var SortingDesk = (function () {
     this.node = this.render(TextItemGeneric.VIEW_HIGHLIGHTS);
     
     this.initialise();
-    owner.getOwner().options.nodes.items.append(this.node);
+    owner.owner.options.nodes.items.append(this.node);
   };
 
   /* Constants */
@@ -1271,7 +1271,7 @@ var SortingDesk = (function () {
     /* Invoke super constructor. */
     Drawable.call(this, owner);
     
-    var parentOwner = owner.getOwner();
+    var parentOwner = owner.owner;
     
     this.fnRender = fnRender;
     this.fnAdd = fnAdd;
@@ -1306,7 +1306,7 @@ var SortingDesk = (function () {
 
   BinAddButton.prototype.onAdd = function (id)
   {
-    var parentOwner = this.owner_.getOwner(),
+    var parentOwner = this.owner_.owner,
         options = parentOwner.options;
     
     /* Do not allow entering into concurrent `add' states. */
@@ -1349,7 +1349,7 @@ var SortingDesk = (function () {
       .focus()
       .blur(function () {
         if(!this.value) {
-          node.fadeOut(self.owner_.getOwner().options.delays.addBinShow,
+          node.fadeOut(self.owner_.owner.options.delays.addBinShow,
                        function () { node.remove(); } );
           return;
         }
