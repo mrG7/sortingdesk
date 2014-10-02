@@ -1,8 +1,5 @@
-* To do items [70%]
-** TODO Review `Instance' and break it up into smaller components
-** TODO Rename `list' to `items'
-** TODO Rename `container' to `bins'
-** TODO Remove hardcoded `less' and `more' CSS classes
+* To do items [80%]
+** TODO Implement keyboard auto-repeat with configurable frequency
 ** TODO End `render' prefixed callbacks and expect constructors instead
 ** TODO [#B] Prefix text-items' and bins' node ids
 - State "TODO"       from "WAIT"       [2014-09-07 Sun 08:16]
@@ -36,6 +33,28 @@ Similar to the tests found on: =git@devhub.diffeo.com:streamboard.git=
 A mechanism for displaying notifications to the user is needed for the purpose
 of providing feedback, in particular in the cases when a user action is invalid
 and results in an error.
+** DONE Create `Owned' class
+- State "DONE"       from "TODO"       [2014-10-02 Thu 15:42]
+** DONE Create `Drawable' class
+- State "DONE"       from "TODO"       [2014-10-02 Thu 15:42]
+** DONE Employ getters and setters
+- State "DONE"       from "TODO"       [2014-10-02 Thu 15:42]
+** DONE `Controller' base class should contain `owner' instance
+- State "DONE"       from "TODO"       [2014-10-02 Thu 15:42]
+** DONE Remove `getOption' method
+- State "DONE"       from "TODO"       [2014-10-02 Thu 12:02]
+** DONE Remove `getController' method
+- State "DONE"       from "TODO"       [2014-10-02 Thu 12:02]
+** DONE Review `Instance' and break it up into smaller components
+- State "DONE"       from "TODO"       [2014-10-02 Thu 15:42]
+** DONE Rename `list' to `items'
+- State "DONE"       from "TODO"       [2014-10-02 Thu 12:29]
+** DONE Rename `container' to `bins'
+- State "DONE"       from "TODO"       [2014-10-02 Thu 12:29]
+** DONE Make `options' private
+- State "DONE"       from "TODO"       [2014-10-02 Thu 12:29]
+** DONE Remove hardcoded `less' and `more' CSS classes
+- State "DONE"       from "TODO"       [2014-10-02 Thu 12:29]
 ** DONE Migrate to a full OO design
 - State "DONE"       from "TODO"       [2014-10-01 Wed 18:18]
 ** DONE Move responsibility for loading notifications entirely to the client
