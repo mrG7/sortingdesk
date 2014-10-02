@@ -860,6 +860,12 @@ var SortingDesk = (function () {
   };
 
   Bin.prototype = Object.create(BinBase.prototype);
+
+  Bin.prototype.add = function ()
+  {
+    this.initialise(this.render());
+    this.owner_.add(this);
+  };
     
   Bin.prototype.render = function () {
     /* Wrap bin name inside a DIV. */
@@ -878,12 +884,6 @@ var SortingDesk = (function () {
   };
 
   BinGeneric.prototype = Object.create(Bin.prototype);
-
-  BinGeneric.prototype.add = function ()
-  {
-    this.initialise(this.render());
-    this.owner_.add(this);
-  };
 
 
   /**
