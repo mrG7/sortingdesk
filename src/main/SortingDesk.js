@@ -128,7 +128,7 @@ var SortingDesk = (function () {
     console.log("Initialising Sorting Desk UI");
     
     this.options_ = $.extend(true, defaults_, opts);
-    this.callbacks = cbs;
+    this.callbacks_ = cbs;
     this.requests_ = [ ];
     this.controllers_ = { };
     
@@ -136,7 +136,7 @@ var SortingDesk = (function () {
      * wasn't given OR content ids (`options_.nodes.contentIds') were not
      * specified. */
     if(this.options_.nodes.bins && this.options_.contentIds) {
-      var promise = this.callbacks.getBinData(this.options_.contentIds),
+      var promise = this.callbacks_.getBinData(this.options_.contentIds),
           self = this;
 
       if(!promise)
@@ -155,7 +155,7 @@ var SortingDesk = (function () {
   Instance.prototype = {
     initialised_: false,
     resetting_: false,
-    callbacks: null,
+    callbacks_: null,
     options_: null,
     controllers_: null,
     over_: null,
@@ -197,7 +197,7 @@ var SortingDesk = (function () {
           if(this.options_.nodes.buttonDelete)
             this.options_.nodes.buttonDelete.off();
           
-          this.options_ = this.callbacks = this.controllers_.bins
+          this.options_ = this.callbacks_ = this.controllers_.bins
             = this.controllers_.items = null;
           
           this.initialised_ = false;
@@ -429,10 +429,10 @@ var SortingDesk = (function () {
     invoke_: function () {
       if(arguments.length < 1)
         throw "Callback name required";
-      else if(!(arguments[0] in this.callbacks))
+      else if(!(arguments[0] in this.callbacks_))
         throw "Callback non existent: " + arguments[0];
 
-      var result = this.callbacks[arguments[0]]
+      var result = this.callbacks_[arguments[0]]
             .apply(null, [].slice.call(arguments, 1));
 
       if(result && 'always' in result) {
@@ -452,16 +452,16 @@ var SortingDesk = (function () {
       this.requests_.push(id);
 
       /* Trigger callback. */
-      if("onRequestStart" in this.callbacks)
-        this.callbacks.onRequestStart(id);
+      if("onRequestStart" in this.callbacks_)
+        this.callbacks_.onRequestStart(id);
     },
 
     onRequestStop_: function (id) {
       this.requests_.splice(this.requests_.indexOf(id), 1);
 
       /* Trigger callback. */
-      if("onRequestStop" in this.callbacks)
-        this.callbacks.onRequestStop(id);
+      if("onRequestStop" in this.callbacks_)
+        this.callbacks_.onRequestStop(id);
     },
 
     getBinByShortcut_: function (keyCode) {
