@@ -1172,7 +1172,7 @@ var SortingDesk = (function () {
       }
     } );
 
-    owner.getContainer().after(button);
+    owner.getContainer().append(button);
   };
 
   BinAddButton.prototype = {
