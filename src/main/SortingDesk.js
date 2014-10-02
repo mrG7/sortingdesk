@@ -297,7 +297,7 @@ var SortingDesk = (function () {
       /* Do not create bin container or process any bins if a bin HTML container
        * wasn't given OR the bins' data result array wasn't received. */
       if(this.options.nodes.bins && bins) {
-        this.controllers_.bins = new BinContainer(this);
+        this.controllers_.bins = new ControllerBins(this);
 
         for(var id in bins) {
           var bin = bins[id];
@@ -311,7 +311,7 @@ var SortingDesk = (function () {
         }
       }
       
-      this.controllers_.items = new ItemsList(this);
+      this.controllers_.items = new ControllerItems(this);
 
       /* Set up listener for keyboard up events. */
       $('body').bind('keyup', function (evt) { self.onKeyUp_(evt); } );
@@ -498,7 +498,7 @@ var SortingDesk = (function () {
   /**
    * @class
    * */
-  var BinContainer = function (owner)
+  var ControllerBins = function (owner)
   {
     var self = this;
 
@@ -534,7 +534,7 @@ var SortingDesk = (function () {
       } );
   };
 
-  BinContainer.prototype = {
+  ControllerBins.prototype = {
     owner: null,
     bins: null,
 
@@ -810,7 +810,7 @@ var SortingDesk = (function () {
   /**
    * @class
    * */
-  var ItemsList = function (owner)
+  var ControllerItems = function (owner)
   {
     this.owner = owner;
     this.container = owner.getOption("nodes").items;
@@ -819,7 +819,7 @@ var SortingDesk = (function () {
     this.check();
   };
 
-  ItemsList.prototype = {
+  ControllerItems.prototype = {
     owner: null,
     container: null,
     items: null,
