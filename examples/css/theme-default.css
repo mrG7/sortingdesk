@@ -45,7 +45,6 @@ BODY {
 #wrapper-items,
 #wrapper-bins {
   overflow: auto;
-  height: 95vh;
 }
 
 #items, #bins {
