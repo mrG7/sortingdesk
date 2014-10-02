@@ -167,7 +167,8 @@ var SortingDesk = (function () {
      *
      * @returns {Boolean}   Returns status of operation: true if succeeded,
      *                      false otherwise.*/
-    reset: function () {
+    reset: function ()
+    {
       var deferred = $.Deferred();
       
       if(!this.options_ || this.resetting_) {
@@ -229,7 +230,8 @@ var SortingDesk = (function () {
     get controllers ()
     { return this.controllers_; },
 
-    initialise_: function (bins) {
+    initialise_: function (bins)
+    {
       var self = this;
       
       if(!this.options_.nodes.buttonDismiss)
@@ -266,7 +268,8 @@ var SortingDesk = (function () {
       console.log("Sorting Desk UI initialised");
     },
 
-    invoke_: function () {
+    invoke_: function ()
+    {
       if(arguments.length < 1)
         throw "Callback name required";
       else if(!(arguments[0] in this.callbacks_))
@@ -365,7 +368,8 @@ var SortingDesk = (function () {
 
   ControllerButtonDismiss.prototype = Object.create(Controller.prototype);
 
-  ControllerButtonDismiss.prototype.initialise = function () {
+  ControllerButtonDismiss.prototype.initialise = function ()
+  {
     var self = this,
         options = this.owner_.options;
     
@@ -425,7 +429,8 @@ var SortingDesk = (function () {
     } );
   };
   
-  ControllerButtonDismiss.prototype.activate = function (callback) {
+  ControllerButtonDismiss.prototype.activate = function (callback)
+  {
     var options = this.owner_.options;
       
     options.nodes.buttonDismiss.stop().fadeIn(
@@ -433,7 +438,8 @@ var SortingDesk = (function () {
       typeof callback == 'function' ? callback : null);
   };
 
-  ControllerButtonDismiss.prototype.deactivate = function () {
+  ControllerButtonDismiss.prototype.deactivate = function ()
+  {
     var options = this.owner_.options;
     
     options.nodes.buttonDismiss.stop().fadeOut(
@@ -790,7 +796,8 @@ var SortingDesk = (function () {
 
   BinGeneric.prototype = Object.create(Bin.prototype);
 
-  BinGeneric.prototype.add = function () {
+  BinGeneric.prototype.add = function ()
+  {
     this.initialise(this.render());
     this.owner_.add(this);
   };
@@ -811,7 +818,8 @@ var SortingDesk = (function () {
 
   SubBin.prototype = Object.create(BinBase.prototype);
 
-  SubBin.prototype.render = function () {
+  SubBin.prototype.render = function ()
+  {
     /* Wrap bin statement_text inside a DIV. */
     return $('<div class="sd-bin-sub"><div class="sd-bin-shortcut"/>'
              + this.bin_.name + '</div>');
