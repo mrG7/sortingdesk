@@ -268,7 +268,7 @@ var SortingDesk = (function () {
       console.log("Sorting Desk UI initialised");
     },
 
-    invoke_: function ()
+    invoke: function ()
     {
       if(arguments.length < 1)
         throw "Callback name required";
@@ -398,7 +398,7 @@ var SortingDesk = (function () {
              * a notification; for what purpose, I don't know. */
             controller.removeAt(controller.indexOf(bin));
 
-            self.owner_.invoke_('removeBin', bin.id)
+            self.owner_.invoke('removeBin', bin.id)
               .fail(function (result) {
                 console.log("bin-remove:", result.error);
                 /* TODO: user notification not implemented yet. */
@@ -412,7 +412,7 @@ var SortingDesk = (function () {
 
           var item = controller.getById(id);
 
-          self.owner_.invoke_("textDismissed", item);
+          self.owner_.invoke("textDismissed", item);
           controller.remove(decodeURIComponent(id));
           
           break;
@@ -493,9 +493,9 @@ var SortingDesk = (function () {
             bin.node.removeClass(options.css.binAnimateAssign);
           }, options.delays.animateAssign);
           
-          this.owner_.invoke_("textDroppedInBin",
-                              controllers.items.current(),
-                              bin);
+          this.owner_.invoke("textDroppedInBin",
+                             controllers.items.current(),
+                             bin);
           controllers.items.remove();
         }
       }
@@ -516,7 +516,7 @@ var SortingDesk = (function () {
         controllers.dismiss.deactivate();
       } );
       
-      this.owner_.invoke_("textDismissed", controllers.items.current());
+      this.owner_.invoke("textDismissed", controllers.items.current());
       controllers.items.remove();
       
       break;
@@ -562,7 +562,7 @@ var SortingDesk = (function () {
       function (id, text) {
         var deferred = $.Deferred();
 
-        self.owner_.invoke_('addBin', text)
+        self.owner_.invoke('addBin', text)
           .fail(function () {
             /* TODO: show message box and notify user. */
             console.log("Failed to add bin:", id, text);
@@ -661,7 +661,7 @@ var SortingDesk = (function () {
   {
     var items = this.owner_.controllers.items;
     
-    this.owner_.invoke_("textDroppedInBin", items.current(), bin);
+    this.owner_.invoke("textDroppedInBin", items.current(), bin);
     items.remove();
   };
 
@@ -723,7 +723,7 @@ var SortingDesk = (function () {
         var id = decodeURIComponent(e.dataTransfer.getData('Text')),
             item = parentOwner.controllers.items.getById(id);
 
-        parentOwner.invoke_("textDroppedInBin", item, self);
+        parentOwner.invoke("textDroppedInBin", item, self);
         parentOwner.controllers.items.remove(
           decodeURIComponent(item.content.node_id));
       }
@@ -864,7 +864,7 @@ var SortingDesk = (function () {
       return;
     
     var self = this,
-        promise = this.owner_.invoke_(
+        promise = this.owner_.invoke(
           "moreTexts",
           this.owner_.options.visibleItems);
 
@@ -1098,7 +1098,7 @@ var SortingDesk = (function () {
 
     this.getNodeClose()
       .click(function () {
-        parentOwner.invoke_("textDismissed", self.content_);
+        parentOwner.invoke("textDismissed", self.content_);
         self.owner_.remove(decodeURIComponent(self.content_.node_id));
         return false;
       } );
