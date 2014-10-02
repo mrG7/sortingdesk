@@ -554,7 +554,12 @@ var SortingDesk = (function () {
     
     append: function (node)
     {
-      this.controller.getOption("nodes").bins.append(node);
+      /* Add bin node to the very top of the container if aren't any yet,
+       * otherwise insert it after the last contained bin. */
+      if(!this.bins.length)
+        this.controller.getOption("nodes").bins.prepend(node);
+      else
+        this.bins[this.bins.length - 1].getNode().after(node);
     },
     
     remove: function (bin)
