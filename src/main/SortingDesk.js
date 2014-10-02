@@ -215,39 +215,6 @@ var SortingDesk = (function () {
     },
 
     /**
-     * Removes a text item from the list of text of items. Requires the id of the
-     * text item to remove.
-     *
-     * @param   {String}    id
-     * 
-     * @returns {Boolean}   Returns status of operation: true if succeeded, false
-     *                      otherwise.
-     * */
-    remove: function (id) {
-      if(!this.initialised_)
-        throw "Sorting Desk not initialised";
-      
-      return this.controllers_.items.remove(id);
-    },
-
-    /**
-     * Looks up a text item, given its id, and returns it. Returns null if not
-     * found.
-     *
-     * @param   {String}    id
-     * 
-     * @return  {TextItem}  Returns the text item if found, or null if not. */
-    getTextById: function (id) {
-      if(!this.initialised_)
-        throw "Sorting Desk not initialised";
-      
-      var item = this.controllers_.items.getById(id);
-
-      /* Return the actual data and not our object. */
-      return item && item.getContent();
-    },
-
-    /**
      * Returns a boolean value indicating whether Sorting Desk has been
      * initialised and is ready to be used.
      *
@@ -256,15 +223,6 @@ var SortingDesk = (function () {
      * */
     isInitialised: function () {
       return this.initialised_;
-    },
-
-    /**
-     * Looks up a bin, given its id, and returns it. Returns null if not found.
-     *
-     * @returns {Boolean}   Returns the bin if found, or null if not.
-     * */
-    getBinById: function(id) {
-      return this.controllers_.bins.getBinById(id);
     },
 
     getOption: function (key)
