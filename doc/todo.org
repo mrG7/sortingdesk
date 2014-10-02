@@ -1,4 +1,6 @@
 * To do items [80%]
+** TODO Rename `isInitialised' to simply 'initialised`
+** TODO Rework reset sequence
 ** TODO Implement keyboard auto-repeat with configurable frequency
 ** TODO End `render' prefixed callbacks and expect constructors instead
 ** TODO [#B] Prefix text-items' and bins' node ids
