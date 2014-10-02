@@ -1140,9 +1140,9 @@ var SortingDesk = (function () {
     this.owner = owner;
     this.fnRender = fnRender;
     this.fnAdd = fnAdd;
-    
+
     var self = this,
-        button = $(renderAddButton_("+"))
+        button = this.render()
           .addClass(owner.getController().getOption("css").buttonAdd)
           .on( {
             click: function () {
@@ -1166,6 +1166,10 @@ var SortingDesk = (function () {
     owner: null,
     fnRender: null,
     fnAdd: null,
+
+    /* overridable */ render: function () {
+      return $('<div><span>+</span></div>');
+    },
     
     onAdd: function (id) {
       var options = this.owner.getController().getOptions();
@@ -1575,17 +1579,14 @@ var SortingDesk = (function () {
         ? true : null);
   };
 
-  var renderAddButton_ = function (caption) {
-    return $('<div><span>' + caption + '</span></div>');
-  };
-
 
   /**
    * Sorting Desk "class" constructor. */
   return {
     Instance: Instance,
     Bin: Bin,
-    TextItem: TextItem
+    TextItem: TextItem,
+    BinAddButton: BinAddButton
   };
   
 } )();
