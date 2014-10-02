@@ -237,6 +237,12 @@ var SortingDesk = (function () {
       if(!this.options_.nodes.buttonDismiss)
         this.options_.nodes.buttonDismiss = $();
 
+      /* Note: we are passing a reference to the `callbacks_' map because it is
+       * not accessible outside of `Instance'. */
+      (this.controllers_.requests = new ControllerRequests(this,
+                                                           this.callbacks_))
+        .initialise();
+      
       (this.controllers_.dismiss = new ControllerButtonDismiss(this))
         .initialise();
       
@@ -281,30 +287,14 @@ var SortingDesk = (function () {
       if(result && 'always' in result) {
         var self = this;
         
-        this.onRequestStart_(result);
+        this.controllers_.requests.begin(result);
         
         result.always(function () {
-          self.onRequestStop_(result);
+          self.controllers_.requests.end(result);
         } );
       }
 
       return result;
-    },
-
-    onRequestStart_: function (id) {
-      this.requests_.push(id);
-
-      /* Trigger callback. */
-      if("onRequestStart" in this.callbacks_)
-        this.callbacks_.onRequestStart(id);
-    },
-
-    onRequestStop_: function (id) {
-      this.requests_.splice(this.requests_.indexOf(id), 1);
-
-      /* Trigger callback. */
-      if("onRequestStop" in this.callbacks_)
-        this.callbacks_.onRequestStop(id);
     }
   };
 
@@ -355,6 +345,63 @@ var SortingDesk = (function () {
 
   /* abstract */ Drawable.prototype.render = function ()
   { throw "Abstract method not implemented"; };
+
+
+  /**
+   * @class@
+   * */
+  var ControllerRequests = function (owner, callbacks)
+  {
+    /* invoke super constructor. */
+    Controller.call(this, owner);
+
+    /* Set initial state. */
+    this.requests_ = { };
+    this.count_ = 0;
+    this.callbacks_ = callbacks;
+
+    /* Define getters. */
+    this.__defineGetter__("count", function () { return this.count_; } );
+  };
+
+  ControllerRequests.prototype = Object.create(Controller.prototype);
+
+  ControllerRequests.prototype.initialise = function () {  };
+
+  ControllerRequests.prototype.begin = function (id)
+  {
+    if(!this.requests_[id])
+      this.requests_[id] = 1;
+    else
+      ++this.requests_[id];
+
+    ++this.count_;
+      
+    /* Trigger callback. */
+    if("onRequestStart" in this.callbacks_)
+      this.callbacks_.onRequestStart(id);
+  };
+
+  ControllerRequests.prototype.end = function (id)
+  {
+    if(id in this.requests_) {
+      /* Delete request from internal collection if last one, otherwise
+       * decrement reference count. */
+      if(this.requests_[id] == 1)
+        delete this.requests_[id];
+      else if(this.requests_[id] > 1)
+        --this.requests_[id];
+      else
+        throw "Requests controller in invalid state";
+      
+      --this.count_;
+    } else
+      console.log("WARNING: unknown request ended:", id);
+
+    /* Trigger callback. */
+    if("onRequestStop" in this.callbacks_)
+      this.callbacks_.onRequestStop(id);
+  };
   
   
   /**
@@ -873,7 +920,7 @@ var SortingDesk = (function () {
       return;
     
     promise.done(function (items) {
-      self.owner_.onRequestStart_('check-items');
+      self.owner_.controllers.requests.begin('check-items');
 
       items.forEach(function (item, index) {
         window.setTimeout( function () {
@@ -887,7 +934,7 @@ var SortingDesk = (function () {
 
       /* Ensure event is fired after the last item is added. */
       window.setTimeout( function () {
-        self.owner_.onRequestStop_('check-items');
+        self.owner_.controllers.requests.end('check-items');
       }, Math.pow(items.length - 1, 2) * 1.1 + 10);
 
     } );
