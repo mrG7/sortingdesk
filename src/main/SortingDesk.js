@@ -59,14 +59,14 @@ var SortingDesk = (function () {
     keyboard: {                 /* Contains scan codes. */
       listUp: 38,               /* up                   */
       listDown: 40,             /* down                 */
-      listDismiss: 46           /* delete               */
+      listDismiss: 46           /* dismiss              */
     },
     delays: {                   /* In milliseconds.     */
       animateAssign: 75,        /* Duration of assignment of text item via
                                  * shortcut. */
       binRemoval: 200,          /* Bin is removed from container. */
-      deleteButtonShow: 150,    /* Time taken to fade in delete button. */
-      deleteButtonHide: 300,    /* Time to fade out delete button. */
+      dismissButtonShow: 150,   /* Time taken to fade in dismiss button. */
+      dismissButtonHide: 300,   /* Time to fade out dismiss button. */
       slideItemUp: 150,         /* Slide up length of deleted text item. */
       addBinShow: 200,          /* Fade in of temporary bin when adding. */
       textItemFade: 100         /* Fade out duration of text item after
@@ -498,7 +498,7 @@ var SortingDesk = (function () {
       var options = this.owner.getOptions();
       
       options.nodes.buttonDismiss.stop().fadeIn(
-        options.delays.deleteButtonShow,
+        options.delays.dismissButtonShow,
         typeof callback == 'function' ? callback : null);
     },
 
@@ -506,7 +506,7 @@ var SortingDesk = (function () {
       var options = this.owner.getOptions();
       
       options.nodes.buttonDismiss.stop().fadeOut(
-        options.delays.deleteButtonHide);
+        options.delays.dismissButtonHide);
     }
   };
 

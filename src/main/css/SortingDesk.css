@@ -280,8 +280,8 @@ A.sd-text-item-title:hover {
   transition: background-color 175ms, color 100ms;
 }
 
-/* Button: delete */
-.sd-button-delete {
+/* Button: dismiss */
+.sd-button-dismiss {
   position: fixed;
   top: 50%;
   left: 50%;
@@ -303,12 +303,12 @@ A.sd-text-item-title:hover {
   display: none;
 }
 
-.sd-button-delete:hover {
+.sd-button-dismiss:hover {
   background-color: #F3DADA;
   transition: background-color 175ms, color 100ms;
 }
 
-.sd-button-delete.droppable-hover {
+.sd-button-dismiss.droppable-hover {
   background-color: #C04343;
   border-color: #7A4747;
   color: #FFF5F5;
