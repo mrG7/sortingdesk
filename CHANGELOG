@@ -1,3 +1,67 @@
+2014-10-02  Miguel Guedes  <miguel@miguelguedes.org>
+
+	* src/main/SortingDesk.js:
+
+	Effort made towards decoupling the different components that are
+	part of Sorting Desk. This has led to the creation of a number of
+	classes, namely:
+
+	+ InstanceResetter: resets Sorting Desk's state (still to be
+	finalised) in a rather intelligent fashion.
+
+	+ ControllerCallbacks: handling of notifications to or issuing to
+	callbacks. I'm actually thinking of creating a class employing the
+	Publish-Subscribe pattern for notification of interesting events
+	such as when a bin is deleted, a text item assigned to a bin, etc,
+	and keeping this class strictly for the purpose of contacting Api
+	methods dealing with server requests. Right now this class does
+	both and that's wrong from a OOD perspective.
+
+	+ ControllerRequests: responsible for keeping track of ongoing
+	requests. A request is classed as such if it is custom specified
+	by a Sorting Desk class instance, or if a callback invocation
+	results in a promise being returned.
+
+	+ ControllerButtonDismiss: activation/deactivation of the text
+	item/bin dismissal button and drag'n'drop support.
+
+	+ ControllerKeyboard: global keyboard event listener and processor
+	of keyboard initiated events.
+
+	+ ControllerBins: manager of bins.
+
+	+ BinBase: base class of every bin, parent or child.
+
+	+ Bin: base class of parent bins.
+
+	+ BinGeneric: generic, default, implementation of the Bin class.
+
+	+ SubBin: base class of children bins.
+
+	+ SubBinGeneric: generic, default, implementation of the SubBin class.
+
+	+ ControllerItems: manager of text items.
+
+	+ TextItem: base class of text items.
+
+	+ TextItemGeneric: generic, default, implementation of the TextItem class.
+
+	+ BinAddButton: generic, default, implementation of the bin add
+	button feature. Can be specialised and methods overriden for
+	customised behaviour.
+
+	In addition, a general effort was made to normalise and bring
+	consistency to the interface, and getter methods were
+	introduced. "Abstract" base classes `Owned', `Controller' and
+	`Drawable' were created with a view to enforce interfaces to
+	specialised classes.
+
+	Lastly, made usual fixes and improvements to code.
+
+	* css:
+
+	Additional improvements to styling.
+
 2014-10-01  Miguel Guedes  <miguel@miguelguedes.org>
 
 	* all:
