@@ -563,7 +563,7 @@ var SortingDesk = (function () {
   {
     return this.bins.indexOf(bin);
   };
-  
+
   ControllerBins.prototype.removeAt = function (index)
   {
     var bin;
@@ -953,7 +953,8 @@ var SortingDesk = (function () {
     var item = this.getById(decodeURIComponent(node.attr('id')));
     return item ? item.content : null;
   };
-    
+
+  /* TODO: This class has different item removal semantics than `Bin'. */
   ControllerItems.prototype.remove = function (id)
   {
     if(typeof id == 'undefined') {
