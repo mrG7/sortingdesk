@@ -133,10 +133,6 @@ var SortingDesk = (function () {
       };
     } else if(!cbs.moreTexts)
       throw "Mandatory `moreTexts' callback missing";
-
-    /* Use default implementation of `renderText' if one not specified. */
-    if(! ("renderText" in cbs))
-      cbs.renderText = renderTextItem_;
     
     console.log("Initialising Sorting Desk UI");
     
@@ -1046,13 +1042,81 @@ var SortingDesk = (function () {
                                    * its own id. (?) */
     node: null,
 
+    initialise: function() {
+      var self = this;
+
+      this.node
+        .attr( {
+          id: encodeURIComponent(this.content.node_id),
+          "data-scope": "text-item"
+        } )
+        .click(function () {
+          self.owner.select(self);
+        } );
+
+      this.getNodeClose()
+        .click(function () {
+          self.owner.getController().invoke_("textDismissed", self.content);
+          self.owner.remove(decodeURIComponent(self.content.node_id));
+          return false;
+        } );
+
+      new Draggable(this.node, {
+        classDragging: this.owner.getController().getOption("css").itemDragging,
+        
+        dragstart: function (e) {
+          /* Firstly select item being dragged to ensure correct item position
+           * in container. */
+          self.owner.select(self);
+
+          /* Activate deletion/dismissal button. */
+          self.owner.getController().onActivateDeleteButton_();
+        },
+        
+        dragend: function () {
+          /* Deactivate deletion/dismissal button. */
+          self.owner.getController().onDeactivateDeleteButton_();
+        }
+      } );
+
+      /* Add logic to less/more links. */
+      this.getNodeLess().click(function () {
+        self.replaceNode(self.render(TEXT_VIEW_HIGHLIGHTS));
+        return false;
+      } );
+
+      this.getNodeMore().click(function () {
+        self.replaceNode(self.render(TEXT_VIEW_UNRESTRICTED));
+        return false;
+      } );
+    },
+
+    replaceNode: function (newNode) {
+      this.node.replaceWith(newNode);
+      this.node = newNode;
+      this.initialise();
+      this.owner.select(this);
+    },
+    
+    /* abstract */ render: function ()
+    { throw "Abstract method must be implemented"; },
+
     getContent: function ()
     { return this.content; },
 
     getNode: function ()
     { return this.node; },
 
-    isSelected: function ()
+    /* overridable */ getNodeClose: function ()
+    { return this.node.find('.sd-text-item-close'); },
+
+    /* overridable */ getNodeLess: function ()
+    { return this.node.find('.sd-less'); },
+
+    /* overridable */ getNodeMore: function ()
+    { return this.node.find('.sd-more'); },
+
+    /* overridable */ isSelected: function ()
     { return this.node.hasClass('sd-selected'); }
   };
   
@@ -1070,78 +1134,79 @@ var SortingDesk = (function () {
 
     TextItem.call(this, owner, item);
 
-    this.node = renderTextItem_(item, TEXT_VIEW_HIGHLIGHTS);
-
+    this.node = this.render(TEXT_VIEW_HIGHLIGHTS);
+    
     this.initialise();
     owner.getController().getOption("nodes").items.append(this.node);
   };
 
   TextItemGeneric.prototype = Object.create(TextItem.prototype);
-  
-  TextItemGeneric.prototype.initialise = function() {
-    var self = this;
 
-    /* TODO: `find' call below expects a `text-item-close' class. */
-    this.node
-      .attr( {
-        id: encodeURIComponent(this.content.node_id),
-        "data-scope": "text-item"
-      } )
-      .click(function () {
-        self.owner.select(self);
-      } )
-      .find('.text-item-close').click(function () {
-        self.owner.getController().invoke_("textDismissed", self.content);
-        self.owner.remove(decodeURIComponent(self.content.node_id));
-        return false;
-      } );
+  TextItemGeneric.prototype.render = function (view)
+  {
+    switch(view || TEXT_VIEW_HIGHLIGHTS) {
+    case TEXT_VIEW_UNRESTRICTED:
+      return this.renderUnrestricted_();
+    case TEXT_VIEW_HIGHLIGHTS:
+    default:
+      return this.renderHighlights_();
+    }
+  };
 
-    new Draggable(this.node, {
-      classDragging: this.owner.getController().getOption("css").itemDragging,
-      
-      dragstart: function (e) {
-        /* Firstly select item being dragged to ensure correct item position
-         * in container. */
-        self.owner.select(self);
+  TextItemGeneric.prototype.renderUnrestricted_ = function ()
+  {
+    return this.renderHtml_(
+      this.content.text,
+      TEXT_VIEW_UNRESTRICTED,
+      new TextItemSnippet(this.content.text).canTextBeReduced(
+        TEXT_HIGHLIGHTS_CHARS,
+        TEXT_HIGHLIGHTS_CHARS)
+        ? true : null);
+  };
 
-        /* Activate deletion/dismissal button. */
-        self.owner.getController().onActivateDeleteButton_();
-      },
-      
-      dragend: function () {
-        /* Deactivate deletion/dismissal button. */
-        self.owner.getController().onDeactivateDeleteButton_();
-      }
-    } );
+  TextItemGeneric.prototype.renderHighlights_ = function ()
+  {
+    return this.renderHtml_(
+      new TextItemSnippet(this.content.text).highlights(
+        TEXT_HIGHLIGHTS_CHARS,
+        TEXT_HIGHLIGHTS_CHARS),
+      TEXT_VIEW_HIGHLIGHTS,
+      false);
+  };
 
-    /* Add logic to less/more links. */
-    /* TODO: `find' expecting `less' CSS class. */
-    this.node.find('.less').click(function () {
-      var t = self.owner.getController().invoke_("renderText",
-                                                 self.content,
-                                                 TEXT_VIEW_HIGHLIGHTS);
-      
-      self.node.replaceWith(t);
-      self.node = t;
-      self.initialise();
-      self.owner.select(self);
-      
-      return false;
-    } );
+  TextItemGeneric.prototype.renderHtml_ = function (text, view, less)
+  {
+    var node = $('<div class="sd-text-item view-' + view + '"/>'),
+        content = $('<div class="sd-text-item-content"/>'),
+        anchor = this.content.name;
 
-    /* TODO: `find' expecting `more' CSS class. */
-    this.node.find('.more').click(function () {
-      var t = self.owner.getController().invoke_("renderText",
-                                                 self.content,
-                                                 TEXT_VIEW_UNRESTRICTED);
-      
-      self.node.replaceWith(t);
-      self.node = t;
-      self.initialise();
-      self.owner.select(self);
-      
-      return false;
-    } );
+    /* Append title if existent. */
+    if(this.content.title)
+      anchor += '&ndash; ' + this.content.title;
+
+    node.append('<a class="sd-text-item-title" target="_blank" '
+                + 'href="' + this.content.url + '">'
+                + anchor + '</a>');
+
+    node.append('<a class="sd-text-item-close" href="#">x</a>');
+
+    /* Append content and remove all CSS classes from children. */
+    content.append(text);
+    content.children().removeClass();
+
+    if(less !== null)
+      content.append(this.renderLessMore_(less));
+
+    node.append(content);
+    
+    return node;
+  };
+
+  TextItemGeneric.prototype.renderLessMore_ = function (less)
+  {
+    var cl = less && 'less' || 'more';
+    return '<div class="sd-less-more sd-' + cl + '">' + cl + '</div>'
+      + '<div style="display: block; clear: both" />';
   };
 
 
@@ -1528,78 +1593,14 @@ var SortingDesk = (function () {
   };
 
 
-  var renderTextItem_ = function (item, view) {
-    switch(view || TEXT_VIEW_HIGHLIGHTS) {
-    case TEXT_VIEW_UNRESTRICTED:
-      return renderTextItemUnrestricted_(item);
-    case TEXT_VIEW_HIGHLIGHTS:
-    default:
-      return renderTextItemHighlights_(item);
-    }      
-  };
-
-  var renderTextItemHtml_ = function (item, text, view, less) {
-    var node = $('<div class="text-item view-' + view + '"/>'),
-        content = $('<div class="text-item-content"/>'),
-        anchor = item.name;
-
-    /* Append title if existent. */
-    if(item.title)
-      anchor += '&ndash; ' + item.title;
-
-    node.append('<a class="text-item-title" target="_blank" '
-                + 'href="' + item.url + '">'
-                + anchor + '</a>');
-
-    node.append('<a class="text-item-close" href="#">x</a>');
-
-    /* Append content and remove all CSS classes from children. */
-    content.append(text);
-    content.children().removeClass();
-
-    if(less !== null)
-      content.append(renderLessMore_(less));
-
-    node.append(content);
-    
-    return node;
-  };
-
-  var renderLessMore_ = function (less) {
-    var cl = less && 'less' || 'more';
-    return '<div class="less-more ' + cl + '">' + cl + '</div>'
-      + '<div style="display: block; clear: both" />';
-  };
-
-  var renderTextItemHighlights_ = function (item) {
-    return renderTextItemHtml_(
-      item,
-      new TextItemSnippet(item.text).highlights(
-        TEXT_HIGHLIGHTS_CHARS,
-        TEXT_HIGHLIGHTS_CHARS),
-      TEXT_VIEW_HIGHLIGHTS,
-      false);
-  };
-
-  var renderTextItemUnrestricted_ = function (item) {
-    return renderTextItemHtml_(
-      item,
-      item.text,
-      TEXT_VIEW_UNRESTRICTED,
-      new TextItemSnippet(item.text).canTextBeReduced(
-        TEXT_HIGHLIGHTS_CHARS,
-        TEXT_HIGHLIGHTS_CHARS)
-        ? true : null);
-  };
-
-
   /**
    * Module public interface. */
   return {
     Instance: Instance,
     Bin: Bin,
     TextItem: TextItem,
-    BinAddButton: BinAddButton
+    BinAddButton: BinAddButton,
+    TextItemSnippet: TextItemSnippet
   };
   
 } )();
