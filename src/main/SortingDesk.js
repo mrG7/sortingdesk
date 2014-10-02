@@ -285,12 +285,14 @@ var SortingDesk = (function () {
       if(!this.options_.nodes.buttonDismiss)
         this.options_.nodes.buttonDismiss = $();
 
-      this.controllers_.dismiss = new ControllerButtonDismiss(this);
+      (this.controllers_.dismiss = new ControllerButtonDismiss(this))
+        .initialise();
       
       /* Do not create bin container or process any bins if a bin HTML container
        * wasn't given OR the bins' data result array wasn't received. */
       if(this.options_.nodes.bins && bins) {
-        this.controllers_.bins = new ControllerBins(this);
+        (this.controllers_.bins = new ControllerBins(this))
+          .initialise();
 
         for(var id in bins) {
           var bin = bins[id];
@@ -304,7 +306,8 @@ var SortingDesk = (function () {
         }
       }
       
-      this.controllers_.items = new ControllerItems(this);
+      (this.controllers_.items = new ControllerItems(this))
+        .initialise();
 
       /* Set up listener for keyboard up events. */
       $('body').bind('keyup', function (evt) { self.onKeyUp_(evt); } );
@@ -435,13 +438,35 @@ var SortingDesk = (function () {
   /**
    * @class@
    * */
+  var /* abstract */ Controller = function () { };
+
+  Controller.prototype = {
+    /* Following method to allow for deferred initialisation. */
+    /* abstract */ initialise: function ()
+    { throw "Abstract method not implemented"; },
+
+    /* abstract */ reset: function ()
+    { throw "Abstract method not implemented"; }
+  };
+  
+  
+  /**
+   * @class@
+   * */
   var ControllerButtonDismiss = function (owner)
   {
-    var self = this,
-        options = owner.getOptions();
-    
     this.owner = owner;
+  };
 
+  ControllerButtonDismiss.prototype = Object.create(Controller.prototype);
+
+  ControllerButtonDismiss.prototype.initialise = function () {
+    var self = this,
+        options = this.owner.getOptions();
+    
+    if(!options.nodes.buttonDismiss.length)
+      return;
+    
     new Droppable(options.nodes.buttonDismiss, {
       classHover: options.css.droppableHover,
       scopes: [ 'bin', 'text-item' ],
@@ -449,8 +474,8 @@ var SortingDesk = (function () {
       drop: function (e, id, scope) {
         switch(scope) {
         case 'bin':
-          var controller = owner.getControllers().bins,
-              bin = controller.getBinById(decodeURIComponent(id));
+          var controller = self.owner.getControllers().bins,
+          bin = controller.getBinById(decodeURIComponent(id));
 
           if(bin) {
             /* It doesn't matter if the API request succeeds or not for the
@@ -461,7 +486,7 @@ var SortingDesk = (function () {
              * a notification; for what purpose, I don't know. */
             controller.bins.remove(bin);
 
-            owner.invoke_('removeBin', bin.getId())
+            self.owner.invoke_('removeBin', bin.getId())
               .fail(function (result) {
                 console.log("bin-remove:", result.error);
                 /* TODO: user notification not implemented yet. */
@@ -471,10 +496,10 @@ var SortingDesk = (function () {
           break;
 
         case 'text-item':
-          var controller = owner.getControllers().items,
-              item = controller.getById(id);
+          var controller = self.owner.getControllers().items,
+          item = controller.getById(id);
 
-          owner.invoke_("textDismissed", item);
+          self.owner.invoke_("textDismissed", item);
           controller.remove(decodeURIComponent(id));
           
           break;
@@ -490,24 +515,20 @@ var SortingDesk = (function () {
       }
     } );
   };
-
-  ControllerButtonDismiss.prototype = {
-    owner: null,
-
-    activate: function (callback) {
-      var options = this.owner.getOptions();
+  
+  ControllerButtonDismiss.prototype.activate = function (callback) {
+    var options = this.owner.getOptions();
       
-      options.nodes.buttonDismiss.stop().fadeIn(
-        options.delays.dismissButtonShow,
-        typeof callback == 'function' ? callback : null);
-    },
+    options.nodes.buttonDismiss.stop().fadeIn(
+      options.delays.dismissButtonShow,
+      typeof callback == 'function' ? callback : null);
+  };
 
-    deactivate: function () {
-      var options = this.owner.getOptions();
-      
-      options.nodes.buttonDismiss.stop().fadeOut(
-        options.delays.dismissButtonHide);
-    }
+  ControllerButtonDismiss.prototype.deactivate = function () {
+    var options = this.owner.getOptions();
+    
+    options.nodes.buttonDismiss.stop().fadeOut(
+      options.delays.dismissButtonHide);
   };
 
 
@@ -516,10 +537,15 @@ var SortingDesk = (function () {
    * */
   var ControllerBins = function (owner)
   {
-    var self = this;
-
     this.owner = owner;
     this.bins = [ ];
+  };
+
+  ControllerBins.prototype = Object.create(Controller.prototype);
+
+  ControllerBins.prototype.initialise = function ()
+  {
+    var self = this;
 
     new BinAddButton(
       this,
@@ -530,7 +556,7 @@ var SortingDesk = (function () {
       function (id, text) {
         var deferred = $.Deferred();
 
-        owner.invoke_('addBin', text)
+        self.owner.invoke_('addBin', text)
           .fail(function () {
             /* TODO: show message box and notify user. */
             console.log("Failed to add bin:", id, text);
@@ -549,97 +575,92 @@ var SortingDesk = (function () {
         return deferred.promise();
       } );
   };
+  
+  ControllerBins.prototype.add = function (bin)
+  {
+    var id = bin.getId();
 
-  ControllerBins.prototype = {
-    owner: null,
-    bins: null,
+    /* Ensure a bin with the same id isn't already contained. */
+    this.bins.forEach(function (ib) {
+      if(ib.getId() == id)
+        throw "Bin is already contained: " + id;
+    } );
 
-    add: function (bin)
-    {
-      var id = bin.getId();
-
-      /* Ensure a bin with the same id isn't already contained. */
-      this.bins.forEach(function (ib) {
-        if(ib.getId() == id)
-          throw "Bin is already contained: " + id;
-      } );
-
-      /* Contain bin and append its HTML node. */
-      this.append(bin.getNode());
-      this.bins.push(bin);
-    },
-    
-    append: function (node)
-    {
-      /* Add bin node to the very top of the container if aren't any yet,
-       * otherwise insert it after the last contained bin. */
-      if(!this.bins.length)
-        this.owner.getOption("nodes").bins.prepend(node);
-      else
-        this.bins[this.bins.length - 1].getNode().after(node);
-    },
-    
-    remove: function (bin)
-    {
-      var self = this,
-          node = bin.getNode();
-
-      this.bins.some(function (ib, ndx) {
-        if(ib == bin) {
-          self.bins.splice(ndx, 1);
-          return true;
-        }
-
-        return false;
-      } );
-      
-      node.remove(); 
-    },
-
-    getBinByShortcut: function (keyCode)
-    {
-      var result = null;
-
-      this.bins.some(function (bin) {
-        if(bin.getShortcut() == keyCode) {
-          result = bin;
-          return true;
-        }
-
-        return false;
-      } );
-
-      return result;
-    },
-
-    getBinById: function (id)
-    {
-      var result = null;
-      
-      this.bins.some(function (bin) {
-        if(bin.getId() == id) {
-          result = bin;
-          return true;
-        }
-
-        return false;
-      } );
-
-      return result;
-    },
-    
-    getBins: function ()
-    { return this.bins; },
-
-    getOwner: function ()
-    { return this.owner; },
-    
-    /* This method is here because it isn't clear at this time whether more
-     * than one bin container will exist going forward. Presently that's not
-     * the case and hence it simply returns `options_.nodes.bins'. */
-    getContainer: function ()
-    { return this.owner.getOption("nodes").bins; }
+    /* Contain bin and append its HTML node. */
+    this.append(bin.getNode());
+    this.bins.push(bin);
   };
+    
+  ControllerBins.prototype.append = function (node)
+  {
+    /* Add bin node to the very top of the container if aren't any yet,
+     * otherwise insert it after the last contained bin. */
+    if(!this.bins.length)
+      this.owner.getOption("nodes").bins.prepend(node);
+    else
+      this.bins[this.bins.length - 1].getNode().after(node);
+  };
+    
+  ControllerBins.prototype.remove = function (bin)
+  {
+    var self = this,
+        node = bin.getNode();
+
+    this.bins.some(function (ib, ndx) {
+      if(ib == bin) {
+        self.bins.splice(ndx, 1);
+        return true;
+      }
+
+      return false;
+    } );
+    
+    node.remove(); 
+  };
+
+  ControllerBins.prototype.getBinByShortcut = function (keyCode)
+  {
+    var result = null;
+
+    this.bins.some(function (bin) {
+      if(bin.getShortcut() == keyCode) {
+        result = bin;
+        return true;
+      }
+
+      return false;
+    } );
+
+    return result;
+  };
+
+  ControllerBins.prototype.getBinById = function (id)
+  {
+    var result = null;
+    
+    this.bins.some(function (bin) {
+      if(bin.getId() == id) {
+        result = bin;
+        return true;
+      }
+
+      return false;
+    } );
+
+    return result;
+  };
+    
+  ControllerBins.prototype.getBins = function ()
+  { return this.bins; };
+
+  ControllerBins.prototype.getOwner = function ()
+  { return this.owner; };
+    
+  /* TODO: This method is here because it isn't clear at this time whether more
+   * than one bin container will exist going forward. Presently that's not the
+   * case and hence it simply returns `options_.nodes.bins'. */
+  ControllerBins.prototype.getContainer = function ()
+  { return this.owner.getOption("nodes").bins; };
 
 
   /**
@@ -831,221 +852,219 @@ var SortingDesk = (function () {
     this.owner = owner;
     this.container = owner.getOption("nodes").items;
     this.items = [ ];
+  };
+
+  ControllerItems.prototype = Object.create(Controller.prototype);
+
+  ControllerItems.prototype.initialise = function ()
+  { this.check(); };
+  
+  ControllerItems.prototype.check = function ()
+  {
+    if(this.items.length >= this.owner.getOption("visibleItems"))
+      return;
+    
+    var self = this,
+        promise = this.owner.invoke_(
+          "moreTexts",
+          this.owner.getOption("visibleItems") );
+
+    /* Check that our request for more text items hasn't been refused. */
+    if(!promise)
+      return;
+    
+    promise.done(function (items) {
+      self.owner.onRequestStart_('check-items');
+
+      items.forEach(function (item, index) {
+        window.setTimeout( function () {
+          self.items.push(new TextItemGeneric(self, item));
+        }, Math.pow(index, 2) * 1.1);
+      } );
+
+      window.setTimeout( function () {
+        self.select();
+      }, 10);
+
+      /* Ensure event is fired after the last item is added. */
+      window.setTimeout( function () {
+        self.owner.onRequestStop_('check-items');
+      }, Math.pow(items.length - 1, 2) * 1.1 + 10);
+
+    } );
+  };
+
+  ControllerItems.prototype.select = function (variant)
+  {
+    /* Fail silently if not initialised anymore. This might happen if, for
+     * example, the `reset' method was invoked but the component is still
+     * loading text items. */
+    if(!this.owner.isInitialised())
+      return;
+    
+    var csel = this.owner.getOption("css").itemSelected;
+    
+    if(!this.container.children().length)
+      return;
+    
+    if(typeof variant == 'undefined') {
+      variant = this.container.find('.' + csel);
+
+      if(variant.length == 0)
+        variant = this.container.children().eq(0);
+      else if(variant.length > 1) {
+        /* We should never reach here. */
+        console.log("WARNING! Multiple text items selected:",
+                    variant.length);
+        
+        variant.removeClass(csel);
+
+        variant = variant.eq(0);
+        variant.addClass(csel);
+      }
+    } else if(typeof variant == 'number') {
+      if(variant < 0)
+        variant = 0;
+      else if(variant > this.container.children().length - 1)
+        variant = this.container.children().length - 1;
+
+      variant = this.container.children().eq(variant);
+    } else if(variant instanceof TextItem)
+      variant = variant.getNode();
+
+    this.container.find('.' + csel).removeClass(csel);
+    variant.addClass(csel);
+
+    /* WARNING: the present implementation requires knowledge of the list
+     * items' container's height or it will fail to ensure the currently
+     * selected item is always visible.
+     *
+     * A particular CSS style involving specifying the container's height
+     * using `vh' units was found to break this behaviour.
+     */
+    
+    /* Ensure text item is _always_ visible at the bottom and top ends of
+     * the containing node. */
+    var st = this.container.scrollTop(),       /* scrolling top */
+        ch = this.container.innerHeight(),     /* container height */
+        ipt = variant.position().top,          /* item position top */
+        ih = st + ipt + variant.outerHeight(); /* item height */
+
+    if(st + ipt < st            /* top */
+       || variant.outerHeight() > ch) {
+      this.container.scrollTop(st + ipt);
+    } else if(ih > st + ch) {   /* bottom */
+      this.container.scrollTop(st + ipt - ch
+                               + variant.outerHeight()
+                               + parseInt(variant.css('marginBottom'))
+                               + parseInt(variant.css('paddingBottom')));
+    }
+  };
+
+  ControllerItems.prototype.selectOffset = function (offset)
+  {
+    var csel = this.owner.getOption("css").itemSelected,
+        index;
+
+    if(!this.container.length)
+      return;
+    else if(!this.container.find('.' + csel).length) {
+      this.select();
+      return;
+    }
+
+    index = this.container.find('.' + csel).prevAll().length + offset;
+
+    if(index < 0)
+      index = 0;
+    else if(index > this.container.children().length - 1)
+      index = this.container.children().length - 1;
+
+    this.select(index);
+  };
+
+  ControllerItems.prototype.current = function()
+  {
+    var node = this.container.find(
+      '.' + this.owner.getOption("css").itemSelected);
+    
+    if(!node.length)
+      return null;
+    
+    var item = this.getById(decodeURIComponent(node.attr('id')));
+    return item ? item.content : null;
+  };
+    
+  ControllerItems.prototype.remove = function (id)
+  {
+    if(typeof id == 'undefined') {
+      var cur = this.current();
+      if (!cur) {
+        this.check();
+        return null;
+      }
+      
+      id = cur.node_id;
+    }
+
+    var self = this,
+        result = false;
+    
+    $.each(this.items, function (i, item) {
+      if(item.getContent().node_id != id)
+        return true;
+      
+      if(item.isSelected()) {
+        if(i < self.items.length - 1)
+          self.select(self.items[i + 1]);
+        else if(self.items.length)
+          self.select(self.items[i - 1]);
+        else
+          console.log("No more items available");
+      }
+      
+      item.getNode()
+        .css('opacity', 0.6)  /* to prevent flicker */
+        .animate( { opacity: 0 },
+                  self.owner.getOption("delays").textItemFade,
+                  function () {
+                    $(this).slideUp(
+                      self.owner.getOption("delays").slideItemUp,
+                      function () {
+                        $(this).remove();
+                        self.select();
+                      } );
+                  } );
+
+      self.items.splice(i, 1);
+      result = true;
+      
+      return false;  
+    } );
     
     this.check();
+
+    return result;
   };
 
-  ControllerItems.prototype = {
-    owner: null,
-    container: null,
-    items: null,
-
-    check: function ()
-    {
-      if(this.items.length >= this.owner.getOption("visibleItems"))
-        return;
-      
-      var self = this,
-          promise = this.owner.invoke_(
-            "moreTexts",
-            this.owner.getOption("visibleItems") );
-
-      /* Check that our request for more text items hasn't been refused. */
-      if(!promise)
-        return;
-      
-      promise.done(function (items) {
-        self.owner.onRequestStart_('check-items');
-
-        items.forEach(function (item, index) {
-          window.setTimeout( function () {
-            self.items.push(new TextItemGeneric(self, item));
-          }, Math.pow(index, 2) * 1.1);
-        } );
-
-        window.setTimeout( function () {
-          self.select();
-        }, 10);
-
-        /* Ensure event is fired after the last item is added. */
-        window.setTimeout( function () {
-          self.owner.onRequestStop_('check-items');
-        }, Math.pow(items.length - 1, 2) * 1.1 + 10);
-
-      } );
-    },
-
-    select: function (variant)
-    {
-      /* Fail silently if not initialised anymore. This might happen if, for
-       * example, the `reset' method was invoked but the component is still
-       * loading text items. */
-      if(!this.owner.isInitialised())
-        return;
-      
-      var csel = this.owner.getOption("css").itemSelected;
-      
-      if(!this.container.children().length)
-        return;
-      
-      if(typeof variant == 'undefined') {
-        variant = this.container.find('.' + csel);
-
-        if(variant.length == 0)
-          variant = this.container.children().eq(0);
-        else if(variant.length > 1) {
-          /* We should never reach here. */
-          console.log("WARNING! Multiple text items selected:",
-                      variant.length);
-          
-          variant.removeClass(csel);
-
-          variant = variant.eq(0);
-          variant.addClass(csel);
-        }
-      } else if(typeof variant == 'number') {
-        if(variant < 0)
-          variant = 0;
-        else if(variant > this.container.children().length - 1)
-          variant = this.container.children().length - 1;
-
-        variant = this.container.children().eq(variant);
-      } else if(variant instanceof TextItem)
-        variant = variant.getNode();
-
-      this.container.find('.' + csel).removeClass(csel);
-      variant.addClass(csel);
-
-      /* WARNING: the present implementation requires knowledge of the list
-       * items' container's height or it will fail to ensure the currently
-       * selected item is always visible.
-       *
-       * A particular CSS style involving specifying the container's height
-       * using `vh' units was found to break this behaviour.
-       */
-      
-      /* Ensure text item is _always_ visible at the bottom and top ends of
-       * the containing node. */
-      var st = this.container.scrollTop(),       /* scrolling top */
-          ch = this.container.innerHeight(),     /* container height */
-          ipt = variant.position().top,          /* item position top */
-          ih = st + ipt + variant.outerHeight(); /* item height */
-
-      if(st + ipt < st            /* top */
-         || variant.outerHeight() > ch) {
-        this.container.scrollTop(st + ipt);
-      } else if(ih > st + ch) {   /* bottom */
-        this.container.scrollTop(st + ipt - ch
-                                 + variant.outerHeight()
-                                 + parseInt(variant.css('marginBottom'))
-                                 + parseInt(variant.css('paddingBottom')));
-      }
-    },
-
-    selectOffset: function (offset)
-    {
-      var csel = this.owner.getOption("css").itemSelected,
-          index;
-
-      if(!this.container.length)
-        return;
-      else if(!this.container.find('.' + csel).length) {
-        this.select();
-        return;
-      }
-
-      index = this.container.find('.' + csel).prevAll().length + offset;
-
-      if(index < 0)
-        index = 0;
-      else if(index > this.container.children().length - 1)
-        index = this.container.children().length - 1;
-
-      this.select(index);
-    },
-
-    current: function() {
-      var node = this.container.find(
-        '.' + this.owner.getOption("css").itemSelected);
-      
-      if(!node.length)
-        return null;
-      
-      var item = this.getById(decodeURIComponent(node.attr('id')));
-      return item ? item.content : null;
-    },
+  ControllerItems.prototype.getById = function (id)
+  {
+    var result = null;
     
-    remove: function (id)
-    {
-      if(typeof id == 'undefined') {
-        var cur = this.current();
-        if (!cur) {
-          this.check();
-          return null;
-        }
-        
-        id = cur.node_id;
+    this.items.some(function (item) {
+      if(item.getContent().node_id == id) {
+        result = item;
+        return true;
       }
 
-      var self = this,
-          result = false;
-      
-      $.each(this.items, function (i, item) {
-        if(item.getContent().node_id != id)
-          return true;
-        
-        if(item.isSelected()) {
-          if(i < self.items.length - 1)
-            self.select(self.items[i + 1]);
-          else if(self.items.length)
-            self.select(self.items[i - 1]);
-          else
-            console.log("No more items available");
-        }
-        
-        item.getNode()
-          .css('opacity', 0.6)  /* to prevent flicker */
-          .animate( { opacity: 0 },
-                    self.owner.getOption("delays").textItemFade,
-                    function () {
-                      $(this).slideUp(
-                        self.owner.getOption("delays").slideItemUp,
-                        function () {
-                          $(this).remove();
-                          self.select();
-                        } );
-                    } );
+      return false;
+    } );
 
-        self.items.splice(i, 1);
-        result = true;
-        
-        return false;  
-      } );
-      
-      this.check();
-
-      return result;
-    },
-
-    getById: function (id)
-    {
-      var result = null;
-      
-      this.items.some(function (item) {
-        if(item.getContent().node_id == id) {
-          result = item;
-          return true;
-        }
-
-        return false;
-      } );
-
-      return result;
-    },
-
-    getOwner: function ()
-    { return this.owner; }
+    return result;
   };
+
+  ControllerItems.prototype.getOwner = function ()
+  { return this.owner; };
 
 
   /**
