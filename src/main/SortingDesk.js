@@ -153,7 +153,6 @@ var SortingDesk = (function () {
   Instance.prototype = {
     initialised_: false,
     resetting_: false,
-    callbacks_: null,
     options_: null,
     /* Controllers */
     callbacks_: null,
