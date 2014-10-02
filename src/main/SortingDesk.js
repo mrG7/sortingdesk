@@ -829,9 +829,6 @@ var SortingDesk = (function () {
 
   /* abstract */ BinBase.prototype.add = function ()
   { throw "Abstract method must be implemented"; };
-
-  /* abstract */ BinBase.prototype.render = function ()
-  { throw "Abstract method must be implemented"; };
     
   BinBase.prototype.setShortcut = function (keyCode)
   {
