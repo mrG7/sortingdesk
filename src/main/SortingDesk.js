@@ -309,31 +309,59 @@ var SortingDesk = (function () {
   /**
    * @class@
    * */
-  var /* abstract */ Controller = function (owner)
+  var /* abstract */ Owned = function (owner)
   {
     this.owner_ = owner;
   };
 
-  Controller.prototype = {
-    owner_: null,
-    
-    /* Following method to allow for deferred initialisation. */
-    /* abstract */ initialise: function ()
-    { throw "Abstract method not implemented"; },
-
-    /* abstract */ reset: function ()
-    { throw "Abstract method not implemented"; },
-
-    get owner ()
+  Owned.prototype = {
+    getOwner: function ()
     { return this.owner_; }
+  };    
+  
+
+  /**
+   * @class@
+   * */
+  var /* abstract */ Controller = function (owner)
+  {
+    /* Invoke super constructor. */
+    Owned.call(this, owner);
   };
+
+  Controller.prototype = Object.create(Owned.prototype);
+
+  /* Following method to allow for deferred initialisation. */
+  /* abstract */ Controller.prototype.initialise = function ()
+  { throw "Abstract method not implemented"; };
+
+  /* abstract */ Controller.prototype.reset = function ()
+  { throw "Abstract method not implemented"; };
+
+
+  /**
+   * @class@
+   * */
+  var /* abstract */ Drawable = function (owner)
+  {
+    /* Invoke super constructor. */
+    Owned.call(this, owner);
+  };
+
+  Drawable.prototype = Object.create(Owned.prototype);
+
+  /* abstract */ Drawable.prototype.render = function ()
+  { throw "Abstract method not implemented"; };
   
   
   /**
    * @class@
    * */
   var ControllerButtonDismiss = function (owner)
-  { Controller.call(this, owner); };
+  {
+    /* Invoke super constructor. */
+    Controller.call(this, owner);
+  };
 
   ControllerButtonDismiss.prototype = Object.create(Controller.prototype);
 
@@ -417,7 +445,10 @@ var SortingDesk = (function () {
    * @class
    * */
   var ControllerKeyboard = function (owner)
-  { Controller.call(this, owner); };
+  {
+    /* Invoke super constructor. */
+    Controller.call(this, owner);
+  };
 
   ControllerKeyboard.prototype = Object.create(Controller.prototype);
 
@@ -618,9 +649,6 @@ var SortingDesk = (function () {
 
   ControllerBins.prototype.getHover = function ()
   { return this.hover_; };
-
-  ControllerBins.prototype.getOwner = function ()
-  { return this.owner; };
     
   /* TODO: This method is here because it isn't clear at this time whether more
    * than one bin container will exist going forward. Presently that's not the
@@ -648,99 +676,93 @@ var SortingDesk = (function () {
    * */
   var BinBase = function (owner, id, bin)
   {
-    this.owner_ = owner;
+    /* Invoke super constructor. */
+    Drawable.call(this, owner);
+
     this.id = id;
     this.bin = bin;
+    this.node = this.shortcut = null;
   };
+
+  BinBase.prototype = Object.create(Drawable.prototype);
   
-  BinBase.prototype = {
-    owner_: null,
-    id: null,
-    bin: null,
-    node: null,
-    shortcut: null,
+  BinBase.prototype.initialise = function ()
+  {
+    var self = this,
+        parentOwner = self.owner_.getOwner();
 
-    initialise: function ()
-    {
-      var self = this,
-          parentOwner = self.owner_.getOwner();
-
-      (this.node = this.render())
-        .attr( {
-          'data-scope': 'bin',
-          'id': encodeURIComponent(this.id)
-        } )
-        .on( {
-          mouseenter: function () {
-            self.owner_.onMouseEnter_(self);
-          },
-          mouseleave: function () {
-            self.owner_.onMouseLeave_();
-          },
-          click: function () {
-            self.owner_.onClick_(self);
-          }
-        } );
-
-      new Droppable(this.node, {
-        classHover: parentOwner.options.css.droppableHover,
-        scopes: [ 'text-item' ],
-        
-        drop: function (e) {
-          var id = decodeURIComponent(e.dataTransfer.getData('Text')),
-              item = parentOwner.controllers.items.getById(id);
-
-          parentOwner.invoke_("textDroppedInBin", item, self);
-          parentOwner.controllers.items.remove(
-            decodeURIComponent(item.getContent().node_id));
+    (this.node = this.render())
+      .attr( {
+        'data-scope': 'bin',
+        'id': encodeURIComponent(this.id)
+      } )
+      .on( {
+        mouseenter: function () {
+          self.owner_.onMouseEnter_(self);
+        },
+        mouseleave: function () {
+          self.owner_.onMouseLeave_();
+        },
+        click: function () {
+          self.owner_.onClick_(self);
         }
       } );
 
-      /* We must defer initialisation of D'n'D because owning object's `bin'
-       * attribute will have not yet been set. */
-      window.setTimeout(function () {
-        new Draggable(self.node, {
-          dragstart: function (e) {
-            parentOwner.controllers.dismiss.activate();
-          },
-          
-          dragend: function (e) {
-            parentOwner.controllers.dismiss.deactivate();
-          }
-        } );
-      }, 0);
-    },
+    new Droppable(this.node, {
+      classHover: parentOwner.options.css.droppableHover,
+      scopes: [ 'text-item' ],
+      
+      drop: function (e) {
+        var id = decodeURIComponent(e.dataTransfer.getData('Text')),
+            item = parentOwner.controllers.items.getById(id);
 
-    /* abstract */ add: function () {
-      throw "Abstract method must be implemented";
-    },
+        parentOwner.invoke_("textDroppedInBin", item, self);
+        parentOwner.controllers.items.remove(
+          decodeURIComponent(item.getContent().node_id));
+      }
+    } );
 
-    /* abstract */ render: function () {
-      throw "Abstract method must be implemented";
-    },
+    /* We must defer initialisation of D'n'D because owning object's `bin'
+     * attribute will have not yet been set. */
+    window.setTimeout(function () {
+      new Draggable(self.node, {
+        dragstart: function (e) {
+          parentOwner.controllers.dismiss.activate();
+        },
+        
+        dragend: function (e) {
+          parentOwner.controllers.dismiss.deactivate();
+        }
+      } );
+    }, 0);
+  };
+
+  /* abstract */ BinBase.prototype.add = function ()
+  { throw "Abstract method must be implemented"; };
+
+  /* abstract */ BinBase.prototype.render = function ()
+  { throw "Abstract method must be implemented"; };
     
-    getId: function ()
-    { return this.id; },
+  BinBase.prototype.getId = function ()
+  { return this.id; };
     
-    setShortcut: function (keyCode)
-    {
-      this.shortcut = keyCode;
+  BinBase.prototype.setShortcut = function (keyCode)
+  {
+    this.shortcut = keyCode;
 
-      this.getNodeShortcut().html(String.fromCharCode(keyCode).toLowerCase());
-    },
+    this.getNodeShortcut().html(String.fromCharCode(keyCode).toLowerCase());
+  };
 
-    getShortcut: function ()
-    { return this.shortcut; },
+  BinBase.prototype.getShortcut = function ()
+  { return this.shortcut; };
     
-    getNode: function ()
-    { return this.node; },
+  BinBase.prototype.getNode = function ()
+  { return this.node; };
 
-    /* overridable */ getNodeShortcut: function ()
-    { return this.node.find(
-      '.'+ this.owner_.getOwner().options.css.binShortcut); },
-
-    getOwner: function ()
-    { return this.owner; }
+  /* overridable */ BinBase.prototype.getNodeShortcut = function ()
+  {
+    return this.node.find(
+      '.'+ this.owner_.getOwner().options.css.binShortcut);
   };
 
 
@@ -752,7 +774,9 @@ var SortingDesk = (function () {
     /* Invoke super constructor. */
     BinBase.call(this, owner, id, bin);
 
-    this.children = [ ];
+    this.children_ = [ ];
+
+    this.__defineGetter__("children", function () { return this.children_; } );
   };
 
   Bin.prototype = Object.create(BinBase.prototype);
@@ -761,10 +785,6 @@ var SortingDesk = (function () {
     /* Wrap bin name inside a DIV. */
     return $('<div class="sd-bin"><div class="sd-bin-shortcut"/>'
              + this.bin.name + '</div>');
-  };
-
-  Bin.prototype.getChildren = function () {
-    return this.children;
   };
 
   
@@ -793,7 +813,9 @@ var SortingDesk = (function () {
     /* Invoke super constructor. */
     BinBase.call(this, owner, id, bin);
 
-    this.parent = parent;
+    this.parent_ = parent;
+
+    this.__defineGetter__("parent", function () { return this.parent_; } );
   };
 
   SubBin.prototype = Object.create(BinBase.prototype);
@@ -802,10 +824,6 @@ var SortingDesk = (function () {
     /* Wrap bin statement_text inside a DIV. */
     return $('<div class="sd-bin-sub"><div class="sd-bin-shortcut"/>'
              + this.bin.name + '</div>');
-  };
-
-  SubBin.prototype.getParent = function () {
-    return this.parent;
   };
 
 
@@ -1046,92 +1064,89 @@ var SortingDesk = (function () {
     return result;
   };
 
-  ControllerItems.prototype.getOwner = function ()
-  { return this.owner; };
-
 
   /**
    * @class
    * */
   var TextItem = function (owner, item)
   {
-    this.owner_ = owner;
+    /* Invoke super constructor. */
+    Drawable.call(this, owner);
+
     this.content = item;
+    this.node = null;
   };
 
-  TextItem.prototype = {
-    owner_: null,
-    content: null,                /* Note: unlike bins, a text item contains
-                                   * its own id. (?) */
-    node: null,
+  TextItem.prototype = Object.create(Drawable.prototype);
 
-    initialise: function() {
-      var self = this,
-          parentOwner = this.owner_.getOwner();
+  TextItem.prototype.initialise = function()
+  {
+    var self = this,
+        parentOwner = this.owner_.getOwner();
 
-      this.node
-        .attr( {
-          id: encodeURIComponent(this.content.node_id),
-          "data-scope": "text-item"
-        } )
-        .click(function () {
-          self.owner_.select(self);
-        } );
-
-      this.getNodeClose()
-        .click(function () {
-          parentOwner.invoke_("textDismissed", self.content);
-          self.owner_.remove(decodeURIComponent(self.content.node_id));
-          return false;
-        } );
-
-      new Draggable(this.node, {
-        classDragging: parentOwner.options.css.itemDragging,
-        
-        dragstart: function (e) {
-          /* Firstly select item being dragged to ensure correct item position
-           * in container. */
-          self.owner_.select(self);
-
-          /* Activate deletion/dismissal button. */
-          parentOwner.controllers.dismiss.activate();
-        },
-        
-        dragend: function () {
-          /* Deactivate deletion/dismissal button. */
-          parentOwner.controllers.dismiss.deactivate();
-        }
+    this.node
+      .attr( {
+        id: encodeURIComponent(this.content.node_id),
+        "data-scope": "text-item"
+      } )
+      .click(function () {
+        self.owner_.select(self);
       } );
-    },
 
-    replaceNode: function (newNode) {
+    this.getNodeClose()
+      .click(function () {
+        parentOwner.invoke_("textDismissed", self.content);
+        self.owner_.remove(decodeURIComponent(self.content.node_id));
+        return false;
+      } );
+
+    new Draggable(this.node, {
+      classDragging: parentOwner.options.css.itemDragging,
+      
+      dragstart: function (e) {
+        /* Firstly select item being dragged to ensure correct item position
+         * in container. */
+        self.owner_.select(self);
+
+        /* Activate deletion/dismissal button. */
+        parentOwner.controllers.dismiss.activate();
+      },
+      
+      dragend: function () {
+        /* Deactivate deletion/dismissal button. */
+        parentOwner.controllers.dismiss.deactivate();
+      }
+    } );
+  };
+
+  TextItem.prototype.replaceNode = function (newNode)
+  {
       this.node.replaceWith(newNode);
       this.node = newNode;
       this.initialise();
       this.owner_.select(this);
-    },
-    
-    /* abstract */ render: function ()
-    { throw "Abstract method must be implemented"; },
-
-    getContent: function ()
-    { return this.content; },
-
-    getNode: function ()
-    { return this.node; },
-
-    /* overridable */ getNodeClose: function ()
-    { return this.node.find('.sd-text-item-close'); },
-
-    /* overridable */ getNodeLess: function ()
-    { return this.node.find('.sd-less'); },
-
-    /* overridable */ getNodeMore: function ()
-    { return this.node.find('.sd-more'); },
-
-    /* overridable */ isSelected: function ()
-    { return this.node.hasClass('sd-selected'); }
   };
+    
+  /* abstract */ TextItem.prototype.render = function ()
+  { throw "Abstract method must be implemented"; };
+
+  TextItem.prototype.getContent = function ()
+  { return this.content; };
+
+  TextItem.prototype.getNode = function ()
+  { return this.node; };
+
+  /* overridable */ TextItem.prototype.getNodeClose = function ()
+  { return this.node.find('.sd-text-item-close'); };
+
+  /* overridable */ TextItem.prototype.getNodeLess = function ()
+  { return this.node.find('.sd-less'); };
+
+  /* overridable */ TextItem.prototype.getNodeMore = function ()
+  { return this.node.find('.sd-more'); };
+
+  /* overridable */ TextItem.prototype.isSelected = function ()
+  { return this.node.hasClass('sd-selected'); };
   
   
   /**
@@ -1253,9 +1268,11 @@ var SortingDesk = (function () {
    * */
   var BinAddButton = function (owner, fnRender, fnAdd)
   {
+    /* Invoke super constructor. */
+    Drawable.call(this, owner);
+    
     var parentOwner = owner.getOwner();
     
-    this.owner_ = owner;
     this.fnRender = fnRender;
     this.fnAdd = fnAdd;
 
@@ -1280,83 +1297,84 @@ var SortingDesk = (function () {
     owner.getContainer().append(button);
   };
 
-  BinAddButton.prototype = {
-    owner: null,
-    fnRender: null,
-    fnAdd: null,
+  BinAddButton.prototype = Object.create(Drawable.prototype);
 
-    /* overridable */ render: function () {
-      return $('<div><span>+</span></div>');
-    },
+  /* overridable */ BinAddButton.prototype.render = function ()
+  {
+    return $('<div><span>+</span></div>');
+  };
+
+  BinAddButton.prototype.onAdd = function (id)
+  {
+    var parentOwner = this.owner_.getOwner(),
+        options = parentOwner.options;
     
-    onAdd: function (id) {
-      var parentOwner = this.owner_.getOwner(),
-          options = parentOwner.options;
-      
-      /* Do not allow entering into concurrent `add' states. */
-      if(this.owner_.getContainer().find('.' + options.css.binAdding).length)
-        return;
+    /* Do not allow entering into concurrent `add' states. */
+    if(this.owner_.getContainer().find('.' + options.css.binAdding).length)
+      return;
 
-      var nodeContent = id ? 'Please wait...'
-            : ('<input placeholder="Enter bin description" '
-               + 'type="text"/>'),
-          node = this.fnRender(nodeContent)
-            .addClass(options.css.binAdding)
-            .fadeIn(options.delays.addBinShow);
+    var nodeContent = id ? 'Please wait...'
+          : ('<input placeholder="Enter bin description" '
+             + 'type="text"/>'),
+        node = this.fnRender(nodeContent)
+          .addClass(options.css.binAdding)
+          .fadeIn(options.delays.addBinShow);
 
-      this.owner_.append(node);
-      
-      if(!id) {
-        this.onAddManual(node);
-        return;
-      }
+    this.owner_.append(node);
+    
+    if(!id) {
+      this.onAddManual(node);
+      return;
+    }
 
-      var item = parentOwner.controllers.items.getById(id);
+    var item = parentOwner.controllers.items.getById(id);
 
-      if(!item) {
-        node.remove();
-        throw "onAdd: failed to retrieve text item: " + id;
-      }
+    if(!item) {
+      node.remove();
+      throw "onAdd: failed to retrieve text item: " + id;
+    }
 
-      this.fnAdd(id,
-                 new TextItemSnippet(item.getContent().text)
-                 .highlights(options.binCharsLeft, options.binCharsRight))
-        .always(function () { node.remove(); } );
-    },
+    this.fnAdd(id,
+               new TextItemSnippet(item.getContent().text)
+               .highlights(options.binCharsLeft, options.binCharsRight))
+      .always(function () { node.remove(); } );
+  };
 
-    onAddManual: function (node) {
-      var self = this,
-          input = node.find('input');
+  BinAddButton.prototype.onAddManual = function (node)
+  {
+    var self = this,
+        input = node.find('input');
 
-      input
-        .focus()
-        .blur(function () {
-          if(!this.value) {
-            node.fadeOut(self.owner_.getOwner().options.delays.addBinShow,
-                         function () { node.remove(); } );
-            return;
-          }
+    input
+      .focus()
+      .blur(function () {
+        if(!this.value) {
+          node.fadeOut(self.owner_.getOwner().options.delays.addBinShow,
+                       function () { node.remove(); } );
+          return;
+        }
 
-          this.disabled = true;
+        this.disabled = true;
 
-          /* TODO: do not use an `alert'. */
-          self.fnAdd(null, this.value)
-            .fail(function () { alert("Failed to create a sub-bin."); } )
-            .always(function () { node.remove(); } );
-        } )
-        .keyup(function (evt) {
-          if(evt.keyCode == 13)
-            this.blur();
-          
-          /* Do not allow event to propagate. */
-          return false;
-        } );
-    }    
+        /* TODO: do not use an `alert'. */
+        self.fnAdd(null, this.value)
+          .fail(function () { alert("Failed to create a sub-bin."); } )
+          .always(function () { node.remove(); } );
+      } )
+      .keyup(function (evt) {
+        if(evt.keyCode == 13)
+          this.blur();
+        
+        /* Do not allow event to propagate. */
+        return false;
+      } );
   };
 
 
   /**
    * @class@
+   *
+   * Static class.
    * */
   var DragDropManager = {
     activeNode: null,
