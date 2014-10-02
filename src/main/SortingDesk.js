@@ -899,6 +899,14 @@ var SortingDesk = (function () {
       this.container.find('.' + csel).removeClass(csel);
       variant.addClass(csel);
 
+      /* WARNING: the present implementation requires knowledge of the list
+       * items' container's height or it will fail to ensure the currently
+       * selected item is always visible.
+       *
+       * A particular CSS style involving specifying the container's height
+       * using `vh' units was found to break this behaviour.
+       */
+      
       /* Ensure text item is _always_ visible at the bottom and top ends of
        * the containing node. */
       var st = this.container.scrollTop(),       /* scrolling top */
