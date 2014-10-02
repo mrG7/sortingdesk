@@ -394,7 +394,7 @@ var SortingDesk = (function () {
              * a notification; for what purpose, I don't know. */
             controller.removeAt(controller.indexOf(bin));
 
-            self.owner_.invoke_('removeBin', bin.getId())
+            self.owner_.invoke_('removeBin', bin.id)
               .fail(function (result) {
                 console.log("bin-remove:", result.error);
                 /* TODO: user notification not implemented yet. */
@@ -481,10 +481,10 @@ var SortingDesk = (function () {
            * CSS class that contains identical styles to the pseudo-class
            * :hover, and removing it after the milliseconds specified in
            * `options.delay.animateAssign'. */
-          bin.getNode().addClass(options.css.binAnimateAssign);
+          bin.node.addClass(options.css.binAnimateAssign);
           
           window.setTimeout(function () {
-            bin.getNode().removeClass(options.css.binAnimateAssign);
+            bin.node.removeClass(options.css.binAnimateAssign);
           }, options.delays.animateAssign);
           
           this.owner_.invoke_("textDroppedInBin",
@@ -578,16 +578,16 @@ var SortingDesk = (function () {
   
   ControllerBins.prototype.add = function (bin)
   {
-    var id = bin.getId();
+    var id = bin.id;
 
     /* Ensure a bin with the same id isn't already contained. */
     this.bins_.forEach(function (ib) {
-      if(ib.getId() == id)
+      if(ib.id == id)
         throw "Bin is already contained: " + id;
     } );
 
     /* Contain bin and append its HTML node. */
-    this.append(bin.getNode());
+    this.append(bin.node);
     this.bins_.push(bin);
   };
     
@@ -598,7 +598,7 @@ var SortingDesk = (function () {
     if(!this.bins_.length)
       this.owner_.options.nodes.bins.prepend(node);
     else
-      this.bins_[this.bins_.length - 1].getNode().after(node);
+      this.bins_[this.bins_.length - 1].node.after(node);
   };
 
   ControllerBins.prototype.indexOf = function (bin)
@@ -616,7 +616,7 @@ var SortingDesk = (function () {
     bin = this.bins_[index];
     this.bins_.splice(index, 1);
     
-    bin.getNode().remove(); 
+    bin.node.remove(); 
   };
 
   ControllerBins.prototype.getBinByShortcut = function (keyCode)
@@ -624,7 +624,7 @@ var SortingDesk = (function () {
     var result = null;
 
     this.bins_.some(function (bin) {
-      if(bin.getShortcut() == keyCode) {
+      if(bin.shortcut == keyCode) {
         result = bin;
         return true;
       }
@@ -640,7 +640,7 @@ var SortingDesk = (function () {
     var result = null;
     
     this.bins_.some(function (bin) {
-      if(bin.getId() == id) {
+      if(bin.id == id) {
         result = bin;
         return true;
       }
@@ -674,9 +674,15 @@ var SortingDesk = (function () {
     /* Invoke super constructor. */
     Drawable.call(this, owner);
 
-    this.id = id;
-    this.bin = bin;
-    this.node = this.shortcut = null;
+    this.id_ = id;
+    this.bin_ = bin;
+    this.node_ = this.shortcut_ = null;
+
+    /* Define getters. */
+    this.__defineGetter__("bin", function () { return this.bin_; } );
+    this.__defineGetter__("id", function () { return this.id_; } );
+    this.__defineGetter__("shortcut", function () { return this.shortcut_; } );
+    this.__defineGetter__("node", function () { return this.node_; } );
   };
 
   BinBase.prototype = Object.create(Drawable.prototype);
@@ -686,10 +692,10 @@ var SortingDesk = (function () {
     var self = this,
         parentOwner = self.owner_.owner;
 
-    (this.node = this.render())
+    (this.node_ = this.render())
       .attr( {
         'data-scope': 'bin',
-        'id': encodeURIComponent(this.id)
+        'id': encodeURIComponent(this.id_)
       } )
       .on( {
         mouseenter: function () {
@@ -703,7 +709,7 @@ var SortingDesk = (function () {
         }
       } );
 
-    new Droppable(this.node, {
+    new Droppable(this.node_, {
       classHover: parentOwner.options.css.droppableHover,
       scopes: [ 'text-item' ],
       
@@ -720,7 +726,7 @@ var SortingDesk = (function () {
     /* We must defer initialisation of D'n'D because owning object's `bin'
      * attribute will have not yet been set. */
     window.setTimeout(function () {
-      new Draggable(self.node, {
+      new Draggable(self.node_, {
         dragstart: function (e) {
           parentOwner.controllers.dismiss.activate();
         },
@@ -738,25 +744,15 @@ var SortingDesk = (function () {
   /* abstract */ BinBase.prototype.render = function ()
   { throw "Abstract method must be implemented"; };
     
-  BinBase.prototype.getId = function ()
-  { return this.id; };
-    
   BinBase.prototype.setShortcut = function (keyCode)
   {
-    this.shortcut = keyCode;
-
+    this.shortcut_ = keyCode;
     this.getNodeShortcut().html(String.fromCharCode(keyCode).toLowerCase());
   };
 
-  BinBase.prototype.getShortcut = function ()
-  { return this.shortcut; };
-    
-  BinBase.prototype.getNode = function ()
-  { return this.node; };
-
   /* overridable */ BinBase.prototype.getNodeShortcut = function ()
   {
-    return this.node.find(
+    return this.node_.find(
       '.'+ this.owner_.owner.options.css.binShortcut);
   };
 
@@ -779,7 +775,7 @@ var SortingDesk = (function () {
   Bin.prototype.render = function () {
     /* Wrap bin name inside a DIV. */
     return $('<div class="sd-bin"><div class="sd-bin-shortcut"/>'
-             + this.bin.name + '</div>');
+             + this.bin_.name + '</div>');
   };
 
   
@@ -818,7 +814,7 @@ var SortingDesk = (function () {
   SubBin.prototype.render = function () {
     /* Wrap bin statement_text inside a DIV. */
     return $('<div class="sd-bin-sub"><div class="sd-bin-shortcut"/>'
-             + this.bin.name + '</div>');
+             + this.bin_.name + '</div>');
   };
 
 
