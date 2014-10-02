@@ -309,15 +309,23 @@ var SortingDesk = (function () {
   /**
    * @class@
    * */
-  var /* abstract */ Controller = function () { };
+  var /* abstract */ Controller = function (owner)
+  {
+    this.owner_ = owner;
+  };
 
   Controller.prototype = {
+    owner_: null,
+    
     /* Following method to allow for deferred initialisation. */
     /* abstract */ initialise: function ()
     { throw "Abstract method not implemented"; },
 
     /* abstract */ reset: function ()
-    { throw "Abstract method not implemented"; }
+    { throw "Abstract method not implemented"; },
+
+    get owner ()
+    { return this.owner_; }
   };
   
   
@@ -325,15 +333,13 @@ var SortingDesk = (function () {
    * @class@
    * */
   var ControllerButtonDismiss = function (owner)
-  {
-    this.owner = owner;
-  };
+  { Controller.call(this, owner); };
 
   ControllerButtonDismiss.prototype = Object.create(Controller.prototype);
 
   ControllerButtonDismiss.prototype.initialise = function () {
     var self = this,
-        options = this.owner.options;
+        options = this.owner_.options;
     
     if(!options.nodes.buttonDismiss.length)
       return;
@@ -343,10 +349,13 @@ var SortingDesk = (function () {
       scopes: [ 'bin', 'text-item' ],
 
       drop: function (e, id, scope) {
+        var controller;
+        
         switch(scope) {
         case 'bin':
-          var controller = self.owner.controllers.bins,
-          bin = controller.getBinById(decodeURIComponent(id));
+          controller = self.owner_.controllers.bins;
+          
+          var bin = controller.getBinById(decodeURIComponent(id));
 
           if(bin) {
             /* It doesn't matter if the API request succeeds or not for the
@@ -357,7 +366,7 @@ var SortingDesk = (function () {
              * a notification; for what purpose, I don't know. */
             controller.removeAt(controller.indexOf(bin));
 
-            self.owner.invoke_('removeBin', bin.getId())
+            self.owner_.invoke_('removeBin', bin.getId())
               .fail(function (result) {
                 console.log("bin-remove:", result.error);
                 /* TODO: user notification not implemented yet. */
@@ -367,10 +376,11 @@ var SortingDesk = (function () {
           break;
 
         case 'text-item':
-          var controller = self.owner.controllers.items,
-          item = controller.getById(id);
+          controller = self.owner_.controllers.items;
 
-          self.owner.invoke_("textDismissed", item);
+          var item = controller.getById(id);
+
+          self.owner_.invoke_("textDismissed", item);
           controller.remove(decodeURIComponent(id));
           
           break;
@@ -388,7 +398,7 @@ var SortingDesk = (function () {
   };
   
   ControllerButtonDismiss.prototype.activate = function (callback) {
-    var options = this.owner.options;
+    var options = this.owner_.options;
       
     options.nodes.buttonDismiss.stop().fadeIn(
       options.delays.dismissButtonShow,
@@ -396,7 +406,7 @@ var SortingDesk = (function () {
   };
 
   ControllerButtonDismiss.prototype.deactivate = function () {
-    var options = this.owner.options;
+    var options = this.owner_.options;
     
     options.nodes.buttonDismiss.stop().fadeOut(
       options.delays.dismissButtonHide);
@@ -407,7 +417,7 @@ var SortingDesk = (function () {
    * @class
    * */
   var ControllerKeyboard = function (owner)
-  { this.owner = owner; };
+  { Controller.call(this, owner); };
 
   ControllerKeyboard.prototype = Object.create(Controller.prototype);
 
@@ -422,8 +432,8 @@ var SortingDesk = (function () {
   ControllerKeyboard.prototype.onKeyUp_ = function (evt)
   {
     var self = this,
-        controllers = this.owner.controllers,
-        options = this.owner.options;
+        controllers = this.owner_.controllers,
+        options = this.owner_.options;
     
     /* First process alpha key strokes. */
     if(evt.keyCode >= 65 && evt.keyCode <= 90) {
@@ -446,9 +456,9 @@ var SortingDesk = (function () {
             bin.getNode().removeClass(options.css.binAnimateAssign);
           }, options.delays.animateAssign);
           
-          this.owner.invoke_("textDroppedInBin",
-                             controllers.items.current(),
-                             bin);
+          this.owner_.invoke_("textDroppedInBin",
+                              controllers.items.current(),
+                              bin);
           controllers.items.remove();
         }
       }
@@ -469,7 +479,7 @@ var SortingDesk = (function () {
         controllers.dismiss.deactivate();
       } );
       
-      this.owner.invoke_("textDismissed", controllers.items.current());
+      this.owner_.invoke_("textDismissed", controllers.items.current());
       controllers.items.remove();
       
       break;
@@ -487,7 +497,8 @@ var SortingDesk = (function () {
    * */
   var ControllerBins = function (owner)
   {
-    this.owner = owner;
+    Controller.call(this, owner);
+    
     this.bins = [ ];
     this.hover_ = null;
   };
@@ -507,7 +518,7 @@ var SortingDesk = (function () {
       function (id, text) {
         var deferred = $.Deferred();
 
-        self.owner.invoke_('addBin', text)
+        self.owner_.invoke_('addBin', text)
           .fail(function () {
             /* TODO: show message box and notify user. */
             console.log("Failed to add bin:", id, text);
@@ -547,7 +558,7 @@ var SortingDesk = (function () {
     /* Add bin node to the very top of the container if aren't any yet,
      * otherwise insert it after the last contained bin. */
     if(!this.bins.length)
-      this.owner.options.nodes.bins.prepend(node);
+      this.owner_.options.nodes.bins.prepend(node);
     else
       this.bins[this.bins.length - 1].getNode().after(node);
   };
@@ -615,13 +626,13 @@ var SortingDesk = (function () {
    * than one bin container will exist going forward. Presently that's not the
    * case and hence it simply returns `options_.nodes.bins'. */
   ControllerBins.prototype.getContainer = function ()
-  { return this.owner.options.nodes.bins; };
+  { return this.owner_.options.nodes.bins; };
 
   ControllerBins.prototype.onClick_ = function (bin)
   {
-    var items = this.owner.controllers.items;
+    var items = this.owner_.controllers.items;
     
-    this.owner.invoke_("textDroppedInBin", items.current(), bin);
+    this.owner_.invoke_("textDroppedInBin", items.current(), bin);
     items.remove();
   };
 
@@ -637,13 +648,13 @@ var SortingDesk = (function () {
    * */
   var BinBase = function (owner, id, bin)
   {
-    this.owner = owner;
+    this.owner_ = owner;
     this.id = id;
     this.bin = bin;
   };
   
   BinBase.prototype = {
-    owner: null,
+    owner_: null,
     id: null,
     bin: null,
     node: null,
@@ -652,7 +663,7 @@ var SortingDesk = (function () {
     initialise: function ()
     {
       var self = this,
-          parentOwner = self.owner.getOwner();
+          parentOwner = self.owner_.getOwner();
 
       (this.node = this.render())
         .attr( {
@@ -661,13 +672,13 @@ var SortingDesk = (function () {
         } )
         .on( {
           mouseenter: function () {
-            self.owner.onMouseEnter_(self);
+            self.owner_.onMouseEnter_(self);
           },
           mouseleave: function () {
-            self.owner.onMouseLeave_();
+            self.owner_.onMouseLeave_();
           },
           click: function () {
-            self.owner.onClick_(self);
+            self.owner_.onClick_(self);
           }
         } );
 
@@ -726,7 +737,7 @@ var SortingDesk = (function () {
 
     /* overridable */ getNodeShortcut: function ()
     { return this.node.find(
-      '.'+ this.owner.getOwner().options.css.binShortcut); },
+      '.'+ this.owner_.getOwner().options.css.binShortcut); },
 
     getOwner: function ()
     { return this.owner; }
@@ -770,7 +781,7 @@ var SortingDesk = (function () {
 
   BinGeneric.prototype.add = function () {
     this.initialise(this.render());
-    this.owner.add(this);
+    this.owner_.add(this);
   };
 
 
@@ -818,8 +829,10 @@ var SortingDesk = (function () {
    * */
   var ControllerItems = function (owner)
   {
-    this.owner = owner;
-    this.container = owner.options.nodes.items;
+    /* Invoke super constructor. */
+    Controller.call(this, owner);
+    
+    this.container = this.owner_.options.nodes.items;
     this.items = [ ];
   };
 
@@ -830,20 +843,20 @@ var SortingDesk = (function () {
   
   ControllerItems.prototype.check = function ()
   {
-    if(this.items.length >= this.owner.options.visibleItems)
+    if(this.items.length >= this.owner_.options.visibleItems)
       return;
     
     var self = this,
-        promise = this.owner.invoke_(
+        promise = this.owner_.invoke_(
           "moreTexts",
-          this.owner.options.visibleItems);
+          this.owner_.options.visibleItems);
 
     /* Check that our request for more text items hasn't been refused. */
     if(!promise)
       return;
     
     promise.done(function (items) {
-      self.owner.onRequestStart_('check-items');
+      self.owner_.onRequestStart_('check-items');
 
       items.forEach(function (item, index) {
         window.setTimeout( function () {
@@ -857,7 +870,7 @@ var SortingDesk = (function () {
 
       /* Ensure event is fired after the last item is added. */
       window.setTimeout( function () {
-        self.owner.onRequestStop_('check-items');
+        self.owner_.onRequestStop_('check-items');
       }, Math.pow(items.length - 1, 2) * 1.1 + 10);
 
     } );
@@ -868,10 +881,10 @@ var SortingDesk = (function () {
     /* Fail silently if not initialised anymore. This might happen if, for
      * example, the `reset' method was invoked but the component is still
      * loading text items. */
-    if(!this.owner.isInitialised)
+    if(!this.owner_.isInitialised)
       return;
     
-    var csel = this.owner.options.css.itemSelected;
+    var csel = this.owner_.options.css.itemSelected;
     
     if(!this.container.children().length)
       return;
@@ -932,7 +945,7 @@ var SortingDesk = (function () {
 
   ControllerItems.prototype.selectOffset = function (offset)
   {
-    var csel = this.owner.options.css.itemSelected,
+    var csel = this.owner_.options.css.itemSelected,
         index;
 
     if(!this.container.length)
@@ -955,7 +968,7 @@ var SortingDesk = (function () {
   ControllerItems.prototype.current = function()
   {
     var node = this.container.find(
-      '.' + this.owner.options.css.itemSelected);
+      '.' + this.owner_.options.css.itemSelected);
     
     if(!node.length)
       return null;
@@ -996,10 +1009,10 @@ var SortingDesk = (function () {
       item.getNode()
         .css('opacity', 0.6)  /* to prevent flicker */
         .animate( { opacity: 0 },
-                  self.owner.options.delays.textItemFade,
+                  self.owner_.options.delays.textItemFade,
                   function () {
                     $(this).slideUp(
-                      self.owner.options.delays.slideItemUp,
+                      self.owner_.options.delays.slideItemUp,
                       function () {
                         $(this).remove();
                         self.select();
@@ -1042,19 +1055,19 @@ var SortingDesk = (function () {
    * */
   var TextItem = function (owner, item)
   {
-    this.owner = owner;
+    this.owner_ = owner;
     this.content = item;
   };
 
   TextItem.prototype = {
-    owner: null,
+    owner_: null,
     content: null,                /* Note: unlike bins, a text item contains
                                    * its own id. (?) */
     node: null,
 
     initialise: function() {
       var self = this,
-          parentOwner = this.owner.getOwner();
+          parentOwner = this.owner_.getOwner();
 
       this.node
         .attr( {
@@ -1062,13 +1075,13 @@ var SortingDesk = (function () {
           "data-scope": "text-item"
         } )
         .click(function () {
-          self.owner.select(self);
+          self.owner_.select(self);
         } );
 
       this.getNodeClose()
         .click(function () {
           parentOwner.invoke_("textDismissed", self.content);
-          self.owner.remove(decodeURIComponent(self.content.node_id));
+          self.owner_.remove(decodeURIComponent(self.content.node_id));
           return false;
         } );
 
@@ -1078,7 +1091,7 @@ var SortingDesk = (function () {
         dragstart: function (e) {
           /* Firstly select item being dragged to ensure correct item position
            * in container. */
-          self.owner.select(self);
+          self.owner_.select(self);
 
           /* Activate deletion/dismissal button. */
           parentOwner.controllers.dismiss.activate();
@@ -1095,7 +1108,7 @@ var SortingDesk = (function () {
       this.node.replaceWith(newNode);
       this.node = newNode;
       this.initialise();
-      this.owner.select(this);
+      this.owner_.select(this);
     },
     
     /* abstract */ render: function ()
@@ -1242,7 +1255,7 @@ var SortingDesk = (function () {
   {
     var parentOwner = owner.getOwner();
     
-    this.owner = owner;
+    this.owner_ = owner;
     this.fnRender = fnRender;
     this.fnAdd = fnAdd;
 
@@ -1277,11 +1290,11 @@ var SortingDesk = (function () {
     },
     
     onAdd: function (id) {
-      var parentOwner = this.owner.getOwner(),
+      var parentOwner = this.owner_.getOwner(),
           options = parentOwner.options;
       
       /* Do not allow entering into concurrent `add' states. */
-      if(this.owner.getContainer().find('.' + options.css.binAdding).length)
+      if(this.owner_.getContainer().find('.' + options.css.binAdding).length)
         return;
 
       var nodeContent = id ? 'Please wait...'
@@ -1291,7 +1304,7 @@ var SortingDesk = (function () {
             .addClass(options.css.binAdding)
             .fadeIn(options.delays.addBinShow);
 
-      this.owner.append(node);
+      this.owner_.append(node);
       
       if(!id) {
         this.onAddManual(node);
@@ -1319,7 +1332,7 @@ var SortingDesk = (function () {
         .focus()
         .blur(function () {
           if(!this.value) {
-            node.fadeOut(self.owner.getOwner().options.delays.addBinShow,
+            node.fadeOut(self.owner_.getOwner().options.delays.addBinShow,
                          function () { node.remove(); } );
             return;
           }
