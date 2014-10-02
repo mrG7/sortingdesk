@@ -40,7 +40,7 @@ var SortingDesk = (function () {
    * nodes: {
    *   items: jQuery-element,           ; mandatory
    *   bins: jQuery-element,            ; optional
-   *   buttonDelete: jQuery-element     ; optional
+   *   buttonDismiss: jQuery-element    ; optional
    * },
    * contentIds: array<string>          ; optional
    * 
@@ -194,8 +194,8 @@ var SortingDesk = (function () {
             this.options_.nodes.bins.children().remove();
 
           /* Detach events from bin/text item delete button. */
-          if(this.options_.nodes.buttonDelete)
-            this.options_.nodes.buttonDelete.off();
+          if(this.options_.nodes.buttonDismiss)
+            this.options_.nodes.buttonDismiss.off();
           
           this.options_ = this.callbacks_ = this.controllers_.bins
             = this.controllers_.items = null;
@@ -282,8 +282,10 @@ var SortingDesk = (function () {
     initialise_: function (bins) {
       var self = this;
       
-      if(!this.options_.nodes.buttonDelete)
-        this.options_.nodes.buttonDelete = $();
+      if(!this.options_.nodes.buttonDismiss)
+        this.options_.nodes.buttonDismiss = $();
+
+      this.controllers_.dismiss = new ControllerButtonDismiss(this);
       
       /* Do not create bin container or process any bins if a bin HTML container
        * wasn't given OR the bins' data result array wasn't received. */
@@ -306,50 +308,6 @@ var SortingDesk = (function () {
 
       /* Set up listener for keyboard up events. */
       $('body').bind('keyup', function (evt) { self.onKeyUp_(evt); } );
-      
-      new Droppable(this.options_.nodes.buttonDelete, {
-        classHover: this.options_.css.droppableHover,
-        scopes: [ 'bin', 'text-item' ],
-
-        drop: function (e, id, scope) {
-          switch(scope) {
-          case 'bin':
-            var bin = self.controllers_.bins.getBinById(decodeURIComponent(id));
-
-            if(bin) {
-              /* It doesn't matter if the API request succeeds or not for the
-               * bin is always deleted. The only case (that I am aware of) where
-               * the API request would fail is if the bin didn't exist
-               * server-side, in which case it should be deleted from the UI
-               * too. So, always delete, BUT, if the request fails show the user
-               * a notification; for what purpose, I don't know. */
-              self.controllers_.bins.remove(bin);
-
-              self.invoke_('removeBin', bin.getId())
-                .fail(function (result) {
-                  console.log("bin-remove:", result.error);
-                  /* TODO: user notification not implemented yet. */
-                } );
-            }
-
-            break;
-
-          case 'text-item':
-            var item = self.controllers_.items.getById(id);
-            self.invoke_("textDismissed", item);
-            self.controllers_.items.remove(decodeURIComponent(id));
-            break;
-
-          default:
-            console.log("Unknown scope:", scope);
-            break;
-          }
-
-          self.onDeactivateDeleteButton_();
-
-          return false;
-        }
-      } );
 
       this.initialised_ = true;
       console.log("Sorting Desk UI initialised");
@@ -397,8 +355,8 @@ var SortingDesk = (function () {
         this.list.selectOffset(1);
         break;
       case this.options_.keyboard.listDismiss:
-        this.onActivateDeleteButton_(function () {
-          self.onDeactivateDeleteButton_();
+        this.controllers_.dismiss.activate(function () {
+          self.controllers_.dismiss.deactivate();
         } );
         
         this.invoke_("textDismissed", this.controllers_.items.current());
@@ -470,17 +428,85 @@ var SortingDesk = (function () {
       return (result = this.controllers_.bins.getBinByShortcut(keyCode))
         ? result
         : null;
-    },
+    }
+  };
+
+
+  /**
+   * @class@
+   * */
+  var ControllerButtonDismiss = function (owner)
+  {
+    var self = this,
+        options = owner.getOptions();
     
-    onActivateDeleteButton_: function (fn) {
-      this.options_.nodes.buttonDelete.fadeIn(
-        this.options_.delays.deleteButtonShow,
-        typeof fn == 'function' ? fn : null);
+    this.owner = owner;
+
+    new Droppable(options.nodes.buttonDismiss, {
+      classHover: options.css.droppableHover,
+      scopes: [ 'bin', 'text-item' ],
+
+      drop: function (e, id, scope) {
+        switch(scope) {
+        case 'bin':
+          var controller = owner.getControllers().bins,
+              bin = controller.getBinById(decodeURIComponent(id));
+
+          if(bin) {
+            /* It doesn't matter if the API request succeeds or not for the
+             * bin is always deleted. The only case (that I am aware of) where
+             * the API request would fail is if the bin didn't exist
+             * server-side, in which case it should be deleted from the UI
+             * too. So, always delete, BUT, if the request fails show the user
+             * a notification; for what purpose, I don't know. */
+            controller.bins.remove(bin);
+
+            owner.invoke_('removeBin', bin.getId())
+              .fail(function (result) {
+                console.log("bin-remove:", result.error);
+                /* TODO: user notification not implemented yet. */
+              } );
+          }
+
+          break;
+
+        case 'text-item':
+          var controller = owner.getControllers().items,
+              item = controller.getById(id);
+
+          owner.invoke_("textDismissed", item);
+          controller.remove(decodeURIComponent(id));
+          
+          break;
+
+        default:
+          console.log("Warning: unknown scope:", scope);
+          break;
+        }
+
+        self.deactivate();
+
+        return false;
+      }
+    } );
+  };
+
+  ControllerButtonDismiss.prototype = {
+    owner: null,
+
+    activate: function (callback) {
+      var options = this.owner.getOptions();
+      
+      options.nodes.buttonDismiss.stop().fadeIn(
+        options.delays.deleteButtonShow,
+        typeof callback == 'function' ? callback : null);
     },
 
-    onDeactivateDeleteButton_: function () {
-      this.options_.nodes.buttonDelete.fadeOut(
-        this.options_.delays.deleteButtonHide);
+    deactivate: function () {
+      var options = this.owner.getOptions();
+      
+      options.nodes.buttonDismiss.stop().fadeOut(
+        options.delays.deleteButtonHide);
     }
   };
 
@@ -674,11 +700,11 @@ var SortingDesk = (function () {
       window.setTimeout(function () {
         new Draggable(self.node, {
           dragstart: function (e) {
-            parentOwner.onActivateDeleteButton_();
+            parentOwner.getControllers().dismiss.activate();
           },
           
           dragend: function (e) {
-            parentOwner.onDeactivateDeleteButton_();
+            parentOwner.getControllers().dismiss.deactivate();
           }
         } );
       }, 0);
@@ -1066,12 +1092,12 @@ var SortingDesk = (function () {
           self.owner.select(self);
 
           /* Activate deletion/dismissal button. */
-          parentOwner.onActivateDeleteButton_();
+          parentOwner.getControllers().dismiss.activate();
         },
         
         dragend: function () {
           /* Deactivate deletion/dismissal button. */
-          parentOwner.onDeactivateDeleteButton_();
+          parentOwner.getControllers().dismiss.deactivate();
         }
       } );
     },
