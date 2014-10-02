@@ -442,7 +442,7 @@ var SortingDesk = (function () {
              * server-side, in which case it should be deleted from the UI
              * too. So, always delete, BUT, if the request fails show the user
              * a notification; for what purpose, I don't know. */
-            controller.bins.remove(bin);
+            controller.remove(bin);
 
             self.owner.invoke_('removeBin', bin.getId())
               .fail(function (result) {
