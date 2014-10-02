@@ -158,7 +158,6 @@ var SortingDesk = (function () {
     callbacks_: null,
     options_: null,
     controllers_: null,
-    over_: null,
     requests_: null,
 
     
@@ -267,82 +266,11 @@ var SortingDesk = (function () {
       (this.controllers_.items = new ControllerItems(this))
         .initialise();
 
-      /* Set up listener for keyboard up events. */
-      $('body').bind('keyup', function (evt) { self.onKeyUp_(evt); } );
+      (this.controllers_.keyboard = new ControllerKeyboard(this))
+        .initialise();
 
       this.initialised_ = true;
       console.log("Sorting Desk UI initialised");
-    },
-    
-    onKeyUp_: function (evt) {
-      var self = this;
-      
-      /* First process alpha key strokes. */
-      if(evt.keyCode >= 65 && evt.keyCode <= 90) {
-        var bin = this.getBinByShortcut_(evt.keyCode);
-
-        if(this.over_) {
-          if(!bin)
-            this.over_.setShortcut(evt.keyCode);
-        } else {
-          if(bin) {
-            /* Simulate the effect produced by a mouse click by assigning the
-             * CSS class that contains identical styles to the pseudo-class
-             * :hover, and removing it after the milliseconds specified in
-             * `options_.delay.animateAssign'. */
-            bin.getNode().addClass(this.options_.css.binAnimateAssign);
-            
-            window.setTimeout(function () {
-              bin.getNode().removeClass(self.options_.css.binAnimateAssign);
-            }, this.options_.delays.animateAssign);
-            
-            this.invoke_("textDroppedInBin",
-                         this.controllers_.items.current(),
-                         bin);
-            
-            this.controllers_.items.remove();
-          }
-        }
-        
-        return false;
-      }
-      
-      /* Not alpha. */
-      switch(evt.keyCode) {
-      case this.options_.keyboard.listUp:
-        this.list.selectOffset(-1);
-        break;
-      case this.options_.keyboard.listDown:
-        this.list.selectOffset(1);
-        break;
-      case this.options_.keyboard.listDismiss:
-        this.controllers_.dismiss.activate(function () {
-          self.controllers_.dismiss.deactivate();
-        } );
-        
-        this.invoke_("textDismissed", this.controllers_.items.current());
-        this.controllers_items.remove();
-        
-        break;
-        
-      default:
-        return;
-      }
-
-      return false;
-    },
-
-    onClick_: function (bin) {
-      this.invoke_("textDroppedInBin", this.controllers_.items.current(), bin);
-      this.controllers_.items.remove();
-    },
-
-    onMouseEnter_: function (bin) {
-      this.over_ = bin;
-    },
-
-    onMouseLeave_: function () {
-      this.over_ = null;
     },
 
     invoke_: function () {
@@ -485,10 +413,90 @@ var SortingDesk = (function () {
   /**
    * @class
    * */
+  var ControllerKeyboard = function (owner)
+  { this.owner = owner; };
+
+  ControllerKeyboard.prototype = Object.create(Controller.prototype);
+
+  ControllerKeyboard.prototype.initialise = function ()
+  {
+    var self = this;
+    
+    /* Set up listener for keyboard up events. */
+    $('body').bind('keyup', function (evt) { self.onKeyUp_(evt); } );
+  };
+
+  ControllerKeyboard.prototype.onKeyUp_ = function (evt)
+  {
+    var self = this,
+        controllers = this.owner.getControllers(),
+        options = this.owner.getOptions();
+    
+    /* First process alpha key strokes. */
+    if(evt.keyCode >= 65 && evt.keyCode <= 90) {
+      var bin = controllers.bins.getBinByShortcut(evt.keyCode);
+
+      if(controllers.bins.getHover()) {
+        if(!bin)
+          controllers.bins.getHover().setShortcut(evt.keyCode);
+      } else {
+        if(bin) {
+          /* TODO: The following animation should be decoupled. */
+          
+          /* Simulate the effect produced by a mouse click by assigning the
+           * CSS class that contains identical styles to the pseudo-class
+           * :hover, and removing it after the milliseconds specified in
+           * `options.delay.animateAssign'. */
+          bin.getNode().addClass(options.css.binAnimateAssign);
+          
+          window.setTimeout(function () {
+            bin.getNode().removeClass(options.css.binAnimateAssign);
+          }, options.delays.animateAssign);
+          
+          this.owner.invoke_("textDroppedInBin",
+                             controllers.items.current(),
+                             bin);
+          controllers.items.remove();
+        }
+      }
+      
+      return false;
+    }
+    
+    /* Not alpha. */
+    switch(evt.keyCode) {
+    case options.keyboard.listUp:
+      controllers.items.selectOffset(-1);
+      break;
+    case options.keyboard.listDown:
+      controllers.items.selectOffset(1);
+      break;
+    case options.keyboard.listDismiss:
+      controllers.dismiss.activate(function () {
+        controllers.dismiss.deactivate();
+      } );
+      
+      this.owner.invoke_("textDismissed", controllers.items.current());
+      controllers.items.remove();
+      
+      break;
+      
+    default:
+      return;
+    }
+
+    return false;
+  };
+
+
+  /**
+   * @class
+   * */
   var ControllerBins = function (owner)
   {
     this.owner = owner;
     this.bins = [ ];
+    this.hover_ = null;
   };
 
   ControllerBins.prototype = Object.create(Controller.prototype);
@@ -604,6 +612,9 @@ var SortingDesk = (function () {
   ControllerBins.prototype.getBins = function ()
   { return this.bins; };
 
+  ControllerBins.prototype.getHover = function ()
+  { return this.hover_; };
+
   ControllerBins.prototype.getOwner = function ()
   { return this.owner; };
     
@@ -613,6 +624,20 @@ var SortingDesk = (function () {
   ControllerBins.prototype.getContainer = function ()
   { return this.owner.getOption("nodes").bins; };
 
+  ControllerBins.prototype.onClick_ = function (bin)
+  {
+    var items = this.owner.getControllers().items;
+    
+    this.owner.invoke_("textDroppedInBin", items.current(), bin);
+    items.remove();
+  };
+
+  ControllerBins.prototype.onMouseEnter_ = function (bin)
+  { this.hover_ = bin; };
+
+  ControllerBins.prototype.onMouseLeave_ = function ()
+  { this.hover_ = null; };
+  
 
   /**
    * @class
@@ -643,13 +668,13 @@ var SortingDesk = (function () {
         } )
         .on( {
           mouseenter: function () {
-            parentOwner.onMouseEnter_(self);
+            self.owner.onMouseEnter_(self);
           },
           mouseleave: function () {
-            parentOwner.onMouseLeave_();
+            self.owner.onMouseLeave_();
           },
           click: function () {
-            parentOwner.onClick_(self);
+            self.owner.onClick_(self);
           }
         } );
 
