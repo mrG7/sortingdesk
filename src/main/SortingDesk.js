@@ -136,16 +136,16 @@ var SortingDesk = (function () {
     
     console.log("Initialising Sorting Desk UI");
     
-    this.options = $.extend(true, defaults_, opts);
+    this.options_ = $.extend(true, defaults_, opts);
     this.callbacks = cbs;
     this.requests_ = [ ];
     this.controllers_ = { };
     
-    /* Do not request bin data if a bins HTML container (`options.nodes.bins')
-     * wasn't given OR content ids (`options.nodes.contentIds') were not
+    /* Do not request bin data if a bins HTML container (`options_.nodes.bins')
+     * wasn't given OR content ids (`options_.nodes.contentIds') were not
      * specified. */
-    if(this.options.nodes.bins && this.options.contentIds) {
-      var promise = this.callbacks.getBinData(this.options.contentIds),
+    if(this.options_.nodes.bins && this.options_.contentIds) {
+      var promise = this.callbacks.getBinData(this.options_.contentIds),
           self = this;
 
       if(!promise)
@@ -165,7 +165,7 @@ var SortingDesk = (function () {
     initialised_: false,
     resetting_: false,
     callbacks: null,
-    options: null,
+    options_: null,
     controllers_: null,
     over_: null,
     requests_: null,
@@ -173,14 +173,14 @@ var SortingDesk = (function () {
     
     /**
      * Resets the component to a virgin state. Removes all nodes contained by
-     * `options.nodes.items' and `options.nodes.bins', if any.
+     * `options_.nodes.items' and `options_.nodes.bins', if any.
      *
      * @returns {Boolean}   Returns status of operation: true if succeeded,
      *                      false otherwise.*/
     reset: function () {
       var deferred = $.Deferred();
       
-      if(!this.options || this.resetting_) {
+      if(!this.options_ || this.resetting_) {
         window.setTimeout(function () {
           deferred.reject();
         } );
@@ -196,17 +196,17 @@ var SortingDesk = (function () {
           if(this.requests_.length)
             return;
           
-          if(this.options.nodes.items)
-            this.options.nodes.items.children().remove();
+          if(this.options_.nodes.items)
+            this.options_.nodes.items.children().remove();
 
-          if(this.options.nodes.bins)
-            this.options.nodes.bins.children().remove();
+          if(this.options_.nodes.bins)
+            this.options_.nodes.bins.children().remove();
 
           /* Detach events from bin/text item delete button. */
-          if(this.options.nodes.buttonDelete)
-            this.options.nodes.buttonDelete.off();
+          if(this.options_.nodes.buttonDelete)
+            this.options_.nodes.buttonDelete.off();
           
-          this.options = this.callbacks = this.controllers_.bins
+          this.options_ = this.callbacks = this.controllers_.bins
             = this.controllers_.items = null;
           
           this.initialised_ = false;
@@ -277,10 +277,10 @@ var SortingDesk = (function () {
     },
 
     getOption: function (key)
-    { return key in this.options ? this.options[key] : null; },
+    { return this.options_[key]; },
 
     getOptions: function (key)
-    { return this.options; },
+    { return this.options_; },
 
     getControllers: function ()
     { return this.controllers_; },
@@ -291,12 +291,12 @@ var SortingDesk = (function () {
     initialise_: function (bins) {
       var self = this;
       
-      if(!this.options.nodes.buttonDelete)
-        this.options.nodes.buttonDelete = $();
+      if(!this.options_.nodes.buttonDelete)
+        this.options_.nodes.buttonDelete = $();
       
       /* Do not create bin container or process any bins if a bin HTML container
        * wasn't given OR the bins' data result array wasn't received. */
-      if(this.options.nodes.bins && bins) {
+      if(this.options_.nodes.bins && bins) {
         this.controllers_.bins = new ControllerBins(this);
 
         for(var id in bins) {
@@ -316,8 +316,8 @@ var SortingDesk = (function () {
       /* Set up listener for keyboard up events. */
       $('body').bind('keyup', function (evt) { self.onKeyUp_(evt); } );
       
-      new Droppable(this.options.nodes.buttonDelete, {
-        classHover: this.options.css.droppableHover,
+      new Droppable(this.options_.nodes.buttonDelete, {
+        classHover: this.options_.css.droppableHover,
         scopes: [ 'bin', 'text-item' ],
 
         drop: function (e, id, scope) {
@@ -378,12 +378,12 @@ var SortingDesk = (function () {
             /* Simulate the effect produced by a mouse click by assigning the
              * CSS class that contains identical styles to the pseudo-class
              * :hover, and removing it after the milliseconds specified in
-             * `options.delay.animateAssign'. */
-            bin.getNode().addClass(this.options.css.binAnimateAssign);
+             * `options_.delay.animateAssign'. */
+            bin.getNode().addClass(this.options_.css.binAnimateAssign);
             
             window.setTimeout(function () {
-              bin.getNode().removeClass(self.options.css.binAnimateAssign);
-            }, this.options.delays.animateAssign);
+              bin.getNode().removeClass(self.options_.css.binAnimateAssign);
+            }, this.options_.delays.animateAssign);
             
             this.invoke_("textDroppedInBin",
                          this.controllers_.items.current(),
@@ -398,13 +398,13 @@ var SortingDesk = (function () {
       
       /* Not alpha. */
       switch(evt.keyCode) {
-      case this.options.keyboard.listUp:
+      case this.options_.keyboard.listUp:
         this.list.selectOffset(-1);
         break;
-      case this.options.keyboard.listDown:
+      case this.options_.keyboard.listDown:
         this.list.selectOffset(1);
         break;
-      case this.options.keyboard.listDismiss:
+      case this.options_.keyboard.listDismiss:
         var self = this;
         
         this.onActivateDeleteButton_(function () {
@@ -483,14 +483,14 @@ var SortingDesk = (function () {
     },
     
     onActivateDeleteButton_: function (fn) {
-      this.options.nodes.buttonDelete.fadeIn(
-        this.options.delays.deleteButtonShow,
+      this.options_.nodes.buttonDelete.fadeIn(
+        this.options_.delays.deleteButtonShow,
         typeof fn == 'function' ? fn : null);
     },
 
     onDeactivateDeleteButton_: function () {
-      this.options.nodes.buttonDelete.fadeOut(
-        this.options.delays.deleteButtonHide);
+      this.options_.nodes.buttonDelete.fadeOut(
+        this.options_.delays.deleteButtonHide);
     }
   };
 
@@ -620,7 +620,7 @@ var SortingDesk = (function () {
     
     /* This method is here because it isn't clear at this time whether more
      * than one bin container will exist going forward. Presently that's not
-     * the case and hence it simply returns `options.nodes.bins'. */
+     * the case and hence it simply returns `options_.nodes.bins'. */
     getContainer: function ()
     { return this.owner.getOption("nodes").bins; }
   };
