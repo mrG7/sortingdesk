@@ -387,7 +387,7 @@ var SortingDesk = (function () {
         case 'bin':
           controller = self.owner_.controllers.bins;
           
-          var bin = controller.getBinById(decodeURIComponent(id));
+          var bin = controller.getById(decodeURIComponent(id));
 
           if(bin) {
             /* It doesn't matter if the API request succeeds or not for the
@@ -474,7 +474,7 @@ var SortingDesk = (function () {
     
     /* First process alpha key strokes. */
     if(evt.keyCode >= 65 && evt.keyCode <= 90) {
-      var bin = controllers.bins.getBinByShortcut(evt.keyCode);
+      var bin = controllers.bins.getByShortcut(evt.keyCode);
 
       if(controllers.bins.hover) {
         if(!bin)
@@ -625,7 +625,7 @@ var SortingDesk = (function () {
     bin.node.remove(); 
   };
 
-  ControllerBins.prototype.getBinByShortcut = function (keyCode)
+  ControllerBins.prototype.getByShortcut = function (keyCode)
   {
     var result = null;
 
@@ -641,7 +641,7 @@ var SortingDesk = (function () {
     return result;
   };
 
-  ControllerBins.prototype.getBinById = function (id)
+  ControllerBins.prototype.getById = function (id)
   {
     var result = null;
     
