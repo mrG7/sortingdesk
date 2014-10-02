@@ -1581,7 +1581,7 @@ var SortingDesk = (function () {
 
 
   /**
-   * Sorting Desk "class" constructor. */
+   * Module public interface. */
   return {
     Instance: Instance,
     Bin: Bin,
