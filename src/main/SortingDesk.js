@@ -224,17 +224,11 @@ var SortingDesk = (function () {
       return this.initialised_;
     },
 
-    getOption: function (key)
-    { return this.options_[key]; },
-
     getOptions: function (key)
     { return this.options_; },
 
     getControllers: function ()
     { return this.controllers_; },
-
-    getController: function (controller)
-    { return this.controllers_[controller]; },
 
     initialise_: function (bins) {
       var self = this;
@@ -554,7 +548,7 @@ var SortingDesk = (function () {
     /* Add bin node to the very top of the container if aren't any yet,
      * otherwise insert it after the last contained bin. */
     if(!this.bins.length)
-      this.owner.getOption("nodes").bins.prepend(node);
+      this.owner.getOptions().nodes.bins.prepend(node);
     else
       this.bins[this.bins.length - 1].getNode().after(node);
   };
@@ -622,7 +616,7 @@ var SortingDesk = (function () {
    * than one bin container will exist going forward. Presently that's not the
    * case and hence it simply returns `options_.nodes.bins'. */
   ControllerBins.prototype.getContainer = function ()
-  { return this.owner.getOption("nodes").bins; };
+  { return this.owner.getOptions().nodes.bins; };
 
   ControllerBins.prototype.onClick_ = function (bin)
   {
@@ -679,7 +673,7 @@ var SortingDesk = (function () {
         } );
 
       new Droppable(this.node, {
-        classHover: parentOwner.getOption("css").droppableHover,
+        classHover: parentOwner.getOptions().css.droppableHover,
         scopes: [ 'text-item' ],
         
         drop: function (e) {
@@ -733,7 +727,7 @@ var SortingDesk = (function () {
 
     /* overridable */ getNodeShortcut: function ()
     { return this.node.find(
-      '.'+ this.owner.getOwner().getOption("css").binShortcut); },
+      '.'+ this.owner.getOwner().getOptions().css.binShortcut); },
 
     getOwner: function ()
     { return this.owner; }
@@ -826,7 +820,7 @@ var SortingDesk = (function () {
   var ControllerItems = function (owner)
   {
     this.owner = owner;
-    this.container = owner.getOption("nodes").items;
+    this.container = owner.getOptions().nodes.items;
     this.items = [ ];
   };
 
@@ -837,13 +831,13 @@ var SortingDesk = (function () {
   
   ControllerItems.prototype.check = function ()
   {
-    if(this.items.length >= this.owner.getOption("visibleItems"))
+    if(this.items.length >= this.owner.getOptions().visibleItems)
       return;
     
     var self = this,
         promise = this.owner.invoke_(
           "moreTexts",
-          this.owner.getOption("visibleItems") );
+          this.owner.getOptions().visibleItems);
 
     /* Check that our request for more text items hasn't been refused. */
     if(!promise)
@@ -878,7 +872,7 @@ var SortingDesk = (function () {
     if(!this.owner.isInitialised())
       return;
     
-    var csel = this.owner.getOption("css").itemSelected;
+    var csel = this.owner.getOptions().css.itemSelected;
     
     if(!this.container.children().length)
       return;
@@ -939,7 +933,7 @@ var SortingDesk = (function () {
 
   ControllerItems.prototype.selectOffset = function (offset)
   {
-    var csel = this.owner.getOption("css").itemSelected,
+    var csel = this.owner.getOptions().css.itemSelected,
         index;
 
     if(!this.container.length)
@@ -962,7 +956,7 @@ var SortingDesk = (function () {
   ControllerItems.prototype.current = function()
   {
     var node = this.container.find(
-      '.' + this.owner.getOption("css").itemSelected);
+      '.' + this.owner.getOptions().css.itemSelected);
     
     if(!node.length)
       return null;
@@ -1003,10 +997,10 @@ var SortingDesk = (function () {
       item.getNode()
         .css('opacity', 0.6)  /* to prevent flicker */
         .animate( { opacity: 0 },
-                  self.owner.getOption("delays").textItemFade,
+                  self.owner.getOptions().delays.textItemFade,
                   function () {
                     $(this).slideUp(
-                      self.owner.getOption("delays").slideItemUp,
+                      self.owner.getOptions().delays.slideItemUp,
                       function () {
                         $(this).remove();
                         self.select();
@@ -1061,7 +1055,7 @@ var SortingDesk = (function () {
 
     initialise: function() {
       var self = this,
-          parentOwner = self.owner.getOwner();
+          parentOwner = this.owner.getOwner();
 
       this.node
         .attr( {
@@ -1075,12 +1069,12 @@ var SortingDesk = (function () {
       this.getNodeClose()
         .click(function () {
           parentOwner.invoke_("textDismissed", self.content);
-          parentOwner.remove(decodeURIComponent(self.content.node_id));
+          self.owner.remove(decodeURIComponent(self.content.node_id));
           return false;
         } );
 
       new Draggable(this.node, {
-        classDragging: parentOwner.getOption("css").itemDragging,
+        classDragging: parentOwner.getOptions().css.itemDragging,
         
         dragstart: function (e) {
           /* Firstly select item being dragged to ensure correct item position
@@ -1144,7 +1138,7 @@ var SortingDesk = (function () {
     this.node = this.render(TextItemGeneric.VIEW_HIGHLIGHTS);
     
     this.initialise();
-    owner.getOwner().getOption("nodes").items.append(this.node);
+    owner.getOwner().getOptions().nodes.items.append(this.node);
   };
 
   /* Constants */
@@ -1255,7 +1249,7 @@ var SortingDesk = (function () {
 
     var self = this,
         button = this.render()
-          .addClass(parentOwner.getOption("css").buttonAdd)
+          .addClass(parentOwner.getOptions().css.buttonAdd)
           .on( {
             click: function () {
               self.onAdd();
@@ -1263,7 +1257,7 @@ var SortingDesk = (function () {
           } );          
 
     new Droppable(button, {
-      classHover: parentOwner.getOption("css").droppableHover,
+      classHover: parentOwner.getOptions().css.droppableHover,
       scopes: [ 'text-item' ],
       
       drop: function (e, id) {
@@ -1326,8 +1320,7 @@ var SortingDesk = (function () {
         .focus()
         .blur(function () {
           if(!this.value) {
-            node.fadeOut(self.owner.getOwner().getOption("delays")
-                         .addBinShow,
+            node.fadeOut(self.owner.getOwner().getOptions().delays.addBinShow,
                          function () { node.remove(); } );
             return;
           }
