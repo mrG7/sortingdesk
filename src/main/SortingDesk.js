@@ -30,15 +30,6 @@ if(typeof define === "function" && define.amd) {
 var SortingDesk = (function () {
 
   /* ----------------------------------------------------------------------
-   *  Contants
-   * ---------------------------------------------------------------------- */
-  var TEXT_VIEW_HIGHLIGHTS = 1,
-      TEXT_VIEW_UNRESTRICTED = 2,
-      TEXT_CONDENSED_CHARS = 100,
-      TEXT_HIGHLIGHTS_CHARS = 150;
-
-  
-  /* ----------------------------------------------------------------------
    *  Default options
    *  Private attribute.
    * ----------------------------------------------------------------------
@@ -1140,20 +1131,26 @@ var SortingDesk = (function () {
 
     TextItem.call(this, owner, item);
 
-    this.node = this.render(TEXT_VIEW_HIGHLIGHTS);
+    this.node = this.render(TextItemGeneric.VIEW_HIGHLIGHTS);
     
     this.initialise();
     owner.getOwner().getOption("nodes").items.append(this.node);
   };
 
+  /* Constants */
+  TextItemGeneric.VIEW_HIGHLIGHTS = 1;
+  TextItemGeneric.VIEW_UNRESTRICTED = 2;
+  TextItemGeneric.CHARS_HIGHLIGHTS = 150;
+
+  /* Prototype */
   TextItemGeneric.prototype = Object.create(TextItem.prototype);
 
   TextItemGeneric.prototype.render = function (view)
   {
-    switch(view || TEXT_VIEW_HIGHLIGHTS) {
-    case TEXT_VIEW_UNRESTRICTED:
+    switch(view || TextItemGeneric.VIEW_HIGHLIGHTS) {
+    case TextItemGeneric.VIEW_UNRESTRICTED:
       return this.renderUnrestricted_();
-    case TEXT_VIEW_HIGHLIGHTS:
+    case TextItemGeneric.VIEW_HIGHLIGHTS:
     default:
       return this.renderHighlights_();
     }
@@ -1163,10 +1160,10 @@ var SortingDesk = (function () {
   {
     return this.renderHtml_(
       this.content.text,
-      TEXT_VIEW_UNRESTRICTED,
+      TextItemGeneric.VIEW_UNRESTRICTED,
       new TextItemSnippet(this.content.text).canTextBeReduced(
-        TEXT_HIGHLIGHTS_CHARS,
-        TEXT_HIGHLIGHTS_CHARS)
+        TextItemGeneric.CHARS_HIGHLIGHTS,
+        TextItemGeneric.CHARS_HIGHLIGHTS)
         ? true : null);
   };
 
@@ -1174,9 +1171,9 @@ var SortingDesk = (function () {
   {
     return this.renderHtml_(
       new TextItemSnippet(this.content.text).highlights(
-        TEXT_HIGHLIGHTS_CHARS,
-        TEXT_HIGHLIGHTS_CHARS),
-      TEXT_VIEW_HIGHLIGHTS,
+        TextItemGeneric.CHARS_HIGHLIGHTS,
+        TextItemGeneric.CHARS_HIGHLIGHTS),
+      TextItemGeneric.VIEW_HIGHLIGHTS,
       false);
   };
 
