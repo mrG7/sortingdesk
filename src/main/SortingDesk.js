@@ -863,12 +863,6 @@ var SortingDesk = (function () {
     this.initialise(this.render());
     this.owner_.add(this);
   };
-    
-  Bin.prototype.render = function () {
-    /* Wrap bin name inside a DIV. */
-    return $('<div class="sd-bin"><div class="sd-bin-shortcut"/>'
-             + this.bin_.name + '</div>');
-  };
 
   
   /**
@@ -881,6 +875,13 @@ var SortingDesk = (function () {
   };
 
   BinGeneric.prototype = Object.create(Bin.prototype);
+    
+  BinGeneric.prototype.render = function ()
+  {
+    /* Wrap bin name inside a DIV. */
+    return $('<div class="sd-bin"><div class="sd-bin-shortcut"/>'
+             + this.bin_.name + '</div>');
+  };
 
 
   /**
