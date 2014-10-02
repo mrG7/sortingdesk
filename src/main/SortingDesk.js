@@ -442,7 +442,7 @@ var SortingDesk = (function () {
              * server-side, in which case it should be deleted from the UI
              * too. So, always delete, BUT, if the request fails show the user
              * a notification; for what purpose, I don't know. */
-            controller.remove(bin);
+            controller.removeAt(controller.indexOf(bin));
 
             self.owner.invoke_('removeBin', bin.getId())
               .fail(function (result) {
@@ -558,22 +558,23 @@ var SortingDesk = (function () {
     else
       this.bins[this.bins.length - 1].getNode().after(node);
   };
-    
-  ControllerBins.prototype.remove = function (bin)
+
+  ControllerBins.prototype.indexOf = function (bin)
   {
-    var self = this,
-        node = bin.getNode();
+    return this.bins.indexOf(bin);
+  };
+  
+  ControllerBins.prototype.removeAt = function (index)
+  {
+    var bin;
 
-    this.bins.some(function (ib, ndx) {
-      if(ib == bin) {
-        self.bins.splice(ndx, 1);
-        return true;
-      }
+    if(index < 0 || index >= this.bins.length)
+      throw "Invalid bin index";
 
-      return false;
-    } );
+    bin = this.bins[index];
+    this.bins.splice(index, 1);
     
-    node.remove(); 
+    bin.getNode().remove(); 
   };
 
   ControllerBins.prototype.getBinByShortcut = function (keyCode)
