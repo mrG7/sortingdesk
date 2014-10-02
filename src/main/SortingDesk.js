@@ -725,7 +725,7 @@ var SortingDesk = (function () {
 
         parentOwner.invoke_("textDroppedInBin", item, self);
         parentOwner.controllers.items.remove(
-          decodeURIComponent(item.getContent().node_id));
+          decodeURIComponent(item.content.node_id));
       }
     } );
 
@@ -929,7 +929,7 @@ var SortingDesk = (function () {
 
       variant = this.node_.children().eq(variant);
     } else if(variant instanceof TextItem)
-      variant = variant.getNode();
+      variant = variant.node;
 
     this.node_.find('.' + csel).removeClass(csel);
     variant.addClass(csel);
@@ -1011,7 +1011,7 @@ var SortingDesk = (function () {
         result = false;
     
     $.each(this.items_, function (i, item) {
-      if(item.getContent().node_id != id)
+      if(item.content.node_id != id)
         return true;
       
       if(item.isSelected()) {
@@ -1023,7 +1023,7 @@ var SortingDesk = (function () {
           console.log("No more items available");
       }
       
-      item.getNode()
+      item.node
         .css('opacity', 0.6)  /* to prevent flicker */
         .animate( { opacity: 0 },
                   self.owner_.options.delays.textItemFade,
@@ -1052,7 +1052,7 @@ var SortingDesk = (function () {
     var result = null;
     
     this.items_.some(function (item) {
-      if(item.getContent().node_id == id) {
+      if(item.content.node_id == id) {
         result = item;
         return true;
       }
@@ -1072,8 +1072,12 @@ var SortingDesk = (function () {
     /* Invoke super constructor. */
     Drawable.call(this, owner);
 
-    this.content = item;
-    this.node = null;
+    this.content_ = item;
+    this.node_ = null;
+
+    /* Define getters. */
+    this.__defineGetter__("content", function () { return this.content_; } );
+    this.__defineGetter__("node", function () { return this.node_; } );
   };
 
   TextItem.prototype = Object.create(Drawable.prototype);
@@ -1083,9 +1087,9 @@ var SortingDesk = (function () {
     var self = this,
         parentOwner = this.owner_.owner;
 
-    this.node
+    this.node_
       .attr( {
-        id: encodeURIComponent(this.content.node_id),
+        id: encodeURIComponent(this.content_.node_id),
         "data-scope": "text-item"
       } )
       .click(function () {
@@ -1094,12 +1098,12 @@ var SortingDesk = (function () {
 
     this.getNodeClose()
       .click(function () {
-        parentOwner.invoke_("textDismissed", self.content);
-        self.owner_.remove(decodeURIComponent(self.content.node_id));
+        parentOwner.invoke_("textDismissed", self.content_);
+        self.owner_.remove(decodeURIComponent(self.content_.node_id));
         return false;
       } );
 
-    new Draggable(this.node, {
+    new Draggable(this.node_, {
       classDragging: parentOwner.options.css.itemDragging,
       
       dragstart: function (e) {
@@ -1120,8 +1124,8 @@ var SortingDesk = (function () {
 
   TextItem.prototype.replaceNode = function (newNode)
   {
-      this.node.replaceWith(newNode);
-      this.node = newNode;
+      this.node_.replaceWith(newNode);
+      this.node_ = newNode;
       this.initialise();
       this.owner_.select(this);
   };
@@ -1129,23 +1133,17 @@ var SortingDesk = (function () {
   /* abstract */ TextItem.prototype.render = function ()
   { throw "Abstract method must be implemented"; };
 
-  TextItem.prototype.getContent = function ()
-  { return this.content; };
-
-  TextItem.prototype.getNode = function ()
-  { return this.node; };
-
   /* overridable */ TextItem.prototype.getNodeClose = function ()
-  { return this.node.find('.sd-text-item-close'); };
+  { return this.node_.find('.sd-text-item-close'); };
 
   /* overridable */ TextItem.prototype.getNodeLess = function ()
-  { return this.node.find('.sd-less'); };
+  { return this.node_.find('.sd-less'); };
 
   /* overridable */ TextItem.prototype.getNodeMore = function ()
-  { return this.node.find('.sd-more'); };
+  { return this.node_.find('.sd-more'); };
 
   /* overridable */ TextItem.prototype.isSelected = function ()
-  { return this.node.hasClass('sd-selected'); };
+  { return this.node_.hasClass('sd-selected'); };
   
   
   /**
@@ -1161,10 +1159,10 @@ var SortingDesk = (function () {
 
     TextItem.call(this, owner, item);
 
-    this.node = this.render(TextItemGeneric.VIEW_HIGHLIGHTS);
+    this.node_ = this.render(TextItemGeneric.VIEW_HIGHLIGHTS);
     
     this.initialise();
-    owner.owner.options.nodes.items.append(this.node);
+    owner.owner.options.nodes.items.append(this.node_);
   };
 
   /* Constants */
@@ -1208,9 +1206,9 @@ var SortingDesk = (function () {
   TextItemGeneric.prototype.renderUnrestricted_ = function ()
   {
     return this.renderHtml_(
-      this.content.text,
+      this.content_.text,
       TextItemGeneric.VIEW_UNRESTRICTED,
-      new TextItemSnippet(this.content.text).canTextBeReduced(
+      new TextItemSnippet(this.content_.text).canTextBeReduced(
         TextItemGeneric.CHARS_HIGHLIGHTS,
         TextItemGeneric.CHARS_HIGHLIGHTS)
         ? true : null);
@@ -1219,7 +1217,7 @@ var SortingDesk = (function () {
   TextItemGeneric.prototype.renderHighlights_ = function ()
   {
     return this.renderHtml_(
-      new TextItemSnippet(this.content.text).highlights(
+      new TextItemSnippet(this.content_.text).highlights(
         TextItemGeneric.CHARS_HIGHLIGHTS,
         TextItemGeneric.CHARS_HIGHLIGHTS),
       TextItemGeneric.VIEW_HIGHLIGHTS,
@@ -1230,14 +1228,14 @@ var SortingDesk = (function () {
   {
     var node = $('<div class="sd-text-item view-' + view + '"/>'),
         content = $('<div class="sd-text-item-content"/>'),
-        anchor = this.content.name;
+        anchor = this.content_.name;
 
     /* Append title if existent. */
-    if(this.content.title)
-      anchor += '&ndash; ' + this.content.title;
+    if(this.content_.title)
+      anchor += '&ndash; ' + this.content_.title;
 
     node.append('<a class="sd-text-item-title" target="_blank" '
-                + 'href="' + this.content.url + '">'
+                + 'href="' + this.content_.url + '">'
                 + anchor + '</a>');
 
     node.append('<a class="sd-text-item-close" href="#">x</a>');
@@ -1334,7 +1332,7 @@ var SortingDesk = (function () {
     }
 
     this.fnAdd(id,
-               new TextItemSnippet(item.getContent().text)
+               new TextItemSnippet(item.content.text)
                .highlights(options.binCharsLeft, options.binCharsRight))
       .always(function () { node.remove(); } );
   };
