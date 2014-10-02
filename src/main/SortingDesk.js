@@ -102,7 +102,7 @@ var SortingDesk = (function () {
      * be the `nodes.items' element. */
     if(!opts)
       throw "No options given: some are mandatory";
-    else if(opts instanceof jQuery) {
+    else if(opts instanceof $) {
       opts = {
         nodes: {
           items: opts
