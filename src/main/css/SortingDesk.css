@@ -113,7 +113,7 @@
 }
 
 /* Text item */
-.text-item {
+.sd-text-item {
   position: relative;
   margin: 15px 5px;
   padding: 10px;
@@ -126,58 +126,58 @@
   cursor: default;
 }
 
-.text-item B:not(:first-child),
-.text-item STRONG:not(:first-child) {
+.sd-text-item B:not(:first-child),
+.sd-text-item STRONG:not(:first-child) {
   padding-left: 10px;
 }
 
-.text-item-content * {
+.sd-text-item-content * {
   display: inline-block;
 }
 
-.text-item:hover {
+.sd-text-item:hover {
   background-color: #F8F8DD;
   color: #44573C;
 }
 
-.text-item:hover .text-item-title {
+.sd-text-item:hover .sd-text-item-title {
   background-color: #F8F8DD;
 }
 
-.text-item:active {
+.sd-text-item:active {
   background-color: #FFF5F8;
   color: #7F8368;
 }
 
-.text-item:active .text-item-title {
+.sd-text-item:active .sd-text-item-title {
   background-color: #FFF5F8;
 }
 
-.text-item.sd-selected {
+.sd-text-item.sd-selected {
   border: 2px solid #8EB4DA;
 }
 
-.text-item:selected .text-item-title {
+.sd-text-item:selected .sd-text-item-title {
   background-color: #FFF5F8;
 }
 
-.text-item.sd-selected:hover {
+.sd-text-item.sd-selected:hover {
   background-color: inherit;
 }
 
-.more, .less {
+.sd-more, .sd-less {
   float: right;
   font-size: 85%;
   padding-top: 3px;
   color: #999;
 }
 
-.more:hover, .less:hover {
+.sd-more:hover, .sd-less:hover {
   color: #123;
   cursor: pointer;
 }
 
-A.text-item-title {
+A.sd-text-item-title {
   position: absolute;
   top: -12px;
   background-color: white;
@@ -188,21 +188,21 @@ A.text-item-title {
   border-radius: 6px;
 }
 
-A.text-item-title:hover {
+A.sd-text-item-title:hover {
   color: #4A8BCC;
 }
 
-.text-item:hover .text-item-close,
-.text-item.sd-selected .text-item-close {
+.sd-text-item:hover .sd-text-item-close,
+.sd-text-item.sd-selected .sd-text-item-close {
   display: block;
 }
 
-.text-item.sd-dragging:hover .text-item-close,
-.text-item.sd-selected.sd-dragging .text-item-close {
+.sd-text-item.sd-dragging:hover .sd-text-item-close,
+.sd-text-item.sd-selected.sd-dragging .sd-text-item-close {
   display: none;
 }
 
-.text-item-close {
+.sd-text-item-close {
   position: absolute;
   top: -8px;
   right: -6px;
@@ -217,16 +217,16 @@ A.text-item-title:hover {
   box-shadow: 1px 1px 1px 0 rgba(50, 50, 50, 0.75);
 }
 
-.text-item-close:hover {
+.sd-text-item-close:hover {
   color: black;
   background-color: #ddd;
 }
 
-.text-item-close:active {
+.sd-text-item-close:active {
   background-color: #eee;
 }
 
-.text-item.sd-dragging {
+.sd-text-item.sd-dragging {
   border-color: #eee !important;
   color: silver !important;
   background-color: inherit !important;
