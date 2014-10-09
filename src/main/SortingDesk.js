@@ -226,6 +226,9 @@ var SortingDesk = (function () {
     get initialised ()
     { return this.initialised_; },
 
+    get resetter ()
+    { return !!this.resetter_; },
+
     get options ()
     { return this.options_; },
 
