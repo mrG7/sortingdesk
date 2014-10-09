@@ -246,6 +246,44 @@ var SortingDesk = (function () {
     {
       var self = this;
 
+      /* Ensure optional `constructors' object, employing the factory method
+       * pattern, is defined. */
+      if(!this.options_.constructors)
+        this.options_.constructors = { };
+
+      /* Assign default factory method, if one not given: `ControllerBins' */
+      if(!(ControllerBins in this.options_.constructors)) {
+        this.options_.constructors.createControllerBins =
+          function (instance) {
+            return new ControllerBins(instance);
+          };
+      }
+
+      /* Assign default factory method, if one not given: `Bin' */
+      if(!(Bin in this.options_.constructors)) {
+        this.options_.constructors.createBin =
+          function(controller, id, bin, parent) {
+            return new BinDefault(controller, id, bin, parent);
+          };
+      }
+
+      /* Assign default factory method, if one not given: `TextItem' */
+      if(!(TextItem in this.options_.constructors)) {
+        this.options_.constructors.createTextItem =
+          function (controller, item) {
+            return new TextItemDefault(controller, item);
+          };
+      }
+
+      /* Assign default factory method, if one not given: `BinAddButton' */
+      if(!(BinAddButton in this.options_.constructors)) {
+        this.options_.constructors.createBinAddButton =
+          function (controller, fnRender, fnAdd) {
+            return new BinAddButton(controller, fnRender, fnAdd);
+        };
+      }
+
+      /* Begin instantiating and initialising controllers. */
       (this.callbacks_ = new ControllerCallbacks(this, this.callbacks_))
         .initialise();
       
@@ -261,7 +299,7 @@ var SortingDesk = (function () {
       /* Do not create bin container or process any bins if a bin HTML container
        * wasn't given OR the bins' data result array wasn't received. */
       if(this.options_.nodes.bins && bins) {
-        (this.bins_ = new ControllerBins(this))
+        (this.bins_ = this.instantiate('ControllerBins', this))
           .initialise();
 
         for(var id in bins) {
@@ -272,7 +310,8 @@ var SortingDesk = (function () {
             continue;
           }
           
-          new BinDefault(this.bins_, id, bin).add();
+          this.instantiate('Bin', this.bins_, id, bin)
+            .add();
         }
       }
       
@@ -285,6 +324,18 @@ var SortingDesk = (function () {
       this.initialised_ = true;
       console.log("Sorting Desk UI initialised");
     },
+
+    instantiate: function ( /* class, ... */ )
+    {
+      if(arguments.length < 1)
+        throw "Class name required";
+      else if(!(('create' + arguments[0]) in this.options_.constructors))
+        throw "Class non existent: " + arguments[0];
+
+      /* Invoke factory method to instantiate class. */
+      return this.options_.constructors['create' + arguments[0]]
+        .apply(null, [].slice.call(arguments, 1));
+    }
   };
 
 
@@ -774,10 +825,15 @@ var SortingDesk = (function () {
   {
     var self = this;
 
-    new BinAddButton(
+    this.owner_.instantiate(
+      'BinAddButton',
       this,
       function (input) {
-        return new BinDefault(null, null, { name: input } )
+        return self.owner_.instantiate('Bin',
+                                       null,
+                                       null,
+                                       { name: input },
+                                       null)
           .render();
       },
       function (id, text) {
@@ -1056,7 +1112,7 @@ var SortingDesk = (function () {
 
       items.forEach(function (item, index) {
         window.setTimeout( function () {
-          self.items_.push(new TextItemDefault(self, item));
+          self.items_.push(self.owner_.instantiate('TextItem', self, item));
         }, Math.pow(index, 2) * 1.1);
       } );
 
