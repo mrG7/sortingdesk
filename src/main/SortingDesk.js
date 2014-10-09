@@ -139,6 +139,9 @@ var SortingDesk = (function () {
      * wasn't given OR content ids (`options_.nodes.contentIds') were not
      * specified. */
     if(this.options_.nodes.bins && this.options_.contentIds) {
+      if(!this.callbacks_.getBinData)
+        throw "Mandatory `getBinData' callback missing";
+      
       var promise = this.callbacks_.getBinData(this.options_.contentIds),
           self = this;
 
