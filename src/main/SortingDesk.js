@@ -132,7 +132,7 @@ var SortingDesk = (function () {
     
     console.log("Initialising Sorting Desk UI");
     
-    this.options_ = $.extend(true, defaults_, opts);
+    this.options_ = $.extend(true, $.extend(true, {}, defaults_), opts);
     this.callbacks_ = cbs;
     
     /* Do not request bin data if a bins HTML container (`options_.nodes.bins')
