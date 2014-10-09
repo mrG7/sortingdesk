@@ -1732,6 +1732,7 @@ var SortingDesk = (function () {
    * Module public interface. */
   return {
     Instance: Instance,
+    ControllerBins: ControllerBins,
     Bin: Bin,
     TextItem: TextItem,
     BinAddButton: BinAddButton,
