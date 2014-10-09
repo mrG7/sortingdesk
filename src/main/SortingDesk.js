@@ -1105,7 +1105,6 @@ var SortingDesk = (function () {
       window.setTimeout( function () {
         self.owner_.requests.end('check-items');
       }, Math.pow(items.length - 1, 2) * 1.1 + 10);
-
     } );
   };
 
