@@ -884,12 +884,12 @@ var SortingDesk = (function () {
 
   ControllerBins.prototype.onMouseLeave_ = function ()
   { this.hover_ = null; };
-  
+
 
   /**
    * @class
    * */
-  var BinBase = function (owner, id, bin)
+  var Bin = function (owner, id, bin, parent)
   {
     /* Invoke super constructor. */
     Drawable.call(this, owner);
@@ -898,16 +898,22 @@ var SortingDesk = (function () {
     this.bin_ = bin;
     this.node_ = this.shortcut_ = null;
 
+    this.children_ = [ ];
+    this.parent_ = null;
+
     /* Define getters. */
     this.__defineGetter__("bin", function () { return this.bin_; } );
     this.__defineGetter__("id", function () { return this.id_; } );
     this.__defineGetter__("shortcut", function () { return this.shortcut_; } );
     this.__defineGetter__("node", function () { return this.node_; } );
+
+    this.__defineGetter__("parent", function () { return this.parent_; } );
+    this.__defineGetter__("children", function () { return this.children_; } );
   };
 
-  BinBase.prototype = Object.create(Drawable.prototype);
-  
-  BinBase.prototype.initialise = function ()
+  Bin.prototype = Object.create(Drawable.prototype);
+
+  Bin.prototype.initialise = function ()
   {
     var self = this,
         parentOwner = self.owner_.owner;
@@ -957,43 +963,21 @@ var SortingDesk = (function () {
     }, 0);
   };
 
-  /* abstract */ BinBase.prototype.add = function ()
-  { throw "Abstract method must be implemented"; };
+  Bin.prototype.add = function ()
+  {
+    this.initialise(this.render());
+    this.owner_.add(this);
+  };
     
-  BinBase.prototype.setShortcut = function (keyCode)
+  Bin.prototype.setShortcut = function (keyCode)
   {
     this.shortcut_ = keyCode;
     this.getNodeShortcut().html(String.fromCharCode(keyCode).toLowerCase());
   };
 
-  /* overridable */ BinBase.prototype.getNodeShortcut = function ()
+  /* overridable */ Bin.prototype.getNodeShortcut = function ()
   {
-    return this.node_.find(
-      '.'+ this.owner_.owner.options.css.binShortcut);
-  };
-
-
-  /**
-   * @class
-   * */
-  var Bin = function (owner, id, bin, parent)
-  {
-    /* Invoke super constructor. */
-    BinBase.call(this, owner, id, bin);
-
-    this.children_ = [ ];
-    this.parent_ = null;
-
-    this.__defineGetter__("parent", function () { return this.parent_; } );
-    this.__defineGetter__("children", function () { return this.children_; } );
-  };
-
-  Bin.prototype = Object.create(BinBase.prototype);
-
-  Bin.prototype.add = function ()
-  {
-    this.initialise(this.render());
-    this.owner_.add(this);
+    return this.node_.find('.' + this.owner_.owner.options.css.binShortcut);
   };
 
   
