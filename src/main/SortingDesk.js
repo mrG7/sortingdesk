@@ -210,7 +210,7 @@ var SortingDesk = (function () {
     get initialised ()
     { return this.initialised_; },
 
-    get resetter ()
+    get resetting ()
     { return !!this.resetter_; },
 
     get options ()
