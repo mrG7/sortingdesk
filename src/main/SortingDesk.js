@@ -223,7 +223,7 @@ var SortingDesk = (function () {
      * @returns {Boolean}   Returns true if Sorting Desk has been successful
      *                      initialised, false otherwise.
      * */
-    get isInitialised ()
+    get initialised ()
     { return this.initialised_; },
 
     get options ()
@@ -978,7 +978,7 @@ var SortingDesk = (function () {
     /* Fail silently if not initialised anymore. This might happen if, for
      * example, the `reset' method was invoked but the component is still
      * loading text items. */
-    if(!this.owner_.isInitialised)
+    if(!this.owner_.initialised)
       return;
     
     var csel = this.owner_.options.css.itemSelected;
@@ -1234,7 +1234,7 @@ var SortingDesk = (function () {
     /* Fail silently if not initialised anymore. This might happen if, for
      * example, the `reset' method was invoked but the component is still
      * loading text items. */
-    if(!owner.owner.isInitialised)
+    if(!owner.owner.initialised)
       return;
 
     TextItem.call(this, owner, item);
