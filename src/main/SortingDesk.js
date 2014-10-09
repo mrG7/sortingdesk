@@ -976,13 +976,15 @@ var SortingDesk = (function () {
   /**
    * @class
    * */
-  var Bin = function (owner, id, bin)
+  var Bin = function (owner, id, bin, parent)
   {
     /* Invoke super constructor. */
     BinBase.call(this, owner, id, bin);
 
     this.children_ = [ ];
+    this.parent_ = null;
 
+    this.__defineGetter__("parent", function () { return this.parent_; } );
     this.__defineGetter__("children", function () { return this.children_; } );
   };
 
@@ -1008,48 +1010,14 @@ var SortingDesk = (function () {
     
   BinDefault.prototype.render = function ()
   {
-    /* Wrap bin name inside a DIV. */
-    return $('<div class="sd-bin"><div class="sd-bin-shortcut"/>'
-             + this.bin_.name + '</div>');
+    if(!this.parent_) {
+      return $('<div class="sd-bin"><div class="sd-bin-shortcut"/>'
+               + this.bin_.name + '</div>');
+    } else {
+      return $('<div class="sd-bin-sub"><div class="sd-bin-shortcut"/>'
+               + this.bin_.name + '</div>');
+    }
   };
-
-
-  /**
-   * @class
-   * */
-  var SubBin = function (owner, id, bin, parent)
-  {
-    /* Invoke super constructor. */
-    BinBase.call(this, owner, id, bin);
-
-    this.parent_ = parent;
-
-    this.__defineGetter__("parent", function () { return this.parent_; } );
-  };
-
-  SubBin.prototype = Object.create(BinBase.prototype);
-
-  SubBin.prototype.render = function ()
-  {
-    /* Wrap bin statement_text inside a DIV. */
-    return $('<div class="sd-bin-sub"><div class="sd-bin-shortcut"/>'
-             + this.bin_.name + '</div>');
-  };
-
-
-  /**
-   * @class
-   * */
-  var SubBinDefault = function (owner, id, bin, parent)
-  {
-    /* Invoke super constructor. */
-    Bin.call(this, owner, id, bin, parent);
-    
-    this.initialise(this.render());
-    parent.add(this);
-  };
-
-  SubBinDefault.prototype = Object.create(SubBin.prototype);
 
 
   /**
