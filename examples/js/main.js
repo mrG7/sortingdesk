@@ -94,7 +94,8 @@ var Examples = (function () {
 
 
   /* Initialise "module" */
-  require( [ "examples/js/examples/minimal",
+  require( [ "examples/js/examples/default",
+             "examples/js/examples/minimal",
              "examples/js/examples/bins-suppressed" ], function () {
     console.log("Initialising examples interface");
     initialise();
