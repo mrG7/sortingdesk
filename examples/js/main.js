@@ -21,7 +21,7 @@ var Examples = (function () {
       ],
       instance_ = null;
 
-  var instance = function () { return instance_; };
+  var instantiated = function () { return !!instance_; };
   
   var initialise = function () {
     var loading = $('#loading'),
@@ -106,8 +106,7 @@ var Examples = (function () {
   
   /* Return public interface. */
   return {
-    instance: instance,
-    register: register,
-    sd: function () { return instance_; }
+    instantiated: instantiated,
+    register: register
   };
 })();
