@@ -210,7 +210,7 @@ var SortingDesk = (function () {
           self.resetter_ = false;
         } );
 
-      return resetter.reset();
+      return this.resetter_;
     },
 
     /**
