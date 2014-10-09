@@ -1,8 +1,12 @@
-* To do items [80%]
-** TODO Rename `isInitialised' to simply 'initialised`
-** TODO Rework reset sequence
+* To do items [85%]
+** TODO Create a list of interesting events to advertise via an Events controller
+** TODO Delete extraneous examples
+** TODO =TextItemGeneric= uses hard-coded CSS classes
+** TODO Conduct analysis on factory method pattern vs passing classes at init time [50%]
+*** DONE Implement chosen method
+- State "DONE"       from "TODO"       [2014-10-09 Thu 18:27]
+*** TODO Make it so each class owns its options
 ** TODO Implement keyboard auto-repeat with configurable frequency
-** TODO End `render' prefixed callbacks and expect constructors instead
 ** TODO [#B] Prefix text-items' and bins' node ids
 - State "TODO"       from "WAIT"       [2014-09-07 Sun 08:16]
 - State "WAIT"       from "TODO"       [2014-09-05 Fri 10:41] \\
@@ -15,10 +19,32 @@
 Must clearly communicate to the user that there aren't any more text items available.
 ** TODO Allow keyboard shortcuts to be assigned programmatically
 ** TODO Resolve all annotated TODO items
-** IN-PROGRESS All bins are born equal
+** WAIT Add support for sub-bins
+- State "WAIT"       from "TODO"       [2014-10-09 Thu 10:40] \\
+  It is currently unclear what the interface should be like.
+** DONE All bins are born equal
+- State "DONE"       from "IN-PROGRESS" [2014-10-09 Thu 17:49]
 - State "IN-PROGRESS" from "TODO"       [2014-10-01 Wed 10:36]
 End bin strata.
-** IN-PROGRESS Simplify initialisation of Sorting Desk
+** DONE Revamp examples
+- State "DONE"       from "TODO"       [2014-10-09 Thu 17:48]
+** DONE Rework reset sequence
+- State "DONE"       from "IN-PROGRESS" [2014-10-09 Thu 10:13]
+- State "IN-PROGRESS" from "TODO"       [2014-10-09 Thu 08:11]
+*** DONE Finish it
+- State "DONE"       from "TODO"       [2014-10-09 Thu 09:02]
+** DONE Merge =Bin= and =SubBin= classes
+- State "DONE"       from "TODO"       [2014-10-09 Thu 10:12]
+*** DONE Merge =BinBase= and =Bin= classes
+- State "DONE"       from "TODO"       [2014-10-09 Thu 10:12]
+** DONE Rename =Generic= suffixed classes to =Default=
+- State "DONE"       from "TODO"       [2014-10-09 Thu 10:02]
+** DONE Rename `isInitialised' to simply 'initialised`
+- State "DONE"       from "TODO"       [2014-10-09 Thu 08:11]
+** DONE End `render' prefixed callbacks and expect constructors instead
+- State "DONE"       from "TODO"       [2014-10-09 Thu 08:12]
+** DONE Simplify initialisation of Sorting Desk
+- State "DONE"       from "IN-PROGRESS" [2014-10-09 Thu 08:12]
 - State "IN-PROGRESS" from "TODO"       [2014-09-30 Tue 18:54]
 Allow the following forms:
 
@@ -26,15 +52,10 @@ Allow the following forms:
 2) new SortingDesk( $("#items"), callbacks );
 
 Require `moreTexts' callback to be present. Require `getBinData' callback if `contentIds' given.
-** IN-PROGRESS [#A] Write jasmine (unit) tests
+** DONE [#A] Write jasmine (unit) tests
+- State "DONE"       from "IN-PROGRESS" [2014-10-09 Thu 08:12]
 - State "IN-PROGRESS" from "TODO"       [2014-09-12 Fri 09:54]
 Similar to the tests found on: =git@devhub.diffeo.com:streamboard.git=
-** WAIT [#C] Implement user notifications
-- State "WAIT"       from "TODO"       [2014-09-05 Fri 11:21] \\
-  Need further information.
-A mechanism for displaying notifications to the user is needed for the purpose
-of providing feedback, in particular in the cases when a user action is invalid
-and results in an error.
 ** DONE Create `Owned' class
 - State "DONE"       from "TODO"       [2014-10-02 Thu 15:42]
 ** DONE Create `Drawable' class
@@ -168,6 +189,14 @@ The text to use as anchor text in each item should be the longest string in the 
 - State "DONE"       from "TODO"       [2014-08-20 Wed 11:54]
 
 Add an input box in the UI that users can edit.
+** CANCELED [#C] Implement user notifications
+- State "CANCELED"   from "WAIT"       [2014-10-09 Thu 10:43] \\
+  This will have to be implemented by the client via notification of events. Not Sorting Desk's concern.
+- State "WAIT"       from "TODO"       [2014-09-05 Fri 11:21] \\
+  Need further information.
+A mechanism for displaying notifications to the user is needed for the purpose
+of providing feedback, in particular in the cases when a user action is invalid
+and results in an error.
 ** CANCELED [#B] Do not allow duplicate bins
 - State "CANCELED"   from "WAIT"       [2014-09-04 Thu 13:02] \\
   Most likely can't be done reliably.
@@ -196,7 +225,7 @@ standalone *editable* text file that doesn't pollute the code and the repository
 ** TODO When items' DIV is selected, scrolling with keyboard both selects next item as well as scroll the DIV contents
 Scrolling on the items' DIV container must be suppressed.
 
-Note that this might not be possible.
+Note that this might not be possible if the browser does not allow control over the HTML element's focus.
 ** DONE `buttonDelete' not hidden after a bin is deleted
 - State "DONE"       from "TODO"       [2014-10-01 Wed 10:37]
 ** DONE Fix failing tests
