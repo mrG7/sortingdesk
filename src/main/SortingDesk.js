@@ -175,19 +175,17 @@ var SortingDesk = (function () {
      *                      false otherwise.*/
     reset: function ()
     {
-      var self = this,
-          resetter = new InstanceResetter(this);
+      var self = this;
 
-      /* If a reset is already underway, simply return the promise from the new
-       * `InstanceResetter' instance created above for it will be refused.
-       * Otherwise, throw an exception if Sorting Desk has just been
-       * instantiated and is currently initialising itself. */
+      /* + If a reset is already underway, simply return its instance.
+       * + Throw an exception if Sorting Desk has just been instantiated and is
+       * currently initialising itself. */
       if(this.resetter_)
-        return resetter.reset();
+        return this.resetter_;
       else if(this.initialised_ === null)
         throw "Instance still initialising";
       
-      this.resetter_ = resetter.reset(
+      this.resetter_ = new InstanceResetter(this).reset(
         [ this.requests_,
           this.keyboard_,
           this.dismiss_,
