@@ -1,3 +1,28 @@
+2014-10-09  Miguel Guedes  <miguel@miguelguedes.org>
+
+	* src/main/SortingDesk.js:
+
+	Implemented "constructors", employing the factory method pattern,
+	for instantiation of public classes.
+
+	Finished generic mechanism responsible for resetting the Sorting
+	Desk instance reliably.
+
+	Merged classes `BinBase', `Bin', and `SubBin'. There is only one
+	class now, `Bin'.
+
+	Renamed old `Generic'-suffixed classes to `Default' suffix.
+
+	Several minor improvements to code.
+
+	* examples:
+
+	Created a mechanism for creating examples as modules. Examples can
+	now be crafted easily as a module. It is also easy to switch
+	between examples by selecting desired example from a select box.
+
+	Deleted extraneous examples.
+
 2014-10-02  Miguel Guedes  <miguel@miguelguedes.org>
 
 	* src/main/SortingDesk.js:
