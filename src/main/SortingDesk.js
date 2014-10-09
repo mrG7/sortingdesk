@@ -1036,7 +1036,7 @@ var SortingDesk = (function () {
           "moreTexts",
           this.owner_.options.visibleItems);
 
-    /* Check that our request for more text items hasn't been refused. */
+    /* Check that our request for more text items hasn't been denied. */
     if(!promise)
       return;
     
