@@ -19,47 +19,21 @@
       "SortingDesk": "src/main/SortingDesk",
       "API-SortingDesk": "src/api/api-sorting_desk-mock",
       "API-Data": "src/api/data/al_ahram.json?",
-      "jQuery": "lib/jquery-2.1.1.min"
+      "jQuery": "lib/jquery-2.1.1.min",
+      "examples-main": "examples/js/main"
     }
   } );
-                
-  require( [ "SortingDesk" ], function () {
-    var loading = $("#loading"),
-        contentIds = [
-          { node_id: '#100', features: { NAME: { "Irrelevant": 0 } } },
-          { node_id: '^1$0#1', features: { NAME: { "Rubbish": 0 } } },
-          { node_id: '1_0%%^&#2', features: { NAME: { "Keep": 0 } } }
-        ],
-        nitems = $("#items"),
-        nbins = $("#bins"),
-        height = $(window).height() - nitems.offset().top - 45,
-        requests = 0;
 
-    $(".wrapper").fadeIn();
-    nitems.height(height);
-    nbins.height(height);
+  require( [ "examples-main" ] );
 
-    new SortingDesk.Instance( {
-      nodes: {
-        items: nitems,
-        bins: nbins,
-        buttonDismiss: $("#button-dismiss")
-      },
-      contentIds: Api.initialise(g_descriptor, contentIds),
-      visibleItems: 15
-    }, $.extend(Api, {
-      onRequestStart: function () { if(!requests++) loading.stop().fadeIn(); },
-      onRequestStop: function () { if(!--requests) loading.stop().fadeOut(); }
-    } ) );
-    
-    g_descriptor = null;
-    
-  });
-
-    </script>
+  </script>
 </head>
-<body>
+  <body>
   <div id="wrapper-outer">
+    <div id="controls">
+      <label for="examples">Select e<u>x</u>ample:</label>
+      <select id="examples" accesskey="x"></select>
+    </div>
     <div id="wrapper-bins" class="wrapper">
       <div id="bins">
       </div>
