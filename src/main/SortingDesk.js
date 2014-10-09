@@ -170,50 +170,34 @@ var SortingDesk = (function () {
      *                      false otherwise.*/
     reset: function ()
     {
-      var deferred = $.Deferred();
+      var self = this,
+          resetter = new InstanceResetter(this);
+
+      if(this.resetter_)
+        return resetter.reset();
       
-      if(!this.options_ || this.resetting_) {
-        window.setTimeout(function () {
-          deferred.reject();
+      this.resetter_ = resetter.reset(
+        [ this.requests_,
+          this.keyboard_,
+          this.dismiss_,
+          [ this.bins_,
+            this.items_,
+            [
+              this.callbacks_
+            ]
+          ]
+        ] )
+        .done(function () {
+          self.options_ = self.callbacks_ = self.bins_ = self.items_ = null;
+          self.requests_ = self.dismiss_ = self.keyboard_ = null;
+          
+          self.initialised_ = false;
+          
+          console.log("Sorting Desk UI reset");
+        } )
+        .always(function () {
+          self.resetter_ = false;
         } );
-      } else {
-        var self = this;
-        
-        this.resetting_ = true;
-        
-        /* Detach `keyup' event right away. */
-        $('body').unbind('keyup', function (evt) { self.this.onKeyUp_(evt); } );
-        
-        var interval = window.setInterval(function () {
-          if(this.requests_.length)
-            return;
-          
-          if(this.options_.nodes.items)
-            this.options_.nodes.items.children().remove();
-
-          if(this.options_.nodes.bins)
-            this.options_.nodes.bins.children().remove();
-
-          /* Detach events from bin/text item delete button. */
-          if(this.options_.nodes.buttonDismiss)
-            this.options_.nodes.buttonDismiss.off();
-          
-          this.options_ = this.callbacks_ = null;
-          this.requests_ = this.dismiss_ = this.keyboard_ = null;
-          this.bins_ = this.items_ = null;
-          
-          this.initialised_ = false;
-          
-          window.clearInterval(interval);
-          window.setTimeout(function () {
-            console.log("Sorting Desk UI reset");
-            this.resetting_ = false;
-            deferred.resolve();
-          });
-        }, 10);
-      }
-      
-      return deferred.promise();
     },
 
     /**
@@ -292,6 +276,111 @@ var SortingDesk = (function () {
     },
   };
 
+
+  /**
+   * @class@
+   * */
+  var InstanceResetter = function (instance)
+  {
+    this.instance_ = instance;
+    this.count_ = 0;
+  };
+
+  InstanceResetter.prototype = {
+    instance_: null,
+    count_: null,
+
+    reset: function (entities)
+    {
+      var deferred = $.Deferred();
+      
+      if(!this.instance_.initialised || this.instance_.resetting) {
+        window.setTimeout(function () {
+          deferred.reject();
+        } );
+      } else {
+        var self = this;
+        this.count_ = this.countEntities_(entities);
+
+        /* Begin resetting entities. */
+        this.resetEntities_(entities);
+
+        /* Begin main instance resetting timer sequence. */
+        var interval = window.setInterval(function () {
+          /* Wait until all instances have reset. */
+          if(self.count_)
+            return;
+
+          /* Clear interval. */
+          window.clearInterval(interval);
+
+          /* State reset. Resolve promise */
+          window.setTimeout(function () {
+            deferred.resolve();
+          }, 10);
+        }, 10);
+      }
+      
+      return deferred.promise();
+    },
+
+    countEntities_: function (entities)
+    {
+      var self = this,
+          count = 0;
+
+      entities.forEach(function (e) {
+        if(e instanceof Array)
+          count += self.countEntities_(e);
+        else
+          ++count;
+      } );
+
+      return count;
+    },
+
+    resetEntities_: function (entities)
+    {
+      var self = this,
+          waiting = 0;
+      
+      entities.forEach(function (e) {
+        /* Deal with sub-dependencies if current element is an array. */
+        if(e instanceof Array) {
+          var interval = window.setInterval(function () {
+            if(waiting)
+              return;
+
+            window.clearInterval(interval);
+            self.resetEntities_(e);
+          }, 10);
+        } else {
+          var result;
+
+          try {
+            result = e.reset();
+          } catch(x) {
+            console.log('Exception thrown whilst resetting:', x);
+          }
+
+          /* Special measure for instances that return a promise. */
+          if(result && 'always' in result) {
+            ++waiting;
+
+            /* Wait until it finishes. The assumption is made that instances
+             * must always reset and therefore it matters not whether the
+             * promise is rejected or not. */
+            result.always(function () {
+              --waiting;
+              --self.count_;
+            } );
+          } else
+            --self.count_;
+        }
+      } );
+    }
+  };
+  
 
   /**
    * @class@
