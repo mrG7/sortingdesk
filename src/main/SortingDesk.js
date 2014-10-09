@@ -445,6 +445,7 @@ var SortingDesk = (function () {
   ControllerCallbacks.prototype = Object.create(Controller.prototype);
 
   ControllerCallbacks.prototype.initialise = function () { };
+  ControllerCallbacks.prototype.reset = function () { };
   
   ControllerCallbacks.prototype.exists = function (callback)
   { return callback in this.callbacks_; };
@@ -502,6 +503,23 @@ var SortingDesk = (function () {
   ControllerRequests.prototype = Object.create(Controller.prototype);
 
   ControllerRequests.prototype.initialise = function () {  };
+  ControllerRequests.prototype.reset = function ()
+  {
+    var self = this,
+        deferred = $.Deferred(),
+        interval;
+
+    /* Don't signal state reset until all requests processed. */
+    interval = window.setInterval(function () {
+      if(self.count_)
+        return;
+
+      window.clearInterval(interval);
+      deferred.resolve();
+    }, 10);
+
+    return deferred.promise();
+  };
 
   ControllerRequests.prototype.begin = function (id)
   {
@@ -604,6 +622,11 @@ var SortingDesk = (function () {
       }
     } );
   };
+
+  ControllerButtonDismiss.prototype.reset = function ()
+  {
+    this.owner_.options.nodes.buttonDismiss.off();
+  };
   
   ControllerButtonDismiss.prototype.activate = function (callback)
   {
@@ -637,9 +660,20 @@ var SortingDesk = (function () {
   ControllerKeyboard.prototype.initialise = function ()
   {
     var self = this;
+
+    /* Save event handler function so we are able to remove it when resetting
+     * the instance. */
+    this.fnEventKeyUp = function (evt) { self.onKeyUp_(evt); };
     
     /* Set up listener for keyboard up events. */
-    $('body').bind('keyup', function (evt) { self.onKeyUp_(evt); } );
+    $('body').bind('keyup', this.fnEventKeyUp);
+  };
+
+  ControllerKeyboard.prototype.reset = function ()
+  {
+    /* Remove keyboard up event listener. */
+    $('body').unbind('keyup', this.fnEventKeyUp);
+    this.fnEventKeyUp = null;
   };
 
   ControllerKeyboard.prototype.onKeyUp_ = function (evt)
@@ -756,6 +790,11 @@ var SortingDesk = (function () {
 
         return deferred.promise();
       } );
+  };
+
+  ControllerBins.prototype.reset = function ()
+  {
+    this.node.children().remove();
   };
   
   ControllerBins.prototype.add = function (bin)
@@ -1029,6 +1068,11 @@ var SortingDesk = (function () {
 
   ControllerItems.prototype.initialise = function ()
   { this.check(); };
+
+  ControllerItems.prototype.reset = function ()
+  {
+    this.owner_.options.nodes.items.children().remove();
+  };
   
   ControllerItems.prototype.check = function ()
   {
