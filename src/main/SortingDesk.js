@@ -95,7 +95,12 @@ var SortingDesk = (function () {
    * */
   var Instance = function (opts, cbs)
   {
-    this.initialised_ = this.resetter_ = false;
+    /* IMPORTANT: It is crucial that the `initialised_' attribute below has an
+     * initial value of `null' *prior* to the method `initialise_' being
+     * called. This is so we can reset a Sorting Desk instance that is
+     * initialisING. */
+    this.initialised_ = null;
+    this.resetter_ = false;
     
     /* Allow a jQuery element to be passed in instead of an object containing
      * options. In the case that a jQuery element is detected, it is assumed to
@@ -151,7 +156,7 @@ var SortingDesk = (function () {
   };
 
   Instance.prototype = {
-    initialised_: false,
+    initialised_: null,
     resetter_: false,
     options_: null,
     /* Controllers */
@@ -173,8 +178,14 @@ var SortingDesk = (function () {
       var self = this,
           resetter = new InstanceResetter(this);
 
+      /* If a reset is already underway, simply return the promise from the new
+       * `InstanceResetter' instance created above for it will be refused.
+       * Otherwise, throw an exception if Sorting Desk has just been
+       * instantiated and is currently initialising itself. */
       if(this.resetter_)
         return resetter.reset();
+      else if(this.initialised_ === null)
+        throw "Instance still initialising";
       
       this.resetter_ = resetter.reset(
         [ this.requests_,
@@ -198,6 +209,8 @@ var SortingDesk = (function () {
         .always(function () {
           self.resetter_ = false;
         } );
+
+      return resetter.reset();
     },
 
     /**
