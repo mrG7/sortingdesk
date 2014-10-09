@@ -95,7 +95,7 @@ var SortingDesk = (function () {
    * */
   var Instance = function (opts, cbs)
   {
-    this.initialised_ = this.resetting_ = false;
+    this.initialised_ = this.resetter_ = false;
     
     /* Allow a jQuery element to be passed in instead of an object containing
      * options. In the case that a jQuery element is detected, it is assumed to
@@ -152,7 +152,7 @@ var SortingDesk = (function () {
 
   Instance.prototype = {
     initialised_: false,
-    resetting_: false,
+    resetter_: false,
     options_: null,
     /* Controllers */
     callbacks_: null,
