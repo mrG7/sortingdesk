@@ -261,7 +261,7 @@ var SortingDesk = (function () {
             continue;
           }
           
-          new BinGeneric(this.bins_, id, bin).add();
+          new BinDefault(this.bins_, id, bin).add();
         }
       }
       
@@ -766,7 +766,7 @@ var SortingDesk = (function () {
     new BinAddButton(
       this,
       function (input) {
-        return new BinGeneric(null, null, { name: input } )
+        return new BinDefault(null, null, { name: input } )
           .render();
       },
       function (id, text) {
@@ -782,7 +782,7 @@ var SortingDesk = (function () {
             window.setTimeout(function () {
               /* We rely on the API returning exactly ONE descriptor. */
               var id = Object.firstKey(bin);
-              new BinGeneric(self, id, bin[id]).add();
+              new BinDefault(self, id, bin[id]).add();
             }, 0);
             
             deferred.resolve();
@@ -998,15 +998,15 @@ var SortingDesk = (function () {
   /**
    * @class
    * */
-  var BinGeneric = function (owner, id, bin)
+  var BinDefault = function (owner, id, bin)
   {
     /* Invoke super constructor. */
     Bin.call(this, owner, id, bin);
   };
 
-  BinGeneric.prototype = Object.create(Bin.prototype);
+  BinDefault.prototype = Object.create(Bin.prototype);
     
-  BinGeneric.prototype.render = function ()
+  BinDefault.prototype.render = function ()
   {
     /* Wrap bin name inside a DIV. */
     return $('<div class="sd-bin"><div class="sd-bin-shortcut"/>'
@@ -1040,7 +1040,7 @@ var SortingDesk = (function () {
   /**
    * @class
    * */
-  var SubBinGeneric = function (owner, id, bin, parent)
+  var SubBinDefault = function (owner, id, bin, parent)
   {
     /* Invoke super constructor. */
     Bin.call(this, owner, id, bin, parent);
@@ -1049,7 +1049,7 @@ var SortingDesk = (function () {
     parent.add(this);
   };
 
-  SubBinGeneric.prototype = Object.create(SubBin.prototype);
+  SubBinDefault.prototype = Object.create(SubBin.prototype);
 
 
   /**
@@ -1093,7 +1093,7 @@ var SortingDesk = (function () {
 
       items.forEach(function (item, index) {
         window.setTimeout( function () {
-          self.items_.push(new TextItemGeneric(self, item));
+          self.items_.push(new TextItemDefault(self, item));
         }, Math.pow(index, 2) * 1.1);
       } );
 
@@ -1364,7 +1364,7 @@ var SortingDesk = (function () {
   /**
    * @class
    * */
-  var TextItemGeneric = function (owner, item)
+  var TextItemDefault = function (owner, item)
   {
     /* Fail silently if not initialised anymore. This might happen if, for
      * example, the `reset' method was invoked but the component is still
@@ -1374,21 +1374,21 @@ var SortingDesk = (function () {
 
     TextItem.call(this, owner, item);
 
-    this.node_ = this.render(TextItemGeneric.VIEW_HIGHLIGHTS);
+    this.node_ = this.render(TextItemDefault.VIEW_HIGHLIGHTS);
     
     this.initialise();
     owner.owner.options.nodes.items.append(this.node_);
   };
 
   /* Constants */
-  TextItemGeneric.VIEW_HIGHLIGHTS = 1;
-  TextItemGeneric.VIEW_UNRESTRICTED = 2;
-  TextItemGeneric.CHARS_HIGHLIGHTS = 150;
+  TextItemDefault.VIEW_HIGHLIGHTS = 1;
+  TextItemDefault.VIEW_UNRESTRICTED = 2;
+  TextItemDefault.CHARS_HIGHLIGHTS = 150;
 
   /* Prototype */
-  TextItemGeneric.prototype = Object.create(TextItem.prototype);
+  TextItemDefault.prototype = Object.create(TextItem.prototype);
 
-  TextItemGeneric.prototype.initialise = function ()
+  TextItemDefault.prototype.initialise = function ()
   {
     var self = this;
 
@@ -1397,49 +1397,49 @@ var SortingDesk = (function () {
 
     /* Add logic to less/more links. */
     this.getNodeLess().click(function () {
-      self.replaceNode(self.render(TextItemGeneric.VIEW_HIGHLIGHTS));
+      self.replaceNode(self.render(TextItemDefault.VIEW_HIGHLIGHTS));
       return false;
     } );
 
     this.getNodeMore().click(function () {
-      self.replaceNode(self.render(TextItemGeneric.VIEW_UNRESTRICTED));
+      self.replaceNode(self.render(TextItemDefault.VIEW_UNRESTRICTED));
       return false;
     } );
   };
   
-  TextItemGeneric.prototype.render = function (view)
+  TextItemDefault.prototype.render = function (view)
   {
-    switch(view || TextItemGeneric.VIEW_HIGHLIGHTS) {
-    case TextItemGeneric.VIEW_UNRESTRICTED:
+    switch(view || TextItemDefault.VIEW_HIGHLIGHTS) {
+    case TextItemDefault.VIEW_UNRESTRICTED:
       return this.renderUnrestricted_();
-    case TextItemGeneric.VIEW_HIGHLIGHTS:
+    case TextItemDefault.VIEW_HIGHLIGHTS:
     default:
       return this.renderHighlights_();
     }
   };
 
-  TextItemGeneric.prototype.renderUnrestricted_ = function ()
+  TextItemDefault.prototype.renderUnrestricted_ = function ()
   {
     return this.renderHtml_(
       this.content_.text,
-      TextItemGeneric.VIEW_UNRESTRICTED,
+      TextItemDefault.VIEW_UNRESTRICTED,
       new TextItemSnippet(this.content_.text).canTextBeReduced(
-        TextItemGeneric.CHARS_HIGHLIGHTS,
-        TextItemGeneric.CHARS_HIGHLIGHTS)
+        TextItemDefault.CHARS_HIGHLIGHTS,
+        TextItemDefault.CHARS_HIGHLIGHTS)
         ? true : null);
   };
 
-  TextItemGeneric.prototype.renderHighlights_ = function ()
+  TextItemDefault.prototype.renderHighlights_ = function ()
   {
     return this.renderHtml_(
       new TextItemSnippet(this.content_.text).highlights(
-        TextItemGeneric.CHARS_HIGHLIGHTS,
-        TextItemGeneric.CHARS_HIGHLIGHTS),
-      TextItemGeneric.VIEW_HIGHLIGHTS,
+        TextItemDefault.CHARS_HIGHLIGHTS,
+        TextItemDefault.CHARS_HIGHLIGHTS),
+      TextItemDefault.VIEW_HIGHLIGHTS,
       false);
   };
 
-  TextItemGeneric.prototype.renderHtml_ = function (text, view, less)
+  TextItemDefault.prototype.renderHtml_ = function (text, view, less)
   {
     var node = $('<div class="sd-text-item view-' + view + '"/>'),
         content = $('<div class="sd-text-item-content"/>'),
@@ -1467,7 +1467,7 @@ var SortingDesk = (function () {
     return node;
   };
 
-  TextItemGeneric.prototype.renderLessMore_ = function (less)
+  TextItemDefault.prototype.renderLessMore_ = function (less)
   {
     var cl = less && 'less' || 'more';
     return '<div class="sd-less-more sd-' + cl + '">' + cl + '</div>'
