@@ -56,23 +56,31 @@ var Api = {
   processing: null,
 
   initialise: function (descriptor, bins) {
-    var ids = [ ];
-    
+    var ids = [ ],
+        process = function (bins, parent) {
+          bins instanceof Array && bins.forEach(function (bin) {
+            if(parent == Api.bins)
+              ids.push(bin.node_id);
+            
+            parent[bin.node_id] = {
+              name: Object.firstKey(bin.features.NAME),
+              children: { }
+            };
+
+            if(typeof bin.node_id == 'number' && Api.lastId < bin.node_id)
+              Api.lastId = bin.node_id;
+
+            if(bin.children instanceof Array)
+              process(bin.children, parent[bin.node_id].children);
+          } );
+        };
+
     Api.lastId = 0;
     Api.lastItemId = 0;
     Api.processing = { };
     Api.bins = { };
 
-    bins instanceof Array && bins.forEach(function (bin) {
-      ids.push(bin.node_id);
-      Api.bins[bin.node_id] = {
-        name: Object.firstKey(bin.features.NAME)
-      };
-
-      if(typeof bin.node_id == 'number' && Api.lastId < bin.node_id)
-        Api.lastId = bin.node_id;
-    } );
-
+    process(bins, Api.bins);
     Api.items = descriptor.items;
 
     return ids;
