@@ -1146,6 +1146,30 @@ var SortingDesk = (function () {
     return this.node_.find('>.' + this.owner_.owner.options.css.binChildren);
   };
 
+  Bin.prototype.indexOf = function (bin)
+  {
+    var result = null,
+        search = function (bins) {
+          /* Top level search. */
+          result = bins.indexOf(bin);
+
+          if(result != -1)
+            return;
+
+          /* Not found. Go deep. */
+          bins.some(function (bin) {
+            search(bin.children_);
+
+            if(result != -1)
+              return true;
+          } );
+        };
+
+    search(this.children_);
+    
+    return result;
+  };
+
   
   /**
    * @class
