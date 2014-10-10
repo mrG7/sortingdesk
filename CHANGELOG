@@ -1,3 +1,35 @@
+2014-10-10  Miguel Guedes  <miguel@miguelguedes.org>
+
+	* src/main/SortingDesk.js:
+
+	Added support for sub-bins. Sub-bins can now be created, queried,
+	dragged and dropped, and removed.
+
+	Implemented a number of deep-search methods for querying multiple
+	aspects about top-level bins and their children.
+
+	Sorting Desk now allows the client to specify factory methods
+	for construction of classes but also classes via the
+	`options.constructors' setting.
+
+	The usual several minor improvements to code.
+
+	* css:
+
+	Moved styling pertaining to sub-bins away from Sorting Desk's
+	internal style sheet.
+
+	* examples:
+
+	Logic now in place that ensures Sorting Desk instantiates itself
+	correctly.
+
+	Added examples of sub-bins.
+
+	* src/api/api-sorting_desk-mock.js:
+
+	Added support for initialisation and querying of sub bin data.
+
 2014-10-09  Miguel Guedes  <miguel@miguelguedes.org>
 
 	* src/main/SortingDesk.js:
