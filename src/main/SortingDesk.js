@@ -28,56 +28,6 @@ if(typeof define === "function" && define.amd) {
  * @returns a "class" constructor that creates a Sorting Desk instance.
  * */
 var SortingDesk = (function () {
-
-  /* ----------------------------------------------------------------------
-   *  Default options
-   *  Private attribute.
-   * ----------------------------------------------------------------------
-   * 
-   * In addition to the properties below, which are obviously optional, the
-   * following attributes are also accepted:
-   *
-   * nodes: {
-   *   items: jQuery-element,           ; mandatory
-   *   bins: jQuery-element,            ; optional
-   *   buttonDismiss: jQuery-element    ; optional
-   * },
-   * contentIds: array<string>          ; optional
-   * 
-   */
-  var defaults_ = {
-    css: {
-      binTop: 'sd-bin',
-      binShortcut: 'sd-bin-shortcut',
-      binChildren: 'sd-children',
-      binAnimateAssign: 'sd-assign',
-      binAdding: 'sd-adding',
-      buttonAdd: 'sd-button-add',
-      itemSelected: 'sd-selected',
-      itemDragging: 'sd-dragging',
-      droppableHover: 'sd-droppable-hover'
-    },
-    keyboard: {                 /* Contains scan codes. */
-      listUp: 38,               /* up                   */
-      listDown: 40,             /* down                 */
-      listDismiss: 46           /* dismiss              */
-    },
-    delays: {                   /* In milliseconds.     */
-      animateAssign: 75,        /* Duration of assignment of text item via
-                                 * shortcut. */
-      binRemoval: 200,          /* Bin is removed from container. */
-      dismissButtonShow: 150,   /* Time taken to fade in dismiss button. */
-      dismissButtonHide: 300,   /* Time to fade out dismiss button. */
-      slideItemUp: 150,         /* Slide up length of deleted text item. */
-      addBinShow: 200,          /* Fade in of temporary bin when adding. */
-      textItemFade: 100         /* Fade out duration of text item after
-                                 * assignment. */
-    },
-    visibleItems: 20,           /* Arbitrary.           */
-    binCharsLeft: 25,
-    binCharsRight: 25
-  };
-
   
   /**
    * Constructor responsible for initialising Sorting Desk.
@@ -255,27 +205,6 @@ var SortingDesk = (function () {
     initialise_: function (bins)
     {
       var self = this;
-
-      /* Ensure optional `constructors' object, employing the factory method
-       * pattern, is defined. */
-      if(!this.options_.constructors)
-        this.options_.constructors = { };
-
-      /* Assign default class, if one not given: `ControllerBins' */
-      if(!(ControllerBins in this.options_.constructors))
-        this.options_.constructors.ControllerBins = ControllerBins;
-
-      /* Assign default class, if one not given: `Bin' */
-      if(!(Bin in this.options_.constructors))
-        this.options_.constructors.Bin = BinDefault;
-
-      /* Assign default class, if one not given: `TextItem' */
-      if(!(TextItem in this.options_.constructors))
-        this.options_.constructors.TextItem = TextItemDefault;
-
-      /* Assign default class, if one not given: `BinAddButton' */
-      if(!(BinAddButton in this.options_.constructors))
-        this.options_.constructors.BinAddButton = BinAddButton;
 
       /* Begin instantiating and initialising controllers. */
       (this.callbacks_ = new ControllerCallbacks(this, this.callbacks_))
@@ -2032,6 +1961,62 @@ var SortingDesk = (function () {
       var reduced = this.highlights(left, right);
       return reduced.length < this.text_.length;
     }
+  };
+
+  
+  /* ----------------------------------------------------------------------
+   *  Default options
+   *  Private attribute.
+   * ----------------------------------------------------------------------
+   * 
+   * In addition to the properties below, which are obviously optional, the
+   * following attributes are also accepted:
+   *
+   * nodes: {
+   *   items: jQuery-element,           ; mandatory
+   *   bins: jQuery-element,            ; optional
+   *   buttonDismiss: jQuery-element    ; optional
+   * },
+   * contentIds: array<string>          ; optional
+   * 
+   */
+  var defaults_ = {
+    css: {
+      binTop: 'sd-bin',
+      binShortcut: 'sd-bin-shortcut',
+      binChildren: 'sd-children',
+      binAnimateAssign: 'sd-assign',
+      binAdding: 'sd-adding',
+      buttonAdd: 'sd-button-add',
+      itemSelected: 'sd-selected',
+      itemDragging: 'sd-dragging',
+      droppableHover: 'sd-droppable-hover'
+    },
+    keyboard: {                 /* Contains scan codes. */
+      listUp: 38,               /* up                   */
+      listDown: 40,             /* down                 */
+      listDismiss: 46           /* dismiss              */
+    },
+    delays: {                   /* In milliseconds.     */
+      animateAssign: 75,        /* Duration of assignment of text item via
+                                 * shortcut. */
+      binRemoval: 200,          /* Bin is removed from container. */
+      dismissButtonShow: 150,   /* Time taken to fade in dismiss button. */
+      dismissButtonHide: 300,   /* Time to fade out dismiss button. */
+      slideItemUp: 150,         /* Slide up length of deleted text item. */
+      addBinShow: 200,          /* Fade in of temporary bin when adding. */
+      textItemFade: 100         /* Fade out duration of text item after
+                                 * assignment. */
+    },
+    constructors: {
+      ControllerBins: ControllerBins,
+      Bin: BinDefault,
+      TextItem: TextItemDefault,
+      BinAddButton: BinAddButton
+    },
+    visibleItems: 20,           /* Arbitrary.           */
+    binCharsLeft: 25,
+    binCharsRight: 25
   };
 
 
