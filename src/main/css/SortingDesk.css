@@ -45,8 +45,7 @@
 
 /* Bin: common */
 .sd-bin {
-  margin-bottom: 10px;
-  padding: 10px 15px 10px;
+  margin: 10px 0 10px 0;
   text-align: center;
   
   box-shadow: 1px 1px 5px 0 rgba(50, 50, 50, 0.75);
