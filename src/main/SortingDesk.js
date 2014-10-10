@@ -1129,7 +1129,11 @@ var SortingDesk = (function () {
   Bin.prototype.setShortcut = function (keyCode)
   {
     this.shortcut_ = keyCode;
-    this.getNodeShortcut().html(String.fromCharCode(keyCode).toLowerCase());
+
+    /* Set shortcut visual cue, if a node exists for this purpose. */
+    var node = this.getNodeShortcut();
+    if(node && node.length)
+      node[0].innerHTML = String.fromCharCode(keyCode).toLowerCase();
   };
 
   /* overridable */ Bin.prototype.getNodeShortcut = function ()
