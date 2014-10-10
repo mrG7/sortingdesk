@@ -1143,7 +1143,7 @@ var SortingDesk = (function () {
 
   /* overridable */ Bin.prototype.getNodeChildren = function ()
   {
-    return this.node_.find('.' + this.owner_.owner.options.css.binChildren);
+    return this.node_.find('>.' + this.owner_.owner.options.css.binChildren);
   };
 
   
