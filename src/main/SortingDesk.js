@@ -915,7 +915,18 @@ var SortingDesk = (function () {
 
   ControllerBins.prototype.indexOf = function (bin)
   {
-    return this.bins_.indexOf(bin);
+    /* Look at top level bins first. */
+    var index = this.bins_.indexOf(bin);
+    
+    /* If not found, look for a match in child bins. */
+    if(index == -1) {
+      this.bins_.some(function (ib) {
+        if( (index = ib.indexOf(bin)) != -1)
+          return true;
+      } );
+    }
+
+    return index;
   };
 
   ControllerBins.prototype.removeAt = function (index)
