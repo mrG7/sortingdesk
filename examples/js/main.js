@@ -98,9 +98,14 @@ var Examples = (function () {
   var load_ = function (descriptor) {
     if(instance_)
       throw "An instance is currently active";
-    
-    instance_ = descriptor.run($.extend(true, {}, options_),
-                               $.extend(true, {}, callbacks_) );
+
+    try {
+      instance_ = descriptor.run($.extend(true, {}, options_),
+                                 $.extend(true, {}, callbacks_) );
+    } catch(x) {
+      console.log("Failed to initialise Sorting Desk: " + x);
+      instance_ = null;
+    }
   };
 
   var register = function (name, caption, run) {
