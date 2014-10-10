@@ -942,34 +942,63 @@ var SortingDesk = (function () {
     bin.node.remove(); 
   };
 
+  ControllerBins.prototype.setShortcut = function (bin, keyCode)
+  {
+    /* Ensure shortcut not currently in use and that bin is contained. */
+    if(this.getByShortcut(keyCode))
+      return false;
+    else if(this.indexOf(bin) == -1)
+      throw "Bin not contained";
+
+    /* Set new shortcut. */
+    bin.setShortcut(keyCode);
+    return true;
+  };
+  
   ControllerBins.prototype.getByShortcut = function (keyCode)
   {
-    var result = null;
+    var result = null,
+        search = function (bins) {
+          bins.some(function (bin) {
+            if(bin.shortcut == keyCode) {
+              result = bin;
+              return true;
+            } else if(bin.children.length) {
+              search(bin.children);
 
-    this.bins_.some(function (bin) {
-      if(bin.shortcut == keyCode) {
-        result = bin;
-        return true;
-      }
+              if(result)
+                return true;
+            }
 
-      return false;
-    } );
+            return false;
+          } );
+        };
 
+    search(this.bins_);
+    
     return result;
   };
 
   ControllerBins.prototype.getById = function (id)
   {
-    var result = null;
-    
-    this.bins_.some(function (bin) {
-      if(bin.id == id) {
-        result = bin;
-        return true;
-      }
+    var result = null,
+        search = function (bins) {
+          bins.some(function (bin) {
+            if(bin.id == id) {
+              result = bin;
+              return true;
+            } else if(bin.children.length) {
+              search(bin.children);
 
-      return false;
-    } );
+              if(result)
+                return true;
+            }
+
+            return false;
+          } );
+        };
+
+    search(this.bins_);
 
     return result;
   };
