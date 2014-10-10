@@ -904,7 +904,7 @@ var SortingDesk = (function () {
     this.bins_.push(bin);
   };
     
-  ControllerBins.prototype.append = function (node)
+  /* overridable */ ControllerBins.prototype.append = function (node)
   {
     /* Add bin node to the very top of the container if aren't any yet,
      * otherwise insert it after the last contained bin. */
