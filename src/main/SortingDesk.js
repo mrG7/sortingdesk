@@ -260,19 +260,19 @@ var SortingDesk = (function () {
       if(!this.options_.constructors)
         this.options_.constructors = { };
 
-      /* Assign default factory method, if one not given: `ControllerBins' */
+      /* Assign default class, if one not given: `ControllerBins' */
       if(!(ControllerBins in this.options_.constructors))
         this.options_.constructors.ControllerBins = ControllerBins;
 
-      /* Assign default factory method, if one not given: `Bin' */
+      /* Assign default class, if one not given: `Bin' */
       if(!(Bin in this.options_.constructors))
         this.options_.constructors.Bin = BinDefault;
 
-      /* Assign default factory method, if one not given: `TextItem' */
+      /* Assign default class, if one not given: `TextItem' */
       if(!(TextItem in this.options_.constructors))
         this.options_.constructors.TextItem = TextItemDefault;
 
-      /* Assign default factory method, if one not given: `BinAddButton' */
+      /* Assign default class, if one not given: `BinAddButton' */
       if(!(BinAddButton in this.options_.constructors))
         this.options_.constructors.BinAddButton = BinAddButton;
 
