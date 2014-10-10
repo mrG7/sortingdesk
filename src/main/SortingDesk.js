@@ -302,9 +302,8 @@ var SortingDesk = (function () {
             console.log("Failed to load bin:", id, bin.error);
             continue;
           }
-          
-          this.instantiate('Bin', this.bins_, id, bin)
-            .add();
+
+          this.bins_.add(this.instantiate('Bin', this.bins_, id, bin));
         }
       }
       
@@ -865,11 +864,12 @@ var SortingDesk = (function () {
             window.setTimeout(function () {
               /* We rely on the API returning exactly ONE descriptor. */
               var id = Object.firstKey(bin);
-              self.owner_.instantiate('Bin',
-                                      self,
-                                      id,
-                                      bin[id])
-                .add();
+
+              self.owner_.bins.add(
+                self.owner_.instantiate('Bin',
+                                        self,
+                                        id,
+                                        bin[id]));
             }, 0);
             
             deferred.resolve();
@@ -893,6 +893,9 @@ var SortingDesk = (function () {
       if(ib.id == id)
         throw "Bin is already contained: " + id;
     } );
+
+    /* Initialise bin. */
+    bin.initialise();
 
     /* Contain bin and append its HTML node. */
     this.append(bin.node);
@@ -1050,10 +1053,28 @@ var SortingDesk = (function () {
     }, 0);
   };
 
-  Bin.prototype.add = function ()
+  Bin.prototype.add = function (bin)
   {
-    this.initialise(this.render());
-    this.owner_.add(this);
+    /* Contain sub-bin only once it's established it's not contained. */
+    var id = bin.id;
+
+    /* Ensure a bin with the same id isn't already contained. */
+    this.children_.forEach(function (ib) {
+      if(ib.id == id)
+        throw "Bin is already contained: " + id;
+    } );
+    
+    this.children_.push(bin);
+
+    /* Initialise bin and append its HTML. */
+    bin.parent = this;
+    bin.initialise();
+    this.append(bin);
+  };
+
+  Bin.prototype.append = function (bin)
+  {
+    this.getNodeChildren().append(bin.node);
   };
     
   Bin.prototype.setShortcut = function (keyCode)
@@ -1065,6 +1086,11 @@ var SortingDesk = (function () {
   /* overridable */ Bin.prototype.getNodeShortcut = function ()
   {
     return this.node_.find('.' + this.owner_.owner.options.css.binShortcut);
+  };
+
+  /* overridable */ Bin.prototype.getNodeChildren = function ()
+  {
+    return this.node_.find('.' + this.owner_.owner.options.css.binChildren);
   };
 
   
