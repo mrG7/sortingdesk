@@ -56,6 +56,15 @@
 
 .sd-bin-sub {
   float: left !important;
+  width: 40%;
+}
+
+.sd-bin-sub:nth-child(odd) {
+  float: left !important;
+}
+
+.sd-bin-sub:nth-child(even) {
+  float: right !important;
 }
 
 .sd-bin-sub:hover:not(.sd-adding) {
