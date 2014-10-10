@@ -3,7 +3,9 @@
 	* src/main/SortingDesk.js:
 
 	Added support for sub-bins. Sub-bins can now be created, queried,
-	dragged and dropped, and removed.
+	dragged and dropped, and removed. In addition, there is no limit
+	to the number of children any bin, allowing for an arbitrary depth
+	of bins that are parents to other bins.
 
 	Implemented a number of deep-search methods for querying multiple
 	aspects about top-level bins and their children.
