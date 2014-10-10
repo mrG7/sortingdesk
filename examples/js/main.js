@@ -15,7 +15,28 @@ var Examples = (function () {
       options_,
       callbacks_,
       contentIds_ = [
-        { node_id: '#100', features: { NAME: { "Irrelevant": 0 } } },
+        {
+          node_id: '#100',
+          features: { NAME: { "Irrelevant": 0 } },
+          children: [
+            {
+              node_id: "test-1",
+              features: { NAME: { "Inner irrelevancy": 0 } }
+            },
+            {
+              node_id: "test-2",
+              features: { NAME: { "Additional irrelevancy": 0 } }
+            },
+            {
+              node_id: "test-3",
+              features: { NAME: { "Sub-par irrelevancy": 0 } }
+            },
+            {
+              node_id: "test-4",
+              features: { NAME: { "Worrying multi-line irrelevancy": 0 } }
+            }
+          ]
+        },
         { node_id: '^1$0#1', features: { NAME: { "Rubbish": 0 } } },
         { node_id: '1_0%%^&#2', features: { NAME: { "Keep": 0 } } }
       ],
