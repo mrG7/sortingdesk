@@ -43,49 +43,8 @@
   transition: background-color 175ms, color 100ms;
 }
 
-/* Bin: sub */
-.sd-bin-sub {
-  position: relative;
-  margin: 10px 0;
-  border: 2px solid #CEA756;
-  background-color: #FFECD0;
-  color: #CA7B56;
-  border-radius: 5px;
-  font-size: 14px;
-}
-
-.sd-bin-sub {
-  float: left !important;
-  width: 40%;
-}
-
-.sd-bin-sub:nth-child(odd) {
-  float: left !important;
-}
-
-.sd-bin-sub:nth-child(even) {
-  float: right !important;
-}
-
-.sd-bin-sub:hover:not(.sd-adding) {
-  background-color: #EED5B2;
-  color: #BE6A42;
-  cursor: pointer;
-  transition: background-color 175ms, color 100ms;
-}
-
-.sd-bin-sub:active:not(.sd-adding),
-.sd-bin-sub.sd-assign {
-  position: relative;
-  top: 2px;
-  left: 2px;
-  box-shadow: none;
-  transition: background-color 175ms, color 100ms;
-}
-
 /* Bin: common */
-.sd-bin,
-.sd-bin-sub {
+.sd-bin {
   margin-bottom: 10px;
   padding: 10px 15px 10px;
   text-align: center;
@@ -95,8 +54,7 @@
   transition: background-color 175ms, color 100ms;
 }
 
-.sd-bin,
-.sd-bin-sub {
+.sd-bin {
   word-wrap: break-word;
 }
 
@@ -115,10 +73,6 @@
 
 .sd-bin .sd-bin-shortcut {
   border-color: #7582C9;
-}
-
-.sd-bin-sub .sd-bin-shortcut {
-  border-color: #CEA756;
 }
 
 /* Text item */

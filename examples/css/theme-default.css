@@ -88,3 +88,61 @@ BODY {
   width: 400px;
   font-family: "Courier New", Courier, monospace;
 }
+
+/* Bin: sub */
+.bin-sub {
+  position: relative;
+  margin: 10px 0;
+  border: 2px solid #CEA756;
+  background-color: #FFECD0;
+  color: #CA7B56;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+.bin-sub {
+  float: left !important;
+  width: 40%;
+}
+
+.bin-sub:nth-child(odd) {
+  float: left !important;
+}
+
+.bin-sub:nth-child(even) {
+  float: right !important;
+}
+
+.bin-sub:hover:not(.sd-adding) {
+  background-color: #EED5B2;
+  color: #BE6A42;
+  cursor: pointer;
+  transition: background-color 175ms, color 100ms;
+}
+
+.bin-sub:active:not(.sd-adding),
+.bin-sub.sd-assign {
+  position: relative;
+  top: 2px;
+  left: 2px;
+  box-shadow: none;
+  transition: background-color 175ms, color 100ms;
+}
+
+.bin-sub {
+  margin-bottom: 10px;
+  padding: 10px 15px 10px;
+  text-align: center;
+  
+  box-shadow: 1px 1px 5px 0 rgba(50, 50, 50, 0.75);
+/*   text-shadow: 1px 1px 1px rgba(150, 150, 150, 1); */
+  transition: background-color 175ms, color 100ms;
+}
+
+.bin-sub {
+  word-wrap: break-word;
+}
+
+.bin-sub .sd-bin-shortcut {
+  border-color: #CEA756;
+}
