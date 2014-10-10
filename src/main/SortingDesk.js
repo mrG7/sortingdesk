@@ -1504,17 +1504,20 @@ var SortingDesk = (function () {
   /* abstract */ TextItem.prototype.render = function ()
   { throw "Abstract method must be implemented"; };
 
+  /* Not mandatory. */
   /* overridable */ TextItem.prototype.getNodeClose = function ()
-  { return this.node_.find('.sd-text-item-close'); };
+  { return $(); };
 
+  /* Not mandatory. */
   /* overridable */ TextItem.prototype.getNodeLess = function ()
-  { return this.node_.find('.sd-less'); };
+  { return $(); };
 
+  /* Not mandatory. */
   /* overridable */ TextItem.prototype.getNodeMore = function ()
-  { return this.node_.find('.sd-more'); };
+  { return $(); };
 
   /* overridable */ TextItem.prototype.isSelected = function ()
-  { return this.node_.hasClass('sd-selected'); };
+  { return this.node_.hasClass(this.owner_.owner.options.css.itemSelected); };
   
   
   /**
@@ -1629,6 +1632,15 @@ var SortingDesk = (function () {
     return '<div class="sd-less-more sd-' + cl + '">' + cl + '</div>'
       + '<div style="display: block; clear: both" />';
   };
+
+  TextItemDefault.prototype.getNodeClose = function ()
+  { return this.node_.find('.sd-text-item-close'); };
+
+  TextItemDefault.prototype.getNodeLess = function ()
+  { return this.node_.find('.sd-less'); };
+
+  TextItemDefault.prototype.getNodeMore = function ()
+  { return this.node_.find('.sd-more'); };
 
 
   /**
