@@ -846,7 +846,7 @@ var SortingDesk = (function () {
       this,
       function (input) {
         return self.owner_.instantiate('Bin',
-                                       null,
+                                       self,
                                        null,
                                        { name: input },
                                        null)
