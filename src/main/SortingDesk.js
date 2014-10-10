@@ -47,8 +47,10 @@ var SortingDesk = (function () {
    */
   var defaults_ = {
     css: {
-      binGeneric: 'sd-bin',
+      binTop: 'sd-bin',
+      binSub: 'sd-bin-sub',
       binShortcut: 'sd-bin-shortcut',
+      binChildren: 'sd-children',
       binAnimateAssign: 'sd-assign',
       binAdding: 'sd-adding',
       buttonAdd: 'sd-button-add',
@@ -1107,12 +1109,17 @@ var SortingDesk = (function () {
     
   BinDefault.prototype.render = function ()
   {
+    var css = this.owner_.owner.options.css;
+    
     if(!this.parent_) {
-      return $('<div class="sd-bin"><div class="sd-bin-shortcut"/>'
-               + this.bin_.name + '</div>');
+      return $('<div class="' + css.binTop + '"><div class="'
+               + css.binShortcut + '"/><div>' + this.bin_.name
+               + '</div><div class="' + css.binChildren + '"></div>'
+               + '<div style="clear:both"></div></div>');
     } else {
-      return $('<div class="sd-bin-sub"><div class="sd-bin-shortcut"/>'
-               + this.bin_.name + '</div>');
+      return $('<div class="' + css.binSub + '"><div class="'
+               + css.binShortcut + '"/><div>' + this.bin_.name
+               + '</div></div>');
     }
   };
 
