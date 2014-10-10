@@ -165,7 +165,8 @@ var Api = {
       ids.some(function (id) {
         if(id in Api.bins) {
           ++count;
-          result[id] = { name: Api.bins[id].name };
+          result[id] = $.extend(true, { }, Api.bins[id]);
+          
           return false;
         }
 
