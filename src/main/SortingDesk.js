@@ -852,7 +852,11 @@ var SortingDesk = (function () {
             window.setTimeout(function () {
               /* We rely on the API returning exactly ONE descriptor. */
               var id = Object.firstKey(bin);
-              new BinDefault(self, id, bin[id]).add();
+              self.owner_.instantiate('Bin',
+                                      self,
+                                      id,
+                                      bin[id])
+                .add();
             }, 0);
             
             deferred.resolve();
