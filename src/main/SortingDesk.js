@@ -48,7 +48,6 @@ var SortingDesk = (function () {
   var defaults_ = {
     css: {
       binTop: 'sd-bin',
-      binSub: 'sd-bin-sub',
       binShortcut: 'sd-bin-shortcut',
       binChildren: 'sd-children',
       binAnimateAssign: 'sd-assign',
@@ -1119,16 +1118,9 @@ var SortingDesk = (function () {
   {
     var css = this.owner_.owner.options.css;
     
-    if(!this.parent_) {
-      return $('<div class="' + css.binTop + '"><div class="'
-               + css.binShortcut + '"/><div>' + this.bin_.name
-               + '</div><div class="' + css.binChildren + '"></div>'
-               + '<div style="clear:both"></div></div>');
-    } else {
-      return $('<div class="' + css.binSub + '"><div class="'
-               + css.binShortcut + '"/><div>' + this.bin_.name
-               + '</div></div>');
-    }
+    return $('<div class="' + css.binTop + '"><div class="'
+             + css.binShortcut + '"/><div>' + this.bin_.name
+             + '</div><div class="' + css.binChildren + '"></div></div>');
   };
 
 
