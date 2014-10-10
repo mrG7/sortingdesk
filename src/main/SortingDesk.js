@@ -1780,6 +1780,8 @@ var SortingDesk = (function () {
 
         if(options.dragstart)
           options.dragstart(e);
+
+        e.stopPropagation();
       },
       
       dragend: function (e) {
@@ -1792,6 +1794,8 @@ var SortingDesk = (function () {
         
         if(options.dragend)
           options.dragend(e);
+
+        e.stopPropagation();
       }
     } ).prop('draggable', true);
   };
