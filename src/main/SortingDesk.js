@@ -981,7 +981,7 @@ var SortingDesk = (function () {
   /**
    * @class
    * */
-  var Bin = function (owner, id, bin, parent)
+  var Bin = function (owner, id, bin)
   {
     /* Invoke super constructor. */
     Drawable.call(this, owner);
@@ -991,7 +991,7 @@ var SortingDesk = (function () {
     this.node_ = this.shortcut_ = null;
 
     this.children_ = [ ];
-    this.parent_ = null;
+    this.parent_ = null;        /* Parents are set by parent bins directly. */
 
     /* Define getters. */
     this.__defineGetter__("bin", function () { return this.bin_; } );
@@ -1001,6 +1001,14 @@ var SortingDesk = (function () {
 
     this.__defineGetter__("parent", function () { return this.parent_; } );
     this.__defineGetter__("children", function () { return this.children_; } );
+
+    /* Define setters. */
+    this.__defineSetter__("parent", function (bin) {
+      if(bin.children.indexOf(this) == -1)
+        throw "Not a parent of bin";
+
+      this.parent_ = bin;
+    } );
   };
 
   Bin.prototype = Object.create(Drawable.prototype);
