@@ -226,14 +226,24 @@ var SortingDesk = (function () {
        * to add. */
       if(this.options_.nodes.binsProvided !== false && bins) {
         for(var id in bins) {
-          var bin = bins[id];
+          var descriptor = bins[id],
+              bin;
           
-          if(bin.error) {
-            console.log("Failed to load bin:", id, bin.error);
+          if(descriptor.error) {
+            console.log("Failed to load bin:", id, descriptor.error);
             continue;
           }
 
-          this.bins_.add(this.instantiate('Bin', this.bins_, id, bin));
+          bin = this.instantiate('Bin', this.bins_, id, descriptor);
+          this.bins_.add(bin);
+
+          /* Instantiate and add sub-bins. */
+          for(var iid in descriptor.children) {
+            bin.add(this.instantiate('Bin',
+                                     this.bins_,
+                                     iid,
+                                     descriptor.children[iid]));
+          }
         }
       }
       
