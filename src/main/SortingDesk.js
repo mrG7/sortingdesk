@@ -1079,12 +1079,12 @@ var SortingDesk = (function () {
     /* Initialise bin and append its HTML. */
     bin.parent = this;
     bin.initialise();
-    this.append(bin);
+    this.append(bin.node);
   };
 
-  Bin.prototype.append = function (bin)
+  /* overridable */ Bin.prototype.append = function (node)
   {
-    this.getNodeChildren().append(bin.node);
+    this.getNodeChildren().append(node);
   };
     
   Bin.prototype.setShortcut = function (keyCode)
