@@ -1121,6 +1121,19 @@ var SortingDesk = (function () {
     this.append(bin.node);
   };
 
+  Bin.prototype.removeAt = function (index)
+  {
+    var bin;
+
+    if(index < 0 || index >= this.children_.length)
+      throw "Invalid bin index";
+
+    bin = this.children_[index];
+    this.children_.splice(index, 1);
+
+    bin.node.remove();
+  };
+  
   /* overridable */ Bin.prototype.append = function (node)
   {
     this.getNodeChildren().append(node);
