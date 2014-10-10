@@ -118,6 +118,12 @@ var SortingDesk = (function () {
     else if(!opts.nodes.items)
       throw "Missing `items' nodes option";
 
+    /* Create dummy jQuery element if bins container not provided. */
+    if(!opts.nodes.bins) {
+      opts.nodes.binsProvided = false;
+      opts.nodes.bins = $();
+    }
+    
     /* Allow a function to be passed in instead of an object containing
      * callbacks. In the case that a function is passed in, it is assumed to be
      * the `moreTexts' callback. */
@@ -282,13 +288,13 @@ var SortingDesk = (function () {
 
       (this.dismiss_ = new ControllerButtonDismiss(this))
         .initialise();
-      
-      /* Do not create bin container or process any bins if a bin HTML container
-       * wasn't given OR the bins' data result array wasn't received. */
-      if(this.options_.nodes.bins && bins) {
-        (this.bins_ = this.instantiate('ControllerBins', this))
-          .initialise();
 
+      (this.bins_ = this.instantiate('ControllerBins', this))
+        .initialise();
+      
+      /* Add bins only if a bin container node has been provided and there bins
+       * to add. */
+      if(this.options_.nodes.binsProvided !== false && bins) {
         for(var id in bins) {
           var bin = bins[id];
           
