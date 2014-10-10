@@ -255,36 +255,20 @@ var SortingDesk = (function () {
         this.options_.constructors = { };
 
       /* Assign default factory method, if one not given: `ControllerBins' */
-      if(!(ControllerBins in this.options_.constructors)) {
-        this.options_.constructors.createControllerBins =
-          function (instance) {
-            return new ControllerBins(instance);
-          };
-      }
+      if(!(ControllerBins in this.options_.constructors))
+        this.options_.constructors.ControllerBins = ControllerBins;
 
       /* Assign default factory method, if one not given: `Bin' */
-      if(!(Bin in this.options_.constructors)) {
-        this.options_.constructors.createBin =
-          function(controller, id, bin, parent) {
-            return new BinDefault(controller, id, bin, parent);
-          };
-      }
+      if(!(Bin in this.options_.constructors))
+        this.options_.constructors.Bin = BinDefault;
 
       /* Assign default factory method, if one not given: `TextItem' */
-      if(!(TextItem in this.options_.constructors)) {
-        this.options_.constructors.createTextItem =
-          function (controller, item) {
-            return new TextItemDefault(controller, item);
-          };
-      }
+      if(!(TextItem in this.options_.constructors))
+        this.options_.constructors.TextItem = TextItemDefault;
 
       /* Assign default factory method, if one not given: `BinAddButton' */
-      if(!(BinAddButton in this.options_.constructors)) {
-        this.options_.constructors.createBinAddButton =
-          function (controller, fnRender, fnAdd) {
-            return new BinAddButton(controller, fnRender, fnAdd);
-        };
-      }
+      if(!(BinAddButton in this.options_.constructors))
+        this.options_.constructors.BinAddButton = BinAddButton;
 
       /* Begin instantiating and initialising controllers. */
       (this.callbacks_ = new ControllerCallbacks(this, this.callbacks_))
