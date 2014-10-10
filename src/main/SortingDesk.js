@@ -332,12 +332,35 @@ var SortingDesk = (function () {
     {
       if(arguments.length < 1)
         throw "Class name required";
-      else if(!(('create' + arguments[0]) in this.options_.constructors))
-        throw "Class non existent: " + arguments[0];
 
-      /* Invoke factory method to instantiate class. */
-      return this.options_.constructors['create' + arguments[0]]
-        .apply(null, [].slice.call(arguments, 1));
+      var descriptor = this.options_.constructors['create' + arguments[0]];
+
+      /* Invoke factory method to instantiate class, if it exists. */
+      if(descriptor)
+        return descriptor.apply(null, [].slice.call(arguments, 1));
+
+      /* Factory method doesn't exist. Ensure class constructor has been passed
+       * and instantiate it. */
+      if(!(arguments[0] in this.options_.constructors))
+        throw "Class or factory non existent: " + arguments[0];
+
+      descriptor = this.options_.constructors[arguments[0]];
+
+      /* We don't want to use `eval' so we employ a bit of trickery to
+       * instantiate a class using variable arguments. */
+      var fakeClass = function () { },
+          object;
+
+      /* Instantiate class prototype. */
+      fakeClass.prototype = descriptor.prototype;
+      object = new fakeClass();
+
+      /* Now simply call class constructor directly and keep reference to
+       * correct constructor. */
+      descriptor.apply(object, [].slice.call(arguments, 1));
+      object.constructor = descriptor.constructor;
+      
+      return object;
     }
   };
 
