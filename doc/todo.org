@@ -1,27 +1,39 @@
-* To do items [85%]
+* To do items [89%]
+** Create examples [0%]
+*** TODO No content ids
+*** TODO Sub-bins
+** TODO Implement Events controller based on the publisher-subscriber design pattern
 ** TODO Create a list of interesting events to advertise via an Events controller
-** TODO Delete extraneous examples
-** TODO =TextItemGeneric= uses hard-coded CSS classes
-** TODO Conduct analysis on factory method pattern vs passing classes at init time [50%]
-*** DONE Implement chosen method
-- State "DONE"       from "TODO"       [2014-10-09 Thu 18:27]
-*** TODO Make it so each class owns its options
 ** TODO Implement keyboard auto-repeat with configurable frequency
 ** TODO [#B] Prefix text-items' and bins' node ids
 - State "TODO"       from "WAIT"       [2014-09-07 Sun 08:16]
 - State "WAIT"       from "TODO"       [2014-09-05 Fri 10:41] \\
   Currently waiting to hear from support as to whether ids are guaranteed to always be unique.
-** TODO [#A] Allow bin statements to be edited
+** TODO Text items controller to notify client when no more items available
+** TODO Resolve all annotated TODO items
+** WAIT [#A] Allow bin statements to be edited
+- State "WAIT"       from "TODO"       [2014-10-10 Fri 16:11] \\
+  This will most likely require involvement of the client via a callback.
 - State "TODO"       from "WAIT"       [2014-09-05 Fri 10:42]
 - State "WAIT"       from "TODO"       [2014-08-22 Fri 13:24] \\
   Not proceeding with this until it's clear whether bins based on existing text items are even editable.
-** TODO [#C] Text items container doesn't have a UI state when it doesn't hold any text items
-Must clearly communicate to the user that there aren't any more text items available.
-** TODO Allow keyboard shortcuts to be assigned programmatically
-** TODO Resolve all annotated TODO items
-** WAIT Add support for sub-bins
+** DONE =TextItem= uses hard-coded CSS classes
+- State "DONE"       from "TODO"       [2014-10-10 Fri 16:20]
+** Conduct analysis on factory method pattern vs passing classes at init time [100%]
+*** DONE Implement chosen method
+- State "DONE"       from "TODO"       [2014-10-09 Thu 18:27]
+*** CANCELED Make it so each class owns its options
+- State "CANCELED"   from "TODO"       [2014-10-10 Fri 06:43] \\
+  This method violates a number logic principles.
+** DONE Add support for sub-bins
+- State "DONE"       from "IN-PROGRESS" [2014-10-10 Fri 16:10]
+- State "IN-PROGRESS" from "WAIT"       [2014-10-10 Fri 11:52]
 - State "WAIT"       from "TODO"       [2014-10-09 Thu 10:40] \\
   It is currently unclear what the interface should be like.
+** DONE Allow keyboard shortcuts to be assigned programmatically
+- State "DONE"       from "TODO"       [2014-10-10 Fri 16:10]
+** DONE Delete extraneous examples
+- State "DONE"       from "TODO"       [2014-10-09 Thu 19:22]
 ** DONE All bins are born equal
 - State "DONE"       from "IN-PROGRESS" [2014-10-09 Thu 17:49]
 - State "IN-PROGRESS" from "TODO"       [2014-10-01 Wed 10:36]
@@ -226,6 +238,8 @@ standalone *editable* text file that doesn't pollute the code and the repository
 Scrolling on the items' DIV container must be suppressed.
 
 Note that this might not be possible if the browser does not allow control over the HTML element's focus.
+** DONE Check that getBinData is defined if bins node given
+- State "DONE"       from "TODO"       [2014-10-09 Thu 19:26]
 ** DONE `buttonDelete' not hidden after a bin is deleted
 - State "DONE"       from "TODO"       [2014-10-01 Wed 10:37]
 ** DONE Fix failing tests
