@@ -765,7 +765,7 @@ var SortingDesk = (function () {
 
       if(this.owner_.bins.hover) {
         if(!bin)
-          this.owner_.bins.hover.setShortcut(evt.keyCode);
+          this.owner_.bins.setShortcut(this.owner_.bins.hover, evt.keyCode);
       } else {
         if(bin) {
           /* TODO: The following animation should be decoupled. */
