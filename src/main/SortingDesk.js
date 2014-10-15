@@ -869,9 +869,7 @@ var SortingDesk = (function () {
               result = bin;
               return true;
             } else if(bin.children.length) {
-              search(bin.children);
-
-              if(result)
+              if(search(bin.children))
                 return true;
             }
 
