@@ -625,7 +625,8 @@ var SortingDesk = (function () {
           var item = self.owner_.items.getById(id);
 
           self.owner_.callbacks.invoke("textDismissed", item);
-          self.owner_.items.remove(decodeURIComponent(id));
+          self.owner_.items.remove(
+            self.owner_.items.getById(decodeURIComponent(id)));
           
           break;
 
@@ -721,7 +722,7 @@ var SortingDesk = (function () {
           }, options.delays.animateAssign);
           
           this.owner_.callbacks.invoke("textDroppedInBin",
-                                       this.owner_.items.current(),
+                                       this.owner_.items.selected(),
                                        bin);
           this.owner_.items.remove();
         }
@@ -744,7 +745,7 @@ var SortingDesk = (function () {
       } );
       
       this.owner_.callbacks.invoke("textDismissed",
-                                   this.owner_.items.current());
+                                   this.owner_.items.selected());
       this.owner_.items.remove();
       
       break;
@@ -755,7 +756,7 @@ var SortingDesk = (function () {
 
     return false;
   };
-
+  
 
   /**
    * @class
@@ -932,7 +933,7 @@ var SortingDesk = (function () {
   ControllerBins.prototype.onClick_ = function (bin)
   {
     this.owner_.callbacks.invoke("textDroppedInBin",
-                                 this.owner_.items.current(), bin);
+                                 this.owner_.items.selected(), bin);
     this.owner_.items.remove();
   };
 
@@ -1012,7 +1013,7 @@ var SortingDesk = (function () {
             item = parentOwner.items.getById(id);
 
         parentOwner.callbacks.invoke("textDroppedInBin", item, self);
-        parentOwner.items.remove(decodeURIComponent(item.content.node_id));
+        parentOwner.items.remove(item);
       }
     } );
 
@@ -1271,69 +1272,65 @@ var SortingDesk = (function () {
     this.select(index);
   };
 
-  ControllerItems.prototype.current = function()
+  ControllerItems.prototype.selected = function()
   {
-    var node = this.node_.find(
-      '.' + this.owner_.options.css.itemSelected);
+    var node = this.getNodeSelected();
     
-    if(!node.length)
+    if(!node || !node.length)
       return null;
     
-    var item = this.getById(decodeURIComponent(node.attr('id')));
-    return item ? item.content : null;
+    return this.getById(decodeURIComponent(node.attr('id')));
   };
 
-  /* TODO: This class has different item removal semantics than `Bin'. */
-  ControllerItems.prototype.remove = function (id)
+  ControllerItems.prototype.remove = function (item)
   {
-    if(typeof id == 'undefined') {
-      var cur = this.current();
-      if (!cur) {
+    if(typeof item == 'undefined') {
+      var selected = this.selected();
+      if (!selected) {
         this.check();
         return null;
       }
       
-      id = cur.node_id;
+      return this.removeAt(this.items_.indexOf(selected));
     }
 
-    var self = this,
-        result = false;
-    
-    $.each(this.items_, function (i, item) {
-      if(item.content.node_id != id)
-        return true;
-      
-      if(item.isSelected()) {
-        if(i < self.items_.length - 1)
-          self.select(self.items_[i + 1]);
-        else if(self.items_.length)
-          self.select(self.items_[i - 1]);
-        else
-          console.log("No more items available");
-      }
-      
-      item.node
-        .css('opacity', 0.6)  /* to prevent flicker */
-        .animate( { opacity: 0 },
-                  self.owner_.options.delays.textItemFade,
-                  function () {
-                    $(this).slideUp(
-                      self.owner_.options.delays.slideItemUp,
-                      function () {
-                        $(this).remove();
-                        self.select();
-                      } );
-                  } );
+    return this.removeAt(this.items_.indexOf(item));
+  };
 
-      self.items_.splice(i, 1);
-      result = true;
-      
-      return false;  
-    } );
+  ControllerItems.prototype.removeAt = function (index)
+  {
+    if(index < 0 || index >= this.items_.length)
+      throw "Invalid item index";
+
+    var self = this,
+        item = this.items_[index];
     
+    if(item.isSelected()) {
+      if(index < this.items_.length - 1)
+        this.select(this.items_[index + 1]);
+      else if(this.items_.length)
+        this.select(this.items_[index - 1]);
+      else
+        console.log("No more items available");
+    }
+    
+    item.node
+      .css('opacity', 0.6)  /* to prevent flicker */
+      .animate( { opacity: 0 },
+                this.owner_.options.delays.textItemFade,
+                function () {
+                  $(this).slideUp(
+                    self.owner_.options.delays.slideItemUp,
+                    function () {
+                      $(this).remove();
+                      self.select();
+                    } );
+                } );
+
+    this.items_.splice(index, 1);
     this.check();
 
-    return result;
+    return true;
   };
 
   ControllerItems.prototype.getById = function (id)
@@ -1350,6 +1347,11 @@ var SortingDesk = (function () {
     } );
 
     return result;
+  };
+
+  /* overridable */ ControllerItems.prototype.getNodeSelected = function ()
+  {
+    return this.node_.find('.' + this.owner_.options.css.itemSelected);
   };
 
 
@@ -1388,7 +1390,7 @@ var SortingDesk = (function () {
     this.getNodeClose()
       .click(function () {
         parentOwner.callbacks.invoke("textDismissed", self.content_);
-        self.owner_.remove(decodeURIComponent(self.content_.node_id));
+        self.owner_.remove(self);
         return false;
       } );
 
