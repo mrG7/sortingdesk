@@ -152,17 +152,15 @@ var Api = {
     var deferred = $.Deferred();
 
     window.setTimeout(function () {
-      ++Api.lastId;
-      
-      Api.bins[Api.lastId] = {
+      var bin = {
+        id: ++Api.lastId,
         name: name,
-        bins: { }
+        children: [ ]
       };
 
-      var result = { };
-      result[Api.lastId] = Api.bins[Api.lastId];
-      
-      deferred.resolve(result);
+      Api.bins.push(bin);
+
+      deferred.resolve(bin);
     }, Math.rand(Api.DELAY_MIN, Api.DELAY_MAX) );
 
     return deferred.promise();
