@@ -19,21 +19,68 @@
       "SortingDesk": "src/main/SortingDesk",
       "API-SortingDesk": "src/api/api-sorting_desk-mock",
       "API-Data": "src/api/data/al_ahram.json?",
-      "jQuery": "lib/jquery-2.1.1.min",
-      "examples-main": "examples/js/main"
+      "jQuery": "lib/jquery-2.1.1.min"
     }
   } );
+                
+  require( [ "SortingDesk", "API-SortingDesk" ], function () {
+    var loading = $("#loading"),
+        contentIds = [
+          {
+            node_id: '#100',
+            features: { NAME: { "Irrelevant": 0 } },
+            children: [
+              {
+                node_id: "test-1",
+                features: { NAME: { "Inner irrelevancy": 0 } }
+              },
+              {
+                node_id: "test-2",
+                features: { NAME: { "Additional irrelevancy": 0 } }
+              },
+              {
+                node_id: "test-3",
+                features: { NAME: { "Sub-par irrelevancy": 0 } }
+              },
+              {
+                node_id: "test-4",
+                features: { NAME: { "Worrying irrelevancy": 0 } }
+              }
+            ]
+          },
+          { node_id: '^1$0#1', features: { NAME: { "Rubbish": 0 } } },
+          { node_id: '1_0%%^&#2', features: { NAME: { "Keep": 0 } } }
+        ],
+        nitems = $("#items"),
+        nbins = $("#bins"),
+        height = $(window).height() - nitems.offset().top - 45,
+        requests = 0;
 
-  require( [ "examples-main" ] );
+    $(".wrapper").fadeIn();
+    nitems.height(height);
+    nbins.height(height);
 
-  </script>
+    new SortingDesk.Instance( {
+      nodes: {
+        items: nitems,
+        bins: nbins,
+        buttonDismiss: $("#button-dismiss")
+      },
+      contentIds: Api.initialise(g_descriptor, contentIds),
+      visibleItems: 15
+    }, $.extend(Api, {
+      onRequestStart: function () { if(!requests++) loading.stop().fadeIn(); },
+      onRequestStop: function () { if(!--requests) loading.stop().fadeOut(); }
+    } ) );
+    
+    g_descriptor = null;
+    
+  });
+
+    </script>
 </head>
-  <body>
+<body>
   <div id="wrapper-outer">
-    <div id="controls">
-      <label for="examples">E<u>x</u>ample:</label>
-      <select id="examples" accesskey="x"></select>
-    </div>
     <div id="wrapper-bins" class="wrapper">
       <div id="bins">
       </div>
