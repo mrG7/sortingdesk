@@ -110,22 +110,15 @@ var SortingDesk = (function () {
     /* Add bins only if a bin container node has been provided and there bins
      * to add. */
     if(this.options_.bins) {
-      for(var id in this.options_.bins) {
-        var descriptor = this.options_.bins[id],
-            bin;
-        
-        if(descriptor.error) {
-          console.log("Failed to load bin:", id, descriptor.error);
-          continue;
-        }
-
-        bin = this.instantiate('Bin', this.bins_, id, descriptor);
-        this.bins_.add(bin);
+      this.options_.bins.forEach(function (descriptor) {
+        var bin = self.instantiate('Bin', self.bins_, descriptor);
+        self.bins_.add(bin);
 
         /* Instantiate and add sub-bins. */
-        for(var iid in descriptor.children)
-          bin.add(bin.createSubBin(iid, descriptor.children[iid]));
-      }
+        descriptor.children && descriptor.children.forEach(function (sb) {
+          bin.add(bin.createSubBin(sb));
+        } );
+      } );
     }
     
     (this.items_ = new ControllerItems(this))
