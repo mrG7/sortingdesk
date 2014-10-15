@@ -158,79 +158,6 @@ var Api = {
     return deferred.promise();
   },
 
-  /* Always resolves for the time being.
-   * 
-   * Returns:
-   * {
-   *   name: string,
-   *   bins: []
-   * }
-   */
-  getBinData: function (ids) {
-    if(Api.processing.getBinData) {
-      console.log("getBinData: request ongoing: ignoring new request");
-      return null;
-    }
-
-    Api.processing.getBinData = true;
-    
-    var deferred = $.Deferred(),
-        received = 0,
-        result = { };
-
-    /* Following function is a hack given that we're "loading" bin data both
-     * from our local fake data store and diffeo's RESTful API service. */
-    function onLoaded_(data) {
-      /* Before removing this hack-function, remember to copy this line into
-       * the `done' callback below. */
-      result[data.node_id] = { name: Object.firstKey(data.features.NAME) };
-      
-      if(++received == ids.length) {
-        deferred.resolve(result);
-
-        /* TODO: stick this line inside the `always' callback when removing this
-         * block. */
-        Api.processing.getBinData = false;
-      }
-    };
-    
-    ids.forEach(function (id) {
-      /* TODO: we are checking to see if the id is in our local bin
-       * repository. MUST remove this time wasting crap ASAP. */
-      var found = false;
-
-      for(var bid in Api.bins) {
-        if(bid != id)
-          continue;
-
-        var bin = Api.bins[bid],
-            name = { };
-        
-        name[bin.name] = 0;
-        onLoaded_( { node_id: bid, features: { NAME: name } } );
-        found = true;
-        
-        break;
-      }
-
-      if(found)                 /* TODO: remove with block above */
-        return false;
-
-      /* Issue request to diffeo's RESTful API service. */
-      $.getJSON(Api.url('nodes/' + id, {}, true))
-        .fail(function () {
-          console.log("getBinData: request failed:", id);
-          Api.processing.getBinData = false;
-          deferred.reject();
-        } )
-        .done(function (data) {
-          onLoaded_(data);
-        } );
-    } );
-    
-    return deferred.promise();
-  },
-
   /* Returns:
    * {
    *   error: error_string    ;; presently never returning an error
@@ -254,42 +181,6 @@ var Api = {
 
       var result = { };
       result[Api.lastId] = Api.bins[Api.lastId];
-      
-      deferred.resolve(result);
-    }, Math.rand(Api.DELAY_MIN, Api.DELAY_MAX) );
-
-    return deferred.promise();
-  },
-
-  /* Returns:
-   * {
-   *   error: error_string
-   * }
-   *   ||
-   * statement_id: {
-   *   statement_text: string
-   * }
-   */
-  addSubBin: function (contentId, text) {
-    var deferred = $.Deferred();
-
-    window.setTimeout(function () {
-      if(! (contentId in Api.bins)) {
-        deferred.reject( {
-          error: "Non-existent parent content id given"
-        } );
-
-        return;
-      }
-      
-      ++Api.lastId;
-      
-      Api.bins[contentId].bins[Api.lastId] = {
-        name: text
-      };
-
-      var result = { };
-      result[Api.lastId] = Api.bins[contentId].bins[Api.lastId];
       
       deferred.resolve(result);
     }, Math.rand(Api.DELAY_MIN, Api.DELAY_MAX) );

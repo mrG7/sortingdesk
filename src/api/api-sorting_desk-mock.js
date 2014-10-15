@@ -141,50 +141,6 @@ var Api = {
     return deferred.promise();
   },
 
-  /* Always resolves for the time being.
-   * 
-   * Returns:
-   * {
-   *   name: string,
-   *   bins: []
-   * }
-   */
-  getBinData: function (ids) {
-    if(Api.processing.getBinData) {
-      console.log("getBinData: request ongoing: ignoring new request");
-      return null;
-    }
-
-    Api.processing.getBinData = true;
-    
-    var deferred = $.Deferred(),
-        count = 0,
-        result = { };
-    
-    window.setTimeout(function () {
-      ids.some(function (id) {
-        if(id in Api.bins) {
-          ++count;
-          result[id] = $.extend(true, { }, Api.bins[id]);
-          
-          return false;
-        }
-
-        console.log("getBinData: bin id not found: " + id);
-        return true;
-      } );
-
-      if(count == ids.length)
-        deferred.resolve(result);
-      else
-        deferred.reject();
-      
-      Api.processing.getBinData = false;
-    }, Math.rand(Api.DELAY_MIN, Api.DELAY_MAX));
-    
-    return deferred.promise();
-  },
-
   /* Returns:
    * {
    *   error: error_string    ;; presently never returning an error
@@ -208,42 +164,6 @@ var Api = {
 
       var result = { };
       result[Api.lastId] = Api.bins[Api.lastId];
-      
-      deferred.resolve(result);
-    }, Math.rand(Api.DELAY_MIN, Api.DELAY_MAX) );
-
-    return deferred.promise();
-  },
-
-  /* Returns:
-   * {
-   *   error: error_string
-   * }
-   *   ||
-   * statement_id: {
-   *   statement_text: string
-   * }
-   */
-  addSubBin: function (contentId, text) {
-    var deferred = $.Deferred();
-
-    window.setTimeout(function () {
-      if(! (contentId in Api.bins)) {
-        deferred.reject( {
-          error: "Non-existent parent content id given"
-        } );
-
-        return;
-      }
-      
-      ++Api.lastId;
-      
-      Api.bins[contentId].bins[Api.lastId] = {
-        name: text
-      };
-
-      var result = { };
-      result[Api.lastId] = Api.bins[contentId].bins[Api.lastId];
       
       deferred.resolve(result);
     }, Math.rand(Api.DELAY_MIN, Api.DELAY_MAX) );
