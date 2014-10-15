@@ -608,7 +608,7 @@ var SortingDesk = (function () {
              * too. So, always delete, BUT, if the request fails show the user
              * a notification; for what purpose, I don't know. */
             if(bin.parent)
-              bin.parent.removeAt(bin.parent.indexOf(bin));
+              bin.parent.remove(bin);
             else
               self.owner_.bins.removeAt(self.owner_.bins.indexOf(bin));
               
@@ -1066,6 +1066,17 @@ var SortingDesk = (function () {
     this.append(bin.node);
   };
 
+  Bin.prototype.indexOf = function (bin)
+  {
+    /* Note: returns the index of immediately contained children bins. */
+    return this.children_.indexOf(bin);
+  };
+
+  Bin.prototype.remove = function (bin)
+  {
+    return this.removeAt(this.children_.indexOf(bin));
+  };
+
   Bin.prototype.removeAt = function (index)
   {
     var bin;
@@ -1102,30 +1113,6 @@ var SortingDesk = (function () {
   /* overridable */ Bin.prototype.getNodeChildren = function ()
   {
     return this.node_.find('>.' + this.owner_.owner.options.css.binChildren);
-  };
-
-  Bin.prototype.indexOf = function (bin)
-  {
-    var result = null,
-        search = function (bins) {
-          /* Top level search. */
-          result = bins.indexOf(bin);
-
-          if(result != -1)
-            return;
-
-          /* Not found. Go deep. */
-          bins.some(function (bin) {
-            search(bin.children_);
-
-            if(result != -1)
-              return true;
-          } );
-        };
-
-    search(this.children_);
-    
-    return result;
   };
 
   
