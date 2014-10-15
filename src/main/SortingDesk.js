@@ -38,9 +38,12 @@ var SortingDesk = (function () {
    * 
    * @param   cbs.moreText            Retrieve additional text items.
    * @param   cbs.getBinData          Get data about bins.
-   * @param   cbs.saveBinData         Save bin state.
    * @param   cbs.addBin              Add a bin.
    * @param   cbs.addSubBin           Add a sub bin.
+   * @param   cbs.textDismissed       Event triggered when a text item is
+   *                                  dismissed.
+   * @param   cbs.textDroppedInBin    Event triggered when a text item is
+   *                                  assigned to a bin.
    * @param   cbs.onRequestStart      Executed after request initiated.
    * @param   cbs.onRequestStop       Executed after request finished.
    * */
