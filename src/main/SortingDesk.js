@@ -1005,20 +1005,16 @@ var SortingDesk = (function () {
   
   Bin.prototype.add = function (bin)
   {
-    /* Contain sub-bin only once it's established it's not contained. */
-    var id = bin.id;
-
     /* Ensure a bin with the same id isn't already contained. */
-    this.children_.forEach(function (ib) {
-      if(ib.id == id)
-        throw "Bin is already contained: " + id;
-    } );
+    if(this.indexOf(bin) != -1)
+      throw "Bin is already contained: " + bin.id;
     
     this.children_.push(bin);
 
     /* Initialise bin and append its HTML. */
     bin.parent = this;
     bin.initialise();
+    
     this.append(bin.node);
   };
 
