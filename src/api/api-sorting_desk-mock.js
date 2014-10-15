@@ -59,7 +59,7 @@ var Api = {
     Api.lastId = 0;
     Api.lastItemId = 0;
     Api.processing = { };
-    Api.bins = $.extend(true, { }, bins);
+    Api.bins = bins.slice();
     Api.items = descriptor.items;
   },
 
