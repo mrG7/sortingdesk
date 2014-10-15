@@ -1005,12 +1005,15 @@ var SortingDesk = (function () {
       .on( {
         mouseenter: function () {
           self.owner_.onMouseEnter_(self);
+          return false;
         },
         mouseleave: function () {
           self.owner_.onMouseLeave_();
+          return false;
         },
         click: function () {
           self.owner_.onClick_(self);
+          return false;
         }
       } );
 
