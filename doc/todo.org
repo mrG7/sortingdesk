@@ -1,30 +1,35 @@
-* To do items [89%]
-** Create examples [0%]
-*** TODO No content ids
-*** TODO Sub-bins
+* To do items [90%]
 ** TODO Implement Events controller based on the publisher-subscriber design pattern
 ** TODO Create a list of interesting events to advertise via an Events controller
-** TODO Implement keyboard auto-repeat with configurable frequency
 ** TODO [#B] Prefix text-items' and bins' node ids
 - State "TODO"       from "WAIT"       [2014-09-07 Sun 08:16]
 - State "WAIT"       from "TODO"       [2014-09-05 Fri 10:41] \\
   Currently waiting to hear from support as to whether ids are guaranteed to always be unique.
 ** TODO Text items controller to notify client when no more items available
-** TODO Resolve all annotated TODO items
+** WAIT Resolve all annotated TODO items
+- State "WAIT"       from "TODO"       [2014-10-15 Wed 13:57] \\
+  To be done when Sorting Desk has reached a significant milestone.
+** WAIT Implement keyboard auto-repeat with configurable frequency
+- State "WAIT"       from "TODO"       [2014-10-15 Wed 13:56] \\
+  Probable unwanted feature.
 ** WAIT [#A] Allow bin statements to be edited
 - State "WAIT"       from "TODO"       [2014-10-10 Fri 16:11] \\
   This will most likely require involvement of the client via a callback.
 - State "TODO"       from "WAIT"       [2014-09-05 Fri 10:42]
 - State "WAIT"       from "TODO"       [2014-08-22 Fri 13:24] \\
   Not proceeding with this until it's clear whether bins based on existing text items are even editable.
+** DONE Reduce CSS required by Sorting Desk
+- State "DONE"       from "TODO"       [2014-10-15 Wed 14:35]
+** DONE Unbundle examples
+- State "DONE"       from "TODO"       [2014-10-15 Wed 13:58]
+** DONE Create bin iterator
+- State "DONE"       from "TODO"       [2014-10-15 Wed 13:34]
+** DONE Create factory method for sub-bin instantiation
+- State "DONE"       from "TODO"       [2014-10-15 Wed 13:33]
+** DONE Remove unused methods from =Api= namespace
+- State "DONE"       from "TODO"       [2014-10-15 Wed 13:48]
 ** DONE =TextItem= uses hard-coded CSS classes
 - State "DONE"       from "TODO"       [2014-10-10 Fri 16:20]
-** Conduct analysis on factory method pattern vs passing classes at init time [100%]
-*** DONE Implement chosen method
-- State "DONE"       from "TODO"       [2014-10-09 Thu 18:27]
-*** CANCELED Make it so each class owns its options
-- State "CANCELED"   from "TODO"       [2014-10-10 Fri 06:43] \\
-  This method violates a number logic principles.
 ** DONE Add support for sub-bins
 - State "DONE"       from "IN-PROGRESS" [2014-10-10 Fri 16:10]
 - State "IN-PROGRESS" from "WAIT"       [2014-10-10 Fri 11:52]
@@ -201,6 +206,9 @@ The text to use as anchor text in each item should be the longest string in the 
 - State "DONE"       from "TODO"       [2014-08-20 Wed 11:54]
 
 Add an input box in the UI that users can edit.
+** CANCELED Create common base class for =Bin= and =BinContainer=
+- State "CANCELED"   from "TODO"       [2014-10-15 Wed 13:33] \\
+  We would need multiple inheritance.
 ** CANCELED [#C] Implement user notifications
 - State "CANCELED"   from "WAIT"       [2014-10-09 Thu 10:43] \\
   This will have to be implemented by the client via notification of events. Not Sorting Desk's concern.
@@ -233,6 +241,15 @@ It was stated that "other types come from other sources including Facebook profi
 Asked to write it as a long code comment block but might be best done in a
 standalone *editable* text file that doesn't pollute the code and the repository?
 
+** Create examples [0%]
+*** TODO No content ids
+*** TODO Sub-bins
+** Conduct analysis on factory method pattern vs passing classes at init time [100%]
+*** DONE Implement chosen method
+- State "DONE"       from "TODO"       [2014-10-09 Thu 18:27]
+*** CANCELED Make it so each class owns its options
+- State "CANCELED"   from "TODO"       [2014-10-10 Fri 06:43] \\
+  This method violates a number logic principles.
 * Bugs [92%]
 ** TODO When items' DIV is selected, scrolling with keyboard both selects next item as well as scroll the DIV contents
 Scrolling on the items' DIV container must be suppressed.
