@@ -6,6 +6,9 @@
 - State "WAIT"       from "TODO"       [2014-09-05 Fri 10:41] \\
   Currently waiting to hear from support as to whether ids are guaranteed to always be unique.
 ** TODO Text items controller to notify client when no more items available
+** TODO Create examples [0%]
+*** TODO No content ids
+*** TODO Sub-bins
 ** WAIT Resolve all annotated TODO items
 - State "WAIT"       from "TODO"       [2014-10-15 Wed 13:57] \\
   To be done when Sorting Desk has reached a significant milestone.
@@ -241,9 +244,6 @@ It was stated that "other types come from other sources including Facebook profi
 Asked to write it as a long code comment block but might be best done in a
 standalone *editable* text file that doesn't pollute the code and the repository?
 
-** Create examples [0%]
-*** TODO No content ids
-*** TODO Sub-bins
 ** Conduct analysis on factory method pattern vs passing classes at init time [100%]
 *** DONE Implement chosen method
 - State "DONE"       from "TODO"       [2014-10-09 Thu 18:27]
