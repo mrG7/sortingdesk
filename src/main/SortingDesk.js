@@ -749,7 +749,6 @@ var SortingDesk = (function () {
       function (input) {
         return self.owner_.instantiate('Bin',
                                        self,
-                                       null,
                                        { name: input },
                                        null)
           .render();
@@ -766,13 +765,10 @@ var SortingDesk = (function () {
           .done(function (bin) {
             window.setTimeout(function () {
               /* We rely on the API returning exactly ONE descriptor. */
-              var id = Object.firstKey(bin);
-
               self.owner_.bins.add(
                 self.owner_.instantiate('Bin',
                                         self,
-                                        id,
-                                        bin[id]));
+                                        bin));
             }, 0);
             
             deferred.resolve();
@@ -906,12 +902,11 @@ var SortingDesk = (function () {
   /**
    * @class
    * */
-  var Bin = function (owner, id, bin)
+  var Bin = function (owner, bin)
   {
     /* Invoke super constructor. */
     Drawable.call(this, owner);
 
-    this.id_ = id;
     this.bin_ = bin;
     this.node_ = this.shortcut_ = null;
 
@@ -920,7 +915,7 @@ var SortingDesk = (function () {
 
     /* Define getters. */
     this.__defineGetter__("bin", function () { return this.bin_; } );
-    this.__defineGetter__("id", function () { return this.id_; } );
+    this.__defineGetter__("id", function () { return this.bin_.id; } );
     this.__defineGetter__("shortcut", function () { return this.shortcut_; } );
     this.__defineGetter__("node", function () { return this.node_; } );
 
@@ -946,7 +941,7 @@ var SortingDesk = (function () {
     (this.node_ = this.render())
       .attr( {
         'data-scope': 'bin',
-        'id': encodeURIComponent(this.id_)
+        'id': encodeURIComponent(this.id)
       } )
       .on( {
         mouseenter: function () {
@@ -1066,10 +1061,10 @@ var SortingDesk = (function () {
   /**
    * @class
    * */
-  var BinDefault = function (owner, id, bin)
+  var BinDefault = function (owner, bin)
   {
     /* Invoke super constructor. */
-    Bin.call(this, owner, id, bin);
+    Bin.call(this, owner, bin);
   };
 
   BinDefault.prototype = Object.create(Bin.prototype);
