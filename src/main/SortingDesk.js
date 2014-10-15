@@ -1203,13 +1203,9 @@ var SortingDesk = (function () {
         variant = this.node_.children().eq(0);
       else if(variant.length > 1) {
         /* We should never reach here. */
-        console.log("WARNING! Multiple text items selected:",
-                    variant.length);
-        
-        variant.removeClass(csel);
+        console.log("WARNING! Multiple text items selected:", variant.length);
 
         variant = variant.eq(0);
-        variant.addClass(csel);
       }
     } else if(typeof variant == 'number') {
       if(variant < 0)
