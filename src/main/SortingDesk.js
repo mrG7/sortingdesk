@@ -853,20 +853,42 @@ var SortingDesk = (function () {
       this.bins_[this.bins_.length - 1].node.after(node);
   };
 
+  ControllerBins.prototype.find = function (callback)
+  {
+    var result = null,
+        search = function (bins) {
+          bins.some(function (bin) {
+            /* Invoke callback. A true result means a positive hit and the
+             * current bin is returned, otherwise a search is initiated on the
+             * children bins, if any are found. */
+            if(callback(bin)) {
+              result = bin;
+              return true;
+            } else if(bin.children.length) {
+              search(bin.children);
+
+              if(result)
+                return true;
+            }
+
+            return false;
+          } );
+        };
+
+    search(this.bins_);
+    
+    return result;
+  };
+
   ControllerBins.prototype.indexOf = function (bin)
   {
-    /* Look at top level bins first. */
-    var index = this.bins_.indexOf(bin);
-    
-    /* If not found, look for a match in child bins. */
-    if(index == -1) {
-      this.bins_.some(function (ib) {
-        if( (index = ib.indexOf(bin)) != -1)
-          return true;
-      } );
-    }
+    /* Note: returns the index of top level bins only. */
+    return this.bins_.indexOf(bin);
+  };
 
-    return index;
+  ControllerBins.prototype.remove = function (bin)
+  {
+    return this.removeAt(this.bins_.indexOf(bin));
   };
 
   ControllerBins.prototype.removeAt = function (index)
@@ -887,8 +909,6 @@ var SortingDesk = (function () {
     /* Ensure shortcut not currently in use and that bin is contained. */
     if(this.getByShortcut(keyCode))
       return false;
-    else if(this.indexOf(bin) == -1)
-      throw "Bin not contained";
 
     /* Set new shortcut. */
     bin.setShortcut(keyCode);
@@ -897,50 +917,16 @@ var SortingDesk = (function () {
   
   ControllerBins.prototype.getByShortcut = function (keyCode)
   {
-    var result = null,
-        search = function (bins) {
-          bins.some(function (bin) {
-            if(bin.shortcut == keyCode) {
-              result = bin;
-              return true;
-            } else if(bin.children.length) {
-              search(bin.children);
-
-              if(result)
-                return true;
-            }
-
-            return false;
-          } );
-        };
-
-    search(this.bins_);
-    
-    return result;
+    return this.find(function (bin) {
+      return bin.shortcut == keyCode;
+    } );
   };
 
   ControllerBins.prototype.getById = function (id)
   {
-    var result = null,
-        search = function (bins) {
-          bins.some(function (bin) {
-            if(bin.id == id) {
-              result = bin;
-              return true;
-            } else if(bin.children.length) {
-              search(bin.children);
-
-              if(result)
-                return true;
-            }
-
-            return false;
-          } );
-        };
-
-    search(this.bins_);
-
-    return result;
+    return this.find(function (bin) {
+      return bin.id == id;
+    } );
   };
 
   ControllerBins.prototype.onClick_ = function (bin)
