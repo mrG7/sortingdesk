@@ -982,9 +982,9 @@ var SortingDesk = (function () {
     }, 0);
   };
 
-  /* overridable */ Bin.prototype.createSubBin = function (id, bin)
+  /* overridable */ Bin.prototype.createSubBin = function (bin)
   {
-    return this.owner_.owner.instantiate('Bin', this.owner_, id, bin);
+    return this.owner_.owner.instantiate('Bin', this.owner_, bin);
   };
   
   Bin.prototype.add = function (bin)
