@@ -7,6 +7,11 @@
 
 	Sub-bins can now be instantiated via a factory method.
 
+	Main class constructor now requires bins' descriptors to be given
+	in a `bins' option and no callback is invoked to retrieve bin
+	data. This resulted in a `Bin' class constructor not requiring its
+	id given separately.
+
 	* examples:
 
 	Reverted to a previous commit when examples were standalone.
@@ -14,10 +19,24 @@
 	Created a prettier example of Sorting Desk utilising improved CSS
 	styling.
 
+	Created an example that uses Sorting Desk's now default bare-bones
+	CSS styling.
+
 	* css:
 
 	Stripped Sorting Desk's CSS down to a minimum that allows it to
-	function without many visual artifacts.
+	function with only very basic CSS styling.
+
+	* Api:
+
+	Consolidated `Api' namespaces' interfaces.
+
+	Fixed stub `removeBin'.
+
+	* all:
+
+	Several improvements to code.
+
 
 2014-10-10  Miguel Guedes  <miguel@miguelguedes.org>
 
