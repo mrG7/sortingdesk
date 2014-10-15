@@ -990,7 +990,7 @@ var SortingDesk = (function () {
   Bin.prototype.add = function (bin)
   {
     /* Ensure a bin with the same id isn't already contained. */
-    if(this.indexOf(bin) != -1)
+    if(this.owner_.getById(bin.id))
       throw "Bin is already contained: " + bin.id;
     
     this.children_.push(bin);
