@@ -25,31 +25,31 @@
                 
   require( [ "SortingDesk", "API-SortingDesk" ], function () {
     var loading = $("#loading"),
-        contentIds = [
+        bins = [
           {
-            node_id: '#100',
-            features: { NAME: { "Irrelevant": 0 } },
+            id: '#100',
+            name: "Irrelevant",
             children: [
               {
-                node_id: "test-1",
-                features: { NAME: { "Inner irrelevancy": 0 } }
+                id: "test-1",
+                name: "Inner irrelevancy"
               },
               {
-                node_id: "test-2",
-                features: { NAME: { "Additional irrelevancy": 0 } }
+                id: "test-2",
+                name: "Additional irrelevancy"
               },
               {
-                node_id: "test-3",
-                features: { NAME: { "Sub-par irrelevancy": 0 } }
+                id: "test-3",
+                name: "Sub-par irrelevancy"
               },
               {
-                node_id: "test-4",
-                features: { NAME: { "Worrying irrelevancy": 0 } }
+                id: "test-4",
+                name: "Worrying irrelevancy"
               }
             ]
           },
-          { node_id: '^1$0#1', features: { NAME: { "Rubbish": 0 } } },
-          { node_id: '1_0%%^&#2', features: { NAME: { "Keep": 0 } } }
+          { id: '^1$0#1', name: "Rubbish" },
+          { id: '1_0%%^&#2', name: "Keep" }
         ],
         nitems = $("#items"),
         nbins = $("#bins"),
@@ -60,13 +60,15 @@
     nitems.height(height);
     nbins.height(height);
 
+    Api.initialise(g_descriptor, bins);
+
     new SortingDesk.Instance( {
       nodes: {
         items: nitems,
         bins: nbins,
         buttonDismiss: $("#button-dismiss")
       },
-      contentIds: Api.initialise(g_descriptor, contentIds),
+      bins: bins,
       visibleItems: 15
     }, $.extend(Api, {
       onRequestStart: function () { if(!requests++) loading.stop().fadeIn(); },

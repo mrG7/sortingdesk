@@ -49,11 +49,7 @@ var SortingDesk = (function () {
    * */
   var Instance = function (opts, cbs)
   {
-    /* IMPORTANT: It is crucial that the `initialised_' attribute below has an
-     * initial value of `null' *prior* to the method `initialise_' being
-     * called. This is so we can reset a Sorting Desk instance that is
-     * initialisING. */
-    this.initialised_ = null;
+    this.initialised_ = false;
     this.resetter_ = false;
     
     /* Allow a jQuery element to be passed in instead of an object containing
@@ -73,10 +69,8 @@ var SortingDesk = (function () {
       throw "Missing `items' nodes option";
 
     /* Create dummy jQuery element if bins container not provided. */
-    if(!opts.nodes.bins) {
-      opts.nodes.binsProvided = false;
+    if(!opts.nodes.bins)
       opts.nodes.bins = $();
-    }
     
     /* Allow a function to be passed in instead of an object containing
      * callbacks. In the case that a function is passed in, it is assumed to be
@@ -94,32 +88,58 @@ var SortingDesk = (function () {
     
     this.options_ = $.extend(true, $.extend(true, {}, defaults_), opts);
     this.callbacks_ = cbs;
-    
-    /* Do not request bin data if a bins HTML container (`options_.nodes.bins')
-     * wasn't given OR content ids (`options_.nodes.contentIds') were not
-     * specified. */
-    if(this.options_.nodes.bins && this.options_.contentIds) {
-      if(!this.callbacks_.getBinData)
-        throw "Mandatory `getBinData' callback missing";
-      
-      var promise = this.callbacks_.getBinData(this.options_.contentIds),
-          self = this;
 
-      if(!promise)
-        throw "Another `getBinData' request is ongoing";
-      
-      promise
-        .done(function(result) {
-          self.initialise_(result);
-        } ).fail(function () {
-          console.log("Failed to initialise Sorting Desk UI");
-        } );
-    } else
-      this.initialise_();
+    var self = this;
+
+    /* Begin instantiating and initialising controllers. */
+    (this.callbacks_ = new ControllerCallbacks(this, this.callbacks_))
+      .initialise();
+    
+    (this.requests_ = new ControllerRequests(this))
+      .initialise();
+    
+    if(!this.options_.nodes.buttonDismiss)
+      this.options_.nodes.buttonDismiss = $();
+
+    (this.dismiss_ = new ControllerButtonDismiss(this))
+      .initialise();
+
+    (this.bins_ = this.instantiate('ControllerBins', this))
+      .initialise();
+    
+    /* Add bins only if a bin container node has been provided and there bins
+     * to add. */
+    if(this.options_.bins) {
+      for(var id in this.options_.bins) {
+        var descriptor = this.options_.bins[id],
+            bin;
+        
+        if(descriptor.error) {
+          console.log("Failed to load bin:", id, descriptor.error);
+          continue;
+        }
+
+        bin = this.instantiate('Bin', this.bins_, id, descriptor);
+        this.bins_.add(bin);
+
+        /* Instantiate and add sub-bins. */
+        for(var iid in descriptor.children)
+          bin.add(bin.createSubBin(iid, descriptor.children[iid]));
+      }
+    }
+    
+    (this.items_ = new ControllerItems(this))
+      .initialise();
+
+    (this.keyboard_ = new ControllerKeyboard(this))
+      .initialise();
+
+    this.initialised_ = true;
+    console.log("Sorting Desk UI initialised");
   };
 
   Instance.prototype = {
-    initialised_: null,
+    initialised_: false,
     resetter_: false,
     options_: null,
     /* Controllers */
@@ -145,8 +165,6 @@ var SortingDesk = (function () {
        * currently initialising itself. */
       if(this.resetter_)
         return this.resetter_;
-      else if(this.initialised_ === null)
-        throw "Instance still initialising";
       
       this.resetter_ = new InstanceResetter(this).reset(
         [ this.requests_,
@@ -204,59 +222,6 @@ var SortingDesk = (function () {
 
     get items ()
     { return this.items_; },
-
-    initialise_: function (bins)
-    {
-      var self = this;
-
-      /* Begin instantiating and initialising controllers. */
-      (this.callbacks_ = new ControllerCallbacks(this, this.callbacks_))
-        .initialise();
-      
-      (this.requests_ = new ControllerRequests(this))
-        .initialise();
-      
-      if(!this.options_.nodes.buttonDismiss)
-        this.options_.nodes.buttonDismiss = $();
-
-      (this.dismiss_ = new ControllerButtonDismiss(this))
-        .initialise();
-
-      (this.bins_ = this.instantiate('ControllerBins', this))
-        .initialise();
-      
-      /* Add bins only if a bin container node has been provided and there bins
-       * to add. */
-      if(this.options_.nodes.binsProvided !== false && bins) {
-        for(var id in bins) {
-          var descriptor = bins[id],
-              bin;
-          
-          if(descriptor.error) {
-            console.log("Failed to load bin:", id, descriptor.error);
-            continue;
-          }
-
-          bin = this.instantiate('Bin', this.bins_, id, descriptor);
-          this.bins_.add(bin);
-
-          /* Instantiate and add sub-bins. */
-          for(var iid in descriptor.children) {
-            bin.add(bin.createSubBin(iid,
-                                     descriptor.children[iid]));
-          }
-        }
-      }
-      
-      (this.items_ = new ControllerItems(this))
-        .initialise();
-
-      (this.keyboard_ = new ControllerKeyboard(this))
-        .initialise();
-
-      this.initialised_ = true;
-      console.log("Sorting Desk UI initialised");
-    },
 
     instantiate: function ( /* class, ... */ )
     {

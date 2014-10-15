@@ -56,34 +56,11 @@ var Api = {
   processing: null,
 
   initialise: function (descriptor, bins) {
-    var ids = [ ],
-        process = function (bins, parent) {
-          bins instanceof Array && bins.forEach(function (bin) {
-            if(parent == Api.bins)
-              ids.push(bin.node_id);
-            
-            parent[bin.node_id] = {
-              name: Object.firstKey(bin.features.NAME),
-              children: { }
-            };
-
-            if(typeof bin.node_id == 'number' && Api.lastId < bin.node_id)
-              Api.lastId = bin.node_id;
-
-            if(bin.children instanceof Array)
-              process(bin.children, parent[bin.node_id].children);
-          } );
-        };
-
     Api.lastId = 0;
     Api.lastItemId = 0;
     Api.processing = { };
-    Api.bins = { };
-
-    process(bins, Api.bins);
+    Api.bins = $.extend(true, { }, bins);
     Api.items = descriptor.items;
-
-    return ids;
   },
 
   moreTexts: function (num) {
@@ -141,6 +118,26 @@ var Api = {
     return deferred.promise();
   },
 
+  getBinById_: function (id)
+  {
+    var result = null,
+        search = function (bins) {
+          bins.some(function (bin) {
+            if(bin.id == id) {
+              result = bin;
+              return true;
+            } else if(bin.children) {
+              if(search(bin.children))
+                return true;
+            }
+          } );
+
+          return result !== null;
+        };
+
+    return search(Api.bins);
+  },
+
   /* Returns:
    * {
    *   error: error_string    ;; presently never returning an error
@@ -185,28 +182,36 @@ var Api = {
     var deferred = $.Deferred();
 
     window.setTimeout(function () {
-      var found = false;
-      
-      /* Ensure bin exists. */
-      for(var i in Api.bins) {
-        var bin = Api.bins[i];
+      var removed = false,
+          parents = [ ],
+          process = function (bins) {
+            bins.some(function (bin) {
+              if(bin.id == id) {
+                if(parents.length) {
+                  var c = parents[parents.length - 1].children;
+                  c.splice(c.indexOf(bin), 1);
+                } else
+                  Api.bins.splice(Api.bins.indexOf(bin), 1);
+                
+                return (removed = true);
+              } else if(bin.children) {
+                parents.push(bin);
+                
+                if(process(bin.children))
+                  return true;
 
-        if(i == id) {
-          delete Api.bins[j];
-          deferred.resolve( { error: null } );
-          break;
-        }
-        
-        for(var j in bin.bins) {
-          if(j == id) {
-            delete bin.bins[j];
-            deferred.resolve( { error: null } );
-            break;
-          }
-        }
-      }
+                parents.pop();
+              }
 
-      if(!found)
+              return false;
+            } );
+
+            return removed;
+          };
+
+      if(removed)
+        deferred.resolve( { error: null } );
+      else
         deferred.reject( { error: "Not a bin" } );
     }, Math.rand(Api.DELAY_MIN, Api.DELAY_MAX));
 
