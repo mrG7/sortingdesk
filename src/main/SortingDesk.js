@@ -785,13 +785,9 @@ var SortingDesk = (function () {
   
   ControllerBins.prototype.add = function (bin)
   {
-    var id = bin.id;
-
     /* Ensure a bin with the same id isn't already contained. */
-    this.bins_.forEach(function (ib) {
-      if(ib.id == id)
-        throw "Bin is already contained: " + id;
-    } );
+    if(this.getById(bin.id))
+      throw "Bin is already contained: " + bin.id;
 
     /* Initialise bin. */
     bin.initialise();
