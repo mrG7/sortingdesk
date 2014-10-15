@@ -231,21 +231,6 @@ var Api = {
     return deferred.promise();
   },
 
-  /* (Always) returns:
-   * {
-   *   error: null
-   * }
-   */
-  saveBinData: function (id, bins) {
-    var deferred = $.Deferred();
-    
-    window.setTimeout(function () {
-      deferred.resolve( { error: null } );
-    }, Math.rand(Api.DELAY_MIN, Api.DELAY_MAX));
-
-    return deferred.promise();
-  },
-
   /* Returns:
    * {
    *   error: error_string    ;; presently never returning an error
