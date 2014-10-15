@@ -180,10 +180,9 @@ var Api = {
     var deferred = $.Deferred();
 
     window.setTimeout(function () {
-      var removed = false,
-          parents = [ ],
+      var parents = [ ],
           process = function (bins) {
-            bins.some(function (bin) {
+            return bins.some(function (bin) {
               if(bin.id == id) {
                 if(parents.length) {
                   var c = parents[parents.length - 1].children;
@@ -191,7 +190,7 @@ var Api = {
                 } else
                   Api.bins.splice(Api.bins.indexOf(bin), 1);
                 
-                return (removed = true);
+                return true;
               } else if(bin.children) {
                 parents.push(bin);
                 
@@ -203,11 +202,9 @@ var Api = {
 
               return false;
             } );
-
-            return removed;
           };
 
-      if(removed)
+      if(process(Api.bins))
         deferred.resolve( { error: null } );
       else
         deferred.reject( { error: "Not a bin" } );
