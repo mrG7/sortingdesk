@@ -189,34 +189,39 @@ var Api = {
     var deferred = $.Deferred();
 
     window.setTimeout(function () {
-      var found = false;
-      
-      /* Ensure bin exists. */
-      for(var i in Api.bins) {
-        var bin = Api.bins[i];
+      var parents = [ ],
+          process = function (bins) {
+            return bins.some(function (bin) {
+              if(bin.id == id) {
+                if(parents.length) {
+                  var c = parents[parents.length - 1].children;
+                  c.splice(c.indexOf(bin), 1);
+                } else
+                  Api.bins.splice(Api.bins.indexOf(bin), 1);
+                
+                return true;
+              } else if(bin.children) {
+                parents.push(bin);
+                
+                if(process(bin.children))
+                  return true;
 
-        if(i == id) {
-          delete Api.bins[j];
-          deferred.resolve( { error: null } );
-          break;
-        }
-        
-        for(var j in bin.bins) {
-          if(j == id) {
-            delete bin.bins[j];
-            deferred.resolve( { error: null } );
-            break;
-          }
-        }
-      }
+                parents.pop();
+              }
 
-      if(!found)
+              return false;
+            } );
+          };
+
+      if(process(Api.bins))
+        deferred.resolve( { error: null } );
+      else
         deferred.reject( { error: "Not a bin" } );
     }, Math.rand(Api.DELAY_MIN, Api.DELAY_MAX));
 
     return deferred.promise();
   },
-
+  
   textDismissed: function(item) {},
   textDroppedInBin: function(item, bin) {}
 };
