@@ -239,9 +239,7 @@ var SortingDesk = (function () {
 
           /* Instantiate and add sub-bins. */
           for(var iid in descriptor.children) {
-            bin.add(this.instantiate('Bin',
-                                     this.bins_,
-                                     iid,
+            bin.add(bin.createSubBin(iid,
                                      descriptor.children[iid]));
           }
         }
@@ -1044,6 +1042,11 @@ var SortingDesk = (function () {
     }, 0);
   };
 
+  /* overridable */ Bin.prototype.createSubBin = function (id, bin)
+  {
+    return this.owner_.owner.instantiate('Bin', this.owner_, id, bin);
+  };
+  
   Bin.prototype.add = function (bin)
   {
     /* Contain sub-bin only once it's established it's not contained. */
