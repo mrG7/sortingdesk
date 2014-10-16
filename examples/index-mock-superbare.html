@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Sorting Desk - Offline - Super bare bones</title>
+  <!-- Include some simple data. -->
+  <script type="text/javascript">
+    function repeat_str(s, count) {
+      var repetitions = [];
+      for (var i = 0; i < count; i++) {
+        repetitions.push(s);
+      }
+      return repetitions.join(' ');
+    }
+
+    var simple_data = [
+      {
+        node_id: "1",
+        name: "red",
+        url: "https://en.wikipedia.org/wiki/Red",
+        text: repeat_str("This is some <b>red</b> text.", 100),
+      },
+      {
+        node_id: "2",
+        name: "green",
+        url: "https://en.wikipedia.org/wiki/Green",
+        text: repeat_str("This is some green text.", 100),
+      },
+      {
+        node_id: "3",
+        name: "blue",
+        url: "https://en.wikipedia.org/wiki/Blue",
+        text: repeat_str("This is some blue text.", 100),
+      },
+      {
+        node_id: "4",
+        name: "yellow",
+        url: "https://en.wikipedia.org/wiki/Yellow",
+        text: repeat_str("This is some yellow text.", 100),
+      },
+      {
+        node_id: "5",
+        name: "brown",
+        url: "https://en.wikipedia.org/wiki/Brown",
+        text: repeat_str("This is some brown text.", 100),
+      },
+      {
+        node_id: "6",
+        name: "black",
+        url: "https://en.wikipedia.org/wiki/Black",
+        text: repeat_str("This is some black text.", 100),
+      }
+    ];
+  </script>
+
+  <!-- Libraries -->
+  <link rel="stylesheet" href="../src/main/css/SortingDesk.css" media="screen" />
+  <script type="text/javascript" src="lib/require-2.1.14.min.js"></script>
+  <script type="text/javascript">
+  require.config( {
+    baseUrl: '../',
+    paths: {
+      "SortingDesk": "src/main/SortingDesk",
+      "jQuery": "lib/jquery-2.1.1.min"
+    }
+  } );
+
+  require( [ "SortingDesk" ], function () {
+    var moreTexts = (function() {
+      var processing = false,
+          lastItemId = 0;
+      return function(num) {
+        if(processing) {
+          console.log("moreTexts: request ongoing: ignoring new request");
+          return null;
+        }
+        processing = true;
+
+        var deferred = $.Deferred();
+        window.setTimeout(function () {
+          var result = [ ];
+          while(num-- > 0) {
+            if(lastItemId >= simple_data.length) {
+              lastItemId = 0;
+            }
+            result.push(simple_data[lastItemId++]);
+          }
+          processing = false;
+          deferred.resolve(result);
+        }, 250);
+        return deferred.promise();
+      };
+    })();
+    new SortingDesk.Instance({ nodes: { items: $('#items') }, visibleItems: 4 },
+                             { moreTexts: moreTexts });
+  });
+  </script>
+
+  <!-- Make the items div not take up the whole page. -->
+  <style type="text/css">
+    #items {
+      width: 700px;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body>
+  <div id="items"></div>
+</body>
+</html>
