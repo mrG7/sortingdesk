@@ -37,9 +37,7 @@ var SortingDesk = (function () {
    * @param   {Object}    cbs   Map of all callbacks
    * 
    * @param   cbs.moreText            Retrieve additional text items.
-   * @param   cbs.getBinData          Get data about bins.
    * @param   cbs.addBin              Add a bin.
-   * @param   cbs.addSubBin           Add a sub bin.
    * @param   cbs.textDismissed       Event triggered when a text item is
    *                                  dismissed.
    * @param   cbs.textDroppedInBin    Event triggered when a text item is
@@ -87,7 +85,13 @@ var SortingDesk = (function () {
     console.log("Initialising Sorting Desk UI");
     
     this.options_ = $.extend(true, $.extend(true, {}, defaults_), opts);
-    this.callbacks_ = cbs;
+    this.callbacks_ = $.extend({
+        addBin: function() {},
+        textDismissed: function() {},
+        textDroppedInBin: function() {},
+        onRequestStart: function() {},
+        onRequestStop: function() {},
+    }, cbs);
 
     var self = this;
 
