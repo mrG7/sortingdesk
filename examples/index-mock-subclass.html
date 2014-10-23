@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Sorting Desk - Offline - Subclassing</title>
+  
+  <link rel="stylesheet" href="css/theme-default.css" media="screen" />
+  <link rel="stylesheet" href="css/theme-example-default.css" media="screen" />
+
+  <!-- Libraries -->
+  <script type="text/javascript" src="lib/require-2.1.14.min.js"></script>
+  
+  <!-- Main initialisation logic -->
+  <script type="text/javascript">
+
+  require.config( {
+    baseUrl: '../',
+    paths: {
+      "SortingDesk": "src/main/SortingDesk",
+      "API-SortingDesk": "src/api/api-sorting_desk-mock",
+      "API-Data": "src/api/data/al_ahram.json?",
+      "jQuery": "lib/jquery-2.1.1.min"
+    }
+  } );
+                
+  require( [ "SortingDesk", "API-SortingDesk" ], function () {
+    var loading = $("#loading"),
+        bins = [
+          {
+            id: '#100',
+            name: "Irrelevant",
+            children: [
+              {
+                id: "test-1",
+                name: "Inner irrelevancy"
+              },
+              {
+                id: "test-2",
+                name: "Additional irrelevancy"
+              },
+              {
+                id: "test-3",
+                name: "Sub-par irrelevancy"
+              },
+              {
+                id: "test-4",
+                name: "Worrying irrelevancy"
+              }
+            ]
+          },
+          { id: '^1$0#1', name: "Rubbish" },
+          { id: '1_0%%^&#2', name: "Keep" },
+        ],
+        nitems = $("#items"),
+        nbins = $("#bins"),
+        height = $(window).height() - nitems.offset().top - 45,
+        requests = 0;
+
+    $(".wrapper").fadeIn();
+    nitems.height(height);
+    nbins.height(height);
+    
+    Api.initialise(g_descriptor, bins);
+
+
+    /* Specialised class `Bin'; derives from `SortingDesk.Bin'. */
+    var Bin = function (owner, bin)
+    { SortingDesk.Bin.call(this, owner, bin); }
+
+    Bin.prototype = Object.create(SortingDesk.Bin.prototype);
+
+    Bin.prototype.render = function () {
+      return $('<div class="sd-bin"><div class="sd-bin-shortcut"></div>'
+             +'<div>' + this.bin_.name
+             + '</div><div class="sd-children"></div></div>');
+    };
+
+    /* Note: I (still) believe SortingDesk should understand the concept of
+     * sub-bins, given that it understands the concept of children bins, and
+     * should thus both provide a default implementation of a sub-bin
+     * (`SubBinDefault'), export its base class (`SubBin') and itself
+     * instantiate `SubBin' classes.
+     *
+     * In addition, if `ControllerBin' does not possess a `createBin' method for
+     * the purpose of instantiating top level bins, why should `Bin' have a
+     * `createSubBin' method for the purpose of instantiating sub-bins? This
+     * strikes me as incoherent. In my view, sub-bins should be instantiated by
+     * Sorting Desk using the factory method/class instantiation mechanism by
+     * which `Bin' is (and other classes are) instantiated. 
+     *
+     * The current method of instantiating sub-bins is not only incoherent but
+     * also forces the client to always subclass `Bin' (which may not be
+     * desired) and override `createSubBin'. */
+    Bin.prototype.createSubBin = function (bin) {
+      return new SubBin(this.owner_, bin);
+    };
+
+
+    /* Specialised class `SubBin'; derives from `SortingDesk.Bin'; instantiated
+     * by `Bin' in `createSubBin' above. */
+    var SubBin = function (owner, bin)
+    { SortingDesk.Bin.call(this, owner, bin); }
+
+    SubBin.prototype = Object.create(SortingDesk.Bin.prototype);
+
+    SubBin.prototype.render = function () {
+      return $('<div class="sd-bin sub-bin"><div class="sd-bin-shortcut"></div>'
+             +'<div>' + this.bin_.name
+             + '</div><div class="sd-children"></div></div>');
+    };
+    
+
+    new SortingDesk.Instance( {
+      nodes: {
+        items: nitems,
+        bins: nbins,
+        buttonDismiss: $("#button-dismiss")
+      },
+      bins: bins,
+      visibleItems: 15,
+      constructors: {
+        Bin: Bin
+      }
+    }, $.extend(Api, {
+      onRequestStart: function () { if(!requests++) loading.stop().fadeIn(); },
+      onRequestStop: function () { if(!--requests) loading.stop().fadeOut(); }
+    } ) );
+    
+    g_descriptor = null;
+    
+  });
+
+    </script>
+</head>
+<body>
+  <div id="wrapper-outer">
+    <div id="wrapper-bins" class="wrapper">
+      <div id="bins">
+      </div>
+    </div>
+    <div id="wrapper-items" class="wrapper">
+      <div id="items">
+      </div>
+    </div>
+  </div>
+  <div id="button-dismiss" class="sd-button-dismiss">X</div>
+  <div id="loading">Loading...</div>
+</body>
+</html>
