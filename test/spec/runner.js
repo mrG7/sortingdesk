@@ -8,6 +8,8 @@
  * 
  */
 
+/*global require, jasmine */
+
 
 require.config( {
   baseUrl: '../',
