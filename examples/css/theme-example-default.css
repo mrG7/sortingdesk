@@ -275,3 +275,17 @@ A.sd-text-item-title:hover {
   border-color: #7A4747;
   color: #FFF5F5;
 }
+
+
+/* Non `sd' prefixed classes follow. */
+.sub-bin {
+  background-color: #d3b3d8;
+  border-color: #9A8C9C;
+  color: #96518B;
+}
+
+.sub-bin:hover:not(.sd-adding) {
+  background-color: #e7ceeb;
+  border-color: #caa3cf;
+  color: #cf77c1;
+}
