@@ -1666,6 +1666,9 @@ var SortingDesk = (function () {
 
     node.on( {
       dragstart: function (e) {
+        /* Note: event propagation needs to be stopped before assignment of
+         * `originalEvent' or some tests will break. */
+        e.stopPropagation();
         e = e.originalEvent;
         e.dataTransfer.setData('Text', this.id);
 
@@ -1676,11 +1679,12 @@ var SortingDesk = (function () {
 
         if(options.dragstart)
           options.dragstart(e);
-
-        e.stopPropagation();
       },
       
       dragend: function (e) {
+        /* Note: event propagation needs to be stopped before assignment of
+         * `originalEvent' or some tests will break. */
+        e.stopPropagation();
         e = e.originalEvent;
         
         if(options.classDragging)
@@ -1690,8 +1694,6 @@ var SortingDesk = (function () {
         
         if(options.dragend)
           options.dragend(e);
-
-        e.stopPropagation();
       }
     } ).prop('draggable', true);
   };
