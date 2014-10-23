@@ -8,7 +8,7 @@
  * 
  */
 
-/*global g_descriptor, SortingDesk, Api */
+/*global $, g_descriptor, SortingDesk, Api */
 /*global afterEach */
 /*jshint laxbreak:true */
 
@@ -18,21 +18,31 @@ Api.DELAY_MIN = Api.DELAY_MAX = 0;
 
 /* Variables */
 var g_sortingDesk = null,
-    g_secondaryBins = [
-      { node_id: 100, features: { NAME: { "Irrelevant": 0 } } },
-      { node_id: 101, features: { NAME: { "Rubbish": 0 } } },
-      { node_id: 102, features: { NAME: { "Keep": 0 } } }
+    g_bins = [
+      {
+        id: '#100',
+        name: "Irrelevant",
+        children: [
+          {
+            id: "test-1",
+            name: "Inner irrelevancy"
+          },
+          {
+            id: "test-2",
+            name: "Additional irrelevancy"
+          }
+        ]
+      },
+      { id: '^1$0#1', name: "Rubbish" },
+      { id: '1_0%%^&#2', name: "Keep" },
     ],
-    g_primaryContentId = g_descriptor.primaryBin.node_id,
-    g_secondaryContentIds = Api.initialise(g_descriptor, g_secondaryBins),
     g_options = {
       nodes: {
         items: $('<div />'),
         bins: $('<div />'),
-        binDelete: $('<div />')
+        buttonDismiss: $('<div />')
       },
-      primaryContentId: g_primaryContentId,
-      secondaryContentIds: g_secondaryContentIds,
+      bins: g_bins,
       visibleItems: 5,
       delays: {
         animateAssign: 0,
@@ -44,22 +54,7 @@ var g_sortingDesk = null,
         textItemFade: 0
       }
     },
-    g_callbacks = {
-      moreTexts: Api.moreTexts,
-      getBinData: Api.getBinData,
-      saveBinData: Api.saveBinData,
-      addPrimarySubBin: Api.addPrimarySubBin,
-      addSecondaryBin: Api.addSecondaryBin,
-      removePrimarySubBin: Api.removePrimarySubBin,
-      removeSecondaryBin: Api.removeSecondaryBin,
-      textDismissed: Api.textDismissed,
-      textDroppedInBin: Api.textDroppedInBin,
-      renderText: Api.renderText,
-      renderPrimaryBin: Api.renderPrimaryBin,
-      renderPrimarySubBin: Api.renderPrimarySubBin,
-      renderSecondaryBin: Api.renderSecondaryBin,
-      renderAddButton: Api.renderAddButton
-    },
+    g_callbacks = Api,
     reset = true,
     result = false;
     
@@ -76,14 +71,15 @@ var DELAY = 10,
 
 
 function setup() {
+  Api.initialise(g_descriptor, g_bins);
+
   afterEach(function () {
-    if(g_sortingDesk
-       && g_sortingDesk.isInitialised
-       && g_sortingDesk.isInitialised())
-    {
+    if(g_sortingDesk && g_sortingDesk.initialised) {
       g_sortingDesk.reset()
-        .done(function () {
+        .always(function () {
           reset = true;
+
+          Api.initialise(g_descriptor, g_bins);
         } );
     } else
       reset = true;
@@ -99,20 +95,16 @@ function run(options, callbacks, condition, done) {
 
     window.clearInterval(interval);
 
-    Api.lastItemId = 0;
-    g_sortingDesk = new SortingDesk(options, callbacks);
+    g_sortingDesk = new SortingDesk.Instance(options, callbacks);
     reset = false;
 
-    interval = window.setInterval(function () {
-      if(!g_sortingDesk.isInitialised())
-        return;
+    if(!g_sortingDesk.initialised)
+      throw "Sorting Desk failed to initialise";
       
-      window.clearInterval(interval);
-      condition();
+    condition();
       
-      if(done)
-        done();
-    }, DELAY);
+    if(done)
+      done();
   }, DELAY);
 }
 
@@ -136,18 +128,21 @@ function runAfterItemsRendered(options, callbacks, condition, done) {
 
     window.clearInterval(interval);
 
-    Api.lastItemId = 0;
-    g_sortingDesk = new SortingDesk(options, callbacks);
+    g_sortingDesk = new SortingDesk.Instance(options, callbacks);
     reset = false;
 
+    if(!g_sortingDesk.initialised)
+      throw "Sorting Desk failed to initialise";
+    
     interval = window.setInterval(function () {
-      if(!g_sortingDesk.isInitialised())
+      if(g_options.nodes.items.children().length < g_options.visibleItems)
         return;
-      else if(g_options.nodes.items.children().length < g_options.visibleItems)
-        return;
-      
-      window.clearInterval(interval);
 
+      window.clearInterval(interval);
+      
+      if(g_options.nodes.items.children().length > g_options.visibleItems)
+        throw "Invalid item count: " + g_options.nodes.items.children().length;
+      
       condition();
       
       if(done)
@@ -166,7 +161,7 @@ var DraggingEvent = function (node)
   this.node = node;
   this.event = $.Event('dragstart');
   this.data = { };
-  
+
   this.event.originalEvent = {
     target: node.get(0),
     dataTransfer: {

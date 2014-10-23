@@ -22,7 +22,7 @@ describe('Instance', function () {
   
   it('initialises itself', function (done) {
     run(g_options, g_callbacks, function () {
-      expect(g_sortingDesk.isInitialised()).toBe(true);
+      expect(g_sortingDesk.initialised).toBe(true);
     }, done);
   } );
 
@@ -34,7 +34,7 @@ describe('Instance', function () {
       
       run({ nodes: { items: $() } }, g_callbacks,
           function () {
-            expect(g_sortingDesk.isInitialised()).toBe(true);
+            expect(g_sortingDesk.initialised).toBe(true);
           },
           function () {
             g_sortingDesk.reset();
@@ -49,7 +49,7 @@ describe('Instance', function () {
     run(g_options, g_callbacks, function () {
       g_sortingDesk.reset()
         .done(function () {
-          expect(g_sortingDesk.isInitialised()).toBe(false);
+          expect(g_sortingDesk.initialised).toBe(false);
           done();
         } );
     } );
@@ -70,29 +70,14 @@ describe('Instance', function () {
   } );
   
   describe('Public methods', function () {
-    it("doesn't process `remove' when not initialised",
-       function (done) {
-         runNoInstantiation(function () {
-           expect(function () { g_sortingDesk.remove(1); })
-             .toThrow("Sorting Desk not initialised");
-         }, done);
-       } );
-
-    it("doesn't process `getById' when not initialised",
-       function (done) {
-         runNoInstantiation(function () {
-           expect(function () { g_sortingDesk.getById(1); })
-             .toThrow("Sorting Desk not initialised");
-         }, done);
-       } );
-    
     it("`remove' removes the correct text item",
        function (done) {
          runAfterItemsRendered(g_options, g_callbacks, function () {
            var id = g_options.nodes.items.children().get(1).id;
            
            expect(g_options.nodes.items.find("[id='" + id + "']").length).toBe(1);
-           expect(g_sortingDesk.remove(decodeURIComponent(id))).toBe(true);
+           expect(g_sortingDesk.items.remove(
+             g_sortingDesk.items.getById(decodeURIComponent(id)))).toBe(true);
 
            window.setTimeout(function () {
              expect(g_options.nodes.items.find("[id='" + id + "']").length).toBe(0);
@@ -107,7 +92,10 @@ describe('Instance', function () {
            var id = g_options.nodes.items.children().get(1).id + "_";
            
            expect(g_options.nodes.items.find("[id='" + id + "']").length).toBe(0);
-           expect(g_sortingDesk.remove(decodeURIComponent(id))).toBe(false);
+           expect(function () {
+             g_sortingDesk.items.remove(
+               g_sortingDesk.items.getById(decodeURIComponent(id)));
+           } ).toThrow("Invalid item index");
 
            window.setTimeout(function () {
              expect(g_options.nodes.items.find("[id='" + id +
@@ -122,7 +110,7 @@ describe('Instance', function () {
     it("`getById' returns correct text item",
        function (done) {
          runAfterItemsRendered(g_options, g_callbacks, function () {
-           expect(g_sortingDesk.getById(decodeURIComponent(
+           expect(g_sortingDesk.items.getById(decodeURIComponent(
              g_options.nodes.items.children().get(1).id))).not.toBe(null);
            done();
          } );
@@ -131,7 +119,7 @@ describe('Instance', function () {
     it("`getById' fails to return a text item from invalid id",
        function (done) {
          runAfterItemsRendered(g_options, g_callbacks, function () {
-           expect(g_sortingDesk.getById(decodeURIComponent(
+           expect(g_sortingDesk.items.getById(decodeURIComponent(
              g_options.nodes.items.children().get(1).id + '_')))
              .toBe(null);
            done();

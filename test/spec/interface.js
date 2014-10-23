@@ -24,30 +24,30 @@ describe('Interface', function () {
     run($.extend(true, { }, g_options, { nodes: { bins: null } }),
         g_callbacks,
         function () {
-          expect(g_sortingDesk.isInitialised()).toBe(true);
+          expect(g_sortingDesk.initialised).toBe(true);
         },
         done);
   } );
 
-  it('initialises without the delete button', function (done) {
-    run($.extend(true, { }, g_options, { nodes: { binDelete: null } }),
+  it('initialises without the dismissal button', function (done) {
+    run($.extend(true, { }, g_options, { nodes: { buttonDismiss: null } }),
         g_callbacks,
         function () {
-          expect(g_sortingDesk.isInitialised()).toBe(true);
+          expect(g_sortingDesk.initialised).toBe(true);
         },
         done);
   } );
 
-  it('initialises without both the bins container and the delete button',
+  it('initialises without both the bins container and the dismissal button',
      function (done) {
        run($.extend(true, { }, g_options, {
          nodes: {
            bins: null,
-           binDelete: null
+           buttonDismiss: null
          } } ),
            g_callbacks,
            function () {
-             expect(g_sortingDesk.isInitialised()).toBe(true);
+             expect(g_sortingDesk.initialised).toBe(true);
            },
            done);
      } );
@@ -56,59 +56,50 @@ describe('Interface', function () {
     runNoInstantiation(
       function () {
         expect(function () {
-          new SortingDesk($.extend(true, { }, g_options,
-                                   { nodes: { items: null } }),
-                          g_callbacks);
+          new SortingDesk.Instance($.extend(true, { }, g_options,
+                                            { nodes: { items: null } }),
+                                   g_callbacks);
         } ).toThrow("Missing `items' nodes option");
       },
       done);
   } );
 
-  it('initialises with expected number of items', function (done) {
+  it('initialises with expected number of text items', function (done) {
     runAfterItemsRendered(g_options, g_callbacks, function () {
       expect(g_options.nodes.items.children().length)
         .toBe(g_options.visibleItems);
       done();
     } );
   } );
+
+  it('initialises with expected number of top level bins', function (done) {
+    run(g_options, g_callbacks, function () {
+      expect(g_options.bins instanceof Array).toBe(true);
+
+      if(g_options.bins instanceof Array) {
+        expect(g_options.nodes.bins.children('.sd-bin').length)
+          .toBe(g_options.bins.length);
+      }
+      
+      done();
+    } );
+  } );
   
-  it("creates a primary sub bin when add button clicked on", function (done) {
+  it("creates a top level bin when add button clicked on", function (done) {
     var caption = "Foo bar baz primary";
     
     run(g_options,
         g_callbacks,
         function () {
-          g_options.nodes.bins.find('.button-add:nth(0)').click();
+          g_options.nodes.bins.find('.sd-button-add:nth(0)').click();
           
           window.setTimeout(function () {
-            g_options.nodes.bins.find('.bin-primary-sub INPUT')
+            g_options.nodes.bins.find('.sd-bin INPUT')
               .val(caption)
               .blur();
 
             window.setTimeout(function () {
-              expect(g_options.nodes.bins.find('.bin-primary-sub').last().text())
-                .toBe(caption);
-              done();
-            }, DELAY_BUTTON_ADD);
-          }, DELAY_BUTTON_ADD);
-        } );
-  } );
-  
-  it("creates a secondary bin when add button clicked on", function (done) {
-    var caption = "Foo bar baz secondary";
-    
-    run(g_options,
-        g_callbacks,
-        function () {
-          g_options.nodes.bins.find('.button-add:nth(1)').click();
-          
-          window.setTimeout(function () {
-            g_options.nodes.bins.find('.bin-secondary INPUT')
-              .val(caption)
-              .blur();
-
-            window.setTimeout(function () {
-              expect(g_options.nodes.bins.find('.bin-secondary').last().text())
+              expect(g_options.nodes.bins.find('.sd-bin').last().text())
                 .toBe(caption);
               done();
             }, DELAY_BUTTON_ADD);
@@ -121,7 +112,7 @@ describe('Interface', function () {
        runAfterItemsRendered(g_options,
            g_callbacks,
            function () {
-             g_options.nodes.items.find('>DIV:nth(0) .text-item-close')
+             g_options.nodes.items.find('>DIV:nth(0) .sd-text-item-close')
                .click();
 
              window.setTimeout(function () {
@@ -132,8 +123,7 @@ describe('Interface', function () {
            } );
      } );
 
-  it('bin delete/text item dismiss button is displayed when text item is'
-     + ' dragged',
+  it('bin text item dismiss button is displayed when text item is dragged',
      function (done) {
        runAfterItemsRendered(g_options,
            g_callbacks,
@@ -143,7 +133,7 @@ describe('Interface', function () {
              new DraggingEvent(node).trigger();
              
              window.setTimeout(function () {
-               expect(g_options.nodes.binDelete.css('display'))
+               expect(g_options.nodes.buttonDismiss.css('display'))
                  .toBe('block');
                done();
              }, DELAY_ITEM_DRAGGED);
@@ -161,7 +151,7 @@ describe('Interface', function () {
              dragging.trigger();
 
              window.setTimeout(function () {
-               dragging.drop(g_options.nodes.binDelete);
+               dragging.drop(g_options.nodes.buttonDismiss);
 
                window.setTimeout(function () {
                  expect(g_options.nodes.items.children().length)
@@ -173,140 +163,123 @@ describe('Interface', function () {
            } );
      } );
 
-  it('primary sub bin is deleted when dropped on to delete button',
+  it('top level bin is deleted when dropped on to dismissal button',
      function (done) {
-       var caption = "Foo bar baz primary";
-    
        runAfterItemsRendered(
          g_options,
          g_callbacks,
          function () {
-           /* Expect there to be no primary sub bins. */
-           expect(g_options.nodes.bins.find('.bin-primary-sub').length)
-             .toBe(0);
-             
-           g_options.nodes.bins.find('.button-add:nth(0)').click();
+           var children = g_options.nodes.bins.children('.sd-bin');
            
+           /* Expect there to be at lease one top level bin. */
+           expect(children.length).not.toBe(0);
+
+           var count = children.length,
+               dragging = new DraggingEvent(children.first());
+
+           dragging.trigger();
+
            window.setTimeout(function () {
-             g_options.nodes.bins.find('.bin-primary-sub INPUT')
-               .val(caption)
-               .blur();
-             
+             dragging.drop(g_options.nodes.buttonDismiss);
+
              window.setTimeout(function () {
-               expect(g_options.nodes.bins.find('.bin-primary-sub').last().text())
-                 .toBe(caption);
-
-               var dragging = new DraggingEvent(
-                 g_options.nodes.bins.find('.bin-primary-sub').last());
-
-               dragging.trigger();
-
-               window.setTimeout(function () {
-                 dragging.drop(g_options.nodes.binDelete);
-
-                 window.setTimeout(function () {
-                   expect(g_options.nodes.bins.find('.bin-primary-sub').length)
-                     .toBe(0);
-                   
-                   done();
-                 }, DELAY_BIN_DROPPED);
-               }, DELAY_BIN_DRAGGED);
-             }, DELAY_BUTTON_ADD);
-           }, DELAY_BUTTON_ADD);
-           
+               expect(g_options.nodes.bins.children('.sd-bin').length)
+                 .toBe(count - 1);
+               
+               done();
+             }, DELAY_BIN_DROPPED);
+           }, DELAY_BIN_DRAGGED);
          } );
      } );
 
-  it("primary sub bin is not deleted when dropped on to element other than "
-     + "delete button",
+  it("top level bin is not deleted when dropped on to element other than "
+     + " dismissal button",
      function (done) {
-       var caption = "Foo bar baz primary";
-    
        runAfterItemsRendered(
          g_options,
          g_callbacks,
          function () {
-           /* Expect there to be no primary sub bins. */
-           expect(g_options.nodes.bins.find('.bin-primary-sub').length)
-             .toBe(0);
-             
-           g_options.nodes.bins.find('.button-add:nth(0)').click();
+           var children = g_options.nodes.bins.children('.sd-bin');
            
+           /* Expect there to be at lease one top level bin. */
+           expect(children.length).not.toBe(0);
+
+           var count = children.length,
+               dragging = new DraggingEvent(children.first());
+
+           dragging.trigger();
+
            window.setTimeout(function () {
-             g_options.nodes.bins.find('.bin-primary-sub INPUT')
-               .val(caption)
-               .blur();
-             
+             dragging.drop($('body'));
+
              window.setTimeout(function () {
-               expect(g_options.nodes.bins.find('.bin-primary-sub').last().text())
-                 .toBe(caption);
-
-               var dragging = new DraggingEvent(
-                 g_options.nodes.bins.find('.bin-primary-sub').last());
-
-               dragging.trigger();
-
-               window.setTimeout(function () {
-                 dragging.drop($('body'));
-
-                 window.setTimeout(function () {
-                   expect(g_options.nodes.bins.find('.bin-primary-sub').length)
-                     .toBe(1);
-                   
-                   done();
-                 }, DELAY_BIN_DROPPED);
-               }, DELAY_BIN_DRAGGED);
-             }, DELAY_BUTTON_ADD);
-           }, DELAY_BUTTON_ADD);
-           
+               expect(g_options.nodes.bins.children('.sd-bin').length).toBe(count);
+               
+               done();
+             }, DELAY_BIN_DROPPED);
+           }, DELAY_BIN_DRAGGED);
          } );
      } );
 
-  it('secondary bin is deleted when dropped on to delete button',
+  it('sub bin is deleted when dropped on to delete button',
      function (done) {
-       runAfterItemsRendered(g_options,
-           g_callbacks,
-           function () {
-             var node = g_options.nodes.bins.find('.bin-secondary').last(),
-                 dragging = new DraggingEvent(node);
+       runAfterItemsRendered(
+         g_options,
+         g_callbacks,
+         function () {
+           var parent = g_options.nodes.bins.children().first()
+                 .find('.sd-children'),
+               children = parent.children();
+           
+           /* Expect there to be at lease one sub-bin in the first top-level bin. */
+           expect(children.length).not.toBe(0);
 
-             dragging.trigger();
+           var count = children.length,
+               dragging = new DraggingEvent(children.first());
+
+           dragging.trigger();
+
+           window.setTimeout(function () {
+             dragging.drop(g_options.nodes.buttonDismiss);
 
              window.setTimeout(function () {
-               dragging.drop(g_options.nodes.binDelete);
-
-               window.setTimeout(function () {
-                 expect(g_options.nodes.bins.find('.bin-secondary').length)
-                   .toBe(g_secondaryContentIds.length - 1);
-                 
-                 done();
-               }, DELAY_BIN_DROPPED);
-             }, DELAY_BIN_DRAGGED);
-           } );
+               expect(parent.children().length).toBe(count - 1);
+               
+               done();
+             }, DELAY_BIN_DROPPED);
+           }, DELAY_BIN_DRAGGED);
+         } );
      } );
 
-  it("secondary bin is not deleted when dropped on to element other than "
-     + "delete button",
+  it("sub bin is not deleted when dropped on to element other than "
+     + "dismissal button",
      function (done) {
-       runAfterItemsRendered(g_options,
-           g_callbacks,
-           function () {
-             var node = g_options.nodes.bins.find('.bin-secondary').last(),
-                 dragging = new DraggingEvent(node);
+       runAfterItemsRendered(
+         g_options,
+         g_callbacks,
+         function () {
+           var parent = g_options.nodes.bins.children().first()
+                 .find('.sd-children'),
+               children = parent.children();
+           
+           /* Expect there to be at lease one sub-bin in the first top-level bin. */
+           expect(children.length).not.toBe(0);
 
-             dragging.trigger();
+           var count = children.length,
+               dragging = new DraggingEvent($('body'));
+
+           dragging.trigger();
+
+           window.setTimeout(function () {
+             dragging.drop(g_options.nodes.buttonDismiss);
 
              window.setTimeout(function () {
-               dragging.drop($("body"));
-
-               window.setTimeout(function () {
-                 expect(g_options.nodes.bins.find('.bin-secondary').length)
-                   .toBe(g_secondaryContentIds.length);
-                 
-                 done();
-               }, DELAY_BIN_DROPPED);
-             }, DELAY_BIN_DRAGGED);
-           } );
+               expect(parent.children().length).toBe(count);
+               
+               done();
+             }, DELAY_BIN_DROPPED);
+           }, DELAY_BIN_DRAGGED);
+         } );
      } );
 
 } );

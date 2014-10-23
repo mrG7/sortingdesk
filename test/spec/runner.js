@@ -21,7 +21,7 @@ require.config( {
   }
 } );
 
-require( [ "SortingDesk" ], function () {
+require( [ "SortingDesk", "API-SortingDesk" ], function () {
   require( [ "spec/init.js" ], function () {
     require( [ "spec/instance.js",
                "spec/callbacks.js",
