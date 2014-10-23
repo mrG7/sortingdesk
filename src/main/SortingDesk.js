@@ -90,7 +90,7 @@ var SortingDesk = (function () {
         textDismissed: function() {},
         textDroppedInBin: function() {},
         onRequestStart: function() {},
-        onRequestStop: function() {},
+        onRequestStop: function() {}
     }, cbs);
 
     var self = this;
