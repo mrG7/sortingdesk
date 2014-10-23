@@ -1,4 +1,17 @@
-* To do items [90%]
+* To do items [86%]
+** TODO Ensure =addBin= callback exists when the 'bin add' button exists
+** TODO Tests [0%]
+*** TODO init: enforce test compartmentalisation through cloning of nodes
+*** TODO instance: ensure reset doesn't run twice
+*** TODO instance: require =visibleItems= to be greater than 0
+*** TODO callbacks: removed test for =renderAddButton=
+*** TODO callbacks: removed test for =renderPrimaryBin=
+*** TODO callbacks: removed test for =renderSecondaryBin=
+*** TODO callbacks: removed test for =addPrimarySubBin=
+*** TODO callbacks: removed test for =addSecondaryBin=
+*** TODO interface: ensure 'bin add' button is created prior to using it
+*** TODO interface: ensure correct number of sub-bins are created
+*** TODO interface: removed test for adding of sub-bin
 ** TODO Implement Events controller based on the publisher-subscriber design pattern
 ** TODO Create a list of interesting events to advertise via an Events controller
 ** TODO [#B] Prefix text-items' and bins' node ids
@@ -21,6 +34,9 @@
 - State "TODO"       from "WAIT"       [2014-09-05 Fri 10:42]
 - State "WAIT"       from "TODO"       [2014-08-22 Fri 13:24] \\
   Not proceeding with this until it's clear whether bins based on existing text items are even editable.
+** DONE Fix presently broken tests
+- State "DONE"       from "IN-PROGRESS" [2014-10-23 Thu 13:30]
+- State "IN-PROGRESS" from "TODO"       [2014-10-23 Thu 11:32]
 ** DONE Reduce CSS required by Sorting Desk
 - State "DONE"       from "TODO"       [2014-10-15 Wed 14:35]
 ** DONE Unbundle examples
