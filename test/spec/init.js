@@ -70,7 +70,7 @@ var DELAY = 10,
     DELAY_BIN_DROPPED = 25;
 
 
-function setup() {
+var setup = function () {
   Api.initialise(g_descriptor, g_bins);
 
   afterEach(function () {
@@ -86,9 +86,9 @@ function setup() {
 
     result = false;
   } );
-}
+};
 
-function run(options, callbacks, condition, done) {
+var run = function (options, callbacks, condition, done) {
   var interval = window.setInterval(function () {
     if(!reset)
       return;
@@ -106,9 +106,9 @@ function run(options, callbacks, condition, done) {
     if(done)
       done();
   }, DELAY);
-}
+};
 
-function runNoInstantiation(condition, done) {
+var runNoInstantiation = function (condition, done) {
   var interval = window.setInterval(function () {
     if(!reset)
       return;
@@ -119,9 +119,9 @@ function runNoInstantiation(condition, done) {
     if(done)
       done();
   }, DELAY);
-}
+};
 
-function runAfterItemsRendered(options, callbacks, condition, done) {
+var runAfterItemsRendered = function (options, callbacks, condition, done) {
   var interval = window.setInterval(function () {
     if(!reset)
       return;
@@ -149,7 +149,7 @@ function runAfterItemsRendered(options, callbacks, condition, done) {
         done();
     }, DELAY);
   }, DELAY);
-}
+};
 
 
 /* Class DraggingEvent
