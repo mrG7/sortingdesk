@@ -1968,6 +1968,7 @@ var SortingDesk = (function () {
     ControllerBins: ControllerBins,
     Bin: Bin,
     TextItem: TextItem,
+    TextItemDefault: TextItemDefault,
     BinAddButton: BinAddButton,
     TextItemSnippet: TextItemSnippet
   };
