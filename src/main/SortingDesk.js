@@ -1230,6 +1230,14 @@ var SortingDesk = (function () {
     return this.getById(decodeURIComponent(node.attr('id')));
   };
 
+  ControllerItems.prototype.remove_all = function() {
+    for (var i = 0; i < this.items_.length; i++) {
+        this.items_[i].node.remove();
+    }
+    this.items_ = [];
+    this.check();
+  };
+
   ControllerItems.prototype.remove = function (item)
   {
     if(typeof item == 'undefined') {
