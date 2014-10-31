@@ -42,6 +42,10 @@ var SortingDesk = (function () {
    *                                  dismissed.
    * @param   cbs.textDroppedInBin    Event triggered when a text item is
    *                                  assigned to a bin.
+   * @param   cbs.textSelected        Event triggered when a text item is
+   *                                  selected.
+   * @param   cbs.textDeselected      Event triggered when a text item is
+   *                                  deselected.
    * @param   cbs.onRequestStart      Executed after request initiated.
    * @param   cbs.onRequestStop       Executed after request finished.
    * */
@@ -89,6 +93,8 @@ var SortingDesk = (function () {
         addBin: function() {},
         textDismissed: function() {},
         textDroppedInBin: function() {},
+        textSelected: function() {},
+        textDeselected: function() {},
         onRequestStart: function() {},
         onRequestStop: function() {}
     }, cbs);
@@ -1169,8 +1175,12 @@ var SortingDesk = (function () {
     } else if(variant instanceof TextItem)
       variant = variant.node;
 
-    this.node_.find('.' + csel).removeClass(csel);
-    variant.addClass(csel);
+    var prevTextItem = this.getByNode(this.getNodeSelected()),
+        nextTextItem = this.getByNode(variant);
+    if (prevTextItem !== null) {
+        prevTextItem.deselect();
+    }
+    nextTextItem.select();
 
     /* WARNING: the present implementation requires knowledge of the list
      * items' container's height or it will fail to ensure the currently
@@ -1289,6 +1299,10 @@ var SortingDesk = (function () {
     return true;
   };
 
+  ControllerItems.prototype.getByNode = function($node) {
+    return this.getById(decodeURIComponent($node.attr('id')));
+  };
+
   ControllerItems.prototype.getById = function (id)
   {
     var result = null;
@@ -1375,6 +1389,16 @@ var SortingDesk = (function () {
       this.node_ = newNode;
       this.initialise();
       this.owner_.select(this);
+  };
+
+  TextItem.prototype.select = function() {
+    this.node.addClass(this.owner.owner.options.css.itemSelected);
+    this.owner.owner.callbacks.invoke("textSelected", this.content);
+  };
+
+  TextItem.prototype.deselect = function() {
+    this.node.removeClass(this.owner.owner.options.css.itemSelected);
+    this.owner.owner.callbacks.invoke("textDeselected", this.content);
   };
     
   /* abstract */ TextItem.prototype.render = function ()
