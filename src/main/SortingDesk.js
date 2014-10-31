@@ -1,12 +1,12 @@
 /**
  * @file Sorting Desk component.
  * @copyright 2014 Diffeo
- * 
+ *
  * @author Miguel Guedes <miguel@miguelguedes.org>
  *
  * Comments:
  *
- * 
+ *
  */
 
 
@@ -28,14 +28,14 @@ if(typeof define === "function" && define.amd) {
  * @returns a "class" constructor that creates a Sorting Desk instance.
  * */
 var SortingDesk = (function () {
-  
+
   /**
    * Constructor responsible for initialising Sorting Desk.
-   * 
+   *
    * @param   {Object}    opts  Initialisation options (please refer to
    *                            `defaults_' above)
    * @param   {Object}    cbs   Map of all callbacks
-   * 
+   *
    * @param   cbs.moreText            Retrieve additional text items.
    * @param   cbs.addBin              Add a bin.
    * @param   cbs.textDismissed       Event triggered when a text item is
@@ -53,7 +53,7 @@ var SortingDesk = (function () {
   {
     this.initialised_ = false;
     this.resetter_ = false;
-    
+
     /* Allow a jQuery element to be passed in instead of an object containing
      * options. In the case that a jQuery element is detected, it is assumed to
      * be the `nodes.items' element. */
@@ -73,7 +73,7 @@ var SortingDesk = (function () {
     /* Create dummy jQuery element if bins container not provided. */
     if(!opts.nodes.bins)
       opts.nodes.bins = $();
-    
+
     /* Allow a function to be passed in instead of an object containing
      * callbacks. In the case that a function is passed in, it is assumed to be
      * the `moreTexts' callback. */
@@ -85,9 +85,9 @@ var SortingDesk = (function () {
       };
     } else if(!cbs.moreTexts)
       throw "Mandatory `moreTexts' callback missing";
-    
+
     console.log("Initialising Sorting Desk UI");
-    
+
     this.options_ = $.extend(true, $.extend(true, {}, defaults_), opts);
     this.callbacks_ = $.extend({
         addBin: function() {},
@@ -104,10 +104,10 @@ var SortingDesk = (function () {
     /* Begin instantiating and initialising controllers. */
     (this.callbacks_ = new ControllerCallbacks(this, this.callbacks_))
       .initialise();
-    
+
     (this.requests_ = new ControllerRequests(this))
       .initialise();
-    
+
     if(!this.options_.nodes.buttonDismiss)
       this.options_.nodes.buttonDismiss = $();
 
@@ -116,7 +116,7 @@ var SortingDesk = (function () {
 
     (this.bins_ = this.instantiate('ControllerBins', this))
       .initialise();
-    
+
     /* Add bins only if a bin container node has been provided and there bins
      * to add. */
     if(this.options_.bins) {
@@ -130,7 +130,7 @@ var SortingDesk = (function () {
         } );
       } );
     }
-    
+
     (this.items_ = new ControllerItems(this))
       .initialise();
 
@@ -152,7 +152,7 @@ var SortingDesk = (function () {
     keyboard_: null,
     bins_: null,
     items_: null,
-    
+
     /**
      * Resets the component to a virgin state. Removes all nodes contained by
      * `options_.nodes.items' and `options_.nodes.bins', if any.
@@ -168,7 +168,7 @@ var SortingDesk = (function () {
        * currently initialising itself. */
       if(this.resetter_)
         return this.resetter_;
-      
+
       this.resetter_ = new InstanceResetter(this).reset(
         [ this.requests_,
           this.keyboard_,
@@ -183,9 +183,9 @@ var SortingDesk = (function () {
         .done(function () {
           self.options_ = self.callbacks_ = self.bins_ = self.items_ = null;
           self.requests_ = self.dismiss_ = self.keyboard_ = null;
-          
+
           self.initialised_ = false;
-          
+
           console.log("Sorting Desk UI reset");
         } )
         .always(function () {
@@ -257,7 +257,7 @@ var SortingDesk = (function () {
        * correct constructor. */
       descriptor.apply(object, [].slice.call(arguments, 1));
       object.constructor = descriptor.constructor;
-      
+
       return object;
     }
   };
@@ -279,7 +279,7 @@ var SortingDesk = (function () {
     reset: function (entities)
     {
       var deferred = $.Deferred();
-      
+
       if(!this.instance_.initialised || this.instance_.resetting) {
         window.setTimeout(function () {
           deferred.reject();
@@ -306,7 +306,7 @@ var SortingDesk = (function () {
           }, 10);
         }, 10);
       }
-      
+
       return deferred.promise();
     },
 
@@ -329,7 +329,7 @@ var SortingDesk = (function () {
     {
       var self = this,
           waiting = 0;
-      
+
       entities.forEach(function (e) {
         /* Deal with sub-dependencies if current element is an array. */
         if(e instanceof Array) {
@@ -366,7 +366,7 @@ var SortingDesk = (function () {
       } );
     }
   };
-  
+
 
   /**
    * @class@
@@ -379,8 +379,8 @@ var SortingDesk = (function () {
   Owned.prototype = {
     get owner ()
     { return this.owner_; }
-  };    
-  
+  };
+
 
   /**
    * @class@
@@ -432,19 +432,19 @@ var SortingDesk = (function () {
 
   ControllerCallbacks.prototype.initialise = function () { };
   ControllerCallbacks.prototype.reset = function () { };
-  
+
   ControllerCallbacks.prototype.exists = function (callback)
   { return callback in this.callbacks_; };
 
   ControllerCallbacks.prototype.invoke = function ()
   {
     var result = this.call_.apply(this, arguments);
-    
+
     if(result && 'always' in result) {
       var self = this;
-      
+
       this.owner_.requests.begin(result);
-      
+
       result.always(function () {
         self.owner_.requests.end(result);
       } );
@@ -468,7 +468,7 @@ var SortingDesk = (function () {
     return this.callbacks_[arguments[0]]
       .apply(null, [].slice.call(arguments, 1));
   };
-  
+
 
   /**
    * @class@
@@ -515,7 +515,7 @@ var SortingDesk = (function () {
       ++this.requests_[id];
 
     ++this.count_;
-      
+
     /* Trigger callback. */
     if(this.owner_.callbacks.exists("onRequestStart"))
       this.owner_.callbacks.passThrough("onRequestStart", id);
@@ -532,7 +532,7 @@ var SortingDesk = (function () {
         --this.requests_[id];
       else
         throw "Requests controller in invalid state";
-      
+
       --this.count_;
     } else
       console.log("WARNING: unknown request ended:", id);
@@ -541,8 +541,8 @@ var SortingDesk = (function () {
     if(this.owner_.callbacks.exists("onRequestStop"))
       this.owner_.callbacks.passThrough("onRequestStop", id);
   };
-  
-  
+
+
   /**
    * @class@
    * */
@@ -558,10 +558,10 @@ var SortingDesk = (function () {
   {
     var self = this,
         options = this.owner_.options;
-    
+
     if(!options.nodes.buttonDismiss.length)
       return;
-    
+
     new Droppable(options.nodes.buttonDismiss, {
       classHover: options.css.droppableHover,
       scopes: [ 'bin', 'text-item' ],
@@ -582,7 +582,7 @@ var SortingDesk = (function () {
               bin.parent.remove(bin);
             else
               self.owner_.bins.removeAt(self.owner_.bins.indexOf(bin));
-              
+
             self.owner_.callbacks.invoke('removeBin', bin.id)
               .fail(function (result) {
                 console.log("bin-remove:", result.error);
@@ -598,7 +598,7 @@ var SortingDesk = (function () {
           self.owner_.callbacks.invoke("textDismissed", item);
           self.owner_.items.remove(
             self.owner_.items.getById(decodeURIComponent(id)));
-          
+
           break;
 
         default:
@@ -617,11 +617,11 @@ var SortingDesk = (function () {
   {
     this.owner_.options.nodes.buttonDismiss.off();
   };
-  
+
   ControllerButtonDismiss.prototype.activate = function (callback)
   {
     var options = this.owner_.options;
-      
+
     options.nodes.buttonDismiss.stop().fadeIn(
       options.delays.dismissButtonShow,
       typeof callback == 'function' ? callback : null);
@@ -630,7 +630,7 @@ var SortingDesk = (function () {
   ControllerButtonDismiss.prototype.deactivate = function ()
   {
     var options = this.owner_.options;
-    
+
     options.nodes.buttonDismiss.stop().fadeOut(
       options.delays.dismissButtonHide);
   };
@@ -654,7 +654,7 @@ var SortingDesk = (function () {
     /* Save event handler function so we are able to remove it when resetting
      * the instance. */
     this.fnEventKeyUp = function (evt) { self.onKeyUp_(evt); };
-    
+
     /* Set up listener for keyboard up events. */
     $('body').bind('keyup', this.fnEventKeyUp);
   };
@@ -670,7 +670,7 @@ var SortingDesk = (function () {
   {
     var self = this,
         options = this.owner_.options;
-    
+
     /* First process alpha key strokes. */
     if(evt.keyCode >= 65 && evt.keyCode <= 90) {
       var bin = this.owner_.bins.getByShortcut(evt.keyCode);
@@ -681,27 +681,27 @@ var SortingDesk = (function () {
       } else {
         if(bin) {
           /* TODO: The following animation should be decoupled. */
-          
+
           /* Simulate the effect produced by a mouse click by assigning the
            * CSS class that contains identical styles to the pseudo-class
            * :hover, and removing it after the milliseconds specified in
            * `options.delay.animateAssign'. */
           bin.node.addClass(options.css.binAnimateAssign);
-          
+
           window.setTimeout(function () {
             bin.node.removeClass(options.css.binAnimateAssign);
           }, options.delays.animateAssign);
-          
+
           this.owner_.callbacks.invoke("textDroppedInBin",
                                        this.owner_.items.selected(),
                                        bin);
           this.owner_.items.remove();
         }
       }
-      
+
       return false;
     }
-    
+
     /* Not alpha. */
     switch(evt.keyCode) {
     case options.keyboard.listUp:
@@ -714,20 +714,20 @@ var SortingDesk = (function () {
       this.owner_.dismiss.activate(function () {
         self.owner_.dismiss.deactivate();
       } );
-      
+
       this.owner_.callbacks.invoke("textDismissed",
                                    this.owner_.items.selected());
       this.owner_.items.remove();
-      
+
       break;
-      
+
     default:
       return;
     }
 
     return false;
   };
-  
+
 
   /**
    * @class
@@ -735,7 +735,7 @@ var SortingDesk = (function () {
   var ControllerBins = function (owner)
   {
     Controller.call(this, owner);
-    
+
     this.bins_ = [ ];
     this.hover_ = null;
 
@@ -780,7 +780,7 @@ var SortingDesk = (function () {
                                         self,
                                         bin));
             }, 0);
-            
+
             deferred.resolve();
           } );
 
@@ -792,7 +792,7 @@ var SortingDesk = (function () {
   {
     this.node.children().remove();
   };
-  
+
   ControllerBins.prototype.add = function (bin)
   {
     /* Ensure a bin with the same id isn't already contained. */
@@ -806,7 +806,7 @@ var SortingDesk = (function () {
     this.append(bin.node);
     this.bins_.push(bin);
   };
-    
+
   /* overridable */ ControllerBins.prototype.append = function (node)
   {
     /* Add bin node to the very top of the container if aren't any yet,
@@ -838,7 +838,7 @@ var SortingDesk = (function () {
         };
 
     search(this.bins_);
-    
+
     return result;
   };
 
@@ -862,8 +862,8 @@ var SortingDesk = (function () {
 
     bin = this.bins_[index];
     this.bins_.splice(index, 1);
-    
-    bin.node.remove(); 
+
+    bin.node.remove();
   };
 
   ControllerBins.prototype.setShortcut = function (bin, keyCode)
@@ -876,7 +876,7 @@ var SortingDesk = (function () {
     bin.setShortcut(keyCode);
     return true;
   };
-  
+
   ControllerBins.prototype.getByShortcut = function (keyCode)
   {
     return this.find(function (bin) {
@@ -967,7 +967,7 @@ var SortingDesk = (function () {
     new Droppable(this.node_, {
       classHover: parentOwner.options.css.droppableHover,
       scopes: [ 'text-item' ],
-      
+
       drop: function (e) {
         var id = decodeURIComponent(e.dataTransfer.getData('Text')),
             item = parentOwner.items.getById(id);
@@ -984,7 +984,7 @@ var SortingDesk = (function () {
         dragstart: function (e) {
           parentOwner.dismiss.activate();
         },
-        
+
         dragend: function (e) {
           parentOwner.dismiss.deactivate();
         }
@@ -996,19 +996,19 @@ var SortingDesk = (function () {
   {
     return this.owner_.owner.instantiate('Bin', this.owner_, bin);
   };
-  
+
   Bin.prototype.add = function (bin)
   {
     /* Ensure a bin with the same id isn't already contained. */
     if(this.owner_.getById(bin.id))
       throw "Bin is already contained: " + bin.id;
-    
+
     this.children_.push(bin);
 
     /* Initialise bin and append its HTML. */
     bin.parent = this;
     bin.initialise();
-    
+
     this.append(bin.node);
   };
 
@@ -1035,12 +1035,12 @@ var SortingDesk = (function () {
 
     bin.node.remove();
   };
-  
+
   /* overridable */ Bin.prototype.append = function (node)
   {
     this.getNodeChildren().append(node);
   };
-    
+
   Bin.prototype.setShortcut = function (keyCode)
   {
     this.shortcut_ = keyCode;
@@ -1063,7 +1063,7 @@ var SortingDesk = (function () {
                            + ':nth(0)');
   };
 
-  
+
   /**
    * @class
    * */
@@ -1074,11 +1074,11 @@ var SortingDesk = (function () {
   };
 
   BinDefault.prototype = Object.create(Bin.prototype);
-    
+
   BinDefault.prototype.render = function ()
   {
     var css = this.owner_.owner.options.css;
-    
+
     return $('<div class="' + css.binTop + '"><div class="'
              + css.binShortcut + '"/><div>' + this.bin_.name
              + '</div><div class="' + css.binChildren + '"></div></div>');
@@ -1092,7 +1092,7 @@ var SortingDesk = (function () {
   {
     /* Invoke super constructor. */
     Controller.call(this, owner);
-    
+
     this.node_ = this.owner_.options.nodes.items;
     this.items_ = [ ];
   };
@@ -1106,12 +1106,12 @@ var SortingDesk = (function () {
   {
     this.owner_.options.nodes.items.children().remove();
   };
-  
+
   ControllerItems.prototype.check = function ()
   {
     if(this.items_.length >= this.owner_.options.visibleItems)
       return;
-    
+
     var self = this,
         promise = this.owner_.callbacks.invoke(
           "moreTexts",
@@ -1120,7 +1120,7 @@ var SortingDesk = (function () {
     /* Check that our request for more text items hasn't been denied. */
     if(!promise)
       return;
-    
+
     promise.done(function (items) {
       self.owner_.requests.begin('check-items');
 
@@ -1148,12 +1148,12 @@ var SortingDesk = (function () {
      * loading text items. */
     if(!this.owner_.initialised)
       return;
-    
+
     var csel = this.owner_.options.css.itemSelected;
-    
+
     if(!this.node_.children().length)
       return;
-    
+
     if(typeof variant == 'undefined') {
       variant = this.node_.find('.' + csel);
 
@@ -1189,7 +1189,7 @@ var SortingDesk = (function () {
      * A particular CSS style involving specifying the container's height
      * using `vh' units was found to break this behaviour.
      */
-    
+
     /* Ensure text item is _always_ visible at the bottom and top ends of
      * the containing node. */
     var st = this.node_.scrollTop(),           /* scrolling top */
@@ -1233,10 +1233,10 @@ var SortingDesk = (function () {
   ControllerItems.prototype.selected = function()
   {
     var node = this.getNodeSelected();
-    
+
     if(!node || !node.length)
       return null;
-    
+
     return this.getById(decodeURIComponent(node.attr('id')));
   };
 
@@ -1256,7 +1256,7 @@ var SortingDesk = (function () {
         this.check();
         return null;
       }
-      
+
       return this.removeAt(this.items_.indexOf(selected));
     }
 
@@ -1270,7 +1270,7 @@ var SortingDesk = (function () {
 
     var self = this,
         item = this.items_[index];
-    
+
     if(item.isSelected()) {
       if(index < this.items_.length - 1)
         this.select(this.items_[index + 1]);
@@ -1279,7 +1279,7 @@ var SortingDesk = (function () {
       else
         console.log("No more items available");
     }
-    
+
     item.node
       .css('opacity', 0.6)  /* to prevent flicker */
       .animate( { opacity: 0 },
@@ -1306,7 +1306,7 @@ var SortingDesk = (function () {
   ControllerItems.prototype.getById = function (id)
   {
     var result = null;
-    
+
     this.items_.some(function (item) {
       if(item.content.node_id == id) {
         result = item;
@@ -1366,7 +1366,7 @@ var SortingDesk = (function () {
 
     new Draggable(this.node_, {
       classDragging: parentOwner.options.css.itemDragging,
-      
+
       dragstart: function (e) {
         /* Firstly select item being dragged to ensure correct item position
          * in container. */
@@ -1375,7 +1375,7 @@ var SortingDesk = (function () {
         /* Activate deletion/dismissal button. */
         parentOwner.dismiss.activate();
       },
-      
+
       dragend: function () {
         /* Deactivate deletion/dismissal button. */
         parentOwner.dismiss.deactivate();
@@ -1400,7 +1400,7 @@ var SortingDesk = (function () {
     this.node.removeClass(this.owner.owner.options.css.itemSelected);
     this.owner.owner.callbacks.invoke("textDeselected", this.content);
   };
-    
+
   /* abstract */ TextItem.prototype.render = function ()
   { throw "Abstract method must be implemented"; };
 
@@ -1418,8 +1418,8 @@ var SortingDesk = (function () {
 
   /* overridable */ TextItem.prototype.isSelected = function ()
   { return this.node_.hasClass(this.owner_.owner.options.css.itemSelected); };
-  
-  
+
+
   /**
    * @class
    * */
@@ -1434,7 +1434,7 @@ var SortingDesk = (function () {
     TextItem.call(this, owner, item);
 
     this.node_ = this.render(TextItemDefault.VIEW_HIGHLIGHTS);
-    
+
     this.initialise();
     owner.owner.options.nodes.items.append(this.node_);
   };
@@ -1465,7 +1465,7 @@ var SortingDesk = (function () {
       return false;
     } );
   };
-  
+
   TextItemDefault.prototype.render = function (view)
   {
     switch(view || TextItemDefault.VIEW_HIGHLIGHTS) {
@@ -1522,7 +1522,7 @@ var SortingDesk = (function () {
       content.append(this.renderLessMore_(less));
 
     node.append(content);
-    
+
     return node;
   };
 
@@ -1550,9 +1550,9 @@ var SortingDesk = (function () {
   {
     /* Invoke super constructor. */
     Drawable.call(this, owner);
-    
+
     var parentOwner = owner.owner;
-    
+
     this.fnRender = fnRender;
     this.fnAdd = fnAdd;
 
@@ -1563,12 +1563,12 @@ var SortingDesk = (function () {
             click: function () {
               self.onAdd();
             }
-          } );          
+          } );
 
     new Droppable(button, {
       classHover: parentOwner.options.css.droppableHover,
       scopes: [ 'text-item' ],
-      
+
       drop: function (e, id) {
         self.onAdd(decodeURIComponent(id));
       }
@@ -1588,7 +1588,7 @@ var SortingDesk = (function () {
   {
     var parentOwner = this.owner_.owner,
         options = parentOwner.options;
-    
+
     /* Do not allow entering into concurrent `add' states. */
     if(this.owner_.node.find('.' + options.css.binAdding).length)
       return;
@@ -1601,7 +1601,7 @@ var SortingDesk = (function () {
           .fadeIn(options.delays.addBinShow);
 
     this.owner_.append(node);
-    
+
     if(!id) {
       this.onAddManual(node);
       return;
@@ -1644,7 +1644,7 @@ var SortingDesk = (function () {
       .keyup(function (evt) {
         if(evt.keyCode == 13)
           this.blur();
-        
+
         /* Do not allow event to propagate. */
         return false;
       } );
@@ -1668,7 +1668,7 @@ var SortingDesk = (function () {
         DragDropManager.activeNode = null;
       }
     },
-    
+
     isScope: function (event, scopes)
     {
       if(!DragDropManager.activeNode)
@@ -1712,18 +1712,18 @@ var SortingDesk = (function () {
         if(options.dragstart)
           options.dragstart(e);
       },
-      
+
       dragend: function (e) {
         /* Note: event propagation needs to be stopped before assignment of
          * `originalEvent' or some tests will break. */
         e.stopPropagation();
         e = e.originalEvent;
-        
+
         if(options.classDragging)
           node.removeClass(options.classDragging);
 
         DragDropManager.onDragEnd(e);
-        
+
         if(options.dragend)
           options.dragend(e);
       }
@@ -1754,16 +1754,16 @@ var SortingDesk = (function () {
           return false;
         }
       },
-      
+
       dragenter: function (e) {
         /* IE requires the following special measure. */
         if(DragDropManager.isScope(e = e.originalEvent, options.scopes)) {
           e.dropEffect = 'move';
-          
+
           return false;
         }
       },
-      
+
       dragleave: function (e) {
         if(DragDropManager.isScope(e = e.originalEvent, options.scopes)) {
           if(options.classHover)
@@ -1772,7 +1772,7 @@ var SortingDesk = (function () {
           return false;
         }
       },
-      
+
       drop: function (e) {
         if(!DragDropManager.isScope(e = e.originalEvent, options.scopes))
           return;
@@ -1785,7 +1785,7 @@ var SortingDesk = (function () {
                        e.dataTransfer.getData('Text'),
                        DragDropManager.getScope());
         }
-        
+
         return false;
       }
     } );
@@ -1802,7 +1802,7 @@ var SortingDesk = (function () {
 
   TextItemSnippet.prototype = {
     text_: null,
-    
+
     highlights: function (left, right) {
       var re = /<\s*[bB]\s*[^>]*>/g,
           matcho = re.exec(this.text_),
@@ -1813,7 +1813,7 @@ var SortingDesk = (function () {
 
       if(!matcho)
         return this.condense(left + right);
-      
+
       /* We (perhaps dangerously) assume that a stranded closing tag </B> will
        * not exist before the first opening tag <b>. */
       matchc = /<\s*\/[bB]\s*>/.exec(this.text_); /* find end of B tag */
@@ -1846,7 +1846,7 @@ var SortingDesk = (function () {
       i = matchc.index + matchc[0].length;
       skip = this.skip(i, right);
       j = this.indexOfWordRight(skip.index);
-      
+
       result += this.text_.substr(i, j - i);
 
       /* Close stranded opened tags.
@@ -1854,10 +1854,10 @@ var SortingDesk = (function () {
        * Note: probably not necessary but since we know about the non-closed
        * tags, why not close them anyway? */
       j = skip.tags.length;
-      
+
       while(j--)
         result += '</' + skip.tags[j] + '>';
-      
+
       /* Append ellipsis at end of result if index not at end of string. */
       if(j < this.text_.length - 1)
         result += "&nbsp;[...]";
@@ -1908,7 +1908,7 @@ var SortingDesk = (function () {
         return { index: match.index + ndx + match[0].length,
                  tag: match[1] ? null : match[2] };
       }
-      
+
       return { index: ndx };
     },
 
@@ -1916,7 +1916,7 @@ var SortingDesk = (function () {
       while(ndx >= 0) {
         if(this.text_.charAt(ndx) == ' ')
           return ndx + 1;
-        
+
         --ndx;
       }
 
@@ -1936,12 +1936,12 @@ var SortingDesk = (function () {
     }
   };
 
-  
+
   /* ----------------------------------------------------------------------
    *  Default options
    *  Private attribute.
    * ----------------------------------------------------------------------
-   * 
+   *
    * In addition to the properties below, which are obviously optional, the
    * following attributes are also accepted:
    *
@@ -1951,7 +1951,7 @@ var SortingDesk = (function () {
    *   buttonDismiss: jQuery-element    ; optional
    * },
    * contentIds: array<string>          ; optional
-   * 
+   *
    */
   var defaults_ = {
     css: {
@@ -2004,5 +2004,5 @@ var SortingDesk = (function () {
     BinAddButton: BinAddButton,
     TextItemSnippet: TextItemSnippet
   };
-  
+
 } )();
