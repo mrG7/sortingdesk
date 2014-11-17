@@ -1,0 +1,12 @@
+logging:
+  root:
+    level: DEBUG
+
+kvlayer:
+  app_name: diffeo_test
+  namespace: dossier_web_testing
+  storage_type: local
+
+dossier.store:
+  impl: treelab.store:TreelabStore
+  feature_indexes: ['NAME']

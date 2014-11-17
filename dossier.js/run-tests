@@ -1,0 +1,60 @@
+#!/bin/sh
+
+# This script is pretty hokey, but basically it does the following things
+# with some nice failure modes:
+#
+#   Starts dossier.web with the given host/port (default: localhost:53608)
+#   Starts $BROWSER to point to tests with host/port info.
+#   Stops dossier.web when $BROWSER is closed.
+#
+# The hiccup here is that on my system, $BROWSER is google-chrome, and
+# google-chrome backgrounds itself. It has thwarted my best attempts to stop
+# it from doing so.
+#
+# ... so use `BROWSER=firefox` to get more reasonable behavior.
+#
+# Other avenues: headless testing with something like PhantomJS. I very
+# briefly looked into this, and I couldn't see any simple-setup that didn't
+# offend me. Supposedly PhantomJS and Jasmine can work together, but there
+# are apparently a bunch of extra packages you need to install. (And what
+# happens to the nice visualization in the browser?)
+#
+# Perhaps PhantomJS + some-other-test-framework?
+#
+# ---AG
+
+function usage {
+  echo "$(basename $0) [--port PORT | --host HOST | --help]"
+  exit
+}
+
+port=53608
+host=localhost
+
+while true; do
+  case $1 in
+    --port) port=$2 && shift 2 ;;
+    --host) host=$2 && shift 2 ;;
+    -h|--help) usage ;;
+    -*) usage ;;
+    *) break ;;
+  esac
+done
+
+if [ -z "$BROWSER" ]; then
+  echo "\$BROWSER not set. Please set it to your browser binary." >&2
+  exit 1
+fi
+if ! command -V dossier.web > /dev/null 2>&1; then
+  echo "Could not find 'dossier.web' program." >&2
+  exit 1
+fi
+
+dossier.web -c "test/config.yaml" --host "$host" --port "$port" \
+  --reload --bottle-debug > dossier.web.log 2>&1 &
+pid=$!
+
+sleep 1  # let dossier.web start
+$BROWSER "./test/index.html?host=$host&port=$port"
+kill $pid
+
