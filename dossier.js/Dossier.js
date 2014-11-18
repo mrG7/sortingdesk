@@ -327,12 +327,16 @@
     }
 
     var module = {
-        API: API,
-        FeatureCollection: FeatureCollection,
-        ProfileContentId: ProfileContentId,
+        // constants
         COREF_VALUE_POSITIVE: COREF_VALUE_POSITIVE,
         COREF_VALUE_UNKNOWN: COREF_VALUE_UNKNOWN,
         COREF_VALUE_NEGATIVE: COREF_VALUE_NEGATIVE,
+
+        // classes
+        API: API,
+        FeatureCollection: FeatureCollection,
+        ProfileContentId: ProfileContentId,
+        SortingQueueItems: SortingQueueItems,
     };
 
     if (typeof define == "function" && define.amd) {
