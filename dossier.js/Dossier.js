@@ -273,8 +273,9 @@
     // `SortingQueue` constructor.
     SortingQueueItems.prototype.callbacks = function() {
         return {
-            textDismissed: SortingQueueItems._textDismissed.bind(this),
-            moreTexts: SortingQueueItems._moreTexts.bind(this),
+            textDismissed:
+                SortingQueueItems.prototype._textDismissed.bind(this),
+            moreTexts: SortingQueueItems.prototype._moreTexts.bind(this),
         };
     };
 
