@@ -23,7 +23,7 @@ describe('DossierJS.API', function() {
     });
 
     it('returns a list of search engines', function(done) {
-        api.search_engines().done(function(engines) {
+        api.searchEngines().done(function(engines) {
             expect(engines.length > 0).toBe(true);
             done();
         });
@@ -31,8 +31,8 @@ describe('DossierJS.API', function() {
 
     it('stores and retrieves a feature collection', function(done) {
         var fc = new DossierJS.FeatureCollection({'NAME': {'foo': 1}});
-        api.fc_put('abc', fc).done(function() {
-            api.fc_get('abc').done(function(got) {
+        api.fcPut('abc', fc).done(function() {
+            api.fcGet('abc').done(function(got) {
                 expect(got).toEqual(fc);
                 done();
             });
@@ -51,7 +51,7 @@ describe('DossierJS.API', function() {
     it('provides basic random searching', function(done) {
         var cid = 'abc',
             fc = new DossierJS.FeatureCollection({'NAME': {'foo': 1}});
-        api.fc_put(cid, fc).done(function() {
+        api.fcPut(cid, fc).done(function() {
             api.search('random', cid, {limit: '1'}).done(function(r) {
                 expect(r.results[0].content_id).toEqual(cid);
                 expect(r.results[0].fc).toEqual(fc);

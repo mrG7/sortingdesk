@@ -85,7 +85,7 @@
     //
     // This returns a jQuery promise that resolves to a list of search engine
     // names.
-    API.prototype.search_engines = function() {
+    API.prototype.searchEngines = function() {
         return $.getJSON(this.url('search_engines'));
     };
 
@@ -98,7 +98,7 @@
     //
     // This returns a jQuery promise which, on success, resolves to
     // an instance of FeatureCollection.
-    API.prototype.fc_get = function(content_id) {
+    API.prototype.fcGet = function(content_id) {
         var url = this.url('feature-collection/'
                            + encodeURIComponent(serialize(content_id)));
         return $.getJSON(url).promise().then(function(data) {
@@ -115,7 +115,7 @@
     //
     // This returns a jQuery promise which resolves when the web server
     // responds.
-    API.prototype.fc_put = function(content_id, fc) {
+    API.prototype.fcPut = function(content_id, fc) {
         var url = this.url('feature-collection/'
                            + encodeURIComponent(serialize(content_id)));
         return $.ajax({
@@ -359,5 +359,4 @@
     } else {
         window.DossierJS = module;
     }
-})(typeof window == "undefined" ? this : window, jQuery)
-
+})(typeof window === 'undefined' ? this : window, jQuery);
