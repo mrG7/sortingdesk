@@ -305,6 +305,21 @@
 
         var p = {limit: self.limit.toString()};
         return self.api.search(self.engine_name, self.query_content_id, p)
+            .then(function(data) {
+                var items = [];
+                data.results.forEach(function(cobj) {
+                    items.push({
+                        content_id: cobj.content_id,
+                        fc: cobj.fc,
+                        node_id: cobj.content_id,
+                        name: cobj.fc.value('NAME') || '',
+                        text: cobj.fc.value('sentences')
+                              || (cobj.fc.value('NAME') + ' (profile)'),
+                        url: cobj.fc.value('abs_url'),
+                    });
+                });
+                return items;
+            })
             .always(function() {
                 self._processing = false;
             })
