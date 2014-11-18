@@ -1266,7 +1266,7 @@ var SortingDesk = (function () {
   ControllerItems.prototype.removeAt = function (index)
   {
     if(index < 0 || index >= this.items_.length)
-      throw "Invalid item index";
+      throw "Invalid item index: " + index;
 
     var self = this,
         item = this.items_[index];
@@ -1330,6 +1330,13 @@ var SortingDesk = (function () {
    * */
   var TextItem = function (owner, item)
   {
+    /* Fail silently if not initialised anymore. This might happen if, for
+     * example, the `reset' method was invoked but the component is still
+     * loading text items. */
+    if (!owner.owner.initialised) {
+        return;
+    }
+
     /* Invoke super constructor. */
     Drawable.call(this, owner);
 
@@ -1339,6 +1346,10 @@ var SortingDesk = (function () {
     /* Define getters. */
     this.__defineGetter__("content", function () { return this.content_; } );
     this.__defineGetter__("node", function () { return this.node_; } );
+
+    this.node_ = this.render();
+    this.initialise();
+    owner.owner.options.nodes.items.append(this.node_);
   };
 
   TextItem.prototype = Object.create(Drawable.prototype);
@@ -1401,146 +1412,37 @@ var SortingDesk = (function () {
     this.owner.owner.callbacks.invoke("textDeselected", this.content);
   };
 
-  /* abstract */ TextItem.prototype.render = function ()
-  { throw "Abstract method must be implemented"; };
-
-  /* Not mandatory. */
-  /* overridable */ TextItem.prototype.getNodeClose = function ()
-  { return $(); };
-
-  /* Not mandatory. */
-  /* overridable */ TextItem.prototype.getNodeLess = function ()
-  { return $(); };
-
-  /* Not mandatory. */
-  /* overridable */ TextItem.prototype.getNodeMore = function ()
-  { return $(); };
-
-  /* overridable */ TextItem.prototype.isSelected = function ()
-  { return this.node_.hasClass(this.owner_.owner.options.css.itemSelected); };
-
-
-  /**
-   * @class
-   * */
-  var TextItemDefault = function (owner, item)
-  {
-    /* Fail silently if not initialised anymore. This might happen if, for
-     * example, the `reset' method was invoked but the component is still
-     * loading text items. */
-    if(!owner.owner.initialised)
-      return;
-
-    TextItem.call(this, owner, item);
-
-    this.node_ = this.render(TextItemDefault.VIEW_HIGHLIGHTS);
-
-    this.initialise();
-    owner.owner.options.nodes.items.append(this.node_);
-  };
-
-  /* Constants */
-  TextItemDefault.VIEW_HIGHLIGHTS = 1;
-  TextItemDefault.VIEW_UNRESTRICTED = 2;
-  TextItemDefault.CHARS_HIGHLIGHTS = 150;
-
-  /* Prototype */
-  TextItemDefault.prototype = Object.create(TextItem.prototype);
-
-  TextItemDefault.prototype.initialise = function ()
-  {
-    var self = this;
-
-    /* Call overrided method. */
-    TextItem.prototype.initialise.call(this);
-
-    /* Add logic to less/more links. */
-    this.getNodeLess().click(function () {
-      self.replaceNode(self.render(TextItemDefault.VIEW_HIGHLIGHTS));
-      return false;
-    } );
-
-    this.getNodeMore().click(function () {
-      self.replaceNode(self.render(TextItemDefault.VIEW_UNRESTRICTED));
-      return false;
-    } );
-  };
-
-  TextItemDefault.prototype.render = function (view)
-  {
-    switch(view || TextItemDefault.VIEW_HIGHLIGHTS) {
-    case TextItemDefault.VIEW_UNRESTRICTED:
-      return this.renderUnrestricted_();
-    case TextItemDefault.VIEW_HIGHLIGHTS:
-    default:
-      return this.renderHighlights_();
-    }
-  };
-
-  TextItemDefault.prototype.renderUnrestricted_ = function ()
-  {
-    return this.renderHtml_(
-      this.content_.text,
-      TextItemDefault.VIEW_UNRESTRICTED,
-      new TextItemSnippet(this.content_.text).canTextBeReduced(
-        TextItemDefault.CHARS_HIGHLIGHTS,
-        TextItemDefault.CHARS_HIGHLIGHTS)
-        ? true : null);
-  };
-
-  TextItemDefault.prototype.renderHighlights_ = function ()
-  {
-    return this.renderHtml_(
-      new TextItemSnippet(this.content_.text).highlights(
-        TextItemDefault.CHARS_HIGHLIGHTS,
-        TextItemDefault.CHARS_HIGHLIGHTS),
-      TextItemDefault.VIEW_HIGHLIGHTS,
-      false);
-  };
-
-  TextItemDefault.prototype.renderHtml_ = function (text, view, less)
-  {
-    var node = $('<div class="sd-text-item view-' + view + '"/>'),
+  TextItem.prototype.render = function() {
+    var node = $('<div class="sd-text-item"/>'),
         content = $('<div class="sd-text-item-content"/>'),
         anchor = this.content_.name;
 
     /* Append title if existent. */
-    if(this.content_.title)
+    if (this.content_.title) {
       anchor += '&ndash; ' + this.content_.title;
+    }
 
     node.append('<a class="sd-text-item-title" target="_blank" '
                 + 'href="' + this.content_.url + '">'
                 + anchor + '</a>');
-
     node.append('<a class="sd-text-item-close" href="#">x</a>');
 
     /* Append content and remove all CSS classes from children. */
-    content.append(text);
+    content.append(this.content_.text);
     content.children().removeClass();
-
-    if(less !== null)
-      content.append(this.renderLessMore_(less));
-
     node.append(content);
-
     return node;
   };
 
-  TextItemDefault.prototype.renderLessMore_ = function (less)
-  {
-    var cl = less && 'less' || 'more';
-    return '<div class="sd-less-more sd-' + cl + '">' + cl + '</div>'
-      + '<div style="display: block; clear: both" />';
+  /* Not mandatory. */
+  /* overridable */
+  TextItem.prototype.getNodeClose = function() {
+    return this.node_.find('.sd-text-item-close');
   };
 
-  TextItemDefault.prototype.getNodeClose = function ()
-  { return this.node_.find('.sd-text-item-close'); };
+  /* overridable */ TextItem.prototype.isSelected = function ()
+  { return this.node_.hasClass(this.owner_.owner.options.css.itemSelected); };
 
-  TextItemDefault.prototype.getNodeLess = function ()
-  { return this.node_.find('.sd-less'); };
-
-  TextItemDefault.prototype.getNodeMore = function ()
-  { return this.node_.find('.sd-more'); };
 
 
   /**
@@ -1792,151 +1694,6 @@ var SortingDesk = (function () {
   };
 
 
-  /**
-   * @class
-   * */
-  var TextItemSnippet = function (text)
-  {
-    this.text_ = text;
-  };
-
-  TextItemSnippet.prototype = {
-    text_: null,
-
-    highlights: function (left, right) {
-      var re = /<\s*[bB]\s*[^>]*>/g,
-          matcho = re.exec(this.text_),
-          matchc,
-          i, j, skip,
-          highlight,
-          result;
-
-      if(!matcho)
-        return this.condense(left + right);
-
-      /* We (perhaps dangerously) assume that a stranded closing tag </B> will
-       * not exist before the first opening tag <b>. */
-      matchc = /<\s*\/[bB]\s*>/.exec(this.text_); /* find end of B tag */
-
-      /* Skip tag, position and extract actual text inside B tag. Use semantic
-       * STRONG rather than B tag. */
-      i = matcho.index + matcho[0].length;
-      highlight = '<STRONG>' + this.text_.substr(
-        i,
-        matchc.index - i) + '</STRONG>';
-
-      /* Move `left' chars to the left of current position and align to word
-       * boundary.
-       *
-       * Note: the assumption is that the browser will be smart enough (and
-       * modern ones are) to drop any closed but unopened tags between `i' and
-       * `matcho.index'. */
-      i = this.indexOfWordLeft(matcho.index - left);
-
-      /* Prepend ellipsis at beginning of result if index not at beginning of
-       * string and add text to left of highlight as well as highlight
-       * itself.. */
-      result = (i > 0 ? "[...]&nbsp;" : '')
-        + this.text_.substr(i < 0 ? 0 : i, matcho.index - i) + highlight;
-
-      /* Set index to the right of the closing B tag and skip at most `right'
-       * chars, taking care not to count chars that are part of any HTML tags
-       * towards the `right' chars limit. Align to word boundary and add
-       * text. */
-      i = matchc.index + matchc[0].length;
-      skip = this.skip(i, right);
-      j = this.indexOfWordRight(skip.index);
-
-      result += this.text_.substr(i, j - i);
-
-      /* Close stranded opened tags.
-       *
-       * Note: probably not necessary but since we know about the non-closed
-       * tags, why not close them anyway? */
-      j = skip.tags.length;
-
-      while(j--)
-        result += '</' + skip.tags[j] + '>';
-
-      /* Append ellipsis at end of result if index not at end of string. */
-      if(j < this.text_.length - 1)
-        result += "&nbsp;[...]";
-
-      /* And Bob's your uncle. */
-      return result;
-    },
-
-    condense: function (right) {
-      var i = this.indexOfWordRight(right),
-          result = this.text_.substring(0, i);
-
-      if(i < this.text_.length - 1)
-        result += '&nbsp;[...]';
-
-      return result;
-    },
-
-    skip: function (ndx, count) {
-      var tags = [ ];
-
-      while(ndx < this.text_.length && count) {
-        var ch = this.text_.charAt(ndx);
-
-        if(ch == '<') {
-          var result = this.extractTag(ndx);
-
-          ndx = result.index;
-
-          if(result.tag)
-            tags.push(result.tag);
-          else
-            tags.pop();
-        } else {
-          ++ndx;
-          --count;
-        }
-      }
-
-      return { index: ndx, tags: tags };
-    },
-
-    extractTag: function (ndx) {
-      var match = /<\s*(\/)?\s*([a-zA-Z]+)\s*[^>]*>/.exec(
-        this.text_.substr(ndx));
-
-      if(match) {
-        return { index: match.index + ndx + match[0].length,
-                 tag: match[1] ? null : match[2] };
-      }
-
-      return { index: ndx };
-    },
-
-    indexOfWordLeft: function (ndx) {
-      while(ndx >= 0) {
-        if(this.text_.charAt(ndx) == ' ')
-          return ndx + 1;
-
-        --ndx;
-      }
-
-      return 0;
-    },
-
-    indexOfWordRight: function (ndx) {
-      while(ndx < this.text_.length && this.text_.charAt(ndx) != ' ')
-        ++ndx;
-
-      return ndx;
-    },
-
-    canTextBeReduced: function (left, right) {
-      var reduced = this.highlights(left, right);
-      return reduced.length < this.text_.length;
-    }
-  };
-
-
   /* ----------------------------------------------------------------------
    *  Default options
    *  Private attribute.
@@ -1984,7 +1741,7 @@ var SortingDesk = (function () {
     constructors: {
       ControllerBins: ControllerBins,
       Bin: BinDefault,
-      TextItem: TextItemDefault,
+      TextItem: TextItem,
       BinAddButton: BinAddButton
     },
     visibleItems: 20,           /* Arbitrary.           */
@@ -2000,9 +1757,7 @@ var SortingDesk = (function () {
     ControllerBins: ControllerBins,
     Bin: Bin,
     TextItem: TextItem,
-    TextItemDefault: TextItemDefault,
     BinAddButton: BinAddButton,
-    TextItemSnippet: TextItemSnippet
   };
 
 } )();

@@ -18,37 +18,37 @@
         node_id: "1",
         name: "red",
         url: "https://en.wikipedia.org/wiki/Red",
-        text: repeat_str("This is some <b>red</b> text.", 100),
+        text: repeat_str("This is some <b>red</b> text.", 10),
       },
       {
         node_id: "2",
         name: "green",
         url: "https://en.wikipedia.org/wiki/Green",
-        text: repeat_str("This is some green text.", 100),
+        text: repeat_str("This is some green text.", 10),
       },
       {
         node_id: "3",
         name: "blue",
         url: "https://en.wikipedia.org/wiki/Blue",
-        text: repeat_str("This is some blue text.", 100),
+        text: repeat_str("This is some blue text.", 10),
       },
       {
         node_id: "4",
         name: "yellow",
         url: "https://en.wikipedia.org/wiki/Yellow",
-        text: repeat_str("This is some yellow text.", 100),
+        text: repeat_str("This is some yellow text.", 10),
       },
       {
         node_id: "5",
         name: "brown",
         url: "https://en.wikipedia.org/wiki/Brown",
-        text: repeat_str("This is some brown text.", 100),
+        text: repeat_str("This is some brown text.", 10),
       },
       {
         node_id: "6",
         name: "black",
         url: "https://en.wikipedia.org/wiki/Black",
-        text: repeat_str("This is some black text.", 100),
+        text: repeat_str("This is some black text.", 10),
       }
     ];
   </script>
@@ -93,15 +93,16 @@
     })();
 
     var MyTextItem = function(owner, item) {
-      SortingDesk.TextItemDefault.call(this, owner, item);
+      SortingDesk.TextItem.call(this, owner, item);
     };
 
-    MyTextItem.prototype = Object.create(SortingDesk.TextItemDefault.prototype);
+    MyTextItem.prototype = Object.create(SortingDesk.TextItem.prototype);
 
-    MyTextItem.prototype.renderHtml_ = function(text, view, less) {
-      var $node = SortingDesk.TextItemDefault.prototype.renderHtml_.call(
+    MyTextItem.prototype.render = function(text, view, less) {
+      var $node = SortingDesk.TextItem.prototype.render.call(
         this, text, view, less);
       var $unk = $('<a class="sd-text-item-unknown" href="#">?</a>');
+      $unk.click(function() { console.log('You clicked the ?'); });
       $unk.insertAfter($node.find('.sd-text-item-close'));
       return $node;
     };
