@@ -264,7 +264,7 @@
         this.api = api;
         this.engine_name = engine_name;
         this.query_content_id = query_content_id;
-        this.annotator = this.annotator;
+        this.annotator = annotator;
         this.limit = 5;
         this._processing = false;
     };
