@@ -1,12 +1,12 @@
 /**
  * @file Sorting Desk component.
  * @copyright 2014 Diffeo
- * 
+ *
  * @author Miguel Guedes <miguel@miguelguedes.org>
  *
  * Comments:
  *
- * 
+ *
  */
 
 
@@ -28,20 +28,24 @@ if(typeof define === "function" && define.amd) {
  * @returns a "class" constructor that creates a Sorting Desk instance.
  * */
 var SortingDesk = (function () {
-  
+
   /**
    * Constructor responsible for initialising Sorting Desk.
-   * 
+   *
    * @param   {Object}    opts  Initialisation options (please refer to
    *                            `defaults_' above)
    * @param   {Object}    cbs   Map of all callbacks
-   * 
+   *
    * @param   cbs.moreText            Retrieve additional text items.
    * @param   cbs.addBin              Add a bin.
    * @param   cbs.textDismissed       Event triggered when a text item is
    *                                  dismissed.
    * @param   cbs.textDroppedInBin    Event triggered when a text item is
    *                                  assigned to a bin.
+   * @param   cbs.textSelected        Event triggered when a text item is
+   *                                  selected.
+   * @param   cbs.textDeselected      Event triggered when a text item is
+   *                                  deselected.
    * @param   cbs.onRequestStart      Executed after request initiated.
    * @param   cbs.onRequestStop       Executed after request finished.
    * */
@@ -49,7 +53,7 @@ var SortingDesk = (function () {
   {
     this.initialised_ = false;
     this.resetter_ = false;
-    
+
     /* Allow a jQuery element to be passed in instead of an object containing
      * options. In the case that a jQuery element is detected, it is assumed to
      * be the `nodes.items' element. */
@@ -69,7 +73,7 @@ var SortingDesk = (function () {
     /* Create dummy jQuery element if bins container not provided. */
     if(!opts.nodes.bins)
       opts.nodes.bins = $();
-    
+
     /* Allow a function to be passed in instead of an object containing
      * callbacks. In the case that a function is passed in, it is assumed to be
      * the `moreTexts' callback. */
@@ -81,14 +85,16 @@ var SortingDesk = (function () {
       };
     } else if(!cbs.moreTexts)
       throw "Mandatory `moreTexts' callback missing";
-    
+
     console.log("Initialising Sorting Desk UI");
-    
+
     this.options_ = $.extend(true, $.extend(true, {}, defaults_), opts);
     this.callbacks_ = $.extend({
         addBin: function() {},
         textDismissed: function() {},
         textDroppedInBin: function() {},
+        textSelected: function() {},
+        textDeselected: function() {},
         onRequestStart: function() {},
         onRequestStop: function() {}
     }, cbs);
@@ -98,10 +104,10 @@ var SortingDesk = (function () {
     /* Begin instantiating and initialising controllers. */
     (this.callbacks_ = new ControllerCallbacks(this, this.callbacks_))
       .initialise();
-    
+
     (this.requests_ = new ControllerRequests(this))
       .initialise();
-    
+
     if(!this.options_.nodes.buttonDismiss)
       this.options_.nodes.buttonDismiss = $();
 
@@ -110,7 +116,7 @@ var SortingDesk = (function () {
 
     (this.bins_ = this.instantiate('ControllerBins', this))
       .initialise();
-    
+
     /* Add bins only if a bin container node has been provided and there bins
      * to add. */
     if(this.options_.bins) {
@@ -124,7 +130,7 @@ var SortingDesk = (function () {
         } );
       } );
     }
-    
+
     (this.items_ = new ControllerItems(this))
       .initialise();
 
@@ -146,7 +152,7 @@ var SortingDesk = (function () {
     keyboard_: null,
     bins_: null,
     items_: null,
-    
+
     /**
      * Resets the component to a virgin state. Removes all nodes contained by
      * `options_.nodes.items' and `options_.nodes.bins', if any.
@@ -162,7 +168,7 @@ var SortingDesk = (function () {
        * currently initialising itself. */
       if(this.resetter_)
         return this.resetter_;
-      
+
       this.resetter_ = new InstanceResetter(this).reset(
         [ this.requests_,
           this.keyboard_,
@@ -177,9 +183,9 @@ var SortingDesk = (function () {
         .done(function () {
           self.options_ = self.callbacks_ = self.bins_ = self.items_ = null;
           self.requests_ = self.dismiss_ = self.keyboard_ = null;
-          
+
           self.initialised_ = false;
-          
+
           console.log("Sorting Desk UI reset");
         } )
         .always(function () {
@@ -251,7 +257,7 @@ var SortingDesk = (function () {
        * correct constructor. */
       descriptor.apply(object, [].slice.call(arguments, 1));
       object.constructor = descriptor.constructor;
-      
+
       return object;
     }
   };
@@ -273,7 +279,7 @@ var SortingDesk = (function () {
     reset: function (entities)
     {
       var deferred = $.Deferred();
-      
+
       if(!this.instance_.initialised || this.instance_.resetting) {
         window.setTimeout(function () {
           deferred.reject();
@@ -300,7 +306,7 @@ var SortingDesk = (function () {
           }, 10);
         }, 10);
       }
-      
+
       return deferred.promise();
     },
 
@@ -323,7 +329,7 @@ var SortingDesk = (function () {
     {
       var self = this,
           waiting = 0;
-      
+
       entities.forEach(function (e) {
         /* Deal with sub-dependencies if current element is an array. */
         if(e instanceof Array) {
@@ -360,7 +366,7 @@ var SortingDesk = (function () {
       } );
     }
   };
-  
+
 
   /**
    * @class@
@@ -373,8 +379,8 @@ var SortingDesk = (function () {
   Owned.prototype = {
     get owner ()
     { return this.owner_; }
-  };    
-  
+  };
+
 
   /**
    * @class@
@@ -426,19 +432,19 @@ var SortingDesk = (function () {
 
   ControllerCallbacks.prototype.initialise = function () { };
   ControllerCallbacks.prototype.reset = function () { };
-  
+
   ControllerCallbacks.prototype.exists = function (callback)
   { return callback in this.callbacks_; };
 
   ControllerCallbacks.prototype.invoke = function ()
   {
     var result = this.call_.apply(this, arguments);
-    
+
     if(result && 'always' in result) {
       var self = this;
-      
+
       this.owner_.requests.begin(result);
-      
+
       result.always(function () {
         self.owner_.requests.end(result);
       } );
@@ -462,7 +468,7 @@ var SortingDesk = (function () {
     return this.callbacks_[arguments[0]]
       .apply(null, [].slice.call(arguments, 1));
   };
-  
+
 
   /**
    * @class@
@@ -509,7 +515,7 @@ var SortingDesk = (function () {
       ++this.requests_[id];
 
     ++this.count_;
-      
+
     /* Trigger callback. */
     if(this.owner_.callbacks.exists("onRequestStart"))
       this.owner_.callbacks.passThrough("onRequestStart", id);
@@ -526,7 +532,7 @@ var SortingDesk = (function () {
         --this.requests_[id];
       else
         throw "Requests controller in invalid state";
-      
+
       --this.count_;
     } else
       console.log("WARNING: unknown request ended:", id);
@@ -535,8 +541,8 @@ var SortingDesk = (function () {
     if(this.owner_.callbacks.exists("onRequestStop"))
       this.owner_.callbacks.passThrough("onRequestStop", id);
   };
-  
-  
+
+
   /**
    * @class@
    * */
@@ -552,10 +558,10 @@ var SortingDesk = (function () {
   {
     var self = this,
         options = this.owner_.options;
-    
+
     if(!options.nodes.buttonDismiss.length)
       return;
-    
+
     new Droppable(options.nodes.buttonDismiss, {
       classHover: options.css.droppableHover,
       scopes: [ 'bin', 'text-item' ],
@@ -576,7 +582,7 @@ var SortingDesk = (function () {
               bin.parent.remove(bin);
             else
               self.owner_.bins.removeAt(self.owner_.bins.indexOf(bin));
-              
+
             self.owner_.callbacks.invoke('removeBin', bin.id)
               .fail(function (result) {
                 console.log("bin-remove:", result.error);
@@ -592,7 +598,7 @@ var SortingDesk = (function () {
           self.owner_.callbacks.invoke("textDismissed", item);
           self.owner_.items.remove(
             self.owner_.items.getById(decodeURIComponent(id)));
-          
+
           break;
 
         default:
@@ -611,11 +617,11 @@ var SortingDesk = (function () {
   {
     this.owner_.options.nodes.buttonDismiss.off();
   };
-  
+
   ControllerButtonDismiss.prototype.activate = function (callback)
   {
     var options = this.owner_.options;
-      
+
     options.nodes.buttonDismiss.stop().fadeIn(
       options.delays.dismissButtonShow,
       typeof callback == 'function' ? callback : null);
@@ -624,7 +630,7 @@ var SortingDesk = (function () {
   ControllerButtonDismiss.prototype.deactivate = function ()
   {
     var options = this.owner_.options;
-    
+
     options.nodes.buttonDismiss.stop().fadeOut(
       options.delays.dismissButtonHide);
   };
@@ -648,7 +654,7 @@ var SortingDesk = (function () {
     /* Save event handler function so we are able to remove it when resetting
      * the instance. */
     this.fnEventKeyUp = function (evt) { self.onKeyUp_(evt); };
-    
+
     /* Set up listener for keyboard up events. */
     $('body').bind('keyup', this.fnEventKeyUp);
   };
@@ -664,7 +670,7 @@ var SortingDesk = (function () {
   {
     var self = this,
         options = this.owner_.options;
-    
+
     /* First process alpha key strokes. */
     if(evt.keyCode >= 65 && evt.keyCode <= 90) {
       var bin = this.owner_.bins.getByShortcut(evt.keyCode);
@@ -675,27 +681,27 @@ var SortingDesk = (function () {
       } else {
         if(bin) {
           /* TODO: The following animation should be decoupled. */
-          
+
           /* Simulate the effect produced by a mouse click by assigning the
            * CSS class that contains identical styles to the pseudo-class
            * :hover, and removing it after the milliseconds specified in
            * `options.delay.animateAssign'. */
           bin.node.addClass(options.css.binAnimateAssign);
-          
+
           window.setTimeout(function () {
             bin.node.removeClass(options.css.binAnimateAssign);
           }, options.delays.animateAssign);
-          
+
           this.owner_.callbacks.invoke("textDroppedInBin",
                                        this.owner_.items.selected(),
                                        bin);
           this.owner_.items.remove();
         }
       }
-      
+
       return false;
     }
-    
+
     /* Not alpha. */
     switch(evt.keyCode) {
     case options.keyboard.listUp:
@@ -708,20 +714,20 @@ var SortingDesk = (function () {
       this.owner_.dismiss.activate(function () {
         self.owner_.dismiss.deactivate();
       } );
-      
+
       this.owner_.callbacks.invoke("textDismissed",
                                    this.owner_.items.selected());
       this.owner_.items.remove();
-      
+
       break;
-      
+
     default:
       return;
     }
 
     return false;
   };
-  
+
 
   /**
    * @class
@@ -729,7 +735,7 @@ var SortingDesk = (function () {
   var ControllerBins = function (owner)
   {
     Controller.call(this, owner);
-    
+
     this.bins_ = [ ];
     this.hover_ = null;
 
@@ -774,7 +780,7 @@ var SortingDesk = (function () {
                                         self,
                                         bin));
             }, 0);
-            
+
             deferred.resolve();
           } );
 
@@ -786,7 +792,7 @@ var SortingDesk = (function () {
   {
     this.node.children().remove();
   };
-  
+
   ControllerBins.prototype.add = function (bin)
   {
     /* Ensure a bin with the same id isn't already contained. */
@@ -800,7 +806,7 @@ var SortingDesk = (function () {
     this.append(bin.node);
     this.bins_.push(bin);
   };
-    
+
   /* overridable */ ControllerBins.prototype.append = function (node)
   {
     /* Add bin node to the very top of the container if aren't any yet,
@@ -832,7 +838,7 @@ var SortingDesk = (function () {
         };
 
     search(this.bins_);
-    
+
     return result;
   };
 
@@ -856,8 +862,8 @@ var SortingDesk = (function () {
 
     bin = this.bins_[index];
     this.bins_.splice(index, 1);
-    
-    bin.node.remove(); 
+
+    bin.node.remove();
   };
 
   ControllerBins.prototype.setShortcut = function (bin, keyCode)
@@ -870,7 +876,7 @@ var SortingDesk = (function () {
     bin.setShortcut(keyCode);
     return true;
   };
-  
+
   ControllerBins.prototype.getByShortcut = function (keyCode)
   {
     return this.find(function (bin) {
@@ -961,7 +967,7 @@ var SortingDesk = (function () {
     new Droppable(this.node_, {
       classHover: parentOwner.options.css.droppableHover,
       scopes: [ 'text-item' ],
-      
+
       drop: function (e) {
         var id = decodeURIComponent(e.dataTransfer.getData('Text')),
             item = parentOwner.items.getById(id);
@@ -978,7 +984,7 @@ var SortingDesk = (function () {
         dragstart: function (e) {
           parentOwner.dismiss.activate();
         },
-        
+
         dragend: function (e) {
           parentOwner.dismiss.deactivate();
         }
@@ -990,19 +996,19 @@ var SortingDesk = (function () {
   {
     return this.owner_.owner.instantiate('Bin', this.owner_, bin);
   };
-  
+
   Bin.prototype.add = function (bin)
   {
     /* Ensure a bin with the same id isn't already contained. */
     if(this.owner_.getById(bin.id))
       throw "Bin is already contained: " + bin.id;
-    
+
     this.children_.push(bin);
 
     /* Initialise bin and append its HTML. */
     bin.parent = this;
     bin.initialise();
-    
+
     this.append(bin.node);
   };
 
@@ -1029,12 +1035,12 @@ var SortingDesk = (function () {
 
     bin.node.remove();
   };
-  
+
   /* overridable */ Bin.prototype.append = function (node)
   {
     this.getNodeChildren().append(node);
   };
-    
+
   Bin.prototype.setShortcut = function (keyCode)
   {
     this.shortcut_ = keyCode;
@@ -1057,7 +1063,7 @@ var SortingDesk = (function () {
                            + ':nth(0)');
   };
 
-  
+
   /**
    * @class
    * */
@@ -1068,11 +1074,11 @@ var SortingDesk = (function () {
   };
 
   BinDefault.prototype = Object.create(Bin.prototype);
-    
+
   BinDefault.prototype.render = function ()
   {
     var css = this.owner_.owner.options.css;
-    
+
     return $('<div class="' + css.binTop + '"><div class="'
              + css.binShortcut + '"/><div>' + this.bin_.name
              + '</div><div class="' + css.binChildren + '"></div></div>');
@@ -1086,7 +1092,7 @@ var SortingDesk = (function () {
   {
     /* Invoke super constructor. */
     Controller.call(this, owner);
-    
+
     this.node_ = this.owner_.options.nodes.items;
     this.items_ = [ ];
   };
@@ -1100,12 +1106,12 @@ var SortingDesk = (function () {
   {
     this.owner_.options.nodes.items.children().remove();
   };
-  
+
   ControllerItems.prototype.check = function ()
   {
     if(this.items_.length >= this.owner_.options.visibleItems)
       return;
-    
+
     var self = this,
         promise = this.owner_.callbacks.invoke(
           "moreTexts",
@@ -1114,7 +1120,7 @@ var SortingDesk = (function () {
     /* Check that our request for more text items hasn't been denied. */
     if(!promise)
       return;
-    
+
     promise.done(function (items) {
       self.owner_.requests.begin('check-items');
 
@@ -1142,12 +1148,12 @@ var SortingDesk = (function () {
      * loading text items. */
     if(!this.owner_.initialised)
       return;
-    
+
     var csel = this.owner_.options.css.itemSelected;
-    
+
     if(!this.node_.children().length)
       return;
-    
+
     if(typeof variant == 'undefined') {
       variant = this.node_.find('.' + csel);
 
@@ -1169,8 +1175,12 @@ var SortingDesk = (function () {
     } else if(variant instanceof TextItem)
       variant = variant.node;
 
-    this.node_.find('.' + csel).removeClass(csel);
-    variant.addClass(csel);
+    var prevTextItem = this.getByNode(this.getNodeSelected()),
+        nextTextItem = this.getByNode(variant);
+    if (prevTextItem !== null) {
+        prevTextItem.deselect();
+    }
+    nextTextItem.select();
 
     /* WARNING: the present implementation requires knowledge of the list
      * items' container's height or it will fail to ensure the currently
@@ -1179,7 +1189,7 @@ var SortingDesk = (function () {
      * A particular CSS style involving specifying the container's height
      * using `vh' units was found to break this behaviour.
      */
-    
+
     /* Ensure text item is _always_ visible at the bottom and top ends of
      * the containing node. */
     var st = this.node_.scrollTop(),           /* scrolling top */
@@ -1223,11 +1233,19 @@ var SortingDesk = (function () {
   ControllerItems.prototype.selected = function()
   {
     var node = this.getNodeSelected();
-    
+
     if(!node || !node.length)
       return null;
-    
+
     return this.getById(decodeURIComponent(node.attr('id')));
+  };
+
+  ControllerItems.prototype.remove_all = function() {
+    for (var i = 0; i < this.items_.length; i++) {
+        this.items_[i].node.remove();
+    }
+    this.items_ = [];
+    this.check();
   };
 
   ControllerItems.prototype.remove = function (item)
@@ -1238,7 +1256,7 @@ var SortingDesk = (function () {
         this.check();
         return null;
       }
-      
+
       return this.removeAt(this.items_.indexOf(selected));
     }
 
@@ -1248,11 +1266,11 @@ var SortingDesk = (function () {
   ControllerItems.prototype.removeAt = function (index)
   {
     if(index < 0 || index >= this.items_.length)
-      throw "Invalid item index";
+      throw "Invalid item index: " + index;
 
     var self = this,
         item = this.items_[index];
-    
+
     if(item.isSelected()) {
       if(index < this.items_.length - 1)
         this.select(this.items_[index + 1]);
@@ -1261,7 +1279,7 @@ var SortingDesk = (function () {
       else
         console.log("No more items available");
     }
-    
+
     item.node
       .css('opacity', 0.6)  /* to prevent flicker */
       .animate( { opacity: 0 },
@@ -1281,10 +1299,14 @@ var SortingDesk = (function () {
     return true;
   };
 
+  ControllerItems.prototype.getByNode = function($node) {
+    return this.getById(decodeURIComponent($node.attr('id')));
+  };
+
   ControllerItems.prototype.getById = function (id)
   {
     var result = null;
-    
+
     this.items_.some(function (item) {
       if(item.content.node_id == id) {
         result = item;
@@ -1308,6 +1330,13 @@ var SortingDesk = (function () {
    * */
   var TextItem = function (owner, item)
   {
+    /* Fail silently if not initialised anymore. This might happen if, for
+     * example, the `reset' method was invoked but the component is still
+     * loading text items. */
+    if (!owner.owner.initialised) {
+        return;
+    }
+
     /* Invoke super constructor. */
     Drawable.call(this, owner);
 
@@ -1317,6 +1346,10 @@ var SortingDesk = (function () {
     /* Define getters. */
     this.__defineGetter__("content", function () { return this.content_; } );
     this.__defineGetter__("node", function () { return this.node_; } );
+
+    this.node_ = this.render();
+    this.initialise();
+    owner.owner.options.nodes.items.append(this.node_);
   };
 
   TextItem.prototype = Object.create(Drawable.prototype);
@@ -1344,7 +1377,7 @@ var SortingDesk = (function () {
 
     new Draggable(this.node_, {
       classDragging: parentOwner.options.css.itemDragging,
-      
+
       dragstart: function (e) {
         /* Firstly select item being dragged to ensure correct item position
          * in container. */
@@ -1353,7 +1386,7 @@ var SortingDesk = (function () {
         /* Activate deletion/dismissal button. */
         parentOwner.dismiss.activate();
       },
-      
+
       dragend: function () {
         /* Deactivate deletion/dismissal button. */
         parentOwner.dismiss.deactivate();
@@ -1368,147 +1401,48 @@ var SortingDesk = (function () {
       this.initialise();
       this.owner_.select(this);
   };
-    
-  /* abstract */ TextItem.prototype.render = function ()
-  { throw "Abstract method must be implemented"; };
 
-  /* Not mandatory. */
-  /* overridable */ TextItem.prototype.getNodeClose = function ()
-  { return $(); };
-
-  /* Not mandatory. */
-  /* overridable */ TextItem.prototype.getNodeLess = function ()
-  { return $(); };
-
-  /* Not mandatory. */
-  /* overridable */ TextItem.prototype.getNodeMore = function ()
-  { return $(); };
-
-  /* overridable */ TextItem.prototype.isSelected = function ()
-  { return this.node_.hasClass(this.owner_.owner.options.css.itemSelected); };
-  
-  
-  /**
-   * @class
-   * */
-  var TextItemDefault = function (owner, item)
-  {
-    /* Fail silently if not initialised anymore. This might happen if, for
-     * example, the `reset' method was invoked but the component is still
-     * loading text items. */
-    if(!owner.owner.initialised)
-      return;
-
-    TextItem.call(this, owner, item);
-
-    this.node_ = this.render(TextItemDefault.VIEW_HIGHLIGHTS);
-    
-    this.initialise();
-    owner.owner.options.nodes.items.append(this.node_);
+  TextItem.prototype.select = function() {
+    this.node.addClass(this.owner.owner.options.css.itemSelected);
+    this.owner.owner.callbacks.invoke("textSelected", this.content);
   };
 
-  /* Constants */
-  TextItemDefault.VIEW_HIGHLIGHTS = 1;
-  TextItemDefault.VIEW_UNRESTRICTED = 2;
-  TextItemDefault.CHARS_HIGHLIGHTS = 150;
-
-  /* Prototype */
-  TextItemDefault.prototype = Object.create(TextItem.prototype);
-
-  TextItemDefault.prototype.initialise = function ()
-  {
-    var self = this;
-
-    /* Call overrided method. */
-    TextItem.prototype.initialise.call(this);
-
-    /* Add logic to less/more links. */
-    this.getNodeLess().click(function () {
-      self.replaceNode(self.render(TextItemDefault.VIEW_HIGHLIGHTS));
-      return false;
-    } );
-
-    this.getNodeMore().click(function () {
-      self.replaceNode(self.render(TextItemDefault.VIEW_UNRESTRICTED));
-      return false;
-    } );
-  };
-  
-  TextItemDefault.prototype.render = function (view)
-  {
-    switch(view || TextItemDefault.VIEW_HIGHLIGHTS) {
-    case TextItemDefault.VIEW_UNRESTRICTED:
-      return this.renderUnrestricted_();
-    case TextItemDefault.VIEW_HIGHLIGHTS:
-    default:
-      return this.renderHighlights_();
-    }
+  TextItem.prototype.deselect = function() {
+    this.node.removeClass(this.owner.owner.options.css.itemSelected);
+    this.owner.owner.callbacks.invoke("textDeselected", this.content);
   };
 
-  TextItemDefault.prototype.renderUnrestricted_ = function ()
-  {
-    return this.renderHtml_(
-      this.content_.text,
-      TextItemDefault.VIEW_UNRESTRICTED,
-      new TextItemSnippet(this.content_.text).canTextBeReduced(
-        TextItemDefault.CHARS_HIGHLIGHTS,
-        TextItemDefault.CHARS_HIGHLIGHTS)
-        ? true : null);
-  };
-
-  TextItemDefault.prototype.renderHighlights_ = function ()
-  {
-    return this.renderHtml_(
-      new TextItemSnippet(this.content_.text).highlights(
-        TextItemDefault.CHARS_HIGHLIGHTS,
-        TextItemDefault.CHARS_HIGHLIGHTS),
-      TextItemDefault.VIEW_HIGHLIGHTS,
-      false);
-  };
-
-  TextItemDefault.prototype.renderHtml_ = function (text, view, less)
-  {
-    var node = $('<div class="sd-text-item view-' + view + '"/>'),
+  TextItem.prototype.render = function() {
+    var node = $('<div class="sd-text-item"/>'),
         content = $('<div class="sd-text-item-content"/>'),
         anchor = this.content_.name;
 
     /* Append title if existent. */
-    if(this.content_.title)
+    if (this.content_.title) {
       anchor += '&ndash; ' + this.content_.title;
+    }
 
     node.append('<a class="sd-text-item-title" target="_blank" '
                 + 'href="' + this.content_.url + '">'
                 + anchor + '</a>');
-
     node.append('<a class="sd-text-item-close" href="#">x</a>');
 
     /* Append content and remove all CSS classes from children. */
-    content.append(text);
+    content.append(this.content_.text);
     content.children().removeClass();
-
-    if(less !== null)
-      content.append(this.renderLessMore_(less));
-
     node.append(content);
-    
     return node;
   };
 
-  TextItemDefault.prototype.renderLessMore_ = function (less)
-  {
-    var cl = less && 'less' || 'more';
-    return '<div class="sd-less-more sd-' + cl + '">' + cl + '</div>'
-      + '<div style="display: block; clear: both" />';
+  /* Not mandatory. */
+  /* overridable */
+  TextItem.prototype.getNodeClose = function() {
+    return this.node_.find('.sd-text-item-close');
   };
 
-  TextItemDefault.prototype.getNodeClose = function ()
-  { return this.node_.find('.sd-text-item-close'); };
+  /* overridable */ TextItem.prototype.isSelected = function ()
+  { return this.node_.hasClass(this.owner_.owner.options.css.itemSelected); };
 
-  TextItemDefault.prototype.getNodeLess = function ()
-  { return this.node_.find('.sd-less'); };
-
-  TextItemDefault.prototype.getNodeMore = function ()
-  { return this.node_.find('.sd-more'); };
 
 
   /**
@@ -1518,9 +1452,9 @@ var SortingDesk = (function () {
   {
     /* Invoke super constructor. */
     Drawable.call(this, owner);
-    
+
     var parentOwner = owner.owner;
-    
+
     this.fnRender = fnRender;
     this.fnAdd = fnAdd;
 
@@ -1531,12 +1465,12 @@ var SortingDesk = (function () {
             click: function () {
               self.onAdd();
             }
-          } );          
+          } );
 
     new Droppable(button, {
       classHover: parentOwner.options.css.droppableHover,
       scopes: [ 'text-item' ],
-      
+
       drop: function (e, id) {
         self.onAdd(decodeURIComponent(id));
       }
@@ -1556,7 +1490,7 @@ var SortingDesk = (function () {
   {
     var parentOwner = this.owner_.owner,
         options = parentOwner.options;
-    
+
     /* Do not allow entering into concurrent `add' states. */
     if(this.owner_.node.find('.' + options.css.binAdding).length)
       return;
@@ -1569,7 +1503,7 @@ var SortingDesk = (function () {
           .fadeIn(options.delays.addBinShow);
 
     this.owner_.append(node);
-    
+
     if(!id) {
       this.onAddManual(node);
       return;
@@ -1612,7 +1546,7 @@ var SortingDesk = (function () {
       .keyup(function (evt) {
         if(evt.keyCode == 13)
           this.blur();
-        
+
         /* Do not allow event to propagate. */
         return false;
       } );
@@ -1636,7 +1570,7 @@ var SortingDesk = (function () {
         DragDropManager.activeNode = null;
       }
     },
-    
+
     isScope: function (event, scopes)
     {
       if(!DragDropManager.activeNode)
@@ -1680,18 +1614,18 @@ var SortingDesk = (function () {
         if(options.dragstart)
           options.dragstart(e);
       },
-      
+
       dragend: function (e) {
         /* Note: event propagation needs to be stopped before assignment of
          * `originalEvent' or some tests will break. */
         e.stopPropagation();
         e = e.originalEvent;
-        
+
         if(options.classDragging)
           node.removeClass(options.classDragging);
 
         DragDropManager.onDragEnd(e);
-        
+
         if(options.dragend)
           options.dragend(e);
       }
@@ -1722,16 +1656,16 @@ var SortingDesk = (function () {
           return false;
         }
       },
-      
+
       dragenter: function (e) {
         /* IE requires the following special measure. */
         if(DragDropManager.isScope(e = e.originalEvent, options.scopes)) {
           e.dropEffect = 'move';
-          
+
           return false;
         }
       },
-      
+
       dragleave: function (e) {
         if(DragDropManager.isScope(e = e.originalEvent, options.scopes)) {
           if(options.classHover)
@@ -1740,7 +1674,7 @@ var SortingDesk = (function () {
           return false;
         }
       },
-      
+
       drop: function (e) {
         if(!DragDropManager.isScope(e = e.originalEvent, options.scopes))
           return;
@@ -1753,163 +1687,18 @@ var SortingDesk = (function () {
                        e.dataTransfer.getData('Text'),
                        DragDropManager.getScope());
         }
-        
+
         return false;
       }
     } );
   };
 
 
-  /**
-   * @class
-   * */
-  var TextItemSnippet = function (text)
-  {
-    this.text_ = text;
-  };
-
-  TextItemSnippet.prototype = {
-    text_: null,
-    
-    highlights: function (left, right) {
-      var re = /<\s*[bB]\s*[^>]*>/g,
-          matcho = re.exec(this.text_),
-          matchc,
-          i, j, skip,
-          highlight,
-          result;
-
-      if(!matcho)
-        return this.condense(left + right);
-      
-      /* We (perhaps dangerously) assume that a stranded closing tag </B> will
-       * not exist before the first opening tag <b>. */
-      matchc = /<\s*\/[bB]\s*>/.exec(this.text_); /* find end of B tag */
-
-      /* Skip tag, position and extract actual text inside B tag. Use semantic
-       * STRONG rather than B tag. */
-      i = matcho.index + matcho[0].length;
-      highlight = '<STRONG>' + this.text_.substr(
-        i,
-        matchc.index - i) + '</STRONG>';
-
-      /* Move `left' chars to the left of current position and align to word
-       * boundary.
-       *
-       * Note: the assumption is that the browser will be smart enough (and
-       * modern ones are) to drop any closed but unopened tags between `i' and
-       * `matcho.index'. */
-      i = this.indexOfWordLeft(matcho.index - left);
-
-      /* Prepend ellipsis at beginning of result if index not at beginning of
-       * string and add text to left of highlight as well as highlight
-       * itself.. */
-      result = (i > 0 ? "[...]&nbsp;" : '')
-        + this.text_.substr(i < 0 ? 0 : i, matcho.index - i) + highlight;
-
-      /* Set index to the right of the closing B tag and skip at most `right'
-       * chars, taking care not to count chars that are part of any HTML tags
-       * towards the `right' chars limit. Align to word boundary and add
-       * text. */
-      i = matchc.index + matchc[0].length;
-      skip = this.skip(i, right);
-      j = this.indexOfWordRight(skip.index);
-      
-      result += this.text_.substr(i, j - i);
-
-      /* Close stranded opened tags.
-       *
-       * Note: probably not necessary but since we know about the non-closed
-       * tags, why not close them anyway? */
-      j = skip.tags.length;
-      
-      while(j--)
-        result += '</' + skip.tags[j] + '>';
-      
-      /* Append ellipsis at end of result if index not at end of string. */
-      if(j < this.text_.length - 1)
-        result += "&nbsp;[...]";
-
-      /* And Bob's your uncle. */
-      return result;
-    },
-
-    condense: function (right) {
-      var i = this.indexOfWordRight(right),
-          result = this.text_.substring(0, i);
-
-      if(i < this.text_.length - 1)
-        result += '&nbsp;[...]';
-
-      return result;
-    },
-
-    skip: function (ndx, count) {
-      var tags = [ ];
-
-      while(ndx < this.text_.length && count) {
-        var ch = this.text_.charAt(ndx);
-
-        if(ch == '<') {
-          var result = this.extractTag(ndx);
-
-          ndx = result.index;
-
-          if(result.tag)
-            tags.push(result.tag);
-          else
-            tags.pop();
-        } else {
-          ++ndx;
-          --count;
-        }
-      }
-
-      return { index: ndx, tags: tags };
-    },
-
-    extractTag: function (ndx) {
-      var match = /<\s*(\/)?\s*([a-zA-Z]+)\s*[^>]*>/.exec(
-        this.text_.substr(ndx));
-
-      if(match) {
-        return { index: match.index + ndx + match[0].length,
-                 tag: match[1] ? null : match[2] };
-      }
-      
-      return { index: ndx };
-    },
-
-    indexOfWordLeft: function (ndx) {
-      while(ndx >= 0) {
-        if(this.text_.charAt(ndx) == ' ')
-          return ndx + 1;
-        
-        --ndx;
-      }
-
-      return 0;
-    },
-
-    indexOfWordRight: function (ndx) {
-      while(ndx < this.text_.length && this.text_.charAt(ndx) != ' ')
-        ++ndx;
-
-      return ndx;
-    },
-
-    canTextBeReduced: function (left, right) {
-      var reduced = this.highlights(left, right);
-      return reduced.length < this.text_.length;
-    }
-  };
-
-  
   /* ----------------------------------------------------------------------
    *  Default options
    *  Private attribute.
    * ----------------------------------------------------------------------
-   * 
+   *
    * In addition to the properties below, which are obviously optional, the
    * following attributes are also accepted:
    *
@@ -1919,7 +1708,7 @@ var SortingDesk = (function () {
    *   buttonDismiss: jQuery-element    ; optional
    * },
    * contentIds: array<string>          ; optional
-   * 
+   *
    */
   var defaults_ = {
     css: {
@@ -1952,7 +1741,7 @@ var SortingDesk = (function () {
     constructors: {
       ControllerBins: ControllerBins,
       Bin: BinDefault,
-      TextItem: TextItemDefault,
+      TextItem: TextItem,
       BinAddButton: BinAddButton
     },
     visibleItems: 20,           /* Arbitrary.           */
@@ -1969,7 +1758,6 @@ var SortingDesk = (function () {
     Bin: Bin,
     TextItem: TextItem,
     BinAddButton: BinAddButton,
-    TextItemSnippet: TextItemSnippet
   };
-  
+
 } )();
