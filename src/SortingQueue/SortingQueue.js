@@ -54,7 +54,6 @@ var SortingQueue = (function (window, $) {
    * */
   var Instance = function (opts, cbs)
   {
-    this.initialised_ = false;
     this.resetter_ = false;
 
     /* Allow a jQuery element to be passed in instead of an object containing
