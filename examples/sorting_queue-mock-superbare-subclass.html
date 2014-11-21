@@ -93,14 +93,14 @@
         };
       })();
 
-      var MyTextItem = function(owner, item) {
-        SortingQueue.TextItem.call(this, owner, item);
+      var MyItem = function(owner, item) {
+        SortingQueue.Item.call(this, owner, item);
       };
 
-      MyTextItem.prototype = Object.create(SortingQueue.TextItem.prototype);
+      MyItem.prototype = Object.create(SortingQueue.Item.prototype);
 
-      MyTextItem.prototype.render = function(text, view, less) {
-        var $node = SortingQueue.TextItem.prototype.render.call(
+      MyItem.prototype.render = function(text, view, less) {
+        var $node = SortingQueue.Item.prototype.render.call(
           this, text, view, less);
         var $unk = $('<a class="sd-text-item-unknown" href="#">?</a>');
         $unk.click(function() { console.log('You clicked the ?'); });
@@ -112,7 +112,7 @@
         nodes: { items: $('#items') },
         visibleItems: 4,
         constructors: {
-          TextItem: MyTextItem,
+          Item: MyItem
         },
       }, {
         moreTexts: moreTexts,

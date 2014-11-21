@@ -593,7 +593,7 @@ var SortingDesk = (function (window, $) {
     }
 
     this.fnAdd(id,
-/*                new TextItemSnippet(item.content.text) */
+/*                new ItemSnippet(item.content.text) */
 /*                .highlights(options.binCharsLeft, options.binCharsRight)) */
                item.content.text)
       .always(function () { node.remove(); } );

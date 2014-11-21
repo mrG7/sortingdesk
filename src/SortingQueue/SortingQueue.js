@@ -748,7 +748,7 @@ var SortingQueue = (function (window, $) {
 
       items.forEach(function (item, index) {
         window.setTimeout( function () {
-          self.items_.push(self.owner_.instantiate('TextItem', self, item));
+          self.items_.push(self.owner_.instantiate('Item', self, item));
         }, Math.pow(index, 2) * 1.1);
       } );
 
@@ -794,7 +794,7 @@ var SortingQueue = (function (window, $) {
         variant = this.node_.children().length - 1;
 
       variant = this.node_.children().eq(variant);
-    } else if(variant instanceof TextItem)
+    } else if(variant instanceof Item)
       variant = variant.node;
 
     /* Select next item (if any), making sure currently active item (if any) is
@@ -954,7 +954,7 @@ var SortingQueue = (function (window, $) {
   /**
    * @class
    * */
-  var TextItem = function (owner, item)
+  var Item = function (owner, item)
   {
     /* Fail silently if not initialised anymore. This might happen if, for
      * example, the `reset' method was invoked but the component is still
@@ -978,9 +978,9 @@ var SortingQueue = (function (window, $) {
     owner.owner.options.nodes.items.append(this.node_);
   };
 
-  TextItem.prototype = Object.create(Drawable.prototype);
+  Item.prototype = Object.create(Drawable.prototype);
 
-  TextItem.prototype.initialise = function()
+  Item.prototype.initialise = function()
   {
     var self = this,
         parentOwner = this.owner_.owner;
@@ -1020,7 +1020,7 @@ var SortingQueue = (function (window, $) {
     } );
   };
 
-  TextItem.prototype.replaceNode = function (newNode)
+  Item.prototype.replaceNode = function (newNode)
   {
       this.node_.replaceWith(newNode);
       this.node_ = newNode;
@@ -1028,17 +1028,17 @@ var SortingQueue = (function (window, $) {
       this.owner_.select(this);
   };
 
-  TextItem.prototype.select = function() {
+  Item.prototype.select = function() {
     this.node.addClass(this.owner.owner.options.css.itemSelected);
     this.owner.owner.callbacks.invoke("textSelected", this.content);
   };
 
-  TextItem.prototype.deselect = function() {
+  Item.prototype.deselect = function() {
     this.node.removeClass(this.owner.owner.options.css.itemSelected);
     this.owner.owner.callbacks.invoke("textDeselected", this.content);
   };
 
-  TextItem.prototype.render = function() {
+  Item.prototype.render = function() {
     var node = $('<div class="sd-text-item"/>'),
         content = $('<div class="sd-text-item-content"/>'),
         anchor = this.content_.name;
@@ -1062,11 +1062,11 @@ var SortingQueue = (function (window, $) {
 
   /* Not mandatory. */
   /* overridable */
-  TextItem.prototype.getNodeClose = function() {
+  Item.prototype.getNodeClose = function() {
     return this.node_.find('.sd-text-item-close');
   };
 
-  /* overridable */ TextItem.prototype.isSelected = function ()
+  /* overridable */ Item.prototype.isSelected = function ()
   { return this.node_.hasClass(this.owner_.owner.options.css.itemSelected); };
 
 
@@ -1245,7 +1245,7 @@ var SortingQueue = (function (window, $) {
                                  * assignment. */
     },
     constructors: {
-      TextItem: TextItem
+      Item: Item
     },
     visibleItems: 20,           /* Arbitrary.           */
     binCharsLeft: 25,
@@ -1268,7 +1268,7 @@ var SortingQueue = (function (window, $) {
     
     /* SortingQueue proper */
     Instance: Instance,
-    TextItem: TextItem
+    Item: Item
   };
 
 } )(typeof window == 'undefined' ? this : window, jQuery);
