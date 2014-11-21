@@ -16,11 +16,15 @@
 
 /* Compatibility with RequireJs. */
 if(typeof define === "function" && define.amd) {
-  define("SortingQueue", [ "jQuery" ], function ($) {
-    return SortingQueue;        /* ideally, we would want the module to be
-                                 * defined here. */
+  define("SortingQueue", [ "jquery" ], function ($) {
+    /* ideally, we would want the module to be defined here. */
+    return _SortingQueue(window, $);
   });
+} else {
+  var SortingQueue = _SortingQueue(window, $);
 }
+
+/* )(typeof window == 'undefined' ? this : window, jQuery); */
 
 
 /**
@@ -28,7 +32,7 @@ if(typeof define === "function" && define.amd) {
  *
  * @returns an object containing class constructors.
  * */
-var SortingQueue = (function (window, $) {
+var _SortingQueue = function (window, $) {
 
   /**
    * @class@
@@ -1271,4 +1275,4 @@ var SortingQueue = (function (window, $) {
     Item: Item
   };
 
-} )(typeof window == 'undefined' ? this : window, jQuery);
+};
