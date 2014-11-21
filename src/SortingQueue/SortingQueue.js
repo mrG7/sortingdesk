@@ -14,16 +14,6 @@
 /*jshint laxbreak:true */
 
 
-/* Compatibility with RequireJs. */
-if(typeof define === "function" && define.amd) {
-  define("SortingQueue", [ "jquery" ], function ($) {
-    /* ideally, we would want the module to be defined here. */
-    return _SortingQueue(window, $);
-  });
-} else {
-  var SortingQueue = _SortingQueue(window, $);
-}
-
 /* )(typeof window == 'undefined' ? this : window, jQuery); */
 
 
@@ -1276,3 +1266,14 @@ var _SortingQueue = function (window, $) {
   };
 
 };
+
+
+/* Compatibility with RequireJs. */
+if(typeof define === "function" && define.amd) {
+  define("SortingQueue", [ "jquery" ], function ($) {
+    /* ideally, we would want the module to be defined here. */
+    return _SortingQueue(window, $);
+  });
+} else {
+  var SortingQueue = _SortingQueue(window, $);
+}
