@@ -16,8 +16,9 @@
 
 /* Compatibility with RequireJs. */
 if(typeof define === "function" && define.amd) {
-  define("SortingQueue", [ "jQuery" ], function() {
-    return SortingQueue;
+  define("SortingQueue", [ "jQuery" ], function ($) {
+    return SortingQueue;        /* ideally, we would want the module to be
+                                 * defined here. */
   });
 }
 

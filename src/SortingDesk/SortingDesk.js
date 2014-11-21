@@ -16,9 +16,11 @@
 
 /* Compatibility with RequireJs. */
 if(typeof define === "function" && define.amd) {
-  define("SortingDesk", [ "jQuery" ], function() {
-    return SortingDesk;
-  });
+  define("SortingDesk", [ "SortingQueue", "jQuery" ],
+         function (SortingQueue, $) {
+           return SortingDesk;         /* ideally, we would want the module to
+                                        * be defined here. */
+         } );
 }
 
 
