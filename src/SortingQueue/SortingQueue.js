@@ -38,7 +38,6 @@ var SortingQueue = (function (window, $) {
    * @param   {Object}    cbs   Map of all callbacks
    *
    * @param   cbs.moreText            Retrieve additional text items.
-   * @param   cbs.addBin              Add a bin.
    * @param   cbs.textDismissed       Event triggered when a text item is
    *                                  dismissed.
    * @param   cbs.textDroppedInBin    Event triggered when a text item is
@@ -91,7 +90,6 @@ var SortingQueue = (function (window, $) {
 
     this.options_ = $.extend(true, $.extend(true, {}, defaults_), opts);
     this.callbacks_ = $.extend({
-        addBin: function() {},
         textDismissed: function() {},
         textDroppedInBin: function() {},
         textSelected: function() {},
@@ -115,23 +113,6 @@ var SortingQueue = (function (window, $) {
     (this.dismiss_ = new ControllerButtonDismiss(this))
       .initialise();
 
-    (this.bins_ = this.instantiate('ControllerBins', this))
-      .initialise();
-
-    /* Add bins only if a bin container node has been provided and there bins
-     * to add. */
-    if(this.options_.bins) {
-      this.options_.bins.forEach(function (descriptor) {
-        var bin = self.instantiate('Bin', self.bins_, descriptor);
-        self.bins_.add(bin);
-
-        /* Instantiate and add sub-bins. */
-        descriptor.children && descriptor.children.forEach(function (sb) {
-          bin.add(bin.createSubBin(sb));
-        } );
-      } );
-    }
-
     (this.items_ = new ControllerItems(this))
       .initialise();
 
@@ -151,7 +132,6 @@ var SortingQueue = (function (window, $) {
     requests_: null,
     dismiss_: null,
     keyboard_: null,
-    bins_: null,
     items_: null,
 
     /**
@@ -174,15 +154,14 @@ var SortingQueue = (function (window, $) {
         [ this.requests_,
           this.keyboard_,
           this.dismiss_,
-          [ this.bins_,
-            this.items_,
+          [ this.items_,
             [
               this.callbacks_
             ]
           ]
         ] )
         .done(function () {
-          self.options_ = self.callbacks_ = self.bins_ = self.items_ = null;
+          self.options_ = self.callbacks_ = self.items_ = null;
           self.requests_ = self.dismiss_ = self.keyboard_ = null;
 
           self.initialised_ = false;
@@ -220,9 +199,6 @@ var SortingQueue = (function (window, $) {
 
     get dismiss ()
     { return this.dismiss_; },
-
-    get bins ()
-    { return this.bins_; },
 
     get items ()
     { return this.items_; },
@@ -545,99 +521,6 @@ var SortingQueue = (function (window, $) {
 
 
   /**
-   * @class@
-   * */
-  var ControllerButtonDismiss = function (owner)
-  {
-    /* Invoke super constructor. */
-    Controller.call(this, owner);
-  };
-
-  ControllerButtonDismiss.prototype = Object.create(Controller.prototype);
-
-  ControllerButtonDismiss.prototype.initialise = function ()
-  {
-    var self = this,
-        options = this.owner_.options;
-
-    if(!options.nodes.buttonDismiss.length)
-      return;
-
-    new Droppable(options.nodes.buttonDismiss, {
-      classHover: options.css.droppableHover,
-      scopes: [ 'bin', 'text-item' ],
-
-      drop: function (e, id, scope) {
-        switch(scope) {
-        case 'bin':
-          var bin = self.owner_.bins.getById(decodeURIComponent(id));
-
-          if(bin) {
-            /* It doesn't matter if the API request succeeds or not for the
-             * bin is always deleted. The only case (that I am aware of) where
-             * the API request would fail is if the bin didn't exist
-             * server-side, in which case it should be deleted from the UI
-             * too. So, always delete, BUT, if the request fails show the user
-             * a notification; for what purpose, I don't know. */
-            if(bin.parent)
-              bin.parent.remove(bin);
-            else
-              self.owner_.bins.removeAt(self.owner_.bins.indexOf(bin));
-
-            self.owner_.callbacks.invoke('removeBin', bin.id)
-              .fail(function (result) {
-                console.log("bin-remove:", result.error);
-                /* TODO: user notification not implemented yet. */
-              } );
-          }
-
-          break;
-
-        case 'text-item':
-          var item = self.owner_.items.getById(id);
-
-          self.owner_.callbacks.invoke("textDismissed", item);
-          self.owner_.items.remove(
-            self.owner_.items.getById(decodeURIComponent(id)));
-
-          break;
-
-        default:
-          console.log("Warning: unknown scope:", scope);
-          break;
-        }
-
-        self.deactivate();
-
-        return false;
-      }
-    } );
-  };
-
-  ControllerButtonDismiss.prototype.reset = function ()
-  {
-    this.owner_.options.nodes.buttonDismiss.off();
-  };
-
-  ControllerButtonDismiss.prototype.activate = function (callback)
-  {
-    var options = this.owner_.options;
-
-    options.nodes.buttonDismiss.stop().fadeIn(
-      options.delays.dismissButtonShow,
-      typeof callback == 'function' ? callback : null);
-  };
-
-  ControllerButtonDismiss.prototype.deactivate = function ()
-  {
-    var options = this.owner_.options;
-
-    options.nodes.buttonDismiss.stop().fadeOut(
-      options.delays.dismissButtonHide);
-  };
-
-
-  /**
    * @class
    * */
   var ControllerKeyboard = function (owner)
@@ -731,361 +614,98 @@ var SortingQueue = (function (window, $) {
 
 
   /**
-   * @class
+   * @class@
    * */
-  var ControllerBins = function (owner)
-  {
-    Controller.call(this, owner);
-
-    this.bins_ = [ ];
-    this.hover_ = null;
-
-    /* Define getters. */
-    this.__defineGetter__("bins", function () { return this.bins_; } );
-    this.__defineGetter__("hover", function () { return this.hover_; } );
-    this.__defineGetter__("node", function () {
-      return this.owner_.options.nodes.bins;
-    } );
-  };
-
-  ControllerBins.prototype = Object.create(Controller.prototype);
-
-  ControllerBins.prototype.initialise = function ()
-  {
-    var self = this;
-
-    this.owner_.instantiate(
-      'BinAddButton',
-      this,
-      function (input) {
-        return self.owner_.instantiate('Bin',
-                                       self,
-                                       { name: input },
-                                       null)
-          .render();
-      },
-      function (id, text) {
-        var deferred = $.Deferred();
-
-        self.owner_.callbacks.invoke('addBin', text)
-          .fail(function () {
-            /* TODO: show message box and notify user. */
-            console.log("Failed to add bin:", id, text);
-            deferred.reject();
-          } )
-          .done(function (bin) {
-            window.setTimeout(function () {
-              /* We rely on the API returning exactly ONE descriptor. */
-              self.owner_.bins.add(
-                self.owner_.instantiate('Bin',
-                                        self,
-                                        bin));
-            }, 0);
-
-            deferred.resolve();
-          } );
-
-        return deferred.promise();
-      } );
-  };
-
-  ControllerBins.prototype.reset = function ()
-  {
-    this.node.children().remove();
-  };
-
-  ControllerBins.prototype.add = function (bin)
-  {
-    /* Ensure a bin with the same id isn't already contained. */
-    if(this.getById(bin.id))
-      throw "Bin is already contained: " + bin.id;
-
-    /* Initialise bin. */
-    bin.initialise();
-
-    /* Contain bin and append its HTML node. */
-    this.append(bin.node);
-    this.bins_.push(bin);
-  };
-
-  /* overridable */ ControllerBins.prototype.append = function (node)
-  {
-    /* Add bin node to the very top of the container if aren't any yet,
-     * otherwise insert it after the last contained bin. */
-    if(!this.bins_.length)
-      this.owner_.options.nodes.bins.prepend(node);
-    else
-      this.bins_[this.bins_.length - 1].node.after(node);
-  };
-
-  ControllerBins.prototype.find = function (callback)
-  {
-    var result = null,
-        search = function (bins) {
-          bins.some(function (bin) {
-            /* Invoke callback. A true result means a positive hit and the
-             * current bin is returned, otherwise a search is initiated on the
-             * children bins, if any are found. */
-            if(callback(bin)) {
-              result = bin;
-              return true;
-            } else if(bin.children.length) {
-              if(search(bin.children))
-                return true;
-            }
-
-            return false;
-          } );
-        };
-
-    search(this.bins_);
-
-    return result;
-  };
-
-  ControllerBins.prototype.indexOf = function (bin)
-  {
-    /* Note: returns the index of top level bins only. */
-    return this.bins_.indexOf(bin);
-  };
-
-  ControllerBins.prototype.remove = function (bin)
-  {
-    return this.removeAt(this.bins_.indexOf(bin));
-  };
-
-  ControllerBins.prototype.removeAt = function (index)
-  {
-    var bin;
-
-    if(index < 0 || index >= this.bins_.length)
-      throw "Invalid bin index";
-
-    bin = this.bins_[index];
-    this.bins_.splice(index, 1);
-
-    bin.node.remove();
-  };
-
-  ControllerBins.prototype.setShortcut = function (bin, keyCode)
-  {
-    /* Ensure shortcut not currently in use and that bin is contained. */
-    if(this.getByShortcut(keyCode))
-      return false;
-
-    /* Set new shortcut. */
-    bin.setShortcut(keyCode);
-    return true;
-  };
-
-  ControllerBins.prototype.getByShortcut = function (keyCode)
-  {
-    return this.find(function (bin) {
-      return bin.shortcut == keyCode;
-    } );
-  };
-
-  ControllerBins.prototype.getById = function (id)
-  {
-    return this.find(function (bin) {
-      return bin.id == id;
-    } );
-  };
-
-  ControllerBins.prototype.onClick_ = function (bin)
-  {
-    this.owner_.callbacks.invoke("textDroppedInBin",
-                                 this.owner_.items.selected(), bin);
-    this.owner_.items.remove();
-  };
-
-  ControllerBins.prototype.onMouseEnter_ = function (bin)
-  { this.hover_ = bin; };
-
-  ControllerBins.prototype.onMouseLeave_ = function ()
-  { this.hover_ = null; };
-
-
-  /**
-   * @class
-   * */
-  var Bin = function (owner, bin)
+  var ControllerButtonDismiss = function (owner)
   {
     /* Invoke super constructor. */
-    Drawable.call(this, owner);
-
-    this.bin_ = bin;
-    this.node_ = this.shortcut_ = null;
-
-    this.children_ = [ ];
-    this.parent_ = null;        /* Parents are set by parent bins directly. */
-
-    /* Define getters. */
-    this.__defineGetter__("bin", function () { return this.bin_; } );
-    this.__defineGetter__("id", function () { return this.bin_.id; } );
-    this.__defineGetter__("shortcut", function () { return this.shortcut_; } );
-    this.__defineGetter__("node", function () { return this.node_; } );
-
-    this.__defineGetter__("parent", function () { return this.parent_; } );
-    this.__defineGetter__("children", function () { return this.children_; } );
-
-    /* Define setters. */
-    this.__defineSetter__("parent", function (bin) {
-      if(bin.children.indexOf(this) == -1)
-        throw "Not a parent of bin";
-
-      this.parent_ = bin;
-    } );
+    Controller.call(this, owner);
   };
 
-  Bin.prototype = Object.create(Drawable.prototype);
+  ControllerButtonDismiss.prototype = Object.create(Controller.prototype);
 
-  Bin.prototype.initialise = function ()
+  ControllerButtonDismiss.prototype.initialise = function ()
   {
     var self = this,
-        parentOwner = self.owner_.owner;
+        options = this.owner_.options;
 
-    (this.node_ = this.render())
-      .attr( {
-        'data-scope': 'bin',
-        'id': encodeURIComponent(this.id)
-      } )
-      .on( {
-        mouseenter: function () {
-          self.owner_.onMouseEnter_(self);
-          return false;
-        },
-        mouseleave: function () {
-          self.owner_.onMouseLeave_();
-          return false;
-        },
-        click: function () {
-          self.owner_.onClick_(self);
-          return false;
+    if(!options.nodes.buttonDismiss.length)
+      return;
+
+    new Droppable(options.nodes.buttonDismiss, {
+      classHover: options.css.droppableHover,
+      scopes: [ 'bin', 'text-item' ],
+
+      drop: function (e, id, scope) {
+        switch(scope) {
+        case 'bin':
+          var bin = self.owner_.bins.getById(decodeURIComponent(id));
+
+          if(bin) {
+            /* It doesn't matter if the API request succeeds or not for the
+             * bin is always deleted. The only case (that I am aware of) where
+             * the API request would fail is if the bin didn't exist
+             * server-side, in which case it should be deleted from the UI
+             * too. So, always delete, BUT, if the request fails show the user
+             * a notification; for what purpose, I don't know. */
+            if(bin.parent)
+              bin.parent.remove(bin);
+            else
+              self.owner_.bins.removeAt(self.owner_.bins.indexOf(bin));
+
+            self.owner_.callbacks.invoke('removeBin', bin.id)
+              .fail(function (result) {
+                console.log("bin-remove:", result.error);
+                /* TODO: user notification not implemented yet. */
+              } );
+          }
+
+          break;
+
+        case 'text-item':
+          var item = self.owner_.items.getById(id);
+
+          self.owner_.callbacks.invoke("textDismissed", item);
+          self.owner_.items.remove(
+            self.owner_.items.getById(decodeURIComponent(id)));
+
+          break;
+
+        default:
+          console.log("Warning: unknown scope:", scope);
+          break;
         }
-      } );
 
-    new Droppable(this.node_, {
-      classHover: parentOwner.options.css.droppableHover,
-      scopes: [ 'text-item' ],
+        self.deactivate();
 
-      drop: function (e) {
-        var id = decodeURIComponent(e.dataTransfer.getData('Text')),
-            item = parentOwner.items.getById(id);
-
-        parentOwner.callbacks.invoke("textDroppedInBin", item, self);
-        parentOwner.items.remove(item);
+        return false;
       }
     } );
-
-    /* We must defer initialisation of D'n'D because owning object's `bin'
-     * attribute will have not yet been set. */
-    window.setTimeout(function () {
-      new Draggable(self.node_, {
-        dragstart: function (e) {
-          parentOwner.dismiss.activate();
-        },
-
-        dragend: function (e) {
-          parentOwner.dismiss.deactivate();
-        }
-      } );
-    }, 0);
   };
 
-  /* overridable */ Bin.prototype.createSubBin = function (bin)
+  ControllerButtonDismiss.prototype.reset = function ()
   {
-    return this.owner_.owner.instantiate('Bin', this.owner_, bin);
+    this.owner_.options.nodes.buttonDismiss.off();
   };
 
-  Bin.prototype.add = function (bin)
+  ControllerButtonDismiss.prototype.activate = function (callback)
   {
-    /* Ensure a bin with the same id isn't already contained. */
-    if(this.owner_.getById(bin.id))
-      throw "Bin is already contained: " + bin.id;
+    var options = this.owner_.options;
 
-    this.children_.push(bin);
-
-    /* Initialise bin and append its HTML. */
-    bin.parent = this;
-    bin.initialise();
-
-    this.append(bin.node);
+    options.nodes.buttonDismiss.stop().fadeIn(
+      options.delays.dismissButtonShow,
+      typeof callback == 'function' ? callback : null);
   };
 
-  Bin.prototype.indexOf = function (bin)
+  ControllerButtonDismiss.prototype.deactivate = function ()
   {
-    /* Note: returns the index of immediately contained children bins. */
-    return this.children_.indexOf(bin);
+    var options = this.owner_.options;
+
+    options.nodes.buttonDismiss.stop().fadeOut(
+      options.delays.dismissButtonHide);
   };
 
-  Bin.prototype.remove = function (bin)
-  {
-    return this.removeAt(this.children_.indexOf(bin));
-  };
-
-  Bin.prototype.removeAt = function (index)
-  {
-    var bin;
-
-    if(index < 0 || index >= this.children_.length)
-      throw "Invalid bin index";
-
-    bin = this.children_[index];
-    this.children_.splice(index, 1);
-
-    bin.node.remove();
-  };
-
-  /* overridable */ Bin.prototype.append = function (node)
-  {
-    this.getNodeChildren().append(node);
-  };
-
-  Bin.prototype.setShortcut = function (keyCode)
-  {
-    this.shortcut_ = keyCode;
-
-    /* Set shortcut visual cue, if a node exists for this purpose. */
-    var node = this.getNodeShortcut();
-    if(node && node.length)
-      node[0].innerHTML = String.fromCharCode(keyCode).toLowerCase();
-  };
-
-  /* overridable */ Bin.prototype.getNodeShortcut = function ()
-  {
-    return this.node_.find('.' + this.owner_.owner.options.css.binShortcut);
-  };
-
-  /* overridable */ Bin.prototype.getNodeChildren = function ()
-  {
-    return this.node_.find('>.'
-                           + this.owner_.owner.options.css.binChildren
-                           + ':nth(0)');
-  };
-
-
-  /**
-   * @class
-   * */
-  var BinDefault = function (owner, bin)
-  {
-    /* Invoke super constructor. */
-    Bin.call(this, owner, bin);
-  };
-
-  BinDefault.prototype = Object.create(Bin.prototype);
-
-  BinDefault.prototype.render = function ()
-  {
-    var css = this.owner_.owner.options.css;
-
-    return $('<div class="' + css.binTop + '"><div class="'
-             + css.binShortcut + '"/><div>' + this.bin_.name
-             + '</div><div class="' + css.binChildren + '"></div></div>');
-  };
-
-
+  
   /**
    * @class
    * */
@@ -1449,115 +1069,6 @@ var SortingQueue = (function (window, $) {
   { return this.node_.hasClass(this.owner_.owner.options.css.itemSelected); };
 
 
-
-  /**
-   * @class
-   * */
-  var BinAddButton = function (owner, fnRender, fnAdd)
-  {
-    /* Invoke super constructor. */
-    Drawable.call(this, owner);
-
-    var parentOwner = owner.owner;
-
-    this.fnRender = fnRender;
-    this.fnAdd = fnAdd;
-
-    var self = this,
-        button = this.render()
-          .addClass(parentOwner.options.css.buttonAdd)
-          .on( {
-            click: function () {
-              self.onAdd();
-            }
-          } );
-
-    new Droppable(button, {
-      classHover: parentOwner.options.css.droppableHover,
-      scopes: [ 'text-item' ],
-
-      drop: function (e, id) {
-        self.onAdd(decodeURIComponent(id));
-      }
-    } );
-
-    owner.node.append(button);
-  };
-
-  BinAddButton.prototype = Object.create(Drawable.prototype);
-
-  /* overridable */ BinAddButton.prototype.render = function ()
-  {
-    return $('<div><span>+</span></div>');
-  };
-
-  BinAddButton.prototype.onAdd = function (id)
-  {
-    var parentOwner = this.owner_.owner,
-        options = parentOwner.options;
-
-    /* Do not allow entering into concurrent `add' states. */
-    if(this.owner_.node.find('.' + options.css.binAdding).length)
-      return;
-
-    var nodeContent = id ? 'Please wait...'
-          : ('<input placeholder="Enter bin description" '
-             + 'type="text"/>'),
-        node = this.fnRender(nodeContent)
-          .addClass(options.css.binAdding)
-          .fadeIn(options.delays.addBinShow);
-
-    this.owner_.append(node);
-
-    if(!id) {
-      this.onAddManual(node);
-      return;
-    }
-
-    var item = parentOwner.items.getById(id);
-
-    if(!item) {
-      node.remove();
-      throw "onAdd: failed to retrieve text item: " + id;
-    }
-
-    this.fnAdd(id,
-               new TextItemSnippet(item.content.text)
-               .highlights(options.binCharsLeft, options.binCharsRight))
-      .always(function () { node.remove(); } );
-  };
-
-  BinAddButton.prototype.onAddManual = function (node)
-  {
-    var self = this,
-        input = node.find('input');
-
-    input
-      .focus()
-      .blur(function () {
-        if(!this.value) {
-          node.fadeOut(self.owner_.owner.options.delays.addBinShow,
-                       function () { node.remove(); } );
-          return;
-        }
-
-        this.disabled = true;
-
-        /* TODO: do not use an `alert'. */
-        self.fnAdd(null, this.value)
-          .fail(function () { alert("Failed to create a sub-bin."); } )
-          .always(function () { node.remove(); } );
-      } )
-      .keyup(function (evt) {
-        if(evt.keyCode == 13)
-          this.blur();
-
-        /* Do not allow event to propagate. */
-        return false;
-      } );
-  };
-
-
   /**
    * @class@
    *
@@ -1697,7 +1208,7 @@ var SortingQueue = (function (window, $) {
       }
     } );
   };
-
+  
 
   /* ----------------------------------------------------------------------
    *  Default options
@@ -1717,15 +1228,8 @@ var SortingQueue = (function (window, $) {
    */
   var defaults_ = {
     css: {
-      binTop: 'sd-bin',
-      binShortcut: 'sd-bin-shortcut',
-      binChildren: 'sd-children',
-      binAnimateAssign: 'sd-assign',
-      binAdding: 'sd-adding',
-      buttonAdd: 'sd-button-add',
       itemSelected: 'sd-selected',
-      itemDragging: 'sd-dragging',
-      droppableHover: 'sd-droppable-hover'
+      itemDragging: 'sd-dragging'
     },
     keyboard: {                 /* Contains scan codes. */
       listUp: 38,               /* up                   */
@@ -1735,19 +1239,12 @@ var SortingQueue = (function (window, $) {
     delays: {                   /* In milliseconds.     */
       animateAssign: 75,        /* Duration of assignment of text item via
                                  * shortcut. */
-      binRemoval: 200,          /* Bin is removed from container. */
-      dismissButtonShow: 150,   /* Time taken to fade in dismiss button. */
-      dismissButtonHide: 300,   /* Time to fade out dismiss button. */
       slideItemUp: 150,         /* Slide up length of deleted text item. */
-      addBinShow: 200,          /* Fade in of temporary bin when adding. */
       textItemFade: 100         /* Fade out duration of text item after
                                  * assignment. */
     },
     constructors: {
-      ControllerBins: ControllerBins,
-      Bin: BinDefault,
-      TextItem: TextItem,
-      BinAddButton: BinAddButton
+      TextItem: TextItem
     },
     visibleItems: 20,           /* Arbitrary.           */
     binCharsLeft: 25,
@@ -1758,11 +1255,19 @@ var SortingQueue = (function (window, $) {
   /**
    * Module public interface. */
   return {
+    /* Base */
+    Owned: Owned,
+    Controller: Controller,
+    Drawable: Drawable,
+    
+    /* Drag and drop */
+    DragDropManager: DragDropManager,
+    Draggable: Draggable,
+    Droppable: Droppable,
+    
+    /* SortingQueue proper */
     Instance: Instance,
-    ControllerBins: ControllerBins,
-    Bin: Bin,
-    TextItem: TextItem,
-    BinAddButton: BinAddButton
+    TextItem: TextItem
   };
 
 } )(typeof window == 'undefined' ? this : window, jQuery);
