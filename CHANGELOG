@@ -1,3 +1,57 @@
+2014-11-21  Miguel Guedes  <miguel@miguelguedes.org>
+
+	* all:
+
+	Renamed the old `SortingDesk' component to `SortingQueue'. This
+	involved making an extensive number of changes to examples,
+	embedded javascript in HTML files, descriptions in CSS and others.
+
+	References to the global object (usually `window', if run from
+	within a browser) and active jQuery instance are now passed in to
+	the module initialiser function of components compatible with AMD
+	specifications¹, for the sake of greater encapsulation. However,
+	because we also provide compatibility with conventional javascript
+	loading methods, this change means loading of said modules has
+	become slightly more complicated given that they now require their
+	respective dependencies to be loaded previously.
+
+	Renamed `TextItem' class to `Item'.
+
+	Few simple improvements made to code.
+
+	¹ Currently only `SortingDesk' and `SortingQueue' employ this.
+
+	* examples:
+
+	Added example making use of (most) all of (new) `SortingDesk'
+	component's features.
+
+	Fixed broken examples after `SortingQueue' component's rename and
+	creation of new `SortingDesk'.
+
+	Employed different naming scheme to reflect the component being
+	used (either `SortingQueue' or `SortingDesk').
+
+	Removed unused (and severely broken) "rating" examples.
+
+	* src/SortingDesk/SortingDesk.js:
+
+	Created new component and ensured it is compatible with both the
+	AMD specifications and conventional javascript loading methods,
+	despite there being downsides to this.
+
+	Moved all code pertaining to the "bins" concept into this new
+	component, namely: `ControllerBins', `Bins', `BinDefault' and
+	`BinAddButton'.
+
+	* src/SortingQueue/SortingQueue.js:
+
+	Moved code out that belongs in the new `SortingDesk'.
+
+	Component now exports additional classes so as to enable clients
+	(and applications alike) to craft classes sharing the same base
+	classes that `SortingQueue' uses.
+
 2014-10-15  Miguel Guedes  <miguel@miguelguedes.org>
 
 	* src/main/SortingDesk.js:
