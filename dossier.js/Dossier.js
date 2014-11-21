@@ -246,7 +246,7 @@
     //
     //   qitems.engine_name = '<engine name>';
     //   qitems.query_content_id = '<content id>';
-    //   sorting_desk_instance.items.remove_all();
+    //   sorting_desk_instance.items.removeAll();
     //
     // Similarly, each instance has an `annotator` attribute, which is set
     // to the value given in the constructor, but may be changed at any time.

@@ -1244,7 +1244,7 @@ var SortingQueue = (function () {
     return this.getById(decodeURIComponent(node.attr('id')));
   };
 
-  ControllerItems.prototype.remove_all = function() {
+  ControllerItems.prototype.removeAll = function() {
     for (var i = 0; i < this.items_.length; i++) {
         this.items_[i].node.remove();
     }
