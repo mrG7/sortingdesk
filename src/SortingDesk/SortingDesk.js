@@ -27,7 +27,7 @@ if(typeof define === "function" && define.amd) {
 /**
  * The Sorting Desk module.
  *
- * @returns a "class" constructor that creates a Sorting Desk instance.
+ * @returns an object containing class constructors.
  * */
 var SortingDesk = (function (window, $) {
 

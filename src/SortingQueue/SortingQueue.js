@@ -26,7 +26,7 @@ if(typeof define === "function" && define.amd) {
 /**
  * The Sorting Queue module.
  *
- * @returns a "class" constructor that creates a Sorting Queue instance.
+ * @returns an object containing class constructors.
  * */
 var SortingQueue = (function (window, $) {
 
