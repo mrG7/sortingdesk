@@ -137,11 +137,10 @@ var SortingQueue = (function (window, $) {
     items_: null,
 
     /**
-     * Resets the component to a virgin state. Removes all nodes contained by
-     * `options_.nodes.items' and `options_.nodes.bins', if any.
+     * Resets the component to a virgin state.
      *
-     * @returns {Boolean}   Returns status of operation: true if succeeded,
-     *                      false otherwise.*/
+     * @returns {Promise} Returns promise that is fulfilled upon successful
+     *                    instance reset. */
     reset: function ()
     {
       var self = this;
