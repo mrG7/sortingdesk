@@ -10,7 +10,7 @@
  */
 
 
-/*global $, define */
+/*global jQuery, define */
 /*jshint laxbreak:true */
 
 
@@ -27,7 +27,7 @@ if(typeof define === "function" && define.amd) {
  *
  * @returns a "class" constructor that creates a Sorting Queue instance.
  * */
-var SortingQueue = (function () {
+var SortingQueue = (function (window, $) {
 
   /**
    * Constructor responsible for initialising Sorting Queue.
@@ -1764,4 +1764,4 @@ var SortingQueue = (function () {
     BinAddButton: BinAddButton,
   };
 
-} )();
+} )(typeof window == 'undefined' ? this : window, jQuery);
