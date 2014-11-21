@@ -2,50 +2,60 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Sorting Queue - Live</title>
+  <title>Sorting Desk - Live</title>
   
   <link rel="stylesheet" href="css/theme-default.css" media="screen" />
-  <link rel="stylesheet" href="../src/SortingQueue/css/SortingQueue.css" media="screen" />
+  <link rel="stylesheet" href="css/theme-example-default.css" media="screen" />
   
   <script type="text/javascript" src="lib/jquery-2.1.1.min.js"></script>
 
-  <!-- Sorting Queue -->
-  <script type="text/javascript" src="../src/SortingQueue/SortingQueue.js"></script>
-
-  <!-- API -->
-  <script type="text/javascript" src="js/api/api-sorting_queue-live.js"></script>
+  <!-- Libraries -->
+  <script type="text/javascript" src="lib/require-2.1.14.min.js"></script>
   
   <!-- Main initialisation logic -->
   <script type="text/javascript">
 
-  $(function () {
-    var sortingQueue,
-      nitems = $("#items"),
-      nbins = $("#bins"),
-      nloading = $("#loading"),
-      height,
-      bins = [
-        { node_id: 100, features: { NAME: { "Irrelevant": 0 } } },
-        { node_id: 101, features: { NAME: { "Rubbish": 0 } } },
-        { node_id: 102, features: { NAME: { "Keep": 0 } } }
-      ],
-      requests = 0;
+  require.config( {
+    baseUrl: '../',
+    paths: {
+      "SortingDesk": "src/SortingDesk/SortingDesk",
+      "SortingQueue": "src/SortingQueue/SortingQueue",
+      "API-SortingQueue": "src/api/api-sorting_queue-live",
+      "jQuery": "lib/jquery-2.1.1.min"
+    }
+  } );
 
-    $(".wrapper").fadeIn();
-    
-    height = $(window).height() - nitems.offset().top - 10;
-    
-    nitems.parent().height(height);
-    nitems.children().remove();
-    
-    nbins.parent().height(height);
-    nbins.children().remove();
+  require( [ "jQuery" ], function () {
+    require( [ "SortingQueue" ], function () {
+      require( [ "SortingDesk", "API-SortingQueue" ], function () {
 
-//     $("#primary-node-id")
-//       .val(primaryContentId)
-//       .change(function () {
+        var sortingQueue,
+        nitems = $("#items"),
+        nbins = $("#bins"),
+        nloading = $("#loading"),
+        height,
+        bins = [
+          { node_id: 100, features: { NAME: { "Irrelevant": 0 } } },
+          { node_id: 101, features: { NAME: { "Rubbish": 0 } } },
+          { node_id: 102, features: { NAME: { "Keep": 0 } } }
+        ],
+        requests = 0;
+
+        $(".wrapper").fadeIn();
+        
+        height = $(window).height() - nitems.offset().top - 10;
+        
+        nitems.parent().height(height);
+        nitems.children().remove();
+        
+        nbins.parent().height(height);
+        nbins.children().remove();
+
+        //     $("#primary-node-id")
+        //       .val(primaryContentId)
+        //       .change(function () {
         var promise,
-            ids = Api.initialise(bins);
+        ids = Api.initialise(bins);
 
         if(!sortingQueue) {
           var deferred = $.Deferred();
@@ -74,8 +84,10 @@
             }
           } ) );
         } );
-//       } )
-//       .change();                  /* Force instantiation. */
+        //       } )
+        //       .change();                  /* Force instantiation. */
+      });
+    });
   });
     </script>
 </head>

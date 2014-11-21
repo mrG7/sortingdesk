@@ -65,58 +65,38 @@
     }
   } );
 
-  require( [ "SortingQueue" ], function () {
-    var moreTexts = (function() {
-      var processing = false,
-          lastItemId = 0;
-      return function(num) {
-        if(processing) {
-          console.log("moreTexts: request ongoing: ignoring new request");
-          return null;
-        }
-        processing = true;
-
-        var deferred = $.Deferred();
-        window.setTimeout(function () {
-          var result = [ ];
-          while(num-- > 0) {
-            if(lastItemId >= simple_data.length) {
-              lastItemId = 0;
-            }
-            result.push(simple_data[lastItemId++]);
+  require( [ "jQuery" ], function () {
+    require( [ "SortingQueue" ], function () {
+      var moreTexts = (function() {
+        var processing = false,
+        lastItemId = 0;
+        return function(num) {
+          if(processing) {
+            console.log("moreTexts: request ongoing: ignoring new request");
+            return null;
           }
-          processing = false;
-          deferred.resolve(result);
-        }, 250);
-        return deferred.promise();
-      };
-    })();
+          processing = true;
 
-    var MyTextItem = function(owner, item) {
-      SortingQueue.TextItem.call(this, owner, item);
-    };
-
-    MyTextItem.prototype = Object.create(SortingQueue.TextItem.prototype);
-
-    MyTextItem.prototype.render = function(text, view, less) {
-      var $node = SortingQueue.TextItem.prototype.render.call(
-        this, text, view, less);
-      var $unk = $('<a class="sd-text-item-unknown" href="#">?</a>');
-      $unk.click(function() { console.log('You clicked the ?'); });
-      $unk.insertAfter($node.find('.sd-text-item-close'));
-      return $node;
-    };
-
-    new SortingQueue.Instance({
-      nodes: { items: $('#items') },
-      visibleItems: 4,
-      constructors: {
-        TextItem: MyTextItem,
-      },
-    }, {
-      moreTexts: moreTexts,
+          var deferred = $.Deferred();
+          window.setTimeout(function () {
+            var result = [ ];
+            while(num-- > 0) {
+              if(lastItemId >= simple_data.length) {
+                lastItemId = 0;
+              }
+              result.push(simple_data[lastItemId++]);
+            }
+            processing = false;
+            deferred.resolve(result);
+          }, 250);
+          return deferred.promise();
+        };
+      })();
+      new SortingQueue.Instance({ nodes: { items: $('#items') }, visibleItems: 4 },
+                                { moreTexts: moreTexts });
     });
   });
+
   </script>
 
   <!-- Make the items div not take up the whole page. -->
@@ -124,10 +104,6 @@
     #items {
       width: 700px;
       margin: 0 auto;
-    }
-    .sd-text-item-unknown {
-      float: right;
-      margin-right: 10px;
     }
   </style>
 </head>
