@@ -1761,7 +1761,7 @@ var SortingQueue = (function (window, $) {
     ControllerBins: ControllerBins,
     Bin: Bin,
     TextItem: TextItem,
-    BinAddButton: BinAddButton,
+    BinAddButton: BinAddButton
   };
 
 } )(typeof window == 'undefined' ? this : window, jQuery);
