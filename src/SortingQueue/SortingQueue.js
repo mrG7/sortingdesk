@@ -1,5 +1,5 @@
 /**
- * @file Sorting Desk component.
+ * @file Sorting Queue component.
  * @copyright 2014 Diffeo
  *
  * @author Miguel Guedes <miguel@miguelguedes.org>
@@ -16,21 +16,21 @@
 
 /* Compatibility with RequireJs. */
 if(typeof define === "function" && define.amd) {
-  define("SortingDesk", [ "jQuery" ], function() {
-    return SortingDesk;
+  define("SortingQueue", [ "jQuery" ], function() {
+    return SortingQueue;
   });
 }
 
 
 /**
- * The Sorting Desk module.
+ * The Sorting Queue module.
  *
- * @returns a "class" constructor that creates a Sorting Desk instance.
+ * @returns a "class" constructor that creates a Sorting Queue instance.
  * */
-var SortingDesk = (function () {
+var SortingQueue = (function () {
 
   /**
-   * Constructor responsible for initialising Sorting Desk.
+   * Constructor responsible for initialising Sorting Queue.
    *
    * @param   {Object}    opts  Initialisation options (please refer to
    *                            `defaults_' above)
@@ -86,7 +86,7 @@ var SortingDesk = (function () {
     } else if(!cbs.moreTexts)
       throw "Mandatory `moreTexts' callback missing";
 
-    console.log("Initialising Sorting Desk UI");
+    console.log("Initialising Sorting Queue UI");
 
     this.options_ = $.extend(true, $.extend(true, {}, defaults_), opts);
     this.callbacks_ = $.extend({
@@ -138,7 +138,7 @@ var SortingDesk = (function () {
       .initialise();
 
     this.initialised_ = true;
-    console.log("Sorting Desk UI initialised");
+    console.log("Sorting Queue UI initialised");
   };
 
   Instance.prototype = {
@@ -164,7 +164,7 @@ var SortingDesk = (function () {
       var self = this;
 
       /* + If a reset is already underway, simply return its instance.
-       * + Throw an exception if Sorting Desk has just been instantiated and is
+       * + Throw an exception if Sorting Queue has just been instantiated and is
        * currently initialising itself. */
       if(this.resetter_)
         return this.resetter_;
@@ -186,7 +186,7 @@ var SortingDesk = (function () {
 
           self.initialised_ = false;
 
-          console.log("Sorting Desk UI reset");
+          console.log("Sorting Queue UI reset");
         } )
         .always(function () {
           self.resetter_ = false;
@@ -196,10 +196,10 @@ var SortingDesk = (function () {
     },
 
     /**
-     * Returns a boolean value indicating whether Sorting Desk has been
+     * Returns a boolean value indicating whether Sorting Queue has been
      * initialised and is ready to be used.
      *
-     * @returns {Boolean}   Returns true if Sorting Desk has been successful
+     * @returns {Boolean}   Returns true if Sorting Queue has been successful
      *                      initialised, false otherwise.
      * */
     get initialised ()

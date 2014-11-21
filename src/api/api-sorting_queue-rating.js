@@ -1,8 +1,8 @@
-/* SortingDesk API plugin.
+/* SortingQueue API plugin.
  *
  * Adapted from:
 
- * api-sorting_desk-live.js --- Sorting Desk's live API
+ * api-sorting_queue-live.js --- Sorting Queue's live API
  * Copyright (C) 2014 Diffeo
  * Author: Miguel Guedes <miguel@miguelguedes.org>
  */
@@ -10,7 +10,7 @@
 
 /* Compatibility with RequireJs. */
 if(typeof define === "function" && define.amd) {
-  define("API-SortingDesk", [ "jQuery" ], function() {
+  define("API-SortingQueue", [ "jQuery" ], function() {
     return Api;
   } );
 }
@@ -81,7 +81,7 @@ var Api = {
   url: function(endpoint, params, jsonp) {
     var url = this.SCHEME + this.BASE + '/namespaces/';
 
-    /* Prepend protocol if using SortingDesk locally. */
+    /* Prepend protocol if using SortingQueue locally. */
     if(!(/^http[s]*:/.test(window.location.protocol)))
       url = 'http:' + url;
     

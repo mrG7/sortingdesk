@@ -135,17 +135,17 @@ var makeModel = function makeModel() {
     var _search = ko.observable(null);
 
     var _contentIds = null;
-    var _sortingDesk = null;
+    var _sortingQueue = null;
 
     var selectEntity = function selectEntity(e) {
         _entity(e);
         _search(null);
 
-      // This turns on SortingDesk
+      // This turns on SortingQueue
       
       /* TODO: Haven't been able to test this out yet but it seems the entity
        * `e', constructed by `makeEntity' is not in the format expected by the
-       * API (api-sorting_desk-rating) and thus instantiation will probably not
+       * API (api-sorting_queue-rating) and thus instantiation will probably not
        * take place.
        * 
        *  - Miguel */
@@ -158,14 +158,14 @@ var makeModel = function makeModel() {
         ];
         _contentIds = Api.initialise(bins);
         var promise;
-        if (_sortingDesk) {
-            promise = _sortingDesk.reset();
+        if (_sortingQueue) {
+            promise = _sortingQueue.reset();
         } else {
             promise = $.Deferred();
             promise.resolve();
         }
         promise.done(function() {
-            _sortingDesk = new SortingDesk({
+            _sortingQueue = new SortingQueue({
                 nodes: {
                     items: $('#items'),
                     bins: $('#bins'),
@@ -185,14 +185,14 @@ var makeModel = function makeModel() {
         _search(entitySearch(selectEntity));
 
         _contentIds = null;
-        if (_sortingDesk) {
-            /* TODO: not checking the SortingDesk instance isn't reset correctly
+        if (_sortingQueue) {
+            /* TODO: not checking the SortingQueue instance isn't reset correctly
              * could potentially lead to `selectEntity' above being called
              * *whilst* the reset is still taking place. Unlikely though. */        
-            _sortingDesk.reset();
+            _sortingQueue.reset();
         }
       
-        _sortingDesk = null;
+        _sortingQueue = null;
     };
 
     deselectEntity();

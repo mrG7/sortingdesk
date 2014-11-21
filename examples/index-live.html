@@ -2,24 +2,24 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Sorting Desk - Live</title>
+  <title>Sorting Queue - Live</title>
   
   <link rel="stylesheet" href="css/theme-default.css" media="screen" />
-  <link rel="stylesheet" href="../src/main/css/SortingDesk.css" media="screen" />
+  <link rel="stylesheet" href="../src/SortingQueue/css/SortingQueue.css" media="screen" />
   
   <script type="text/javascript" src="lib/jquery-2.1.1.min.js"></script>
 
-  <!-- Sorting Desk -->
-  <script type="text/javascript" src="../src/main/SortingDesk.js"></script>
+  <!-- Sorting Queue -->
+  <script type="text/javascript" src="../src/SortingQueue/SortingQueue.js"></script>
 
   <!-- API -->
-  <script type="text/javascript" src="js/api/api-sorting_desk-live.js"></script>
+  <script type="text/javascript" src="js/api/api-sorting_queue-live.js"></script>
   
   <!-- Main initialisation logic -->
   <script type="text/javascript">
 
   $(function () {
-    var sortingDesk,
+    var sortingQueue,
       nitems = $("#items"),
       nbins = $("#bins"),
       nloading = $("#loading"),
@@ -47,15 +47,15 @@
         var promise,
             ids = Api.initialise(bins);
 
-        if(!sortingDesk) {
+        if(!sortingQueue) {
           var deferred = $.Deferred();
           promise = deferred.promise();
           window.setTimeout(function () { deferred.resolve(); });
         } else
-          promise = sortingDesk.reset();
+          promise = sortingQueue.reset();
 
         promise.always(function () {
-          sortingDesk = new SortingDesk.Instance( {
+          sortingQueue = new SortingQueue.Instance( {
             nodes: {
               items: nitems,
               bins: nbins,

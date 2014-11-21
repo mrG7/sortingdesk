@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Sorting Desk - Offline - Bare bones</title>
+  <title>Sorting Queue - Offline - Bare bones</title>
   
   <link rel="stylesheet" href="css/theme-default.css" media="screen" />
-  <link rel="stylesheet" href="../src/main/css/SortingDesk.css" media="screen" />
+  <link rel="stylesheet" href="../src/SortingQueue/css/SortingQueue.css" media="screen" />
 
   <!-- Libraries -->
   <script type="text/javascript" src="lib/require-2.1.14.min.js"></script>
@@ -16,14 +16,14 @@
   require.config( {
     baseUrl: '../',
     paths: {
-      "SortingDesk": "src/main/SortingDesk",
-      "API-SortingDesk": "src/api/api-sorting_desk-mock",
+      "SortingQueue": "src/SortingQueue/SortingQueue",
+      "API-SortingQueue": "src/api/api-sorting_queue-mock",
       "API-Data": "src/api/data/al_ahram.json?",
       "jQuery": "lib/jquery-2.1.1.min"
     }
   } );
                 
-  require( [ "SortingDesk", "API-SortingDesk" ], function () {
+  require( [ "SortingQueue", "API-SortingQueue" ], function () {
     var loading = $("#loading"),
         bins = [
           {
@@ -62,7 +62,7 @@
 
     Api.initialise(g_descriptor, bins);
 
-    new SortingDesk.Instance( {
+    new SortingQueue.Instance( {
       nodes: {
         items: nitems,
         bins: nbins,

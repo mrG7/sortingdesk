@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Sorting Desk - Offline - Super bare bones</title>
+  <title>Sorting Queue - Offline - Super bare bones</title>
   <!-- Include some simple data. -->
   <script type="text/javascript">
     function repeat_str(s, count) {
@@ -54,18 +54,18 @@
   </script>
 
   <!-- Libraries -->
-  <link rel="stylesheet" href="../src/main/css/SortingDesk.css" media="screen" />
+  <link rel="stylesheet" href="../src/SortingQueue/css/SortingQueue.css" media="screen" />
   <script type="text/javascript" src="lib/require-2.1.14.min.js"></script>
   <script type="text/javascript">
   require.config( {
     baseUrl: '../',
     paths: {
-      "SortingDesk": "src/main/SortingDesk",
+      "SortingQueue": "src/SortingQueue/SortingQueue",
       "jQuery": "lib/jquery-2.1.1.min"
     }
   } );
 
-  require( [ "SortingDesk" ], function () {
+  require( [ "SortingQueue" ], function () {
     var moreTexts = (function() {
       var processing = false,
           lastItemId = 0;
@@ -93,13 +93,13 @@
     })();
 
     var MyTextItem = function(owner, item) {
-      SortingDesk.TextItem.call(this, owner, item);
+      SortingQueue.TextItem.call(this, owner, item);
     };
 
-    MyTextItem.prototype = Object.create(SortingDesk.TextItem.prototype);
+    MyTextItem.prototype = Object.create(SortingQueue.TextItem.prototype);
 
     MyTextItem.prototype.render = function(text, view, less) {
-      var $node = SortingDesk.TextItem.prototype.render.call(
+      var $node = SortingQueue.TextItem.prototype.render.call(
         this, text, view, less);
       var $unk = $('<a class="sd-text-item-unknown" href="#">?</a>');
       $unk.click(function() { console.log('You clicked the ?'); });
@@ -107,7 +107,7 @@
       return $node;
     };
 
-    new SortingDesk.Instance({
+    new SortingQueue.Instance({
       nodes: { items: $('#items') },
       visibleItems: 4,
       constructors: {

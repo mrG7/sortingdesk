@@ -14,14 +14,14 @@
 require.config( {
   baseUrl: '../',
   paths: {
-    "SortingDesk": "src/main/SortingDesk",
-    "API-SortingDesk": "src/api/api-sorting_desk-mock",
+    "SortingQueue": "src/SortingQueue/SortingQueue",
+    "API-SortingQueue": "src/api/api-sorting_queue-mock",
     "API-Data": "src/api/data/al_ahram.json?",
     "jQuery": "lib/jquery-2.1.1.min"
   }
 } );
 
-require( [ "SortingDesk", "API-SortingDesk" ], function () {
+require( [ "SortingQueue", "API-SortingQueue" ], function () {
   require( [ "spec/init.js" ], function () {
     require( [ "spec/instance.js",
                "spec/callbacks.js",

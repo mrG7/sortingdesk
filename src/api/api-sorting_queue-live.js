@@ -1,4 +1,4 @@
-/** api-sorting_desk-mock.js --- Sorting Desk's mock API
+/** api-sorting_queue-live.js --- Sorting Queue's live API
  *
  * Copyright (C) 2014 Diffeo
  *
@@ -12,15 +12,15 @@
 
 /* Compatibility with RequireJs. */
 if(typeof define === "function" && define.amd) {
-  define("API-SortingDesk", [ "jQuery", "API-Data" ], function() {
+  define("API-SortingQueue", [ "jQuery" ], function() {
     return Api;
   } );
 }
 
 
 if(typeof Api !== 'undefined')
-  throw "Symbol `API' already defined";
-
+  throw "Symbol API already defined";
+  
 
 /* Declare random number generator and assign it to Math static class */
 Math.rand = function (min, max)
@@ -43,24 +43,47 @@ Object.firstKey = function (obj)
 /* Class containing only static methods and attributes.
  * Cannot be instantiated.*/
 var Api = {
-  DELAY_MIN: 250,
-  DELAY_MAX: 1000,
+  DELAY_MIN: 200,
+  DELAY_MAX: 750,
   MULTIPLE_NODES_LIMIT: 10,
-
-  primaryContentId: null,
-  bins: null,
-  items: null,
-  lastId: null,                /* So we may assign ids to secondary bins when
+  SCHEME: '//',
+  BASE: 'demo.diffeo.com:8080',
+  NAMESPACE: 'miguel_sorting_desk',
+  RANKER: 'similar',
+  
+  lastId: 0,                   /* So we may assign ids to secondary bins when
                                 * creating them. */
-  lastItemId: null,
-  processing: null,
 
-  initialise: function (descriptor, bins) {
+  processing: { },
+
+  initialise: function (bins)
+  {
     Api.lastId = 0;
     Api.lastItemId = 0;
     Api.processing = { };
     Api.bins = bins.slice();
-    Api.items = descriptor.items;
+  },
+
+  // Given the name of an endpoint (e.g., 's2' or 'nodes'), a dictionary of
+  // query parameters and an optional boolean `jsonp` (to craft a JSONP URL),
+  // returns a properly encoded URL.
+  //
+  // Note that this uses jQuery "traditional" style, so with array data, you'll
+  // get `key=a&key=b` instead of `key[]=a&key[]=b`.
+  url: function(endpoint, params, jsonp) {
+    params = params || {};
+    var url = this.SCHEME + this.BASE + '/namespaces/';
+
+    /* Prepend protocol if using SortingQueue locally. */
+    if(!/^http[s]*:/.test(window.location.protocol))
+      url = 'http:' + url;
+    
+    url += encodeURIComponent(this.NAMESPACE);
+    url += '/' + encodeURIComponent(endpoint) + '/?';
+    if (jsonp) {
+      url += 'callback=?&format=jsonp&';
+    }
+    return url + $.param(params, true);
   },
 
   moreTexts: function (num) {
@@ -75,67 +98,53 @@ var Api = {
 
     if(num <= 0)
       throw "Specified invalid number of items to retrieve";
-    else if(!Api.items.length)
-      throw "Items container is empty";
 
-    window.setTimeout(function () {
-      var result = [ ];
+    var params = {
+      noprof: '1', label: true, order: Api.RANKER,
+      limit: Api.MULTIPLE_NODES_LIMIT,
+      node_id: Api.primaryContentId
+    };
+    
+    $.getJSON(Api.url('s2', params, true))
+      .fail(function () {
+        console.log("moreTexts: request failed");
+        deferred.reject();
+      } )
+      .done(function (data) {
+        var result = [ ];
 
-      while(num-- > 0) {
-        if(Api.lastItemId >= Api.items.length)
-          Api.lastItemId = 0;
-        
-        var node = { },
-            item = Api.items[Api.lastItemId++];
-        
-        try {
-          node.raw = item;
-          node.node_id = item.node_id;
-          
-          item = item.features;
-          node.name = Object.firstKey(item.NAME);
+        data.forEach(function (item) {
+          var node = { };
 
-          if(item.abs_url)
-            node.url = Object.firstKey(item.abs_url);
-          
-          node.text = Object.firstKey(item.sentences);
+          try {
+            node.raw = item;
+            node.node_id = item.node_id;
+            
+            item = item.features;
+            node.name = Object.firstKey(item.NAME);
 
-          if(item.title)
-            node.title = item.title;
+            if(item.abs_url)
+              node.url = Object.firstKey(item.abs_url);
+            
+            node.text = Object.firstKey(item.sentences);
 
-          result.push(node);
-        } catch(x) {
-          console.log("Exception triggered whilst processing node:",
-                      x,
-                      item);
-        }
-      };
-      
-      Api.processing.moreTexts = false;
-      deferred.resolve(result);
-    }, Math.rand(Api.DELAY_MIN, Api.DELAY_MAX));
+            if(item.title)
+              node.title = item.title;
+
+            result.push(node);
+          } catch(x) {
+            console.log("Exception triggered whilst processing node:",
+                        x,
+                        item);
+          }
+        } );
+
+        deferred.resolve(result); } )
+      .always(function () {
+        Api.processing.moreTexts = false;
+      } );
 
     return deferred.promise();
-  },
-
-  getBinById_: function (id)
-  {
-    var result = null,
-        search = function (bins) {
-          bins.some(function (bin) {
-            if(bin.id == id) {
-              result = bin;
-              return true;
-            } else if(bin.children) {
-              if(search(bin.children))
-                return true;
-            }
-          } );
-
-          return result !== null;
-        };
-
-    return search(Api.bins);
   },
 
   /* Returns:
@@ -212,7 +221,7 @@ var Api = {
 
     return deferred.promise();
   },
-
+  
   textDismissed: function(item) {},
   textDroppedInBin: function(item, bin) {}
 };

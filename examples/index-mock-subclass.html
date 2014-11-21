@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Sorting Desk - Offline - Subclassing</title>
+  <title>Sorting Queue - Offline - Subclassing</title>
   
   <link rel="stylesheet" href="css/theme-default.css" media="screen" />
   <link rel="stylesheet" href="css/theme-example-default.css" media="screen" />
@@ -16,14 +16,14 @@
   require.config( {
     baseUrl: '../',
     paths: {
-      "SortingDesk": "src/main/SortingDesk",
-      "API-SortingDesk": "src/api/api-sorting_desk-mock",
+      "SortingQueue": "src/SortingQueue/SortingQueue",
+      "API-SortingQueue": "src/api/api-sorting_queue-mock",
       "API-Data": "src/api/data/al_ahram.json?",
       "jQuery": "lib/jquery-2.1.1.min"
     }
   } );
                 
-  require( [ "SortingDesk", "API-SortingDesk" ], function () {
+  require( [ "SortingQueue", "API-SortingQueue" ], function () {
     var loading = $("#loading"),
         bins = [
           {
@@ -63,11 +63,11 @@
     Api.initialise(g_descriptor, bins);
 
 
-    /* Specialised class `Bin'; derives from `SortingDesk.Bin'. */
+    /* Specialised class `Bin'; derives from `SortingQueue.Bin'. */
     var Bin = function (owner, bin)
-    { SortingDesk.Bin.call(this, owner, bin); }
+    { SortingQueue.Bin.call(this, owner, bin); }
 
-    Bin.prototype = Object.create(SortingDesk.Bin.prototype);
+    Bin.prototype = Object.create(SortingQueue.Bin.prototype);
 
     Bin.prototype.render = function () {
       return $('<div class="sd-bin"><div class="sd-bin-shortcut"></div>'
@@ -75,7 +75,7 @@
              + '</div><div class="sd-children"></div></div>');
     };
 
-    /* Note: I (still) believe SortingDesk should understand the concept of
+    /* Note: I (still) believe SortingQueue should understand the concept of
      * sub-bins, given that it understands the concept of children bins, and
      * should thus both provide a default implementation of a sub-bin
      * (`SubBinDefault'), export its base class (`SubBin') and itself
@@ -85,7 +85,7 @@
      * the purpose of instantiating top level bins, why should `Bin' have a
      * `createSubBin' method for the purpose of instantiating sub-bins? This
      * strikes me as incoherent. In my view, sub-bins should be instantiated by
-     * Sorting Desk using the factory method/class instantiation mechanism by
+     * Sorting Queue using the factory method/class instantiation mechanism by
      * which `Bin' is (and other classes are) instantiated. 
      *
      * The current method of instantiating sub-bins is not only incoherent but
@@ -96,12 +96,12 @@
     };
 
 
-    /* Specialised class `SubBin'; derives from `SortingDesk.Bin'; instantiated
+    /* Specialised class `SubBin'; derives from `SortingQueue.Bin'; instantiated
      * by `Bin' in `createSubBin' above. */
     var SubBin = function (owner, bin)
-    { SortingDesk.Bin.call(this, owner, bin); }
+    { SortingQueue.Bin.call(this, owner, bin); }
 
-    SubBin.prototype = Object.create(SortingDesk.Bin.prototype);
+    SubBin.prototype = Object.create(SortingQueue.Bin.prototype);
 
     SubBin.prototype.render = function () {
       return $('<div class="sd-bin sub-bin"><div class="sd-bin-shortcut"></div>'
@@ -110,7 +110,7 @@
     };
     
 
-    new SortingDesk.Instance( {
+    new SortingQueue.Instance( {
       nodes: {
         items: nitems,
         bins: nbins,

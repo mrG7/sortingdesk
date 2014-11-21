@@ -8,7 +8,7 @@
  * 
  */
 
-/*global $, g_descriptor, SortingDesk, Api */
+/*global $, g_descriptor, SortingQueue, Api */
 /*global afterEach */
 /*jshint laxbreak:true */
 
@@ -17,7 +17,7 @@
 Api.DELAY_MIN = Api.DELAY_MAX = 0;
 
 /* Variables */
-var g_sortingDesk = null,
+var g_sortingQueue = null,
     g_bins = [
       {
         id: '#100',
@@ -74,8 +74,8 @@ var setup = function () {
   Api.initialise(g_descriptor, g_bins);
 
   afterEach(function () {
-    if(g_sortingDesk && g_sortingDesk.initialised) {
-      g_sortingDesk.reset()
+    if(g_sortingQueue && g_sortingQueue.initialised) {
+      g_sortingQueue.reset()
         .always(function () {
           reset = true;
 
@@ -95,11 +95,11 @@ var run = function (options, callbacks, condition, done) {
 
     window.clearInterval(interval);
 
-    g_sortingDesk = new SortingDesk.Instance(options, callbacks);
+    g_sortingQueue = new SortingQueue.Instance(options, callbacks);
     reset = false;
 
-    if(!g_sortingDesk.initialised)
-      throw "Sorting Desk failed to initialise";
+    if(!g_sortingQueue.initialised)
+      throw "Sorting Queue failed to initialise";
       
     condition();
       
@@ -128,11 +128,11 @@ var runAfterItemsRendered = function (options, callbacks, condition, done) {
 
     window.clearInterval(interval);
 
-    g_sortingDesk = new SortingDesk.Instance(options, callbacks);
+    g_sortingQueue = new SortingQueue.Instance(options, callbacks);
     reset = false;
 
-    if(!g_sortingDesk.initialised)
-      throw "Sorting Desk failed to initialise";
+    if(!g_sortingQueue.initialised)
+      throw "Sorting Queue failed to initialise";
     
     interval = window.setInterval(function () {
       if(g_options.nodes.items.children().length < g_options.visibleItems)

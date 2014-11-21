@@ -8,7 +8,7 @@
  * 
  */
 
-/*global SortingDesk, Api, DraggingEvent, g_sortingDesk, setup, run,
+/*global SortingQueue, Api, DraggingEvent, g_sortingQueue, setup, run,
  *global runNoInstantiation, runAfterItemsRendered, reset, result
  *global DELAY_ITEMS, DELAY_ITEM_DELETED, DELAY_BUTTON_ADD, DELAY_ITEM_DRAGGED,
  *global DELAY_ITEM_DROPPED, DELAY_BIN_DRAGGED, DELAY_BIN_DROPPED

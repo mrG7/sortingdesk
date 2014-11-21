@@ -8,7 +8,7 @@
  * 
  */
 
-/*global SortingDesk, Api, DraggingEvent, g_sortingDesk, setup, run,
+/*global SortingQueue, Api, DraggingEvent, g_sortingQueue, setup, run,
  *global runNoInstantiation, runAfterItemsRendered, reset, result
  *global DELAY_ITEMS, DELAY_ITEM_DELETED, DELAY_BUTTON_ADD, DELAY_ITEM_DRAGGED,
  *global DELAY_ITEM_DROPPED, DELAY_BIN_DRAGGED, DELAY_BIN_DROPPED
@@ -22,23 +22,23 @@ describe('Instance', function () {
   
   it('initialises itself', function (done) {
     run(g_options, g_callbacks, function () {
-      expect(g_sortingDesk.initialised).toBe(true);
+      expect(g_sortingQueue.initialised).toBe(true);
     }, done);
   } );
 
   it('initialises more than once', function (done) {
     run(g_options, g_callbacks, function () {
-      var instance = g_sortingDesk;
+      var instance = g_sortingQueue;
 
       reset = true;
       
       run({ nodes: { items: $() } }, g_callbacks,
           function () {
-            expect(g_sortingDesk.initialised).toBe(true);
+            expect(g_sortingQueue.initialised).toBe(true);
           },
           function () {
-            g_sortingDesk.reset();
-            g_sortingDesk = instance;
+            g_sortingQueue.reset();
+            g_sortingQueue = instance;
             
             done();
           } );
@@ -47,9 +47,9 @@ describe('Instance', function () {
 
   it('resets itself correctly', function (done) {
     run(g_options, g_callbacks, function () {
-      g_sortingDesk.reset()
+      g_sortingQueue.reset()
         .done(function () {
-          expect(g_sortingDesk.initialised).toBe(false);
+          expect(g_sortingQueue.initialised).toBe(false);
           done();
         } );
     } );
@@ -57,7 +57,7 @@ describe('Instance', function () {
 
   it("`reset' rejects promise when no instance active", function (done) {
     runNoInstantiation(function () {
-      g_sortingDesk.reset()
+      g_sortingQueue.reset()
         .fail(function () {
           expect(true).toBe(true);
           done();
@@ -76,8 +76,8 @@ describe('Instance', function () {
            var id = g_options.nodes.items.children().get(1).id;
            
            expect(g_options.nodes.items.find("[id='" + id + "']").length).toBe(1);
-           expect(g_sortingDesk.items.remove(
-             g_sortingDesk.items.getById(decodeURIComponent(id)))).toBe(true);
+           expect(g_sortingQueue.items.remove(
+             g_sortingQueue.items.getById(decodeURIComponent(id)))).toBe(true);
 
            window.setTimeout(function () {
              expect(g_options.nodes.items.find("[id='" + id + "']").length).toBe(0);
@@ -93,8 +93,8 @@ describe('Instance', function () {
            
            expect(g_options.nodes.items.find("[id='" + id + "']").length).toBe(0);
            expect(function () {
-             g_sortingDesk.items.remove(
-               g_sortingDesk.items.getById(decodeURIComponent(id)));
+             g_sortingQueue.items.remove(
+               g_sortingQueue.items.getById(decodeURIComponent(id)));
            } ).toThrow("Invalid item index");
 
            window.setTimeout(function () {
@@ -110,7 +110,7 @@ describe('Instance', function () {
     it("`getById' returns correct text item",
        function (done) {
          runAfterItemsRendered(g_options, g_callbacks, function () {
-           expect(g_sortingDesk.items.getById(decodeURIComponent(
+           expect(g_sortingQueue.items.getById(decodeURIComponent(
              g_options.nodes.items.children().get(1).id))).not.toBe(null);
            done();
          } );
@@ -119,7 +119,7 @@ describe('Instance', function () {
     it("`getById' fails to return a text item from invalid id",
        function (done) {
          runAfterItemsRendered(g_options, g_callbacks, function () {
-           expect(g_sortingDesk.items.getById(decodeURIComponent(
+           expect(g_sortingQueue.items.getById(decodeURIComponent(
              g_options.nodes.items.children().get(1).id + '_')))
              .toBe(null);
            done();

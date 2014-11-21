@@ -1,4 +1,10 @@
-* To do items [86%]
+* To do items [83%]
+** IN-PROGRESS Rename =SortingDesk= component to =SortingQueue=
+- State "IN-PROGRESS" from "TODO"       [2014-11-21 Fri 07:53]
+** IN-PROGRESS Rename old Sorting Desk's API to reflect component rename
+- State "IN-PROGRESS" from "TODO"       [2014-11-21 Fri 08:15]
+** TODO Employ use of classes to identify hover state and possibly others
+This is meant to resolve the problem that parent elements can't be styled depending on mouse state, such as =:hover=, when nested elements are used. The only way to reliably solve this problem is to rely on CSS classes to signal mouse states.
 ** TODO Ensure =addBin= callback exists when the 'bin add' button exists
 ** TODO Tests [0%]
 *** TODO init: enforce test compartmentalisation through cloning of nodes
@@ -12,16 +18,18 @@
 *** TODO interface: ensure 'bin add' button is created prior to using it
 *** TODO interface: ensure correct number of sub-bins are created
 *** TODO interface: removed test for adding of sub-bin
-** TODO Implement Events controller based on the publisher-subscriber design pattern
 ** TODO Create a list of interesting events to advertise via an Events controller
 ** TODO [#B] Prefix text-items' and bins' node ids
 - State "TODO"       from "WAIT"       [2014-09-07 Sun 08:16]
 - State "WAIT"       from "TODO"       [2014-09-05 Fri 10:41] \\
   Currently waiting to hear from support as to whether ids are guaranteed to always be unique.
 ** TODO Text items controller to notify client when no more items available
-** TODO Create examples [0%]
+** TODO Create examples [50%]
 *** TODO No content ids
-*** TODO Sub-bins
+*** DONE Sub-bins
+- State "DONE"       from "TODO"       [2014-10-23 Thu 14:42]
+** WAIT Implement Events controller based on the publisher-subscriber design pattern
+- State "WAIT"       from "TODO"       [2014-10-23 Thu 14:42]
 ** WAIT Resolve all annotated TODO items
 - State "WAIT"       from "TODO"       [2014-10-15 Wed 13:57] \\
   To be done when Sorting Desk has reached a significant milestone.

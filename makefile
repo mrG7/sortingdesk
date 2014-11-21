@@ -1,4 +1,4 @@
-# Sorting Desk: project make file
+# Project make file
 # 
 # Copyright (c) 2014 Diffeo
 # Author: Miguel Guedes <miguel@miguelguedes.org>
@@ -9,7 +9,7 @@ DIR_OUTPUT_DOC=$(DIR_OUTPUT)/doc
 
 JSDOC=jsdoc
 JSDOC_CONF=jsdoc.conf
-JSDOC_SOURCES=src/main/SortingDesk.js
+JSDOC_SOURCES=src/SortingQueue/SortingQueue.js
 
 
 all: build man

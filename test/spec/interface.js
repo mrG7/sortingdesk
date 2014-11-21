@@ -8,7 +8,7 @@
  * 
  */
 
-/*global SortingDesk, Api, DraggingEvent, g_sortingDesk, setup, run,
+/*global SortingQueue, Api, DraggingEvent, g_sortingQueue, setup, run,
  *global runNoInstantiation, runAfterItemsRendered, reset, result
  *global DELAY_ITEMS, DELAY_ITEM_DELETED, DELAY_BUTTON_ADD, DELAY_ITEM_DRAGGED,
  *global DELAY_ITEM_DROPPED, DELAY_BIN_DRAGGED, DELAY_BIN_DROPPED
@@ -24,7 +24,7 @@ describe('Interface', function () {
     run($.extend(true, { }, g_options, { nodes: { bins: null } }),
         g_callbacks,
         function () {
-          expect(g_sortingDesk.initialised).toBe(true);
+          expect(g_sortingQueue.initialised).toBe(true);
         },
         done);
   } );
@@ -33,7 +33,7 @@ describe('Interface', function () {
     run($.extend(true, { }, g_options, { nodes: { buttonDismiss: null } }),
         g_callbacks,
         function () {
-          expect(g_sortingDesk.initialised).toBe(true);
+          expect(g_sortingQueue.initialised).toBe(true);
         },
         done);
   } );
@@ -47,7 +47,7 @@ describe('Interface', function () {
          } } ),
            g_callbacks,
            function () {
-             expect(g_sortingDesk.initialised).toBe(true);
+             expect(g_sortingQueue.initialised).toBe(true);
            },
            done);
      } );
@@ -56,8 +56,8 @@ describe('Interface', function () {
     runNoInstantiation(
       function () {
         expect(function () {
-          new SortingDesk.Instance($.extend(true, { }, g_options,
-                                            { nodes: { items: null } }),
+          new SortingQueue.Instance($.extend(true, { }, g_options,
+                                             { nodes: { items: null } }),
                                    g_callbacks);
         } ).toThrow("Missing `items' nodes option");
       },
