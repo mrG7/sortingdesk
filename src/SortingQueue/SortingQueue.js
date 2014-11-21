@@ -1175,12 +1175,16 @@ var SortingQueue = (function () {
     } else if(variant instanceof TextItem)
       variant = variant.node;
 
-    var prevTextItem = this.getByNode(this.getNodeSelected()),
-        nextTextItem = this.getByNode(variant);
-    if (prevTextItem !== null) {
-        prevTextItem.deselect();
-    }
-    nextTextItem.select();
+    /* Select next item (if any), making sure currently active item (if any) is
+     * deselected. */
+    var current = this.getNodeSelected(),
+        next = this.getByNode(variant);
+    
+    if(current.length)
+      this.getByNode(current).deselect();
+
+    if(next)
+      next.select();
 
     /* WARNING: the present implementation requires knowledge of the list
      * items' container's height or it will fail to ensure the currently
