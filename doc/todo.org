@@ -1,7 +1,19 @@
-* To do items [83%]
-** IN-PROGRESS Rename =SortingDesk= component to =SortingQueue=
+* To do items [85%]
+** DONE [#A] Create =SortingDesk= client
+- State "DONE"       from "IN-PROGRESS" [2014-11-21 Fri 11:21]
+- State "IN-PROGRESS" from "TODO"       [2014-11-21 Fri 09:12]
+** DONE Move logic pertaining to the concept of bin into =SortingDesk=
+- State "DONE"       from "IN-PROGRESS" [2014-11-21 Fri 11:21]
+- State "IN-PROGRESS" from "TODO"       [2014-11-21 Fri 09:16]
+** DONE Rename =TextItem= to =Item=
+- State "DONE"       from "TODO"       [2014-11-21 Fri 12:26]
+** TODO =ControllerKeyboard=: must allow clients to process interesting events
+`SortingDesk' doesn't currently allow `ControllerBin' to receive notifications about the global keyboard input state, which means the user is unable to perform actions affecting bins with the keyboard at the moment.
+** DONE Rename =SortingDesk= component to =SortingQueue=
+- State "DONE"       from "IN-PROGRESS" [2014-11-21 Fri 09:12]
 - State "IN-PROGRESS" from "TODO"       [2014-11-21 Fri 07:53]
-** IN-PROGRESS Rename old Sorting Desk's API to reflect component rename
+** DONE Rename old Sorting Desk's API to reflect component rename
+- State "DONE"       from "IN-PROGRESS" [2014-11-21 Fri 09:12]
 - State "IN-PROGRESS" from "TODO"       [2014-11-21 Fri 08:15]
 ** TODO Employ use of classes to identify hover state and possibly others
 This is meant to resolve the problem that parent elements can't be styled depending on mouse state, such as =:hover=, when nested elements are used. The only way to reliably solve this problem is to rely on CSS classes to signal mouse states.
