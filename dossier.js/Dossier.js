@@ -1,4 +1,4 @@
-(function(window, $) {
+var _DossierJS = function(window, $) {
     var API_VERSION = {
         dossier: 1,
     };
@@ -341,7 +341,7 @@
         return typeof obj.serialize === 'function' ? obj.serialize() : obj;
     }
 
-    var module = {
+    return {
         // constants
         API_VERSION: API_VERSION,
         COREF_VALUE_POSITIVE: COREF_VALUE_POSITIVE,
@@ -354,10 +354,12 @@
         ProfileContentId: ProfileContentId,
         SortingQueueItems: SortingQueueItems,
     };
+};
 
-    if (typeof define == "function" && define.amd) {
-        define(function() { return module; });
-    } else {
-        window.DossierJS = module;
-    }
-})(typeof window === 'undefined' ? this : window, jQuery);
+if(typeof define === "function" && define.amd) {
+    define("DossierJS", ["jquery"], function($) {
+        return _DossierJS(window, $);
+    });
+} else {
+    var DossierJS = _DossierJS(window, $);
+}
