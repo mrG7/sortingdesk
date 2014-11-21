@@ -31,6 +31,9 @@ if(typeof define === "function" && define.amd) {
 var SortingQueue = (function (window, $) {
 
   /**
+   * @class@
+   * */
+  /**
    * Constructor responsible for initialising Sorting Queue.
    *
    * @param   {Object}    opts  Initialisation options (please refer to
