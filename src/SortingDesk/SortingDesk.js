@@ -10,7 +10,7 @@
  */
 
 
-/*global jQuery, define */
+/*global SortingQueue, jQuery, define */
 /*jshint laxbreak:true */
 
 
