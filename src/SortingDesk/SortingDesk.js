@@ -75,6 +75,9 @@ var SortingDesk_ = function (window, $, SortingQueue) {
     (this.bins_ = this.sortingQueue_.instantiate('ControllerBins', this))
       .initialise();
 
+    (this.keyboard_ = new ControllerKeyboard(this))
+      .initialise();
+
     /* Add bins only if a bin container node has been provided and there bins
      * to add. */
     if(this.options_.bins) {
@@ -100,6 +103,7 @@ var SortingDesk_ = function (window, $, SortingQueue) {
     /* Instances */
     sortingQueue_: null,
     bins_: null,
+    keyboard_: null,
 
     /**
      * Resets the component to a virgin state. Removes all nodes contained by
@@ -117,6 +121,7 @@ var SortingDesk_ = function (window, $, SortingQueue) {
           reset = this.sortingQueue_.reset();
       
       reset.done(function () {
+        self.keyboard_.reset();
         self.bins_.reset();
 
         self.bins_ = self.options_ = self.sortingQueue_ = null;
@@ -148,7 +153,61 @@ var SortingDesk_ = function (window, $, SortingQueue) {
     { return this.options_; },
 
     get bins ()
-    { return this.bins_; }
+    { return this.bins_; },
+
+    get keyboard ()
+    { return this.keyboard_; }
+  };
+
+
+  /**
+   * @class
+   * */
+  var ControllerKeyboard = function (owner)
+  {
+    /* Invoke super constructor. */
+    SortingQueue.ControllerKeyboardBase.call(this, owner);
+  };
+
+  ControllerKeyboard.prototype = Object.create(
+    SortingQueue.ControllerKeyboardBase.prototype);
+
+  ControllerKeyboard.prototype.onKeyUp = function (evt)
+  {
+    var self = this,
+        options = this.owner_.options;
+
+    /* First process alpha key strokes. */
+    if(evt.keyCode >= 65 && evt.keyCode <= 90) {
+      var bin = this.owner_.bins.getByShortcut(evt.keyCode);
+
+      if(this.owner_.bins.hover) {
+        if(!bin)
+          this.owner_.bins.setShortcut(this.owner_.bins.hover, evt.keyCode);
+      } else {
+        if(bin) {
+          /* TODO: The following animation should be decoupled. */
+
+          /* Simulate the effect produced by a mouse click by assigning the
+           * CSS class that contains identical styles to the pseudo-class
+           * :hover, and removing it after the milliseconds specified in
+           * `options.delay.animateAssign'. */
+          bin.node.addClass(options.css.binAnimateAssign);
+
+          window.setTimeout(function () {
+            bin.node.removeClass(options.css.binAnimateAssign);
+          }, options.delays.animateAssign);
+
+          this.owner_.sortingQueue.callbacks.invoke(
+            "textDroppedInBin",
+            this.owner_.sortingQueue.items.selected(),
+            bin);
+          this.owner_.sortingQueue.items.remove();
+        }
+      }
+
+      return true;
+    }
   };
 
 

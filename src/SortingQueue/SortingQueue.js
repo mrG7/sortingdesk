@@ -511,70 +511,53 @@ var SortingQueue_ = function (window, $) {
   /**
    * @class
    * */
-  var ControllerKeyboard = function (owner)
+  var ControllerKeyboardBase = function (owner)
   {
     /* Invoke super constructor. */
     Controller.call(this, owner);
   };
 
-  ControllerKeyboard.prototype = Object.create(Controller.prototype);
+  ControllerKeyboardBase.prototype = Object.create(Controller.prototype);
 
-  ControllerKeyboard.prototype.initialise = function ()
+  ControllerKeyboardBase.prototype.fnEventKeyUp = null;
+
+  ControllerKeyboardBase.prototype.initialise = function ()
   {
     var self = this;
-
+    
     /* Save event handler function so we are able to remove it when resetting
      * the instance. */
-    this.fnEventKeyUp = function (evt) { self.onKeyUp_(evt); };
+    this.fnEventKeyUp = function (evt) { self.onKeyUp(evt); };
 
     /* Set up listener for keyboard up events. */
     $('body').bind('keyup', this.fnEventKeyUp);
   };
 
-  ControllerKeyboard.prototype.reset = function ()
+  ControllerKeyboardBase.prototype.reset = function ()
   {
     /* Remove keyboard up event listener. */
     $('body').unbind('keyup', this.fnEventKeyUp);
     this.fnEventKeyUp = null;
   };
 
-  ControllerKeyboard.prototype.onKeyUp_ = function (evt)
+
+  /**
+   * @class
+   * */
+  var ControllerKeyboard = function (owner)
+  {
+    /* Invoke super constructor. */
+    ControllerKeyboardBase.call(this, owner);
+  };
+
+  ControllerKeyboard.prototype =
+    Object.create(ControllerKeyboardBase.prototype);
+
+  ControllerKeyboard.prototype.onKeyUp = function (evt)
   {
     var self = this,
         options = this.owner_.options;
-
-    /* First process alpha key strokes. */
-    if(evt.keyCode >= 65 && evt.keyCode <= 90) {
-      var bin = this.owner_.bins.getByShortcut(evt.keyCode);
-
-      if(this.owner_.bins.hover) {
-        if(!bin)
-          this.owner_.bins.setShortcut(this.owner_.bins.hover, evt.keyCode);
-      } else {
-        if(bin) {
-          /* TODO: The following animation should be decoupled. */
-
-          /* Simulate the effect produced by a mouse click by assigning the
-           * CSS class that contains identical styles to the pseudo-class
-           * :hover, and removing it after the milliseconds specified in
-           * `options.delay.animateAssign'. */
-          bin.node.addClass(options.css.binAnimateAssign);
-
-          window.setTimeout(function () {
-            bin.node.removeClass(options.css.binAnimateAssign);
-          }, options.delays.animateAssign);
-
-          this.owner_.callbacks.invoke("textDroppedInBin",
-                                       this.owner_.items.selected(),
-                                       bin);
-          this.owner_.items.remove();
-        }
-      }
-
-      return false;
-    }
-
-    /* Not alpha. */
+    
     switch(evt.keyCode) {
     case options.keyboard.listUp:
       this.owner_.items.selectOffset(-1);
@@ -597,9 +580,9 @@ var SortingQueue_ = function (window, $) {
       return;
     }
 
-    return false;
+    return true;
   };
-
+  
 
   /**
    * @class@
@@ -1247,6 +1230,7 @@ var SortingQueue_ = function (window, $) {
     Owned: Owned,
     Controller: Controller,
     Drawable: Drawable,
+    ControllerKeyboardBase: ControllerKeyboardBase,
     
     /* Drag and drop */
     DragDropManager: DragDropManager,
