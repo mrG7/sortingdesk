@@ -14,9 +14,6 @@
 /*jshint laxbreak:true */
 
 
-/* )(typeof window == 'undefined' ? this : window, jQuery); */
-
-
 /**
  * The Sorting Queue module.
  *
