@@ -12,7 +12,7 @@
 
 /* Compatibility with RequireJs. */
 if(typeof define === "function" && define.amd) {
-  define("API-SortingQueue", [ "jQuery", "API-Data" ], function() {
+  define("API-SortingQueue", [ "jquery", "API-Data" ], function() {
     return Api;
   } );
 }

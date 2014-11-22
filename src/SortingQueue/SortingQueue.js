@@ -19,7 +19,7 @@
  *
  * @returns an object containing class constructors.
  * */
-var _SortingQueue = function (window, $) {
+var SortingQueue_ = function (window, $) {
 
   /**
    * @class@
@@ -1265,12 +1265,12 @@ var _SortingQueue = function (window, $) {
 };
 
 
+var SortingQueue;
+
 /* Compatibility with RequireJs. */
 if(typeof define === "function" && define.amd) {
   define("SortingQueue", [ "jquery" ], function ($) {
-    /* ideally, we would want the module to be defined here. */
-    return _SortingQueue(window, $);
+    return SortingQueue_(window, $);
   });
-} else {
-  var SortingQueue = _SortingQueue(window, $);
-}
+} else
+  SortingQueue = SortingQueue_(window, $);

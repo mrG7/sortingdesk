@@ -61,62 +61,60 @@
     baseUrl: '../',
     paths: {
       "SortingQueue": "src/SortingQueue/SortingQueue",
-      "jQuery": "lib/jquery-2.1.1.min"
+      "jquery": "lib/jquery-2.1.1.min"
     }
   } );
 
-  require( [ "jQuery" ], function () {
-    require( [ "SortingQueue" ], function () {
-      var moreTexts = (function() {
-        var processing = false,
-        lastItemId = 0;
-        return function(num) {
-          if(processing) {
-            console.log("moreTexts: request ongoing: ignoring new request");
-            return null;
-          }
-          processing = true;
+  require( [ "jquery", "SortingQueue" ], function ($, SortingQueue) {
+    var moreTexts = (function() {
+      var processing = false,
+      lastItemId = 0;
+      return function(num) {
+        if(processing) {
+          console.log("moreTexts: request ongoing: ignoring new request");
+          return null;
+        }
+        processing = true;
 
-          var deferred = $.Deferred();
-          window.setTimeout(function () {
-            var result = [ ];
-            while(num-- > 0) {
-              if(lastItemId >= simple_data.length) {
-                lastItemId = 0;
-              }
-              result.push(simple_data[lastItemId++]);
+        var deferred = $.Deferred();
+        window.setTimeout(function () {
+          var result = [ ];
+          while(num-- > 0) {
+            if(lastItemId >= simple_data.length) {
+              lastItemId = 0;
             }
-            processing = false;
-            deferred.resolve(result);
-          }, 250);
-          return deferred.promise();
-        };
-      })();
-
-      var MyItem = function(owner, item) {
-        SortingQueue.Item.call(this, owner, item);
+            result.push(simple_data[lastItemId++]);
+          }
+          processing = false;
+          deferred.resolve(result);
+        }, 250);
+        return deferred.promise();
       };
+    })();
 
-      MyItem.prototype = Object.create(SortingQueue.Item.prototype);
+    var MyItem = function(owner, item) {
+      SortingQueue.Item.call(this, owner, item);
+    };
 
-      MyItem.prototype.render = function(text, view, less) {
-        var $node = SortingQueue.Item.prototype.render.call(
-          this, text, view, less);
-        var $unk = $('<a class="sd-text-item-unknown" href="#">?</a>');
-        $unk.click(function() { console.log('You clicked the ?'); });
-        $unk.insertAfter($node.find('.sd-text-item-close'));
-        return $node;
-      };
+    MyItem.prototype = Object.create(SortingQueue.Item.prototype);
 
-      new SortingQueue.Instance({
-        nodes: { items: $('#items') },
-        visibleItems: 4,
-        constructors: {
-          Item: MyItem
-        },
-      }, {
-        moreTexts: moreTexts,
-      });
+    MyItem.prototype.render = function(text, view, less) {
+      var $node = SortingQueue.Item.prototype.render.call(
+        this, text, view, less);
+      var $unk = $('<a class="sd-text-item-unknown" href="#">?</a>');
+      $unk.click(function() { console.log('You clicked the ?'); });
+      $unk.insertAfter($node.find('.sd-text-item-close'));
+      return $node;
+    };
+
+    new SortingQueue.Instance({
+      nodes: { items: $('#items') },
+      visibleItems: 4,
+      constructors: {
+        Item: MyItem
+      },
+    }, {
+      moreTexts: moreTexts,
     });
   });
 

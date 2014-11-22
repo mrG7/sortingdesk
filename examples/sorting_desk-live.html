@@ -21,74 +21,72 @@
       "SortingDesk": "src/SortingDesk/SortingDesk",
       "SortingQueue": "src/SortingQueue/SortingQueue",
       "API-SortingQueue": "src/api/api-sorting_queue-live",
-      "jQuery": "lib/jquery-2.1.1.min"
+      "jquery": "lib/jquery-2.1.1.min"
     }
   } );
 
-  require( [ "jQuery" ], function () {
-    require( [ "SortingQueue" ], function () {
-      require( [ "SortingDesk", "API-SortingQueue" ], function () {
+  require( [ "jquery", "SortingDesk", "API-SortingQueue" ],
+    function ($, SortingDesk) {
 
-        var sortingQueue,
-        nitems = $("#items"),
-        nbins = $("#bins"),
-        nloading = $("#loading"),
-        height,
-        bins = [
-          { node_id: 100, features: { NAME: { "Irrelevant": 0 } } },
-          { node_id: 101, features: { NAME: { "Rubbish": 0 } } },
-          { node_id: 102, features: { NAME: { "Keep": 0 } } }
-        ],
-        requests = 0;
+      var instance,
+          nitems = $("#items"),
+          nbins = $("#bins"),
+          nloading = $("#loading"),
+          height,
+          bins = [
+            { node_id: 100, features: { NAME: { "Irrelevant": 0 } } },
+            { node_id: 101, features: { NAME: { "Rubbish": 0 } } },
+            { node_id: 102, features: { NAME: { "Keep": 0 } } }
+          ],
+          requests = 0;
 
-        $(".wrapper").fadeIn();
-        
-        height = $(window).height() - nitems.offset().top - 10;
-        
-        nitems.parent().height(height);
-        nitems.children().remove();
-        
-        nbins.parent().height(height);
-        nbins.children().remove();
+      $(".wrapper").fadeIn();
+      
+      height = $(window).height() - nitems.offset().top - 10;
+      
+      nitems.parent().height(height);
+      nitems.children().remove();
+      
+      nbins.parent().height(height);
+      nbins.children().remove();
 
-        //     $("#primary-node-id")
-        //       .val(primaryContentId)
-        //       .change(function () {
-        var promise,
-        ids = Api.initialise(bins);
+      //     $("#primary-node-id")
+      //       .val(primaryContentId)
+      //       .change(function () {
+      var promise,
+      ids = Api.initialise(bins);
 
-        if(!sortingQueue) {
-          var deferred = $.Deferred();
-          promise = deferred.promise();
-          window.setTimeout(function () { deferred.resolve(); });
-        } else
-          promise = sortingQueue.reset();
+      if(!instance) {
+        var deferred = $.Deferred();
+        promise = deferred.promise();
+        window.setTimeout(function () { deferred.resolve(); });
+      } else
+        promise = instance.reset();
 
-        promise.always(function () {
-          sortingQueue = new SortingQueue.Instance( {
-            nodes: {
-              items: nitems,
-              bins: nbins,
-              binDelete: $("#button-delete") /* Also used for 'dimissing' text
-                                              * items that aren't/can't/won't be
-                                              * sorted into a bin */
-            },
-            contentIds: ids,
-            visibleItems: 15
-          }, $.extend(Api, {
-            onRequestStart: function () {
-              if(requests ++ == 0) nloading.stop().fadeIn();
-            },
-            onRequestStop: function () {
-              if(--requests == 0) nloading.stop().fadeOut();
-            }
-          } ) );
-        } );
-        //       } )
-        //       .change();                  /* Force instantiation. */
-      });
+      promise.always(function () {
+        instance = new SortingDesk.Instance( {
+          nodes: {
+            items: nitems,
+            bins: nbins,
+            binDelete: $("#button-delete") /* Also used for 'dimissing' text
+                                            * items that aren't/can't/won't be
+                                            * sorted into a bin */
+          },
+          contentIds: ids,
+          visibleItems: 15
+        }, $.extend(Api, {
+          onRequestStart: function () {
+            if(requests ++ == 0) nloading.stop().fadeIn();
+          },
+          onRequestStop: function () {
+            if(--requests == 0) nloading.stop().fadeOut();
+          }
+        } ) );
+      } );
+      //       } )
+      //       .change();                  /* Force instantiation. */
     });
-  });
+      
     </script>
 </head>
 <body>
