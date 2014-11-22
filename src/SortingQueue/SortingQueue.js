@@ -63,10 +63,6 @@ var SortingQueue_ = function (window, $) {
     else if(!opts.nodes.items)
       throw "Missing `items' nodes option";
 
-    /* Create dummy jQuery element if bins container not provided. */
-    if(!opts.nodes.bins)
-      opts.nodes.bins = $();
-
     /* Allow a function to be passed in instead of an object containing
      * callbacks. In the case that a function is passed in, it is assumed to be
      * the `moreTexts' callback. */
