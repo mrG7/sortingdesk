@@ -521,6 +521,9 @@ var SortingQueue_ = function (window, $) {
 
   ControllerKeyboardBase.prototype.fnEventKeyUp = null;
 
+  /* Required: */
+  /* abstract */ ControllerKeyboardBase.prototype.onKeyUp = null;
+
   ControllerKeyboardBase.prototype.initialise = function ()
   {
     var self = this;
