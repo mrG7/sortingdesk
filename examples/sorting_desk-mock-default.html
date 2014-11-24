@@ -25,50 +25,22 @@
 
   require( [ "SortingDesk", "API-SortingDesk" ], function (SortingDesk) {
     var loading = $("#loading"),
-    bins = [
-      {
-        id: '#100',
-        name: "Irrelevant",
-        children: [
-          {
-            id: "test-1",
-            name: "Inner irrelevancy"
-          },
-          {
-            id: "test-2",
-            name: "Additional irrelevancy"
-          },
-          {
-            id: "test-3",
-            name: "Sub-par irrelevancy"
-          },
-          {
-            id: "test-4",
-            name: "Worrying irrelevancy"
-          }
-        ]
-      },
-      { id: '^1$0#1', name: "Rubbish" },
-      { id: '1_0%%^&#2', name: "Keep" },
-    ],
-    nitems = $("#items"),
-    nbins = $("#bins"),
-    height = $(window).height() - nitems.offset().top - 45,
-    requests = 0;
+        nitems = $("#items"),
+        nbins = $("#bins"),
+        height = $(window).height() - nitems.offset().top - 45,
+        requests = 0;
 
     $(".wrapper").fadeIn();
     nitems.height(height);
     nbins.height(height);
     
-    Api.initialise(g_descriptor, bins);
-
+    Api.initialise(g_descriptor);
     new SortingDesk.Instance( {
       nodes: {
         items: nitems,
         bins: nbins,
         buttonDismiss: $("#button-dismiss")
       },
-      bins: bins,
       visibleItems: 15
     }, $.extend(Api, {
       onRequestStart: function () { if(!requests++) loading.stop().fadeIn(); },
