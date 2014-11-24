@@ -1194,7 +1194,6 @@ var SortingQueue_ = function (window, $) {
    *
    * nodes: {
    *   items: jQuery-element,           ; mandatory
-   *   bins: jQuery-element,            ; optional
    *   buttonDismiss: jQuery-element    ; optional
    * },
    * contentIds: array<string>          ; optional
