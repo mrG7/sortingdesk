@@ -1,3 +1,69 @@
+2014-11-24  Miguel Guedes  <miguel@miguelguedes.org>
+
+	* mock APIs:
+
+	Created API for the SortingDesk component that makes use of mock
+	data. It supports the following features:
+
+	+ retrieval of random ranker
+	+ creation of a bin
+	+ removal of a bin
+	+ setting a bin active
+	+ retrieval of items based on the currently active ranker
+
+	SortingDesk's mock API, and SortingDesk itself, need further
+	work. In particular the API's =addBin= reliance on being supplied
+	with a ranker is particularly annoying.
+
+	Created mock data for use with SortingDesk's API employing
+	different fake "rankers", each of which with its own list of
+	items. This needs to be revisited as it doesn't model real world
+	usage, but for now should serve the purpose of illustrating how
+	the component works.
+
+	Improved several (minor) aspects in SortingQueue's mock API.
+
+	* CSS:
+
+	Merged CSS used by examples and separated styles so that examples
+	targeting the two components can have their own specific styles.
+
+	* src/SortingDesk/SortingDesk.js:
+
+	Reworked component instantiation to enable a random ranker to be
+	retrieved, a bin created and made active, before the component is
+	initialised.
+
+	* all:
+
+	Removed dead or code no longer relevant.
+
+	Several improvements.
+
+2014-11-22  Miguel Guedes  <miguel@miguelguedes.org>
+
+	* all:
+
+	Fixed lingering AMD module loading issues. There are no issues now
+	concerning automatic loading of dependencies.
+
+	* src/SortingQueue/SortingQueue.js:
+
+	Created a keyboard input base class that handles low level
+	initialisation and reset of keyboard events.
+
+	Implemented a specialised class with the purpose of handling
+	keyboard input events specific to the `SortingQueue' component.
+
+	Reworked `ControllerButtonDismiss' class so as to enable clients
+	to register drop scopes and function handlers to process said drop
+	events.
+
+	* src/SortingDesk/SortingDesk.js:
+
+	Created a specialised class that handles keyboard input events
+	specific to the `SortingDesk' component.
+
 2014-11-21  Miguel Guedes  <miguel@miguelguedes.org>
 
 	* all:
