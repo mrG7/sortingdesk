@@ -64,58 +64,29 @@ var SortingDesk_ = function (window, $, SortingQueue) {
     console.log("Initialising Sorting Desk UI");
 
     this.options_ = $.extend(true, $.extend(true, {}, defaults_), opts);
-    cbs = $.extend({
-        addBin: function () {}
-    }, cbs);
 
-    /* Begin instantiating and initialising controllers. */
-    this.sortingQueue_ = new SortingQueue.Instance(this.options_, cbs);
+    cbs.getRandomRanker()
+      .done(function (result) {
+        console.log("Using ranker:", result.ranker);
 
-    (this.bins_ = this.sortingQueue_.instantiate('ControllerBins', this))
-      .initialise();
+        cbs.addBin(result.ranker, result.ranker, true)
+          .done(function (bin) {
+            console.log("Created default bin");
 
-    (this.keyboard_ = new ControllerKeyboard(this))
-      .initialise();
+            if(!self.options_.bins)
+              self.options_.bins = [ ];
 
-    this.sortingQueue_.dismiss.register('bin', function (e, id, scope) {
-      var bin = self.bins_.getById(decodeURIComponent(id));
-
-      if(bin) {
-        /* It doesn't matter if the API request succeeds or not for the
-         * bin is always deleted. The only case (that I am aware of) where
-         * the API request would fail is if the bin didn't exist
-         * server-side, in which case it should be deleted from the UI
-         * too. So, always delete, BUT, if the request fails show the user
-         * a notification; for what purpose, I don't know. */
-        if(bin.parent)
-          bin.parent.remove(bin);
-        else
-          self.bins_.removeAt(self.bins_.indexOf(bin));
-
-        self.sortingQueue.callbacks.invoke('removeBin', bin.id)
+            self.options_.bins.unshift(bin);
+            
+            self.initialise_(cbs);
+          } )
           .fail(function (result) {
-            console.log("bin-remove:", result.error);
-            /* TODO: user notification not implemented yet. */
+            throw "Failed to create initial bin: " + result.error;
           } );
-      }
-    } );
-
-    /* Add bins only if a bin container node has been provided and there bins
-     * to add. */
-    if(this.options_.bins) {
-      this.options_.bins.forEach(function (descriptor) {
-        var bin = self.sortingQueue_.instantiate('Bin', self.bins_, descriptor);
-        self.bins_.add(bin);
-
-        /* Instantiate and add sub-bins. */
-        descriptor.children && descriptor.children.forEach(function (sb) {
-          bin.add(bin.createSubBin(sb));
-        } );
+      } )
+      .fail(function (result) {
+        throw "Failed to retrieve random ranker: " + result.error;
       } );
-    }
-
-    this.initialised_ = true;
-    console.log("Sorting Desk UI initialised");
   };
 
   Instance.prototype = {
@@ -126,6 +97,56 @@ var SortingDesk_ = function (window, $, SortingQueue) {
     sortingQueue_: null,
     bins_: null,
     keyboard_: null,
+
+    initialise_: function (cbs)
+    {
+      var self = this;
+      
+      /* Begin instantiating and initialising controllers. */
+      this.sortingQueue_ = new SortingQueue.Instance(this.options_, cbs);
+      
+      (this.bins_ = this.sortingQueue_.instantiate('ControllerBins', this))
+        .initialise();
+
+      (this.keyboard_ = new ControllerKeyboard(this))
+        .initialise();
+
+      this.sortingQueue_.dismiss.register('bin', function (e, id, scope) {
+        var bin = self.bins_.getById(decodeURIComponent(id));
+
+        if(bin) {
+          /* It doesn't matter if the API request succeeds or not for the
+           * bin is always deleted. The only case (that I am aware of) where
+           * the API request would fail is if the bin didn't exist
+           * server-side, in which case it should be deleted from the UI
+           * too. So, always delete, BUT, if the request fails show the user
+           * a notification; for what purpose, I don't know. */
+          if(bin.parent)
+            bin.parent.remove(bin);
+          else
+            self.bins_.removeAt(self.bins_.indexOf(bin));
+
+          self.sortingQueue_.callbacks.invoke('removeBin', bin.id)
+            .fail(function (result) {
+              console.log("bin-remove:", result.error);
+              /* TODO: user notification not implemented yet. */
+            } );
+        }
+      } );
+
+      this.options_.bins.forEach(function (descriptor) {
+        var bin = self.sortingQueue_.instantiate('Bin', self.bins_, descriptor);
+        self.bins_.add(bin);
+
+        /* Instantiate and add sub-bins. */
+        descriptor.children && descriptor.children.forEach(function (sb) {
+          bin.add(bin.createSubBin(sb));
+        } );
+      } );
+
+      this.initialised_ = true;
+      console.log("Sorting Desk UI initialised");
+    },
 
     /**
      * Resets the component to a virgin state. Removes all nodes contained by
