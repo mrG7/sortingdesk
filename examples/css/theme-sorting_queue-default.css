@@ -1,4 +1,5 @@
-/** SortingQueue.css --- Default theme used by the Sorting Queue component
+/** theme-sorting_queue-default.css --- Default theme used by examples
+ * illustrating usage of the SortingQueue component.
  *
  * Copyright (C) 2014 Diffeo
  *
@@ -12,7 +13,82 @@
 /*csslint adjoining-classes: false, important: false */
 
 
-/* Bin */
+/* HTML tags */
+BODY {
+  font: 15px Arial, sans-serif;
+}
+
+#wrapper-outer {
+  width: 1000px;
+  margin: auto;
+}
+
+.wrapper {
+  border: 4px solid #DFDED5;
+  border-radius: 10px;
+  width: 480px;
+  display: none;
+}
+
+#wrapper-outer .wrapper.single {
+  margin: auto;
+  float: none;
+}
+
+#controls {
+  height: 30px;
+}
+
+#controls LABEL {
+  padding-right: 10px;
+}
+
+#wrapper-items {
+  float: left;
+}
+
+#wrapper-bins {
+  float: right;
+}
+
+#wrapper-items,
+#wrapper-bins {
+  overflow: auto;
+}
+
+#items, #bins {
+  padding: 10px;
+  overflow: auto;
+  position: relative;
+}
+
+#loading {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 5px 10px 5px 10px;
+  display: none;
+  background-color: rgb(219, 60, 60);
+  color: white;
+}
+
+#notification {
+  display: none;
+  width: 600px;
+  position: absolute;
+  left: 50%;
+  margin-left: -300px;
+}
+
+.debug-controls {
+  clear: both;
+  padding: 10px;
+}
+
+
+/* SortingQueue specifics
+ * ----------------------------------------------------------------------
+ *  Bin */
 .sd-bin {
   position: relative;
   border: 4px solid #7582C9;
