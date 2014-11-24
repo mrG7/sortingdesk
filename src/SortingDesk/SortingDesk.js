@@ -69,7 +69,6 @@ var SortingDesk_ = function (window, $, SortingQueue) {
     }, cbs);
 
     /* Begin instantiating and initialising controllers. */
-    /* NOTE: `opts' and `cbs' */
     this.sortingQueue_ = new SortingQueue.Instance(this.options_, cbs);
 
     (this.bins_ = this.sortingQueue_.instantiate('ControllerBins', this))
