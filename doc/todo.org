@@ -1,20 +1,44 @@
-* To do items [85%]
-** DONE [#A] Create =SortingDesk= client
-- State "DONE"       from "IN-PROGRESS" [2014-11-21 Fri 11:21]
-- State "IN-PROGRESS" from "TODO"       [2014-11-21 Fri 09:12]
-** DONE Move logic pertaining to the concept of bin into =SortingDesk=
-- State "DONE"       from "IN-PROGRESS" [2014-11-21 Fri 11:21]
-- State "IN-PROGRESS" from "TODO"       [2014-11-21 Fri 09:16]
-** DONE Rename =TextItem= to =Item=
-- State "DONE"       from "TODO"       [2014-11-21 Fri 12:26]
-** TODO =ControllerKeyboard=: must allow clients to process interesting events
-`SortingDesk' doesn't currently allow `ControllerBin' to receive notifications about the global keyboard input state, which means the user is unable to perform actions affecting bins with the keyboard at the moment.
-** DONE Rename =SortingDesk= component to =SortingQueue=
-- State "DONE"       from "IN-PROGRESS" [2014-11-21 Fri 09:12]
-- State "IN-PROGRESS" from "TODO"       [2014-11-21 Fri 07:53]
-** DONE Rename old Sorting Desk's API to reflect component rename
-- State "DONE"       from "IN-PROGRESS" [2014-11-21 Fri 09:12]
-- State "IN-PROGRESS" from "TODO"       [2014-11-21 Fri 08:15]
+* To do items [86%]
+** =SortingDesk= [20%]
+*** DONE Retrieve random item from the list and create bin off it
+- State "DONE"       from "TODO"       [2014-11-24 Mon 17:58]
+*** TODO Set =search engine= to random item retrieved at initialisation time
+*** TODO Allow bins to be created by dragging items out of the list
+*** TODO Clicking on a bin selects it as the active item ranker
+*** TODO Handle removal of currently active bin
+*** TODO =addBin=: how to deal with the =ranker= argument?
+** TODO =onRequestStart/End= are not triggered in =SortingDesk='s constructor
+** TODO Revisit =sorting_desk-live.html= example
+It no longer runs and its CSS is invalid compared to the =sorting_desk-mock-default.html= example.
+** TODO Ensure CSS contained by Sorting Desk and Queue components is (still) valid
+Many changes have been made which must have surely affected the CSS.
+** TODO Rename callbacks
+Given that the =TextItem= prefixed classes have been renamed to =Item=, it then follows that the callbacks prefixed with the string =text= should also be renamed to =item=.
+** TODO Review data structures
+This includes =Sorting Desk='s bin data structure and =Sorting Queue='s item
+data structure. Changes to any of the components will require updating the
+different API and example source files, as well as dossier.js .
+
+For instance, Sorting Queue expects an item to be composed of the following properties:
+
++ =raw=: reference to raw structure; probably not needed
++ =node_id=: the item's id
++ =name=: (a sort of) label/tag
++ =url=: URL to point =name= above to
++ =text=: actual item content
++ =title=: optional; appended to =name= above
+
+The above could instead be:
+
++ =id=
++ =label= (or =tag=)
+  - =name=
+  - =title=
+  - =url=
++ =text=
+
+A similar discussion could be had regarding bins' data structure.
+** TODO SortingQueue always expects 
 ** TODO Employ use of classes to identify hover state and possibly others
 This is meant to resolve the problem that parent elements can't be styled depending on mouse state, such as =:hover=, when nested elements are used. The only way to reliably solve this problem is to rely on CSS classes to signal mouse states.
 ** TODO Ensure =addBin= callback exists when the 'bin add' button exists
@@ -54,6 +78,25 @@ This is meant to resolve the problem that parent elements can't be styled depend
 - State "TODO"       from "WAIT"       [2014-09-05 Fri 10:42]
 - State "WAIT"       from "TODO"       [2014-08-22 Fri 13:24] \\
   Not proceeding with this until it's clear whether bins based on existing text items are even editable.
+** DONE =ControllerButtonDismiss=: must allow clients to register interested scopes and receive events when these occur
+- State "DONE"       from "TODO"       [2014-11-22 Sat 08:10]
+** DONE Create =SortingDesk= client
+- State "DONE"       from "IN-PROGRESS" [2014-11-21 Fri 11:21]
+- State "IN-PROGRESS" from "TODO"       [2014-11-21 Fri 09:12]
+** DONE Move logic pertaining to the concept of bin into =SortingDesk=
+- State "DONE"       from "IN-PROGRESS" [2014-11-21 Fri 11:21]
+- State "IN-PROGRESS" from "TODO"       [2014-11-21 Fri 09:16]
+** DONE Rename =TextItem= to =Item=
+- State "DONE"       from "TODO"       [2014-11-21 Fri 12:26]
+** DONE =ControllerKeyboard=: must allow clients to process interesting events
+- State "DONE"       from "TODO"       [2014-11-22 Sat 07:43]
+`SortingDesk' doesn't currently allow `ControllerBin' to receive notifications about the global keyboard input state, which means the user is unable to perform actions affecting bins with the keyboard at the moment.
+** DONE Rename =SortingDesk= component to =SortingQueue=
+- State "DONE"       from "IN-PROGRESS" [2014-11-21 Fri 09:12]
+- State "IN-PROGRESS" from "TODO"       [2014-11-21 Fri 07:53]
+** DONE Rename old Sorting Desk's API to reflect component rename
+- State "DONE"       from "IN-PROGRESS" [2014-11-21 Fri 09:12]
+- State "IN-PROGRESS" from "TODO"       [2014-11-21 Fri 08:15]
 ** DONE Fix presently broken tests
 - State "DONE"       from "IN-PROGRESS" [2014-10-23 Thu 13:30]
 - State "IN-PROGRESS" from "TODO"       [2014-10-23 Thu 11:32]
