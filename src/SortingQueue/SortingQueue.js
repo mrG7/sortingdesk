@@ -102,6 +102,14 @@ var SortingQueue_ = function (window, $) {
     (this.dismiss_ = new ControllerButtonDismiss(this))
       .initialise();
 
+    this.dismiss_.register('text-item', function (e, id, scope) {
+      var item = self.items.getById(id);
+
+      self.callbacks.invoke("textDismissed", item);
+      self.items.remove(
+        self.items.getById(decodeURIComponent(id)));
+    } );
+
     (this.items_ = new ControllerItems(this))
       .initialise();
 
@@ -594,9 +602,14 @@ var SortingQueue_ = function (window, $) {
   {
     /* Invoke super constructor. */
     Controller.call(this, owner);
+
+    this.handlers_ = [ ];
   };
 
   ControllerButtonDismiss.prototype = Object.create(Controller.prototype);
+
+  ControllerButtonDismiss.prototype.droppable_ = null;
+  ControllerButtonDismiss.prototype.handlers_ = null;
 
   ControllerButtonDismiss.prototype.initialise = function ()
   {
@@ -606,48 +619,16 @@ var SortingQueue_ = function (window, $) {
     if(!options.nodes.buttonDismiss.length)
       return;
 
-    new Droppable(options.nodes.buttonDismiss, {
+    this.droppable_ = new Droppable(options.nodes.buttonDismiss, {
       classHover: options.css.droppableHover,
-      scopes: [ 'bin', 'text-item' ],
+      scopes: [ ],
 
       drop: function (e, id, scope) {
-        switch(scope) {
-        case 'bin':
-          var bin = self.owner_.bins.getById(decodeURIComponent(id));
-
-          if(bin) {
-            /* It doesn't matter if the API request succeeds or not for the
-             * bin is always deleted. The only case (that I am aware of) where
-             * the API request would fail is if the bin didn't exist
-             * server-side, in which case it should be deleted from the UI
-             * too. So, always delete, BUT, if the request fails show the user
-             * a notification; for what purpose, I don't know. */
-            if(bin.parent)
-              bin.parent.remove(bin);
-            else
-              self.owner_.bins.removeAt(self.owner_.bins.indexOf(bin));
-
-            self.owner_.callbacks.invoke('removeBin', bin.id)
-              .fail(function (result) {
-                console.log("bin-remove:", result.error);
-                /* TODO: user notification not implemented yet. */
-              } );
-          }
-
-          break;
-
-        case 'text-item':
-          var item = self.owner_.items.getById(id);
-
-          self.owner_.callbacks.invoke("textDismissed", item);
-          self.owner_.items.remove(
-            self.owner_.items.getById(decodeURIComponent(id)));
-
-          break;
-
-        default:
-          console.log("Warning: unknown scope:", scope);
-          break;
+        if(scope in self.handlers_) {
+          self.handlers_[scope](e, id, scope);
+        } else {
+          console.log("Warning: unknown scope: " + scope);
+          return;
         }
 
         self.deactivate();
@@ -657,9 +638,20 @@ var SortingQueue_ = function (window, $) {
     } );
   };
 
+  ControllerButtonDismiss.prototype.register = function (scope, fnHandler)
+  {
+    if(!(scope in this.handlers_))
+      this.droppable_.addScope(scope);
+    
+    this.handlers_[scope] = fnHandler;
+  };
+
   ControllerButtonDismiss.prototype.reset = function ()
   {
     this.owner_.options.nodes.buttonDismiss.off();
+
+    this.handlers_ = [ ];
+    this.droppable_ = null;
   };
 
   ControllerButtonDismiss.prototype.activate = function (callback)
@@ -1130,6 +1122,8 @@ var SortingQueue_ = function (window, $) {
   {
     var self = this;
 
+    this.options_ = options;
+
     node.on( {
       dragover: function (e) {
         if(DragDropManager.isScope(e = e.originalEvent, options.scopes)) {
@@ -1181,6 +1175,16 @@ var SortingQueue_ = function (window, $) {
         return false;
       }
     } );
+  };
+
+  Droppable.prototype = {
+    options_: null,
+
+    addScope: function (scope)
+    {
+      if(!(scope in this.options_.scopes))
+        this.options_.scopes.push(scope);
+    }
   };
   
 

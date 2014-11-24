@@ -78,6 +78,29 @@ var SortingDesk_ = function (window, $, SortingQueue) {
     (this.keyboard_ = new ControllerKeyboard(this))
       .initialise();
 
+    this.sortingQueue_.dismiss.register('bin', function (e, id, scope) {
+      var bin = self.bins_.getById(decodeURIComponent(id));
+
+      if(bin) {
+        /* It doesn't matter if the API request succeeds or not for the
+         * bin is always deleted. The only case (that I am aware of) where
+         * the API request would fail is if the bin didn't exist
+         * server-side, in which case it should be deleted from the UI
+         * too. So, always delete, BUT, if the request fails show the user
+         * a notification; for what purpose, I don't know. */
+        if(bin.parent)
+          bin.parent.remove(bin);
+        else
+          self.bins_.removeAt(self.bins_.indexOf(bin));
+
+        self.sortingQueue.callbacks.invoke('removeBin', bin.id)
+          .fail(function (result) {
+            console.log("bin-remove:", result.error);
+            /* TODO: user notification not implemented yet. */
+          } );
+      }
+    } );
+
     /* Add bins only if a bin container node has been provided and there bins
      * to add. */
     if(this.options_.bins) {
