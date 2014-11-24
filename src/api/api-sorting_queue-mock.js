@@ -71,7 +71,7 @@ var Api = {
 
     if(num <= 0)
       throw "Specified invalid number of items to retrieve";
-    else if(!Api.items.length)
+    else if(!Api.items || !Api.items.length)
       throw "Items container is empty";
 
     Api.processing.moreTexts = true;
