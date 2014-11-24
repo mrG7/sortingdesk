@@ -17,13 +17,13 @@
     paths: {
       "SortingDesk": "src/SortingDesk/SortingDesk",
       "SortingQueue": "src/SortingQueue/SortingQueue",
-      "API-SortingQueue": "src/api/api-sorting_queue-mock",
-      "API-Data": "src/api/data/al_ahram.json?",
+      "API-SortingDesk": "src/api/api-sorting_desk-mock",
+      "API-Data": "src/api/data/test-ranker.json?",
       "jquery": "lib/jquery-2.1.1.min"
     }
   } );
 
-  require( [ "SortingDesk", "API-SortingQueue" ], function (SortingDesk) {
+  require( [ "SortingDesk", "API-SortingDesk" ], function (SortingDesk) {
     var loading = $("#loading"),
     bins = [
       {
