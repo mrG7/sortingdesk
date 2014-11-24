@@ -292,9 +292,9 @@ var SortingDesk_ = function (window, $, SortingQueue) {
         var deferred = $.Deferred();
 
         self.owner_.sortingQueue.callbacks.invoke('addBin', text)
-          .fail(function () {
+          .fail(function (result) {
             /* TODO: show message box and notify user. */
-            console.log("Failed to add bin:", id, text);
+            console.log("Failed to add bin:", id, text, ":", result.error);
             deferred.reject();
           } )
           .done(function (bin) {
