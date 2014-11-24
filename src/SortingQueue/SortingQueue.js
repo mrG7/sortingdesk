@@ -704,10 +704,6 @@ var SortingQueue_ = function (window, $) {
           "moreTexts",
           this.owner_.options.visibleItems);
 
-    /* Check that our request for more text items hasn't been denied. */
-    if(!promise)
-      return;
-
     promise.done(function (items) {
       self.owner_.requests.begin('check-items');
 

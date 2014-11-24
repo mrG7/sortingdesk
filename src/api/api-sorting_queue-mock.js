@@ -64,19 +64,17 @@ var Api = {
   },
 
   moreTexts: function (num) {
-    if(Api.processing.moreTexts) {
-      console.log("moreTexts: request ongoing: ignoring new request");
-      return null;
-    }
-
-    Api.processing.moreTexts = true;
-    
     var deferred = $.Deferred();
+    
+    if(Api.processing.moreTexts)
+      return Api.denyRequest_(deferred, "moreTexts");
 
     if(num <= 0)
       throw "Specified invalid number of items to retrieve";
     else if(!Api.items.length)
       throw "Items container is empty";
+
+    Api.processing.moreTexts = true;
 
     window.setTimeout(function () {
       var result = [ ];
@@ -214,5 +212,17 @@ var Api = {
   },
 
   textDismissed: function(item) {},
-  textDroppedInBin: function(item, bin) {}
+  textDroppedInBin: function(item, bin) {},
+
+  /* Private methods */
+  denyRequest_: function (deferred, /* optional */ name) {
+    if(name)
+      console.log(name + ": request ongoing: rejecting");
+
+    window.setTimeout(function () {
+      deferred.reject( { error: "Request ongoing" } );
+    } );
+
+    return deferred.promise();
+  }
 };
