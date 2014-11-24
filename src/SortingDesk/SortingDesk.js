@@ -489,11 +489,11 @@ var SortingDesk_ = function (window, $, SortingQueue) {
     window.setTimeout(function () {
       new SortingQueue.Draggable(self.node_, {
         dragstart: function (e) {
-          parentOwner.dismiss.activate();
+          parentOwner.sortingQueue.dismiss.activate();
         },
 
         dragend: function (e) {
-          parentOwner.dismiss.deactivate();
+          parentOwner.sortingQueue.dismiss.deactivate();
         }
       } );
     }, 0);
