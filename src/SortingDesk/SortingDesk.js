@@ -36,15 +36,6 @@ var SortingDesk_ = function (window, $, SortingQueue) {
   var Instance = function (opts, cbs)
   {
     var self = this;
-
-    /* Since we aim to be compatible with RequireJs and conventional script loading
-     * methods, we have no way of executing the code that follows only AFTER
-     * dependencies (and sub-dependencies) have been loaded (see `define' statement
-     * above). The simple statement below is thus to ensure that `SortingQueue' has
-     * been loaded prior to continuing; similarly, if `SortingQueue' is defined,
-     * we can safely assume that jQuery has been loaded too. */
-    if(typeof SortingQueue == 'undefined')
-      throw "SortingQueue not loaded";
     
     /* Allow a jQuery element to be passed in instead of an object containing
      * options. In the case that a jQuery element is detected, it is assumed to
