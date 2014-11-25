@@ -763,7 +763,8 @@ var SortingDesk_ = function (window, $, SortingQueue) {
   return {
     Instance: Instance,
     ControllerBins: ControllerBins,
-    Bin: Bin
+    Bin: Bin,
+    BinDefault: BinDefault
   };
   
 };
