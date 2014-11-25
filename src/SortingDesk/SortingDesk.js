@@ -453,7 +453,7 @@ var SortingDesk_ = function (window, $, SortingQueue) {
     this.owner.sortingQueue.callbacks.invoke("setActiveBin", bin.id)
       .done(function () {
         if(self.active_)
-          bin.deactivate();
+          self.active_.deactivate();
         
         self.active_ = bin;
         bin.activate();
