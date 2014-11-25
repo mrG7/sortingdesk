@@ -130,6 +130,18 @@ var _DossierJS = function(window, $) {
         });
     };
 
+    // Fetches a random feature collection from the database.
+    //
+    // This returns a jQuery promise which, on success, resolves to an array
+    // with exactly two elements. The first is a content id and the second
+    // is a `FeatureCollection`.
+    API.prototype.fcRandomGet = function() {
+        var url = this.url('random/feature-collection');
+        return $.getJSON(url).promise().then(function(data) {
+            return [data[0], new FeatureCollection(data[1])];
+        });
+    };
+
     // Adds a new label to the database, which will be used to support
     // active learning.
     //

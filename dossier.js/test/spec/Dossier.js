@@ -39,6 +39,18 @@ describe('DossierJS.API', function() {
         });
     });
 
+    it('can retrieve a random feature collection', function(done) {
+        var cid = 'abc',
+            fc = new DossierJS.FeatureCollection({'NAME': {'foo': 1}});
+        api.fcPut(cid, fc).done(function() {
+            api.fcRandomGet().done(function(r) {
+                expect(r[0]).toEqual(cid);
+                expect(r[1]).toEqual(fc);
+                done();
+            });
+        });
+    });
+
     it('adds a label', function(done) {
         // We have no way to observe whether a label was actually inserted
         // or not (unavailable in the web service), but arguably, that's a
