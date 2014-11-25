@@ -92,11 +92,8 @@ var Api = {
         deferred.resolve( {
           ranker: Api.rankers[ Math.rand(0, Api.rankers.length - 1) ]
         } );
-      } else {
-        deferred.reject( {
-          error: "No rankers exist"
-        } );
-      }
+      } else
+        deferred.reject( { error: "No rankers exist" } );
 
       Api.processing.getRandomRanker = false;
     }, Math.rand(Api.DELAY_MIN, Api.DELAY_MAX));
