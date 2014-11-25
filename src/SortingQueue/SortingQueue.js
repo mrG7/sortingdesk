@@ -622,9 +622,6 @@ var SortingQueue_ = function (window, $) {
     var self = this,
         options = this.owner_.options;
 
-    if(!options.nodes.buttonDismiss.length)
-      return;
-
     this.droppable_ = new Droppable(options.nodes.buttonDismiss, {
       classHover: options.css.droppableHover,
       scopes: [ ],
