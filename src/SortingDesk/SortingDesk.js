@@ -690,7 +690,7 @@ var SortingDesk_ = function (window, $, SortingQueue) {
     this.fnRender_ = this.fnAdd_ = null;
   };
 
-  ControllerBinSpawner.prototype.onAdd = function (id)
+  ControllerBinSpawner.prototype.add = function (id)
   {
     var parentOwner = this.owner_.owner,
         options = parentOwner.options;
@@ -709,7 +709,7 @@ var SortingDesk_ = function (window, $, SortingQueue) {
     this.owner_.append(node);
 
     if(!id) {
-      this.onAddManual(node);
+      this.addManual(node);
       return;
     }
 
@@ -717,7 +717,7 @@ var SortingDesk_ = function (window, $, SortingQueue) {
 
     if(!item) {
       node.remove();
-      throw "onAdd: failed to retrieve text item: " + id;
+      throw "add: failed to retrieve text item: " + id;
     }
 
     this.fnAdd_(id,
@@ -727,7 +727,7 @@ var SortingDesk_ = function (window, $, SortingQueue) {
       .always(function () { node.remove(); } );
   };
 
-  ControllerBinSpawner.prototype.onAddManual = function (node)
+  ControllerBinSpawner.prototype.addManual = function (node)
   {
     var self = this,
         input = node.find('input');
