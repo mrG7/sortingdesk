@@ -457,6 +457,8 @@ var SortingDesk_ = function (window, $, SortingQueue) {
         
         self.active_ = bin;
         bin.activate();
+
+        self.owner_.sortingQueue.items.redraw();
       } )
       .fail(function (result) {
         /* TODO: notify user property that an error occurred. */
