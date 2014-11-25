@@ -1,5 +1,5 @@
 var g_descriptor = {
-  rankers: {
+  labels: {
     "Colors": {
       items: [
         {

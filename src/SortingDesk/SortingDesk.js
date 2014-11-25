@@ -57,13 +57,13 @@ var SortingDesk_ = function (window, $, SortingQueue) {
     this.options_ = $.extend(true, $.extend(true, {}, defaults_), opts);
     this.sortingQueue_ = new SortingQueue.Instance(this.options_, cbs);
     
-    this.sortingQueue_.callbacks.invoke("getRandomRanker")
+    this.sortingQueue_.callbacks.invoke("getRandomLabel")
       .done(function (result) {
-        console.log("Using ranker:", result.ranker);
+        console.log("Using label:", result.label);
 
         self.sortingQueue_.callbacks.invoke("addBin",
-                                            result.ranker,
-                                            result.ranker,
+                                            result.label,
+                                            result.label,
                                             true)
           .done(function (bin) {
             console.log("Created default bin");
@@ -80,7 +80,7 @@ var SortingDesk_ = function (window, $, SortingQueue) {
           } );
       } )
       .fail(function (result) {
-        throw "Failed to retrieve random ranker: " + result.error;
+        throw "Failed to retrieve random label: " + result.error;
       } );
   };
 

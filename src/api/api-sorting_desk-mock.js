@@ -50,7 +50,7 @@ var Api = {
   bins: null,
   activeBin: null,
 
-  rankers: null,
+  labels: null,
   items: null,
   lastBinId: null,    /* So we may assign ids to bins when creating them. */
   lastItemId: null,
@@ -62,16 +62,16 @@ var Api = {
     Api.processing = { };
     
     Api.bins = [ ];
-    Api.rankers = [ ];
+    Api.labels = [ ];
     Api.descriptor = descriptor;
 
-    for(var ranker in descriptor.rankers)
-      Api.rankers.push(ranker);
+    for(var label in descriptor.labels)
+      Api.labels.push(label);
   },
 
   /* Resolves:
    * {
-   *   ranker: String
+   *   label: String
    * }
    *
    * Rejects:
@@ -79,23 +79,23 @@ var Api = {
    *   error: String
    * }
    */
-  getRandomRanker: function () {
+  getRandomLabel: function () {
     var deferred = $.Deferred();
     
-    if(Api.processing.getRandomRanker)
-      return Api.denyRequest_(deferred, "getRandomRanker");
+    if(Api.processing.getRandomLabel)
+      return Api.denyRequest_(deferred, "getRandomLabel");
     
-    Api.processing.getRandomRanker = true;
+    Api.processing.getRandomLabel = true;
 
     window.setTimeout(function () {
-      if(Api.rankers.length) {
+      if(Api.labels.length) {
         deferred.resolve( {
-          ranker: Api.rankers[ Math.rand(0, Api.rankers.length - 1) ]
+          label: Api.labels[ Math.rand(0, Api.labels.length - 1) ]
         } );
       } else
-        deferred.reject( { error: "No rankers exist" } );
+        deferred.reject( { error: "No labels exist" } );
 
-      Api.processing.getRandomRanker = false;
+      Api.processing.getRandomLabel = false;
     }, Math.rand(Api.DELAY_MIN, Api.DELAY_MAX));
     
     return deferred.promise();
@@ -143,7 +143,7 @@ var Api = {
    *   error: String
    * }
    */
-  addBin: function (name, ranker, activate) {
+  addBin: function (name, label, activate) {
     var deferred = $.Deferred();
 
     if(Api.processing.addBin)
@@ -152,15 +152,15 @@ var Api = {
     Api.processing.addBin = true;
       
     window.setTimeout(function () {
-      if(!ranker || Api.rankers.indexOf(ranker) < 0)
-        deferred.reject( { error: "Ranker not found" } );
-      else if(Api.getBinByRanker_(ranker))
-        deferred.reject( { error: "Bin exists for ranker" } );
+      if(!label || Api.labels.indexOf(label) < 0)
+        deferred.reject( { error: "Label not found" } );
+      else if(Api.getBinByLabel_(label))
+        deferred.reject( { error: "Bin exists for label" } );
       else {
         var bin = {
           id: (++Api.lastBinId).toString(),
           name: name,
-          ranker: ranker
+          label: label
         };
 
         Api.bins.push(bin);
@@ -246,25 +246,25 @@ var Api = {
           
           var node = { },
               item,
-              ranker;
+              label;
 
           /* 1 item in 3 will be picked at random. */
           if(Math.rand(0, 100) < 33) {
-            ranker = Api.rankers[Math.rand(0, Api.rankers.length - 1)];
-            var i = Api.descriptor.rankers[ranker].items;
+            label = Api.labels[Math.rand(0, Api.labels.length - 1)];
+            var i = Api.descriptor.labels[label].items;
             item = i[Math.rand(0, i.length - 1)];
           } else {
-            ranker = Api.activeBin.ranker;
+            label = Api.activeBin.label;
             item = Api.items[Api.lastItemId++];
           }
           
           node.raw = item;
-          node.raw.ranker = ranker;
+          node.raw.label = label;
           
           node.node_id = item.id;
           node.text = item.text;
           
-          node.name = ranker;
+          node.name = label;
           node.url = '#';
 
           result.push(node);
@@ -296,11 +296,11 @@ var Api = {
     return result || null;
   },
   
-  getBinByRanker_: function (ranker) {
+  getBinByLabel_: function (label) {
     var result;
     
     Api.bins.some(function (bin) {
-      if(bin.ranker == ranker) {
+      if(bin.label == label) {
         result = bin;
         return true;
       }
@@ -325,7 +325,7 @@ var Api = {
       throw "Null or invalid bin given";
     
     Api.activeBin = bin;
-    Api.items = Api.descriptor.rankers[bin.ranker].items;
+    Api.items = Api.descriptor.labels[bin.label].items;
     Api.lastItemId = 0;
   }
 };
