@@ -9,11 +9,15 @@ var BASE_URL = (function() {
 var passed = function(done) { expect(true).toEqual(true); if (done) done(); }
 var failed = function(done) { expect(true).toEqual(false); if (done) done(); }
 
+var content_id = 'abc';
+var fc = new DossierJS.FeatureCollection({'NAME': {'foo': 1}});
+
 describe('DossierJS.API', function() {
     var api;
 
-    beforeEach(function() {
+    beforeEach(function(done) {
         api = new DossierJS.API(BASE_URL);
+        api.fcPut(content_id, fc).done(function() { done(); });
     });
 
     it('builds valid URLs', function() {
@@ -30,24 +34,17 @@ describe('DossierJS.API', function() {
     });
 
     it('stores and retrieves a feature collection', function(done) {
-        var fc = new DossierJS.FeatureCollection({'NAME': {'foo': 1}});
-        api.fcPut('abc', fc).done(function() {
-            api.fcGet('abc').done(function(got) {
-                expect(got).toEqual(fc);
-                done();
-            });
+        api.fcGet('abc').done(function(got) {
+            expect(got).toEqual(fc);
+            done();
         });
     });
 
     it('can retrieve a random feature collection', function(done) {
-        var cid = 'abc',
-            fc = new DossierJS.FeatureCollection({'NAME': {'foo': 1}});
-        api.fcPut(cid, fc).done(function() {
-            api.fcRandomGet().done(function(r) {
-                expect(r[0]).toEqual(cid);
-                expect(r[1]).toEqual(fc);
-                done();
-            });
+        api.fcRandomGet().done(function(r) {
+            expect(r[0]).toEqual(content_id);
+            expect(r[1]).toEqual(fc);
+            done();
         });
     });
 
@@ -61,14 +58,10 @@ describe('DossierJS.API', function() {
     });
 
     it('provides basic random searching', function(done) {
-        var cid = 'abc',
-            fc = new DossierJS.FeatureCollection({'NAME': {'foo': 1}});
-        api.fcPut(cid, fc).done(function() {
-            api.search('random', cid, {limit: '1'}).done(function(r) {
-                expect(r.results[0].content_id).toEqual(cid);
-                expect(r.results[0].fc).toEqual(fc);
-                done();
-            }).fail(function() { failed(done); });
+        api.search('random', content_id, {limit: '1'}).done(function(r) {
+            expect(r.results[0].content_id).toEqual(content_id);
+            expect(r.results[0].fc).toEqual(fc);
+            done();
         }).fail(function() { failed(done); });
     });
 });
