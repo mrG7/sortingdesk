@@ -11,10 +11,10 @@
   
   <!-- Main initialisation logic -->
   <script type="text/javascript">
-
   require.config( {
     baseUrl: '../',
     paths: {
+      "main": "examples/js/sorting_desk-mock-default",
       "SortingDesk": "src/SortingDesk/SortingDesk",
       "SortingQueue": "src/SortingQueue/SortingQueue",
       "API-SortingDesk": "src/api/api-sorting_desk-mock",
@@ -23,34 +23,8 @@
     }
   } );
 
-  require( [ "SortingDesk", "API-SortingDesk" ], function (SortingDesk) {
-    var loading = $("#loading"),
-        nitems = $("#items"),
-        nbins = $("#bins"),
-        height = $(window).height() - nitems.offset().top - 45,
-        requests = 0;
-
-    $(".wrapper").fadeIn();
-    nitems.height(height);
-    nbins.height(height);
-    
-    Api.initialise(g_descriptor);
-    new SortingDesk.Instance( {
-      nodes: {
-        items: nitems,
-        bins: nbins,
-        buttonDismiss: $("#button-dismiss")
-      },
-      visibleItems: 15
-    }, $.extend(Api, {
-      onRequestStart: function () { if(!requests++) loading.stop().fadeIn(); },
-      onRequestStop: function () { if(!--requests) loading.stop().fadeOut(); }
-    } ) );
-    
-    g_descriptor = null;
-  });      
-
-    </script>
+  require( [ "main" ]);
+  </script>
 </head>
 <body>
   <div id="wrapper-outer">
