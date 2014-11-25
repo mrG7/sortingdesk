@@ -102,7 +102,10 @@ var SortingDesk_ = function (window, $, SortingQueue) {
     {
       var self = this;
       
-      /* Begin instantiating and initialising controllers. */
+      /* Begin instantiating and initialising controllers.
+       *
+       * Start by explicitly initialising SortingQueue's instance and proceed to
+       * initialising our own instance.. */
       this.sortingQueue_.initialise();
       
       (this.bins_ = this.sortingQueue_.instantiate('ControllerBins', this))
