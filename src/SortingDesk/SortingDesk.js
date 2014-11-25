@@ -545,6 +545,16 @@ var SortingDesk_ = function (window, $, SortingQueue) {
     this.append(bin.node);
   };
 
+  Bin.prototype.activate = function ()
+  {
+    this.node.addClass(this.owner_.owner.options.css.binActive);
+  };
+
+  Bin.prototype.deactivate = function ()
+  {
+    this.node.removeClass(this.owner_.owner.options.css.binActive);
+  };
+
   Bin.prototype.indexOf = function (bin)
   {
     /* Note: returns the index of immediately contained children bins. */
@@ -762,6 +772,7 @@ var SortingDesk_ = function (window, $, SortingQueue) {
       binChildren: 'sd-children',
       binAnimateAssign: 'sd-assign',
       binAdding: 'sd-adding',
+      binActive: 'sd-active',
       buttonAdd: 'sd-button-add',
       droppableHover: 'sd-droppable-hover'
     },
