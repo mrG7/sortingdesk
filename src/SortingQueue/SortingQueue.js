@@ -87,37 +87,12 @@ var SortingQueue_ = function (window, $) {
         onRequestStop: function() {}
     }, cbs);
 
-    var self = this;
-
     /* Begin instantiating and initialising controllers. */
     (this.callbacks_ = new ControllerCallbacks(this, this.callbacks_))
       .initialise();
 
     (this.requests_ = new ControllerRequests(this))
       .initialise();
-
-    if(!this.options_.nodes.buttonDismiss)
-      this.options_.nodes.buttonDismiss = $();
-
-    (this.dismiss_ = new ControllerButtonDismiss(this))
-      .initialise();
-
-    this.dismiss_.register('text-item', function (e, id, scope) {
-      var item = self.items.getById(id);
-
-      self.callbacks.invoke("textDismissed", item);
-      self.items.remove(
-        self.items.getById(decodeURIComponent(id)));
-    } );
-
-    (this.items_ = new ControllerItems(this))
-      .initialise();
-
-    (this.keyboard_ = new ControllerKeyboard(this))
-      .initialise();
-
-    this.initialised_ = true;
-    console.log("Sorting Queue UI initialised");
   };
 
   Instance.prototype = {
@@ -130,6 +105,37 @@ var SortingQueue_ = function (window, $) {
     dismiss_: null,
     keyboard_: null,
     items_: null,
+
+    initialise: function ()
+    {
+      var self = this;
+      
+      if(this.initialised_)
+        throw "Already initialised";
+      
+      if(!this.options_.nodes.buttonDismiss)
+        this.options_.nodes.buttonDismiss = $();
+
+      (this.dismiss_ = new ControllerButtonDismiss(this))
+        .initialise();
+
+      this.dismiss_.register('text-item', function (e, id, scope) {
+        var item = self.items.getById(id);
+
+        self.callbacks.invoke("textDismissed", item);
+        self.items.remove(
+          self.items.getById(decodeURIComponent(id)));
+      } );
+
+      (this.items_ = new ControllerItems(this))
+        .initialise();
+
+      (this.keyboard_ = new ControllerKeyboard(this))
+        .initialise();
+
+      this.initialised_ = true;
+      console.log("Sorting Queue UI initialised");
+    },
 
     /**
      * Resets the component to a virgin state.
