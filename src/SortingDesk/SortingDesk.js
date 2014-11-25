@@ -269,6 +269,7 @@ var SortingDesk_ = function (window, $, SortingQueue) {
 
     this.bins_ = [ ];
     this.hover_ = null;
+    this.active_ = null;
     this.spawner_ = null;
 
     /* Define getters. */
@@ -337,6 +338,10 @@ var SortingDesk_ = function (window, $, SortingQueue) {
     /* Contain bin and append its HTML node. */
     this.append(bin.node);
     this.bins_.push(bin);
+
+    /* If first bin to be contained, activate it by default. */
+    if(this.bins_.length == 1)
+      bin.activate();
   };
 
   /* overridable */ ControllerBins.prototype.append = function (node)
@@ -421,6 +426,24 @@ var SortingDesk_ = function (window, $, SortingQueue) {
     return this.find(function (bin) {
       return bin.id == id;
     } );
+  };
+
+  ControllerBins.prototype.setActive = function (bin)
+  {
+    var self = this;
+    
+    this.owner.sortingQueue.callbacks.invoke("setActiveBin", bin.id)
+      .done(function () {
+        if(self.active_)
+          bin.deactivate();
+        
+        self.active_ = bin;
+        bin.activate();
+      } )
+      .fail(function (result) {
+        /* TODO: notify user property that an error occurred. */
+        console.log("Failed to set active bin:", result.error);
+      } );
   };
 
   ControllerBins.prototype.onItemDropped = function (bin)
@@ -628,7 +651,7 @@ var SortingDesk_ = function (window, $, SortingQueue) {
     /* Now add an additional event handler for mouse clicks, which will, by
      * default, invoke the item dropped event handler in `ControllerBin'. */
     this.node_.click(function () {
-      self.owner_.onSelect(self);
+      self.owner_.setActive(self);
       return false;
     } );
 
