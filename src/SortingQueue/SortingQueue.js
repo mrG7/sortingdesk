@@ -714,6 +714,13 @@ var SortingQueue_ = function (window, $) {
     this.node_ = this.items_ = this.fnDisableEvent_ = null;
   };
 
+  ControllerItems.prototype.redraw = function ()
+  {
+    this.node_.children().remove();
+    this.items_ = [ ];
+    this.check();
+  };
+
   ControllerItems.prototype.check = function ()
   {
     if(this.items_.length >= this.owner_.options.visibleItems)
