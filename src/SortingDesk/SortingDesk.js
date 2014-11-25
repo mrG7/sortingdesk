@@ -448,11 +448,12 @@ var SortingDesk_ = function (window, $, SortingQueue) {
       } );
   };
 
-  ControllerBins.prototype.onItemDropped = function (bin)
+  ControllerBins.prototype.dropItem = function (bin,
+                                                /* optional */ item)
   {
     this.owner_.sortingQueue.callbacks.invoke(
       "itemDroppedInBin",
-      this.owner_.sortingQueue.items.selected(), bin);
+      item || this.owner_.sortingQueue.items.selected(), bin);
     
     this.owner_.sortingQueue.items.remove();
   };
