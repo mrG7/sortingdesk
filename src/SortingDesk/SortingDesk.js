@@ -350,8 +350,10 @@ var SortingDesk_ = function (window, $, SortingQueue) {
     this.bins_.push(bin);
 
     /* If first bin to be contained, activate it by default. */
-    if(this.bins_.length == 1)
+    if(!this.active_) {
+      this.active_ = bin;
       bin.activate();
+    }
   };
 
   /* overridable */ ControllerBins.prototype.append = function (node)
