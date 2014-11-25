@@ -1,19 +1,30 @@
-* To do items [86%]
-** =SortingDesk= [20%]
+* To do items [83%]
+** =SortingDesk= [42%]
 *** DONE Retrieve random item from the list and create bin off it
 - State "DONE"       from "TODO"       [2014-11-24 Mon 17:58]
-*** TODO Set =search engine= to random item retrieved at initialisation time
+*** DONE Set =ranker= to random one and create bin
+- State "DONE"       from "TODO"       [2014-11-25 Tue 06:41]
+*** DONE Rename =ranker= to =label=
+- State "DONE"       from "TODO"       [2014-11-25 Tue 07:40]
 *** TODO Allow bins to be created by dragging items out of the list
 *** TODO Clicking on a bin selects it as the active item ranker
 *** TODO Handle removal of currently active bin
 *** TODO =addBin=: how to deal with the =ranker= argument?
+*** TODO =ControllerBins=: =onItemDropped= unused
+*** TODO =ControllerBinSpawner=: =addManual= can't be supported as it stands
++ API requires knowledge of the bin's =label=.
++ Several TODO annotations have been created regarding this issue.
+** TODO =SortingQueue=: [0%]
+*** TODO =Droppable=: requires reset method
+See =ProtarchBinSpawner=. Specifically, there are instances where the events attached by =Droppable= need to be unbound at destruction time; i.e. when a =Droppable= instance is created on the DOM's own body.
+** DONE =BinDefault= . =click= handler invokes private method
+- State "DONE"       from "TODO"       [2014-11-25 Tue 09:27]
+Specifically, the =click= handler in =BinDefault.initialise= invokes the private method =onClick_= of =ControllerBin=.
 ** TODO =onRequestStart/End= are not triggered in =SortingDesk='s constructor
 ** TODO Revisit =sorting_desk-live.html= example
 It no longer runs and its CSS is invalid compared to the =sorting_desk-mock-default.html= example.
 ** TODO Ensure CSS contained by Sorting Desk and Queue components is (still) valid
 Many changes have been made which must have surely affected the CSS.
-** TODO Rename callbacks
-Given that the =TextItem= prefixed classes have been renamed to =Item=, it then follows that the callbacks prefixed with the string =text= should also be renamed to =item=.
 ** TODO Review data structures
 This includes =Sorting Desk='s bin data structure and =Sorting Queue='s item
 data structure. Changes to any of the components will require updating the
@@ -38,32 +49,21 @@ The above could instead be:
 + =text=
 
 A similar discussion could be had regarding bins' data structure.
-** TODO SortingQueue always expects 
-** TODO Employ use of classes to identify hover state and possibly others
-This is meant to resolve the problem that parent elements can't be styled depending on mouse state, such as =:hover=, when nested elements are used. The only way to reliably solve this problem is to rely on CSS classes to signal mouse states.
+** DONE Rename callbacks
+- State "DONE"       from "TODO"       [2014-11-25 Tue 07:14]
+Given that the =TextItem= prefixed classes have been renamed to =Item=, it then follows that the callbacks prefixed with the string =text= should also be renamed to =item=.
+** DONE Implement explicit initialisation of =SortingQueue=
+- State "DONE"       from "TODO"       [2014-11-25 Tue 07:04]
+This is needed so as to support clients with more complicated instantiation processes, as is the case with =SortingDesk=.
 ** TODO Ensure =addBin= callback exists when the 'bin add' button exists
-** TODO Tests [0%]
-*** TODO init: enforce test compartmentalisation through cloning of nodes
-*** TODO instance: ensure reset doesn't run twice
-*** TODO instance: require =visibleItems= to be greater than 0
-*** TODO callbacks: removed test for =renderAddButton=
-*** TODO callbacks: removed test for =renderPrimaryBin=
-*** TODO callbacks: removed test for =renderSecondaryBin=
-*** TODO callbacks: removed test for =addPrimarySubBin=
-*** TODO callbacks: removed test for =addSecondaryBin=
-*** TODO interface: ensure 'bin add' button is created prior to using it
-*** TODO interface: ensure correct number of sub-bins are created
-*** TODO interface: removed test for adding of sub-bin
 ** TODO Create a list of interesting events to advertise via an Events controller
 ** TODO [#B] Prefix text-items' and bins' node ids
 - State "TODO"       from "WAIT"       [2014-09-07 Sun 08:16]
 - State "WAIT"       from "TODO"       [2014-09-05 Fri 10:41] \\
   Currently waiting to hear from support as to whether ids are guaranteed to always be unique.
 ** TODO Text items controller to notify client when no more items available
-** TODO Create examples [50%]
-*** TODO No content ids
-*** DONE Sub-bins
-- State "DONE"       from "TODO"       [2014-10-23 Thu 14:42]
+** TODO Employ use of classes to identify hover state and possibly others
+This is meant to resolve the problem that parent elements can't be styled depending on mouse state, such as =:hover=, when nested elements are used. The only way to reliably solve this problem is to rely on CSS classes to signal mouse states.
 ** WAIT Implement Events controller based on the publisher-subscriber design pattern
 - State "WAIT"       from "TODO"       [2014-10-23 Thu 14:42]
 ** WAIT Resolve all annotated TODO items
@@ -78,6 +78,26 @@ This is meant to resolve the problem that parent elements can't be styled depend
 - State "TODO"       from "WAIT"       [2014-09-05 Fri 10:42]
 - State "WAIT"       from "TODO"       [2014-08-22 Fri 13:24] \\
   Not proceeding with this until it's clear whether bins based on existing text items are even editable.
+** WAIT Create examples [50%]
+- State "WAIT"       from "TODO"       [2014-11-25 Tue 06:39] \\
+  Not a priority at the moment.
+*** TODO No content ids
+*** DONE Sub-bins
+- State "DONE"       from "TODO"       [2014-10-23 Thu 14:42]
+** WAIT Tests [0%]
+- State "WAIT"       from "TODO"       [2014-11-25 Tue 06:39] \\
+  Need explicit approval.
+*** TODO init: enforce test compartmentalisation through cloning of nodes
+*** TODO instance: ensure reset doesn't run twice
+*** TODO instance: require =visibleItems= to be greater than 0
+*** TODO callbacks: removed test for =renderAddButton=
+*** TODO callbacks: removed test for =renderPrimaryBin=
+*** TODO callbacks: removed test for =renderSecondaryBin=
+*** TODO callbacks: removed test for =addPrimarySubBin=
+*** TODO callbacks: removed test for =addSecondaryBin=
+*** TODO interface: ensure 'bin add' button is created prior to using it
+*** TODO interface: ensure correct number of sub-bins are created
+*** TODO interface: removed test for adding of sub-bin
 ** DONE =ControllerButtonDismiss=: must allow clients to register interested scopes and receive events when these occur
 - State "DONE"       from "TODO"       [2014-11-22 Sat 08:10]
 ** DONE Create =SortingDesk= client
@@ -334,6 +354,8 @@ standalone *editable* text file that doesn't pollute the code and the repository
 Scrolling on the items' DIV container must be suppressed.
 
 Note that this might not be possible if the browser does not allow control over the HTML element's focus.
+** TODO Wrong items are selected when a list of items contains duplicate items
+A possible solution for this is to append a timestamp to each item's id. Even though each HTML node's id would be unique, they would each refer to the same item datum.
 ** DONE Check that getBinData is defined if bins node given
 - State "DONE"       from "TODO"       [2014-10-09 Thu 19:26]
 ** DONE `buttonDelete' not hidden after a bin is deleted
