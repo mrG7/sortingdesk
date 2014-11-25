@@ -710,7 +710,7 @@ var SortingQueue_ = function (window, $) {
       dragover: this.fnDisableEvent_
     } );
     
-    this.owner_.options.nodes.items.children().remove();
+    this.node_.children().remove();
     this.node_ = this.items_ = this.fnDisableEvent_ = null;
   };
 
