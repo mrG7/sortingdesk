@@ -78,6 +78,9 @@ var SortingQueue_ = function (window, $) {
     console.log("Initialising Sorting Queue UI");
 
     this.options_ = $.extend(true, $.extend(true, {}, defaults_), opts);
+
+    /* TODO: the following callbacks need to be turned into events that clients
+     * can subscribe to one or more times. */
     this.callbacks_ = $.extend({
         itemDismissed: function() {},
         itemDroppedInBin: function() {},
