@@ -226,7 +226,7 @@ var _DossierJS = function(window, $) {
     // Namely, it provides the following callback functions:
     //
     //   moreTexts - Returns results from a search.
-    //   textDismissed - Adds a label between the `query_content_id` and
+    //   itemDismissed - Adds a label between the `query_content_id` and
     //                   the text item that was dismissed. The coref value
     //                   used is `-1`.
     //
@@ -273,8 +273,8 @@ var _DossierJS = function(window, $) {
     // `SortingQueue` constructor.
     SortingQueueItems.prototype.callbacks = function() {
         return {
-            textDismissed:
-                SortingQueueItems.prototype._textDismissed.bind(this),
+            itemDismissed:
+                SortingQueueItems.prototype._itemDismissed.bind(this),
             moreTexts: SortingQueueItems.prototype._moreTexts.bind(this),
         };
     };
@@ -290,7 +290,7 @@ var _DossierJS = function(window, $) {
                                  cid, this.annotator, coref_value);
     };
 
-    SortingQueueItems.prototype._textDismissed = function(cobj) {
+    SortingQueueItems.prototype._itemDismissed = function(cobj) {
         this.addLabel(cobj.content_id, COREF_VALUE_NEGATIVE);
     };
 

@@ -222,6 +222,6 @@ var Api = {
     return deferred.promise();
   },
   
-  textDismissed: function(item) {},
-  textDroppedInBin: function(item, bin) {}
+  itemDismissed: function(item) {},
+  itemDroppedInBin: function(item, bin) {}
 };

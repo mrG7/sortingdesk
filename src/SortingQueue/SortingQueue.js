@@ -32,13 +32,13 @@ var SortingQueue_ = function (window, $) {
    * @param   {Object}    cbs   Map of all callbacks
    *
    * @param   cbs.moreText            Retrieve additional text items.
-   * @param   cbs.textDismissed       Event triggered when a text item is
+   * @param   cbs.itemDismissed       Event triggered when a text item is
    *                                  dismissed.
-   * @param   cbs.textDroppedInBin    Event triggered when a text item is
+   * @param   cbs.itemDroppedInBin    Event triggered when a text item is
    *                                  assigned to a bin.
-   * @param   cbs.textSelected        Event triggered when a text item is
+   * @param   cbs.itemSelected        Event triggered when a text item is
    *                                  selected.
-   * @param   cbs.textDeselected      Event triggered when a text item is
+   * @param   cbs.itemDeselected      Event triggered when a text item is
    *                                  deselected.
    * @param   cbs.onRequestStart      Executed after request initiated.
    * @param   cbs.onRequestStop       Executed after request finished.
@@ -79,10 +79,10 @@ var SortingQueue_ = function (window, $) {
 
     this.options_ = $.extend(true, $.extend(true, {}, defaults_), opts);
     this.callbacks_ = $.extend({
-        textDismissed: function() {},
-        textDroppedInBin: function() {},
-        textSelected: function() {},
-        textDeselected: function() {},
+        itemDismissed: function() {},
+        itemDroppedInBin: function() {},
+        itemSelected: function() {},
+        itemDeselected: function() {},
         onRequestStart: function() {},
         onRequestStop: function() {}
     }, cbs);
@@ -122,7 +122,7 @@ var SortingQueue_ = function (window, $) {
       this.dismiss_.register('text-item', function (e, id, scope) {
         var item = self.items.getById(id);
 
-        self.callbacks.invoke("textDismissed", item);
+        self.callbacks.invoke("itemDismissed", item);
         self.items.remove(
           self.items.getById(decodeURIComponent(id)));
       } );
@@ -587,7 +587,7 @@ var SortingQueue_ = function (window, $) {
         self.owner_.dismiss.deactivate();
       } );
 
-      this.owner_.callbacks.invoke("textDismissed",
+      this.owner_.callbacks.invoke("itemDismissed",
                                    this.owner_.items.selected());
       this.owner_.items.remove();
 
@@ -960,7 +960,7 @@ var SortingQueue_ = function (window, $) {
 
     this.getNodeClose()
       .click(function () {
-        parentOwner.callbacks.invoke("textDismissed", self.content_);
+        parentOwner.callbacks.invoke("itemDismissed", self.content_);
         self.owner_.remove(self);
         return false;
       } );
@@ -994,12 +994,12 @@ var SortingQueue_ = function (window, $) {
 
   Item.prototype.select = function() {
     this.node.addClass(this.owner.owner.options.css.itemSelected);
-    this.owner.owner.callbacks.invoke("textSelected", this.content);
+    this.owner.owner.callbacks.invoke("itemSelected", this.content);
   };
 
   Item.prototype.deselect = function() {
     this.node.removeClass(this.owner.owner.options.css.itemSelected);
-    this.owner.owner.callbacks.invoke("textDeselected", this.content);
+    this.owner.owner.callbacks.invoke("itemDeselected", this.content);
   };
 
   Item.prototype.render = function() {

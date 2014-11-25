@@ -237,7 +237,7 @@ var SortingDesk_ = function (window, $, SortingQueue) {
           }, options.delays.animateAssign);
 
           this.owner_.sortingQueue.callbacks.invoke(
-            "textDroppedInBin",
+            "itemDroppedInBin",
             this.owner_.sortingQueue.items.selected(),
             bin);
           this.owner_.sortingQueue.items.remove();
@@ -412,7 +412,7 @@ var SortingDesk_ = function (window, $, SortingQueue) {
   ControllerBins.prototype.onClick_ = function (bin)
   {
     this.owner_.sortingQueue.callbacks.invoke(
-      "textDroppedInBin",
+      "itemDroppedInBin",
       this.owner_.sortingQueue.items.selected(), bin);
     
     this.owner_.sortingQueue.items.remove();
@@ -492,7 +492,7 @@ var SortingDesk_ = function (window, $, SortingQueue) {
         var id = decodeURIComponent(e.dataTransfer.getData('Text')),
             item = parentOwner.sortingQueue.items.getById(id);
 
-        parentOwner.sortingQueue.callbacks.invoke("textDroppedInBin",
+        parentOwner.sortingQueue.callbacks.invoke("itemDroppedInBin",
                                                   item,
                                                   self);
         
