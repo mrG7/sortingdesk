@@ -136,7 +136,7 @@ var _DossierJS = function(window, $) {
     // `cid1` and `cid2` are the content ids corresponding to the content
     // objects participating in the label. They may be supplied in any order.
     // If `cid1` or `cid2` has a `serialize` method, then it is called for
-    // you. (Which means you can pass `ProfileContentId` instances directly.)
+    // you.
     //
     // `annotator` is any string identifying the human who created this label.
     //
@@ -203,24 +203,6 @@ var _DossierJS = function(window, $) {
             return null;
         }
     }
-
-    // Constructs a new content id for a profile. `source_id` should be a
-    // unique identifier within the knowledge base identified by `source`.
-    //
-    // Note that `source` is optional. If missing, it defaults to "kb".
-    var ProfileContentId = function(source_id, source) {
-        this.source = source || 'kb';
-        this.source_id = source_id;
-    };
-
-    // A method that serializes a content id to its binary form.
-    ProfileContentId.prototype.serialize = function() {
-        return [
-            rfc3986EncodeURIComponent('p'),
-            rfc3986EncodeURIComponent(this.source),
-            rfc3986EncodeURIComponent(this.source_id),
-        ].join('|');
-    };
 
     // SortingQueueItems provides SortingQueue integration with DossierJS.
     // Namely, it provides the following callback functions:
@@ -328,15 +310,6 @@ var _DossierJS = function(window, $) {
             });
     };
 
-    function rfc3986EncodeURIComponent(s) {
-        // Taken from: http://goo.gl/kRTxRW
-        // (Javascript's default `encodeURIComponent` does not strictly
-        // conform to RFC 3986.)
-        return encodeURIComponent(s).replace(/[!'()*]/g, function(c) {
-            return '%' + c.charCodeAt(0).toString(16);
-        });
-    }
-
     function serialize(obj) {
         return typeof obj.serialize === 'function' ? obj.serialize() : obj;
     }
@@ -351,7 +324,6 @@ var _DossierJS = function(window, $) {
         // classes
         API: API,
         FeatureCollection: FeatureCollection,
-        ProfileContentId: ProfileContentId,
         SortingQueueItems: SortingQueueItems,
     };
 };

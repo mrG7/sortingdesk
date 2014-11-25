@@ -82,15 +82,3 @@ describe('DossierJS.FeatureCollection', function() {
         expect(fc.value('fubar')).toBeNull();
     });
 });
-
-describe('DossierJS.ProfileContentId', function() {
-    it('serializes correctly', function() {
-        var cid = new DossierJS.ProfileContentId('fu!bar');
-        expect(cid.serialize()).toEqual('p|kb|fu%21bar');
-    });
-
-    it('serializes correctly with /', function() {
-        var cid = new DossierJS.ProfileContentId('fu/bar');
-        expect(cid.serialize()).toEqual('p|kb|fu%2Fbar');
-    });
-});
