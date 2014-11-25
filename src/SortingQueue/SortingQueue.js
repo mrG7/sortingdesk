@@ -688,16 +688,30 @@ var SortingQueue_ = function (window, $) {
 
     this.node_ = this.owner_.options.nodes.items;
     this.items_ = [ ];
+    this.fnDisableEvent_ = function (e) { return false; };
   };
 
   ControllerItems.prototype = Object.create(Controller.prototype);
 
   ControllerItems.prototype.initialise = function ()
-  { this.check(); };
+  {
+    /* Disallow dragging of elements over items container. */
+    this.node_.on( {
+      dragover: this.fnDisableEvent_
+    } );
+    
+    this.check();
+  };
 
   ControllerItems.prototype.reset = function ()
   {
+    /* Reallow dragging of elements over items container. */
+    this.node_.off( {
+      dragover: this.fnDisableEvent_
+    } );
+    
     this.owner_.options.nodes.items.children().remove();
+    this.node_ = this.items_ = this.fnDisableEvent_ = null;
   };
 
   ControllerItems.prototype.check = function ()
