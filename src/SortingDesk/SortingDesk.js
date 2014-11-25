@@ -443,7 +443,11 @@ var SortingDesk_ = function (window, $, SortingQueue) {
   ControllerBins.prototype.setActive = function (bin)
   {
     var self = this;
-    
+
+    /* Don't activate bin if currently active already. */
+    if(this.active_ == bin)
+      return;
+
     this.owner.sortingQueue.callbacks.invoke("setActiveBin", bin.id)
       .done(function () {
         if(self.active_)
