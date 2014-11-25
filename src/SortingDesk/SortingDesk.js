@@ -680,47 +680,14 @@ var SortingDesk_ = function (window, $, SortingQueue) {
 
     this.fnRender_ = fnRender;
     this.fnAdd_ = fnAdd;
-    this.node_ = null;
   };
 
   ControllerBinSpawner.prototype =
     Object.create(SortingQueue.Controller.prototype);
 
-  ControllerBinSpawner.prototype.initialise = function ()
-  {
-    var parentOwner = this.owner_.owner;
-
-    var self = this;
-
-    this.node_ = this.render()
-      .addClass(parentOwner.options.css.buttonAdd)
-      .on( {
-        click: function () {
-          self.onAdd();
-        }
-      } );
-
-    new SortingQueue.Droppable(this.node_, {
-      classHover: parentOwner.options.css.droppableHover,
-      scopes: [ 'text-item' ],
-
-      drop: function (e, id) {
-        self.onAdd(decodeURIComponent(id));
-      }
-    } );
-
-    this.owner_.node.append(this.node_);
-  };
-
   ControllerBinSpawner.prototype.reset = function ()
   {
-    this.node_.remove();
-    this.node_ = this.fnRender_ = this.fnAdd_ = null;
-  };
-
-  /* overridable */ ControllerBinSpawner.prototype.render = function ()
-  {
-    return $('<div><span>+</span></div>');
+    this.fnRender_ = this.fnAdd_ = null;
   };
 
   ControllerBinSpawner.prototype.onAdd = function (id)
@@ -790,6 +757,61 @@ var SortingDesk_ = function (window, $, SortingQueue) {
       } );
   };
 
+
+  /**
+   * @class
+   * */
+  var ControllerBinSpawnerDefault = function (owner, fnRender, fnAdd)
+  {
+    /* Invoke base class constructor. */
+    ControllerBinSpawner.call(this, owner, fnRender, fnAdd);
+
+    this.node_ = null;
+  };
+
+  ControllerBinSpawnerDefault.prototype =
+    Object.create(ControllerBinSpawner.prototype);
+
+  ControllerBinSpawnerDefault.prototype.initialise = function ()
+  {
+    var self = this,
+        parentOwner = this.owner_.owner;
+
+    this.node_ = this.render()
+      .addClass(parentOwner.options.css.buttonAdd)
+      .on( {
+        click: function () {
+          self.add();
+        }
+      } );
+
+    new SortingQueue.Droppable(this.node_, {
+      classHover: parentOwner.options.css.droppableHover,
+      scopes: [ 'text-item' ],
+
+      drop: function (e, id) {
+        self.add(decodeURIComponent(id));
+      }
+    } );
+
+    this.owner_.node.append(this.node_);
+  };
+
+  ControllerBinSpawnerDefault.prototype.reset = function ()
+  {
+    if(this.node_) {
+      this.node_.remove();
+      this.node_ = null;
+    }
+
+    ControllerBinSpawner.prototype.reset.call(this);
+  };
+
+  /* overridable */ ControllerBinSpawnerDefault.prototype.render = function ()
+  {
+    return $('<div><span>+</span></div>');
+  };
+
   
   var defaults_ = {
     css: {
@@ -811,7 +833,7 @@ var SortingDesk_ = function (window, $, SortingQueue) {
     constructors: {
       ControllerBins: ControllerBins,
       Bin: BinDefault,
-      ControllerBinSpawner: ControllerBinSpawner
+      ControllerBinSpawner: ControllerBinSpawnerDefault
     }
   };
 
@@ -820,7 +842,8 @@ var SortingDesk_ = function (window, $, SortingQueue) {
     ControllerBins: ControllerBins,
     Bin: Bin,
     BinDefault: BinDefault,
-    ControllerBinSpawner: ControllerBinSpawner
+    ControllerBinSpawner: ControllerBinSpawner,
+    ControllerBinSpawnerDefault: ControllerBinSpawnerDefault
   };
   
 };
