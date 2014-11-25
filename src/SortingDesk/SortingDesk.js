@@ -285,10 +285,7 @@ var SortingDesk_ = function (window, $, SortingQueue) {
       this,
       function (input) {
         return self.owner_.sortingQueue.instantiate(
-          'Bin',
-          self,
-          { name: input },
-          null).render();
+          'Bin', self, { name: input }, null).render();
       },
       function (id, text) {
         var deferred = $.Deferred(),
