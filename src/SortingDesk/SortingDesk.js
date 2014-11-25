@@ -5,7 +5,7 @@
  * @author Miguel Guedes <miguel@miguelguedes.org>
  *
  * Comments:
- *
+ * Uses the Sorting Queue component.
  *
  */
 
