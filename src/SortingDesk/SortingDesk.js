@@ -55,12 +55,16 @@ var SortingDesk_ = function (window, $, SortingQueue) {
     console.log("Initialising Sorting Desk UI");
 
     this.options_ = $.extend(true, $.extend(true, {}, defaults_), opts);
-
-    cbs.getRandomRanker()
+    this.sortingQueue_ = new SortingQueue.Instance(this.options_, cbs);
+    
+    this.sortingQueue_.callbacks.invoke("getRandomRanker")
       .done(function (result) {
         console.log("Using ranker:", result.ranker);
 
-        cbs.addBin(result.ranker, result.ranker, true)
+        self.sortingQueue_.callbacks.invoke("addBin",
+                                            result.ranker,
+                                            result.ranker,
+                                            true)
           .done(function (bin) {
             console.log("Created default bin");
 
@@ -69,7 +73,7 @@ var SortingDesk_ = function (window, $, SortingQueue) {
 
             self.options_.bins.unshift(bin);
             
-            self.initialise_(cbs);
+            self.initialise_();
           } )
           .fail(function (result) {
             throw "Failed to create initial bin: " + result.error;
@@ -89,12 +93,12 @@ var SortingDesk_ = function (window, $, SortingQueue) {
     bins_: null,
     keyboard_: null,
 
-    initialise_: function (cbs)
+    initialise_: function ()
     {
       var self = this;
       
       /* Begin instantiating and initialising controllers. */
-      this.sortingQueue_ = new SortingQueue.Instance(this.options_, cbs);
+      this.sortingQueue_.initialise();
       
       (this.bins_ = this.sortingQueue_.instantiate('ControllerBins', this))
         .initialise();
