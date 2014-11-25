@@ -640,6 +640,8 @@ var SortingQueue_ = function (window, $) {
 
   ControllerButtonDismiss.prototype.register = function (scope, fnHandler)
   {
+    if(!this.droppable_)
+      return;
     if(!(scope in this.handlers_))
       this.droppable_.addScope(scope);
     
