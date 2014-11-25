@@ -291,9 +291,17 @@ var SortingDesk_ = function (window, $, SortingQueue) {
           null).render();
       },
       function (id, text) {
-        var deferred = $.Deferred();
+        var deferred = $.Deferred(),
+            item = self.owner_.sortingQueue.items.getById(id);
 
-        self.owner_.sortingQueue.callbacks.invoke('addBin', text)
+        if(!item) {
+          console.log("Item not found");
+          deferred.reject();
+        }
+
+        item = item.content.raw;
+
+        self.owner_.sortingQueue.callbacks.invoke('addBin', item.label, item.label)
           .fail(function (result) {
             /* TODO: show message box and notify user. */
             console.log("Failed to add bin:", id, text, ":", result.error);
