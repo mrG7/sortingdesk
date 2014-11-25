@@ -56,7 +56,9 @@ var SortingDesk_ = function (window, $, SortingQueue) {
 
     this.options_ = $.extend(true, $.extend(true, {}, defaults_), opts);
     this.sortingQueue_ = new SortingQueue.Instance(this.options_, cbs);
-    
+
+    /* Before proceeding with instance initialisation, contact the API to
+     * retrieve a random label, then create a default bin and set it active. */
     this.sortingQueue_.callbacks.invoke("getRandomLabel")
       .done(function (result) {
         console.log("Using label:", result.label);
