@@ -1,3 +1,50 @@
+2014-11-25  Miguel Guedes  <miguel@miguelguedes.org>
+
+	* src/SortingQueue/SortingQueue.js:
+
+	Implemented explicit initialisation of SortingQueue to support
+	clients with more complicated instantiation procedures, as is the
+	case with SortingDesk.
+
+	Added logic to forcefully redraw the items container, a useful
+	feature to clients whose items vary according to different
+	contexts.
+
+	* src/SortingDesk/SortingDesk.js:
+
+	A user can now manually make a bin the active one by clicking on
+	it. By default, the first bin added internally, usually on
+	instance initialisation, is made active. The items container is
+	redrawn when a different bin is activated.
+
+	Upgraded `BinAddButton' into a `Controller'-derived class and
+	split its functionality into an abstract class, for easy
+	specialisation by clients (`ControllerBinSpawner'), and a default
+	implementation (`ControllerBinSpawnerDefault').
+
+	* examples/sorting_desk-mock-default.html:
+
+	Created example illustrating new SortingDesk's new
+	feature-set. The example's javascript logic had to be moved into a
+	separate source file (see
+	`examples/js/sorting_desk-mock-default.js') as it was causing
+	formatting issues and thus impeding development.
+
+	* CSS:
+
+	Created styling for the sorting_desk-mock-default example.
+
+	* all:
+
+	Given that the `TextItem' prefixed classes have been renamed to
+	`Item', it then follows that the callbacks (events?) prefixed with
+	the string `text' should also be renamed to `item'; this has now
+	been done.
+
+	Removed no longer used files.
+
+	Many minor improvements.
+
 2014-11-24  Miguel Guedes  <miguel@miguelguedes.org>
 
 	* mock APIs:
