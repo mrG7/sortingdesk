@@ -417,7 +417,7 @@ var SortingDesk_ = function (window, $, SortingQueue) {
     } );
   };
 
-  ControllerBins.prototype.onClick_ = function (bin)
+  ControllerBins.prototype.onItemDropped = function (bin)
   {
     this.owner_.sortingQueue.callbacks.invoke(
       "itemDroppedInBin",
@@ -484,10 +484,6 @@ var SortingDesk_ = function (window, $, SortingQueue) {
         },
         mouseleave: function () {
           self.owner_.onMouseLeave_();
-          return false;
-        },
-        click: function () {
-          self.owner_.onClick_(self);
           return false;
         }
       } );
@@ -605,6 +601,22 @@ var SortingDesk_ = function (window, $, SortingQueue) {
   };
 
   BinDefault.prototype = Object.create(Bin.prototype);
+
+  BinDefault.prototype.initialise = function ()
+  {
+    var self = this;
+
+    /* Invoke base class implementation. */
+    Bin.prototype.initialise.call(this);
+
+    /* Now add an additional event handler for mouse clicks, which will, by
+     * default, invoke the item dropped event handler in `ControllerBin'. */
+    this.node_.click(function () {
+      self.owner_.onSelect(self);
+      return false;
+    } );
+
+  };
 
   BinDefault.prototype.render = function ()
   {
