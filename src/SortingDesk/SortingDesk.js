@@ -448,6 +448,8 @@ var SortingDesk_ = function (window, $, SortingQueue) {
     if(this.active_ == bin)
       return;
 
+    /* Invoke API to activate the bin. If successful, update UI state and force
+     * a redraw of the items container. */
     this.owner.sortingQueue.callbacks.invoke("setActiveBin", bin.id)
       .done(function () {
         if(self.active_)
