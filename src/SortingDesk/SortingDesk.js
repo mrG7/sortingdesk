@@ -70,7 +70,10 @@ var SortingDesk_ = function (window, $, SortingQueue) {
           .done(function (bin) {
             console.log("Created default bin");
 
-            if(!self.options_.bins)
+            /* Ensure a `bins' options exists and that it is an instance of the
+             * builtin `Array' class. Then, prepend default bin and proceed
+             * with instance initialisation. */
+            if(!self.options_.bins || !(self.options_.bins instanceof Array))
               self.options_.bins = [ ];
 
             self.options_.bins.unshift(bin);
