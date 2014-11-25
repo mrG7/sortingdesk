@@ -324,6 +324,8 @@ var SortingDesk_ = function (window, $, SortingQueue) {
   {
     this.spawner_.reset();
     this.node.children().remove();
+
+    this.bins_ = this.hover_ = this.active_ = this.spawner_ = null;
   };
 
   ControllerBins.prototype.add = function (bin)
