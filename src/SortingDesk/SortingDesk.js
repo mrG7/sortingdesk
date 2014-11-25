@@ -262,10 +262,14 @@ var SortingDesk_ = function (window, $, SortingQueue) {
    * */
   var ControllerBins = function (owner)
   {
+    var self = this;
+
+    /* Invoke base class constructor. */
     SortingQueue.Controller.call(this, owner);
 
     this.bins_ = [ ];
     this.hover_ = null;
+    this.spawner_ = null;
 
     /* Define getters. */
     this.__defineGetter__("bins", function () { return this.bins_; } );
@@ -273,16 +277,10 @@ var SortingDesk_ = function (window, $, SortingQueue) {
     this.__defineGetter__("node", function () {
       return this.owner_.options.nodes.bins;
     } );
-  };
 
-  ControllerBins.prototype = Object.create(SortingQueue.Controller.prototype);
-
-  ControllerBins.prototype.initialise = function ()
-  {
-    var self = this;
-
-    this.owner_.sortingQueue.instantiate(
-      'BinAddButton',
+    /* Instantiate spawner controller. */
+    this.spawner_ = this.owner_.sortingQueue.instantiate(
+      'ControllerBinSpawner',
       this,
       function (input) {
         return self.owner_.sortingQueue.instantiate('Bin',
@@ -314,8 +312,16 @@ var SortingDesk_ = function (window, $, SortingQueue) {
       } );
   };
 
+  ControllerBins.prototype = Object.create(SortingQueue.Controller.prototype);
+
+  ControllerBins.prototype.initialise = function ()
+  {
+    this.spawner_.initialise();
+  };
+
   ControllerBins.prototype.reset = function ()
   {
+    this.spawner_.reset();
     this.node.children().remove();
   };
 
@@ -631,26 +637,34 @@ var SortingDesk_ = function (window, $, SortingQueue) {
   /**
    * @class
    * */
-  var BinAddButton = function (owner, fnRender, fnAdd)
+  var ControllerBinSpawner = function (owner, fnRender, fnAdd)
   {
     /* Invoke super constructor. */
-    SortingQueue.Drawable.call(this, owner);
+    SortingQueue.Controller.call(this, owner);
 
-    var parentOwner = owner.owner;
+    this.fnRender_ = fnRender;
+    this.fnAdd_ = fnAdd;
+    this.node_ = null;
+  };
 
-    this.fnRender = fnRender;
-    this.fnAdd = fnAdd;
+  ControllerBinSpawner.prototype =
+    Object.create(SortingQueue.Drawable.prototype);
 
-    var self = this,
-        button = this.render()
-          .addClass(parentOwner.options.css.buttonAdd)
-          .on( {
-            click: function () {
-              self.onAdd();
-            }
-          } );
+  ControllerBinSpawner.prototype.initialise = function ()
+  {
+    var parentOwner = this.owner_.owner;
 
-    new SortingQueue.Droppable(button, {
+    var self = this;
+
+    this.node_ = this.render()
+      .addClass(parentOwner.options.css.buttonAdd)
+      .on( {
+        click: function () {
+          self.onAdd();
+        }
+      } );
+
+    new SortingQueue.Droppable(this.node_, {
       classHover: parentOwner.options.css.droppableHover,
       scopes: [ 'text-item' ],
 
@@ -659,17 +673,21 @@ var SortingDesk_ = function (window, $, SortingQueue) {
       }
     } );
 
-    owner.node.append(button);
+    this.owner_.node.append(this.node_);
   };
 
-  BinAddButton.prototype = Object.create(SortingQueue.Drawable.prototype);
+  ControllerBinSpawner.prototype.reset = function ()
+  {
+    this.node_.remove();
+    this.node_ = this.fnRender_ = this.fnAdd_ = null;
+  };
 
-  /* overridable */ BinAddButton.prototype.render = function ()
+  /* overridable */ ControllerBinSpawner.prototype.render = function ()
   {
     return $('<div><span>+</span></div>');
   };
 
-  BinAddButton.prototype.onAdd = function (id)
+  ControllerBinSpawner.prototype.onAdd = function (id)
   {
     var parentOwner = this.owner_.owner,
         options = parentOwner.options;
@@ -681,7 +699,7 @@ var SortingDesk_ = function (window, $, SortingQueue) {
     var nodeContent = id ? 'Please wait...'
           : ('<input placeholder="Enter bin description" '
              + 'type="text"/>'),
-        node = this.fnRender(nodeContent)
+        node = this.fnRender_(nodeContent)
           .addClass(options.css.binAdding)
           .fadeIn(options.delays.addBinShow);
 
@@ -699,14 +717,14 @@ var SortingDesk_ = function (window, $, SortingQueue) {
       throw "onAdd: failed to retrieve text item: " + id;
     }
 
-    this.fnAdd(id,
+    this.fnAdd_(id,
 /*                new ItemSnippet(item.content.text) */
 /*                .highlights(options.binCharsLeft, options.binCharsRight)) */
                item.content.text)
       .always(function () { node.remove(); } );
   };
 
-  BinAddButton.prototype.onAddManual = function (node)
+  ControllerBinSpawner.prototype.onAddManual = function (node)
   {
     var self = this,
         input = node.find('input');
@@ -723,7 +741,7 @@ var SortingDesk_ = function (window, $, SortingQueue) {
         this.disabled = true;
 
         /* TODO: do not use an `alert'. */
-        self.fnAdd(null, this.value)
+        self.fnAdd_(null, this.value)
           .fail(function () { alert("Failed to create a sub-bin."); } )
           .always(function () { node.remove(); } );
       } )
@@ -756,7 +774,7 @@ var SortingDesk_ = function (window, $, SortingQueue) {
     constructors: {
       ControllerBins: ControllerBins,
       Bin: BinDefault,
-      BinAddButton: BinAddButton
+      ControllerBinSpawner: ControllerBinSpawner
     }
   };
 
@@ -764,7 +782,8 @@ var SortingDesk_ = function (window, $, SortingQueue) {
     Instance: Instance,
     ControllerBins: ControllerBins,
     Bin: Bin,
-    BinDefault: BinDefault
+    BinDefault: BinDefault,
+    ControllerBinSpawner: ControllerBinSpawner
   };
   
 };
