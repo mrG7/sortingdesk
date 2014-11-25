@@ -684,7 +684,7 @@ var SortingDesk_ = function (window, $, SortingQueue) {
   };
 
   ControllerBinSpawner.prototype =
-    Object.create(SortingQueue.Drawable.prototype);
+    Object.create(SortingQueue.Controller.prototype);
 
   ControllerBinSpawner.prototype.initialise = function ()
   {
