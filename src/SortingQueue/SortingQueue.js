@@ -1074,9 +1074,11 @@ var SortingQueue_ = function (window, $) {
       if(!DragDropManager.activeNode)
         return false;
 
+      var currentScope = DragDropManager.activeNode.getAttribute('data-scope');
+
       return (scopes instanceof Array ? scopes : [ scopes ])
         .some(function (scope) {
-          return DragDropManager.activeNode.getAttribute('data-scope') == scope;
+          return currentScope == scope;
         } );
     },
 
