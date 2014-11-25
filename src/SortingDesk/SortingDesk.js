@@ -724,7 +724,11 @@ var SortingDesk_ = function (window, $, SortingQueue) {
     this.owner_.append(node);
 
     if(!id) {
-      this.addManual(node);
+      /* TODO: manually creating a bin is DISABLED as this implementation
+       * currently has no way of obtaining a label (search engine) for the
+       * bin. */
+      console.log("Manually creating a bin is DISABLED");
+/*       this.addManual(node); */
       return;
     }
 
@@ -744,6 +748,11 @@ var SortingDesk_ = function (window, $, SortingQueue) {
 
   ControllerBinSpawner.prototype.addManual = function (node)
   {
+    /* TODO: manually creating a bin is DISABLED as this implementation
+     * currently has no way of obtaining a label (search engine) for the
+     * bin. */
+    throw "Manually creating a bin is DISABLED";
+    
     var self = this,
         input = node.find('input');
 
