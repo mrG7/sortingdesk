@@ -29,11 +29,7 @@ var _Api = function(window, $, DossierJS) {
         return '';
     };
 
-    var getRandomLabel = function() {
-        // It should be **getRandomItem**.
-        // A label is a unit of ground truth data, and SortingDesk is
-        // (currently) only a *producer* of ground truth data---it never
-        // consumes labels.
+    var getRandomItem = function() {
         return api.fcRandomGet().then(function(cobj) {
             return { label: getFirstKey_(cobj[1].raw.NAME) };
         });
@@ -50,7 +46,7 @@ var _Api = function(window, $, DossierJS) {
     };
 
     return $.extend({}, qitems.callbacks(), {
-        getRandomLabel: getRandomLabel,
+        getRandomItem: getRandomItem,
         addBin: addBin,
     });
 };
