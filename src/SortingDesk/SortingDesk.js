@@ -264,6 +264,7 @@ var SortingDesk_ = function (window, $, SortingQueue) {
     /* Define getters. */
     this.__defineGetter__("bins", function () { return this.bins_; } );
     this.__defineGetter__("hover", function () { return this.hover_; } );
+    this.__defineGetter__("active", function () { return this.active_; } );
     this.__defineGetter__("node", function () {
       return this.owner_.options.nodes.bins;
     } );
