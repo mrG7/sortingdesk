@@ -314,11 +314,12 @@ var _DossierJS = function(window, $) {
             
             return deferred.promise();
         }
+
         self._processing = true;
 
         var p = {limit: self.limit.toString()};
         return self.api.search(self.engine_name, self.query_content_id, p)
-            .done(function(data) {
+            .then(function(data) {
                 var items = [];
                 data.results.forEach(function(cobj) {
                     items.push({
@@ -333,11 +334,11 @@ var _DossierJS = function(window, $) {
                 });
                 return items;
             })
-            .fail(function() {
-                console.log("moreTexts: request failed");
-            })
             .always(function() {
                 self._processing = false;
+            })
+            .fail(function() {
+                console.log("moreTexts: request failed");
             });
     };
 
