@@ -120,11 +120,10 @@ var SortingQueue_ = function (window, $) {
         .initialise();
 
       this.dismiss_.register('text-item', function (e, id, scope) {
-        var item = self.items.getById(id);
-
+        var item = self.items.getById(decodeURIComponent(id));
+        
         self.callbacks.invoke("itemDismissed", item);
-        self.items.remove(
-          self.items.getById(decodeURIComponent(id)));
+        self.items.remove(item);
       } );
 
       (this.items_ = new ControllerItems(this))
