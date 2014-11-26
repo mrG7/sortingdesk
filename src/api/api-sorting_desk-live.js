@@ -53,7 +53,8 @@ var _Api = function(window, $, DossierJS) {
     };
 
     var itemDismissed = function (item) {
-        /* Translate `item' used by Sorting Queue into an object the API can
+        /* We are overriding the callback in `Dossier.js' because of the need to
+         * translate `item' used by Sorting Queue into an object the API can
          * use. */
         qitems.callbacks().itemDismissed(item.content);
     };
