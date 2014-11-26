@@ -390,6 +390,9 @@ var SortingDesk_ = function (window, $, SortingQueue) {
     this.bins_.splice(index, 1);
 
     bin.node.remove();
+
+    if(bin == this.active_)
+      this.setActive(this.bins_.length && this.bins_[0] || null);
   };
 
   ControllerBins.prototype.setShortcut = function (bin, keyCode)
