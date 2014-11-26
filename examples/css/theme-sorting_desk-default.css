@@ -42,6 +42,7 @@ BODY.sd-droppable-hover {
   left: 50%;
   margin-left: -240px;
   width: 480px;
+  background-color: white;
 }
 
 #wrapper-bins {
