@@ -291,7 +291,7 @@ var SortingDesk_ = function (window, $, SortingQueue) {
           self.owner_.bins.add(
             self.owner_.sortingQueue.instantiate('Bin', self, {
               id: id,
-              name: item.content.text } ) );
+              name: item.content.name } ) );
           
           deferred.resolve();
         }, 0);
