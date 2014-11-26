@@ -735,20 +735,23 @@ var SortingQueue_ = function (window, $) {
       .done(function (items) {
         self.owner_.requests.begin('check-items');
 
-        items.forEach(function (item, index) {
+        /* Ensure we've received a valid items array. */
+        if(items && items instanceof Array && items.length) {
+          items.forEach(function (item, index) {
+            window.setTimeout( function () {
+              self.items_.push(self.owner_.instantiate('Item', self, item));
+            }, Math.pow(index, 2) * 1.1);
+          } );
+
           window.setTimeout( function () {
-            self.items_.push(self.owner_.instantiate('Item', self, item));
-          }, Math.pow(index, 2) * 1.1);
-        } );
+            self.select();
+          }, 10);
 
-        window.setTimeout( function () {
-          self.select();
-        }, 10);
-
-        /* Ensure event is fired after the last item is added. */
-        window.setTimeout( function () {
-          self.owner_.requests.end('check-items');
-        }, Math.pow(items.length - 1, 2) * 1.1 + 10);
+          /* Ensure event is fired after the last item is added. */
+          window.setTimeout( function () {
+            self.owner_.requests.end('check-items');
+          }, Math.pow(items.length - 1, 2) * 1.1 + 10);
+        }
       } );
   };
 
