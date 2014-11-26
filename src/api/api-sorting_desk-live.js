@@ -36,19 +36,16 @@ var _Api = function(window, $, DossierJS) {
         });
     };
 
-    var addBin = function(name, label, activate) {
-        var deferred = $.Deferred();
-        deferred.resolve({
-            id: name,
-            name: name,
-            label: label,
-        });
-        return deferred;
+    var addBin = function(id, label) {
+        return $.Deferred().then(function () {
+            return { id: id,
+                     name: label };
+        } );
     };
 
     return $.extend({}, qitems.callbacks(), {
         getRandomItem: getRandomItem,
-        addBin: addBin,
+        addBin: addBin
     });
 };
 
