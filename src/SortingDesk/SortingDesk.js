@@ -114,7 +114,8 @@ var SortingDesk_ = function (window, $, SortingQueue) {
           else {
             /* Allow removal of last bin only if there is at least one item in
              * the queue. */
-            if(this.bins_.length == 1 && !this.owner_.sortingQueue.items.length)
+            if(self.bins_.bins.length == 1
+               && !self.sortingQueue.items.items.length)
             {
               console.log("Disallowing removal of last bin when items' queue"
                           + " empty");
