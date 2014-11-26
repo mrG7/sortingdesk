@@ -1,220 +1,200 @@
 var g_descriptor = {
-  labels: {
-    "Colors": {
-      items: [
-        {
-          id: "color-1",
-          text: "Red"
-        },
-        {
-          id: "color-2",
-          text: "Green"
-        },
-        {
-          id: "color-3",
-          text: "Blue"
-        },
-        {
-          id: "color-4",
-          text: "Yellow"
-        },
-        {
-          id: "color-5",
-          text: "Antique White"
-        },
-        {
-          id: "color-6",
-          text: "Apricot"
-        },
-        {
-          id: "color-7",
-          text: "Black"
-        },
-        {
-          id: "color-8",
-          text: "Grey"
-        },
-        {
-          id: "color-9",
-          text: "White"
-        },
-        {
-          id: "color-10",
-          text: "Aquamarine"
-        }
-      ]
+  items: [
+    {
+      id: "color-1",
+      text: "Red"
     },
-    "Shapes": {
-      items: [
-        {
-          id: "shape-1",
-          text: "Bowditch curve"
-        },
-        {
-          id: "shape-2",
-          text: "Brachistochrone"
-        },
-        {
-          id: "shape-3",
-          text: "Butterfly curve"
-        },
-        {
-          id: "shape-4",
-          text: "Catenary"
-        },
-        {
-          id: "shape-5",
-          text: "Clélies"
-        },
-        {
-          id: "shape-6",
-          text: "Cochleoid"
-        },
-        {
-          id: "shape-7",
-          text: "Cycloid"
-        },
-        {
-          id: "shape-8",
-          text: "Horopter"
-        },
-        {
-          id: "shape-9",
-          text: "Interscendental curve"
-        },
-        {
-          id: "shape-10",
-          text: "Isochrone"
-        }
-      ]
+    {
+      id: "color-2",
+      text: "Green"
     },
-    "Hypothetical particles": {
-      items: [
-        {
-          id: "hypp-1",
-          text: "Neutralino"
-        },
-        {
-          id: "hypp-2",
-          text: "Chargino"
-        },
-        {
-          id: "hypp-3",
-          text: "Photino"
-        },
-        {
-          id: "hypp-4",
-          text: "Wino"
-        },
-        {
-          id: "hypp-5",
-          text: "Zino"
-        },
-        {
-          id: "hypp-6",
-          text: "Higgsino"
-        },
-        {
-          id: "hypp-7",
-          text: "Gluino"
-        },
-        {
-          id: "hypp-8",
-          text: "Gravitino"
-        },
-        {
-          id: "hypp-9",
-          text: "Sleptons"
-        },
-        {
-          id: "hypp-10",
-          text: "Sneutrino"
-        },
-        {
-          id: "hypp-11",
-          text: "Squarks"
-        }
-      ]
+    {
+      id: "color-3",
+      text: "Blue"
     },
-    "Science": {
-      items: [
-        {
-          id: "science-1",
-          text: "Physics"
-        },
-        {
-          id: "science-2",
-          text: "Chemistry"
-        },
-        {
-          id: "science-3",
-          text: "Geology"
-        },
-        {
-          id: "science-4",
-          text: "Biology"
-        },
-        {
-          id: "science-5",
-          text: "Mathematics"
-        }
-      ]
+    {
+      id: "color-4",
+      text: "Yellow"
     },
-    "Nobel Laureates in Physics": {
-      items: [
-        {
-          id: "np-1",
-          text: "Hendrik Lorentz & Pieter Zeeman"
-        },
-        {
-          id: "np-2",
-          text: "Pierre Curie & Maria Curie"
-        },
-        {
-          id: "np-3",
-          text: "Max von Laue"
-        },
-        {
-          id: "np-4",
-          text: "Max Planck"
-        },
-        {
-          id: "np-5",
-          text: "Albert Einstein"
-        },
-        {
-          id: "np-6",
-          text: "Niels Bohr"
-        },
-        {
-          id: "np-7",
-          text: "James Franck & Gustav Hertz"
-        },
-        {
-          id: "np-8",
-          text: "Werner Heisenberg"
-        },
-        {
-          id: "np-9",
-          text: "Erwin Schrodinger & Paul Dirac"
-        },
-        {
-          id: "np-10",
-          text: "Enrico Fermi"
-        },
-        {
-          id: "np-11",
-          text: "Wolfgang Pauli"
-        },
-        {
-          id: "np-12",
-          text: "Bardeen, Brattain & Shockley"
-        },
-        {
-          id: "np-13",
-          text: "Feynman, Schwinger & Tomonaga"
-        }
-      ]
+    {
+      id: "color-5",
+      text: "Antique White"
+    },
+    {
+      id: "color-6",
+      text: "Apricot"
+    },
+    {
+      id: "color-7",
+      text: "Black"
+    },
+    {
+      id: "color-8",
+      text: "Grey"
+    },
+    {
+      id: "color-9",
+      text: "White"
+    },
+    {
+      id: "color-10",
+      text: "Aquamarine"
+    },
+    {
+      id: "shape-1",
+      text: "Bowditch curve"
+    },
+    {
+      id: "shape-2",
+      text: "Brachistochrone"
+    },
+    {
+      id: "shape-3",
+      text: "Butterfly curve"
+    },
+    {
+      id: "shape-4",
+      text: "Catenary"
+    },
+    {
+      id: "shape-5",
+      text: "Clélies"
+    },
+    {
+      id: "shape-6",
+      text: "Cochleoid"
+    },
+    {
+      id: "shape-7",
+      text: "Cycloid"
+    },
+    {
+      id: "shape-8",
+      text: "Horopter"
+    },
+    {
+      id: "shape-9",
+      text: "Interscendental curve"
+    },
+    {
+      id: "shape-10",
+      text: "Isochrone"
+    },
+    {
+      id: "hypp-1",
+      text: "Neutralino"
+    },
+    {
+      id: "hypp-2",
+      text: "Chargino"
+    },
+    {
+      id: "hypp-3",
+      text: "Photino"
+    },
+    {
+      id: "hypp-4",
+      text: "Wino"
+    },
+    {
+      id: "hypp-5",
+      text: "Zino"
+    },
+    {
+      id: "hypp-6",
+      text: "Higgsino"
+    },
+    {
+      id: "hypp-7",
+      text: "Gluino"
+    },
+    {
+      id: "hypp-8",
+      text: "Gravitino"
+    },
+    {
+      id: "hypp-9",
+      text: "Sleptons"
+    },
+    {
+      id: "hypp-10",
+      text: "Sneutrino"
+    },
+    {
+      id: "hypp-11",
+      text: "Squarks"
+    },
+    {
+      id: "science-1",
+      text: "Physics"
+    },
+    {
+      id: "science-2",
+      text: "Chemistry"
+    },
+    {
+      id: "science-3",
+      text: "Geology"
+    },
+    {
+      id: "science-4",
+      text: "Biology"
+    },
+    {
+      id: "science-5",
+      text: "Mathematics"
+    },
+    {
+      id: "np-1",
+      text: "Hendrik Lorentz & Pieter Zeeman"
+    },
+    {
+      id: "np-2",
+      text: "Pierre Curie & Maria Curie"
+    },
+    {
+      id: "np-3",
+      text: "Max von Laue"
+    },
+    {
+      id: "np-4",
+      text: "Max Planck"
+    },
+    {
+      id: "np-5",
+      text: "Albert Einstein"
+    },
+    {
+      id: "np-6",
+      text: "Niels Bohr"
+    },
+    {
+      id: "np-7",
+      text: "James Franck & Gustav Hertz"
+    },
+    {
+      id: "np-8",
+      text: "Werner Heisenberg"
+    },
+    {
+      id: "np-9",
+      text: "Erwin Schrodinger & Paul Dirac"
+    },
+    {
+      id: "np-10",
+      text: "Enrico Fermi"
+    },
+    {
+      id: "np-11",
+      text: "Wolfgang Pauli"
+    },
+    {
+      id: "np-12",
+      text: "Bardeen, Brattain & Shockley"
+    },
+    {
+      id: "np-13",
+      text: "Feynman, Schwinger & Tomonaga"
     }
-  }
+  ]
 };
