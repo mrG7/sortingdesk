@@ -318,7 +318,7 @@ var _DossierJS = function(window, $) {
 
         var p = {limit: self.limit.toString()};
         return self.api.search(self.engine_name, self.query_content_id, p)
-            .then(function(data) {
+            .done(function(data) {
                 var items = [];
                 data.results.forEach(function(cobj) {
                     items.push({
