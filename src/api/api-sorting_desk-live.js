@@ -59,7 +59,7 @@ var _Api = function(window, $, DossierJS) {
     };
 
     var itemDroppedInBin = function (item, bin) {
-        api.addLabel(bin.id, item.id, qitems.annotator, 1);
+        api.addLabel(bin.id, item.content.content_id, qitems.annotator, 1);
     };
 
     return $.extend({}, qitems.callbacks(), {
