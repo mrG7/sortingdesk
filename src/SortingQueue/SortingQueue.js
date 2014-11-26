@@ -1196,9 +1196,15 @@ var SortingQueue_ = function (window, $) {
           node.removeClass(options.classHover);
 
         if(options.drop) {
-          options.drop(e,
-                       e.dataTransfer.getData('Text'),
-                       DragDropManager.getScope());
+          /* The following try-catch is required to prevent the drop event from
+           * bubbling up, should an error occur inside the handler. */
+          try {
+            options.drop(e,
+                         e.dataTransfer.getData('Text'),
+                         DragDropManager.getScope());
+          } catch (x) {
+            console.log("Exception occurred:", x);
+          }
         }
 
         return false;
