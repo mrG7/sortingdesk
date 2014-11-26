@@ -796,7 +796,12 @@ var SortingDesk_ = function (window, $, SortingQueue) {
       scopes: [ 'text-item' ],
 
       drop: function (e, id) {
-        self.add(decodeURIComponent(id));
+        id = decodeURIComponent(id);
+        
+        self.add(id);
+        
+        var items = self.owner_.owner.sortingQueue.items;
+        items.remove(items.getById(id));
       }
     } );
 
