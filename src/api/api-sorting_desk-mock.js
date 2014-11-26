@@ -48,9 +48,7 @@ var Api = {
 
   descriptor: null,
   bins: null,
-  activeBin: null,
 
-  labels: null,
   items: null,
   lastBinId: null,    /* So we may assign ids to bins when creating them. */
   lastItemId: null,
@@ -62,11 +60,8 @@ var Api = {
     Api.processing = { };
     
     Api.bins = [ ];
-    Api.labels = [ ];
+    Api.items = descriptor.items;
     Api.descriptor = descriptor;
-
-    for(var label in descriptor.labels)
-      Api.labels.push(label);
   },
 
   /* Resolves:
@@ -79,101 +74,28 @@ var Api = {
    *   error: String
    * }
    */
-  getRandomLabel: function () {
+  getRandomItem: function () {
     var deferred = $.Deferred();
     
-    if(Api.processing.getRandomLabel)
-      return Api.denyRequest_(deferred, "getRandomLabel");
+    if(Api.processing.getRandomItem)
+      return Api.denyRequest_(deferred, "getRandomItem");
     
-    Api.processing.getRandomLabel = true;
+    Api.processing.getRandomItem = true;
 
     window.setTimeout(function () {
-      if(Api.labels.length) {
+      if(Api.items.length) {
+        var item = Api.items[ Math.rand(0, Api.items.length - 1) ];
+
         deferred.resolve( {
-          label: Api.labels[ Math.rand(0, Api.labels.length - 1) ]
+          id: item.id,
+          text: item.text
         } );
       } else
-        deferred.reject( { error: "No labels exist" } );
+        deferred.reject( { error: "No items exist" } );
 
-      Api.processing.getRandomLabel = false;
+      Api.processing.getRandomItem = false;
     }, Math.rand(Api.DELAY_MIN, Api.DELAY_MAX));
     
-    return deferred.promise();
-  },
-
-  /* Resolves:  null
-   *
-   * Rejects:
-   * {
-   *   error: String
-   * }
-   */
-  setActiveBin: function (id) {
-    var deferred = $.Deferred();
-
-    if(Api.processing.setActiveBin)
-      return Api.denyRequest_(deferred, "setActiveBin");
-
-    Api.processing.setActiveBin = true;
-
-    window.setTimeout(function () {
-      var bin = Api.getBinById_(id);
-
-      if(!bin)
-        deferred.reject( { error: "Bin not found" } );
-      else {
-        Api.setActiveBin_(bin);
-        deferred.resolve();
-      }
-      
-      Api.processing.setActiveBin = false;
-    }, Math.rand(Api.DELAY_MIN, Api.DELAY_MAX));
-
-    return deferred.promise();
-  },
-
-  /* Resolves:
-   * {
-   *   id:   String,
-   *   name: String
-   * }
-   *
-   * Rejects:
-   * {
-   *   error: String
-   * }
-   */
-  addBin: function (name, label, activate) {
-    var deferred = $.Deferred();
-
-    if(Api.processing.addBin)
-      return Api.denyRequest_(deferred, "addBin");
-
-    Api.processing.addBin = true;
-      
-    window.setTimeout(function () {
-      if(!label || Api.labels.indexOf(label) < 0)
-        deferred.reject( { error: "Label not found" } );
-      else if(Api.getBinByLabel_(label))
-        deferred.reject( { error: "Bin exists for label" } );
-      else {
-        var bin = {
-          id: (++Api.lastBinId).toString(),
-          name: name,
-          label: label
-        };
-
-        Api.bins.push(bin);
-
-        if(activate)
-          Api.setActiveBin_(bin);
-        
-        deferred.resolve(bin);
-      }
-
-      Api.processing.addBin = false;
-    }, Math.rand(Api.DELAY_MIN, Api.DELAY_MAX) );
-
     return deferred.promise();
   },
 
@@ -235,43 +157,30 @@ var Api = {
     Api.processing.moreTexts = true;
 
     window.setTimeout(function () {
-      if(!Api.activeBin)
-        deferred.reject( { error: "No active bin" } );
-      else {
-        var result = [ ];
+      var result = [ ];
 
-        while(num-- > 0) {
-          if(Api.lastItemId >= Api.items.length)
-            Api.lastItemId = 0;
-          
-          var node = { },
-              item,
-              label;
+      while(num-- > 0) {
+        if(Api.lastItemId >= Api.items.length)
+          Api.lastItemId = 0;
+        
+        var node = { },
+            item = Api.items[Api.lastItemId],
+            label;
+        
+        node.raw = item;
+        
+        node.node_id = item.id;
+        node.text = item.text;
+        
+        node.name = '';
+        node.url = '#';
 
-          /* 1 item in 3 will be picked at random. */
-          if(Math.rand(0, 100) < 33) {
-            label = Api.labels[Math.rand(0, Api.labels.length - 1)];
-            var i = Api.descriptor.labels[label].items;
-            item = i[Math.rand(0, i.length - 1)];
-          } else {
-            label = Api.activeBin.label;
-            item = Api.items[Api.lastItemId++];
-          }
-          
-          node.raw = item;
-          node.raw.label = label;
-          
-          node.node_id = item.id;
-          node.text = item.text;
-          
-          node.name = label;
-          node.url = '#';
+        ++ Api.lastItemId;
 
-          result.push(node);
-        }
-
-        deferred.resolve(result);
+        result.push(node);
       }
+
+      deferred.resolve(result);
       
       Api.processing.moreTexts = false;
     }, Math.rand(Api.DELAY_MIN, Api.DELAY_MAX));
@@ -295,19 +204,6 @@ var Api = {
 
     return result || null;
   },
-  
-  getBinByLabel_: function (label) {
-    var result;
-    
-    Api.bins.some(function (bin) {
-      if(bin.label == label) {
-        result = bin;
-        return true;
-      }
-    } );
-
-    return result || null;
-  },
 
   denyRequest_: function (deferred, /* optional */ name) {
     if(name)
@@ -318,14 +214,5 @@ var Api = {
     } );
 
     return deferred.promise();
-  },
-
-  setActiveBin_: function (bin) {
-    if(!bin || Api.bins.indexOf(bin) < 0)
-      throw "Null or invalid bin given";
-    
-    Api.activeBin = bin;
-    Api.items = Api.descriptor.labels[bin.label].items;
-    Api.lastItemId = 0;
   }
 };
