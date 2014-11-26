@@ -12,9 +12,9 @@
 
 var _Api = function(window, $, DossierJS) {
     // This initialization is highly suspect.
-    var api = new DossierJS.API('http://54.173.159.137:8080');
-    var qitems = new DossierJS.SortingQueueItems(
-        api, 'index_scan', 'p|kb|Jeremy_Hammond', 'dossier.models');
+    var api = new DossierJS.API('http://54.173.159.137:8080'),
+        qitems = new DossierJS.SortingQueueItems(
+            api, 'index_scan', 'p|kb|Jeremy_Hammond', 'dossier.models');
 
     
     var getFirstKey_ = function (obj) {
