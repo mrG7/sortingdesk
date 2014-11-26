@@ -435,6 +435,7 @@ var SortingDesk_ = function (window, $, SortingQueue) {
     self.active_ = bin;
     bin.activate();
 
+    self.owner_.sortingQueue.callbacks.invoke("setQueryContentId", bin.id);
     self.owner_.sortingQueue.items.redraw();
   };
 
