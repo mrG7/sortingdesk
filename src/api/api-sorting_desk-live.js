@@ -56,11 +56,11 @@ var _Api = function(window, $, DossierJS) {
         /* We are overriding the callback in `Dossier.js' because of the need to
          * translate `item' used by Sorting Queue into an object the API can
          * use. */
-        qitems.callbacks().itemDismissed(item.content);
+        return qitems.callbacks().itemDismissed(item.content);
     };
 
     var itemDroppedInBin = function (item, bin) {
-        api.addLabel(bin.id, item.content.content_id, qitems.annotator, 1);
+        return api.addLabel(bin.id, item.content.content_id, qitems.annotator, 1);
     };
 
     return $.extend({}, qitems.callbacks(), {
