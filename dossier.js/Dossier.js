@@ -269,7 +269,7 @@ var _DossierJS = function(window, $) {
         return {
             itemDismissed:
                 SortingQueueItems.prototype._itemDismissed.bind(this),
-            moreTexts: SortingQueueItems.prototype._moreTexts.bind(this),
+            moreTexts: SortingQueueItems.prototype._moreTexts.bind(this)
         };
     };
 
