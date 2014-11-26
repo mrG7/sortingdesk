@@ -66,8 +66,8 @@ var SortingDesk_ = function (window, $, SortingQueue) {
         if(!self.options_.bins || !(self.options_.bins instanceof Array))
           self.options_.bins = [ ];
 
-        self.options_.bins.unshift( { id: result.id,
-                                      name: result.text } );
+        self.options_.bins.unshift( { id: result.content_id,
+                                      name: result.name } );
         self.initialise_();
       } )
       .fail(function (result) {
