@@ -52,6 +52,12 @@ var _Api = function(window, $, DossierJS) {
         qitems.query_content_id = id;
     };
 
+    var itemDismissed = function (item) {
+        /* Translate `item' used by Sorting Queue into an object the API can
+         * use. */
+        qitems.callbacks().itemDismissed(item.content);
+    };
+
     var itemDroppedInBin = function (item, bin) {
         api.addLabel(bin.id, item.id, qitems.annotator, 1);
     };
@@ -59,6 +65,7 @@ var _Api = function(window, $, DossierJS) {
     return $.extend({}, qitems.callbacks(), {
         getRandomItem: getRandomItem,
         setQueryContentId: setQueryContentId,
+        itemDismissed: itemDismissed,
         itemDroppedInBin: itemDroppedInBin
     });
 };
