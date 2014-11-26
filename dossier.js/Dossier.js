@@ -1,4 +1,5 @@
-/** Dossier.js --- Diffeo's dossier.web API
+/* -*- js2-basic-offset: 4 -*-
+ ** Dossier.js --- Diffeo's dossier.web API
  *
  * Copyright (C) 2014 Diffeo
  *
