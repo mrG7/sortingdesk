@@ -30,8 +30,6 @@ var SortingDesk_ = function (window, $, SortingQueue) {
    * @param   {Object}    opts  Initialisation options (please refer to
    *                            `defaults_' above)
    * @param   {Object}    cbs   Map of all callbacks
-   *
-   * @param   cbs.addBin              Add a bin.
    * */
   var Instance = function (opts, cbs)
   {
@@ -62,31 +60,18 @@ var SortingDesk_ = function (window, $, SortingQueue) {
      * it active. */
     this.sortingQueue_.callbacks.invoke("getRandomItem")
       .done(function (result) {
-        console.log("Using label:", result.label);
+        /* Ensure a `bins' options exists and that it is an instance of the
+         * builtin `Array' class. Then, prepend default bin and proceed
+         * with instance initialisation. */
+        if(!self.options_.bins || !(self.options_.bins instanceof Array))
+          self.options_.bins = [ ];
 
-        self.sortingQueue_.callbacks.invoke("addBin",
-                                            result.label,
-                                            result.label,
-                                            true)
-          .done(function (bin) {
-            console.log("Created default bin");
-
-            /* Ensure a `bins' options exists and that it is an instance of the
-             * builtin `Array' class. Then, prepend default bin and proceed
-             * with instance initialisation. */
-            if(!self.options_.bins || !(self.options_.bins instanceof Array))
-              self.options_.bins = [ ];
-
-            self.options_.bins.unshift(bin);
-            
-            self.initialise_();
-          } )
-          .fail(function (result) {
-            throw "Failed to create initial bin: " + result.error;
-          } );
+        self.options_.bins.unshift( { id: result.id,
+                                      name: result.text } );
+        self.initialise_();
       } )
       .fail(function (result) {
-        throw "Failed to retrieve random label: " + result.error;
+        throw "Failed to retrieve random item: " + result.error;
       } );
   };
 
@@ -297,24 +282,16 @@ var SortingDesk_ = function (window, $, SortingQueue) {
           deferred.reject();
         }
 
-        item = item.content.raw;
-
-        self.owner_.sortingQueue.callbacks.invoke('addBin', item.label, item.label)
-          .fail(function (result) {
-            /* TODO: show message box and notify user. */
-            console.log("Failed to add bin:", id, text, ":", result.error);
-            deferred.reject();
-          } )
-          .done(function (bin) {
-            window.setTimeout(function () {
-              /* We rely on the API returning exactly ONE descriptor. */
-              self.owner_.bins.add(
-                self.owner_.sortingQueue.instantiate('Bin', self, bin));
-            }, 0);
-
-            deferred.resolve();
-          } );
-
+        window.setTimeout(function () {
+          /* We rely on the API returning exactly ONE descriptor. */
+          self.owner_.bins.add(
+            self.owner_.sortingQueue.instantiate('Bin', self, {
+              id: id,
+              name: item.content.text } ) );
+          
+          deferred.resolve();
+        }, 0);
+        
         return deferred.promise();
       } );
   };
