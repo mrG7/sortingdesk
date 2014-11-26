@@ -31,8 +31,17 @@ var _Api = function(window, $, DossierJS) {
 
     var getRandomItem = function() {
         return api.fcRandomGet().then(function(cobj) {
-            return { id: cobj[0],
-                     text: getFirstKey_(cobj[1].raw.NAME) };
+            var fc = cobj[1];
+            
+            return {
+                content_id: cobj[0],
+                fc: fc,
+                node_id: cobj.content_id,
+                name: fc.value('NAME') || '',
+                text: fc.value('sentences')
+                    || (fc.value('NAME') + ' (profile)'),
+                url: fc.value('abs_url')
+            };
         });
     };
 
