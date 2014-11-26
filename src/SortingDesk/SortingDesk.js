@@ -288,11 +288,17 @@ var SortingDesk_ = function (window, $, SortingQueue) {
         }
 
         window.setTimeout(function () {
-          /* We rely on the API returning exactly ONE descriptor. */
-          self.owner_.bins.add(
-            self.owner_.sortingQueue.instantiate('Bin', self, {
-              id: id,
-              name: item.content.name } ) );
+          try {
+            /* We rely on the API returning exactly ONE descriptor. */
+            self.owner_.bins.add(
+              self.owner_.sortingQueue.instantiate('Bin', self, {
+                id: id,
+                name: item.content.name } ) );
+          } catch(x) {
+            console.log("Exception occurred: " + x);
+            deferred.reject();
+            return;
+          }
           
           deferred.resolve();
         }, 0);
