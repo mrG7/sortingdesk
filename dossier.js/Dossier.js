@@ -333,11 +333,11 @@ var _DossierJS = function(window, $) {
                 });
                 return items;
             })
-            .always(function() {
-                self._processing = false;
-            })
             .fail(function() {
                 console.log("moreTexts: request failed");
+            })
+            .always(function() {
+                self._processing = false;
             });
     };
 
