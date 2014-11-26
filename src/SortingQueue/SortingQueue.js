@@ -34,8 +34,6 @@ var SortingQueue_ = function (window, $) {
    * @param   cbs.moreTexts           Retrieve additional text items.
    * @param   cbs.itemDismissed       Event triggered when a text item is
    *                                  dismissed.
-   * @param   cbs.itemDroppedInBin    Event triggered when a text item is
-   *                                  assigned to a bin.
    * @param   cbs.itemSelected        Event triggered when a text item is
    *                                  selected.
    * @param   cbs.itemDeselected      Event triggered when a text item is
@@ -83,7 +81,6 @@ var SortingQueue_ = function (window, $) {
      * can subscribe to one or more times. */
     this.callbacks_ = $.extend({
         itemDismissed: function() {},
-        itemDroppedInBin: function() {},
         itemSelected: function() {},
         itemDeselected: function() {},
         onRequestStart: function() {},
