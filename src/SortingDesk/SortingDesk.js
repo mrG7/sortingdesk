@@ -751,10 +751,7 @@ var SortingDesk_ = function (window, $, SortingQueue) {
       throw "add: failed to retrieve text item: " + id;
     }
 
-    this.fnAdd_(id,
-/*                new ItemSnippet(item.content.text) */
-/*                .highlights(options.binCharsLeft, options.binCharsRight)) */
-               item.content.text)
+    this.fnAdd_(id, item.content.text)
       .always(function () { node.remove(); } );
   };
 
