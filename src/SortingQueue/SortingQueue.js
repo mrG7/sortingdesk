@@ -31,11 +31,9 @@ var SortingQueue_ = function (window, $) {
    *                            `defaults_' above)
    * @param   {Object}    cbs   Map of all callbacks
    *
-   * @param   cbs.moreText            Retrieve additional text items.
+   * @param   cbs.moreTexts           Retrieve additional text items.
    * @param   cbs.itemDismissed       Event triggered when a text item is
    *                                  dismissed.
-   * @param   cbs.itemDroppedInBin    Event triggered when a text item is
-   *                                  assigned to a bin.
    * @param   cbs.itemSelected        Event triggered when a text item is
    *                                  selected.
    * @param   cbs.itemDeselected      Event triggered when a text item is
@@ -83,7 +81,6 @@ var SortingQueue_ = function (window, $) {
      * can subscribe to one or more times. */
     this.callbacks_ = $.extend({
         itemDismissed: function() {},
-        itemDroppedInBin: function() {},
         itemSelected: function() {},
         itemDeselected: function() {},
         onRequestStart: function() {},
@@ -123,11 +120,10 @@ var SortingQueue_ = function (window, $) {
         .initialise();
 
       this.dismiss_.register('text-item', function (e, id, scope) {
-        var item = self.items.getById(id);
-
+        var item = self.items.getById(decodeURIComponent(id));
+        
         self.callbacks.invoke("itemDismissed", item);
-        self.items.remove(
-          self.items.getById(decodeURIComponent(id)));
+        self.items.remove(item);
       } );
 
       (this.items_ = new ControllerItems(this))
@@ -691,6 +687,9 @@ var SortingQueue_ = function (window, $) {
     this.node_ = this.owner_.options.nodes.items;
     this.items_ = [ ];
     this.fnDisableEvent_ = function (e) { return false; };
+
+    /* Define getters. */
+    this.__defineGetter__("items", function () { return this.items_; } );
   };
 
   ControllerItems.prototype = Object.create(Controller.prototype);
@@ -728,29 +727,32 @@ var SortingQueue_ = function (window, $) {
     if(this.items_.length >= this.owner_.options.visibleItems)
       return;
 
-    var self = this,
-        promise = this.owner_.callbacks.invoke(
-          "moreTexts",
-          this.owner_.options.visibleItems);
+    var self = this;
 
-    promise.done(function (items) {
-      self.owner_.requests.begin('check-items');
+    this.owner_.callbacks.invoke("moreTexts",
+                                 this.owner_.options.visibleItems)
+      .done(function (items) {
+        self.owner_.requests.begin('check-items');
 
-      items.forEach(function (item, index) {
-        window.setTimeout( function () {
-          self.items_.push(self.owner_.instantiate('Item', self, item));
-        }, Math.pow(index, 2) * 1.1);
+        /* Ensure we've received a valid items array. */
+        if(items && items instanceof Array && items.length) {
+          items.forEach(function (item, index) {
+            window.setTimeout( function () {
+              self.items_.push(self.owner_.instantiate('Item', self, item));
+            }, Math.pow(index, 2) * 1.1);
+          } );
+
+          window.setTimeout( function () {
+            self.select();
+          }, 10);
+
+          /* Ensure event is fired after the last item is added. */
+          window.setTimeout( function () {
+            self.owner_.requests.end('check-items');
+          }, Math.pow(items.length - 1, 2) * 1.1 + 10);
+        } else
+          self.owner_.requests.end('check-items');
       } );
-
-      window.setTimeout( function () {
-        self.select();
-      }, 10);
-
-      /* Ensure event is fired after the last item is added. */
-      window.setTimeout( function () {
-        self.owner_.requests.end('check-items');
-      }, Math.pow(items.length - 1, 2) * 1.1 + 10);
-    } );
   };
 
   ControllerItems.prototype.select = function (variant)
@@ -1194,9 +1196,15 @@ var SortingQueue_ = function (window, $) {
           node.removeClass(options.classHover);
 
         if(options.drop) {
-          options.drop(e,
-                       e.dataTransfer.getData('Text'),
-                       DragDropManager.getScope());
+          /* The following try-catch is required to prevent the drop event from
+           * bubbling up, should an error occur inside the handler. */
+          try {
+            options.drop(e,
+                         e.dataTransfer.getData('Text'),
+                         DragDropManager.getScope());
+          } catch (x) {
+            console.log("Exception occurred:", x);
+          }
         }
 
         return false;

@@ -30,8 +30,6 @@ var SortingDesk_ = function (window, $, SortingQueue) {
    * @param   {Object}    opts  Initialisation options (please refer to
    *                            `defaults_' above)
    * @param   {Object}    cbs   Map of all callbacks
-   *
-   * @param   cbs.addBin              Add a bin.
    * */
   var Instance = function (opts, cbs)
   {
@@ -58,34 +56,27 @@ var SortingDesk_ = function (window, $, SortingQueue) {
     this.sortingQueue_ = new SortingQueue.Instance(this.options_, cbs);
 
     /* Before proceeding with instance initialisation, contact the API to
-     * retrieve a random label, then create a default bin and set it active. */
-    this.sortingQueue_.callbacks.invoke("getRandomLabel")
+     * retrieve a random item, then create a default bin based off of it and set
+     * it active. */
+    this.sortingQueue_.callbacks.invoke("getRandomItem")
       .done(function (result) {
-        console.log("Using label:", result.label);
+        /* Ensure a `bins' options exists and that it is an instance of the
+         * builtin `Array' class. Then, prepend default bin and proceed
+         * with instance initialisation. */
+        if(!self.options_.bins || !(self.options_.bins instanceof Array))
+          self.options_.bins = [ ];
 
-        self.sortingQueue_.callbacks.invoke("addBin",
-                                            result.label,
-                                            result.label,
-                                            true)
-          .done(function (bin) {
-            console.log("Created default bin");
+        self.options_.bins.unshift( { id: result.content_id,
+                                      name: result.name } );
 
-            /* Ensure a `bins' options exists and that it is an instance of the
-             * builtin `Array' class. Then, prepend default bin and proceed
-             * with instance initialisation. */
-            if(!self.options_.bins || !(self.options_.bins instanceof Array))
-              self.options_.bins = [ ];
-
-            self.options_.bins.unshift(bin);
-            
-            self.initialise_();
-          } )
-          .fail(function (result) {
-            throw "Failed to create initial bin: " + result.error;
-          } );
+        /* Set query content id before initialising SortingQueue to ensure
+         * correct contexts for items retrieved. */
+        self.sortingQueue_.callbacks.invoke('setQueryContentId',
+                                            result.content_id);
+        self.initialise_();
       } )
       .fail(function (result) {
-        throw "Failed to retrieve random label: " + result.error;
+        throw "Failed to retrieve random item: " + result.error;
       } );
   };
 
@@ -118,22 +109,21 @@ var SortingDesk_ = function (window, $, SortingQueue) {
         var bin = self.bins_.getById(decodeURIComponent(id));
 
         if(bin) {
-          /* It doesn't matter if the API request succeeds or not for the
-           * bin is always deleted. The only case (that I am aware of) where
-           * the API request would fail is if the bin didn't exist
-           * server-side, in which case it should be deleted from the UI
-           * too. So, always delete, BUT, if the request fails show the user
-           * a notification; for what purpose, I don't know. */
           if(bin.parent)
             bin.parent.remove(bin);
-          else
+          else {
+            /* Allow removal of last bin only if there is at least one item in
+             * the queue. */
+            if(self.bins_.bins.length == 1
+               && !self.sortingQueue.items.items.length)
+            {
+              console.log("Disallowing removal of last bin when items' queue"
+                          + " empty");
+              return;
+            }
+            
             self.bins_.removeAt(self.bins_.indexOf(bin));
-
-          self.sortingQueue_.callbacks.invoke('removeBin', bin.id)
-            .fail(function (result) {
-              console.log("bin-remove:", result.error);
-              /* TODO: user notification not implemented yet. */
-            } );
+          }
         }
       } );
 
@@ -275,6 +265,7 @@ var SortingDesk_ = function (window, $, SortingQueue) {
     /* Define getters. */
     this.__defineGetter__("bins", function () { return this.bins_; } );
     this.__defineGetter__("hover", function () { return this.hover_; } );
+    this.__defineGetter__("active", function () { return this.active_; } );
     this.__defineGetter__("node", function () {
       return this.owner_.options.nodes.bins;
     } );
@@ -296,24 +287,22 @@ var SortingDesk_ = function (window, $, SortingQueue) {
           deferred.reject();
         }
 
-        item = item.content.raw;
-
-        self.owner_.sortingQueue.callbacks.invoke('addBin', item.label, item.label)
-          .fail(function (result) {
-            /* TODO: show message box and notify user. */
-            console.log("Failed to add bin:", id, text, ":", result.error);
+        window.setTimeout(function () {
+          try {
+            /* We rely on the API returning exactly ONE descriptor. */
+            self.owner_.bins.add(
+              self.owner_.sortingQueue.instantiate('Bin', self, {
+                id: id,
+                name: item.content.name } ) );
+          } catch(x) {
+            console.log("Exception occurred: " + x);
             deferred.reject();
-          } )
-          .done(function (bin) {
-            window.setTimeout(function () {
-              /* We rely on the API returning exactly ONE descriptor. */
-              self.owner_.bins.add(
-                self.owner_.sortingQueue.instantiate('Bin', self, bin));
-            }, 0);
-
-            deferred.resolve();
-          } );
-
+            return;
+          }
+          
+          deferred.resolve();
+        }, 0);
+        
         return deferred.promise();
       } );
   };
@@ -347,10 +336,8 @@ var SortingDesk_ = function (window, $, SortingQueue) {
     this.bins_.push(bin);
 
     /* If first bin to be contained, activate it by default. */
-    if(!this.active_) {
-      this.active_ = bin;
-      bin.activate();
-    }
+    if(!this.active_)
+      this.setActive(bin);
   };
 
   /* overridable */ ControllerBins.prototype.append = function (node)
@@ -410,6 +397,9 @@ var SortingDesk_ = function (window, $, SortingQueue) {
     this.bins_.splice(index, 1);
 
     bin.node.remove();
+
+    if(bin == this.active_)
+      this.setActive(this.bins_.length && this.bins_[0] || null);
   };
 
   ControllerBins.prototype.setShortcut = function (bin, keyCode)
@@ -447,20 +437,19 @@ var SortingDesk_ = function (window, $, SortingQueue) {
 
     /* Invoke API to activate the bin. If successful, update UI state and force
      * a redraw of the items container. */
-    this.owner.sortingQueue.callbacks.invoke("setActiveBin", bin.id)
-      .done(function () {
-        if(self.active_)
-          self.active_.deactivate();
-        
-        self.active_ = bin;
-        bin.activate();
+    if(self.active_)
+      self.active_.deactivate();
+    
+    self.active_ = bin;
 
+    if(bin) {
+      bin.activate();
+
+      if(this.owner_.initialised) {
+        self.owner_.sortingQueue.callbacks.invoke("setQueryContentId", bin.id);
         self.owner_.sortingQueue.items.redraw();
-      } )
-      .fail(function (result) {
-        /* TODO: notify user property that an error occurred. */
-        console.log("Failed to set active bin:", result.error);
-      } );
+      }
+    }
   };
 
   ControllerBins.prototype.dropItem = function (bin,
@@ -537,17 +526,40 @@ var SortingDesk_ = function (window, $, SortingQueue) {
 
     new SortingQueue.Droppable(this.node_, {
       classHover: parentOwner.options.css.droppableHover,
-      scopes: [ 'text-item' ],
+      scopes: [ 'text-item', 'bin' ],
 
-      drop: function (e) {
-        var id = decodeURIComponent(e.dataTransfer.getData('Text')),
-            item = parentOwner.sortingQueue.items.getById(id);
+      drop: function (e, id, scope) {
+        var id = decodeURIComponent(e.dataTransfer.getData('Text'));
+            
+        switch(scope) {
+        case 'text-item':
+          var item = parentOwner.sortingQueue.items.getById(id);
 
-        parentOwner.sortingQueue.callbacks.invoke("itemDroppedInBin",
-                                                  item,
-                                                  self);
-        
-        parentOwner.sortingQueue.items.remove(item);
+          parentOwner.sortingQueue.callbacks.invoke("itemDroppedInBin",
+                                                    item,
+                                                    self);
+          
+          parentOwner.sortingQueue.items.remove(item);
+          break;
+          
+        case 'bin':
+          var bin = self.owner_.getById(id);
+
+          parentOwner.sortingQueue.callbacks.invoke("mergeBins",
+                                                    self,
+                                                    bin);
+
+          self.owner_.removeAt(self.owner_.indexOf(bin));
+
+          /* Important: DOM node is destroyed above, which means the `dragend'
+           * event won't be triggered, leaving the dismissal button visible. */
+          parentOwner.sortingQueue.dismiss.deactivate();
+          
+          break;
+
+        default:
+          throw "Invalid scope: " + scope;
+        }
       }
     } );
 
@@ -739,10 +751,7 @@ var SortingDesk_ = function (window, $, SortingQueue) {
       throw "add: failed to retrieve text item: " + id;
     }
 
-    this.fnAdd_(id,
-/*                new ItemSnippet(item.content.text) */
-/*                .highlights(options.binCharsLeft, options.binCharsRight)) */
-               item.content.text)
+    this.fnAdd_(id, item.content.text)
       .always(function () { node.remove(); } );
   };
 
@@ -814,7 +823,12 @@ var SortingDesk_ = function (window, $, SortingQueue) {
       scopes: [ 'text-item' ],
 
       drop: function (e, id) {
-        self.add(decodeURIComponent(id));
+        id = decodeURIComponent(id);
+        
+        self.add(id);
+        
+        var items = self.owner_.owner.sortingQueue.items;
+        items.remove(items.getById(id));
       }
     } );
 

@@ -1,3 +1,16 @@
+/* -*- js2-basic-offset: 4 -*-
+ ** Dossier.js --- Diffeo's dossier.web API
+ *
+ * Copyright (C) 2014 Diffeo
+ *
+ * Author: Andrew Gallant <andrew@diffeo.com>
+ *
+ * Comments:
+ *
+ *
+ */
+
+
 var _DossierJS = function(window, $) {
     var API_VERSION = {
         dossier: 1,
@@ -173,7 +186,7 @@ var _DossierJS = function(window, $) {
             type: 'PUT',
             url: this.url(endpoint),
             contentType: 'text/plain',
-            data: coref_value.toString(),
+            data: coref_value.toString()
         }).fail(function() {
             var label = [cid1.toString(), cid2.toString(),
                          annotator.toString(), coref_value.toString()];
@@ -271,7 +284,7 @@ var _DossierJS = function(window, $) {
         return {
             itemDismissed:
                 SortingQueueItems.prototype._itemDismissed.bind(this),
-            moreTexts: SortingQueueItems.prototype._moreTexts.bind(this),
+            moreTexts: SortingQueueItems.prototype._moreTexts.bind(this)
         };
     };
 
@@ -294,9 +307,16 @@ var _DossierJS = function(window, $) {
         var self = this;
 
         if (self._processing) {
-            console.log('moreTexts in progress, ignoring new request');
-            return null;
+            var deferred = $.Deferred();
+
+            window.setTimeout(function () {
+                console.log('moreTexts in progress, ignoring new request');
+                deferred.reject( { error: "Request in progress" } );
+            } );
+            
+            return deferred.promise();
         }
+
         self._processing = true;
 
         var p = {limit: self.limit.toString()};
@@ -311,7 +331,7 @@ var _DossierJS = function(window, $) {
                         name: cobj.fc.value('NAME') || '',
                         text: cobj.fc.value('sentences')
                               || (cobj.fc.value('NAME') + ' (profile)'),
-                        url: cobj.fc.value('abs_url'),
+                        url: cobj.fc.value('abs_url')
                     });
                 });
                 return items;
@@ -338,7 +358,7 @@ var _DossierJS = function(window, $) {
         // classes
         API: API,
         FeatureCollection: FeatureCollection,
-        SortingQueueItems: SortingQueueItems,
+        SortingQueueItems: SortingQueueItems
     };
 };
 

@@ -37,8 +37,12 @@ require(["SortingDesk", "SortingQueue", "API-SortingDesk"],
       scopes: [ 'text-item' ],
 
       drop: function (e, id) {
-        var item = self.owner_.owner.sortingQueue.items.getById(id);
-        self.add(decodeURIComponent(id));
+        id = decodeURIComponent(id);
+        
+        self.add(id);
+        
+        var items = self.owner_.owner.sortingQueue.items;
+        items.remove(items.getById(id));
       }
     } );
   };

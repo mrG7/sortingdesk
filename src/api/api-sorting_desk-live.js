@@ -1,4 +1,4 @@
-/** api-sorting_desk-mock.js --- Sorting Desk's mock API
+/** api-sorting_desk-live.js --- Sorting Desk's live API
  *
  * Copyright (C) 2014 Diffeo
  *
@@ -9,35 +9,70 @@
  *
  */
 
+
 var _Api = function(window, $, DossierJS) {
     // This initialization is highly suspect.
-    var api = new DossierJS.API('http://54.173.159.137:8080');
-    var qitems = new DossierJS.SortingQueueItems(
-        api, 'index_scan', 'p|kb|Jeremy_Hammond', 'dossier.models');
+    var api = new DossierJS.API('http://54.173.159.137:8080'),
+        qitems = new DossierJS.SortingQueueItems(
+            api, 'index_scan', 'p|kb|Jeremy_Hammond', 'unknown');
 
-    var getRandomLabel = function() {
-        // It should be **getRandomItem**.
-        // A label is a unit of ground truth data, and SortingDesk is
-        // (currently) only a *producer* of ground truth data---it never
-        // consumes labels.
+    
+    var getFirstKey_ = function (obj) {
+        if(obj) {
+            if(typeof obj == 'string')
+                return obj;
+
+            for(var k in obj)
+                return k;
+        }
+        
+        return '';
+    };
+
+    var getRandomItem = function() {
         return api.fcRandomGet().then(function(cobj) {
-            return {label: cobj[0]};
+            var fc = cobj[1];
+            
+            return {
+                content_id: cobj[0],
+                fc: fc,
+                node_id: cobj.content_id,
+                name: fc.value('NAME') || '',
+                text: fc.value('sentences')
+                    || (fc.value('NAME') + ' (profile)'),
+                url: fc.value('abs_url')
+            };
         });
     };
 
-    var addBin = function(name, label, activate) {
-        var deferred = $.Deferred();
-        deferred.resolve({
-            id: name,
-            name: name,
-            label: label,
-        });
-        return deferred;
+    var setQueryContentId = function (id) {
+        if(!id)
+            throw "Invalid engine content id";
+        
+        qitems.query_content_id = id;
+    };
+
+    var itemDismissed = function (item) {
+        /* We are overriding the callback in `Dossier.js' because of the need to
+         * translate `item' used by Sorting Queue into an object the API can
+         * use. */
+        return qitems.callbacks().itemDismissed(item.content);
+    };
+
+    var itemDroppedInBin = function (item, bin) {
+        return api.addLabel(bin.id, item.content.content_id, qitems.annotator, 1);
+    };
+
+    var mergeBins = function (ibin, jbin) {
+        return api.addLabel(ibin.id, jbin.id, qitems.annotator, 1);
     };
 
     return $.extend({}, qitems.callbacks(), {
-        getRandomLabel: getRandomLabel,
-        addBin: addBin,
+        getRandomItem: getRandomItem,
+        setQueryContentId: setQueryContentId,
+        itemDismissed: itemDismissed,
+        itemDroppedInBin: itemDroppedInBin,
+        mergeBins: mergeBins
     });
 };
 

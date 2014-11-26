@@ -48,7 +48,6 @@ var Api = {
   MULTIPLE_NODES_LIMIT: 10,
 
   primaryContentId: null,
-  bins: null,
   items: null,
   lastId: null,                /* So we may assign ids to secondary bins when
                                 * creating them. */
@@ -59,7 +58,6 @@ var Api = {
     Api.lastId = 0;
     Api.lastItemId = 0;
     Api.processing = { };
-    Api.bins = bins.slice();
     Api.items = descriptor.items;
   },
 
@@ -111,101 +109,6 @@ var Api = {
       
       Api.processing.moreTexts = false;
       deferred.resolve(result);
-    }, Math.rand(Api.DELAY_MIN, Api.DELAY_MAX));
-
-    return deferred.promise();
-  },
-
-  getBinById_: function (id)
-  {
-    var result = null,
-        search = function (bins) {
-          bins.some(function (bin) {
-            if(bin.id == id) {
-              result = bin;
-              return true;
-            } else if(bin.children) {
-              if(search(bin.children))
-                return true;
-            }
-          } );
-
-          return result !== null;
-        };
-
-    return search(Api.bins);
-  },
-
-  /* Returns:
-   * {
-   *   error: error_string    ;; presently never returning an error
-   * }
-   *   ||
-   * statement_id: {
-   *   name: string,
-   *   bins: []
-   * }
-   */
-  addBin: function (name) {
-    var deferred = $.Deferred();
-
-    window.setTimeout(function () {
-      var bin = {
-        id: ++Api.lastId,
-        name: name,
-        children: [ ]
-      };
-
-      Api.bins.push(bin);
-
-      deferred.resolve(bin);
-    }, Math.rand(Api.DELAY_MIN, Api.DELAY_MAX) );
-
-    return deferred.promise();
-  },
-
-  /* Resolves:
-   * {
-   *   error: null
-   * }
-   *
-   * Rejects:
-   * {
-   *   error: string
-   * }
-   */
-  removeBin: function (id) {
-    var deferred = $.Deferred();
-
-    window.setTimeout(function () {
-      var parents = [ ],
-          process = function (bins) {
-            return bins.some(function (bin) {
-              if(bin.id == id) {
-                if(parents.length) {
-                  var c = parents[parents.length - 1].children;
-                  c.splice(c.indexOf(bin), 1);
-                } else
-                  Api.bins.splice(Api.bins.indexOf(bin), 1);
-                
-                return true;
-              } else if(bin.children) {
-                parents.push(bin);
-                
-                if(process(bin.children))
-                  return true;
-
-                parents.pop();
-              }
-
-              return false;
-            } );
-          };
-
-      if(process(Api.bins))
-        deferred.resolve( { error: null } );
-      else
-        deferred.reject( { error: "Not a bin" } );
     }, Math.rand(Api.DELAY_MIN, Api.DELAY_MAX));
 
     return deferred.promise();
