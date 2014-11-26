@@ -184,7 +184,7 @@ var _DossierJS = function(window, $) {
             type: 'PUT',
             url: this.url(endpoint),
             contentType: 'text/plain',
-            data: coref_value.toString(),
+            data: coref_value.toString()
         }).fail(function() {
             var label = [cid1.toString(), cid2.toString(),
                          annotator.toString(), coref_value.toString()];
@@ -328,7 +328,7 @@ var _DossierJS = function(window, $) {
                         name: cobj.fc.value('NAME') || '',
                         text: cobj.fc.value('sentences')
                               || (cobj.fc.value('NAME') + ' (profile)'),
-                        url: cobj.fc.value('abs_url'),
+                        url: cobj.fc.value('abs_url')
                     });
                 });
                 return items;
@@ -355,7 +355,7 @@ var _DossierJS = function(window, $) {
         // classes
         API: API,
         FeatureCollection: FeatureCollection,
-        SortingQueueItems: SortingQueueItems,
+        SortingQueueItems: SortingQueueItems
     };
 };
 
