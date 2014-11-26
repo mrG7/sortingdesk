@@ -16,13 +16,26 @@ var _Api = function(window, $, DossierJS) {
     var qitems = new DossierJS.SortingQueueItems(
         api, 'index_scan', 'p|kb|Jeremy_Hammond', 'dossier.models');
 
+    
+    var getFirstKey_ = function (obj) {
+        if(obj) {
+            if(typeof obj == 'string')
+                return obj;
+
+            for(var k in obj)
+                return k;
+        }
+        
+        return '';
+    };
+
     var getRandomLabel = function() {
         // It should be **getRandomItem**.
         // A label is a unit of ground truth data, and SortingDesk is
         // (currently) only a *producer* of ground truth data---it never
         // consumes labels.
         return api.fcRandomGet().then(function(cobj) {
-            return {label: cobj[0]};
+            return { label: getFirstKey_(cobj[1].raw.NAME) };
         });
     };
 
