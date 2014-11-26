@@ -46,7 +46,7 @@ BODY.sd-droppable-hover {
 
 #wrapper-bins {
   width: 1000px;
-/*   border: none; */
+  border: none;
 }
 
 #wrapper-items,
