@@ -11,20 +11,21 @@ See =ProtarchBinSpawner=. Specifically, there are instances where the events att
 - State "TODO"       from "WAIT"       [2014-09-07 Sun 08:16]
 - State "WAIT"       from "TODO"       [2014-09-05 Fri 10:41] \\
   Currently waiting to hear from support as to whether ids are guaranteed to always be unique.
-** =SortingDesk= [0%]
-*** TODO Handle removal of currently active bin
-*** TODO =addBin=: how to deal with the =ranker= argument?
+*** TODO Remove code handling keyboard events
+** =SortingDesk= [27%]
+*** DONE Handle removal of currently active bin
+- State "DONE"       from "TODO"       [2014-11-26 Wed 16:26]
 *** TODO =ControllerBins=: =onItemDropped= unused
 *** TODO =ControllerBinSpawner=: =addManual= can't be supported as it stands
 + API requires knowledge of the bin's =label=.
 + Several TODO annotations have been created regarding this issue.
 *** TODO Display of the bins should be minimal
 Ideally, each bin should look like the item that was first dropped to create that bin.
-*** TODO Ensure =addBin= callback exists when the 'bin add' button exists
 *** TODO [#B] Prefix bins' node ids
 - State "TODO"       from "WAIT"       [2014-09-07 Sun 08:16]
 - State "WAIT"       from "TODO"       [2014-09-05 Fri 10:41] \\
   Currently waiting to hear from support as to whether ids are guaranteed to always be unique.
+*** TODO =itemDroppedInBin=: should it be optional?
 *** WAIT Implement keyboard auto-repeat with configurable frequency
 - State "WAIT"       from "TODO"       [2014-10-15 Wed 13:56] \\
   Probable unwanted feature.
@@ -42,6 +43,12 @@ Ideally, each bin should look like the item that was first dropped to create tha
 - State "WAIT"       from "TODO"       [2014-08-22 Fri 12:44] \\
   Specifications aren't clear as to how bins that are based on existing text items
   are created.  
+*** CANCELED =addBin=: how to deal with the =ranker= argument?
+- State "CANCELED"   from "TODO"       [2014-11-26 Wed 15:07] \\
+  =addBin= callback no longer used.
+*** CANCELED Ensure =addBin= callback exists when the 'bin add' button exists
+- State "CANCELED"   from "TODO"       [2014-11-26 Wed 15:06] \\
+  =addBin= callback no longer used.
 ** API [0%]
 *** Live [0%]
 **** TODO =getRandomLabel=: rename to =getRandomItem=
@@ -49,12 +56,10 @@ Ideally, each bin should look like the item that was first dropped to create tha
 ** Examples [0%]
 *** TODO Revisit =sorting_desk-live.html= example
 It no longer runs and its CSS is invalid compared to the =sorting_desk-mock-default.html= example.
-*** WAIT Create examples [50%]
+*** WAIT Create examples [0%]
 - State "WAIT"       from "TODO"       [2014-11-25 Tue 06:39] \\
   Not a priority at the moment.
 **** TODO No content ids
-**** DONE Sub-bins
-- State "DONE"       from "TODO"       [2014-10-23 Thu 14:42]
 ** CSS [0%]
 *** TODO Ensure CSS contained by Sorting Desk and Queue components is (still) valid
 Many changes have been made which must have surely affected the CSS.  
@@ -71,6 +76,8 @@ Many changes have been made which must have surely affected the CSS.
 *** TODO interface: ensure correct number of sub-bins are created
 *** TODO interface: removed test for adding of sub-bin
 ** Unclassified
+*** TODO Revamp errors returned via promises to include error *codes*
+It is easier for programs to process errors if they are given as a code. Errors in human natural language are only useful to humans, not programs.
 *** TODO Review data structures
 This includes =Sorting Desk='s bin data structure and =Sorting Queue='s item
 data structure. Changes to any of the components will require updating the
@@ -110,7 +117,7 @@ This is meant to resolve the problem that parent elements can't be styled depend
 A mechanism for displaying notifications to the user is needed for the purpose
 of providing feedback, in particular in the cases when a user action is invalid
 and results in an error.
-* Bugs [86%]
+* Bugs [0%]
 ** TODO When items' DIV is selected, scrolling with keyboard both selects next item as well as scroll the DIV contents
 Scrolling on the items' DIV container must be suppressed.
 
