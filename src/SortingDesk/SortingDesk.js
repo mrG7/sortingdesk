@@ -550,6 +550,11 @@ var SortingDesk_ = function (window, $, SortingQueue) {
                                                     bin);
 
           self.owner_.removeAt(self.owner_.indexOf(bin));
+
+          /* Important: DOM node is destroyed above, which means the `dragend'
+           * event won't be triggered, leaving the dismissal button visible. */
+          parentOwner.sortingQueue.dismiss.deactivate();
+          
           break;
 
         default:
