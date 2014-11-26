@@ -31,7 +31,8 @@ var _Api = function(window, $, DossierJS) {
 
     var getRandomItem = function() {
         return api.fcRandomGet().then(function(cobj) {
-            return { label: getFirstKey_(cobj[1].raw.NAME) };
+            return { id: cobj[0],
+                     text: getFirstKey_(cobj[1].raw.NAME) };
         });
     };
 
