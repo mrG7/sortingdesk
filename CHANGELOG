@@ -1,3 +1,26 @@
+2014-11-26  Miguel Guedes  <miguel@miguelguedes.org>
+
+	* SortingDesk:
+
+	Implemented all required major features, namely:
+
+	+ Set active bin, and internally set query content id
+	+ Drag item into dismissal button and trigger `addLabel' callback
+	+ Drag item into bin and trigger `itemDroppedInBin' callback
+	+ Drag item into DOM body and create a bin
+	+ Drag bin into another bin and merge them
+
+	Creating a bin now does not trigger a callback (formerly invoked
+	`addBin') and similarly, nor does removing a bin.
+
+	* css:
+
+	Adjusted CSS styling.
+
+	* all:
+
+	MANY improvements to the code.
+
 2014-11-25  Miguel Guedes  <miguel@miguelguedes.org>
 
 	* src/SortingQueue/SortingQueue.js:
