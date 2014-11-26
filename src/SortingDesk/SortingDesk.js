@@ -520,17 +520,35 @@ var SortingDesk_ = function (window, $, SortingQueue) {
 
     new SortingQueue.Droppable(this.node_, {
       classHover: parentOwner.options.css.droppableHover,
-      scopes: [ 'text-item' ],
+      scopes: [ 'text-item', 'bin' ],
 
-      drop: function (e) {
-        var id = decodeURIComponent(e.dataTransfer.getData('Text')),
-            item = parentOwner.sortingQueue.items.getById(id);
+      drop: function (e, id, scope) {
+        var id = decodeURIComponent(e.dataTransfer.getData('Text'));
+            
+        switch(scope) {
+        case 'text-item':
+          var item = parentOwner.sortingQueue.items.getById(id);
 
-        parentOwner.sortingQueue.callbacks.invoke("itemDroppedInBin",
-                                                  item,
-                                                  self);
-        
-        parentOwner.sortingQueue.items.remove(item);
+          parentOwner.sortingQueue.callbacks.invoke("itemDroppedInBin",
+                                                    item,
+                                                    self);
+          
+          parentOwner.sortingQueue.items.remove(item);
+          break;
+          
+        case 'bin':
+          var bin = self.owner_.getById(id);
+
+          parentOwner.sortingQueue.callbacks.invoke("mergeBins",
+                                                    self,
+                                                    bin);
+
+          self.owner_.removeAt(self.owner_.indexOf(bin));
+          break;
+
+        default:
+          throw "Invalid scope: " + scope;
+        }
       }
     } );
 
