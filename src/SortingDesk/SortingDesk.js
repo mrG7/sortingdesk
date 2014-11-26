@@ -329,10 +329,8 @@ var SortingDesk_ = function (window, $, SortingQueue) {
     this.bins_.push(bin);
 
     /* If first bin to be contained, activate it by default. */
-    if(!this.active_) {
-      this.active_ = bin;
-      bin.activate();
-    }
+    if(!this.active_)
+      this.setActive(bin);
   };
 
   /* overridable */ ControllerBins.prototype.append = function (node)
@@ -433,10 +431,15 @@ var SortingDesk_ = function (window, $, SortingQueue) {
       self.active_.deactivate();
     
     self.active_ = bin;
-    bin.activate();
 
-    self.owner_.sortingQueue.callbacks.invoke("setQueryContentId", bin.id);
-    self.owner_.sortingQueue.items.redraw();
+    if(bin) {
+      bin.activate();
+
+      if(this.owner_.initialised) {
+        self.owner_.sortingQueue.callbacks.invoke("setQueryContentId", bin.id);
+        self.owner_.sortingQueue.items.redraw();
+      }
+    }
   };
 
   ControllerBins.prototype.dropItem = function (bin,
