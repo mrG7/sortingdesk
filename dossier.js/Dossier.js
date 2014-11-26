@@ -305,8 +305,14 @@ var _DossierJS = function(window, $) {
         var self = this;
 
         if (self._processing) {
-            console.log('moreTexts in progress, ignoring new request');
-            return null;
+            var deferred = $.Deferred();
+
+            window.setTimeout(function () {
+                console.log('moreTexts in progress, ignoring new request');
+                deferred.reject( { error: "Request in progress" } );
+            } );
+            
+            return deferred.promise();
         }
         self._processing = true;
 
