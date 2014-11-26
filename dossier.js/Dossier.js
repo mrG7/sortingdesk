@@ -1,3 +1,15 @@
+/** Dossier.js --- Diffeo's dossier.web API
+ *
+ * Copyright (C) 2014 Diffeo
+ *
+ * Author: Andrew Gallant <andrew@diffeo.com>
+ *
+ * Comments:
+ *
+ *
+ */
+
+
 var _DossierJS = function(window, $) {
     var API_VERSION = {
         dossier: 1,
