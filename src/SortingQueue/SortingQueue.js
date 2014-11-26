@@ -31,7 +31,7 @@ var SortingQueue_ = function (window, $) {
    *                            `defaults_' above)
    * @param   {Object}    cbs   Map of all callbacks
    *
-   * @param   cbs.moreText            Retrieve additional text items.
+   * @param   cbs.moreTexts           Retrieve additional text items.
    * @param   cbs.itemDismissed       Event triggered when a text item is
    *                                  dismissed.
    * @param   cbs.itemDroppedInBin    Event triggered when a text item is
@@ -728,29 +728,28 @@ var SortingQueue_ = function (window, $) {
     if(this.items_.length >= this.owner_.options.visibleItems)
       return;
 
-    var self = this,
-        promise = this.owner_.callbacks.invoke(
-          "moreTexts",
-          this.owner_.options.visibleItems);
+    var self = this;
 
-    promise.done(function (items) {
-      self.owner_.requests.begin('check-items');
+    this.owner_.callbacks.invoke("moreTexts",
+                                 this.owner_.options.visibleItems)
+      .done(function (items) {
+        self.owner_.requests.begin('check-items');
 
-      items.forEach(function (item, index) {
+        items.forEach(function (item, index) {
+          window.setTimeout( function () {
+            self.items_.push(self.owner_.instantiate('Item', self, item));
+          }, Math.pow(index, 2) * 1.1);
+        } );
+
         window.setTimeout( function () {
-          self.items_.push(self.owner_.instantiate('Item', self, item));
-        }, Math.pow(index, 2) * 1.1);
+          self.select();
+        }, 10);
+
+        /* Ensure event is fired after the last item is added. */
+        window.setTimeout( function () {
+          self.owner_.requests.end('check-items');
+        }, Math.pow(items.length - 1, 2) * 1.1 + 10);
       } );
-
-      window.setTimeout( function () {
-        self.select();
-      }, 10);
-
-      /* Ensure event is fired after the last item is added. */
-      window.setTimeout( function () {
-        self.owner_.requests.end('check-items');
-      }, Math.pow(items.length - 1, 2) * 1.1 + 10);
-    } );
   };
 
   ControllerItems.prototype.select = function (variant)
