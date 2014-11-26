@@ -68,6 +68,10 @@ var SortingDesk_ = function (window, $, SortingQueue) {
 
         self.options_.bins.unshift( { id: result.content_id,
                                       name: result.name } );
+
+        /* Set query content id before initialising SortingQueue to ensure
+         * correct contexts for items retrieved. */
+        self.sortingQueue_.invoke('setQueryContentId', result.content_id);
         self.initialise_();
       } )
       .fail(function (result) {
