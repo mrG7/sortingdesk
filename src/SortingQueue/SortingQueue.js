@@ -688,6 +688,9 @@ var SortingQueue_ = function (window, $) {
     this.node_ = this.owner_.options.nodes.items;
     this.items_ = [ ];
     this.fnDisableEvent_ = function (e) { return false; };
+
+    /* Define getters. */
+    this.__defineGetter__("items", function () { return this.items_; } );
   };
 
   ControllerItems.prototype = Object.create(Controller.prototype);
