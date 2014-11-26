@@ -45,11 +45,21 @@ var _Api = function(window, $, DossierJS) {
         });
     };
 
+    var setQueryContentId = function (id) {
+        if(!id)
+            throw "Invalid engine content id";
+        
+        qitems.query_content_id = id;
+    };
+
+    var itemDroppedInBin = function (item, bin) {
+        api.addLabel(bin.id, item.id, qitems.annotator, 1);
     };
 
     return $.extend({}, qitems.callbacks(), {
         getRandomItem: getRandomItem,
-        addBin: addBin
+        setQueryContentId: setQueryContentId,
+        itemDroppedInBin: itemDroppedInBin
     });
 };
 
