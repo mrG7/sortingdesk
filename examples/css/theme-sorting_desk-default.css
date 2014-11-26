@@ -40,8 +40,8 @@ BODY.sd-droppable-hover {
 #wrapper-items {
   bottom: 10px;
   left: 50%;
-  margin-left: -240px;
-  width: 480px;
+  margin-left: -300px;
+  width: 600px;
   background-color: white;
 }
 
@@ -174,6 +174,12 @@ BODY.sd-droppable-hover {
 .sd-text-item B:not(:first-child),
 .sd-text-item STRONG:not(:first-child) {
   padding-left: 10px;
+}
+
+.sd-text-item-content {
+  overflow: hidden;
+  max-height: 65px;
+  text-overflow: ellipsis;
 }
 
 .sd-text-item-content * {
