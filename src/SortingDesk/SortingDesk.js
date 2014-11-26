@@ -111,8 +111,18 @@ var SortingDesk_ = function (window, $, SortingQueue) {
         if(bin) {
           if(bin.parent)
             bin.parent.remove(bin);
-          else
+          else {
+            /* Allow removal of last bin only if there is at least one item in
+             * the queue. */
+            if(this.bins_.length == 1 && !this.owner_.sortingQueue.items.length)
+            {
+              console.log("Disallowing removal of last bin when items' queue"
+                          + " empty");
+              return;
+            }
+            
             self.bins_.removeAt(self.bins_.indexOf(bin));
+          }
         }
       } );
 
