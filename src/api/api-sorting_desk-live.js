@@ -63,11 +63,16 @@ var _Api = function(window, $, DossierJS) {
         return api.addLabel(bin.id, item.content.content_id, qitems.annotator, 1);
     };
 
+    var mergeBins = function (ibin, jbin) {
+        return api.addLabel(ibin.id, jbin.id, qitems.annotator, 1);
+    };
+
     return $.extend({}, qitems.callbacks(), {
         getRandomItem: getRandomItem,
         setQueryContentId: setQueryContentId,
         itemDismissed: itemDismissed,
-        itemDroppedInBin: itemDroppedInBin
+        itemDroppedInBin: itemDroppedInBin,
+        mergeBins: mergeBins
     });
 };
 
