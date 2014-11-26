@@ -2,97 +2,32 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Sorting Desk - Live</title>
-  
+  <title>Sorting Desk - Offline - Default</title>
+
   <link rel="stylesheet" href="css/theme-sorting_desk-default.css" media="screen" />
-  
-  <script type="text/javascript" src="lib/jquery-2.1.1.min.js"></script>
 
   <!-- Libraries -->
   <script type="text/javascript" src="lib/require-2.1.14.min.js"></script>
-  
+
   <!-- Main initialisation logic -->
   <script type="text/javascript">
-
   require.config( {
     baseUrl: '../',
     paths: {
+      "main": "examples/js/sorting_desk-live",
       "SortingDesk": "src/SortingDesk/SortingDesk",
       "SortingQueue": "src/SortingQueue/SortingQueue",
-      "API-SortingQueue": "src/api/api-sorting_queue-live",
+      "DossierJS": "dossier.js/Dossier",
+      "API-SortingDesk": "src/api/api-sorting_desk-live",
       "jquery": "lib/jquery-2.1.1.min"
     }
   } );
 
-  require( [ "jquery", "SortingDesk", "API-SortingQueue" ],
-    function ($, SortingDesk) {
-
-      var instance,
-          nitems = $("#items"),
-          nbins = $("#bins"),
-          nloading = $("#loading"),
-          height,
-          bins = [
-            { node_id: 100, features: { NAME: { "Irrelevant": 0 } } },
-            { node_id: 101, features: { NAME: { "Rubbish": 0 } } },
-            { node_id: 102, features: { NAME: { "Keep": 0 } } }
-          ],
-          requests = 0;
-
-      $(".wrapper").fadeIn();
-      
-      height = $(window).height() - nitems.offset().top - 10;
-      
-      nitems.parent().height(height);
-      nitems.children().remove();
-      
-      nbins.parent().height(height);
-      nbins.children().remove();
-
-      //     $("#primary-node-id")
-      //       .val(primaryContentId)
-      //       .change(function () {
-      var promise,
-      ids = Api.initialise(bins);
-
-      if(!instance) {
-        var deferred = $.Deferred();
-        promise = deferred.promise();
-        window.setTimeout(function () { deferred.resolve(); });
-      } else
-        promise = instance.reset();
-
-      promise.always(function () {
-        instance = new SortingDesk.Instance( {
-          nodes: {
-            items: nitems,
-            bins: nbins,
-            binDelete: $("#button-delete") /* Also used for 'dimissing' text
-                                            * items that aren't/can't/won't be
-                                            * sorted into a bin */
-          },
-          contentIds: ids,
-          visibleItems: 15
-        }, $.extend(Api, {
-          onRequestStart: function () {
-            if(requests ++ == 0) nloading.stop().fadeIn();
-          },
-          onRequestStop: function () {
-            if(--requests == 0) nloading.stop().fadeOut();
-          }
-        } ) );
-      } );
-      //       } )
-      //       .change();                  /* Force instantiation. */
-    });
-      
-    </script>
+  require( [ "main" ]);
+  </script>
 </head>
 <body>
   <div id="wrapper-outer">
-<!--     <div class="debug-controls"> -->
-<!--       <label for="primary-node-id">Primary node id:&nbsp;<input id="primary-node-id" type="text" /></label> -->
-<!--     </div> -->
     <div id="wrapper-bins" class="wrapper">
       <div id="bins">
       </div>
@@ -102,7 +37,7 @@
       </div>
     </div>
   </div>
-  <div id="button-delete" class="sd-button-delete">X</div>
+  <div id="button-dismiss" class="sd-button-dismiss">X</div>
   <div id="loading">Loading...</div>
 </body>
 </html>
