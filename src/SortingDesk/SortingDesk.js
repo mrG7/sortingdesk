@@ -71,7 +71,8 @@ var SortingDesk_ = function (window, $, SortingQueue) {
 
         /* Set query content id before initialising SortingQueue to ensure
          * correct contexts for items retrieved. */
-        self.sortingQueue_.invoke('setQueryContentId', result.content_id);
+        self.sortingQueue_.callbacks.invoke('setQueryContentId',
+                                            result.content_id);
         self.initialise_();
       } )
       .fail(function (result) {
