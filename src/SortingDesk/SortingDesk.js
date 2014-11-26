@@ -425,20 +425,13 @@ var SortingDesk_ = function (window, $, SortingQueue) {
 
     /* Invoke API to activate the bin. If successful, update UI state and force
      * a redraw of the items container. */
-    this.owner.sortingQueue.callbacks.invoke("setActiveBin", bin.id)
-      .done(function () {
-        if(self.active_)
-          self.active_.deactivate();
-        
-        self.active_ = bin;
-        bin.activate();
+    if(self.active_)
+      self.active_.deactivate();
+    
+    self.active_ = bin;
+    bin.activate();
 
-        self.owner_.sortingQueue.items.redraw();
-      } )
-      .fail(function (result) {
-        /* TODO: notify user property that an error occurred. */
-        console.log("Failed to set active bin:", result.error);
-      } );
+    self.owner_.sortingQueue.items.redraw();
   };
 
   ControllerBins.prototype.dropItem = function (bin,
