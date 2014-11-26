@@ -45,11 +45,6 @@ var _Api = function(window, $, DossierJS) {
         });
     };
 
-    var addBin = function(id, label) {
-        return $.Deferred().then(function () {
-            return { id: id,
-                     name: label };
-        } );
     };
 
     return $.extend({}, qitems.callbacks(), {
