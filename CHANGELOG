@@ -1,3 +1,25 @@
+2014-12-05  Miguel Guedes  <miguel@miguelguedes.org>
+
+	* tests:
+
+        Fixed broken tests and improved a number of structural
+	deficiencies, namely:
+
+	* Recent changes made to SortingQueue, in particular its AMD
+	module loading logic, meant that the manner in which tests were
+	loaded, initialised and executed was fundamentally flawed. This
+	needed to be re-engineered.
+
+	* Given that SortingQueue is no longer responsible for bin (or
+	even aware of the concept), a few tests had to be removed. In
+	addition, and in anticipation that tests will be written for
+	SortingDesk at some point in time, infrastructure was laid down to
+	support tests for multiple components.
+
+	* As a result of the above changes, describing a test
+	specification is now much cleaner and the underlying
+	infrastructure much more reliable and solid.
+
 2014-11-26  Miguel Guedes  <miguel@miguelguedes.org>
 
 	* SortingDesk:
