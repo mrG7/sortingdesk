@@ -1,8 +1,8 @@
 
 /* ------------------------------------------------------------
  * Load modules and respective dependencies.                    */
-require(["SortingDesk", "SortingQueue", "API-SortingDesk"],
-        function (SortingDesk, SortingQueue, Api) {
+require(["SortingDesk", "SortingQueue", "DossierJS", "API-SortingDesk"],
+        function (SortingDesk, SortingQueue, DossierJS, Api) {
 
   var loading = $("#loading"),
       nitems = $("#items"),
@@ -38,9 +38,9 @@ require(["SortingDesk", "SortingQueue", "API-SortingDesk"],
 
       drop: function (e, id) {
         id = decodeURIComponent(id);
-        
+
         self.add(id);
-        
+
         var items = self.owner_.owner.sortingQueue.items;
         items.remove(items.getById(id));
       }
@@ -56,7 +56,7 @@ require(["SortingDesk", "SortingQueue", "API-SortingDesk"],
 
   /* ------------------------------------------------------------
    * Initialise API and instantiate SortingDesk. */
-  new SortingDesk.Instance( {
+  var sd = new SortingDesk.Instance( {
     nodes: {
       items: nitems,
       bins: nbins,
@@ -70,5 +70,21 @@ require(["SortingDesk", "SortingQueue", "API-SortingDesk"],
     onRequestStart: function () { if(!requests++) loading.stop().fadeIn(); },
     onRequestStop: function () { if(!--requests) loading.stop().fadeOut(); }
   } ) );
+
+  var api = new DossierJS.API(DOSSIER_STACK_API_URL);
+  var $sel_engines = $('#search-engine select');
+  api.searchEngines().done(function(search_engines) {
+    search_engines.forEach(function(name) {
+      var $opt = $('<option value="' + name + '">' + name + '</option>');
+      if (Api.getSearchEngine() == name) {
+        $opt.attr('selected', true);
+      }
+      $sel_engines.append($opt);
+    });
+  });
+  $sel_engines.change(function() {
+      Api.setSearchEngine(this.options[this.selectedIndex].value);
+      sd.sortingQueue.items.removeAll();
+  });
 });
 
