@@ -8,41 +8,48 @@
  * 
  */
 
-/*global $, g_descriptor, SortingQueue, Api */
+/*global $, Api, g_descriptor, define */
 /*global afterEach */
 /*jshint laxbreak:true */
 
 
-/* Configure API. */
-Api.DELAY_MIN = Api.DELAY_MAX = 0;
+var Tests_ = function ($, SortingQueue) {
 
-/* Variables */
-var g_sortingQueue = null,
-    g_bins = [
-      {
-        id: '#100',
-        name: "Irrelevant",
-        children: [
-          {
-            id: "test-1",
-            name: "Inner irrelevancy"
-          },
-          {
-            id: "test-2",
-            name: "Additional irrelevancy"
-          }
-        ]
-      },
-      { id: '^1$0#1', name: "Rubbish" },
-      { id: '1_0%%^&#2', name: "Keep" },
-    ],
-    g_options = {
+  var Queue = function ()
+  {
+    /* > BEGIN: Initialise instance attributes. */
+    this.reset_ = true;
+    this.result_ = null;
+    this.instance_ = null;
+    this.descriptor_ = g_descriptor;
+    this.defaults_ = {
+      bins: [
+        {
+          id: '#100',
+          name: "Irrelevant",
+          children: [
+            {
+              id: "test-1",
+              name: "Inner irrelevancy"
+            },
+            {
+              id: "test-2",
+              name: "Additional irrelevancy"
+            }
+          ]
+        },
+        { id: '^1$0#1', name: "Rubbish" },
+        { id: '1_0%%^&#2', name: "Keep" },
+      ]
+    };
+    
+    this.defaults_.options = {
       nodes: {
         items: $('<div />'),
         bins: $('<div />'),
         buttonDismiss: $('<div />')
       },
-      bins: g_bins,
+      bins: this.bins,
       visibleItems: 5,
       delays: {
         animateAssign: 0,
@@ -53,154 +60,201 @@ var g_sortingQueue = null,
         addBinShow: 0,
         textItemFade: 0
       }
+    };
+    
+    this.defaults_.callbacks = Api;
+
+    /* Constants */
+    this.TIMEOUT = 2000;
+    this.DELAY = 10;
+    this.DELAY_ITEM_DELETED = 25;
+    this.DELAY_BUTTON_ADD = 50;
+    this.DELAY_ITEM_DRAGGED = 25;
+    this.DELAY_ITEM_DROPPED = 25;
+    this.DELAY_BIN_DRAGGED = 25;
+    this.DELAY_BIN_DROPPED = 25;
+    this.DELAY_ITEMS = Math.pow(this.defaults_.options.visibleItems, 2)
+      * 1.1 + 10;
+    
+    /* Specify test classes available. */
+    this.classes_ = {
+      "Standard": QueueTestStandard,
+      "NoInstantiation": QueueTestNoInstantiation,
+      "AfterItemsRendered": QueueTestAfterItemsRendered
+    };
+    /* < END: Initialisation of class attributes */
+
+    /* Initialise the mock API. */
+    Api.DELAY_MIN = Api.DELAY_MAX = 0;
+    Api.initialise(this.descriptor_, this.defaults_.bins);
+
+    /* Set up clean up sequence to run when a test concludes. */
+    var self = this;
+    
+    afterEach(function () {
+      if(self.instance_ && self.instance_.initialised) {
+        self.instance_.reset()
+          .always(function () {
+            self.reset_ = true;
+
+            Api.initialise(self.descriptor_, self.defaults_.bins);
+          } );
+      } else
+        self.reset_ = true;
+
+      self.result_ = null;
+    } );
+  };
+
+  Queue.prototype = {
+    set instance(instance)
+    {
+      if(!this.reset_)
+        throw "A SortingQueue instance is currently active";
+
+      this.instance_ = instance;
+      this.reset_ = false;
     },
-    g_callbacks = Api,
-    reset = true,
-    result = false;
+
+    get instance()
+    { return this.instance_; },
+
+    set reset(flag)
+    {
+      if(flag)
+        this.instance_ = null;
+
+      this.reset_ = flag;
+    },
     
+    get reset()
+    { return this.reset_; },
 
-/* Constants */
-var DELAY = 10,
-    DELAY_ITEMS = Math.pow(g_options.visibleItems, 2) * 1.1 + 10,
-    DELAY_ITEM_DELETED = 25,
-    DELAY_BUTTON_ADD = 50,
-    DELAY_ITEM_DRAGGED = 25,
-    DELAY_ITEM_DROPPED = 25,
-    DELAY_BIN_DRAGGED = 25,
-    DELAY_BIN_DROPPED = 25;
+    set result(value)
+    { this.result_ = value; },
 
+    get result()
+    { return this.result_; },
 
-var setup = function () {
-  Api.initialise(g_descriptor, g_bins);
+    get defaults()
+    { return this.defaults_; },
 
-  afterEach(function () {
-    if(g_sortingQueue && g_sortingQueue.initialised) {
-      g_sortingQueue.reset()
-        .always(function () {
-          reset = true;
-
-          Api.initialise(g_descriptor, g_bins);
-        } );
-    } else
-      reset = true;
-
-    result = false;
-  } );
-};
-
-var run = function (options, callbacks, condition, done) {
-  var interval = window.setInterval(function () {
-    if(!reset)
-      return;
-
-    window.clearInterval(interval);
-
-    g_sortingQueue = new SortingQueue.Instance(options, callbacks);
-    reset = false;
-
-    if(!g_sortingQueue.initialised)
-      throw "Sorting Queue failed to initialise";
-      
-    condition();
-      
-    if(done)
-      done();
-  }, DELAY);
-};
-
-var runNoInstantiation = function (condition, done) {
-  var interval = window.setInterval(function () {
-    if(!reset)
-      return;
-
-    window.clearInterval(interval);
-    condition();
-    
-    if(done)
-      done();
-  }, DELAY);
-};
-
-var runAfterItemsRendered = function (options, callbacks, condition, done) {
-  var interval = window.setInterval(function () {
-    if(!reset)
-      return;
-
-    window.clearInterval(interval);
-
-    g_sortingQueue = new SortingQueue.Instance(options, callbacks);
-    reset = false;
-
-    if(!g_sortingQueue.initialised)
-      throw "Sorting Queue failed to initialise";
-    
-    interval = window.setInterval(function () {
-      if(g_options.nodes.items.children().length < g_options.visibleItems)
-        return;
-
-      window.clearInterval(interval);
-      
-      if(g_options.nodes.items.children().length > g_options.visibleItems)
-        throw "Invalid item count: " + g_options.nodes.items.children().length;
-      
-      condition();
-      
-      if(done)
-        done();
-    }, DELAY);
-  }, DELAY);
-};
-
-
-/* Class DraggingEvent
- * ---------------------------------------------------------------------- */
-var DraggingEvent = function (node)
-{
-  var self = this;
+    get SortingQueue()
+    { return SortingQueue; },
   
-  this.node = node;
-  this.event = $.Event('dragstart');
-  this.data = { };
+    instantiate: function (className, condition, done, options, callbacks)
+    {
+      var self = this,
+          timestamp = Date.now();
 
-  this.event.originalEvent = {
-    target: node.get(0),
-    dataTransfer: {
-      setData: function (domain, value) {
-        if(domain) {
-          domain = domain.toLowerCase();
+      if(!(className in this.classes_))
+        throw "Invalid test name: " + className;
+      
+      var interval = window.setInterval(function () {
+        if(!self.reset_) {
+          /* Deactivate timer once we've hit `TIMEOUT'. */
+          if(Date.now() - timestamp > self.TIMEOUT) {
+            console.log("Test timed out: terminating");
+            window.clearInterval(interval);
+
+            if(done) done();
+          }
           
-          if(typeof value === 'undefined' || value === null)
-            delete self.data[domain];
-          else
-            self.data[domain] = value;
+          return;
         }
-      },
 
-      getData: function (domain) {
-        if(domain)
-          return self.data[domain.toLowerCase()];
+        window.clearInterval(interval);
 
-        return null;
-      }
+        new self.classes_[className](
+          self, condition, done,
+          options || $.extend(true, { }, self.defaults_.options),
+          callbacks || $.extend(true, { }, self.defaults_.callbacks) );
+      }, this.DELAY);
     }
   };
-};
 
-DraggingEvent.prototype = {
-  node: null,
-  event: null,
-  data: null,
 
-  trigger: function () {
-    this.node.trigger(this.event);
-  },
-
-  drop: function (node) {
-    var self = this,
-        event = $.Event('drop');
+  var QueueTestStandard = function (queue, condition, done, options, callbacks)
+  {
+    queue.instance = new SortingQueue.Instance(options, callbacks);
+    queue.instance.initialise();
     
-    event.originalEvent = {
+    if(!queue.instance.initialised)
+      throw "Sorting Queue failed to initialise";
+
+    condition(queue.instance);
+    if(done) done();
+  };
+
+
+  var QueueTestNoInstantiation = function (queue, condition, done,
+                                           options, callbacks)
+  {
+    condition();
+    if(done) done();
+  };
+
+  
+  var QueueTestAfterItemsRendered = function (queue, condition, done,
+                                              options, callbacks)
+  {
+    queue.instance = new SortingQueue.Instance(options, callbacks);
+    queue.instance.initialise();
+    
+    if(!queue.instance.initialised)
+      throw "Sorting Queue failed to initialise";
+    
+    var timestamp = Date.now();
+    var interval = window.setInterval(function () {
+      if(options.nodes.items.children().length < options.visibleItems)
+      {
+        /* Deactivate timer once we've hit `TIMEOUT'. */
+        if(Date.now() - timestamp > self.TIMEOUT) {
+          console.log("Test timed out waiting for text items to be rendered:"
+                      + " terminating");
+          window.clearInterval(interval);
+
+          if(done) done();
+        }
+
+        return;
+      }
+      
+      window.clearInterval(interval);
+      
+      if(options.nodes.items.children().length > options.visibleItems)
+        throw "Invalid item count: " + options.nodes.items.children().length;
+      
+      condition(queue.instance);
+      if(done) done();
+    }, this.DELAY);
+  };
+
+
+  /* Class DraggingEvent
+   * ---------------------------------------------------------------------- */
+  var DraggingEvent = function (node)
+  {
+    var self = this;
+    
+    this.node = node;
+    this.event = $.Event('dragstart');
+    this.data = { };
+
+    this.event.originalEvent = {
+      target: node.get(0),
       dataTransfer: {
+        setData: function (domain, value) {
+          if(domain) {
+            domain = domain.toLowerCase();
+            
+            if(typeof value === 'undefined' || value === null)
+              delete self.data[domain];
+            else
+              self.data[domain] = value;
+          }
+        },
+
         getData: function (domain) {
           if(domain)
             return self.data[domain.toLowerCase()];
@@ -209,7 +263,66 @@ DraggingEvent.prototype = {
         }
       }
     };
+  };
 
-    node.trigger(event);
-  }
+  DraggingEvent.prototype = {
+    node: null,
+    event: null,
+    data: null,
+
+    trigger: function () {
+      this.node.trigger(this.event);
+    },
+
+    drop: function (node) {
+      var self = this,
+          event = $.Event('drop');
+      
+      event.originalEvent = {
+        dataTransfer: {
+          getData: function (domain) {
+            if(domain)
+              return self.data[domain.toLowerCase()];
+
+            return null;
+          }
+        }
+      };
+
+      node.trigger(event);
+    }
+  };
+
+
+  /* Module interface */
+  var instances_ = { },
+      classes_ = {
+        "Queue": Queue
+      };
+
+  
+  var get_ = function (className) {
+    if(!(className in classes_))
+      throw "Invalid class name: " + className;
+    else if(className in instances_)
+      return instances_[className];
+
+    return (instances_[className] = new classes_[className]());
+  };
+  
+  var getQueue = function () { return get_("Queue"); };
+
+
+  /* Public interface */
+  return {
+    DraggingEvent: DraggingEvent,
+    
+    getQueue: getQueue
+  };
 };
+
+
+define("Tests", [ "jquery", "SortingQueue", "API-SortingQueue" ], function ($, SortingQueue) {
+  return Tests_($, SortingQueue);
+} );
+
