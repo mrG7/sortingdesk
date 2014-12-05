@@ -16,7 +16,7 @@ var _Api = function(window, $, DossierJS) {
         qitems = new DossierJS.SortingQueueItems(
             api, 'index_scan', 'p|kb|Jeremy_Hammond', 'unknown');
 
-    
+
     var getFirstKey_ = function (obj) {
         if(obj) {
             if(typeof obj == 'string')
@@ -25,14 +25,14 @@ var _Api = function(window, $, DossierJS) {
             for(var k in obj)
                 return k;
         }
-        
+
         return '';
     };
 
     var getRandomItem = function() {
         return api.fcRandomGet().then(function(cobj) {
             var fc = cobj[1];
-            
+
             return {
                 content_id: cobj[0],
                 fc: fc,
@@ -48,15 +48,8 @@ var _Api = function(window, $, DossierJS) {
     var setQueryContentId = function (id) {
         if(!id)
             throw "Invalid engine content id";
-        
-        qitems.query_content_id = id;
-    };
 
-    var itemDismissed = function (item) {
-        /* We are overriding the callback in `Dossier.js' because of the need to
-         * translate `item' used by Sorting Queue into an object the API can
-         * use. */
-        return qitems.callbacks().itemDismissed(item.content);
+        qitems.query_content_id = id;
     };
 
     var itemDroppedInBin = function (item, bin) {
@@ -70,7 +63,6 @@ var _Api = function(window, $, DossierJS) {
     return $.extend({}, qitems.callbacks(), {
         getRandomItem: getRandomItem,
         setQueryContentId: setQueryContentId,
-        itemDismissed: itemDismissed,
         itemDroppedInBin: itemDroppedInBin,
         mergeBins: mergeBins
     });
