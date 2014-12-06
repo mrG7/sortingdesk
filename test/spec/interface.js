@@ -8,7 +8,7 @@
  * 
  */
 
-/*global Api, g_tests, g_queue, describe, it, expect */
+/*global Api, g_tests, g_queue, describe, it, expect, $ */
 /*jshint laxbreak:true */
 
 
