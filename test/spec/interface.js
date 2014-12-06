@@ -146,8 +146,7 @@ describe('Interface', function () {
        g_queue.instantiate(
          'AfterItemsRendered',
          function (instance) {
-           var items = instance.options.nodes.items,
-               selected = items.find('.sd-selected');
+           var selected = instance.options.nodes.items.find('.sd-selected');
            
            expect(selected.length).toBe(1);
 
