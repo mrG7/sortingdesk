@@ -155,5 +155,25 @@ describe('Interface', function () {
          },
          done);
      } );
-  
+
+  it('pressing the down arrow key selects the next item',
+     function (done) {
+       g_queue.instantiate(
+         'AfterItemsRendered',
+         function (instance) {
+           var selected;
+
+           $('body').trigger($.Event('keyup', { keyCode: 40 } ));
+
+           selected = instance.options.nodes.items.find('.sd-selected');
+           expect(selected.length).toBe(1);
+
+           if(selected.length === 1) {
+             expect(selected.get(0).previousSibling).not.toBe(null);
+             expect(selected.get(0).previousSibling.previousSibling)
+               .toBe(null);
+           }
+         },
+         done);
+     } );
 } );
