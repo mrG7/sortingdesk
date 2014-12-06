@@ -102,7 +102,14 @@ describe('Interface', function () {
            if(selected.length !== 1) {
              done(); return;
            }
-           
+
+           expect(instance.items.selected()).not.toBe(null);
+           expect(instance.items.selected().node.length).toBe(1);
+           if(!instance.items.selected()
+              || instance.items.selected().node.length !== 1) {
+             done(); return;
+           }
+
            expect(instance.items.selected().node.get(0))
              .toBe(selected.get(0));
            if(instance.items.selected().node.get(0) !== selected.get(0)) {
@@ -167,8 +174,14 @@ describe('Interface', function () {
        g_queue.instantiate(
          'AfterItemsRendered',
          function (instance) {
-           expect(instance.options.nodes.items.find('.sd-selected').length)
-             .toBe(1);
+           var selected = instance.options.nodes.items.find('.sd-selected');
+           
+           expect(selected.length).toBe(1);
+           
+           expect(instance.items.selected()).not.toBe(null);
+           expect(instance.items.selected().node.length).toBe(1);
+           expect(instance.items.selected().node.get(0))
+             .toBe(selected.get(0));
          },
          done);
      } );
@@ -184,6 +197,11 @@ describe('Interface', function () {
 
            if(selected.length === 1)
              expect(selected.get(0).previousSibling).toBe(null);
+
+           expect(instance.items.selected()).not.toBe(null);
+           expect(instance.items.selected().node.length).toBe(1);
+           expect(instance.items.selected().node.get(0))
+             .toBe(selected.get(0));
          },
          done);
      } );
