@@ -13,6 +13,11 @@
 /*jshint laxbreak:true */
 
 
+define("Tests", [ "jquery", "SortingQueue", "API-SortingQueue" ], function ($, SortingQueue) {
+  return Tests_($, SortingQueue);
+} );
+
+
 var Tests_ = function ($, SortingQueue) {
 
   var Queue = function ()
@@ -320,9 +325,3 @@ var Tests_ = function ($, SortingQueue) {
     getQueue: getQueue
   };
 };
-
-
-define("Tests", [ "jquery", "SortingQueue", "API-SortingQueue" ], function ($, SortingQueue) {
-  return Tests_($, SortingQueue);
-} );
-
