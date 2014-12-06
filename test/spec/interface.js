@@ -90,45 +90,6 @@ describe('Interface', function () {
          } );
      } );
 
-  it('deletes currently selected item when DEL pressed',
-     function (done) {
-       g_queue.instantiate(
-         'AfterItemsRendered',
-         function (instance) {
-           var items = instance.options.nodes.items,
-               selected = items.find('.sd-selected');
-
-           expect(selected.length === 1);
-           if(selected.length !== 1) {
-             done(); return;
-           }
-
-           expect(instance.items.selected()).not.toBe(null);
-           expect(instance.items.selected().node.length).toBe(1);
-           if(!instance.items.selected()
-              || instance.items.selected().node.length !== 1) {
-             done(); return;
-           }
-
-           expect(instance.items.selected().node.get(0))
-             .toBe(selected.get(0));
-           if(instance.items.selected().node.get(0) !== selected.get(0)) {
-             done(); return;
-           }
-
-           $('body').trigger($.Event('keyup', { keyCode: 46 } ));
-
-           expect(instance.items.selected().node.get(0))
-             .not.toBe(items.find('sd-selected').get(0));
-
-           window.setTimeout(function () {
-             expect(instance.options.nodes.items.children().length)
-               .toBe(instance.options.visibleItems * 2 - 1);
-             done();
-           }, g_queue.DELAY_ITEMS);
-         } );
-     } );
-
   it('dismissal button is displayed when item is dragged',
      function (done) {
        g_queue.instantiate(
@@ -206,53 +167,94 @@ describe('Interface', function () {
          done);
      } );
 
-  it('pressing the down arrow key selects the next item',
-     function (done) {
-       g_queue.instantiate(
-         'AfterItemsRendered',
-         function (instance) {
-           var selected;
+  describe("Keyboard", function () {
+    it('DOWN: selects the next item',
+       function (done) {
+         g_queue.instantiate(
+           'AfterItemsRendered',
+           function (instance) {
+             var selected;
 
-           $('body').trigger($.Event('keyup', { keyCode: 40 } ));
+             $('body').trigger($.Event('keyup', { keyCode: 40 } ));
 
-           selected = instance.options.nodes.items.find('.sd-selected');
-           expect(selected.length).toBe(1);
+             selected = instance.options.nodes.items.find('.sd-selected');
+             expect(selected.length).toBe(1);
 
-           if(selected.length === 1) {
-             expect(selected.get(0).previousSibling).not.toBe(null);
-             expect(selected.get(0).previousSibling.previousSibling)
-               .toBe(null);
-           }
-         },
-         done);
-     } );
-
-  it('pressing the up arrow key selects the previous item',
-     function (done) {
-       g_queue.instantiate(
-         'AfterItemsRendered',
-         function (instance) {
-           var selected;
-
-           $('body').trigger($.Event('keyup', { keyCode: 40 } ));
-
-           selected = instance.options.nodes.items.find('.sd-selected');
-           expect(selected.length).toBe(1);
-
-           if(selected.length === 1) {
-             expect(selected.get(0).previousSibling).not.toBe(null);
-
-             if(selected.get(0).previousSibling) {
-               $('body').trigger($.Event('keyup', { keyCode: 38 } ));
-
-               selected = instance.options.nodes.items.find('.sd-selected');
-               expect(selected.length).toBe(1);
-
-               if(selected.length === 1)
-                 expect(selected.get(0).previousSibling).toBe(null);
+             if(selected.length === 1) {
+               expect(selected.get(0).previousSibling).not.toBe(null);
+               expect(selected.get(0).previousSibling.previousSibling)
+                 .toBe(null);
              }
-           }
-         },
-         done);
-     } );
+           },
+           done);
+       } );
+
+    it('UP: selects the previous item',
+       function (done) {
+         g_queue.instantiate(
+           'AfterItemsRendered',
+           function (instance) {
+             var selected;
+
+             $('body').trigger($.Event('keyup', { keyCode: 40 } ));
+
+             selected = instance.options.nodes.items.find('.sd-selected');
+             expect(selected.length).toBe(1);
+
+             if(selected.length === 1) {
+               expect(selected.get(0).previousSibling).not.toBe(null);
+
+               if(selected.get(0).previousSibling) {
+                 $('body').trigger($.Event('keyup', { keyCode: 38 } ));
+
+                 selected = instance.options.nodes.items.find('.sd-selected');
+                 expect(selected.length).toBe(1);
+
+                 if(selected.length === 1)
+                   expect(selected.get(0).previousSibling).toBe(null);
+               }
+             }
+           },
+           done);
+       } );
+
+    it('DEL: deletes currently selected item',
+       function (done) {
+         g_queue.instantiate(
+           'AfterItemsRendered',
+           function (instance) {
+             var items = instance.options.nodes.items,
+                 selected = items.find('.sd-selected');
+
+             expect(selected.length === 1);
+             if(selected.length !== 1) {
+               done(); return;
+             }
+
+             expect(instance.items.selected()).not.toBe(null);
+             expect(instance.items.selected().node.length).toBe(1);
+             if(!instance.items.selected()
+                || instance.items.selected().node.length !== 1) {
+               done(); return;
+             }
+
+             expect(instance.items.selected().node.get(0))
+               .toBe(selected.get(0));
+             if(instance.items.selected().node.get(0) !== selected.get(0)) {
+               done(); return;
+             }
+
+             $('body').trigger($.Event('keyup', { keyCode: 46 } ));
+
+             expect(instance.items.selected().node.get(0))
+               .not.toBe(items.find('sd-selected').get(0));
+
+             window.setTimeout(function () {
+               expect(instance.options.nodes.items.children().length)
+                 .toBe(instance.options.visibleItems * 2 - 1);
+               done();
+             }, g_queue.DELAY_ITEMS);
+           } );
+       } );
+  } );
 } );
