@@ -130,4 +130,15 @@ describe('Interface', function () {
          } );
      } );
 
+  it('an item is selected by default upon instantiation',
+     function (done) {
+       g_queue.instantiate(
+         'AfterItemsRendered',
+         function (instance) {
+           expect(instance.options.nodes.items.find('.sd-selected').length)
+             .toBe(1);
+         },
+         done);
+     } );
+  
 } );
