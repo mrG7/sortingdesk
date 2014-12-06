@@ -587,7 +587,7 @@ var SortingQueue_ = function (window, $) {
       } );
 
       this.owner_.callbacks.invoke("itemDismissed",
-                                   this.owner_.items.selected());
+                                   this.owner_.items.selected().content);
       this.owner_.items.remove();
 
       break;
