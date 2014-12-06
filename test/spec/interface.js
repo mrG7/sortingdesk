@@ -176,4 +176,33 @@ describe('Interface', function () {
          },
          done);
      } );
+
+  it('pressing the up arrow key selects the previous item',
+     function (done) {
+       g_queue.instantiate(
+         'AfterItemsRendered',
+         function (instance) {
+           var selected;
+
+           $('body').trigger($.Event('keyup', { keyCode: 40 } ));
+
+           selected = instance.options.nodes.items.find('.sd-selected');
+           expect(selected.length).toBe(1);
+
+           if(selected.length === 1) {
+             expect(selected.get(0).previousSibling).not.toBe(null);
+
+             if(selected.get(0).previousSibling) {
+               $('body').trigger($.Event('keyup', { keyCode: 38 } ));
+
+               selected = instance.options.nodes.items.find('.sd-selected');
+               expect(selected.length).toBe(1);
+
+               if(selected.length === 1)
+                 expect(selected.get(0).previousSibling).toBe(null);
+             }
+           }
+         },
+         done);
+     } );
 } );
