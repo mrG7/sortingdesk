@@ -90,6 +90,38 @@ describe('Interface', function () {
          } );
      } );
 
+  it('deletes currently selected item when DEL pressed',
+     function (done) {
+       g_queue.instantiate(
+         'AfterItemsRendered',
+         function (instance) {
+           var items = instance.options.nodes.items,
+               selected = items.find('.sd-selected');
+
+           expect(selected.length === 1);
+           if(selected.length !== 1) {
+             done(); return;
+           }
+           
+           expect(instance.items.selected().node.get(0))
+             .toBe(selected.get(0));
+           if(instance.items.selected().node.get(0) !== selected.get(0)) {
+             done(); return;
+           }
+
+           $('body').trigger($.Event('keyup', { keyCode: 46 } ));
+
+           expect(instance.items.selected().node.get(0))
+             .not.toBe(items.find('sd-selected').get(0));
+
+           window.setTimeout(function () {
+             expect(instance.options.nodes.items.children().length)
+               .toBe(instance.options.visibleItems * 2 - 1);
+             done();
+           }, g_queue.DELAY_ITEMS);
+         } );
+     } );
+
   it('dismissal button is displayed when item is dragged',
      function (done) {
        g_queue.instantiate(
