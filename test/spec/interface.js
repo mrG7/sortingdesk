@@ -140,5 +140,21 @@ describe('Interface', function () {
          },
          done);
      } );
+
+  it('the item selected by default upon instantiation is top-most',
+     function (done) {
+       g_queue.instantiate(
+         'AfterItemsRendered',
+         function (instance) {
+           var items = instance.options.nodes.items,
+               selected = items.find('.sd-selected');
+           
+           expect(selected.length).toBe(1);
+
+           if(selected.length === 1)
+             expect(selected.get(0).previousSibling).toBe(null);
+         },
+         done);
+     } );
   
 } );
