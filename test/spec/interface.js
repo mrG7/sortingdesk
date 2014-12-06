@@ -90,7 +90,7 @@ describe('Interface', function () {
          } );
      } );
 
-  it('bin text item dismiss button is displayed when text item is dragged',
+  it('dismissal button is displayed when item is dragged',
      function (done) {
        g_queue.instantiate(
          'AfterItemsRendered',
