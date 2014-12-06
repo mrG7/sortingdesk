@@ -1,3 +1,29 @@
+2014-12-06  Miguel Guedes  <miguel@miguelguedes.org>
+
+	* tests:
+
+	Added several new tests, namely:
+
+	+ Pressing the up arrow key selects the previous item.
+	+ Pressing the down arrow key selects the next item.
+	+ An item is selected by default upon instantiation.
+	+ The item selected by default upon instantiation is the top-most
+	one.
+
+	In addition, some existing tests have been made more robust and
+	additional checks and expectations have been added, in particular
+	to ensure that expected UI state match the actual SortingQueue
+	state.
+
+	* src/SortingQueue/SortingQueue.js:
+
+	Fixed exceptions thrown when processing the `itemDismissed'
+	callback.
+
+	* all:
+
+	A few minor improvements to code.
+
 2014-12-05  Miguel Guedes  <miguel@miguelguedes.org>
 
 	* tests:
@@ -5,18 +31,18 @@
         Fixed broken tests and improved a number of structural
 	deficiencies, namely:
 
-	* Recent changes made to SortingQueue, in particular its AMD
+	+ Recent changes made to SortingQueue, in particular its AMD
 	module loading logic, meant that the manner in which tests were
 	loaded, initialised and executed was fundamentally flawed. This
 	needed to be re-engineered.
 
-	* Given that SortingQueue is no longer responsible for bin (or
+	+ Given that SortingQueue is no longer responsible for bin (or
 	even aware of the concept), a few tests had to be removed. In
 	addition, and in anticipation that tests will be written for
 	SortingDesk at some point in time, infrastructure was laid down to
 	support tests for multiple components.
 
-	* As a result of the above changes, describing a test
+	+ As a result of the above changes, describing a test
 	specification is now much cleaner and the underlying
 	infrastructure much more reliable and solid.
 
