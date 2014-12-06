@@ -5,7 +5,7 @@
 /* TODO: break up long line below.
  * This is a temporary measure to ensure the function block is indented as
  * intended. */
-require(["SortingDesk", "SortingQueue", "API-SortingDesk"], function (SortingDesk, SortingQueue, Api) {
+require(["SortingDesk", "SortingQueue", "API-SortingDesk", "DossierJS"], function (SortingDesk, SortingQueue, Api, DossierJS) {
 
   var loading = $("#loading"),
       nitems = $("#items"),
