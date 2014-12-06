@@ -65,7 +65,7 @@ describe('Interface', function () {
       done);
   } );
 
-  it('initialises with expected number of text items', function (done) {
+  it('initialises with expected number of items', function (done) {
     g_queue.instantiate(
       'AfterItemsRendered',
       function (instance) {
@@ -74,7 +74,7 @@ describe('Interface', function () {
       }, done);
   } );
 
-  it('correctly deletes a text item when its close button is clicked on',
+  it('deletes an item when its close button is clicked on',
      function (done) {
        g_queue.instantiate(
          'AfterItemsRendered',
@@ -107,7 +107,7 @@ describe('Interface', function () {
          } );
      } );
 
-  it('text item is dismissed when dropped on to dismissal button',
+  it('item is dismissed when dropped on to dismissal button',
      function (done) {
        g_queue.instantiate(
          'AfterItemsRendered',

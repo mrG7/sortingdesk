@@ -66,7 +66,7 @@ describe('Instance', function () {
   } );
   
   describe('Public methods', function () {
-    it("`remove' removes the correct text item",
+    it("`remove' removes the correct item",
        function (done) {
          g_queue.instantiate('AfterItemsRendered', function (instance) {
            var id = instance.options.nodes.items.children().get(1).id,
@@ -105,7 +105,7 @@ describe('Instance', function () {
          } );
        } );
     
-    it("`getById' returns correct text item",
+    it("`getById' returns correct item",
        function (done) {
          g_queue.instantiate('AfterItemsRendered', function (instance) {
            expect(instance.items.getById(decodeURIComponent(
@@ -115,7 +115,7 @@ describe('Instance', function () {
          } );
        } );
     
-    it("`getById' fails to return a text item from invalid id",
+    it("`getById' fails to return a item from invalid id",
        function (done) {
          g_queue.instantiate('AfterItemsRendered',function (instance) {
            expect(instance.items.getById(decodeURIComponent(
