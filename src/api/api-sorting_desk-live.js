@@ -9,40 +9,35 @@
  *
  */
 
+var QUERY_ID = null;
 
 var _Api = function(window, $, DossierJS) {
     // This initialization is highly suspect.
-    var api = new DossierJS.API('http://54.173.159.137:8080'),
+    var api = new DossierJS.API(DOSSIER_STACK_API_URL),
         qitems = new DossierJS.SortingQueueItems(
-            api, 'index_scan', 'p|kb|Jeremy_Hammond', 'unknown');
-
-
-    var getFirstKey_ = function (obj) {
-        if(obj) {
-            if(typeof obj == 'string')
-                return obj;
-
-            for(var k in obj)
-                return k;
-        }
-
-        return '';
-    };
+            api, 'index_scan', '', 'unknown');
 
     var getRandomItem = function() {
-        return api.fcRandomGet().then(function(cobj) {
-            var fc = cobj[1];
-
+        var mkitem = function(content_id, fc) {
             return {
-                content_id: cobj[0],
+                content_id: content_id,
                 fc: fc,
-                node_id: cobj.content_id,
+                node_id: content_id,
                 name: fc.value('NAME') || '',
                 text: fc.value('sentences')
                     || (fc.value('NAME') + ' (profile)'),
                 url: fc.value('abs_url')
             };
-        });
+        };
+        if (QUERY_ID === null) {
+            return api.fcRandomGet().then(function(cobj) {
+                return mkitem(cobj[0], cobj[1]);
+            });
+        } else {
+            return api.fcGet(QUERY_ID).then(function(fc) {
+                return mkitem(QUERY_ID, fc);
+            });
+        }
     };
 
     var setQueryContentId = function (id) {
@@ -50,6 +45,14 @@ var _Api = function(window, $, DossierJS) {
             throw "Invalid engine content id";
 
         qitems.query_content_id = id;
+    };
+
+    var setSearchEngine = function(name) {
+        qitems.engine_name = name;
+    };
+
+    var getSearchEngine = function(name) {
+        return qitems.engine_name;
     };
 
     var itemDroppedInBin = function (item, bin) {
@@ -64,7 +67,9 @@ var _Api = function(window, $, DossierJS) {
         getRandomItem: getRandomItem,
         setQueryContentId: setQueryContentId,
         itemDroppedInBin: itemDroppedInBin,
-        mergeBins: mergeBins
+        mergeBins: mergeBins,
+        setSearchEngine: setSearchEngine,
+        getSearchEngine: getSearchEngine,
     });
 };
 
