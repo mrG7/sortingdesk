@@ -209,11 +209,14 @@ var _DossierJS = function(window, $) {
         this.raw = obj || {};
     };
 
-    // Returns the feature corresponding to the given name.
+    // Returns the feature corresponding to the given name. This will
+    // check for and prefer a "display" version of the feature and return
+    // that instead.
     //
-    // Equivalent to `fc.raw[name] || null`.
+    // Equivalent to `fc.raw['#' + name] || fc.raw[name] || null`.
     FeatureCollection.prototype.feature = function(name) {
-        return this.raw[name] || null;
+        var display_name = '#' + name;
+        return this.raw[display_name] || this.raw[name] || null;
     };
 
     // Arbitrarily return the value of a named feature. (e.g., A Unicode
@@ -313,7 +316,7 @@ var _DossierJS = function(window, $) {
                 console.log('moreTexts in progress, ignoring new request');
                 deferred.reject( { error: "Request in progress" } );
             } );
-            
+
             return deferred.promise();
         }
 
