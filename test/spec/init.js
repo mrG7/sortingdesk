@@ -13,6 +13,11 @@
 /*jshint laxbreak:true */
 
 
+define("Tests", [ "jquery", "SortingQueue", "API-SortingQueue" ], function ($, SortingQueue) {
+  return Tests_($, SortingQueue);
+} );
+
+
 var Tests_ = function ($, SortingQueue) {
 
   var Queue = function ()
@@ -210,7 +215,7 @@ var Tests_ = function ($, SortingQueue) {
       {
         /* Deactivate timer once we've hit `TIMEOUT'. */
         if(Date.now() - timestamp > self.TIMEOUT) {
-          console.log("Test timed out waiting for text items to be rendered:"
+          console.log("Test timed out waiting for items to be rendered:"
                       + " terminating");
           window.clearInterval(interval);
 
@@ -320,9 +325,3 @@ var Tests_ = function ($, SortingQueue) {
     getQueue: getQueue
   };
 };
-
-
-define("Tests", [ "jquery", "SortingQueue", "API-SortingQueue" ], function ($, SortingQueue) {
-  return Tests_($, SortingQueue);
-} );
-

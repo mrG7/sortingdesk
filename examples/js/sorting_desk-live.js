@@ -1,8 +1,11 @@
 
 /* ------------------------------------------------------------
  * Load modules and respective dependencies.                    */
-require(["SortingDesk", "SortingQueue", "DossierJS", "API-SortingDesk"],
-        function (SortingDesk, SortingQueue, DossierJS, Api) {
+
+/* TODO: break up long line below.
+ * This is a temporary measure to ensure the function block is indented as
+ * intended. */
+require(["SortingDesk", "SortingQueue", "API-SortingDesk", "DossierJS"], function (SortingDesk, SortingQueue, Api, DossierJS) {
 
   var loading = $("#loading"),
       nitems = $("#items"),

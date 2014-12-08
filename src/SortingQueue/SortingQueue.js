@@ -122,7 +122,7 @@ var SortingQueue_ = function (window, $) {
       this.dismiss_.register('text-item', function (e, id, scope) {
         var item = self.items.getById(decodeURIComponent(id));
         
-        self.callbacks.invoke("itemDismissed", item);
+        self.callbacks.invoke("itemDismissed", item.content);
         self.items.remove(item);
       } );
 
@@ -587,7 +587,7 @@ var SortingQueue_ = function (window, $) {
       } );
 
       this.owner_.callbacks.invoke("itemDismissed",
-                                   this.owner_.items.selected());
+                                   this.owner_.items.selected().content);
       this.owner_.items.remove();
 
       break;

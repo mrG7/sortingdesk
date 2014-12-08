@@ -8,7 +8,7 @@
  * 
  */
 
-/*global Api, g_tests, g_queue, describe, it, expect */
+/*global Api, g_tests, g_queue, describe, it, expect, $ */
 /*jshint laxbreak:true */
 
 
@@ -65,7 +65,7 @@ describe('Interface', function () {
       done);
   } );
 
-  it('initialises with expected number of text items', function (done) {
+  it('initialises with expected number of items', function (done) {
     g_queue.instantiate(
       'AfterItemsRendered',
       function (instance) {
@@ -74,7 +74,7 @@ describe('Interface', function () {
       }, done);
   } );
 
-  it('correctly deletes a text item when its close button is clicked on',
+  it('deletes an item when its close button is clicked on',
      function (done) {
        g_queue.instantiate(
          'AfterItemsRendered',
@@ -90,7 +90,7 @@ describe('Interface', function () {
          } );
      } );
 
-  it('bin text item dismiss button is displayed when text item is dragged',
+  it('dismissal button is displayed when item is dragged',
      function (done) {
        g_queue.instantiate(
          'AfterItemsRendered',
@@ -107,7 +107,7 @@ describe('Interface', function () {
          } );
      } );
 
-  it('text item is dismissed when dropped on to dismissal button',
+  it('item is dismissed when dropped on to dismissal button',
      function (done) {
        g_queue.instantiate(
          'AfterItemsRendered',
@@ -130,4 +130,131 @@ describe('Interface', function () {
          } );
      } );
 
+  it('an item is selected by default upon instantiation',
+     function (done) {
+       g_queue.instantiate(
+         'AfterItemsRendered',
+         function (instance) {
+           var selected = instance.options.nodes.items.find('.sd-selected');
+           
+           expect(selected.length).toBe(1);
+           
+           expect(instance.items.selected()).not.toBe(null);
+           expect(instance.items.selected().node.length).toBe(1);
+           expect(instance.items.selected().node.get(0))
+             .toBe(selected.get(0));
+         },
+         done);
+     } );
+
+  it('the item selected by default upon instantiation is top-most',
+     function (done) {
+       g_queue.instantiate(
+         'AfterItemsRendered',
+         function (instance) {
+           var selected = instance.options.nodes.items.find('.sd-selected');
+           
+           expect(selected.length).toBe(1);
+
+           if(selected.length === 1)
+             expect(selected.get(0).previousSibling).toBe(null);
+
+           expect(instance.items.selected()).not.toBe(null);
+           expect(instance.items.selected().node.length).toBe(1);
+           expect(instance.items.selected().node.get(0))
+             .toBe(selected.get(0));
+         },
+         done);
+     } );
+
+  describe("Keyboard", function () {
+    it('DOWN: selects the next item',
+       function (done) {
+         g_queue.instantiate(
+           'AfterItemsRendered',
+           function (instance) {
+             var selected;
+
+             $('body').trigger($.Event('keyup', { keyCode: 40 } ));
+
+             selected = instance.options.nodes.items.find('.sd-selected');
+             expect(selected.length).toBe(1);
+
+             if(selected.length === 1) {
+               expect(selected.get(0).previousSibling).not.toBe(null);
+               expect(selected.get(0).previousSibling.previousSibling)
+                 .toBe(null);
+             }
+           },
+           done);
+       } );
+
+    it('UP: selects the previous item',
+       function (done) {
+         g_queue.instantiate(
+           'AfterItemsRendered',
+           function (instance) {
+             var selected;
+
+             $('body').trigger($.Event('keyup', { keyCode: 40 } ));
+
+             selected = instance.options.nodes.items.find('.sd-selected');
+             expect(selected.length).toBe(1);
+
+             if(selected.length === 1) {
+               expect(selected.get(0).previousSibling).not.toBe(null);
+
+               if(selected.get(0).previousSibling) {
+                 $('body').trigger($.Event('keyup', { keyCode: 38 } ));
+
+                 selected = instance.options.nodes.items.find('.sd-selected');
+                 expect(selected.length).toBe(1);
+
+                 if(selected.length === 1)
+                   expect(selected.get(0).previousSibling).toBe(null);
+               }
+             }
+           },
+           done);
+       } );
+
+    it('DEL: deletes currently selected item',
+       function (done) {
+         g_queue.instantiate(
+           'AfterItemsRendered',
+           function (instance) {
+             var items = instance.options.nodes.items,
+                 selected = items.find('.sd-selected');
+
+             expect(selected.length === 1);
+             if(selected.length !== 1) {
+               done(); return;
+             }
+
+             expect(instance.items.selected()).not.toBe(null);
+             expect(instance.items.selected().node.length).toBe(1);
+             if(!instance.items.selected()
+                || instance.items.selected().node.length !== 1) {
+               done(); return;
+             }
+
+             expect(instance.items.selected().node.get(0))
+               .toBe(selected.get(0));
+             if(instance.items.selected().node.get(0) !== selected.get(0)) {
+               done(); return;
+             }
+
+             $('body').trigger($.Event('keyup', { keyCode: 46 } ));
+
+             expect(instance.items.selected().node.get(0))
+               .not.toBe(items.find('sd-selected').get(0));
+
+             window.setTimeout(function () {
+               expect(instance.options.nodes.items.children().length)
+                 .toBe(instance.options.visibleItems * 2 - 1);
+               done();
+             }, g_queue.DELAY_ITEMS);
+           } );
+       } );
+  } );
 } );
