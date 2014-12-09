@@ -402,7 +402,6 @@ var SortingQueue_ = function (window, $) {
 
     /* Set initial state. */
     this.callbacks_ = callbacks;
-    console.log(callbacks);
   };
 
   ControllerCallbacks.prototype = Object.create(Controller.prototype);
