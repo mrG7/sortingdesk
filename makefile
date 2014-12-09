@@ -6,6 +6,7 @@
 
 DIR_OUTPUT=out
 DIR_OUTPUT_DOC=$(DIR_OUTPUT)/doc
+DIR_OUTPUT_SRC=$(DIR_OUTPUT)/src
 
 JSDOC=jsdoc
 JSDOC_CONF=jsdoc.conf
@@ -19,7 +20,7 @@ help:
 
 build:
 	echo "Minification of javascript files not yet implemented"
-	test -d "$(DIR_OUTPUT)/src" || mkdir -p "$(DIR_OUTPUT_SRC)"
+	test -d "$(DIR_OUTPUT_SRC)" || mkdir -p "$(DIR_OUTPUT_SRC)"
 
 man:
 	test -d "$(DIR_OUTPUT_DOC)" || mkdir -p "$(DIR_OUTPUT_DOC)"
