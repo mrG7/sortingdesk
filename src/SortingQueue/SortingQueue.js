@@ -77,19 +77,17 @@ var SortingQueue_ = function (window, $) {
 
     this.options_ = $.extend(true, $.extend(true, {}, defaults_), opts);
 
-    /* TODO: the following callbacks need to be turned into events that clients
-     * can subscribe to one or more times. */
-    this.callbacks_ = $.extend({
+    /* Begin instantiating and initialising controllers. */
+    (this.callbacks_ = new ControllerCallbacks(
+      this,
+      $.extend(true, {
         itemDismissed: function() {},
         itemSelected: function() {},
         itemDeselected: function() {},
         onRequestStart: function() {},
         onRequestStop: function() {}
-    }, cbs);
-
-    /* Begin instantiating and initialising controllers. */
-    (this.callbacks_ = new ControllerCallbacks(this, this.callbacks_))
-      .initialise();
+      }, cbs)))
+        .initialise();
 
     (this.requests_ = new ControllerRequests(this))
       .initialise();
