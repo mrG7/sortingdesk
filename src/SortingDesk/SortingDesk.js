@@ -23,12 +23,15 @@ var SortingDesk_ = function (window, $, SortingQueue) {
   
   /**
    * @class
-   * */
-  /**
-   * Constructor responsible for initialising Sorting Desk.
+   * The main class of the Sorting Desk component.  Its responsibilities include
+   * initialising the user interface and Sorting Queue, on which it depends, as
+   * well as internal structures.
+   *
+   * Initialisation is not finalised by the time code execution exits the
+   * constructor.  
    *
    * @param   {Object}    opts  Initialisation options (please refer to
-   *                            `defaults_' above)
+   *                            `defaults_' at the end of this source file)
    * @param   {Object}    cbs   Map of all callbacks
    * */
   var Instance = function (opts, cbs)
