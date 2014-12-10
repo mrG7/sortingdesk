@@ -1079,37 +1079,46 @@ var SortingQueue_ = function (window, $) {
    * Static class.
    * */
   var DragDropManager = {
-    activeNode: null,
+    activeNode_: null,
 
     onDragStart: function (event) {
-      DragDropManager.activeNode = (event.originalEvent || event).target;
+      DragDropManager.activeNode_ = (event.originalEvent || event).target;
     },
 
     onDragEnd: function (event) {
-      if(DragDropManager.activeNode == (event.originalEvent || event).target) {
-        DragDropManager.activeNode = null;
+      if(DragDropManager.activeNode_ == (event.originalEvent || event).target) {
+        DragDropManager.activeNode_ = null;
       }
     },
 
     isScope: function (event, scopes)
     {
-      if(!DragDropManager.activeNode)
+      if(!DragDropManager.activeNode_)
         return false;
 
-      var currentScope = DragDropManager.activeNode.getAttribute('data-scope');
-
-      return (scopes instanceof Array ? scopes : [ scopes ])
-        .some(function (scope) {
-          return currentScope == scope;
-        } );
+      var currentScope = DragDropManager.activeNode_.getAttribute('data-scope');
+      if(currentScope)
+        return DragDropManager.hasScope(scopes, currentScope);
     },
 
     getScope: function (event)
     {
-      return DragDropManager.activeNode
-        ? DragDropManager.activeNode.getAttribute('data-scope')
+      return DragDropManager.activeNode_
+        ? DragDropManager.activeNode_.getAttribute('data-scope')
         : null;
-    }
+    },
+
+    hasScope: function (all, target)
+    {
+      return (all instanceof Array ? all : [ all ])
+        .some(function (s) {
+          return s === target;
+        } );
+    },
+
+    /* Private methods */
+    reset_: function ()
+    { DragDropManager.activeNode_ = null; }
   };
 
 
