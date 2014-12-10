@@ -1025,12 +1025,13 @@ var SortingQueue_ = function (window, $) {
 
   Item.prototype.deselect = function() {
     this.node.removeClass(this.owner.owner.options.css.itemSelected);
-    this.owner.owner.callbacks.invoke("itemDeselected", this.content);
+    this.owner_.owner.callbacks.invoke("itemDeselected", this.content);
   };
 
   Item.prototype.render = function() {
-    var node = $('<div class="sd-text-item"/>'),
-        content = $('<div class="sd-text-item-content"/>'),
+    var css = this.owner_.owner.options.css,
+        node = $('<div class="' + css.item + '"/>'),
+        content = $('<div class="' + css.itemContent + '"/>'),
         anchor = this.content_.name;
 
     /* Append title if existent. */
@@ -1038,10 +1039,10 @@ var SortingQueue_ = function (window, $) {
       anchor += '&ndash; ' + this.content_.title;
     }
 
-    node.append('<a class="sd-text-item-title" target="_blank" '
+    node.append('<a class="' + css.itemTitle + '" target="_blank" '
                 + 'href="' + this.content_.url + '">'
                 + anchor + '</a>');
-    node.append('<a class="sd-text-item-close" href="#">x</a>');
+    node.append('<a class="' + css.itemClose + '" href="#">x</a>');
 
     /* Append content and remove all CSS classes from children. */
     content.append(this.content_.text);
@@ -1053,7 +1054,7 @@ var SortingQueue_ = function (window, $) {
   /* Not mandatory. */
   /* overridable */
   Item.prototype.getNodeClose = function() {
-    return this.node_.find('.sd-text-item-close');
+    return this.node_.find('.' + this.owner_.owner.options.css.itemClose);
   };
 
   /* overridable */ Item.prototype.isSelected = function ()
@@ -1238,6 +1239,10 @@ var SortingQueue_ = function (window, $) {
    */
   var defaults_ = {
     css: {
+      item: 'sd-text-item',
+      itemContent: 'sd-text-item-content',
+      itemTitle: 'sd-text-item-title',
+      itemClose: 'sd-text-item-close',
       itemSelected: 'sd-selected',
       itemDragging: 'sd-dragging'
     },
