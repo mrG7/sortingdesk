@@ -20,6 +20,7 @@ See =ProtarchBinSpawner=. Specifically, there are instances where the events att
 *** WAIT Implement Events controller based on the publisher-subscriber design pattern
 - State "WAIT"       from "TODO"       [2014-10-23 Thu 14:42]
 ** =SortingDesk= [25%]
+*** TODO Allow specialisation of =ControllerButtonDismiss=
 *** TODO Tentative: allow =SortingDesk='s constructor to receive a deferred object
 Allow the constructor of =SortingDesk= to receive an *optional* deferred object provided, and which is under the responsibility of the user, that can be actioned upon depending on the result of the initialisation sequence.
 
