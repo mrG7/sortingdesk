@@ -1200,7 +1200,6 @@ var SortingQueue_ = function (window, $) {
         
         e.dropEffect = 'move';
         return false;
-        }
       },
 
       dragleave: function (e) {
