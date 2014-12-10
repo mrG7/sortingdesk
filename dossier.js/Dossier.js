@@ -245,7 +245,7 @@ var _DossierJS = function(window, $) {
     // instance of `SortingQueue` with the appropriate callbacks. e.g.,
     //
     //   var qitems = new SortingQueueItems(...);
-    //   new SortingQueue.Instance(
+    //   new SortingQueue.Sorter(
     //     config, $.extend(qitems.callbacks(), yourCallbacks));
     //
     // The query and search engine can be changed by modifying the contents

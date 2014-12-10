@@ -59,7 +59,7 @@ require(["SortingDesk", "SortingQueue", "API-SortingDesk", "DossierJS"], functio
 
   /* ------------------------------------------------------------
    * Initialise API and instantiate SortingDesk. */
-  var sd = new SortingDesk.Instance( {
+  var sd = new SortingDesk.Sorter( {
     nodes: {
       items: nitems,
       bins: nbins,

@@ -34,7 +34,7 @@ var SortingDesk_ = function (window, $, SortingQueue) {
    *                            `defaults_' at the end of this source file)
    * @param   {Object}    cbs   Map of all callbacks
    * */
-  var Instance = function (opts, cbs)
+  var Sorter = function (opts, cbs)
   {
     var self = this;
     
@@ -56,7 +56,7 @@ var SortingDesk_ = function (window, $, SortingQueue) {
     console.log("Initialising Sorting Desk UI");
 
     this.options_ = $.extend(true, $.extend(true, {}, defaults_), opts);
-    this.sortingQueue_ = new SortingQueue.Instance(this.options_, cbs);
+    this.sortingQueue_ = new SortingQueue.Sorter(this.options_, cbs);
 
     /* Before proceeding with instance initialisation, contact the API to
      * retrieve a random item, then create a default bin based off of it and set
@@ -83,7 +83,7 @@ var SortingDesk_ = function (window, $, SortingQueue) {
       } );
   };
 
-  Instance.prototype = {
+  Sorter.prototype = {
     initialised_: false,
     options_: null,
     
@@ -879,7 +879,7 @@ var SortingDesk_ = function (window, $, SortingQueue) {
   };
 
   return {
-    Instance: Instance,
+    Sorter: Sorter,
     ControllerBins: ControllerBins,
     Bin: Bin,
     BinDefault: BinDefault,

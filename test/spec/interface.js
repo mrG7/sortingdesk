@@ -56,7 +56,7 @@ describe('Interface', function () {
       'NoInstantiation',
       function (instance) {
         expect(function () {
-          new g_queue.SortingQueue.Instance(
+          new g_queue.SortingQueue.Sorter(
             $.extend(true, { }, g_queue.defaults.options,
                      { nodes: { items: null } }),
             g_queue.defaults.callbacks);

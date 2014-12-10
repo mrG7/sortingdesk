@@ -91,8 +91,8 @@
         return deferred.promise();
       };
     })();
-    new SortingQueue.Instance({ nodes: { items: $('#items') }, visibleItems: 4 },
-                              { moreTexts: moreTexts })
+    new SortingQueue.Sorter({ nodes: { items: $('#items') }, visibleItems: 4 },
+                            { moreTexts: moreTexts })
       .initialise();
   });
 

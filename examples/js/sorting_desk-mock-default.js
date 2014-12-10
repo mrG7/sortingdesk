@@ -52,7 +52,7 @@ require( [ "SortingDesk", "SortingQueue", "API-SortingDesk" ], function (Sorting
   /* ------------------------------------------------------------
    * Initialise API and instantiate SortingDesk. */
   Api.initialise(g_descriptor);
-  new SortingDesk.Instance( {
+  new SortingDesk.Sorter( {
     nodes: {
       items: nitems,
       bins: nbins,

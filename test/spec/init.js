@@ -181,7 +181,7 @@ var Tests_ = function ($, SortingQueue) {
 
   var QueueTestStandard = function (queue, condition, done, options, callbacks)
   {
-    queue.instance = new SortingQueue.Instance(options, callbacks);
+    queue.instance = new SortingQueue.Sorter(options, callbacks);
     queue.instance.initialise();
     
     if(!queue.instance.initialised)
@@ -203,7 +203,7 @@ var Tests_ = function ($, SortingQueue) {
   var QueueTestAfterItemsRendered = function (queue, condition, done,
                                               options, callbacks)
   {
-    queue.instance = new SortingQueue.Instance(options, callbacks);
+    queue.instance = new SortingQueue.Sorter(options, callbacks);
     queue.instance.initialise();
     
     if(!queue.instance.initialised)

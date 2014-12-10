@@ -41,7 +41,7 @@ var SortingQueue_ = function (window, $) {
    * @param   cbs.onRequestStart      Executed after request initiated.
    * @param   cbs.onRequestStop       Executed after request finished.
    * */
-  var Instance = function (opts, cbs)
+  var Sorter = function (opts, cbs)
   {
     this.resetter_ = false;
 
@@ -93,7 +93,7 @@ var SortingQueue_ = function (window, $) {
       .initialise();
   };
 
-  Instance.prototype = {
+  Sorter.prototype = {
     initialised_: false,
     resetter_: false,
     options_: null,
@@ -1277,7 +1277,7 @@ var SortingQueue_ = function (window, $) {
     Droppable: Droppable,
     
     /* SortingQueue proper */
-    Instance: Instance,
+    Sorter: Sorter,
     Item: Item
   };
 
