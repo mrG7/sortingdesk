@@ -1093,7 +1093,9 @@ var SortingQueue_ = function (window, $) {
 
     isScope: function (event, scopes)
     {
-      if(!DragDropManager.activeNode_)
+      if(!scopes)
+        return true;
+      else if(!DragDropManager.activeNode_)
         return false;
 
       var currentScope = DragDropManager.activeNode_.getAttribute('data-scope');
@@ -1175,37 +1177,40 @@ var SortingQueue_ = function (window, $) {
 
     node.on( {
       dragover: function (e) {
-        if(DragDropManager.isScope(e = e.originalEvent, options.scopes)) {
-          /* Drag and drop has a tendency to suffer from flicker in the sense that
-           * the `dragleave' event is fired while the pointer is on a valid drop
-           * target but the `dragenter' event ISN'T fired again, causing the
-           * element to lose its special styling -- given by `options.classHover'
-           * -- and its `dropEffect'. We then need re-set everything in the
-           * `dragover' event. */
-          if(options.classHover)
-            node.addClass(options.classHover);
+        if(!DragDropManager.isScope(e = e.originalEvent, options.scopes))
+          return;
+        
+        /* Drag and drop has a tendency to suffer from flicker in the sense that
+         * the `dragleave' event is fired while the pointer is on a valid drop
+         * target but the `dragenter' event ISN'T fired again, causing the
+         * element to lose its special styling -- given by `options.classHover'
+         * -- and its `dropEffect'. We then need re-set everything in the
+         * `dragover' event. */
+        if(options.classHover)
+          node.addClass(options.classHover);
 
-          e.dropEffect = 'move';
-          return false;
-        }
+        e.dropEffect = 'move';
+        return false;
       },
 
       dragenter: function (e) {
         /* IE requires the following special measure. */
-        if(DragDropManager.isScope(e = e.originalEvent, options.scopes)) {
-          e.dropEffect = 'move';
-
-          return false;
+        if(!DragDropManager.isScope(e = e.originalEvent, options.scopes))
+          return;
+        
+        e.dropEffect = 'move';
+        return false;
         }
       },
 
       dragleave: function (e) {
-        if(DragDropManager.isScope(e = e.originalEvent, options.scopes)) {
-          if(options.classHover)
-            node.removeClass(options.classHover);
+        if(!DragDropManager.isScope(e = e.originalEvent, options.scopes))
+          return;
+        
+        if(options.classHover)
+          node.removeClass(options.classHover);
 
-          return false;
-        }
+        return false;
       },
 
       drop: function (e) {
@@ -1220,12 +1225,17 @@ var SortingQueue_ = function (window, $) {
            * bubbling up, should an error occur inside the handler. */
           try {
             options.drop(e,
-                         e.dataTransfer.getData('Text'),
+                         e.dataTransfer && e.dataTransfer.getData('Text')
+                         || null,
                          DragDropManager.getScope());
           } catch (x) {
             console.log("Exception occurred:", x);
           }
         }
+
+        /* Forcefully reset state as some drag and drop events don't cause the
+         * dragleave event to be fired at the end. */
+        DragDropManager.reset_();
 
         return false;
       }
@@ -1237,6 +1247,9 @@ var SortingQueue_ = function (window, $) {
 
     addScope: function (scope)
     {
+      if(!this.options_.scopes)
+        this.options_.scopes = [ ];
+      
       if(!(scope in this.options_.scopes))
         this.options_.scopes.push(scope);
     }
