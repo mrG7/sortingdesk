@@ -1019,12 +1019,12 @@ var SortingQueue_ = function (window, $) {
   };
 
   Item.prototype.select = function() {
-    this.node.addClass(this.owner.owner.options.css.itemSelected);
-    this.owner.owner.callbacks.invoke("itemSelected", this.content);
+    this.node.addClass(this.owner_.owner.options.css.itemSelected);
+    this.owner_.owner.callbacks.invoke("itemSelected", this.content);
   };
 
   Item.prototype.deselect = function() {
-    this.node.removeClass(this.owner.owner.options.css.itemSelected);
+    this.node.removeClass(this.owner_.owner.options.css.itemSelected);
     this.owner_.owner.callbacks.invoke("itemDeselected", this.content);
   };
 
