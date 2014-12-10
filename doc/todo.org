@@ -2,6 +2,8 @@
 ** *ALL* [0%]
 *** TODO Document code
 First iteration would include modules and classes.
+*** TODO Document required options
+=SortingQueue=, =SortingDesk= and possibly other components, could do with documentation about required and optional options, callbacks and so on.
 ** =SortingQueue= [0%]
 *** TODO Rename CSS class names alluding to the old concept of text item
 Some CSS class names are still in use which employ the old concept of text item. These should be renamed such that the "text" word is removed.
@@ -9,21 +11,19 @@ Some CSS class names are still in use which employ the old concept of text item.
 See =ProtarchBinSpawner=. Specifically, there are instances where the events attached by =Droppable= need to be unbound at destruction time; i.e. when a =Droppable= instance is created on the DOM's own body.
 *** TODO =ControllerItems=: disable all other dragging-related events
 *** TODO Create a list of interesting events to advertise via an Events controller
-*** WAIT Implement Events controller based on the publisher-subscriber design pattern
-- State "WAIT"       from "TODO"       [2014-10-23 Thu 14:42]
 *** TODO Items controller to notify client when no more items available
 *** TODO [#B] Prefix text-items' node ids
 - State "TODO"       from "WAIT"       [2014-09-07 Sun 08:16]
 - State "WAIT"       from "TODO"       [2014-09-05 Fri 10:41] \\
   Currently waiting to hear from support as to whether ids are guaranteed to always be unique.
 *** TODO Remove code handling keyboard events
-** =SortingDesk= [27%]
+*** WAIT Implement Events controller based on the publisher-subscriber design pattern
+- State "WAIT"       from "TODO"       [2014-10-23 Thu 14:42]
+** =SortingDesk= [25%]
 *** TODO Tentative: allow =SortingDesk='s constructor to receive a deferred object
 Allow the constructor of =SortingDesk= to receive an *optional* deferred object provided, and which is under the responsibility of the user, that can be actioned upon depending on the result of the initialisation sequence.
 
 Ultimately this optional mechanism would allow the user to receive perfectly timed notifications regarding Sorting Desk's initialisation state as and when they happen.
-*** DONE Handle removal of currently active bin
-- State "DONE"       from "TODO"       [2014-11-26 Wed 16:26]
 *** TODO =ControllerBins=: =onItemDropped= unused
 *** TODO =ControllerBinSpawner=: =addManual= can't be supported as it stands
 + API requires knowledge of the bin's =label=.
@@ -52,6 +52,8 @@ Ideally, each bin should look like the item that was first dropped to create tha
 - State "WAIT"       from "TODO"       [2014-08-22 Fri 12:44] \\
   Specifications aren't clear as to how bins that are based on existing text items
   are created.  
+*** DONE Handle removal of currently active bin
+- State "DONE"       from "TODO"       [2014-11-26 Wed 16:26]
 *** CANCELED =addBin=: how to deal with the =ranker= argument?
 - State "CANCELED"   from "TODO"       [2014-11-26 Wed 15:07] \\
   =addBin= callback no longer used.
@@ -63,14 +65,16 @@ Ideally, each bin should look like the item that was first dropped to create tha
 **** DONE =getRandomLabel=: rename to =getRandomItem=
 - State "DONE"       from "TODO"       [2014-12-06 Sat 11:42]
 *** Mock [0%]
-** Examples [50%]
-*** DONE Revisit =sorting_desk-live.html= example
-- State "DONE"       from "TODO"       [2014-12-06 Sat 11:42]
-It no longer runs and its CSS is invalid compared to the =sorting_desk-mock-default.html= example.
+** Examples [33%]
+*** TODO Fix broken examples
+It seems only the =sorting_desk-live= example works at the moment.
 *** WAIT Create examples [0%]
 - State "WAIT"       from "TODO"       [2014-11-25 Tue 06:39] \\
   Not a priority at the moment.
 **** TODO No content ids
+*** DONE Revisit =sorting_desk-live.html= example
+- State "DONE"       from "TODO"       [2014-12-06 Sat 11:42]
+It no longer runs and its CSS is invalid compared to the =sorting_desk-mock-default.html= example.
 ** CSS [0%]
 *** TODO Ensure CSS contained by Sorting Desk and Queue components is (still) valid
 Many changes have been made which must have surely affected the CSS.  
