@@ -107,10 +107,10 @@ var SortingQueue_ = function (window, $) {
     initialise: function ()
     {
       var self = this;
-      
+
       if(this.initialised_)
         throw "Already initialised";
-      
+
       if(!this.options_.nodes.buttonDismiss)
         this.options_.nodes.buttonDismiss = $();
 
@@ -119,7 +119,7 @@ var SortingQueue_ = function (window, $) {
 
       this.dismiss_.register('text-item', function (e, id, scope) {
         var item = self.items.getById(decodeURIComponent(id));
-        
+
         self.callbacks.invoke("itemDismissed", item.content);
         self.items.remove(item);
       } );
@@ -538,7 +538,7 @@ var SortingQueue_ = function (window, $) {
   ControllerKeyboardBase.prototype.initialise = function ()
   {
     var self = this;
-    
+
     /* Save event handler function so we are able to remove it when resetting
      * the instance. */
     this.fnEventKeyUp = function (evt) { self.onKeyUp(evt); };
@@ -571,7 +571,7 @@ var SortingQueue_ = function (window, $) {
   {
     var self = this,
         options = this.owner_.options;
-    
+
     switch(evt.keyCode) {
     case options.keyboard.listUp:
       this.owner_.items.selectOffset(-1);
@@ -596,7 +596,7 @@ var SortingQueue_ = function (window, $) {
 
     return true;
   };
-  
+
 
   /**
    * @class
@@ -644,7 +644,7 @@ var SortingQueue_ = function (window, $) {
       return;
     if(!(scope in this.handlers_))
       this.droppable_.addScope(scope);
-    
+
     this.handlers_[scope] = fnHandler;
   };
 
@@ -673,7 +673,7 @@ var SortingQueue_ = function (window, $) {
       options.delays.dismissButtonHide);
   };
 
-  
+
   /**
    * @class
    * */
@@ -698,7 +698,7 @@ var SortingQueue_ = function (window, $) {
     this.node_.on( {
       dragover: this.fnDisableEvent_
     } );
-    
+
     this.check();
   };
 
@@ -708,7 +708,7 @@ var SortingQueue_ = function (window, $) {
     this.node_.off( {
       dragover: this.fnDisableEvent_
     } );
-    
+
     this.node_.children().remove();
     this.node_ = this.items_ = this.fnDisableEvent_ = null;
   };
@@ -912,7 +912,7 @@ var SortingQueue_ = function (window, $) {
      * deselected. */
     var current = this.getNodeSelected(),
         next = this.getByNode(variant);
-    
+
     if(current.length)
       this.getByNode(current).deselect();
 
@@ -944,7 +944,7 @@ var SortingQueue_ = function (window, $) {
                            + parseInt(variant.css('paddingBottom')));
     }
   };
-  
+
 
   /**
    * @class
@@ -999,7 +999,7 @@ var SortingQueue_ = function (window, $) {
     /* Do not set up drag and drop on the item if not supposed to. */
     if(!parentOwner.options.itemsDraggable)
       return;
-    
+
     new Draggable(this.node_, {
       classDragging: parentOwner.options.css.itemDragging,
 
@@ -1047,7 +1047,7 @@ var SortingQueue_ = function (window, $) {
                   + 'href="' + this.content_.url + '">'
                   + anchor + '</a>');
     }
-    
+
     node.append('<a class="' + css.itemClose + '" href="#">x</a>');
 
     /* Append content and remove all CSS classes from children. */
@@ -1142,7 +1142,8 @@ var SortingQueue_ = function (window, $) {
          * `originalEvent' or some tests will break. */
         e.stopPropagation();
         e = e.originalEvent;
-        e.dataTransfer.setData('Text', this.id);
+        e.dataTransfer.setData('Text', ' ');
+        e.dataTransfer.setData('DossierId', this.id);
 
         if(options.classDragging)
           node.addClass(options.classDragging);
@@ -1184,7 +1185,7 @@ var SortingQueue_ = function (window, $) {
       dragover: function (e) {
         if(!DragDropManager.isScope(e = e.originalEvent, options.scopes))
           return;
-        
+
         /* Drag and drop has a tendency to suffer from flicker in the sense that
          * the `dragleave' event is fired while the pointer is on a valid drop
          * target but the `dragenter' event ISN'T fired again, causing the
@@ -1202,7 +1203,7 @@ var SortingQueue_ = function (window, $) {
         /* IE requires the following special measure. */
         if(!DragDropManager.isScope(e = e.originalEvent, options.scopes))
           return;
-        
+
         e.dropEffect = 'move';
         return false;
       },
@@ -1210,7 +1211,7 @@ var SortingQueue_ = function (window, $) {
       dragleave: function (e) {
         if(!DragDropManager.isScope(e = e.originalEvent, options.scopes))
           return;
-        
+
         if(options.classHover)
           node.removeClass(options.classHover);
 
@@ -1229,7 +1230,7 @@ var SortingQueue_ = function (window, $) {
            * bubbling up, should an error occur inside the handler. */
           try {
             options.drop(e,
-                         e.dataTransfer && e.dataTransfer.getData('Text')
+                         e.dataTransfer && e.dataTransfer.getData('DossierId')
                          || null,
                          DragDropManager.getScope());
           } catch (x) {
@@ -1253,12 +1254,12 @@ var SortingQueue_ = function (window, $) {
     {
       if(!this.options_.scopes)
         this.options_.scopes = [ ];
-      
+
       if(!(scope in this.options_.scopes))
         this.options_.scopes.push(scope);
     }
   };
-  
+
 
   /* ----------------------------------------------------------------------
    *  Default options
@@ -1314,12 +1315,12 @@ var SortingQueue_ = function (window, $) {
     Controller: Controller,
     Drawable: Drawable,
     ControllerKeyboardBase: ControllerKeyboardBase,
-    
+
     /* Drag and drop */
     DragDropManager: DragDropManager,
     Draggable: Draggable,
     Droppable: Droppable,
-    
+
     /* SortingQueue proper */
     Sorter: Sorter,
     Item: Item
