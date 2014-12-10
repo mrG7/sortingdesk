@@ -1,5 +1,4 @@
-/* -*- js2-basic-offset: 4 -*-
- ** Dossier.js --- Diffeo's dossier.web API
+/** Dossier.js --- Diffeo's dossier.web API
  *
  * Copyright (C) 2014 Diffeo
  *
@@ -373,3 +372,11 @@ if(typeof define === "function" && define.amd) {
 } else {
     var DossierJS = _DossierJS(window, $);
 }
+
+
+/*  Emacs settings     */
+/* ------------------- */
+/* Local Variables:    */
+/* js2-basic-offset: 4 */
+/* End:                */
+/* ------------------- */
