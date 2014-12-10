@@ -532,7 +532,7 @@ var SortingDesk_ = function (window, $, SortingQueue) {
       scopes: [ 'text-item', 'bin' ],
 
       drop: function (e, id, scope) {
-        var id = decodeURIComponent(e.dataTransfer.getData('Text'));
+        id = decodeURIComponent(e.dataTransfer.getData('Text'));
             
         switch(scope) {
         case 'text-item':
