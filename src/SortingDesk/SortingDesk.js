@@ -22,7 +22,7 @@
 var SortingDesk_ = function (window, $, SortingQueue) {
   
   /**
-   * @class@
+   * @class
    * */
   /**
    * Constructor responsible for initialising Sorting Desk.
