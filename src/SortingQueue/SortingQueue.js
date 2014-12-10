@@ -1095,12 +1095,17 @@ var SortingQueue_ = function (window, $) {
     {
       if(!scopes)
         return true;
-      else if(!DragDropManager.activeNode_)
-        return false;
 
-      var currentScope = DragDropManager.activeNode_.getAttribute('data-scope');
-      if(currentScope)
-        return DragDropManager.hasScope(scopes, currentScope);
+      var isFilter = (typeof scopes === 'function');
+
+      if(!DragDropManager.activeNode_)
+        return isFilter && scopes(null);
+
+      var current = DragDropManager.activeNode_.getAttribute('data-scope');
+
+      return isFilter
+        ? scopes(current)
+        : DragDropManager.hasScope(scopes, current);
     },
 
     getScope: function (event)
