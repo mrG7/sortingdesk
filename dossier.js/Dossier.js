@@ -264,8 +264,8 @@ var _DossierJS = function(window, $) {
     // to the value given in the constructor, but may be changed at any time.
     // The value is used whenever a label is created.
     //
-    // There is also a `limit` instance attribute, which is set to `5` by
-    // default. It can be changed at any time.
+    // There are also `limit` and `params` instance attributes. `limit` is set
+    // to `5` by default. `params` is empty by default.
     //
     // The `api` parameter should be an instance of `DossierJS.API`.
     //
@@ -278,6 +278,7 @@ var _DossierJS = function(window, $) {
         this.query_content_id = query_content_id;
         this.annotator = annotator;
         this.limit = 5;
+        this.params = {};
         this._processing = false;
     };
 
@@ -322,7 +323,7 @@ var _DossierJS = function(window, $) {
 
         self._processing = true;
 
-        var p = {limit: self.limit.toString()};
+        var p = $.extend({limit: self.limit.toString()}, self.params);
         return self.api.search(self.engine_name, self.query_content_id, p)
             .then(function(data) {
                 var items = [];
