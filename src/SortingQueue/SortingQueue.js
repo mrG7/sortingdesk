@@ -991,6 +991,10 @@ var SortingQueue_ = function (window, $) {
         return false;
       } );
 
+    /* Do not set up drag and drop on the item if not supposed to. */
+    if(!parentOwner.options.itemsDraggable)
+      return;
+    
     new Draggable(this.node_, {
       classDragging: parentOwner.options.css.itemDragging,
 
@@ -1265,7 +1269,8 @@ var SortingQueue_ = function (window, $) {
     },
     visibleItems: 20,           /* Arbitrary.           */
     binCharsLeft: 25,
-    binCharsRight: 25
+    binCharsRight: 25,
+    itemsDraggable: true
   };
 
 
