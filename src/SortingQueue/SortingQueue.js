@@ -1035,13 +1035,15 @@ var SortingQueue_ = function (window, $) {
         anchor = this.content_.name;
 
     /* Append title if existent. */
-    if (this.content_.title) {
+    if (this.content_.title)
       anchor += '&ndash; ' + this.content_.title;
-    }
 
-    node.append('<a class="' + css.itemTitle + '" target="_blank" '
-                + 'href="' + this.content_.url + '">'
-                + anchor + '</a>');
+    if(this.content_.url && anchor) {
+      node.append('<a class="' + css.itemTitle + '" target="_blank" '
+                  + 'href="' + this.content_.url + '">'
+                  + anchor + '</a>');
+    }
+    
     node.append('<a class="' + css.itemClose + '" href="#">x</a>');
 
     /* Append content and remove all CSS classes from children. */
