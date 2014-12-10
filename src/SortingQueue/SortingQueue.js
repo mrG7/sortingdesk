@@ -22,7 +22,7 @@
 var SortingQueue_ = function (window, $) {
 
   /**
-   * @class@
+   * @class
    * */
   /**
    * Constructor responsible for initialising Sorting Queue.
@@ -240,7 +240,7 @@ var SortingQueue_ = function (window, $) {
 
 
   /**
-   * @class@
+   * @class
    * */
   var InstanceResetter = function (instance)
   {
@@ -345,7 +345,7 @@ var SortingQueue_ = function (window, $) {
 
 
   /**
-   * @class@
+   * @class
    * */
   var /* abstract */ Owned = function (owner)
   {
@@ -359,7 +359,7 @@ var SortingQueue_ = function (window, $) {
 
 
   /**
-   * @class@
+   * @class
    * */
   var /* abstract */ Controller = function (owner)
   {
@@ -378,7 +378,7 @@ var SortingQueue_ = function (window, $) {
 
 
   /**
-   * @class@
+   * @class
    * */
   var /* abstract */ Drawable = function (owner)
   {
@@ -393,7 +393,7 @@ var SortingQueue_ = function (window, $) {
 
 
   /**
-   * @class@
+   * @class
    * */
   var ControllerCallbacks = function (owner, callbacks)
   {
@@ -447,7 +447,7 @@ var SortingQueue_ = function (window, $) {
 
 
   /**
-   * @class@
+   * @class
    * */
   var ControllerRequests = function (owner)
   {
@@ -599,7 +599,7 @@ var SortingQueue_ = function (window, $) {
   
 
   /**
-   * @class@
+   * @class
    * */
   var ControllerButtonDismiss = function (owner)
   {
@@ -1061,7 +1061,7 @@ var SortingQueue_ = function (window, $) {
 
 
   /**
-   * @class@
+   * @class
    *
    * Static class.
    * */
@@ -1101,7 +1101,7 @@ var SortingQueue_ = function (window, $) {
 
 
   /**
-   * @class@
+   * @class
    * */
   var Draggable = function (node, options)
   {
@@ -1143,7 +1143,7 @@ var SortingQueue_ = function (window, $) {
 
 
   /**
-   * @class@
+   * @class
    * */
   var Droppable = function (node, options)
   {
