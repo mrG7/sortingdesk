@@ -754,75 +754,7 @@ var SortingQueue_ = function (window, $) {
   };
 
   ControllerItems.prototype.select = function (variant)
-  {
-    /* Fail silently if not initialised anymore. This might happen if, for
-     * example, the `reset' method was invoked but the component is still
-     * loading text items. */
-    if(!this.owner_.initialised)
-      return;
-
-    var csel = this.owner_.options.css.itemSelected;
-
-    if(!this.node_.children().length)
-      return;
-
-    if(typeof variant == 'undefined') {
-      variant = this.node_.find('.' + csel);
-
-      if(variant.length == 0)
-        variant = this.node_.children().eq(0);
-      else if(variant.length > 1) {
-        /* We should never reach here. */
-        console.log("WARNING! Multiple text items selected:", variant.length);
-
-        variant = variant.eq(0);
-      }
-    } else if(typeof variant == 'number') {
-      if(variant < 0)
-        variant = 0;
-      else if(variant > this.node_.children().length - 1)
-        variant = this.node_.children().length - 1;
-
-      variant = this.node_.children().eq(variant);
-    } else if(variant instanceof Item)
-      variant = variant.node;
-
-    /* Select next item (if any), making sure currently active item (if any) is
-     * deselected. */
-    var current = this.getNodeSelected(),
-        next = this.getByNode(variant);
-    
-    if(current.length)
-      this.getByNode(current).deselect();
-
-    if(next)
-      next.select();
-
-    /* WARNING: the present implementation requires knowledge of the list
-     * items' container's height or it will fail to ensure the currently
-     * selected item is always visible.
-     *
-     * A particular CSS style involving specifying the container's height
-     * using `vh' units was found to break this behaviour.
-     */
-
-    /* Ensure text item is _always_ visible at the bottom and top ends of
-     * the containing node. */
-    var st = this.node_.scrollTop(),           /* scrolling top */
-        ch = this.node_.innerHeight(),         /* container height */
-        ipt = variant.position().top,          /* item position top */
-        ih = st + ipt + variant.outerHeight(); /* item height */
-
-    if(st + ipt < st            /* top */
-       || variant.outerHeight() > ch) {
-      this.node_.scrollTop(st + ipt);
-    } else if(ih > st + ch) {   /* bottom */
-      this.node_.scrollTop(st + ipt - ch
-                           + variant.outerHeight()
-                           + parseInt(variant.css('marginBottom'))
-                           + parseInt(variant.css('paddingBottom')));
-    }
-  };
+  { this.select_(variant); };
 
   ControllerItems.prototype.selectOffset = function (offset)
   {
@@ -940,6 +872,79 @@ var SortingQueue_ = function (window, $) {
     return this.node_.find('.' + this.owner_.options.css.itemSelected);
   };
 
+  /* Private methods */
+  ControllerItems.prototype.select_ = function (variant,
+                                                /* optional */ ev)
+  {
+    /* Fail silently if not initialised anymore. This might happen if, for
+     * example, the `reset' method was invoked but the component is still
+     * loading text items. */
+    if(!this.owner_.initialised)
+      return;
+
+    var csel = this.owner_.options.css.itemSelected;
+
+    if(!this.node_.children().length)
+      return;
+
+    if(typeof variant == 'undefined') {
+      variant = this.node_.find('.' + csel);
+
+      if(variant.length == 0)
+        variant = this.node_.children().eq(0);
+      else if(variant.length > 1) {
+        /* We should never reach here. */
+        console.log("WARNING! Multiple text items selected:", variant.length);
+
+        variant = variant.eq(0);
+      }
+    } else if(typeof variant == 'number') {
+      if(variant < 0)
+        variant = 0;
+      else if(variant > this.node_.children().length - 1)
+        variant = this.node_.children().length - 1;
+
+      variant = this.node_.children().eq(variant);
+    } else if(variant instanceof Item)
+      variant = variant.node;
+
+    /* Select next item (if any), making sure currently active item (if any) is
+     * deselected. */
+    var current = this.getNodeSelected(),
+        next = this.getByNode(variant);
+    
+    if(current.length)
+      this.getByNode(current).deselect();
+
+    if(next)
+      next.select_(ev);
+
+    /* WARNING: the present implementation requires knowledge of the list
+     * items' container's height or it will fail to ensure the currently
+     * selected item is always visible.
+     *
+     * A particular CSS style involving specifying the container's height
+     * using `vh' units was found to break this behaviour.
+     */
+
+    /* Ensure text item is _always_ visible at the bottom and top ends of
+     * the containing node. */
+    var st = this.node_.scrollTop(),           /* scrolling top */
+        ch = this.node_.innerHeight(),         /* container height */
+        ipt = variant.position().top,          /* item position top */
+        ih = st + ipt + variant.outerHeight(); /* item height */
+
+    if(st + ipt < st            /* top */
+       || variant.outerHeight() > ch) {
+      this.node_.scrollTop(st + ipt);
+    } else if(ih > st + ch) {   /* bottom */
+      this.node_.scrollTop(st + ipt - ch
+                           + variant.outerHeight()
+                           + parseInt(variant.css('marginBottom'))
+                           + parseInt(variant.css('paddingBottom')));
+    }
+  };
+  
 
   /**
    * @class
@@ -980,8 +985,8 @@ var SortingQueue_ = function (window, $) {
         id: encodeURIComponent(this.content_.node_id),
         "data-scope": "text-item"
       } )
-      .click(function () {
-        self.owner_.select(self);
+      .click(function (ev) {
+        self.owner_.select_(self, ev);
       } );
 
     this.getNodeClose()
@@ -1022,11 +1027,6 @@ var SortingQueue_ = function (window, $) {
       this.owner_.select(this);
   };
 
-  Item.prototype.select = function() {
-    this.node.addClass(this.owner_.owner.options.css.itemSelected);
-    this.owner_.owner.callbacks.invoke("itemSelected", this.content);
-  };
-
   Item.prototype.deselect = function() {
     this.node.removeClass(this.owner_.owner.options.css.itemSelected);
     this.owner_.owner.callbacks.invoke("itemDeselected", this.content);
@@ -1065,6 +1065,12 @@ var SortingQueue_ = function (window, $) {
 
   /* overridable */ Item.prototype.isSelected = function ()
   { return this.node_.hasClass(this.owner_.owner.options.css.itemSelected); };
+
+  /* Private methods */
+  Item.prototype.select_ = function (ev) {
+    this.node.addClass(this.owner_.owner.options.css.itemSelected);
+    this.owner_.owner.callbacks.invoke("itemSelected", this.content, ev);
+  };
 
 
   /**
