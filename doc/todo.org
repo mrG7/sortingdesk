@@ -1,4 +1,7 @@
 * To do items [0%]
+** *ALL* [0%]
+*** TODO Document code
+First iteration would include modules and classes.
 ** =SortingQueue= [0%]
 *** TODO Rename CSS class names alluding to the old concept of text item
 Some CSS class names are still in use which employ the old concept of text item. These should be renamed such that the "text" word is removed.
@@ -15,6 +18,10 @@ See =ProtarchBinSpawner=. Specifically, there are instances where the events att
   Currently waiting to hear from support as to whether ids are guaranteed to always be unique.
 *** TODO Remove code handling keyboard events
 ** =SortingDesk= [27%]
+*** TODO Tentative: allow =SortingDesk='s constructor to receive a deferred object
+Allow the constructor of =SortingDesk= to receive an *optional* deferred object provided, and which is under the responsibility of the user, that can be actioned upon depending on the result of the initialisation sequence.
+
+Ultimately this optional mechanism would allow the user to receive perfectly timed notifications regarding Sorting Desk's initialisation state as and when they happen.
 *** DONE Handle removal of currently active bin
 - State "DONE"       from "TODO"       [2014-11-26 Wed 16:26]
 *** TODO =ControllerBins=: =onItemDropped= unused
