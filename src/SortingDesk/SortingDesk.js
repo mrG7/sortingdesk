@@ -245,7 +245,7 @@ var SortingDesk_ = function (window, $, SortingQueue) {
         }
       }
 
-      return true;
+      return false;
     }
   };
 
