@@ -1,3 +1,40 @@
+2014-12-15  Miguel Guedes  <miguel@miguelguedes.org>
+
+	* src/SortingQueue/SortingQueue.js:
+	* src/SortingDesk/SortingDesk.js:
+
+	Code now uses `hasOwnProperty´ instead of `in´.
+
+	Reworked way modules are declared in global namespace.
+
+2014-12-10  Miguel Guedes  <miguel@miguelguedes.org>
+
+	* src/SortingQueue/SortingQueue.js:
+	* src/SortingDesk/SortingDesk.js:
+
+	Renamed `Instance´ class to `Sorter´.
+
+	Code now allows a reference to an event to be passed to the
+	`itemSelected´ callback when a user action triggered an item to be
+	selected. An event is passed, if applicable and available,
+	otherwise null.
+
+	`DragDropManager´ now supports the concept of `null´ scopes. Null
+	scopes were implemented so that clients may find it easier to
+	extend HTML5 drag and drop support to entities of any kind, be
+	they browser-based or not.
+
+	It is now possible to instruct Sorting Queue not to allow items to
+	be draggable by setting the option `itemsDraggable´ to `false´.
+
+	Removed hardcoded references to CSS classes.
+
+	Cleaned up code in places.
+
+	* dossier.js/Dossier.js:
+
+	Added emacs hints.
+
 2014-12-06  Miguel Guedes  <miguel@miguelguedes.org>
 
 	* tests:
