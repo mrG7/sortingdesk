@@ -228,9 +228,25 @@ var _DossierJS = function(window, $) {
         if (typeof feat === 'string') {
             return feat;
         } else {
-            for (var k in this.feature(name)) { return k; }
+            for (var k in feat) { return k; }
             return null;
         }
+    };
+
+    // This is just like the `value` method, except it returns an array
+    // of all values. If the feature is empty or non-existent, an empty
+    // array is returned;
+    FeatureCollection.prototype.values = function(name) {
+        var vals = [],
+            feat = this.feature(name);
+        if (typeof feat === 'string') {
+            return [feat];
+        } else {
+            for (var k in feat) {
+                vals.push(k);
+            }
+        }
+        return vals;
     }
 
     // SortingQueueItems provides SortingQueue integration with DossierJS.
@@ -281,7 +297,7 @@ var _DossierJS = function(window, $) {
         this._processing = false;
     };
 
-    // Returns an object of callbacks that may be given directory to the
+    // Returns an object of callbacks that may be given directly to the
     // `SortingQueue` constructor.
     SortingQueueItems.prototype.callbacks = function() {
         return {
