@@ -326,7 +326,7 @@ var SortingQueue_ = function (window, $) {
           }
 
           /* Special measure for instances that return a promise. */
-          if(result && 'always' in result) {
+          if(result && results.always) {
             ++waiting;
 
             /* Wait until it finishes. The assumption is made that instances
@@ -416,7 +416,7 @@ var SortingQueue_ = function (window, $) {
   {
     var result = this.call_.apply(this, arguments);
 
-    if(result && 'always' in result) {
+    if(result && results.always) {
       var self = this;
 
       this.owner_.requests.begin(result);
