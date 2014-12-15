@@ -1229,10 +1229,10 @@ var SortingQueue_ = function (window, $) {
           /* The following try-catch is required to prevent the drop event from
            * bubbling up, should an error occur inside the handler. */
           try {
-            options.drop(e,
-                         e.dataTransfer && e.dataTransfer.getData('DossierId')
-                         || null,
-                         DragDropManager.getScope());
+            options.drop(
+              e,
+              e.dataTransfer && e.dataTransfer.getData('DossierId') || null,
+              DragDropManager.getScope());
           } catch (x) {
             console.log("Exception occurred:", x);
           }
