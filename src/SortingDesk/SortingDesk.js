@@ -890,8 +890,6 @@ var SortingDesk_ = function (window, $, SortingQueue) {
 };
 
 
-var SortingDesk;
-
 /* Compatibility with RequireJs. */
 if(typeof define === "function" && define.amd) {
   define("SortingDesk", [ "jquery", "SortingQueue" ],
@@ -899,4 +897,4 @@ if(typeof define === "function" && define.amd) {
            return SortingDesk_(window, $, SortingQueue);
          } );
 } else
-  SortingDesk = SortingDesk_(window, jQuery, SortingQueue);
+  window.SortingDesk = SortingDesk_(window, jQuery, SortingQueue);

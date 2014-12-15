@@ -215,7 +215,7 @@ var SortingQueue_ = function (window, $) {
 
       /* Factory method doesn't exist. Ensure class constructor has been passed
        * and instantiate it. */
-      if(!(arguments[0] in this.options_.constructors))
+      if(!this.options_.constructors.hasOwnProperty(arguments[0]))
         throw "Class or factory non existent: " + arguments[0];
 
       descriptor = this.options_.constructors[arguments[0]];
@@ -326,7 +326,7 @@ var SortingQueue_ = function (window, $) {
           }
 
           /* Special measure for instances that return a promise. */
-          if(result && results.always) {
+          if(result && result.hasOwnProperty('always')) {
             ++waiting;
 
             /* Wait until it finishes. The assumption is made that instances
@@ -410,13 +410,13 @@ var SortingQueue_ = function (window, $) {
   ControllerCallbacks.prototype.reset = function () { };
 
   ControllerCallbacks.prototype.exists = function (callback)
-  { return callback in this.callbacks_; };
+  { return this.callbacks_.hasOwnProperty(callback); };
 
   ControllerCallbacks.prototype.invoke = function ()
   {
     var result = this.call_.apply(this, arguments);
 
-    if(result && results.always) {
+    if(result && result.hasOwnProperty('always')) {
       var self = this;
 
       this.owner_.requests.begin(result);
@@ -438,7 +438,7 @@ var SortingQueue_ = function (window, $) {
   {
     if(arguments.length < 1)
       throw "Callback name required";
-    else if(!(arguments[0] in this.callbacks_))
+    else if(!this.callbacks_.hasOwnProperty(arguments[0]))
       throw "Callback non existent: " + arguments[0];
 
     return this.callbacks_[arguments[0]]
@@ -499,7 +499,7 @@ var SortingQueue_ = function (window, $) {
 
   ControllerRequests.prototype.end = function (id)
   {
-    if(id in this.requests_) {
+    if(this.requests_.hasOwnProperty(id)) {
       /* Delete request from internal collection if last one, otherwise
        * decrement reference count. */
       if(this.requests_[id] == 1)
@@ -624,7 +624,7 @@ var SortingQueue_ = function (window, $) {
       scopes: [ ],
 
       drop: function (e, id, scope) {
-        if(scope in self.handlers_) {
+        if(self.handlers_.hasOwnProperty(scope)) {
           self.handlers_[scope](e, id, scope);
         } else {
           console.log("Warning: unknown scope: " + scope);
@@ -642,7 +642,7 @@ var SortingQueue_ = function (window, $) {
   {
     if(!this.droppable_)
       return;
-    if(!(scope in this.handlers_))
+    else if(!this.handlers_.hasOwnProperty(scope))
       this.droppable_.addScope(scope);
 
     this.handlers_[scope] = fnHandler;
@@ -1248,10 +1248,10 @@ var SortingQueue_ = function (window, $) {
           /* The following try-catch is required to prevent the drop event from
            * bubbling up, should an error occur inside the handler. */
           try {
-            options.drop(e,
-                         e.dataTransfer && e.dataTransfer.getData('DossierId')
-                         || null,
-                         DragDropManager.getScope());
+            options.drop(
+              e,
+              e.dataTransfer && e.dataTransfer.getData('DossierId') || null,
+              DragDropManager.getScope());
           } catch (x) {
             console.log("Exception occurred:", x);
           }
@@ -1274,7 +1274,7 @@ var SortingQueue_ = function (window, $) {
       if(!this.options_.scopes)
         this.options_.scopes = [ ];
 
-      if(!(scope in this.options_.scopes))
+      if(!this.options_.scopes.hasOwnProperty(scope))
         this.options_.scopes.push(scope);
     }
   };
@@ -1348,12 +1348,10 @@ var SortingQueue_ = function (window, $) {
 };
 
 
-var SortingQueue;
-
 /* Compatibility with RequireJs. */
 if(typeof define === "function" && define.amd) {
   define("SortingQueue", [ "jquery" ], function ($) {
     return SortingQueue_(window, $);
   });
 } else
-  SortingQueue = SortingQueue_(window, $);
+  window.SortingQueue = SortingQueue_(window, $);
