@@ -720,6 +720,24 @@ var SortingQueue_ = function (window, $) {
     this.check();
   };
 
+  // Returns a de-duped `items`.
+  // This includes de-duping with respect to items currently in the queue.
+  ControllerItems.prototype.dedupItems = function(items) {
+    var seen = {},
+        deduped = [];
+    for (var i = 0; i < this.items.length; i++) {
+      seen[this.items[i].content.node_id] = true;
+    }
+    for (var i = 0; i < items.length; i++) {
+      var id = items[i].node_id;
+      if (!seen[id]) {
+        seen[id] = true;
+        deduped.push(items[i]);
+      }
+    }
+    return deduped;
+  };
+
   ControllerItems.prototype.check = function ()
   {
     if(this.items_.length >= this.owner_.options.visibleItems)
@@ -734,6 +752,7 @@ var SortingQueue_ = function (window, $) {
 
         /* Ensure we've received a valid items array. */
         if(items && items instanceof Array && items.length) {
+          items = self.dedupItems(items);
           items.forEach(function (item, index) {
             window.setTimeout( function () {
               self.items_.push(self.owner_.instantiate('Item', self, item));
