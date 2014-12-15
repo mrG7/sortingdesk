@@ -1329,12 +1329,10 @@ var SortingQueue_ = function (window, $) {
 };
 
 
-var SortingQueue;
-
 /* Compatibility with RequireJs. */
 if(typeof define === "function" && define.amd) {
   define("SortingQueue", [ "jquery" ], function ($) {
     return SortingQueue_(window, $);
   });
 } else
-  SortingQueue = SortingQueue_(window, $);
+  window.SortingQueue = SortingQueue_(window, $);
