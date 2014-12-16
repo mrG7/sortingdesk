@@ -139,5 +139,9 @@ and results in an error.
 Scrolling on the items' DIV container must be suppressed.
 
 Note that this might not be possible if the browser does not allow control over the HTML element's focus.
+
 ** TODO Wrong items are selected when a list of items contains duplicate items
 A possible solution for this is to append a timestamp to each item's id. Even though each HTML node's id would be unique, they would each refer to the same item datum.
+
+** TODO =Droppable=: =reset= clearing *all* events
+This could be undesirable since all the events attached to the element are cleared, including any events the client may have set up.
