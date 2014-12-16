@@ -1199,6 +1199,7 @@ var SortingQueue_ = function (window, $) {
     var self = this;
 
     this.options_ = options;
+    this.node_ = node;
 
     node.on( {
       dragover: function (e) {
@@ -1267,6 +1268,7 @@ var SortingQueue_ = function (window, $) {
   };
 
   Droppable.prototype = {
+    node_: null,
     options_: null,
 
     addScope: function (scope)
@@ -1276,6 +1278,17 @@ var SortingQueue_ = function (window, $) {
 
       if(!this.options_.scopes.hasOwnProperty(scope))
         this.options_.scopes.push(scope);
+    },
+
+    reset: function ()
+    {
+      /* Clear all events.
+       *
+       * Note that this may be undesirable since all the events attached to the
+       * element are cleared, including any events the client may have set
+       * up. */
+      this.node_.off();
+      this.node_ = this.options_ = null;
     }
   };
 
