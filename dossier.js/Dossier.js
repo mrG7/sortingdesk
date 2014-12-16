@@ -343,15 +343,13 @@ var _DossierJS = function(window, $) {
             .then(function(data) {
                 var items = [];
                 data.results.forEach(function(cobj) {
-                    items.push({
-                        content_id: cobj.content_id,
-                        fc: cobj.fc,
+                    items.push($.extend(cobj, {
                         node_id: cobj.content_id,
                         name: cobj.fc.value('NAME') || '',
                         text: cobj.fc.value('sentences')
                               || (cobj.fc.value('NAME') + ' (profile)'),
                         url: cobj.fc.value('abs_url')
-                    });
+                    }));
                 });
                 return items;
             })
