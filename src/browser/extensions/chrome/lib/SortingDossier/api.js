@@ -1,4 +1,4 @@
-/** api.js --- Sorting Datawake's live API
+/** api.js --- Sorting Dossier's live API
  *
  * Copyright (C) 2014 Diffeo
  *
