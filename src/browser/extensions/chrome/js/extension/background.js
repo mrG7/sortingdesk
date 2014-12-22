@@ -27,8 +27,6 @@ var Background = function ()
   {
     new MessageHandler();
     handlerTabs_ = new MessageHandlerTabs();
-
-    Config.load();
   };
 
   var save_ = function (tabId, state)
@@ -140,10 +138,12 @@ var Background = function ()
     onGetMeta_: function (request, sender, callback)
     {
       if(callback) {
-        callback( {
-          config: Config.get(),
-          tab: sender.tab,
-          activeBinId: activeBinId_
+        Config.load(function (options) {
+          callback( {
+            config: options,
+            tab: sender.tab,
+            activeBinId: activeBinId_
+          } );
         } );
       }
     }
