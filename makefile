@@ -23,17 +23,18 @@ help:
 	echo "Usage: make [ build | man | clean | deps ]"
 
 build:
-	echo "Minification of javascript files not yet implemented"
-	test -d "$(DIR_OUTPUT_SRC)" || mkdir -p "$(DIR_OUTPUT_SRC)"
+	>&2 echo "E: minification of javascript files not yet implemented" \
+		&& exit 1
+	# test -d "$(DIR_OUTPUT_SRC)" || mkdir -p "$(DIR_OUTPUT_SRC)"
 
 man:
 	test -d "$(DIR_OUTPUT_DOC)" || mkdir -p "$(DIR_OUTPUT_DOC)"
 	$(JSDOC) -c="$(JSDOC_CONF)" -d="$(DIR_OUTPUT_DOC)" $(JSDOC_SOURCES)
 
 clean:
-	echo Removing output directory
+	echo I: removing output directory
 	rm -vfr "$(DIR_OUTPUT)"
-	echo Deleting extraneous files
+	echo I: deleting extraneous files
 	find -type f \( -name '*~' -or -name '\#*' -or -name '.\#*' \) -exec rm -fv {} +
 
 deps:
