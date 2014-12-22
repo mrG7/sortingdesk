@@ -1,7 +1,11 @@
-# Project make file
+# makefile --- Master make file
 # 
 # Copyright (c) 2014 Diffeo
+# 
 # Author: Miguel Guedes <miguel@miguelguedes.org>
+#
+# Comments:
+# 
 
 
 DIR_OUTPUT=out
