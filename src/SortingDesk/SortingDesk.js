@@ -20,7 +20,7 @@
  * @returns an object containing class constructors.
  * */
 var SortingDesk_ = function (window, $, SortingQueue) {
-  
+
   /**
    * @class
    * The main class of the Sorting Desk component.  Its responsibilities include
@@ -28,7 +28,7 @@ var SortingDesk_ = function (window, $, SortingQueue) {
    * well as internal structures.
    *
    * Initialisation is not finalised by the time code execution exits the
-   * constructor.  
+   * constructor.
    *
    * @param   {Object}    opts  Initialisation options (please refer to
    *                            `defaults_' at the end of this source file)
@@ -37,7 +37,7 @@ var SortingDesk_ = function (window, $, SortingQueue) {
   var Sorter = function (opts, cbs)
   {
     var self = this;
-    
+
     /* Allow a jQuery element to be passed in instead of an object containing
      * options. In the case that a jQuery element is detected, it is assumed to
      * be the `nodes.items' element. */
@@ -86,7 +86,7 @@ var SortingDesk_ = function (window, $, SortingQueue) {
   Sorter.prototype = {
     initialised_: false,
     options_: null,
-    
+
     /* Instances */
     sortingQueue_: null,
     bins_: null,
@@ -95,13 +95,13 @@ var SortingDesk_ = function (window, $, SortingQueue) {
     initialise_: function ()
     {
       var self = this;
-      
+
       /* Begin instantiating and initialising controllers.
        *
        * Start by explicitly initialising SortingQueue's instance and proceed to
        * initialising our own instance.. */
       this.sortingQueue_.initialise();
-      
+
       (this.bins_ = this.sortingQueue_.instantiate('ControllerBins', this))
         .initialise();
 
@@ -124,7 +124,7 @@ var SortingDesk_ = function (window, $, SortingQueue) {
                           + " empty");
               return;
             }
-            
+
             self.bins_.removeAt(self.bins_.indexOf(bin));
           }
         }
@@ -158,14 +158,14 @@ var SortingDesk_ = function (window, $, SortingQueue) {
 
       var self = this,
           reset = this.sortingQueue_.reset();
-      
+
       reset.done(function () {
         self.keyboard_.reset();
         self.bins_.reset();
 
         self.bins_ = self.options_ = self.sortingQueue_ = null;
         self.initialised_ = false;
-        
+
         console.log("Sorting Desk UI reset");
       } );
 
@@ -302,10 +302,10 @@ var SortingDesk_ = function (window, $, SortingQueue) {
             deferred.reject();
             return;
           }
-          
+
           deferred.resolve();
         }, 0);
-        
+
         return deferred.promise();
       } );
   };
@@ -442,7 +442,7 @@ var SortingDesk_ = function (window, $, SortingQueue) {
      * a redraw of the items container. */
     if(self.active_)
       self.active_.deactivate();
-    
+
     self.active_ = bin;
 
     if(bin) {
@@ -461,7 +461,7 @@ var SortingDesk_ = function (window, $, SortingQueue) {
     this.owner_.sortingQueue.callbacks.invoke(
       "itemDroppedInBin",
       item || this.owner_.sortingQueue.items.selected(), bin);
-    
+
     this.owner_.sortingQueue.items.remove();
   };
 
@@ -532,8 +532,8 @@ var SortingDesk_ = function (window, $, SortingQueue) {
       scopes: [ 'text-item', 'bin' ],
 
       drop: function (e, id, scope) {
-        id = decodeURIComponent(e.dataTransfer.getData('Text'));
-            
+        id = decodeURIComponent(e.dataTransfer.getData('DossierId'));
+
         switch(scope) {
         case 'text-item':
           var item = parentOwner.sortingQueue.items.getById(id);
@@ -541,10 +541,10 @@ var SortingDesk_ = function (window, $, SortingQueue) {
           parentOwner.sortingQueue.callbacks.invoke("itemDroppedInBin",
                                                     item,
                                                     self);
-          
+
           parentOwner.sortingQueue.items.remove(item);
           break;
-          
+
         case 'bin':
           var bin = self.owner_.getById(id);
 
@@ -557,7 +557,7 @@ var SortingDesk_ = function (window, $, SortingQueue) {
           /* Important: DOM node is destroyed above, which means the `dragend'
            * event won't be triggered, leaving the dismissal button visible. */
           parentOwner.sortingQueue.dismiss.deactivate();
-          
+
           break;
 
         default:
@@ -764,7 +764,7 @@ var SortingDesk_ = function (window, $, SortingQueue) {
      * currently has no way of obtaining a label (search engine) for the
      * bin. */
     throw "Manually creating a bin is DISABLED";
-    
+
     var self = this,
         input = node.find('input');
 
@@ -827,9 +827,9 @@ var SortingDesk_ = function (window, $, SortingQueue) {
 
       drop: function (e, id) {
         id = decodeURIComponent(id);
-        
+
         self.add(id);
-        
+
         var items = self.owner_.owner.sortingQueue.items;
         items.remove(items.getById(id));
       }
@@ -853,7 +853,7 @@ var SortingDesk_ = function (window, $, SortingQueue) {
     return $('<div><span>+</span></div>');
   };
 
-  
+
   var defaults_ = {
     css: {
       binTop: 'sd-bin',
@@ -886,7 +886,7 @@ var SortingDesk_ = function (window, $, SortingQueue) {
     ControllerBinSpawner: ControllerBinSpawner,
     ControllerBinSpawnerDefault: ControllerBinSpawnerDefault
   };
-  
+
 };
 
 
