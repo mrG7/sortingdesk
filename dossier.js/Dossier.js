@@ -170,27 +170,197 @@ var _DossierJS = function(window, $) {
     // of `-1`, `0` or `1`, which stand for "not coreferent", "I don't know"
     // and "are coreferent", respectively.
     //
+    // Alternatively, this function can accept a single argument that is an
+    // instance of `Label`. (This is the only way to add subtopic labels.)
+    //
     // This function returns a jQuery promise that resolves when the web
     // service responds.
     API.prototype.addLabel = function(cid1, cid2, annotator, coref_value) {
+        var label;
+        if (arguments.length == 4) {
+            label = new Label(arguments[0], arguments[1],
+                              arguments[2], arguments[3]);
+        } else {
+            label = arguments[0];
+        }
+        var url_cid1 = encodeURIComponent(serialize(label.cid1)),
+            url_cid2 = encodeURIComponent(serialize(label.cid2)),
+            url_ann = encodeURIComponent(label.annotator_id),
+            endpoint = ['label', url_cid1, url_cid2, url_ann].join('/'),
+            params = {};
+        if (label.subtopic_id1) params.subtopic_id1 = label.subtopic_id1;
+        if (label.subtopic_id2) params.subtopic_id2 = label.subtopic_id2;
+        return $.ajax({
+            type: 'PUT',
+            url: this.url(endpoint, params),
+            contentType: 'text/plain',
+            data: label.coref_value.toString()
+        }).fail(function() {
+            console.log("Could not add label <" + label.toString() + ">");
+        }).promise();
+    };
+
+    // A convenience class for fetching labels.
+    //
+    // Since querying labels can be complex, constructing a query follow the
+    // "builder" or "method chaining" pattern. For example, to find the 5th
+    // page of positive expanded labels, with 10 labels per page for the
+    // query content id "abc":
+    //
+    //   var api = new DossierJS.API(...);
+    //   var fetcher = new LabelFetcher(api);
+    //   fetcher.cid("abc")
+    //          .which("positive")
+    //          .method("expanded")
+    //          .page(5)
+    //          .perpage(10)
+    //          .get(function(labels) {
+    //              console.log('retrieved ' + labels.length + ' labels');
+    //          });
+    var LabelFetcher = function(api) {
+        this.api = api;
+        this._cid = null;
+        this._method = undefined;
+        this._which = 'direct';
+        this._page = 1;
+        this._perpage = 30;
+        return this;
+    };
+
+    // Set the query content id for labels.
+    LabelFetcher.prototype.cid = function(cid) {
+        this._cid = cid;
+        return this;
+    };
+
+    // Indicate the kind of label query you want to do. There are three
+    // choices:
+    //
+    //  direct   - Finds all directly connected labels to the query.
+    //             This includes positive, negative and unknown labels.
+    //  positive - Finds all positive labels via a connected component
+    //             or label expansion (toggled with `method`).
+    //  negative - Finds all negatively inferred labels.
+    LabelFetcher.prototype.which = function(which) {
+        this._which = which;
+        return this;
+    }
+
+    // Set an auxiliary method for the search.
+    //
+    // Currently, only a 'positive' search supports 'connected' and 'expanded'.
+    LabelFetcher.prototype.method = function(method) {
+        this._method = method;
+        return this;
+    };
+
+    // Move to the next page.
+    LabelFetcher.prototype.next = function() {
+        this._page += 1;
+        return this;
+    };
+
+    // Move to the previous page.
+    LabelFetcher.prototype.prev = function() {
+        this._page = Math.max(1, this._page - 1);
+        return this;
+    };
+
+    // Explicitly set the page number.
+    //
+    // It's probably a bad idea to use this method because the backend has
+    // no way of reporting how many pages are available. (Our architecture
+    // makes this a very expensive operation, so we don't do it.)
+    LabelFetcher.prototype.page = function(page) {
+        this._page = Math.max(1, page);
+        return this;
+    };
+
+    // Set the number of labels retrieved per page.
+    LabelFetcher.prototype.perpage = function(perpage) {
+        this._perpage = perpage;
+        return this;
+    };
+
+    // Launch a search and return a promise. The promise, on success, resolves
+    // to an array of `Label`s.
+    LabelFetcher.prototype.get = function() {
+        if (!this._cid) {
+            throw new "query content id is not set";
+        }
+        if (['direct', 'positive', 'negative'].indexOf(this._which) === -1) {
+            throw new "unrecognized web service: " + this._which;
+        }
+        if ([undefined, 'connected', 'expanded'].indexOf(this._method) === -1) {
+            throw new "unrecognize positive label method: " + this._method;
+        }
+        if (!und(this._method) && this._which != 'positive') {
+            throw new "method can only be used with positive labels";
+        }
+        var cid = encodeURIComponent(serialize(this._cid)),
+            endpoint = 'label/' + cid + '/' + this._which,
+            params = {};
+
+        if (this._method) params.method = this._method;
+        if (this._page) params.page = this._page;
+        if (this._perpage) params.perpage = this._perpage;
+        var url = this.api.url(endpoint, params);
+        return $.getJSON(url).promise().then(function(labels) {
+            return labels.map(function(label) {
+                return new Label(label.content_id1, label.content_id2,
+                                 label.annotator_id, label.value,
+                                 label.subtopic_id1 || undefined,
+                                 label.subtopic_id2 || undefined);
+            });
+        });
+    };
+
+    // Constructs a new label.
+    //
+    // The `subtopic_id1` and `subtopic_id2` parameters are optional. All other
+    // parameters are required. Note that a single subtopic_id can be given
+    // while leaving the other blank. Since `subtopic_id1` is a sub topic of
+    // `cid1` (and similarly for `subtopic_id2` and `cid2`), one must specify
+    // `undefined` for `subtopic_id1` when only specifying `subtopic_id2`.
+    //
+    // For example, to create a label from `a` to `b_2`, set:
+    //
+    //   cid1 = a, subtopic_id1 = undefined
+    //   cid2 = b, subtopic_id2 = 2
+    //
+    // e.g.,
+    //
+    //   new Label('a', 'b', '...', COREF_VALUE_POSITIVE,
+    //             undefined, '2');
+    var Label = function(cid1, cid2, annotator_id, coref_value,
+                         subtopic_id1, subtopic_id2) {
+        if (und(cid1) || und(cid2) || und(annotator_id) || und(coref_value)) {
+            throw "Labels require content ids, annotator id and a " +
+                  "coref value.";
+        }
         if ([-1, 0, 1].indexOf(coref_value) == -1) {
             throw "Invalid coref value: '" + coref_value + "' " +
                   "(must be an integer in {-1, 0, 1}).";
         }
-        var url_cid1 = encodeURIComponent(serialize(cid1));
-            url_cid2 = encodeURIComponent(serialize(cid2));
-            url_ann = encodeURIComponent(annotator),
-            endpoint = ['label', url_cid1, url_cid2, url_ann].join('/');
-        return $.ajax({
-            type: 'PUT',
-            url: this.url(endpoint),
-            contentType: 'text/plain',
-            data: coref_value.toString()
-        }).fail(function() {
-            var label = [cid1.toString(), cid2.toString(),
-                         annotator.toString(), coref_value.toString()];
-            console.log("Could not add label <" + label.join(", ") + ">");
-        }).promise();
+        this.cid1 = cid1;
+        this.cid2 = cid2;
+        this.annotator_id = annotator_id;
+        this.coref_value = coref_value;
+        this.subtopic_id1 = subtopic_id1;
+        this.subtopic_id2 = subtopic_id2;
+        // It's not useful to define this on the client side.
+        this.epoch_ticks = null;
+    };
+
+    // Tests equality of two labels using the definition of equality from
+    // `dossier.label`.
+    Label.prototype.equals = function(lab2) {
+        var lab1 = this;
+        return lab1.annotator_id === lab2.annotator_id
+            && unordered_pair_eq([lab1.cid1, lab1.cid2],
+                                 [lab2.cid1, lab2.cid2])
+            && unordered_pair_eq([lab1.subtopic_id1, lab1.subtopic_id2],
+                                 [lab2.subtopic_id1, lab2.subtopic_id2]);
     };
 
     // Constructs a new feature collection.
@@ -365,6 +535,13 @@ var _DossierJS = function(window, $) {
         return typeof obj.serialize === 'function' ? obj.serialize() : obj;
     }
 
+    function und(v) { return typeof v === 'undefined'; }
+
+    function unordered_pair_eq(p1, p2) {
+        return (p1[0] == p2[0] && p1[1] == p2[1])
+            || (p1[0] == p2[1] && p1[1] == p2[0]);
+    }
+
     return {
         // constants
         API_VERSION: API_VERSION,
@@ -375,6 +552,8 @@ var _DossierJS = function(window, $) {
         // classes
         API: API,
         FeatureCollection: FeatureCollection,
+        Label: Label,
+        LabelFetcher: LabelFetcher,
         SortingQueueItems: SortingQueueItems
     };
 };
