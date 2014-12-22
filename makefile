@@ -20,7 +20,7 @@ JSDOC_SOURCES=src/SortingQueue/SortingQueue.js
 all: build man
 
 help:
-	echo "Usage: make [ build | man | clean ]"
+	echo "Usage: make [ build | man | clean | deps ]"
 
 build:
 	echo "Minification of javascript files not yet implemented"
@@ -35,5 +35,9 @@ clean:
 	rm -vfr "$(DIR_OUTPUT)"
 	echo Deleting extraneous files
 	find -type f \( -name '*~' -or -name '\#*' -or -name '.\#*' \) -exec rm -fv {} +
+
+deps:
+	echo I: updating dependencies
+	sh/update-deps
 
 .SILENT:

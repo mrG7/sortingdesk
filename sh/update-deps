@@ -1,0 +1,43 @@
+#!/bin/bash
+# update-deps --- Updates external dependencies used by this project's different
+# components
+# 
+# Copyright (c) 2014 Diffeo
+# 
+# Author: Miguel Guedes <miguel@miguelguedes.org>
+#
+# Comments:
+# 
+
+set -e
+
+dir_root="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. && pwd )"
+
+
+# Component: SortingDossier
+# ---
+cd "$dir_root/src/browser/chrome"
+
+# The user isn't supposed to add anything into the `lib´ directory. We therefore
+# assume that all its contents can be removed.
+[ -d lib ] && rm lib -rfv
+mkdir -vp lib
+
+mkdir lib/SortingQueue -v
+mkdir lib/SortingDossier -v
+mkdir lib/dossier.js -v
+
+# Note: Google Chrom(e|ium) browsers do not support symlinks (!). There is no
+# other option but to actually copy, and thus duplicate, the external
+# dependencies we need.
+cp -v "$dir_root/lib/jquery-2.1.1.min.js" lib/
+cp -v "$dir_root/src/SortingQueue/SortingQueue.js" lib/SortingQueue/
+cp -v "$dir_root/src/SortingDossier/SortingDossier.js" lib/SortingDossier/
+cp -v "$dir_root/src/SortingDossier/api.js" lib/SortingDossier/
+cp -v "$dir_root/dossier.js/Dossier.js" lib/dossier.js/
+
+# All files inside `lib' are treated as immutable. We therefore make every file
+# inside `lib' read-only to prevent accidental changes.
+find lib -type f -exec chmod -v =r {} +
+
+echo -e "\ndone."
