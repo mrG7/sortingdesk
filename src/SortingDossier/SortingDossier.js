@@ -13,10 +13,26 @@
 /*global chrome, SortingQueue, $, define */
 /*jshint laxbreak:true */
 
+// Notes from Miguel on abstracting out the use of `chrome` in this file:
+//
+// + a mechanism to send notifications whenever in need of saving state. I
+// thought we could use the existing (outwards facing) callbacks and extending
+// it so the component can communicate with the owning instance, which in
+// Chrome's case is the script `Ui.js´, but you may have a different strategy
+// in mind.
+//
+// + a mechanism that enables `SortingDossier´ to *receive* notifications;
+// presently this is required so it knows when to update state when, for
+// instance, state changes in a different tab. In essence, this is the opposite
+// of the callbacks mechanism in place now; instead of issuing notifications,
+// it needs to receive them. My suggestion would be to create a method in the
+// `SortingDossier.Sorter´, part of the module's public API, that returns an
+// object containing its (inwards facing) callbacks.
+
 
 /**
  * The Sorting Dossier module.
- * 
+ *
  * @returns an object containing the module's public interface.
  * */
 var SortingDossier_ = function (window, $) {
@@ -62,7 +78,7 @@ var SortingDossier_ = function (window, $) {
           /* Set `queryId´ accordingly. */
           queryId = self.sortingQueue_.callbacks
             .invoke('makeId', (Url.encode(window.location.href)));
-          
+
           bins = [ { id: queryId,
                      data: window.document.title.trim()
                            || '&lt; no-name &gt;' } ];
@@ -82,7 +98,7 @@ var SortingDossier_ = function (window, $) {
               }
             } );
           }
-          
+
           queryId = bins[index === -1 ? 0 : index].id;
         }
 
@@ -270,7 +286,7 @@ var SortingDossier_ = function (window, $) {
 
       if(!bins || !(bins instanceof Array) || bins.length === 0)
         throw "Bins array container invalid or empty";
-      
+
       if(this.bins_)
         this.bins_.reset();
 
@@ -298,7 +314,7 @@ var SortingDossier_ = function (window, $) {
 
         bin = bins[0];
       }
-      
+
       this.bins_.setActive(bin);
     },
 
@@ -881,7 +897,7 @@ var SortingDossier_ = function (window, $) {
           }
 
           parentOwner.bins.setActive(bin);
-          
+
           return false;
         }
       } );
