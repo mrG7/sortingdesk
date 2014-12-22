@@ -5,7 +5,7 @@
   "version": "0.1",
   "options_page": "html/options.html",
   "web_accessible_resources": [
-    "js/Ui.js",
+    "js/content/Ui.js",
     "lib/*.js",
     "lib/SortingQueue/*.js",
     "lib/SortingDossier/*.js",
@@ -16,13 +16,13 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": [ "lib/jquery-2.1.1.min.js", "lib/dossier.js/Dossier.js", "lib/SortingQueue/SortingQueue.js", "lib/SortingDossier/api.js", "lib/SortingDossier/SortingDossier.js", "js/Ui.js" ],
+      "js": [ "lib/jquery-2.1.1.min.js", "lib/dossier.js/Dossier.js", "lib/SortingQueue/SortingQueue.js", "lib/SortingDossier/api.js", "lib/SortingDossier/SortingDossier.js", "js/content/Ui.js" ],
       "css": [ "css/theme-default.css" ]
     }
   ],
   
   "background": {
-    "scripts": [ "lib/jquery-2.1.1.min.js", "js/config.js", "js/background.js" ]
+    "scripts": [ "lib/jquery-2.1.1.min.js", "js/extension/config.js", "js/extension/background.js" ]
   },
 
   "permissions": [
