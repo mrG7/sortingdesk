@@ -61,11 +61,22 @@ Ideally, each bin should look like the item that was first dropped to create tha
 *** CANCELED Ensure =addBin= callback exists when the 'bin add' button exists
 - State "CANCELED"   from "TODO"       [2014-11-26 Wed 15:06] \\
   =addBin= callback no longer used.
+** =SortingDossier= [60%]
+*** TODO Remove browser-specific statements from =SortingDossier= module
+*** DONE Decouple from Datawake
+- State "DONE"       from "TODO"       [2014-12-22 Mon 18:11]
+*** DONE Rename to =SortingDossier=
+- State "DONE"       from "TODO"       [2014-12-22 Mon 18:11]
+*** DONE Realign loading and queue empty notifications when both present
+- State "DONE"       from "TODO"       [2014-12-22 Mon 18:11]
 ** API [0%]
+*** All [0%]
+**** TODO Move all API-related files into respective component directory
+**** TODO Add timeout to AJAX calls
 *** Live [100%]
 **** DONE =getRandomLabel=: rename to =getRandomItem=
 - State "DONE"       from "TODO"       [2014-12-06 Sat 11:42]
-*** Mock [0%]
+*** Mock [100%]
 ** Examples [33%]
 *** TODO Fix broken examples
 It seems only the =sorting_desk-live= example works at the moment.
