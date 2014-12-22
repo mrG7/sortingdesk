@@ -10,7 +10,7 @@
  */
 
 
-/*global jQuery, define */
+/*global $, define */
 /*jshint laxbreak:true */
 
 
