@@ -1,0 +1,514 @@
+/** theme-default.css --- Default theme used by Sorting Datawake
+ *
+ * Copyright (C) 2014 Diffeo
+ *
+ * Author: Miguel Guedes <miguel@miguelguedes.org>
+ *
+ * Comments:
+ * 
+ */
+
+/*csslint adjoining-classes: false, important: false */
+
+
+/* Positioning of master container (#sdw-container)
+ * Note: null rule-set placeholders. */
+.sdw-bottom-right { }
+.sdw-bottom-left { }
+.sdw-top-left { }
+.sdw-top-right { }
+
+/* Master container */
+#sdw-container {
+  position: fixed;
+  font-family: arial,sans-serif;
+  font-size: 12px;
+  z-index: 1000000;
+}
+
+#sdw-container.sdw-top-left {
+  top: 5px;
+  left: 5px;
+}
+
+#sdw-container.sdw-top-right {
+  top: 5px;
+  right: 5px;
+}
+
+#sdw-container.sdw-bottom-right {
+  bottom: 5px;
+  right: 5px;
+}
+
+#sdw-container.sdw-bottom-left {
+  bottom: 5px;
+  left: 5px;
+}
+
+/* Container of bins and queue */
+#sdw-sorter {
+  display: none;
+  border: 2px solid #ccc;
+  width: 400px;
+  height: 400px;
+  background-color: white;
+
+  /* box-shadow */
+  -webkit-box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.6);
+  -moz-box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.6);
+  box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.6);
+}
+
+#sdw-container.sdw-top-left #sdw-sorter {
+  border-radius: 0 10px 10px 10px;
+}
+
+#sdw-container.sdw-top-right #sdw-sorter {
+  border-radius: 10px 0 10px 10px;
+}
+
+#sdw-container.sdw-bottom-right #sdw-sorter {
+  border-radius: 10px 10px 0 10px;
+}
+
+#sdw-container.sdw-bottom-left #sdw-sorter {
+  border-radius: 10px 10px 10px 0;
+}
+
+#sdw-sorter > DIV {
+  margin: 5px;
+}
+
+/* Activator button */
+#sdw-activator {
+  display: inline-block;
+  background-color: #3D3C3C;
+  color: white;
+  border: 1px solid #B0B0B0;
+  padding: 5px;
+  cursor: pointer;
+  border-radius: 20px;
+  line-height: 1.5 !important;
+  height: 20px;
+  opacity: .75;
+  font-size: 13px;
+  overflow: hidden;
+  white-space: nowrap;
+  
+  /* box sizing */
+  -moz-box-sizing: content-box;
+  -webkit-box-sizing: content-box;
+  box-sizing: content-box;
+}
+
+#sdw-container.sdw-top-left #sdw-activator,
+#sdw-container.sdw-bottom-left #sdw-activator {
+  float: left;
+}
+
+#sdw-container.sdw-top-right #sdw-activator,
+#sdw-container.sdw-bottom-right #sdw-activator {
+  float: right;
+}
+
+#sdw-container.sdw-active #sdw-activator {
+  border-radius: 0;
+  opacity: 1;
+}
+
+#sdw-activator:hover {
+  opacity: 1;
+}
+
+#sdw-activator:active {
+  position: relative;
+  top: 1px;
+  left: 1px;
+}
+
+/* Button: add */
+#sdw-button-add {
+  display: none;
+  position: absolute;
+  z-index: -1;
+  border: 2px solid #A2C5A6;
+  background-color: #ECF8EA;
+  clear: both;
+  padding: 5px;
+  font-size: 25px;
+  color: green;
+  font-weight: bold;
+  width: 28px;
+  text-align: center;
+  border-radius: 19px;
+  box-shadow: 1px 1px 2px 0 rgba(50, 50, 50, 0.75);
+  text-shadow: 1px 1px 2px rgba(150, 150, 150, 1);
+  transition: background-color 175ms, color 100ms;
+  cursor: pointer;
+  line-height: 25px;
+}
+
+#sdw-container.sdw-top-left #sdw-button-add,
+#sdw-container.sdw-bottom-left #sdw-button-add {
+  top: 33px;
+  right: -25px;
+}
+
+#sdw-container.sdw-top-right #sdw-button-add,
+#sdw-container.sdw-bottom-right #sdw-button-add {
+  top: 33px;
+  left: -25px;
+}
+
+#sdw-container.sdw-active #sdw-button-add {
+  display: block;
+}
+
+#sdw-button-add SPAN {
+  position: relative;
+}
+
+#sdw-container.sdw-top-left #sdw-button-add SPAN,
+#sdw-container.sdw-bottom-left #sdw-button-add SPAN {
+  margin-right: -10px;
+}
+
+#sdw-container.sdw-top-right #sdw-button-add SPAN,
+#sdw-container.sdw-bottom-right #sdw-button-add SPAN {
+  margin-left: -10px;
+}
+
+#sdw-button-add:hover {
+  background-color: #DEF3DA;
+  transition: background-color 175ms, color 100ms;
+}
+
+/* NOTE: disabled as we would need to set specific styling for each of the four
+ *       corners. */
+/* #sdw-button-add:active { */
+/*   top: -14px; */
+/*   left: -24px; */
+/*   box-shadow: none; */
+/*   transition: background-color 175ms, color 100ms; */
+/* } */
+
+/* Various */
+#sdw-bins {
+  position: relative;
+  height: 70px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+}
+
+#sdw-queue {
+  position: relative;
+  height: 310px;
+  overflow-y: auto;
+}
+
+.sdw-clear {
+  height: 0;
+  clear: both;
+}
+
+#sdw-load {
+  position: absolute;
+  top: 135px;
+  padding: 5px 15px 5px 15px;
+  display: none;
+  background-color: silver;
+  color: black;
+  opacity: .7;
+  font-size: 13px;
+}
+
+#sdw-empty {
+  position: absolute;
+  top: 200px;
+  color: gray;
+  font-size: 13px;
+  text-shadow: 1px 1px 1px rgba(150, 150, 150, .75);
+  display: none;
+}
+
+
+/* ----------------------------------------------------------------------
+ *  Sorting Datawake
+ * ---------------------------------------------------------------------- */
+.sdw-bin {
+  display: inline-block;
+  position: relative;
+  border: 2px solid #7582C9;
+  background-color: #D0DDFF;
+  color: #5C7CCA;
+  border-radius: 8px;
+  padding: 5px;
+  margin: 5px 5px 5px 0;
+  text-align: center;
+  font-size: 13px;
+  box-shadow: 1px 1px 1px 0 rgba(50, 50, 50, 0.75);
+  text-shadow: 1px 1px 1px rgba(150, 150, 150, 1);
+  transition: background-color 175ms, color 100ms;
+  max-width: 200px;
+  line-height: 19px;
+}
+
+.sdw-bin:hover:not(.sdw-adding) {
+  background-color: #A9BEF3;
+  color: #F2F6FF;
+  cursor: pointer;
+  transition: background-color 175ms, color 100ms;
+}
+
+.sdw-bin:active:not(.sdw-adding),
+.sdw-bin.sdw-assign {
+  position: relative;
+  top: 3px;
+  left: 3px;
+  box-shadow: none;
+  transition: background-color 175ms, color 100ms;
+}
+
+.sdw-bin.sdw-active {
+  color: #E6FFD6;
+  background-color: #83c78e;
+  border-color: #349950;
+}
+
+.sdw-bin.sdw-active:hover {
+  color: #E6FFD6;
+  background-color: #92E29F;
+  border-color: #349950;
+}
+
+/* Bin: name */
+.sdw-bin-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sdw-bin-name IMG {
+  border: 0 none;
+  height: 19px;
+}
+
+/* Text item */
+.sdw-text-item {
+  position: relative;
+  margin: 15px 5px;
+  padding: 10px;
+  background-color: #FFFFFA;
+  border: 2px solid #E0E2B6;
+  border-radius: 8px;
+  color: #242922;
+  text-align: justify;
+  font-size: 12px;
+  cursor: default;
+  line-height: 15px;
+}
+
+.sdw-text-item B:not(:first-child),
+.sdw-text-item STRONG:not(:first-child) {
+  padding-left: 10px;
+}
+
+.sdw-text-item-content {
+  overflow: hidden;
+  max-height: 65px;
+  text-overflow: ellipsis;
+}
+
+.sdw-text-item-content * {
+  display: inline-block;
+}
+
+.sdw-text-item-content A {
+  color: #85B7E4;
+}
+
+.sdw-text-item-content A:hover {
+  color: #85B7E4;
+  text-decoration: underline;
+}
+
+.sdw-text-item-content A:visited {
+  color: #778BBE !important;
+}
+
+.sdw-text-item:hover {
+  background-color: #F8F8DD;
+  color: #44573C;
+}
+
+.sdw-text-item:hover .sdw-text-item-title {
+  background-color: #F8F8DD;
+}
+
+.sdw-text-item:active {
+  background-color: #FFF5F8;
+  color: #7F8368;
+}
+
+.sdw-text-item:active .sdw-text-item-title {
+  background-color: #FFF5F8;
+}
+
+.sdw-text-item.sdw-selected {
+  border: 2px solid #8EB4DA;
+}
+
+.sdw-text-item:selected .sdw-text-item-title {
+  background-color: #FFF5F8;
+}
+
+.sdw-text-item.sdw-selected:hover {
+  background-color: inherit;
+}
+
+.sdw-text-item.sdw-selected .sdw-text-item-content A {
+  color: #465C94 !important;
+}
+
+.sdw-more, .sdw-less {
+  float: right;
+  font-size: 85%;
+  padding-top: 3px;
+  color: #999;
+}
+
+.sdw-more:hover, .sdw-less:hover {
+  color: #123;
+  cursor: pointer;
+}
+
+A.sdw-text-item-title {
+  position: absolute;
+  top: -12px;
+  background-color: white;
+  padding: 2px 8px 2px 8px;
+  display: block;
+  text-decoration: none;
+  color: #2D5C8B;
+  border-radius: 6px;
+}
+
+A.sdw-text-item-title:hover {
+  color: #4A8BCC;
+}
+
+.sdw-text-item:hover .sdw-text-item-close,
+.sdw-text-item.sdw-selected .sdw-text-item-close {
+  display: block;
+}
+
+.sdw-text-item.sdw-dragging:hover .sdw-text-item-close,
+.sdw-text-item.sdw-selected.sdw-dragging .sdw-text-item-close {
+  display: none;
+}
+
+.sdw-text-item-close {
+  position: absolute;
+  top: -8px;
+  right: -6px;
+  background-color: white;
+  padding: 5px 4px 5px 5px;
+  display: none;
+  text-decoration: none;
+  border: 1px solid silver;
+  border-radius: 12px;
+  line-height: 7px;
+  box-shadow: 1px 1px 1px 0 rgba(50, 50, 50, 0.75);
+}
+
+.sdw-text-item-close,
+.sdw-text-item-close:visited {
+  color: grey !important;
+}  
+
+.sdw-text-item-close:hover {
+  color: black;
+  background-color: #ddd;
+}
+
+.sdw-text-item-close:active {
+  background-color: #eee;
+}
+
+.sdw-text-item.sdw-dragging {
+  border-color: #eee !important;
+  color: silver !important;
+  background-color: inherit !important;
+}
+
+/* Droppable elements */
+.sdw-droppable {
+  border-style: dashed;
+}
+
+.sdw-droppable-highlight {
+  border-style: dashed !important;
+}
+
+.sdw-droppable-hover {
+  border-style: dotted !important;
+}
+
+/* Button: dismiss */
+#sdw-button-dismiss {
+  display: none;
+  position: absolute;
+  z-index: -1;
+  border: 2px solid #C5A2A2;
+  background-color: #F8EAEA;
+  clear: both;
+  font-size: 20px;
+  color: #900;
+  padding: 5px;
+  width: 28px;
+  text-align: center;
+  border-radius: 19px;
+  box-shadow: 1px 1px 2px 0 rgba(50, 50, 50, 0.75);
+  text-shadow: 1px 1px 2px rgba(150, 150, 150, 1);
+  transition: background-color 175ms, color 100ms;
+  cursor: pointer;
+  line-height: 25px;
+}
+
+#sdw-container.sdw-top-left #sdw-button-dismiss,
+#sdw-container.sdw-bottom-left #sdw-button-dismiss {
+  top: 33px;
+  right: -25px;
+}
+
+#sdw-container.sdw-top-right #sdw-button-dismiss,
+#sdw-container.sdw-bottom-right #sdw-button-dismiss {
+  top: 33px;
+  left: -25px;
+}
+
+#sdw-button-dismiss SPAN {
+  position: relative;
+}
+
+#sdw-container.sdw-top-left #sdw-button-dismiss SPAN,
+#sdw-container.sdw-bottom-left #sdw-button-dismiss SPAN {
+  margin-right: -10px;
+}
+
+#sdw-container.sdw-top-right #sdw-button-dismiss SPAN,
+#sdw-container.sdw-bottom-right #sdw-button-dismiss SPAN {
+  margin-left: -10px;
+}
+
+#sdw-button-dismiss:hover {
+  background-color: #F3DADA;
+  transition: background-color 175ms, color 100ms;
+}
+
+#sdw-button-dismiss.droppable-hover {
+  background-color: #C04343;
+  border-color: #7A4747;
+  color: #FFF5F5;
+}

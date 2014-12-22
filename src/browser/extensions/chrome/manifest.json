@@ -1,0 +1,48 @@
+{
+  "manifest_version": 2,
+  "name": "Sorting Dossier",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwRxbuYGddPObX/e7TStDUBoblvIi3F1oyKpMIuFZz8tUqaL5VpYtLx6hpD3pwTw0xGiyTciE7gREyN715a5jIU+Sfk1m5THQs2davZrFX1Ri496lXFYlzHm3tIx34oH19oz3a4IzcsoAYPDMrt3BFzUkx88i/eLKgRZbSFeNOOaAH3n96j9lnb1jFK7sTR5t4wkH6MXL5txf/B7AMWPr+tnixEl6LxZy+onJ9l6lXsUq5vyrWWkxUTpd9J77RY9Wlo2UyEDLaTYfANVgy2sJvvFUkRpBZv4CkcDeDXwCY8TCLpXOTIOW+LBopNqTL66h2mKbgrL1bg5TjNO2uqNOOQIDAQAB",
+  "version": "0.1",
+  "options_page": "html/options.html",
+  "web_accessible_resources": [
+    "js/Ui.js",
+    "lib/*.js",
+    "lib/SortingQueue/*.js",
+    "lib/SortingDossier/*.js",
+    "lib/dossier.js/*.js",
+    "html/container.html"
+  ],
+  
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": [ "lib/jquery-2.1.1.min.js", "lib/dossier.js/Dossier.js", "lib/SortingQueue/SortingQueue.js", "lib/SortingDossier/api.js", "lib/SortingDossier/SortingDossier.js", "js/Ui.js" ],
+      "css": [ "css/theme-default.css" ]
+    }
+  ],
+  
+  "background": {
+    "scripts": [ "lib/jquery-2.1.1.min.js", "js/config.js", "js/background.js" ]
+  },
+
+  "permissions": [
+    "tabs",
+    "storage",
+    "activeTab",
+    "<all_urls>"
+  ],
+  
+  "icons": {
+  },
+
+  "browser_action": {
+    "default_icon": {
+    },
+    "default_title": "Sorting Dossier"
+  },
+
+  "chrome_url_overrides": {
+  },
+  
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'"
+}
