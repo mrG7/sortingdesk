@@ -16,7 +16,7 @@ dir_root="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. && pwd )"
 
 # Component: SortingDossier
 # ---
-cd "$dir_root/src/browser/chrome"
+cd "$dir_root/src/browser/extensions/chrome"
 
 # The user isn't supposed to add anything into the `lib´ directory. We therefore
 # assume that all its contents can be removed.
