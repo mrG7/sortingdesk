@@ -58,9 +58,15 @@ var ChromeExtensionUi = (function () {
           
           self.activator_ = new Activator(self);
           self.positioner_ = new Positioner(self);
-          
-          self.center('loading');
-          self.center('empty');
+
+          /* The main container must be visible or it won't be possible to
+           * center elements contained. */
+          this.nodes_.sorter.show();
+          {
+            self.center('loading');
+            self.center('empty');
+          }
+          this.nodes_.sorter.hide();
           
           /* Initialise API and instantiate `SortingDossier´ class. */
           self.sortingDossier_ = new SortingDossier.Sorter( {
@@ -115,8 +121,13 @@ var ChromeExtensionUi = (function () {
     center: function (node)
     {
       if((node = this.nodes_[node])) {
-        node.css('left',
-                 ((this.nodes_.sorter.width() - node.outerWidth()) / 2) + 'px');
+        /* Both the node and main container must be visible if the node's width
+         * is to be known. */
+        node
+          .show()
+          .css('left',
+               ((this.nodes_.sorter.width() - node.outerWidth()) / 2) + 'px')
+          .hide();
       }
     }
   };
