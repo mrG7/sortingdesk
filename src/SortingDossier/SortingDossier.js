@@ -276,20 +276,7 @@ var SortingDossier_ = function (window, $) {
 
     load_: function ()
     {
-      var self = this,
-          deferred = $.Deferred();
-
-      chrome.storage.local.get('bins', function (result) {
-        if(!result.hasOwnProperty('bins') || !(result.bins instanceof Array)) {
-          deferred.resolve([]);
-          return;
-        }
-
-        console.log("Loaded state: %d bin(s)", result.bins.length);
-        deferred.resolve(result.bins);
-      } );
-
-      return deferred.promise();
+      return this.sortingQueue_.callbacks.invoke('getBins');
     },
 
     /* Getter methods */
