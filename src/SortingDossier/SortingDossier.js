@@ -112,24 +112,6 @@ var SortingDossier_ = function (window, $) {
         } );
     },
 
-    load_: function ()
-    {
-      var self = this,
-          deferred = $.Deferred();
-
-      chrome.storage.local.get('bins', function (result) {
-        if(!result.hasOwnProperty('bins') || !(result.bins instanceof Array)) {
-          deferred.resolve([]);
-          return;
-        }
-
-        console.log("Loaded state: %d bin(s)", result.bins.length);
-        deferred.resolve(result.bins);
-      } );
-
-      return deferred.promise();
-    },
-
     save: function ()
     {
       var state = { bins: [ ] },
@@ -300,6 +282,24 @@ var SortingDossier_ = function (window, $) {
       }
       
       this.bins_.setActive(bin);
+    },
+
+    load_: function ()
+    {
+      var self = this,
+          deferred = $.Deferred();
+
+      chrome.storage.local.get('bins', function (result) {
+        if(!result.hasOwnProperty('bins') || !(result.bins instanceof Array)) {
+          deferred.resolve([]);
+          return;
+        }
+
+        console.log("Loaded state: %d bin(s)", result.bins.length);
+        deferred.resolve(result.bins);
+      } );
+
+      return deferred.promise();
     },
 
     /* Getter methods */
