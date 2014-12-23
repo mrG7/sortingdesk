@@ -114,26 +114,9 @@ var SortingDossier_ = function (window, $) {
 
     save: function ()
     {
-      var state = { bins: [ ] },
-          deferred = $.Deferred();
-
-      /* Push bin data into an array. */
-      this.bins_.bins.forEach(function (bin) {
-        state.bins.push(bin.serialise());
-      } );
-
-      chrome.runtime.sendMessage( {
-        operation: 'save-state',
-        state: state
-      }, function (result) {
-        if(result) {
-          deferred.resolve();
-        } else {
-          deferred.reject();
-        }
-      } );
-
-      return deferred.promise();
+      return this.sortingQueue_.callbacks.invoke(
+        'setBins',
+        { bins: this.bins_.serialise() } );
     },
 
     /**
@@ -599,6 +582,18 @@ var SortingDossier_ = function (window, $) {
     /* Let the extension know that the active bin has changed. */
     chrome.runtime.sendMessage( { operation: 'set-active-bin',
                                   bin: bin.data } );
+  };
+
+  ControllerBins.prototype.serialise = function ()
+  {
+    var bins = [ ];
+
+    /* Push serialised bin data into array. */
+    this.bins.forEach(function (bin) {
+      bins.push(bin.serialise());
+    } );
+
+    return bins;
   };
 
   ControllerBins.prototype.onMouseEnter_ = function (bin)
