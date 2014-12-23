@@ -11,6 +11,8 @@ var failed = function(done) { expect(true).toEqual(false); if (done) done(); }
 
 var content_id = 'abc';
 var fc = new DossierJS.FeatureCollection({'NAME': {'foo': 1}});
+var lab = new DossierJS.Label('a', 'b', 'tester',
+                              DossierJS.COREF_VALUE_POSITIVE);
 
 describe('DossierJS.API', function() {
     var api;
@@ -49,12 +51,81 @@ describe('DossierJS.API', function() {
     });
 
     it('adds a label', function(done) {
-        // We have no way to observe whether a label was actually inserted
-        // or not (unavailable in the web service), but arguably, that's a
-        // test that belongs in dossier.web. ---AG
-        api.addLabel('a', 'b', 'tester', DossierJS.COREF_VALUE_POSITIVE)
-            .done(function() { passed(done); })
-            .fail(function() { failed(done); });
+        api.addLabel(lab.cid1, lab.cid2, lab.annotator_id, lab.coref_value)
+            .fail(function() { failed(done); })
+            .done(function() { labelExists(api, lab, done); });
+    });
+
+    it('adds a label 2', function(done) {
+        api.addLabel(lab)
+            .fail(function() { failed(done); })
+            .done(function() { labelExists(api, lab, done); });
+    });
+
+    it('adds a negative label', function(done) {
+        var lab = new DossierJS.Label('a', 'b', 'tester',
+                                      DossierJS.COREF_VALUE_NEGATIVE);
+        api.addLabel(lab)
+            .fail(function() { failed(done); })
+            .done(function() { labelExists(api, lab, done); });
+    });
+
+    it('adds a negative label and is inferred', function(done) {
+        var lab = new DossierJS.Label('a', 'b', 'tester',
+                                      DossierJS.COREF_VALUE_NEGATIVE);
+        var fetcher = function(f) { return f.which('negative'); };
+        api.addLabel(lab)
+            .fail(function() { failed(done); })
+            .done(function() { labelExists(api, lab, done, fetcher); });
+    });
+
+    it('adds a negative label and is not part of positives', function(done) {
+        var lab = new DossierJS.Label('x', 'y', 'tester',
+                                      DossierJS.COREF_VALUE_NEGATIVE);
+        var fetcher = function(f) { return f.which('positive'); };
+        api.addLabel(lab)
+            .fail(function() { failed(done); })
+            .done(function() { labelExists(api, lab, done, fetcher, true); });
+    });
+
+    it('adds labels with subtopics', function(done) {
+        var lab = new DossierJS.Label('s', 't', 'tester',
+                                      DossierJS.COREF_VALUE_POSITIVE,
+                                      'subs', 'subt');
+        api.addLabel(lab)
+            .fail(function() { failed(done); })
+            .done(function() { labelExists(api, lab, done); });
+    });
+
+    it('adds labels with subtopics that are part of an expansion',
+       function(done) {
+        var lab = new DossierJS.Label('m', 'n', 'tester',
+                                      DossierJS.COREF_VALUE_POSITIVE,
+                                      'subm', 'subn');
+        var fetcher = function(f) {
+            return f.which('positive').method('expanded');
+        };
+        api.addLabel(lab)
+            .fail(function() { failed(done); })
+            .done(function() { labelExists(api, lab, done); });
+    });
+
+    it('paginates labels', function(done) {
+        var lab1 = new DossierJS.Label('p', 'a', 'tester',
+                                      DossierJS.COREF_VALUE_POSITIVE);
+        var lab2 = new DossierJS.Label('p', 'b', 'tester',
+                                      DossierJS.COREF_VALUE_POSITIVE);
+        var fetcher = function(f) { return f.perpage(1).next(); };
+        api.addLabel(lab1)
+            .fail(function() { failed(done); })
+            .done(function() {
+                api.addLabel(lab2)
+                    .fail(function() { failed(done); })
+                    .done(function() {
+                        labelExists(api, lab1, done, fetcher, true);
+                        labelExists(api, lab2, done, fetcher);
+                    });
+            });
     });
 
     it('provides basic random searching', function(done) {
@@ -87,3 +158,20 @@ describe('DossierJS.FeatureCollection', function() {
         expect(fc.value('fubar')).toBeNull();
     });
 });
+
+function labelExists(api, label, done, fetcher, invert) {
+    if (typeof fetcher === 'undefined') {
+        fetcher = function(v) { return v; };
+    }
+    fetcher(new DossierJS.LabelFetcher(api).cid(label.cid1)).get()
+        .fail(function() { failed(done); })
+        .done(function(labels) {
+            for (var i = 0; i < labels.length; i++) {
+                if (labels[i].equals(label)) {
+                    if (invert) { failed(done); } else { passed(done); }
+                    return;
+                }
+            }
+            if (invert) { passed(done); } else { failed(done); }
+        });
+}
