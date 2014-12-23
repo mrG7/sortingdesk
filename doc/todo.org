@@ -61,8 +61,9 @@ Ideally, each bin should look like the item that was first dropped to create tha
 *** CANCELED Ensure =addBin= callback exists when the 'bin add' button exists
 - State "CANCELED"   from "TODO"       [2014-11-26 Wed 15:06] \\
   =addBin= callback no longer used.
-** =SortingDossier= [60%]
-*** TODO Remove browser-specific statements from =SortingDossier= module
+** =SortingDossier= [100%]
+*** DONE Remove browser-specific statements from =SortingDossier= module
+- State "DONE"       from "TODO"       [2014-12-23 Tue 11:59]
 *** DONE Decouple from Datawake
 - State "DONE"       from "TODO"       [2014-12-22 Mon 18:11]
 *** DONE Rename to =SortingDossier=
