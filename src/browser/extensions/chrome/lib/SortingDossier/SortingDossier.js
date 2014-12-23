@@ -10,7 +10,7 @@
  */
 
 
-/*global chrome, SortingQueue, $, define */
+/*global SortingQueue, $, define */
 /*jshint laxbreak:true */
 
 
@@ -39,7 +39,17 @@ var SortingDossier_ = function (window, $) {
    *
    * @param   {Object}    opts  Initialisation options (please refer to
    *                            `defaults_' at the end of this source file)
-   * @param   {Object}    cbs   Map of all callbacks
+   * @param   {Object}    cbs   Map of all callbacks in a key to function
+   *                            manner. These are: 
+   *                            + makeId
+   *                            + setQueryContentId
+   *                            + generateId
+   *                            + mergeBins
+   *                            + updateQueryFc
+   *                            + addLabel
+   *                            + getBins
+   *                            + setBins
+   *                            + setActiveBin
    * */
   var Sorter = function (opts, cbs)
   {
@@ -112,46 +122,11 @@ var SortingDossier_ = function (window, $) {
         } );
     },
 
-    load_: function ()
-    {
-      var self = this,
-          deferred = $.Deferred();
-
-      chrome.storage.local.get('bins', function (result) {
-        if(!result.hasOwnProperty('bins') || !(result.bins instanceof Array)) {
-          deferred.resolve([]);
-          return;
-        }
-
-        console.log("Loaded state: %d bin(s)", result.bins.length);
-        deferred.resolve(result.bins);
-      } );
-
-      return deferred.promise();
-    },
-
     save: function ()
     {
-      var state = { bins: [ ] },
-          deferred = $.Deferred();
-
-      /* Push bin data into an array. */
-      this.bins_.bins.forEach(function (bin) {
-        state.bins.push(bin.serialise());
-      } );
-
-      chrome.runtime.sendMessage( {
-        operation: 'save-state',
-        state: state
-      }, function (result) {
-        if(result) {
-          deferred.resolve();
-        } else {
-          deferred.reject();
-        }
-      } );
-
-      return deferred.promise();
+      return this.sortingQueue_.callbacks.invoke(
+        'setBins',
+        { bins: this.bins_.serialise() } );
     },
 
     /**
@@ -234,9 +209,6 @@ var SortingDossier_ = function (window, $) {
        * initialising our own instance.. */
       this.sortingQueue_.initialise();
 
-      (this.messageHandler_ = new ControllerMessageHandler(this))
-        .initialise();
-
       (this.draggable_ = new ControllerDraggableImage(this))
         .initialise();
 
@@ -302,6 +274,11 @@ var SortingDossier_ = function (window, $) {
       this.bins_.setActive(bin);
     },
 
+    load_: function ()
+    {
+      return this.sortingQueue_.callbacks.invoke('getBins');
+    },
+
     /* Getter methods */
     get sortingQueue ()
     { return this.sortingQueue_; },
@@ -327,52 +304,6 @@ var SortingDossier_ = function (window, $) {
 
     get draggable ()
     { return this.draggable_; }
-  };
-
-
-  /**
-   * @class
-   * */
-  var ControllerMessageHandler = function (owner)
-  {
-    /* Invoke super constructor. */
-    SortingQueue.Controller.call(this, owner);
-  };
-
-  ControllerMessageHandler.prototype = Object.create(
-    SortingQueue.Controller.prototype);
-
-  /* Methods */
-  ControllerMessageHandler.prototype.initialise = function ()
-  {
-    var self = this,
-        methods = {
-          "load-state": this.onLoadState_
-        };
-
-    /* Handler of messages. */
-    chrome.runtime.onMessage.addListener(
-      function (request, sender, callback) {
-        if(methods.hasOwnProperty(request.operation)) {
-          console.log("Invoking message handler [type="
-                      + request.operation + "]");
-
-          methods[request.operation].call(
-            self, request, sender, callback);
-        }
-      }
-    );
-  };
-
-  ControllerMessageHandler.prototype.onLoadState_ = function (
-    request, sender, callback)
-  {
-    var self = this;
-
-    console.log("Refreshing state");
-
-    this.owner_.load(request.activeBinId);
-    if(callback) callback();
   };
 
 
@@ -597,10 +528,22 @@ var SortingDossier_ = function (window, $) {
     }
 
     /* Let the extension know that the active bin has changed. */
-    chrome.runtime.sendMessage( { operation: 'set-active-bin',
-                                  bin: bin.data } );
+    this.owner_.sortingQueue.callbacks.invoke('setActiveBin', bin.data);
   };
 
+  ControllerBins.prototype.serialise = function ()
+  {
+    var bins = [ ];
+
+    /* Push serialised bin data into array. */
+    this.bins.forEach(function (bin) {
+      bins.push(bin.serialise());
+    } );
+
+    return bins;
+  };
+
+  /* Protected methods */
   ControllerBins.prototype.onMouseEnter_ = function (bin)
   { this.hover_ = bin; };
 
