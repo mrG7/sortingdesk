@@ -56,9 +56,10 @@ var ChromeExtensionUi = (function () {
             loading: $('#sdw-load'),
             empty: $('#sdw-empty')
           };
-          
-          self.activator_ = new Activator(self);
-          self.positioner_ = new Positioner(self);
+
+          /* Instantiate class components. */
+          self.activator_ = new Activator();
+          self.positioner_ = new Positioner();
 
           /* Center the `loading´ and `empty´ notifications.
            * 
@@ -286,8 +287,8 @@ var ChromeExtensionUi = (function () {
   /**
    * @class
    * */
-  var Activator = function (ui) {
-    var nodes = ui.nodes,
+  var Activator = function () {
+    var nodes = ui_.nodes,
         width = nodes.activator.width();
     
     nodes.activator.click(function () {
@@ -327,8 +328,7 @@ var ChromeExtensionUi = (function () {
   /**
    * @class
    * */
-  var Positioner = function (ui, startPosition) {
-    this.ui_ = ui;
+  var Positioner = function (startPosition) {
     this.current_ = null;
 
     this.position(startPosition || Positioner.TOP_RIGHT);
@@ -347,12 +347,11 @@ var ChromeExtensionUi = (function () {
   ];
 
   Positioner.prototype = {
-    ui_: null,
     current_: null,
 
     position: function (target)
     {
-      var nodes = this.ui_.nodes;
+      var nodes = ui_.nodes;
       
       if(target < 1 || target > 4)
         throw "Invalid target position";
