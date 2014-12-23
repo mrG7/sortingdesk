@@ -39,7 +39,17 @@ var SortingDossier_ = function (window, $) {
    *
    * @param   {Object}    opts  Initialisation options (please refer to
    *                            `defaults_' at the end of this source file)
-   * @param   {Object}    cbs   Map of all callbacks
+   * @param   {Object}    cbs   Map of all callbacks in a key to function
+   *                            manner. These are: 
+   *                            + makeId
+   *                            + setQueryContentId
+   *                            + generateId
+   *                            + mergeBins
+   *                            + updateQueryFc
+   *                            + addLabel
+   *                            + getBins
+   *                            + setBins
+   *                            + setActiveBin
    * */
   var Sorter = function (opts, cbs)
   {
