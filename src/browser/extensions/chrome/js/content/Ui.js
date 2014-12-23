@@ -60,6 +60,8 @@ var ChromeExtensionUi = (function () {
           /* Instantiate class components. */
           self.activator_ = new Activator();
           self.positioner_ = new Positioner();
+          self.requests_ = new Requests();
+          self.transceiver_ = new Transceiver();
 
           /* Center the `loading´ and `empty´ notifications.
            * 
@@ -118,14 +120,22 @@ var ChromeExtensionUi = (function () {
     /* Class instances */
     activator_: null,
     positioner_: null,
+    requests_: null,
+    transceiver_: null,
+    sortingDossier_: null,
     /* Nodes */
     nodes_: null,
 
+    /* Getter methods */
     get activator() { return this.activator_; },
     get positioner() { return this.positioner_; },
+    get requests() { return this.requests_; },
+    get transceiver() { return this.transceiver_; },
+    get sortingDossier() { return this.sortingDossier_; },
     get nodes() { return this.nodes_; },
     node: function (key) { return this.nodes_[key]; },
 
+    /* Public interface */
     center: function (node)
     {
       if((node = this.nodes_[node])) {
