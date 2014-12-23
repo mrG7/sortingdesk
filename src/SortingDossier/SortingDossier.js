@@ -528,8 +528,7 @@ var SortingDossier_ = function (window, $) {
     }
 
     /* Let the extension know that the active bin has changed. */
-    chrome.runtime.sendMessage( { operation: 'set-active-bin',
-                                  bin: bin.data } );
+    this.owner_.sortingQueue.callbacks.invoke('setActiveBin', bin.data);
   };
 
   ControllerBins.prototype.serialise = function ()
