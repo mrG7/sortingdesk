@@ -48,6 +48,7 @@ var ChromeExtensionUi = (function () {
           
           $('body').append(html);
 
+          /* Cache jQuery references to nodes used. */
           self.nodes_ = {
             container: $('#sdw-container'),
             sorter: $('#sdw-sorter'),
