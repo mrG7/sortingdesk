@@ -10,7 +10,7 @@
  */
 
 
-/*global chrome, SortingQueue, $, define */
+/*global SortingQueue, $, define */
 /*jshint laxbreak:true */
 
 
