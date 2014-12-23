@@ -199,9 +199,6 @@ var SortingDossier_ = function (window, $) {
        * initialising our own instance.. */
       this.sortingQueue_.initialise();
 
-      (this.messageHandler_ = new ControllerMessageHandler(this))
-        .initialise();
-
       (this.draggable_ = new ControllerDraggableImage(this))
         .initialise();
 
@@ -310,52 +307,6 @@ var SortingDossier_ = function (window, $) {
 
     get draggable ()
     { return this.draggable_; }
-  };
-
-
-  /**
-   * @class
-   * */
-  var ControllerMessageHandler = function (owner)
-  {
-    /* Invoke super constructor. */
-    SortingQueue.Controller.call(this, owner);
-  };
-
-  ControllerMessageHandler.prototype = Object.create(
-    SortingQueue.Controller.prototype);
-
-  /* Methods */
-  ControllerMessageHandler.prototype.initialise = function ()
-  {
-    var self = this,
-        methods = {
-          "load-state": this.onLoadState_
-        };
-
-    /* Handler of messages. */
-    chrome.runtime.onMessage.addListener(
-      function (request, sender, callback) {
-        if(methods.hasOwnProperty(request.operation)) {
-          console.log("Invoking message handler [type="
-                      + request.operation + "]");
-
-          methods[request.operation].call(
-            self, request, sender, callback);
-        }
-      }
-    );
-  };
-
-  ControllerMessageHandler.prototype.onLoadState_ = function (
-    request, sender, callback)
-  {
-    var self = this;
-
-    console.log("Refreshing state");
-
-    this.owner_.load(request.activeBinId);
-    if(callback) callback();
   };
 
 
