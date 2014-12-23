@@ -596,6 +596,7 @@ var SortingDossier_ = function (window, $) {
     return bins;
   };
 
+  /* Protected methods */
   ControllerBins.prototype.onMouseEnter_ = function (bin)
   { this.hover_ = bin; };
 
