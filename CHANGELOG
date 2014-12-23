@@ -1,8 +1,38 @@
+2014-12-23  Miguel Guedes  <miguel@miguelguedes.org>
+
+	* src/SortingDossier.js:
+
+	Fully decoupled `SortingDossier´ and removed all hard-coded
+	references to Google Chrome browser's unique global objects. It
+	should now be possible to use the component in virtually any
+	context.
+
+	* src/browser/extensions/chrome/*:
+
+	Added callbacks and message handling capabilities to account for
+	the increased genericity of the `SortingDossier´ component.
+
+	Improved styling of activator button.
+
+2014-12-22  Miguel Guedes  <miguel@miguelguedes.org>
+
+	* src/SortingDossier.js:
+
+	Imported `SortingDossier´ component from Datawake
+	repository. Still has a few hard-coded statements to Google
+	Chrome's browser `chrome´ global object because of the fact that
+	it was being used in an extension for the aforementioned browser.
+
+	* src/browser/extensions/chrome/*:
+
+	Created standalone Google Chrome browser extension employing the
+	`SortingDossier´ component.
+
 2014-12-16  Miguel Guedes  <miguel@miguelguedes.org>
 
 	* src/SortingQueue/SortingQueue.js:
 
-	A small change was made to the =Droppable= class to ensure that
+	A small change was made to the `Droppable´ class to ensure that
 	all events are properly dettached when the instance is reset.
 
 2014-12-15  Miguel Guedes  <miguel@miguelguedes.org>
