@@ -143,6 +143,40 @@ var ChromeExtensionUi = (function () {
   /**
    * @class
    * */
+  var Requests = function ()
+  {
+    this.count_ = 0;
+  };
+
+  Requests.prototype = {
+    count_: null,
+
+    /* Events */
+    onRequestStart: function ()
+    {
+      if(this.count_++ === 0)
+        ui_.nodes.loading.stop().fadeIn();
+    },
+    
+    onRequestStop: function () {
+      if(--this.count_ === 0)
+        ui_.nodes.loading.stop().fadeOut();
+    },
+    
+    /* Getter methods */
+    get callbacks ()
+    {
+      return {
+        onRequestStart: this.onRequestStart.bind(this),
+        onRequestStop: this.onRequestStop.bind(this)
+      };
+    }
+  };
+
+
+  /**
+   * @class
+   * */
   var Activator = function (ui) {
     var nodes = ui.nodes,
         width = nodes.activator.width();
