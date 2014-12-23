@@ -385,31 +385,6 @@ var ChromeExtensionUi = (function () {
       this.current_ = target;
     }
   };
-  
-
-  /**
-   * @class
-   * */
-  var MessageHandler = function () {
-    var self = this,
-        methods = {
-        };
-    
-    /* Handler of messages. */
-    chrome.runtime.onMessage.addListener(
-      function (request, sender, callback) {
-        if(methods.hasOwnProperty(request.operation)) {
-          console.log("Invoking message handler [type="
-                      + request.operation + "]");
-          
-          methods[request.operation].call(self, request, sender, callback);
-        }
-      }
-    );
-  };
-
-  MessageHandler.prototype = {
-  };
 
 
   /**
