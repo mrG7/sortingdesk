@@ -256,7 +256,7 @@ var SortingDossier_ = function (window, $) {
       var self = this,
           bin;
 
-      if(!bins || !(bins instanceof Array) || bins.length === 0)
+      if(!(bins instanceof Array) || bins.length === 0)
         throw "Bins array container invalid or empty";
 
       if(this.bins_)
