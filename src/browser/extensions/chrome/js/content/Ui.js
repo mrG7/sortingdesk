@@ -60,14 +60,20 @@ var ChromeExtensionUi = (function () {
           self.activator_ = new Activator(self);
           self.positioner_ = new Positioner(self);
 
-          /* The main container must be visible or it won't be possible to
-           * center elements contained. */
-          this.nodes_.sorter.show();
+          /* Center the `loading´ and `empty´ notifications.
+           * 
+           * Note that both the main container and the element(s) to be centered
+           * MUST be visible or their widths can't be computed and thus
+           * centering fails. By the way, even though several elements are shown
+           * and hidden in quick succession, no flicker occurs because painting
+           * only takes place once the script returns execution to the
+           * browser. */
+          self.nodes_.sorter.show();
           {
             self.center('loading');
             self.center('empty');
           }
-          this.nodes_.sorter.hide();
+          self.nodes_.sorter.hide();
           
           /* Initialise API and instantiate `SortingDossier´ class. */
           self.sortingDossier_ = new SortingDossier.Sorter( {
