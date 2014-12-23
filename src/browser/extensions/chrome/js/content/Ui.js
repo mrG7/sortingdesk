@@ -92,26 +92,10 @@ var ChromeExtensionUi = (function () {
             visibleItems: 10,
             itemsDraggable: false,
             activeBinId: result.activeBinId
-          }, $.extend(true, $.extend({},  Api), {
-            onRequestStart: function () {
-              if(!requests++) self.nodes_.loading.stop().fadeIn(); },
-            
-            onRequestStop: function () {
-              if(!--requests) self.nodes_.loading.stop().fadeOut(); },
-            
-            moreTexts: function (n) {
-              return Api.moreTexts(n)
-                .done(function (items) {
-                  if(!items || !(items instanceof Array) || items.length === 0)
-                    self.nodes_.empty.fadeIn('slow');
-                  else
-                    self.nodes_.empty.fadeOut(100);
-                } )
-                .fail(function () {
-                  self.nodes_.empty.show();
-                } );
-            }
-          } ) );
+          }, $.extend(true, { },
+                      Api,
+                      self.requests_.callbacks,
+                      self.transceiver_.callbacks ) );
         } );
       } );
   };
