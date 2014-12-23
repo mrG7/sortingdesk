@@ -177,6 +177,115 @@ var ChromeExtensionUi = (function () {
   /**
    * @class
    * */
+  var Transceiver = function ()
+  {
+    var self = this,
+        methods = {
+          "load-state": this.onLoadState_
+        };
+
+    /* Handle messages whose `operation´ is defined above in `methods´. */
+    chrome.runtime.onMessage.addListener(
+      function (request, sender, callback) {
+        if(methods.hasOwnProperty(request.operation)) {
+          console.log("Invoking message handler [type="
+                      + request.operation + "]");
+
+          methods[request.operation].call(
+            self, request, sender, callback);
+        }
+      }
+    );
+  };
+
+  Transceiver.prototype = {
+    /* Getter methods */
+    get callbacks ()
+    {
+      return {
+        moreTexts: this.onMoreTexts_.bind(this),
+        getBins: this.onGetBins_.bind(this),
+        setBins: this.onSetBins_.bind(this),
+        setActiveBin: this.onSetActiveBin_.bind(this)
+      };
+    },
+    
+    /* Inbound events initiated by `SortingDossier´ */
+    onMoreTexts_: function (n)
+    {
+      var self = this;
+      
+      return Api.moreTexts(n)
+        .done(function (items) {
+          if(!items || !(items instanceof Array) || items.length === 0)
+            ui_.nodes.empty.fadeIn('slow');
+          else
+            ui_.nodes.empty.fadeOut(100);
+        } )
+        .fail(function () {
+          ui_.nodes.empty.show();
+        } );
+    },
+
+    onGetBins_: function ()
+    {
+      var self = this,
+          deferred = $.Deferred();
+
+      chrome.storage.local.get('bins', function (result) {
+        if(!result.hasOwnProperty('bins') || !(result.bins instanceof Array)) {
+          deferred.resolve( [] );
+          return;
+        }
+
+        console.log("Loaded state: %d bin(s)", result.bins.length);
+        deferred.resolve(result.bins);
+      } );
+
+      return deferred.promise();
+    },
+
+    onSetBins_: function (state)
+    {
+      var deferred = $.Deferred();
+      
+      chrome.runtime.sendMessage( {
+        operation: 'save-state',
+        state: state
+      }, function (result) {
+        if(result) {
+          deferred.resolve();
+        } else {
+          console.log("Failed to save state");
+          deferred.reject();
+        }
+      } );
+
+      return deferred.promise();
+    },
+
+    onSetActiveBin_: function (bin)
+    {
+      chrome.runtime.sendMessage( {
+        operation: 'set-active-bin',
+        bin: bin
+      } );
+    },
+
+    /* Events initiated by the extension outbound to `SortingDossier´ */
+    onLoadState_: function (request, sender, callback)
+    {
+      console.log("Refreshing state");
+
+      ui_.sortingDossier.load(request.activeBinId);
+      if(callback) callback();
+    }
+  };
+
+
+  /**
+   * @class
+   * */
   var Activator = function (ui) {
     var nodes = ui.nodes,
         width = nodes.activator.width();
