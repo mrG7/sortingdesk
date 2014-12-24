@@ -1,50 +1,73 @@
 * To do items [0%]
-** *ALL* [0%]
+** *ALL* [33%]
 *** TODO Document code
 First iteration would include modules and classes.
+
 *** TODO Document required options
 =SortingQueue=, =SortingDesk= and possibly other components, could do with documentation about required and optional options, callbacks and so on.
+
+*** DONE Rename components
+- State "DONE"       from "TODO"       [2014-12-24 Wed 13:37]
++ Rename existing =SortingDesk= component to =SortingBinsExample= and its source file to =sorting-bins-example.js=.
++ Rename =SortingDossier= component to =SortingDesk=.
+  
 ** =SortingQueue= [0%]
 *** TODO Rename CSS class names alluding to the old concept of text item
 Some CSS class names are still in use which employ the old concept of text item. These should be renamed such that the "text" word is removed.
+
 *** TODO =Droppable=: requires reset method
 See =ProtarchBinSpawner=. Specifically, there are instances where the events attached by =Droppable= need to be unbound at destruction time; i.e. when a =Droppable= instance is created on the DOM's own body.
+
 *** TODO =ControllerItems=: disable all other dragging-related events
+
 *** TODO Create a list of interesting events to advertise via an Events controller
+
 *** TODO Items controller to notify client when no more items available
+
 *** TODO [#B] Prefix text-items' node ids
 - State "TODO"       from "WAIT"       [2014-09-07 Sun 08:16]
 - State "WAIT"       from "TODO"       [2014-09-05 Fri 10:41] \\
   Currently waiting to hear from support as to whether ids are guaranteed to always be unique.
+  
 *** TODO Remove code handling keyboard events
 *** WAIT Implement Events controller based on the publisher-subscriber design pattern
 - State "WAIT"       from "TODO"       [2014-10-23 Thu 14:42]
-** =SortingDesk= [25%]
+  
+** =SortingDesk= [28%]
 *** TODO Allow specialisation of =ControllerButtonDismiss=
+
 *** TODO Tentative: allow =SortingDesk='s constructor to receive a deferred object
 Allow the constructor of =SortingDesk= to receive an *optional* deferred object provided, and which is under the responsibility of the user, that can be actioned upon depending on the result of the initialisation sequence.
 
 Ultimately this optional mechanism would allow the user to receive perfectly timed notifications regarding Sorting Desk's initialisation state as and when they happen.
+
 *** TODO =ControllerBins=: =onItemDropped= unused
+
 *** TODO =ControllerBinSpawner=: =addManual= can't be supported as it stands
 + API requires knowledge of the bin's =label=.
 + Several TODO annotations have been created regarding this issue.
+  
 *** TODO Display of the bins should be minimal
 Ideally, each bin should look like the item that was first dropped to create that bin.
+
 *** TODO [#B] Prefix bins' node ids
 - State "TODO"       from "WAIT"       [2014-09-07 Sun 08:16]
 - State "WAIT"       from "TODO"       [2014-09-05 Fri 10:41] \\
   Currently waiting to hear from support as to whether ids are guaranteed to always be unique.
+  
 *** TODO =itemDroppedInBin=: should it be optional?
+
 *** WAIT Implement keyboard auto-repeat with configurable frequency
 - State "WAIT"       from "TODO"       [2014-10-15 Wed 13:56] \\
   Probable unwanted feature.
+  
 *** WAIT [#A] Allow bin statements to be edited
 - State "WAIT"       from "TODO"       [2014-10-10 Fri 16:11] \\
   This will most likely require involvement of the client via a callback.
 - State "TODO"       from "WAIT"       [2014-09-05 Fri 10:42]
 - State "WAIT"       from "TODO"       [2014-08-22 Fri 13:24] \\
   Not proceeding with this until it's clear whether bins based on existing text items are even editable.
+  
 *** WAIT [#B] Do not allow duplicate bins
 - State "WAIT"       from "CANCELED"   [2014-11-26 Wed 09:09] \\
   Reissuing TODO item as there is validity in the concept.
@@ -52,61 +75,93 @@ Ideally, each bin should look like the item that was first dropped to create tha
   Most likely can't be done reliably.
 - State "WAIT"       from "TODO"       [2014-08-22 Fri 12:44] \\
   Specifications aren't clear as to how bins that are based on existing text items
-  are created.  
+  are created.
+  
+*** DONE Append string `live´ to API source file
+- State "DONE"       from "TODO"       [2014-12-24 Wed 13:46]
+
 *** DONE Handle removal of currently active bin
 - State "DONE"       from "TODO"       [2014-11-26 Wed 16:26]
+  
 *** CANCELED =addBin=: how to deal with the =ranker= argument?
 - State "CANCELED"   from "TODO"       [2014-11-26 Wed 15:07] \\
   =addBin= callback no longer used.
+  
 *** CANCELED Ensure =addBin= callback exists when the 'bin add' button exists
 - State "CANCELED"   from "TODO"       [2014-11-26 Wed 15:06] \\
   =addBin= callback no longer used.
+  
 ** =SortingDossier= [100%]
 *** DONE Remove browser-specific statements from =SortingDossier= module
 - State "DONE"       from "TODO"       [2014-12-23 Tue 11:59]
+  
 *** DONE Decouple from Datawake
 - State "DONE"       from "TODO"       [2014-12-22 Mon 18:11]
+  
 *** DONE Rename to =SortingDossier=
 - State "DONE"       from "TODO"       [2014-12-22 Mon 18:11]
+  
 *** DONE Realign loading and queue empty notifications when both present
 - State "DONE"       from "TODO"       [2014-12-22 Mon 18:11]
+  
 ** API [0%]
 *** All [0%]
 **** TODO Move all API-related files into respective component directory
+
 **** TODO Add timeout to AJAX calls
+
 *** Live [100%]
 **** DONE =getRandomLabel=: rename to =getRandomItem=
 - State "DONE"       from "TODO"       [2014-12-06 Sat 11:42]
+  
 *** Mock [100%]
+
 ** Examples [33%]
 *** TODO Fix broken examples
 It seems only the =sorting_desk-live= example works at the moment.
+
 *** WAIT Create examples [0%]
 - State "WAIT"       from "TODO"       [2014-11-25 Tue 06:39] \\
   Not a priority at the moment.
+  
 **** TODO No content ids
+
 *** DONE Revisit =sorting_desk-live.html= example
 - State "DONE"       from "TODO"       [2014-12-06 Sat 11:42]
 It no longer runs and its CSS is invalid compared to the =sorting_desk-mock-default.html= example.
+
 ** CSS [0%]
 *** TODO Ensure CSS contained by Sorting Desk and Queue components is (still) valid
-Many changes have been made which must have surely affected the CSS.  
+Many changes have been made which must have surely affected the CSS.
+
 ** Tests [9%]
 *** DONE init: enforce test compartmentalisation through cloning of nodes
 - State "DONE"       from "TODO"       [2014-12-06 Sat 11:43]
+  
 *** TODO instance: ensure reset doesn't run twice
+
 *** TODO instance: require =visibleItems= to be greater than 0
+
 *** TODO callbacks: removed test for =renderAddButton=
+
 *** TODO callbacks: removed test for =renderPrimaryBin=
+
 *** TODO callbacks: removed test for =renderSecondaryBin=
+
 *** TODO callbacks: removed test for =addPrimarySubBin=
+
 *** TODO callbacks: removed test for =addSecondaryBin=
+
 *** TODO interface: ensure 'bin add' button is created prior to using it
+
 *** TODO interface: ensure correct number of sub-bins are created
+
 *** TODO interface: removed test for adding of sub-bin
+
 ** Unclassified
 *** TODO Revamp errors returned via promises to include error *codes*
 It is easier for programs to process errors if they are given as a code. Errors in human natural language are only useful to humans, not programs.
+
 *** TODO Review data structures
 This includes =Sorting Desk='s bin data structure and =Sorting Queue='s item
 data structure. Changes to any of the components will require updating the
@@ -131,11 +186,14 @@ The above could instead be:
 + =text=
 
 A similar discussion could be had regarding bins' data structure.
+
 *** TODO Employ use of classes to identify hover state and possibly others
 This is meant to resolve the problem that parent elements can't be styled depending on mouse state, such as =:hover=, when nested elements are used. The only way to reliably solve this problem is to rely on CSS classes to signal mouse states.
+
 *** WAIT Resolve all annotated TODO items
 - State "WAIT"       from "TODO"       [2014-10-15 Wed 13:57] \\
   To be done when Sorting Desk has reached a significant milestone.
+  
 *** WAIT [#C] Implement user notifications
 - State "WAIT"       from "CANCELED"   [2014-11-26 Wed 09:08] \\
   Requires explicit approval.
@@ -146,6 +204,7 @@ This is meant to resolve the problem that parent elements can't be styled depend
 A mechanism for displaying notifications to the user is needed for the purpose
 of providing feedback, in particular in the cases when a user action is invalid
 and results in an error.
+
 * Bugs [0%]
 ** TODO When items' DIV is selected, scrolling with keyboard both selects next item as well as scroll the DIV contents
 Scrolling on the items' DIV container must be suppressed.
