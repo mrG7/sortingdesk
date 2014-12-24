@@ -1,5 +1,5 @@
-/** theme-sorting_desk-default.css --- Default theme used by examples
- * illustrating usage of the SortingDesk component.
+/** theme-sorting_bins_example-default.css --- Default theme used by examples
+ * illustrating usage of sorting-bins-example.
  *
  * Copyright (C) 2014 Diffeo
  *
@@ -80,7 +80,7 @@ BODY.sd-droppable-hover {
 }
 
 
-/* SortingDesk specifics
+/* sorting-bins-example specifics
  * ----------------------------------------------------------------------
  *  Bin */
 .sd-bin {

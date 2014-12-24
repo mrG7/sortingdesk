@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Sorting Desk - Live</title>
+  <title>Sorting Bins Example - Live - OLD</title>
   
-  <link rel="stylesheet" href="css/theme-sorting_desk-default.css" media="screen" />
+  <link rel="stylesheet" href="css/theme-sorting_bins_example-default.css" media="screen" />
   
   <script type="text/javascript" src="lib/jquery-2.1.1.min.js"></script>
 
@@ -17,15 +17,15 @@
   require.config( {
     baseUrl: '../',
     paths: {
-      "SortingDesk": "src/SortingDesk/SortingDesk",
+      "sorting-bins-example": "examples/js/sorting-bins-example",
       "SortingQueue": "src/SortingQueue/SortingQueue",
-      "API-SortingQueue": "src/api/api-sorting_queue-live",
+      "API": "examples/js/api-sorting-bins-example-live",
       "jquery": "lib/jquery-2.1.1.min"
     }
   } );
 
-  require( [ "jquery", "SortingDesk", "API-SortingQueue" ],
-    function ($, SortingDesk) {
+  require( [ "jquery", "sorting-bins-example", "API" ],
+    function ($, SortingBinsExample) {
 
       var instance,
           nitems = $("#items"),
@@ -63,7 +63,7 @@
         promise = instance.reset();
 
       promise.always(function () {
-        instance = new SortingDesk.Sorter( {
+        instance = new SortingBinsExample.Sorter( {
           nodes: {
             items: nitems,
             bins: nbins,

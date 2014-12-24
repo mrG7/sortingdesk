@@ -15,15 +15,15 @@
   require.config( {
     baseUrl: '../',
     paths: {
-      "SortingDesk": "src/SortingDesk/SortingDesk",
+      "sorting-bins-example": "examples/js/sorting-bins-example",
       "SortingQueue": "src/SortingQueue/SortingQueue",
-      "API-SortingQueue": "src/api/api-sorting_queue-mock",
-      "API-Data": "src/api/data/al_ahram.json?",
+      "API": "examples/js/api-sorting-bins-example-mock",
+      "API-Data": "examples/data/al_ahram.json?",
       "jquery": "lib/jquery-2.1.1.min"
     }
   } );
 
-  require( [ "jquery", "SortingDesk", "API-SortingQueue" ], function ($, SortingDesk) {
+  require( [ "jquery", "sorting-bins-example", "API" ], function ($, SortingBinsExample) {
     var loading = $("#loading"),
         bins = [
           {
@@ -62,7 +62,7 @@
 
     Api.initialise(g_descriptor, bins);
 
-    new SortingDesk.Sorter( {
+    new SortingBinsExample.Sorter( {
       nodes: {
         items: nitems,
         bins: nbins,

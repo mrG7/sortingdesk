@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Sorting Desk - Offline - Default</title>
+  <title>Sorting Bins Example - Offline - Bins in right panel</title>
   
-  <link rel="stylesheet" href="css/sorting_desk-mock-bins_right_panel.css" media="screen" />
+  <link rel="stylesheet" href="css/theme-sorting_bins_example-bins_right_panel.css" media="screen" />
 
   <!-- Libraries -->
   <script type="text/javascript" src="lib/require-2.1.14.min.js"></script>
@@ -15,15 +15,15 @@
   require.config( {
     baseUrl: '../',
     paths: {
-      "SortingDesk": "src/SortingDesk/SortingDesk",
+      "sorting-bins-example": "examples/js/sorting-bins-example",
       "SortingQueue": "src/SortingQueue/SortingQueue",
-      "API-SortingDesk": "src/api/api-sorting_desk-mock",
-      "API-Data": "src/api/data/test-ranker.json?",
+      "API": "examples/js/api-sorting-bins-example-mock",
+      "API-Data": "examples/data/al_ahram.json?",
       "jquery": "lib/jquery-2.1.1.min"
     }
   } );
 
-  require( [ "SortingDesk", "API-SortingDesk" ], function (SortingDesk) {
+  require( [ "sorting-bins-example", "API" ], function (SortingBinsExample) {
     var loading = $("#loading"),
         nitems = $("#items"),
         nbins = $("#bins"),
@@ -35,7 +35,7 @@
     nbins.height(height);
     
     Api.initialise(g_descriptor);
-    new SortingDesk.Sorter( {
+    new SortingBinsExample.Sorter( {
       nodes: {
         items: nitems,
         bins: nbins,

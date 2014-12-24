@@ -1,4 +1,4 @@
-/** api-sorting_desk-mock.js --- Sorting Desk's mock API
+/** api-sorting-bins-example-mock.js --- Mock API
  *
  * Copyright (C) 2014 Diffeo
  *
@@ -12,7 +12,7 @@
 
 /* Compatibility with RequireJs. */
 if(typeof define === "function" && define.amd) {
-  define("API-SortingDesk", [ "jquery", "API-Data" ], function() {
+  define("API", [ "jquery", "API-Data" ], function() {
     return Api;
   } );
 }

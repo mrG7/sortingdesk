@@ -1,5 +1,5 @@
 /**
- * @file Sorting Desk component.
+ * @file Sorting bins example.
  * @copyright 2014 Diffeo
  *
  * @author Miguel Guedes <miguel@miguelguedes.org>
@@ -15,15 +15,15 @@
 
 
 /**
- * The Sorting Desk module.
+ * The Sorting bins example module.
  *
  * @returns an object containing class constructors.
  * */
-var SortingDesk_ = function (window, $, SortingQueue) {
+var SortingBinsExample_ = function (window, $, SortingQueue) {
 
   /**
    * @class
-   * The main class of the Sorting Desk component.  Its responsibilities include
+   * The main class of the Sorting bins example.  Its responsibilities include
    * initialising the user interface and Sorting Queue, on which it depends, as
    * well as internal structures.
    *
@@ -53,7 +53,7 @@ var SortingDesk_ = function (window, $, SortingQueue) {
     if(!cbs)
       throw "No callbacks given: some are mandatory";
 
-    console.log("Initialising Sorting Desk UI");
+    console.log("Initialising Sorting bins example UI");
 
     this.options_ = $.extend(true, $.extend(true, {}, defaults_), opts);
     this.sortingQueue_ = new SortingQueue.Sorter(this.options_, cbs);
@@ -141,7 +141,7 @@ var SortingDesk_ = function (window, $, SortingQueue) {
       } );
 
       this.initialised_ = true;
-      console.log("Sorting Desk UI initialised");
+      console.log("Sorting bins example initialised");
     },
 
     /**
@@ -166,7 +166,7 @@ var SortingDesk_ = function (window, $, SortingQueue) {
         self.bins_ = self.options_ = self.sortingQueue_ = null;
         self.initialised_ = false;
 
-        console.log("Sorting Desk UI reset");
+        console.log("Sorting bins example reset");
       } );
 
       return reset;
@@ -892,9 +892,9 @@ var SortingDesk_ = function (window, $, SortingQueue) {
 
 /* Compatibility with RequireJs. */
 if(typeof define === "function" && define.amd) {
-  define("SortingDesk", [ "jquery", "SortingQueue" ],
+  define("sorting-bins-example", [ "jquery", "SortingQueue" ],
          function ($, SortingQueue) {
-           return SortingDesk_(window, $, SortingQueue);
+           return SortingBinsExample_(window, $, SortingQueue);
          } );
 } else
-  window.SortingDesk = SortingDesk_(window, jQuery, SortingQueue);
+  window.SortingBinsExample = SortingBinsExample_(window, jQuery, SortingQueue);

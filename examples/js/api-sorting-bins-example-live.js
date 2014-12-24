@@ -1,4 +1,4 @@
-/** api-sorting_desk-live.js --- Sorting Desk's live API
+/** api-sorting-bins-example-live.js --- Live API
  *
  * Copyright (C) 2014 Diffeo
  *
@@ -74,7 +74,7 @@ var _Api = function(window, $, DossierJS) {
 };
 
 if(typeof define === "function" && define.amd) {
-    define("API-SortingDesk", ["jquery", "DossierJS"], function($, DossierJS) {
+    define("API", ["jquery", "DossierJS"], function($, DossierJS) {
         return _Api(window, $, DossierJS);
     });
 } else {
