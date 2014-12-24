@@ -1,5 +1,5 @@
 /**
- * @file Initialisation and handling of the SortingDossier Google Chrome
+ * @file Initialisation and handling of the SortingDesk Google Chrome
  * extension user interface.
  * 
  * @copyright 2014 Diffeo
@@ -7,12 +7,12 @@
  * @author Miguel Guedes <miguel@miguelguedes.org>
  *
  * Comments:
- * Uses the `SortingDossier' component.
+ * Uses the `SortingDesk' component.
  *
  */
 
 
-/*global chrome, $, SortingDossier, SortingQueue, Api, DossierJS */
+/*global chrome, $, SortingDesk, SortingQueue, Api, DossierJS */
 /*jshint laxbreak:true */
 
 
@@ -32,7 +32,7 @@ var ChromeExtensionUi = (function () {
       { operation: "get-meta" },
       function (result)
       {
-        /* Do not instantiate Sorting Dossier if not currently enabled or
+        /* Do not instantiate SortingDesk if not currently enabled or
          * current tab not active. */
         if(!result.config.active || !result.tab.active)
           return;
@@ -78,8 +78,8 @@ var ChromeExtensionUi = (function () {
           }
           self.nodes_.sorter.hide();
           
-          /* Initialise API and instantiate `SortingDossier´ class. */
-          self.sortingDossier_ = new SortingDossier.Sorter( {
+          /* Initialise API and instantiate `SortingDesk´ class. */
+          self.sortingDesk_ = new SortingDesk.Sorter( {
             nodes: {
               items: $('#sdw-queue'),
               bins: $('#sdw-bins'),
@@ -106,7 +106,7 @@ var ChromeExtensionUi = (function () {
     positioner_: null,
     requests_: null,
     transceiver_: null,
-    sortingDossier_: null,
+    sortingDesk_: null,
     /* Nodes */
     nodes_: null,
 
@@ -115,7 +115,7 @@ var ChromeExtensionUi = (function () {
     get positioner() { return this.positioner_; },
     get requests() { return this.requests_; },
     get transceiver() { return this.transceiver_; },
-    get sortingDossier() { return this.sortingDossier_; },
+    get sortingDesk() { return this.sortingDesk_; },
     get nodes() { return this.nodes_; },
     node: function (key) { return this.nodes_[key]; },
 
@@ -205,7 +205,7 @@ var ChromeExtensionUi = (function () {
       };
     },
     
-    /* Inbound events initiated by `SortingDossier´ */
+    /* Inbound events initiated by `SortingDesk´ */
     onMoreTexts_: function (n)
     {
       var self = this;
@@ -267,12 +267,12 @@ var ChromeExtensionUi = (function () {
       } );
     },
 
-    /* Events initiated by the extension outbound to `SortingDossier´ */
+    /* Events initiated by the extension outbound to `SortingDesk´ */
     onLoadState_: function (request, sender, callback)
     {
       console.log("Refreshing state");
 
-      ui_.sortingDossier.load(request.activeBinId);
+      ui_.sortingDesk.load(request.activeBinId);
       if(callback) callback();
     }
   };
@@ -302,7 +302,7 @@ var ChromeExtensionUi = (function () {
         
         self.html_ = nodes.activator.html();
         nodes.activator
-          .html('Sorting Dossier')
+          .html('Sorting Desk')
           .animate( { width: '105px' }, 150);
         
         nodes.sorter

@@ -1,5 +1,5 @@
 /**
- * @file Sorting Dossier component.
+ * @file Sorting Desk component.
  * @copyright 2014 Diffeo
  *
  * @author Miguel Guedes <miguel@miguelguedes.org>
@@ -21,21 +21,21 @@
 // Chrome's case is the script `Ui.js´, but you may have a different strategy
 // in mind.
 //
-// + a mechanism that enables `SortingDossier´ to *receive* notifications;
+// + a mechanism that enables `SortingDesk´ to *receive* notifications;
 // presently this is required so it knows when to update state when, for
 // instance, state changes in a different tab. In essence, this is the opposite
 // of the callbacks mechanism in place now; instead of issuing notifications,
 // it needs to receive them. My suggestion would be to create a method in the
-// `SortingDossier.Sorter´, part of the module's public API, that returns an
+// `SortingDesk.Sorter´, part of the module's public API, that returns an
 // object containing its (inwards facing) callbacks.
 
 
 /**
- * The Sorting Dossier module.
+ * The Sorting Desk module.
  *
  * @returns an object containing the module's public interface.
  * */
-var SortingDossier_ = function (window, $) {
+var SortingDesk_ = function (window, $) {
 
   var Url = {
     encode: function (s)
@@ -72,7 +72,7 @@ var SortingDossier_ = function (window, $) {
     var self = this,
         queryId;
 
-    console.log("Initialising Sorting Dossier UI");
+    console.log("Initialising Sorting Desk UI");
 
     this.options_ = $.extend(true, $.extend(true, {}, defaults_), opts);
     this.sortingQueue_ = new SortingQueue.Sorter(this.options_, cbs);
@@ -166,7 +166,7 @@ var SortingDossier_ = function (window, $) {
         self.bins_ = self.options_ = self.sortingQueue_ = null;
         self.initialised_ = false;
 
-        console.log("Sorting Dossier UI reset");
+        console.log("Sorting Desk UI reset");
       } );
 
       return reset;
@@ -248,7 +248,7 @@ var SortingDossier_ = function (window, $) {
       this.initialiseBins_(bins, activeBinId);
 
       this.initialised_ = true;
-      console.log("Sorting Dossier UI initialised");
+      console.log("Sorting Desk UI initialised");
     },
 
     initialiseBins_: function (bins, activeBinId)
@@ -914,8 +914,8 @@ var SortingDossier_ = function (window, $) {
 
 /* Compatibility with RequireJs. */
 if(typeof define === "function" && define.amd) {
-  define("SortingDossier", [ "jquery" ], function ($) {
-    return SortingDossier_(window, $);
+  define("SortingDesk", [ "jquery" ], function ($) {
+    return SortingDesk_(window, $);
   });
 } else
-  window.SortingDossier = SortingDossier_(window, $);
+  window.SortingDesk = SortingDesk_(window, $);

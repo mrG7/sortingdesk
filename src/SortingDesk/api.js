@@ -1,4 +1,4 @@
-/** api.js --- Sorting Dossier's live API
+/** api.js --- Sorting Desk's live API
  *
  * Copyright (C) 2014 Diffeo
  *
