@@ -33,7 +33,7 @@ mkdir lib/dossier.js -v
 cp -v "$dir_root/lib/jquery-2.1.1.min.js" lib/
 cp -v "$dir_root/src/SortingQueue/SortingQueue.js" lib/SortingQueue/
 cp -v "$dir_root/src/SortingDesk/SortingDesk.js" lib/SortingDesk/
-cp -v "$dir_root/src/SortingDesk/api.js" lib/SortingDesk/
+cp -v "$dir_root/src/SortingDesk/api-live.js" lib/SortingDesk/
 cp -v "$dir_root/dossier.js/Dossier.js" lib/dossier.js/
 
 # All files inside `lib' are treated as immutable. We therefore make every file
