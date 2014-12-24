@@ -15,7 +15,8 @@
 
 
 /* Global constants */
-var DOSSIER_STACK_API_URL = 'http://54.173.159.86:8000';
+var DOSSIER_STACK_API_URL = 'http://54.174.195.250:8080';
+/* var DOSSIER_STACK_API_URL = 'http://localhost:8080'; */
 
 
 var Api = (function() {
