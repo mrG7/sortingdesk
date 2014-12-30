@@ -604,6 +604,12 @@ var SortingDesk_ = function (window, $) {
         mouseleave: function () {
           self.owner_.onMouseLeave_();
           return false;
+        },
+        mousedown: function() {
+          $(this).addClass(parentOwner.options.css.mouseDown);
+        },
+        mouseup: function () {
+          $(this).removeClass(parentOwner.options.css.mouseDown);
         }
       } );
 
@@ -668,6 +674,7 @@ var SortingDesk_ = function (window, $) {
 
         dragend: function (e) {
           parentOwner.sortingQueue.dismiss.deactivate();
+          self.node_.removeClass(parentOwner.options.css.mouseDown);
         }
       } );
     }, 0);
@@ -906,6 +913,7 @@ var SortingDesk_ = function (window, $) {
       binActive: 'sd-active',
       buttonAdd: 'sd-button-add',
       droppableHover: 'sd-droppable-hover',
+      mouseDown: 'sd-mousedown',
       labelBrowser: 'sd-bin-browser-icon',
       labelBrowserDisabled: 'sd-bin-browser-icon-disable'
     },

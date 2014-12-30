@@ -267,7 +267,7 @@
   transition: background-color 175ms, color 100ms;
 }
 
-.sd-bin:active:not(.sd-adding),
+.sd-bin.sd-mousedown:not(.sd-adding),
 .sd-bin.sd-assign {
   position: relative;
   top: 3px;
