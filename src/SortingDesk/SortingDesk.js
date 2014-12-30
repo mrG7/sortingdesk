@@ -958,10 +958,13 @@ var SortingDesk_ = function (window, $) {
       ControllerBins: ControllerBins,
       Bin: BinDefault,
       BinImage: BinImageDefault,
-      ControllerBinSpawner: ControllerBinSpawnerDefault
+      ControllerBinSpawner: ControllerBinSpawnerDefault,
+      LabelBrowser: LabelBrowser
     }
   };
 
+
+  /* Module public API */
   return {
     Sorter: Sorter,
     ControllerBins: ControllerBins,
@@ -969,7 +972,8 @@ var SortingDesk_ = function (window, $) {
     BinDefault: BinDefault,
     BinImageDefault: BinImageDefault,
     ControllerBinSpawner: ControllerBinSpawner,
-    ControllerBinSpawnerDefault: ControllerBinSpawnerDefault
+    ControllerBinSpawnerDefault: ControllerBinSpawnerDefault,
+    LabelBrowser: LabelBrowser
   };
 
 };
