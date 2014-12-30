@@ -871,21 +871,43 @@ var SortingDesk_ = function (window, $) {
   };
 
 
+  /**
+   * @class
+   * */
+  var LabelBrowser = function (owner)
+  {
+    SortingQueue.Controller.call(this, owner);
+  };
+
+  LabelBrowser.prototype = Object.create(SortingQueue.Controller.prototype);
+
+  LabelBrowser.prototype.initialise = function ()
+  {
+  };
+
+  LabelBrowser.prototype.reset = function ()
+  {
+  };
+
+
+  /* Default options */
   var defaults_ = {
     css: {
-      item: 'sdw-text-item',
-      itemContent: 'sdw-text-item-content',
-      itemTitle: 'sdw-text-item-title',
-      itemClose: 'sdw-text-item-close',
-      itemSelected: 'sdw-selected',
-      itemDragging: 'sdw-dragging',
-      bin: 'sdw-bin',
-      binName: 'sdw-bin-name',
-      binAnimateAssign: 'sdw-assign',
-      binAdding: 'sdw-adding',
-      binActive: 'sdw-active',
-      buttonAdd: 'sdw-button-add',
-      droppableHover: 'sdw-droppable-hover'
+      item: 'sd-text-item',
+      itemContent: 'sd-text-item-content',
+      itemTitle: 'sd-text-item-title',
+      itemClose: 'sd-text-item-close',
+      itemSelected: 'sd-selected',
+      itemDragging: 'sd-dragging',
+      bin: 'sd-bin',
+      binName: 'sd-bin-name',
+      binAnimateAssign: 'sd-assign',
+      binAdding: 'sd-adding',
+      binActive: 'sd-active',
+      buttonAdd: 'sd-button-add',
+      droppableHover: 'sd-droppable-hover',
+      labelBrowser: 'sd-bin-browser-icon',
+      labelBrowserDisabled: 'sd-bin-browser-icon-disable'
     },
     delays: {                   /* In milliseconds.     */
       binRemoval: 200,          /* Bin is removed from container. */

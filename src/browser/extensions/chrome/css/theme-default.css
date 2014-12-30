@@ -1,53 +1,56 @@
-/** theme-default.css --- Default theme used by Sorting Datawake
+/** theme-default.css --- Default theme used by Sorting Desk
  *
  * Copyright (C) 2014 Diffeo
  *
  * Author: Miguel Guedes <miguel@miguelguedes.org>
  *
  * Comments:
- * 
+ *
+ * Uses the free "100 External Link Icons" pack by Oksana Khristenko available
+ * online at http://www.shapes4free.com/vector-icons/external-link-icons/
+ * (accessed 30/12/2014).
  */
 
 /*csslint adjoining-classes: false, important: false */
 
 
-/* Positioning of master container (#sdw-container)
+/* Positioning of master container (#sd-container)
  * Note: null rule-set placeholders. */
-.sdw-bottom-right { }
-.sdw-bottom-left { }
-.sdw-top-left { }
-.sdw-top-right { }
+.sd-bottom-right { }
+.sd-bottom-left { }
+.sd-top-left { }
+.sd-top-right { }
 
 /* Master container */
-#sdw-container {
+#sd-container {
   position: fixed;
   font-family: arial,sans-serif;
   font-size: 12px;
   z-index: 1000000;
 }
 
-#sdw-container.sdw-top-left {
+#sd-container.sd-top-left {
   top: 5px;
   left: 5px;
 }
 
-#sdw-container.sdw-top-right {
+#sd-container.sd-top-right {
   top: 5px;
   right: 5px;
 }
 
-#sdw-container.sdw-bottom-right {
+#sd-container.sd-bottom-right {
   bottom: 5px;
   right: 5px;
 }
 
-#sdw-container.sdw-bottom-left {
+#sd-container.sd-bottom-left {
   bottom: 5px;
   left: 5px;
 }
 
 /* Container of bins and queue */
-#sdw-sorter {
+#sd-sorter {
   display: none;
   border: 2px solid #ccc;
   width: 400px;
@@ -60,28 +63,28 @@
   box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.6);
 }
 
-#sdw-container.sdw-top-left #sdw-sorter {
+#sd-container.sd-top-left #sd-sorter {
   border-radius: 0 10px 10px 10px;
 }
 
-#sdw-container.sdw-top-right #sdw-sorter {
+#sd-container.sd-top-right #sd-sorter {
   border-radius: 10px 0 10px 10px;
 }
 
-#sdw-container.sdw-bottom-right #sdw-sorter {
+#sd-container.sd-bottom-right #sd-sorter {
   border-radius: 10px 10px 0 10px;
 }
 
-#sdw-container.sdw-bottom-left #sdw-sorter {
+#sd-container.sd-bottom-left #sd-sorter {
   border-radius: 10px 10px 10px 0;
 }
 
-#sdw-sorter > DIV {
+#sd-sorter > DIV {
   margin: 5px;
 }
 
 /* Activator button */
-#sdw-activator {
+#sd-activator {
   display: inline-block;
   background-color: #3D3C3C;
   color: white;
@@ -104,33 +107,33 @@
   box-sizing: content-box;
 }
 
-#sdw-container.sdw-top-left #sdw-activator,
-#sdw-container.sdw-bottom-left #sdw-activator {
+#sd-container.sd-top-left #sd-activator,
+#sd-container.sd-bottom-left #sd-activator {
   float: left;
 }
 
-#sdw-container.sdw-top-right #sdw-activator,
-#sdw-container.sdw-bottom-right #sdw-activator {
+#sd-container.sd-top-right #sd-activator,
+#sd-container.sd-bottom-right #sd-activator {
   float: right;
 }
 
-#sdw-container.sdw-active #sdw-activator {
+#sd-container.sd-active #sd-activator {
   border-radius: 0;
   opacity: 1;
 }
 
-#sdw-activator:hover {
+#sd-activator:hover {
   opacity: 1;
 }
 
-#sdw-activator:active {
+#sd-activator:active {
   position: relative;
   top: 1px;
   left: 1px;
 }
 
 /* Button: add */
-#sdw-button-add {
+#sd-button-add {
   display: none;
   position: absolute;
   z-index: -1;
@@ -151,44 +154,44 @@
   line-height: 25px;
 }
 
-#sdw-container.sdw-top-left #sdw-button-add,
-#sdw-container.sdw-bottom-left #sdw-button-add {
+#sd-container.sd-top-left #sd-button-add,
+#sd-container.sd-bottom-left #sd-button-add {
   top: 33px;
   right: -25px;
 }
 
-#sdw-container.sdw-top-right #sdw-button-add,
-#sdw-container.sdw-bottom-right #sdw-button-add {
+#sd-container.sd-top-right #sd-button-add,
+#sd-container.sd-bottom-right #sd-button-add {
   top: 33px;
   left: -25px;
 }
 
-#sdw-container.sdw-active #sdw-button-add {
+#sd-container.sd-active #sd-button-add {
   display: block;
 }
 
-#sdw-button-add SPAN {
+#sd-button-add SPAN {
   position: relative;
 }
 
-#sdw-container.sdw-top-left #sdw-button-add SPAN,
-#sdw-container.sdw-bottom-left #sdw-button-add SPAN {
+#sd-container.sd-top-left #sd-button-add SPAN,
+#sd-container.sd-bottom-left #sd-button-add SPAN {
   margin-right: -10px;
 }
 
-#sdw-container.sdw-top-right #sdw-button-add SPAN,
-#sdw-container.sdw-bottom-right #sdw-button-add SPAN {
+#sd-container.sd-top-right #sd-button-add SPAN,
+#sd-container.sd-bottom-right #sd-button-add SPAN {
   margin-left: -10px;
 }
 
-#sdw-button-add:hover {
+#sd-button-add:hover {
   background-color: #DEF3DA;
   transition: background-color 175ms, color 100ms;
 }
 
 /* NOTE: disabled as we would need to set specific styling for each of the four
  *       corners. */
-/* #sdw-button-add:active { */
+/* #sd-button-add:active { */
 /*   top: -14px; */
 /*   left: -24px; */
 /*   box-shadow: none; */
@@ -196,7 +199,7 @@
 /* } */
 
 /* Various */
-#sdw-bins {
+#sd-bins {
   position: relative;
   height: 70px;
   overflow-x: auto;
@@ -204,18 +207,18 @@
   white-space: nowrap;
 }
 
-#sdw-queue {
+#sd-queue {
   position: relative;
   height: 310px;
   overflow-y: auto;
 }
 
-.sdw-clear {
+.sd-clear {
   height: 0;
   clear: both;
 }
 
-#sdw-load {
+#sd-load {
   position: absolute;
   top: 135px;
   padding: 5px 15px 5px 15px;
@@ -226,7 +229,7 @@
   font-size: 13px;
 }
 
-#sdw-empty {
+#sd-empty {
   position: absolute;
   top: 200px;
   color: gray;
@@ -239,7 +242,7 @@
 /* ----------------------------------------------------------------------
  *  Sorting Desk
  * ---------------------------------------------------------------------- */
-.sdw-bin {
+.sd-bin {
   display: inline-block;
   position: relative;
   border: 2px solid #7582C9;
@@ -257,15 +260,15 @@
   line-height: 19px;
 }
 
-.sdw-bin:hover:not(.sdw-adding) {
+.sd-bin:hover:not(.sd-adding) {
   background-color: #A9BEF3;
   color: #F2F6FF;
   cursor: pointer;
   transition: background-color 175ms, color 100ms;
 }
 
-.sdw-bin:active:not(.sdw-adding),
-.sdw-bin.sdw-assign {
+.sd-bin:active:not(.sd-adding),
+.sd-bin.sd-assign {
   position: relative;
   top: 3px;
   left: 3px;
@@ -273,31 +276,31 @@
   transition: background-color 175ms, color 100ms;
 }
 
-.sdw-bin.sdw-active {
+.sd-bin.sd-active {
   color: #E6FFD6;
   background-color: #83c78e;
   border-color: #349950;
 }
 
-.sdw-bin.sdw-active:hover {
+.sd-bin.sd-active:hover {
   color: #E6FFD6;
   background-color: #92E29F;
   border-color: #349950;
 }
 
 /* Bin: name */
-.sdw-bin-name {
+.sd-bin-name {
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.sdw-bin-name IMG {
+.sd-bin-name IMG {
   border: 0 none;
   height: 19px;
 }
 
 /* Text item */
-.sdw-text-item {
+.sd-text-item {
   position: relative;
   margin: 15px 5px;
   padding: 10px;
@@ -311,81 +314,81 @@
   line-height: 15px;
 }
 
-.sdw-text-item B:not(:first-child),
-.sdw-text-item STRONG:not(:first-child) {
+.sd-text-item B:not(:first-child),
+.sd-text-item STRONG:not(:first-child) {
   padding-left: 10px;
 }
 
-.sdw-text-item-content {
+.sd-text-item-content {
   overflow: hidden;
   max-height: 65px;
   text-overflow: ellipsis;
 }
 
-.sdw-text-item-content * {
+.sd-text-item-content * {
   display: inline-block;
 }
 
-.sdw-text-item-content A {
+.sd-text-item-content A {
   color: #85B7E4;
 }
 
-.sdw-text-item-content A:hover {
+.sd-text-item-content A:hover {
   color: #85B7E4;
   text-decoration: underline;
 }
 
-.sdw-text-item-content A:visited {
+.sd-text-item-content A:visited {
   color: #778BBE !important;
 }
 
-.sdw-text-item:hover {
+.sd-text-item:hover {
   background-color: #F8F8DD;
   color: #44573C;
 }
 
-.sdw-text-item:hover .sdw-text-item-title {
+.sd-text-item:hover .sd-text-item-title {
   background-color: #F8F8DD;
 }
 
-.sdw-text-item:active {
+.sd-text-item:active {
   background-color: #FFF5F8;
   color: #7F8368;
 }
 
-.sdw-text-item:active .sdw-text-item-title {
+.sd-text-item:active .sd-text-item-title {
   background-color: #FFF5F8;
 }
 
-.sdw-text-item.sdw-selected {
+.sd-text-item.sd-selected {
   border: 2px solid #8EB4DA;
 }
 
-.sdw-text-item:selected .sdw-text-item-title {
+.sd-text-item:selected .sd-text-item-title {
   background-color: #FFF5F8;
 }
 
-.sdw-text-item.sdw-selected:hover {
+.sd-text-item.sd-selected:hover {
   background-color: inherit;
 }
 
-.sdw-text-item.sdw-selected .sdw-text-item-content A {
+.sd-text-item.sd-selected .sd-text-item-content A {
   color: #465C94 !important;
 }
 
-.sdw-more, .sdw-less {
+.sd-more, .sd-less {
   float: right;
   font-size: 85%;
   padding-top: 3px;
   color: #999;
 }
 
-.sdw-more:hover, .sdw-less:hover {
+.sd-more:hover, .sd-less:hover {
   color: #123;
   cursor: pointer;
 }
 
-A.sdw-text-item-title {
+A.sd-text-item-title {
   position: absolute;
   top: -12px;
   background-color: white;
@@ -396,21 +399,21 @@ A.sdw-text-item-title {
   border-radius: 6px;
 }
 
-A.sdw-text-item-title:hover {
+A.sd-text-item-title:hover {
   color: #4A8BCC;
 }
 
-.sdw-text-item:hover .sdw-text-item-close,
-.sdw-text-item.sdw-selected .sdw-text-item-close {
+.sd-text-item:hover .sd-text-item-close,
+.sd-text-item.sd-selected .sd-text-item-close {
   display: block;
 }
 
-.sdw-text-item.sdw-dragging:hover .sdw-text-item-close,
-.sdw-text-item.sdw-selected.sdw-dragging .sdw-text-item-close {
+.sd-text-item.sd-dragging:hover .sd-text-item-close,
+.sd-text-item.sd-selected.sd-dragging .sd-text-item-close {
   display: none;
 }
 
-.sdw-text-item-close {
+.sd-text-item-close {
   position: absolute;
   top: -8px;
   right: -6px;
@@ -424,41 +427,41 @@ A.sdw-text-item-title:hover {
   box-shadow: 1px 1px 1px 0 rgba(50, 50, 50, 0.75);
 }
 
-.sdw-text-item-close,
-.sdw-text-item-close:visited {
+.sd-text-item-close,
+.sd-text-item-close:visited {
   color: grey !important;
 }  
 
-.sdw-text-item-close:hover {
+.sd-text-item-close:hover {
   color: black;
   background-color: #ddd;
 }
 
-.sdw-text-item-close:active {
+.sd-text-item-close:active {
   background-color: #eee;
 }
 
-.sdw-text-item.sdw-dragging {
+.sd-text-item.sd-dragging {
   border-color: #eee !important;
   color: silver !important;
   background-color: inherit !important;
 }
 
 /* Droppable elements */
-.sdw-droppable {
+.sd-droppable {
   border-style: dashed;
 }
 
-.sdw-droppable-highlight {
+.sd-droppable-highlight {
   border-style: dashed !important;
 }
 
-.sdw-droppable-hover {
+.sd-droppable-hover {
   border-style: dotted !important;
 }
 
 /* Button: dismiss */
-#sdw-button-dismiss {
+#sd-button-dismiss {
   display: none;
   position: absolute;
   z-index: -1;
@@ -478,38 +481,38 @@ A.sdw-text-item-title:hover {
   line-height: 25px;
 }
 
-#sdw-container.sdw-top-left #sdw-button-dismiss,
-#sdw-container.sdw-bottom-left #sdw-button-dismiss {
+#sd-container.sd-top-left #sd-button-dismiss,
+#sd-container.sd-bottom-left #sd-button-dismiss {
   top: 33px;
   right: -25px;
 }
 
-#sdw-container.sdw-top-right #sdw-button-dismiss,
-#sdw-container.sdw-bottom-right #sdw-button-dismiss {
+#sd-container.sd-top-right #sd-button-dismiss,
+#sd-container.sd-bottom-right #sd-button-dismiss {
   top: 33px;
   left: -25px;
 }
 
-#sdw-button-dismiss SPAN {
+#sd-button-dismiss SPAN {
   position: relative;
 }
 
-#sdw-container.sdw-top-left #sdw-button-dismiss SPAN,
-#sdw-container.sdw-bottom-left #sdw-button-dismiss SPAN {
+#sd-container.sd-top-left #sd-button-dismiss SPAN,
+#sd-container.sd-bottom-left #sd-button-dismiss SPAN {
   margin-right: -10px;
 }
 
-#sdw-container.sdw-top-right #sdw-button-dismiss SPAN,
-#sdw-container.sdw-bottom-right #sdw-button-dismiss SPAN {
+#sd-container.sd-top-right #sd-button-dismiss SPAN,
+#sd-container.sd-bottom-right #sd-button-dismiss SPAN {
   margin-left: -10px;
 }
 
-#sdw-button-dismiss:hover {
+#sd-button-dismiss:hover {
   background-color: #F3DADA;
   transition: background-color 175ms, color 100ms;
 }
 
-#sdw-button-dismiss.droppable-hover {
+#sd-button-dismiss.droppable-hover {
   background-color: #C04343;
   border-color: #7A4747;
   color: #FFF5F5;

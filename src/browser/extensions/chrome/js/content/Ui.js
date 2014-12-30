@@ -50,11 +50,11 @@ var ChromeExtensionUi = (function () {
 
           /* Cache jQuery references to nodes used. */
           self.nodes_ = {
-            container: $('#sdw-container'),
-            sorter: $('#sdw-sorter'),
-            activator: $('#sdw-activator'),
-            loading: $('#sdw-load'),
-            empty: $('#sdw-empty')
+            container: $('#sd-container'),
+            sorter: $('#sd-sorter'),
+            activator: $('#sd-activator'),
+            loading: $('#sd-load'),
+            empty: $('#sd-empty')
           };
 
           /* Instantiate class components. */
@@ -81,10 +81,10 @@ var ChromeExtensionUi = (function () {
           /* Initialise API and instantiate `SortingDesk´ class. */
           self.sortingDesk_ = new SortingDesk.Sorter( {
             nodes: {
-              items: $('#sdw-queue'),
-              bins: $('#sdw-bins'),
-              add: $('#sdw-button-add'),
-              buttonDismiss: $("#sdw-button-dismiss")
+              items: $('#sd-queue'),
+              bins: $('#sd-bins'),
+              add: $('#sd-button-add'),
+              buttonDismiss: $("#sd-button-dismiss")
             },
             constructors: {
               Item: ItemLinkify
@@ -286,7 +286,7 @@ var ChromeExtensionUi = (function () {
         width = nodes.activator.width();
     
     nodes.activator.click(function () {
-      if(nodes.container.hasClass('sdw-active')) {
+      if(nodes.container.hasClass('sd-active')) {
         nodes.sorter
           .stop(true, true)
           .fadeOut( { duration: 200, queue: false } );
@@ -296,9 +296,9 @@ var ChromeExtensionUi = (function () {
             $(this).html(self.html_);
           } );
         
-        nodes.container.removeClass('sdw-active');
+        nodes.container.removeClass('sd-active');
       } else {
-        nodes.container.addClass('sdw-active');
+        nodes.container.addClass('sd-active');
         
         self.html_ = nodes.activator.html();
         nodes.activator
@@ -334,10 +334,10 @@ var ChromeExtensionUi = (function () {
   Positioner.BOTTOM_LEFT  = 3;
   Positioner.BOTTOM_RIGHT = 4;
   Positioner.TARGET_CLASSES = [
-    'sdw-top-left',
-    'sdw-top-right',
-    'sdw-bottom-left',
-    'sdw-bottom-right'
+    'sd-top-left',
+    'sd-top-right',
+    'sd-bottom-left',
+    'sd-bottom-right'
   ];
 
   Positioner.prototype = {
