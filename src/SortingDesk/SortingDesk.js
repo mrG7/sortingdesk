@@ -395,12 +395,25 @@ var SortingDesk_ = function (window, $) {
     this.active_ = null;
     this.spawner_ = null;
 
+    /* TODO: at the very least, a `hasConstructor´ method should be created in
+     * the `SortingQueue.Sorter´ class.  Ideally, a controller class responsible
+     * for constructors should be created instead and the `instantiate´ and
+     * `hasContructor´ methods should be placed there. */
+    this.haveBrowser_ = owner.sortingQueue.options.constructors
+      .hasOwnProperty('createLabelBrowser')
+      || owner.sortingQueue.options.constructors
+      .hasOwnProperty('LabelBrowser');
+                
     /* Define getters. */
     this.__defineGetter__("bins", function () { return this.bins_; } );
     this.__defineGetter__("hover", function () { return this.hover_; } );
     this.__defineGetter__("active", function () { return this.active_; } );
     this.__defineGetter__("node", function () {
       return this.owner_.options.nodes.bins;
+    } );
+    
+    this.__defineGetter__("haveBrowser", function () {
+      return this.haveBrowser_;
     } );
 
     /* Instantiate spawner controller. */
@@ -698,6 +711,25 @@ var SortingDesk_ = function (window, $) {
     };
   };
 
+  /* overridable */ Bin.prototype.renderBrowserIcon = function (node)
+  {
+    if(this.owner_.haveBrowser) {
+      var icon = $('<a class="' + this.owner_.owner.options.css.labelBrowser
+                   + '" href="#"></a>')
+            .on( {
+              mousedown: function () { return false; },
+              click: function () {
+                console.log("Label Browser clicked");
+                return false;
+              }
+            } );
+      
+      node.prepend(icon);
+    }
+
+    return node;
+  };
+
 
   /**
    * @class
@@ -727,10 +759,11 @@ var SortingDesk_ = function (window, $) {
 
   BinDefault.prototype.render = function ()
   {
-    var css = this.owner_.owner.options.css;
+    var css = this.owner_.owner.options.css,
+        node = $('<div class="' + css.bin + '"><div class="' + css.binName + '">'
+                 + this.data_.data + '</div></div>');
 
-    return $('<div class="' + css.bin + '"><div class="' + css.binName + '">'
-             + this.data_.data + '</div></div>');
+    return this.renderBrowserIcon(node);
   };
 
 

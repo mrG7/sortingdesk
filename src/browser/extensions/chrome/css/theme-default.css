@@ -288,6 +288,28 @@
   border-color: #349950;
 }
 
+.sd-bin-browser-icon {
+  position: absolute;
+  width: 12px;
+  height: 11px;
+  top: -5px;
+  right: -10px;
+  display: none;
+	background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAALCAYAAABLcGxfAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAFRJREFUeNpi/P//PwMMtLW1ITjYgQATA4mABV2gqqqKEZtCoO0fwBqIcAYKADnpI8htuEzGpoGBVBso8zQhP7HgCyFoyMgDxT9S7KQPQNOI0gAQYABBlBoyuWKGWgAAAABJRU5ErkJggg==') white no-repeat center;
+  padding: 3px;
+  border: 1px solid grey;
+  border-radius: 9px;
+}
+
+.sd-bin:hover .sd-bin-browser-icon {
+  display: block;
+  background-color: white;
+}
+
+.sd-bin-browser-icon:not(.sd-bin-browser-icon-disable):hover {
+  background-color: #ececec;
+}
+
 /* Bin: name */
 .sd-bin-name {
   overflow: hidden;
