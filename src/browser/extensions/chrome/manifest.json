@@ -1,8 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Sorting Desk",
-  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwRxbuYGddPObX/e7TStDUBoblvIi3F1oyKpMIuFZz8tUqaL5VpYtLx6hpD3pwTw0xGiyTciE7gREyN715a5jIU+Sfk1m5THQs2davZrFX1Ri496lXFYlzHm3tIx34oH19oz3a4IzcsoAYPDMrt3BFzUkx88i/eLKgRZbSFeNOOaAH3n96j9lnb1jFK7sTR5t4wkH6MXL5txf/B7AMWPr+tnixEl6LxZy+onJ9l6lXsUq5vyrWWkxUTpd9J77RY9Wlo2UyEDLaTYfANVgy2sJvvFUkRpBZv4CkcDeDXwCY8TCLpXOTIOW+LBopNqTL66h2mKbgrL1bg5TjNO2uqNOOQIDAQAB",
-  "version": "0.1",
+  "version": "0.1.1",
   "options_page": "html/options.html",
   "web_accessible_resources": [
     "js/content/Ui.js",
@@ -12,7 +11,7 @@
     "lib/dossier.js/*.js",
     "html/container.html"
   ],
-  
+
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
@@ -20,7 +19,7 @@
       "css": [ "css/theme-default.css" ]
     }
   ],
-  
+
   "background": {
     "scripts": [ "lib/jquery-2.1.1.min.js", "js/extension/config.js", "js/extension/background.js" ]
   },
@@ -31,8 +30,9 @@
     "activeTab",
     "<all_urls>"
   ],
-  
+
   "icons": {
+    "128": "icon_128.png"
   },
 
   "browser_action": {
@@ -43,6 +43,7 @@
 
   "chrome_url_overrides": {
   },
-  
-  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'"
+
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+  "description": "Social bookmarking tool for gathering text and images to build reports; alpha prototype built on Dossier Stack"
 }
