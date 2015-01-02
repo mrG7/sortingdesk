@@ -32,13 +32,13 @@ man:
 	$(JSDOC) -c="$(JSDOC_CONF)" -d="$(DIR_OUTPUT_DOC)" $(JSDOC_SOURCES)
 
 clean:
-	echo I: removing output directory
+	echo "I: removing output directory"
 	rm -vfr "$(DIR_OUTPUT)"
-	echo I: deleting extraneous files
+	echo "I: deleting extraneous files"
 	find -type f \( -name '*~' -or -name '\#*' -or -name '.\#*' \) -exec rm -fv {} +
 
 deps:
-	echo I: updating dependencies
+	echo "I: updating dependencies"
 	sh/update-deps
 
 ext-chrome:
