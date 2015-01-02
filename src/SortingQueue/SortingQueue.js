@@ -539,7 +539,7 @@ var SortingQueue_ = function (window, $) {
     if(this.requests_.hasOwnProperty(id)) {
       /* Delete request from internal collection if last one, otherwise
        * decrement reference count. */
-      if(this.requests_[id] == 1)
+      if(this.requests_[id] === 1)
         delete this.requests_[id];
       else if(this.requests_[id] > 1)
         --this.requests_[id];
@@ -699,7 +699,7 @@ var SortingQueue_ = function (window, $) {
 
     options.nodes.buttonDismiss.stop().fadeIn(
       options.delays.dismissButtonShow,
-      typeof callback == 'function' ? callback : null);
+      typeof callback === 'function' ? callback : null);
   };
 
   ControllerButtonDismiss.prototype.deactivate = function ()
@@ -854,7 +854,7 @@ var SortingQueue_ = function (window, $) {
 
   ControllerItems.prototype.remove = function (item)
   {
-    if(typeof item == 'undefined') {
+    if(typeof item === 'undefined') {
       var selected = this.selected();
       if (!selected) {
         this.check();
@@ -912,7 +912,7 @@ var SortingQueue_ = function (window, $) {
     var result = null;
 
     this.items_.some(function (item) {
-      if(item.content.node_id == id) {
+      if(item.content.node_id === id) {
         result = item;
         return true;
       }
@@ -943,10 +943,10 @@ var SortingQueue_ = function (window, $) {
     if(!this.node_.children().length)
       return;
 
-    if(typeof variant == 'undefined') {
+    if(typeof variant === 'undefined') {
       variant = this.node_.find('.' + csel);
 
-      if(variant.length == 0)
+      if(variant.length === 0)
         variant = this.node_.children().eq(0);
       else if(variant.length > 1) {
         /* We should never reach here. */
@@ -954,7 +954,7 @@ var SortingQueue_ = function (window, $) {
 
         variant = variant.eq(0);
       }
-    } else if(typeof variant == 'number') {
+    } else if(typeof variant === 'number') {
       if(variant < 0)
         variant = 0;
       else if(variant > this.node_.children().length - 1)
@@ -1142,7 +1142,7 @@ var SortingQueue_ = function (window, $) {
     },
 
     onDragEnd: function (event) {
-      if(DragDropManager.activeNode_ == (event.originalEvent || event).target) {
+      if(DragDropManager.activeNode_=== (event.originalEvent || event).target) {
         DragDropManager.activeNode_ = null;
       }
     },

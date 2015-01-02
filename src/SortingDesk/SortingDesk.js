@@ -517,14 +517,14 @@ var SortingDesk_ = function (window, $) {
 
     bin.node.remove();
 
-    if(bin == this.active_)
+    if(bin === this.active_)
       this.setActive(this.bins_.length && this.bins_[0] || null);
   };
 
   ControllerBins.prototype.getById = function (id)
   {
     return this.find(function (bin) {
-      return bin.id == id;
+      return bin.id === id;
     } );
   };
 
@@ -533,7 +533,7 @@ var SortingDesk_ = function (window, $) {
     var self = this;
 
     /* Don't activate bin if currently active already. */
-    if(this.active_ == bin)
+    if(this.active_ === bin)
       return;
 
     /* Invoke API to activate the bin. If successful, update UI state and force
