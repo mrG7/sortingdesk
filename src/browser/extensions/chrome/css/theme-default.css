@@ -388,6 +388,7 @@
 
 .sd-text-item.sd-selected {
   border: 2px solid #8EB4DA;
+  background-color: #f0f8ff;
 }
 
 .sd-text-item:selected .sd-text-item-title {
@@ -460,7 +461,7 @@ A.sd-text-item-title:hover {
 
 .sd-text-item-close:hover {
   color: black;
-  background-color: #ddd;
+  background-color: #ececec;
 }
 
 .sd-text-item-close:active {
