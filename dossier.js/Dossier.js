@@ -214,9 +214,10 @@ var _DossierJS = function(window, $) {
     //          .method("expanded")
     //          .page(5)
     //          .perpage(10)
-    //          .get(function(labels) {
-    //              console.log('retrieved ' + labels.length + ' labels');
-    //          });
+    //          .get()
+    //            .done(function(labels) {
+    //               console.log('retrieved ' + labels.length + ' labels');
+    //            });
     var LabelFetcher = function(api) {
         this.api = api;
         this._cid = null;
