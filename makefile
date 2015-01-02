@@ -22,7 +22,7 @@ all: build man
 help:
 	echo "Usage: make [ build | man | clean | deps ]"
 
-build: minify
+build: minify ext-chrome
 
 man:
 	test -d "$(DIR_OUTPUT_DOC)" || mkdir -p "$(DIR_OUTPUT_DOC)"
