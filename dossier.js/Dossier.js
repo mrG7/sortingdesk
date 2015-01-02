@@ -494,12 +494,17 @@ var _DossierJS = function(window, $) {
     SortingQueueItems.prototype._moreTexts = function() {
         var self = this;
 
-        if (self._processing) {
+        if (self._processing || !self.query_content_id) {
             var deferred = $.Deferred();
 
             window.setTimeout(function () {
-                console.log('moreTexts in progress, ignoring new request');
-                deferred.reject( { error: "Request in progress" } );
+                if(self._processing) {
+                    console.log('moreTexts in progress, ignoring new request');
+                    deferred.reject( { error: "Request in progress" } );
+                } else {
+                    console.log('Query content id not yet set');
+                    deferred.reject( { error: "No query content id" } );
+                }
             } );
 
             return deferred.promise();
