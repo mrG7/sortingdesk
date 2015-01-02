@@ -299,11 +299,15 @@
   padding: 3px;
   border: 1px solid grey;
   border-radius: 9px;
+  opacity: 0;
+  box-shadow: 1px 1px 1px 0 rgba(50, 50, 50, 0.75);
+  transition: all 200ms;
 }
 
 .sd-bin:hover .sd-bin-browser-icon {
   display: block;
   background-color: white;
+  opacity: 1;
 }
 
 .sd-bin-browser-icon:not(.sd-bin-browser-icon-disable):hover {
