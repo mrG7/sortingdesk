@@ -1054,6 +1054,12 @@ var SortingDesk_ = function (window, $) {
 
   /* Default options */
   var defaults_ = {
+    nodes: {
+      items: null,
+      bins: null,
+      add: null,
+      buttonDismiss: null
+    },
     css: {
       item: 'sd-text-item',
       itemContent: 'sd-text-item-content',
