@@ -10,7 +10,7 @@
  */
 
 
-/*global SortingQueue, $, define */
+/*global SortingQueue, define */
 /*jshint laxbreak:true */
 
 // Notes from Miguel on abstracting out the use of `chrome` in this file:
