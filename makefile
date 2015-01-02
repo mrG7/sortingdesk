@@ -43,6 +43,7 @@ minify:
 	# test -d "$(DIR_OUTPUT_SRC)" || mkdir -p "$(DIR_OUTPUT_SRC)"
 
 ext-chrome:
+	echo "I: packaging chrome extension"
 	(cd src/browser/extensions && zip -r sortingdesk_chrome.zip chrome)
 	mv src/browser/extensions/sortingdesk_chrome.zip ./
 
