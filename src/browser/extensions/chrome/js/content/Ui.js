@@ -40,10 +40,6 @@ var ChromeExtensionUi = (function () {
           operation: "read-file",
           identifier: "html/container.html"
         }, function (html) {
-          /* TODO: domain is hardcoded. */
-          /* Set current domain. */
-          Api.setDomain("mydomain");
-          
           $('body').append(html);
 
           /* Cache jQuery references to nodes used. */
