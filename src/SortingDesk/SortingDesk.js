@@ -580,7 +580,7 @@ var SortingDesk_ = function (window, $) {
       } );
   };
 
-  ControllerBins.prototype.serialise = function ()
+  /* overridable */ ControllerBins.prototype.serialise = function ()
   {
     var bins = [ ];
 
