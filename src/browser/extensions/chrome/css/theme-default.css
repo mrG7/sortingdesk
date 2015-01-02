@@ -619,6 +619,15 @@ A.sd-text-item-title:hover {
   width: 100%;
   border-collapse: collapse;
   border-spacing: 2px;
+  font-family: arial,sans-serif;
+}
+
+.sd-lb-items TABLE TH {
+  font-size: 14px;
+}
+
+.sd-lb-items TABLE TH {
+  font-size: 13px;
 }
 
 .sd-lb-items TABLE TH,
