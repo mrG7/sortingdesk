@@ -394,6 +394,7 @@ var SortingDesk_ = function (window, $) {
     this.hover_ = null;
     this.active_ = null;
     this.spawner_ = null;
+    this.browser_ = null;
 
     /* TODO: at the very least, a `hasConstructor´ method should be created in
      * the `SortingQueue.Sorter´ class.  Ideally, a controller class responsible
@@ -558,6 +559,25 @@ var SortingDesk_ = function (window, $) {
 
     /* Let the extension know that the active bin has changed. */
     this.owner_.sortingQueue.callbacks.invoke('setActiveBin', bin.data);
+  };
+
+  ControllerBins.prototype.browse = function (bin)
+  {
+    var self = this;
+    
+    if(!this.haveBrowser_)
+      throw "Label Browser component unavailable";
+    else if(this.browser_)
+      throw "Label Browser already active";
+
+    (this.browser_ = this.owner_.sortingQueue.instantiate('LabelBrowser',
+                                                          this,
+                                                          bin))
+      .initialise()
+      .done(function () {
+        self.browser_.reset();
+        self.browser_ = null;
+      } );
   };
 
   ControllerBins.prototype.serialise = function ()
