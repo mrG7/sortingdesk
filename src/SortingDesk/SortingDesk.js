@@ -914,19 +914,120 @@ var SortingDesk_ = function (window, $) {
   /**
    * @class
    * */
-  var LabelBrowser = function (owner)
+  var LabelBrowser = function (owner, bin)
   {
+    /* Invoke super-constructor. */
     SortingQueue.Controller.call(this, owner);
+
+    /* Attributes */
+    this.deferred_ = null;
+    this.nodes_ = { };
+    this.bin_ = bin;
+    this.rows_ = [ ];
+
+    /* Getters */
+    this.__defineGetter__('nodes', function () { return this.nodes_; } );
   };
 
   LabelBrowser.prototype = Object.create(SortingQueue.Controller.prototype);
 
   LabelBrowser.prototype.initialise = function ()
   {
+    var self = this;
+
+    this.deferred_ = $.Deferred();
+
+    this.nodes_.container = $('[data-sd-purpose="container-label-browser"]');
+    
+    this.nodes_.buttonClose = this.nodes_.container
+      .find('[data-sd-purpose="label-browser-close"]')
+      .click( function () {
+        self.close();
+      } );
+    
+    this.nodes_.heading = this.nodes_.container
+      .find('[data-sd-purpose="label-browser-heading"]')
+      .html(this.bin_.data.data);
+    
+    this.nodes_.items = this.nodes_.container
+      .find('[data-sd-purpose="label-browser-items"]');
+
+    this.nodes_.table = this.nodes_.items.find('TABLE');
+
+    this.show();
+
+    var cbs = this.owner_.owner.sortingQueue.callbacks,
+        api = cbs.invoke('getApi');
+
+    (new (cbs.invoke('getClass', 'LabelFetcher'))(api))
+      .cid(this.bin_.id)
+      .which('positive')
+      .get()
+      .done(function (labels) {
+        console.log('retrieved LABEL:', labels.slice());
+
+        var fnGetNext = function () {
+          if(labels.length) {
+            var cid = labels.shift().cid2;
+            
+            api.fcGet(cid)
+              .done(function(fc) {
+                console.log('retrieved FC:', fc);
+                fnGetNext();
+              } )
+              .fail(function () {
+                console.log('Failed to retrieve feature collection (id=%s)',
+                            cid);
+              } );
+          } else
+            console.log('Done loading feature collections');
+        };
+
+        fnGetNext();
+      } )
+      .fail(function () {
+        console.log('Failed to retrieve labels');
+      } );
+
+
+    return this.deferred_.promise();
   };
 
   LabelBrowser.prototype.reset = function ()
   {
+    /* TODO: implement! */
+  };
+
+  LabelBrowser.prototype.show = function ()
+  {
+    this.nodes_.container.css( {
+      transform: 'scale(1,1)',
+      opacity: 1
+    } );
+  };
+  
+  LabelBrowser.prototype.close = function ()
+  {
+    this.nodes_.container
+      .css( {
+        transform: 'scale(.2,.2)',
+        opacity: 0
+      } );
+    
+    this.deferred_.resolve();
+  };
+
+
+  var LabelBrowserRow = function (owner, label)
+  {
+    var row = $('<tr><td>' + label.cid2 + '</td>'
+                + '<td>undefined</td>'
+                + '<td>' + label.annotator_id + '</td>');
+    
+    owner.nodes.table.append(row);
+  };
+
+  LabelBrowserRow.prototype = {
   };
 
 
