@@ -433,11 +433,13 @@ A.sd-text-item-title:hover {
 .sd-text-item:hover .sd-text-item-close,
 .sd-text-item.sd-selected .sd-text-item-close {
   display: block;
+  opacity: 1;
 }
 
 .sd-text-item.sd-dragging:hover .sd-text-item-close,
 .sd-text-item.sd-selected.sd-dragging .sd-text-item-close {
   display: none;
+  opacity: 0;
 }
 
 .sd-text-item-close {
@@ -452,6 +454,7 @@ A.sd-text-item-title:hover {
   border-radius: 12px;
   line-height: 7px;
   box-shadow: 1px 1px 1px 0 rgba(50, 50, 50, 0.75);
+  transition: all 200ms;
 }
 
 .sd-text-item-close,
