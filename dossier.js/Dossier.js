@@ -293,7 +293,7 @@ var _DossierJS = function(window, $) {
             throw "unrecognized web service: " + this._which;
         }
         if ([undefined, 'connected', 'expanded'].indexOf(this._method) === -1) {
-            throw "unrecognize positive label method: " + this._method;
+            throw "unrecognized positive label method: " + this._method;
         }
         if (!und(this._method) && this._which != 'positive') {
             throw "method can only be used with positive labels";
