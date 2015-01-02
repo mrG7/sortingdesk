@@ -1,11 +1,11 @@
 # makefile --- Master make file
-# 
+#
 # Copyright (c) 2014 Diffeo
-# 
+#
 # Author: Miguel Guedes <miguel@miguelguedes.org>
 #
 # Comments:
-# 
+#
 
 
 DIR_OUTPUT=out
@@ -40,5 +40,9 @@ clean:
 deps:
 	echo I: updating dependencies
 	sh/update-deps
+
+ext-chrome:
+	(cd src/browser/extensions && zip -r sortingdesk_chrome.zip chrome)
+	mv src/browser/extensions/sortingdesk_chrome.zip ./
 
 .SILENT:
