@@ -734,12 +734,13 @@ var SortingDesk_ = function (window, $) {
   /* overridable */ Bin.prototype.renderBrowserIcon = function (node)
   {
     if(this.owner_.haveBrowser) {
-      var icon = $('<a class="' + this.owner_.owner.options.css.labelBrowser
+      var self = this,
+          icon = $('<a class="' + this.owner_.owner.options.css.iconLabelBrowser
                    + '" href="#"></a>')
             .on( {
               mousedown: function () { return false; },
               click: function () {
-                console.log("Label Browser clicked");
+                self.owner_.browse(self);
                 return false;
               }
             } );
