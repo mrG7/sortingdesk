@@ -214,9 +214,10 @@ var _DossierJS = function(window, $) {
     //          .method("expanded")
     //          .page(5)
     //          .perpage(10)
-    //          .get(function(labels) {
-    //              console.log('retrieved ' + labels.length + ' labels');
-    //          });
+    //          .get()
+    //            .done(function(labels) {
+    //               console.log('retrieved ' + labels.length + ' labels');
+    //            });
     var LabelFetcher = function(api) {
         this.api = api;
         this._cid = null;
@@ -286,16 +287,16 @@ var _DossierJS = function(window, $) {
     // to an array of `Label`s.
     LabelFetcher.prototype.get = function() {
         if (!this._cid) {
-            throw new "query content id is not set";
+            throw "query content id is not set";
         }
         if (['direct', 'positive', 'negative'].indexOf(this._which) === -1) {
-            throw new "unrecognized web service: " + this._which;
+            throw "unrecognized web service: " + this._which;
         }
         if ([undefined, 'connected', 'expanded'].indexOf(this._method) === -1) {
-            throw new "unrecognize positive label method: " + this._method;
+            throw "unrecognized positive label method: " + this._method;
         }
         if (!und(this._method) && this._which != 'positive') {
-            throw new "method can only be used with positive labels";
+            throw "method can only be used with positive labels";
         }
         var cid = encodeURIComponent(serialize(this._cid)),
             endpoint = 'label/' + cid + '/' + this._which,

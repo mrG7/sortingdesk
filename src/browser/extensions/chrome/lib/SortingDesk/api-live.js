@@ -150,6 +150,19 @@ var Api = (function() {
         return ["web", id].join("|");
     };
 
+    var getClass = function (cl)
+    {
+        return DossierJS.hasOwnProperty(cl)
+            && typeof DossierJS[cl] === 'function'
+            ? DossierJS[cl]
+            : null;
+    };
+
+    var getApi = function ()
+    {
+        return api;
+    };
+
     return $.extend({}, qitems.callbacks(), {
         setDomain: setDomain,
         getDomain: getDomain,
@@ -160,7 +173,9 @@ var Api = (function() {
         addLabel: addLabel,
         mergeBins: mergeBins,
         generateId: generateId,
-        makeId: makeId
+        makeId: makeId,
+        getClass: getClass,
+        getApi: getApi
     });
 } )();
 

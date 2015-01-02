@@ -207,27 +207,27 @@ var SortingQueue_ = function (window, $) {
       if(arguments.length < 1)
         throw "Class name required";
 
+      /* Invoke factory method to instantiate class, if it exists. */
       var descriptor = this.options_.constructors['create' + arguments[0]];
 
-      /* Invoke factory method to instantiate class, if it exists. */
       if(descriptor)
         return descriptor.apply(null, [].slice.call(arguments, 1));
 
       /* Factory method doesn't exist. Ensure class constructor has been passed
        * and instantiate it. */
-      if(!this.options_.constructors.hasOwnProperty(arguments[0]))
-        throw "Class or factory non existent: " + arguments[0];
-
       descriptor = this.options_.constructors[arguments[0]];
+      
+      if(!descriptor)
+        throw "Class or factory non existent: " + arguments[0];
 
       /* We don't want to use `eval' so we employ a bit of trickery to
        * instantiate a class using variable arguments. */
-      var fakeClass = function () { },
+      var FakeClass = function () { },
           object;
 
       /* Instantiate class prototype. */
-      fakeClass.prototype = descriptor.prototype;
-      object = new fakeClass();
+      FakeClass.prototype = descriptor.prototype;
+      object = new FakeClass();
 
       /* Now simply call class constructor directly and keep reference to
        * correct constructor. */

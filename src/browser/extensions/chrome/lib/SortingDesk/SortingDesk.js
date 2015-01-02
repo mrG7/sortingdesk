@@ -394,13 +394,27 @@ var SortingDesk_ = function (window, $) {
     this.hover_ = null;
     this.active_ = null;
     this.spawner_ = null;
+    this.browser_ = null;
 
+    /* TODO: at the very least, a `hasConstructor´ method should be created in
+     * the `SortingQueue.Sorter´ class.  Ideally, a controller class responsible
+     * for constructors should be created instead and the `instantiate´ and
+     * `hasContructor´ methods should be placed there. */
+    this.haveBrowser_ = owner.sortingQueue.options.constructors
+      .hasOwnProperty('createLabelBrowser')
+      || owner.sortingQueue.options.constructors
+      .hasOwnProperty('LabelBrowser');
+                
     /* Define getters. */
     this.__defineGetter__("bins", function () { return this.bins_; } );
     this.__defineGetter__("hover", function () { return this.hover_; } );
     this.__defineGetter__("active", function () { return this.active_; } );
     this.__defineGetter__("node", function () {
       return this.owner_.options.nodes.bins;
+    } );
+    
+    this.__defineGetter__("haveBrowser", function () {
+      return this.haveBrowser_;
     } );
 
     /* Instantiate spawner controller. */
@@ -547,7 +561,26 @@ var SortingDesk_ = function (window, $) {
     this.owner_.sortingQueue.callbacks.invoke('setActiveBin', bin.data);
   };
 
-  ControllerBins.prototype.serialise = function ()
+  ControllerBins.prototype.browse = function (bin)
+  {
+    var self = this;
+    
+    if(!this.haveBrowser_)
+      throw "Label Browser component unavailable";
+    else if(this.browser_)
+      throw "Label Browser already active";
+
+    (this.browser_ = this.owner_.sortingQueue.instantiate('LabelBrowser',
+                                                          this,
+                                                          bin))
+      .initialise()
+      .done(function () {
+        self.browser_.reset();
+        self.browser_ = null;
+      } );
+  };
+
+  /* overridable */ ControllerBins.prototype.serialise = function ()
   {
     var bins = [ ];
 
@@ -604,6 +637,12 @@ var SortingDesk_ = function (window, $) {
         mouseleave: function () {
           self.owner_.onMouseLeave_();
           return false;
+        },
+        mousedown: function() {
+          $(this).addClass(parentOwner.options.css.mouseDown);
+        },
+        mouseup: function () {
+          $(this).removeClass(parentOwner.options.css.mouseDown);
         }
       } );
 
@@ -668,6 +707,7 @@ var SortingDesk_ = function (window, $) {
 
         dragend: function (e) {
           parentOwner.sortingQueue.dismiss.deactivate();
+          self.node_.removeClass(parentOwner.options.css.mouseDown);
         }
       } );
     }, 0);
@@ -689,6 +729,26 @@ var SortingDesk_ = function (window, $) {
       id: this.data_.id,
       data: this.data_.data
     };
+  };
+
+  /* overridable */ Bin.prototype.renderBrowserIcon = function (node)
+  {
+    if(this.owner_.haveBrowser) {
+      var self = this,
+          icon = $('<a class="' + this.owner_.owner.options.css.iconLabelBrowser
+                   + '" href="#"></a>')
+            .on( {
+              mousedown: function () { return false; },
+              click: function () {
+                self.owner_.browse(self);
+                return false;
+              }
+            } );
+      
+      node.prepend(icon);
+    }
+
+    return node;
   };
 
 
@@ -720,10 +780,11 @@ var SortingDesk_ = function (window, $) {
 
   BinDefault.prototype.render = function ()
   {
-    var css = this.owner_.owner.options.css;
+    var css = this.owner_.owner.options.css,
+        node = $('<div class="' + css.bin + '"><div class="' + css.binName + '">'
+                 + this.data_.data + '</div></div>');
 
-    return $('<div class="' + css.bin + '"><div class="' + css.binName + '">'
-             + this.data_.data + '</div></div>');
+    return this.renderBrowserIcon(node);
   };
 
 
@@ -871,21 +932,150 @@ var SortingDesk_ = function (window, $) {
   };
 
 
+  /**
+   * @class
+   * */
+  var LabelBrowser = function (owner, bin)
+  {
+    /* Invoke super-constructor. */
+    SortingQueue.Controller.call(this, owner);
+
+    /* Attributes */
+    this.deferred_ = null;
+    this.nodes_ = { };
+    this.bin_ = bin;
+    this.rows_ = [ ];
+
+    /* Getters */
+    this.__defineGetter__('nodes', function () { return this.nodes_; } );
+  };
+
+  LabelBrowser.prototype = Object.create(SortingQueue.Controller.prototype);
+
+  LabelBrowser.prototype.initialise = function ()
+  {
+    var self = this;
+
+    this.deferred_ = $.Deferred();
+
+    this.nodes_.container = $('[data-sd-purpose="container-label-browser"]');
+    
+    this.nodes_.buttonClose = this.nodes_.container
+      .find('[data-sd-purpose="label-browser-close"]')
+      .click( function () {
+        self.close();
+      } );
+    
+    this.nodes_.heading = this.nodes_.container
+      .find('[data-sd-purpose="label-browser-heading"]')
+      .html(this.bin_.data.data);
+    
+    this.nodes_.items = this.nodes_.container
+      .find('[data-sd-purpose="label-browser-items"]');
+
+    this.nodes_.table = this.nodes_.items.find('TABLE');
+
+    this.show();
+
+    var cbs = this.owner_.owner.sortingQueue.callbacks,
+        api = cbs.invoke('getApi');
+
+    (new (cbs.invoke('getClass', 'LabelFetcher'))(api))
+      .cid(this.bin_.id)
+      .which('positive')
+      .get()
+      .done(function (labels) {
+        console.log('retrieved LABEL:', labels.slice());
+
+        var fnGetNext = function () {
+          if(labels.length) {
+            var cid = labels.shift().cid2;
+            
+            api.fcGet(cid)
+              .done(function(fc) {
+                console.log('retrieved FC:', fc);
+                fnGetNext();
+              } )
+              .fail(function () {
+                console.log('Failed to retrieve feature collection (id=%s)',
+                            cid);
+              } );
+          } else
+            console.log('Done loading feature collections');
+        };
+
+        fnGetNext();
+      } )
+      .fail(function () {
+        console.log('Failed to retrieve labels');
+      } );
+
+
+    return this.deferred_.promise();
+  };
+
+  LabelBrowser.prototype.reset = function ()
+  {
+    /* TODO: implement! */
+  };
+
+  LabelBrowser.prototype.show = function ()
+  {
+    this.nodes_.container.css( {
+      transform: 'scale(1,1)',
+      opacity: 1
+    } );
+  };
+  
+  LabelBrowser.prototype.close = function ()
+  {
+    this.nodes_.container
+      .css( {
+        transform: 'scale(.2,.2)',
+        opacity: 0
+      } );
+    
+    this.deferred_.resolve();
+  };
+
+
+  var LabelBrowserRow = function (owner, label)
+  {
+    var row = $('<tr><td>' + label.cid2 + '</td>'
+                + '<td>undefined</td>'
+                + '<td>' + label.annotator_id + '</td>');
+    
+    owner.nodes.table.append(row);
+  };
+
+  LabelBrowserRow.prototype = {
+  };
+
+
+  /* Default options */
   var defaults_ = {
+    nodes: {
+      items: null,
+      bins: null,
+      add: null,
+      buttonDismiss: null
+    },
     css: {
-      item: 'sdw-text-item',
-      itemContent: 'sdw-text-item-content',
-      itemTitle: 'sdw-text-item-title',
-      itemClose: 'sdw-text-item-close',
-      itemSelected: 'sdw-selected',
-      itemDragging: 'sdw-dragging',
-      bin: 'sdw-bin',
-      binName: 'sdw-bin-name',
-      binAnimateAssign: 'sdw-assign',
-      binAdding: 'sdw-adding',
-      binActive: 'sdw-active',
-      buttonAdd: 'sdw-button-add',
-      droppableHover: 'sdw-droppable-hover'
+      item: 'sd-text-item',
+      itemContent: 'sd-text-item-content',
+      itemTitle: 'sd-text-item-title',
+      itemClose: 'sd-text-item-close',
+      itemSelected: 'sd-selected',
+      itemDragging: 'sd-dragging',
+      bin: 'sd-bin',
+      binName: 'sd-bin-name',
+      binAnimateAssign: 'sd-assign',
+      binAdding: 'sd-adding',
+      binActive: 'sd-active',
+      buttonAdd: 'sd-button-add',
+      droppableHover: 'sd-droppable-hover',
+      mouseDown: 'sd-mousedown',
+      iconLabelBrowser: 'sd-bin-browser-icon'
     },
     delays: {                   /* In milliseconds.     */
       binRemoval: 200,          /* Bin is removed from container. */
@@ -895,10 +1085,13 @@ var SortingDesk_ = function (window, $) {
       ControllerBins: ControllerBins,
       Bin: BinDefault,
       BinImage: BinImageDefault,
-      ControllerBinSpawner: ControllerBinSpawnerDefault
+      ControllerBinSpawner: ControllerBinSpawnerDefault,
+      LabelBrowser: LabelBrowser
     }
   };
 
+
+  /* Module public API */
   return {
     Sorter: Sorter,
     ControllerBins: ControllerBins,
@@ -906,7 +1099,8 @@ var SortingDesk_ = function (window, $) {
     BinDefault: BinDefault,
     BinImageDefault: BinImageDefault,
     ControllerBinSpawner: ControllerBinSpawner,
-    ControllerBinSpawnerDefault: ControllerBinSpawnerDefault
+    ControllerBinSpawnerDefault: ControllerBinSpawnerDefault,
+    LabelBrowser: LabelBrowser
   };
 
 };
