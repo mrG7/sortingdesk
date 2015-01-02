@@ -6,12 +6,10 @@ First iteration would include modules and classes.
 *** TODO Document required options
 =SortingQueue=, =SortingDesk= and possibly other components, could do with documentation about required and optional options, callbacks and so on.
 
-*** DONE Rename components
-- State "DONE"       from "TODO"       [2014-12-24 Wed 13:37]
-+ Rename existing =SortingDesk= component to =SortingBinsExample= and its source file to =sorting-bins-example.js=.
-+ Rename =SortingDossier= component to =SortingDesk=.
-  
 ** =SortingQueue= [0%]
+*** TODO Create controller responsible for constructors
+The method =instantiate= should be moved there and a new method  =hasConstructor= created.
+
 *** TODO Rename CSS class names alluding to the old concept of text item
 Some CSS class names are still in use which employ the old concept of text item. These should be renamed such that the "text" word is removed.
 
@@ -24,7 +22,7 @@ See =ProtarchBinSpawner=. Specifically, there are instances where the events att
 
 *** TODO Items controller to notify client when no more items available
 
-*** TODO [#B] Prefix text-items' node ids
+*** TODO Prefix text-items' node ids
 - State "TODO"       from "WAIT"       [2014-09-07 Sun 08:16]
 - State "WAIT"       from "TODO"       [2014-09-05 Fri 10:41] \\
   Currently waiting to hear from support as to whether ids are guaranteed to always be unique.
@@ -33,15 +31,43 @@ See =ProtarchBinSpawner=. Specifically, there are instances where the events att
 *** WAIT Implement Events controller based on the publisher-subscriber design pattern
 - State "WAIT"       from "TODO"       [2014-10-23 Thu 14:42]
   
-** =SortingDesk= [28%]
+** =SortingDesk= [9%]
+*** =LabelBrowser= [100%]
+
+**** TODO Implement =reset=
+As it stands, the component is not resetting its state.
+
+**** TODO Decouple component from =SortingDesk.js=
+Component needs to stand on its own, have its own set of options, callbacks and so on. Being so tightly coupled with the =SortingDesk= module means that currently the =options= structure is logically nonsensical and it is unable to receive notifications for loading events, among other problems.
+
+*** TODO Implement HTML declarative form as mechanism of assigning context
+See =LabelBrowser= and how it uses HTML5 =data=-prefixed tags to give DOM nodes a context. Essentially, this mechanism would allow us to avoid forcing the client to pass jQuery object references to DOM nodes needed, thereby simplifying the process.
+
+Question: AngularJS uses the prefix =ng-= for its many HTML tags. Perhaps we could mirror this practice and thus not have to rely on HTML5's =data-= prefixed tags as we currently do? Is it a standards compliant way, however?
+
+*** TODO Revisit =options=
+Sorter and Label Browser's options reside together but Sorter's options are not prefixed.
+
+*** TODO =options.nodes.add=
+Inconsistency: =buttonDismissed= is prefixed but =add= isn't.
+
+*** TODO Assess whether instance should keep reference to =options= object
+Should it rely on =SortingQueue= instead?
+
+*** TODO Time to think about decoupling =SortingDesk.js=
+
+*** TODO Add option: create initial bin by default
+Enable client to specify whether Sorting Desk should create a default bin using the current page as its content id if no state can be retrieved from local storage.
+
+*** TODO Throw exception when instantiating if not on valid page
+URL of page must have a valid HTTP[S] protocol. Disallow on any other page and throw exception.
+
 *** TODO Allow specialisation of =ControllerButtonDismiss=
 
 *** TODO Tentative: allow =SortingDesk='s constructor to receive a deferred object
 Allow the constructor of =SortingDesk= to receive an *optional* deferred object provided, and which is under the responsibility of the user, that can be actioned upon depending on the result of the initialisation sequence.
 
-Ultimately this optional mechanism would allow the user to receive perfectly timed notifications regarding Sorting Desk's initialisation state as and when they happen.
-
-*** TODO =ControllerBins=: =onItemDropped= unused
+Ultimately this optional mechanism would allow the client to receive a perfectly timed notification regarding Sorting Desk's initialisation state as and when it happens.
 
 *** TODO =ControllerBinSpawner=: =addManual= can't be supported as it stands
 + API requires knowledge of the bin's =label=.
@@ -61,14 +87,14 @@ Ideally, each bin should look like the item that was first dropped to create tha
 - State "WAIT"       from "TODO"       [2014-10-15 Wed 13:56] \\
   Probable unwanted feature.
   
-*** WAIT [#A] Allow bin statements to be edited
+*** WAIT Allow bin statements to be edited
 - State "WAIT"       from "TODO"       [2014-10-10 Fri 16:11] \\
   This will most likely require involvement of the client via a callback.
 - State "TODO"       from "WAIT"       [2014-09-05 Fri 10:42]
 - State "WAIT"       from "TODO"       [2014-08-22 Fri 13:24] \\
   Not proceeding with this until it's clear whether bins based on existing text items are even editable.
   
-*** WAIT [#B] Do not allow duplicate bins
+*** WAIT Do not allow duplicate bins
 - State "WAIT"       from "CANCELED"   [2014-11-26 Wed 09:09] \\
   Reissuing TODO item as there is validity in the concept.
 - State "CANCELED"   from "WAIT"       [2014-09-04 Thu 13:02] \\
@@ -76,12 +102,6 @@ Ideally, each bin should look like the item that was first dropped to create tha
 - State "WAIT"       from "TODO"       [2014-08-22 Fri 12:44] \\
   Specifications aren't clear as to how bins that are based on existing text items
   are created.
-  
-*** DONE Append string `live´ to API source file
-- State "DONE"       from "TODO"       [2014-12-24 Wed 13:46]
-
-*** DONE Handle removal of currently active bin
-- State "DONE"       from "TODO"       [2014-11-26 Wed 16:26]
   
 *** CANCELED =addBin=: how to deal with the =ranker= argument?
 - State "CANCELED"   from "TODO"       [2014-11-26 Wed 15:07] \\
@@ -91,19 +111,13 @@ Ideally, each bin should look like the item that was first dropped to create tha
 - State "CANCELED"   from "TODO"       [2014-11-26 Wed 15:06] \\
   =addBin= callback no longer used.
   
-** =SortingDossier= [100%]
-*** DONE Remove browser-specific statements from =SortingDossier= module
-- State "DONE"       from "TODO"       [2014-12-23 Tue 11:59]
-  
-*** DONE Decouple from Datawake
-- State "DONE"       from "TODO"       [2014-12-22 Mon 18:11]
-  
-*** DONE Rename to =SortingDossier=
-- State "DONE"       from "TODO"       [2014-12-22 Mon 18:11]
-  
-*** DONE Realign loading and queue empty notifications when both present
-- State "DONE"       from "TODO"       [2014-12-22 Mon 18:11]
-  
+** Extension [0%]
+*** All [100%]
+*** Chrome [80%]
+**** TODO Do not show activator when not on valid page
+URL of page must have a valid HTTP[S] protocol. Disallow on any other page.
+
+**** TODO [#A] Add option: Dossier stack API URL
 ** API [0%]
 *** All [0%]
 **** TODO Move all API-related files into respective component directory
@@ -111,10 +125,7 @@ Ideally, each bin should look like the item that was first dropped to create tha
 **** TODO Add timeout to AJAX calls
 
 *** Live [100%]
-**** DONE =getRandomLabel=: rename to =getRandomItem=
-- State "DONE"       from "TODO"       [2014-12-06 Sat 11:42]
-  
-*** Mock [100%]
+** Mock [100%]
 
 ** Examples [33%]
 *** TODO Fix broken examples
@@ -126,18 +137,11 @@ It seems only the =sorting_desk-live= example works at the moment.
   
 **** TODO No content ids
 
-*** DONE Revisit =sorting_desk-live.html= example
-- State "DONE"       from "TODO"       [2014-12-06 Sat 11:42]
-It no longer runs and its CSS is invalid compared to the =sorting_desk-mock-default.html= example.
-
 ** CSS [0%]
 *** TODO Ensure CSS contained by Sorting Desk and Queue components is (still) valid
 Many changes have been made which must have surely affected the CSS.
 
 ** Tests [9%]
-*** DONE init: enforce test compartmentalisation through cloning of nodes
-- State "DONE"       from "TODO"       [2014-12-06 Sat 11:43]
-  
 *** TODO instance: ensure reset doesn't run twice
 
 *** TODO instance: require =visibleItems= to be greater than 0
