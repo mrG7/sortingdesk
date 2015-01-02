@@ -10,7 +10,8 @@
     "lib/SortingQueue/*.js",
     "lib/SortingDesk/*.js",
     "lib/dossier.js/*.js",
-    "html/container.html"
+    "html/container.html",
+    "media/*"
   ],
   
   "content_scripts": [
