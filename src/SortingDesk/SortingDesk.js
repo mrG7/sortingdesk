@@ -1075,8 +1075,7 @@ var SortingDesk_ = function (window, $) {
       buttonAdd: 'sd-button-add',
       droppableHover: 'sd-droppable-hover',
       mouseDown: 'sd-mousedown',
-      labelBrowser: 'sd-bin-browser-icon',
-      labelBrowserDisabled: 'sd-bin-browser-icon-disable'
+      iconLabelBrowser: 'sd-bin-browser-icon'
     },
     delays: {                   /* In milliseconds.     */
       binRemoval: 200,          /* Bin is removed from container. */
