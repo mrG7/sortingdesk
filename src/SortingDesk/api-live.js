@@ -29,6 +29,7 @@ var Api_ = (function (window, $, CryptoJS) {
     api_ = new DossierJS.API(url || DEFAULT_DOSSIER_STACK_API_URL);
     qitems_ = new DossierJS.SortingQueueItems(api_, 'index_scan', '', 'unknown');
 
+    /* Return module public API -- post initialization */
     return {
       getCallbacks: getCallbacks,
       setQueryContentId: setQueryContentId,
@@ -182,7 +183,8 @@ var Api_ = (function (window, $, CryptoJS) {
       });
   };
 
-  
+
+  /* return module public API -- pre-initialization*/
   return {
     initialize: initialize
   };
