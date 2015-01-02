@@ -185,9 +185,8 @@ var SortingDesk_ = function (window, $, Api) {
         else if(document.selection && document.selection.type !== "Control")
           result.data = document.selection.createRange().text;
 
-        if(result.data) {
-          result.id = this.api_.generateId(result.data);
-        }
+        if(result.data)
+          result.id = this.api_.generateContentId(result.data);
       }
 
       /* Clear the currently active node. */
