@@ -946,7 +946,8 @@ var SortingDesk_ = function (window, $) {
 
   LabelBrowser.prototype.initialise = function ()
   {
-    var self = this;
+    var self = this,
+        callbacks = this.owner_.owner.sortingQueue.callbacks;
 
     this.deferred_ = $.Deferred();
 
@@ -967,12 +968,9 @@ var SortingDesk_ = function (window, $) {
 
     this.nodes_.table = this.nodes_.items.find('TABLE');
 
-    this.show();
+    var api = callbacks.invoke('getApi');
 
-    var cbs = this.owner_.owner.sortingQueue.callbacks,
-        api = cbs.invoke('getApi');
-
-    (new (cbs.invoke('getClass', 'LabelFetcher'))(api))
+    (new (callbacks.invoke('getClass', 'LabelFetcher'))(api))
       .cid(this.bin_.id)
       .which('positive')
       .get()
@@ -1002,6 +1000,13 @@ var SortingDesk_ = function (window, $) {
         console.log('Failed to retrieve labels');
       } );
 
+    /* NOTE: This should really be an event. */
+    callbacks.invoke({
+      name: "onLabelBrowserInitialised",
+      mandatory: false
+    }, this.nodes_.container);
+
+    this.show();
 
     return this.deferred_.promise();
   };
