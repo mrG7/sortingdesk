@@ -8,11 +8,11 @@
  */
 
 
-/*global DossierJS, $ */
+/*global define, DossierJS, $, CryptoJS */
 /*jshint laxbreak:true */
 
 
-var Api = (function() {
+var Api_ = (function (window, $, CryptoJS) {
   /* Constants */
   var DEFAULT_DOSSIER_STACK_API_URL = 'http://54.174.195.250:8080';
 
@@ -186,4 +186,13 @@ var Api = (function() {
   return {
     initialize: initialize
   };
-} )();
+} );
+
+
+/* Compatibility with RequireJs. */
+if(typeof define === "function" && define.amd) {
+  define("API", [ "jquery", "CryptoJS" ], function ($, CryptoJS) {
+    return _(window, $, CryptoJS);
+  });
+} else
+  window.Api = Api_(window, $, CryptoJS);
