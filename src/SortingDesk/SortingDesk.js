@@ -80,22 +80,10 @@ var SortingDesk_ = function (window, $) {
     /* Restore state from local storage. */
     this.load_()
       .done(function (bins) {
-        /* If no bins were retrievable from local storage, create a default bin
-         * for the current page.  Otherwise, activate the bin that is the
-         * currently active one (as specified in `options.activeBinId´) or, if
-         * one isn't yet active, use the first element as the active bin. */
-        if(!bins || bins.length === 0) {
-          /* Set `queryId´ accordingly. */
-          queryId = self.sortingQueue_.callbacks
-            .invoke('makeId', (Url.encode(window.location.href)));
-
-          bins = [ { id: queryId,
-                     data: window.document.title.trim()
-                           || '&lt; no-name &gt;' } ];
-
-          /* Forcefully save state since a bin was added by default. */
-          window.setTimeout(function () { self.save(); });
-        } else {
+        /* If bins were retrieved from local storage, activate the bin that is
+         * the currently active one (as specified in `options.activeBinId´) or,
+         * if one isn't yet active, use the first element as the active bin. */
+        if(bins && bins.length > 0) {
           var index = -1;
 
           /* Look for the active bin, if one has been specified, and set query
