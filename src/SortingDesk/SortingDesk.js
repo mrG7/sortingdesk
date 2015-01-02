@@ -54,16 +54,7 @@ var SortingDesk_ = function (window, $, CryptoJS) {
    * @param   {Object}    opts  Initialisation options (please refer to
    *                            `defaults_' at the end of this source file)
    * @param   {Object}    cbs   Map of all callbacks in a key to function
-   *                            manner. These are: 
-   *                            + makeId
-   *                            + setQueryContentId
-   *                            + generateId
-   *                            + mergeBins
-   *                            + updateQueryFc
-   *                            + addLabel
-   *                            + getBins
-   *                            + setBins
-   *                            + setActiveBin
+   *                            manner.
    * */
   var Sorter = function (opts, cbs)
   {
