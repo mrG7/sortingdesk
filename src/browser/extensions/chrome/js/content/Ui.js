@@ -231,7 +231,7 @@ var ChromeExtensionUi = (function () {
     {
       var self = this;
       
-      return Api.moreTexts(n)
+      return ui_.sortingDesk.api.getCallbacks().moreTexts(n)
         .done(function (items) {
           if(!items || !(items instanceof Array) || items.length === 0)
             ui_.nodes.empty.fadeIn('slow');
