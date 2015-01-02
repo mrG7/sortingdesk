@@ -2,8 +2,6 @@
  * @file Sorting bins example.
  * @copyright 2014 Diffeo
  *
- * @author Miguel Guedes <miguel@miguelguedes.org>
- *
  * Comments:
  * Uses the Sorting Queue component.
  *

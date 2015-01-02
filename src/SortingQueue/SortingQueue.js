@@ -2,8 +2,6 @@
  * @file Sorting Queue component.
  * @copyright 2014 Diffeo
  *
- * @author Miguel Guedes <miguel@miguelguedes.org>
- *
  * Comments:
  *
  *

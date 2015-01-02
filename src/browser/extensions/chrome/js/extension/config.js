@@ -2,8 +2,6 @@
  * @file Module responsible for the extension's configuration state.
  * @copyright 2014 Diffeo
  *
- * @author Miguel Guedes <miguel@miguelguedes.org>
- *
  * Comments:
  *
  */

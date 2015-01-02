@@ -2,8 +2,6 @@
  * @file Sorting Desk component.
  * @copyright 2014 Diffeo
  *
- * @author Miguel Guedes <miguel@miguelguedes.org>
- *
  * Comments:
  * Uses the `SortingQueue' component.
  *
@@ -13,7 +11,7 @@
 /*global SortingQueue, define */
 /*jshint laxbreak:true */
 
-// Notes from Miguel on abstracting out the use of `chrome` in this file:
+// Notes from the contractor on abstracting out the use of `chrome` in this file:
 //
 // + a mechanism to send notifications whenever in need of saving state. I
 // thought we could use the existing (outwards facing) callbacks and extending

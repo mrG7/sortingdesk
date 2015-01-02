@@ -2,8 +2,6 @@
  * @file Google Chrome extension employing the Sorting Desk component.
  * @copyright 2014 Diffeo
  *
- * @author Miguel Guedes <miguel@miguelguedes.org>
- *
  * Comments:
  *
  */

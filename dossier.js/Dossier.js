@@ -2,8 +2,6 @@
  *
  * Copyright (C) 2014 Diffeo
  *
- * Author: Andrew Gallant <andrew@diffeo.com>
- *
  * Comments:
  *
  *

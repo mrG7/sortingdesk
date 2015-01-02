@@ -1,7 +1,6 @@
 /**
  * @file Test specifications runner.
  * @copyright 2014 Diffeo
- * @author Miguel Guedes <miguel@miguelguedes.org>
  *
  * Comments:
  *

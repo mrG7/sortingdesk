@@ -2,8 +2,6 @@
 #
 # Copyright (c) 2014 Diffeo
 #
-# Author: Miguel Guedes <miguel@miguelguedes.org>
-#
 # Comments:
 #
 
