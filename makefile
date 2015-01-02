@@ -22,10 +22,7 @@ all: build man
 help:
 	echo "Usage: make [ build | man | clean | deps ]"
 
-build:
-	>&2 echo "E: minification of javascript files not yet implemented" \
-		&& exit 1
-	# test -d "$(DIR_OUTPUT_SRC)" || mkdir -p "$(DIR_OUTPUT_SRC)"
+build: minify
 
 man:
 	test -d "$(DIR_OUTPUT_DOC)" || mkdir -p "$(DIR_OUTPUT_DOC)"
@@ -40,6 +37,10 @@ clean:
 deps:
 	echo "I: updating dependencies"
 	sh/update-deps
+
+minify:
+	>&2 echo "W: minification of javascript files not yet implemented"
+	# test -d "$(DIR_OUTPUT_SRC)" || mkdir -p "$(DIR_OUTPUT_SRC)"
 
 ext-chrome:
 	(cd src/browser/extensions && zip -r sortingdesk_chrome.zip chrome)
