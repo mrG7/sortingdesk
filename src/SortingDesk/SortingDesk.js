@@ -62,9 +62,14 @@ var SortingDesk_ = function (window, $, CryptoJS) {
         queryId;
 
     console.log("Initialising Sorting Desk UI");
+    
+    /* TODO: must pass in Dossier API URL. */
+    this.api_ = Api.initialize(this);
 
     this.options_ = $.extend(true, $.extend(true, {}, defaults_), opts);
-    this.sortingQueue_ = new SortingQueue.Sorter(this.options_, cbs);
+    this.sortingQueue_ = new SortingQueue.Sorter(
+      this.options_,
+      $.extend(cbs, this.api_.getCallbacks()));
 
     /* Restore state from local storage. */
     this.load_()
@@ -87,11 +92,12 @@ var SortingDesk_ = function (window, $, CryptoJS) {
           }
 
           queryId = bins[index === -1 ? 0 : index].id;
-        }
 
-        /* Set query content before initialising SortingQueue to ensure correct
-         * contexts for items retrieved. */
-        self.sortingQueue_.callbacks.invoke('setQueryContentId', queryId);
+          /* Set query content before initialising SortingQueue to ensure
+           * correct contexts for items retrieved. */
+          self.api_.setQueryContentId(queryId);
+        }
+        
         self.initialise_(bins, queryId);
       } );
   };
@@ -101,6 +107,7 @@ var SortingDesk_ = function (window, $, CryptoJS) {
     options_: null,
 
     /* Instances */
+    api_: null,
     sortingQueue_: null,
     bins_: null,
     draggable_: null,
@@ -167,8 +174,7 @@ var SortingDesk_ = function (window, $, CryptoJS) {
         result.data = this.draggable_.activeNode.attr('src');
 
         if(result.data) {
-          result.id = this.sortingQueue_.callbacks
-            .invoke('generateId', result.data);
+          result.id = this.api_.generateId(result.data);
         } else
           console.log("Unable to retrieve valid `src´ attribute");
       } else {
@@ -180,8 +186,7 @@ var SortingDesk_ = function (window, $, CryptoJS) {
           result.data = document.selection.createRange().text;
 
         if(result.data) {
-          result.id = this.sortingQueue_.callbacks
-            .invoke('generateId', result.data);
+          result.id = this.api_.generateId(result.data);
         }
       }
 
@@ -222,7 +227,8 @@ var SortingDesk_ = function (window, $, CryptoJS) {
         }
       } );
 
-      this.initialiseBins_(bins, activeBinId);
+      if(bins instanceof Array && bins.length > 0)
+        this.initialiseBins_(bins, activeBinId);
 
       this.initialised_ = true;
       console.log("Sorting Desk UI initialised");
@@ -252,7 +258,7 @@ var SortingDesk_ = function (window, $, CryptoJS) {
 
         self.bins_.add(bin, false);
       } );
-
+      
       /* Now manually set the active bin. */
       bin = this.bins_.getById(activeBinId);
 
@@ -285,6 +291,9 @@ var SortingDesk_ = function (window, $, CryptoJS) {
      * */
     get initialised ()
     { return this.initialised_; },
+
+    get api ()
+    { return this.api_; },
 
     get resetting ()
     { return this.sortingQueue_.resetting(); },
@@ -524,7 +533,7 @@ var SortingDesk_ = function (window, $, CryptoJS) {
       bin.activate();
 
       if(this.owner_.initialised) {
-        self.owner_.sortingQueue.callbacks.invoke("setQueryContentId", bin.id);
+        self.owner_.api.setQueryContentId(bin.id);
         self.owner_.sortingQueue.items.redraw();
       }
 
@@ -535,7 +544,7 @@ var SortingDesk_ = function (window, $, CryptoJS) {
     }
 
     /* Let the extension know that the active bin has changed. */
-    this.owner_.sortingQueue.callbacks.invoke('setActiveBin', bin.data);
+    this.owner_.api.setActiveBin(bin.data);
   };
 
   ControllerBins.prototype.browse = function (bin)
@@ -639,7 +648,7 @@ var SortingDesk_ = function (window, $, CryptoJS) {
           else if(bin === self)
             break;
 
-          parentOwner.sortingQueue.callbacks.invoke("mergeBins", self, bin);
+          parentOwner.api.mergeBins(self, bin);
           self.owner_.removeAt(self.owner_.indexOf(bin));
 
           /* Important: DOM node is destroyed above, which means the `dragend'
@@ -654,12 +663,10 @@ var SortingDesk_ = function (window, $, CryptoJS) {
           /* If we received a map object, assume a valid drop. */
           if(result) {
             /* Create label between snippet/image and bin. */
-            parentOwner.sortingQueue.callbacks
-              .invoke("addLabel", result.id, self);
+            parentOwner.api.addLabel(result.id, self);
 
             /* Update query FC. */
-            parentOwner.sortingQueue.callbacks
-              .invoke("updateQueryFc", result.id, result.data)
+            parentOwner.api.updateQueryFc(result.id, result.data)
               .fail(function () {
                 console.log("Failed to update query FC");
               } );
@@ -871,8 +878,7 @@ var SortingDesk_ = function (window, $, CryptoJS) {
       .on( {
         click: function () {
           var bin,
-              id = parentOwner.sortingQueue.callbacks
-                .invoke('makeId', (Url.encode(window.location.href)));
+              id = parentOwner.api.makeId(Url.encode(window.location.href));
 
           bin = parentOwner.bins.getById(id);
 
@@ -936,7 +942,7 @@ var SortingDesk_ = function (window, $, CryptoJS) {
   LabelBrowser.prototype.initialise = function ()
   {
     var self = this,
-        callbacks = this.owner_.owner.sortingQueue.callbacks;
+        api = this.owner_.owner.api;
 
     this.deferred_ = $.Deferred();
 
@@ -957,9 +963,7 @@ var SortingDesk_ = function (window, $, CryptoJS) {
 
     this.nodes_.table = this.nodes_.items.find('TABLE');
 
-    var api = callbacks.invoke('getApi');
-
-    (new (callbacks.invoke('getClass', 'LabelFetcher'))(api))
+    (new (api.getClass('LabelFetcher'))(api))
       .cid(this.bin_.id)
       .which('positive')
       .get()
@@ -990,7 +994,7 @@ var SortingDesk_ = function (window, $, CryptoJS) {
       } );
 
     /* NOTE: This should really be an event. */
-    callbacks.invoke({
+    this.owner_.owner.sortingQueue.callbacks.invoke({
       name: "onLabelBrowserInitialised",
       mandatory: false
     }, this.nodes_.container);
