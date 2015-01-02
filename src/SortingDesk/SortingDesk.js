@@ -541,7 +541,7 @@ var SortingDesk_ = function (window, $, Api) {
     }
 
     /* Let the extension know that the active bin has changed. */
-    this.owner_.api.setActiveBin(bin.data);
+    this.owner_.sortingQueue.callbacks.invoke('setActiveBin', bin.data);
   };
 
   ControllerBins.prototype.browse = function (bin)
