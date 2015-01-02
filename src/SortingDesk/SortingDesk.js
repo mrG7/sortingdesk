@@ -35,7 +35,7 @@
  *
  * @returns an object containing the module's public interface.
  * */
-var SortingDesk_ = function (window, $) {
+var SortingDesk_ = function (window, $, CryptoJS) {
 
   var Url = {
     encode: function (s)
@@ -1105,8 +1105,8 @@ var SortingDesk_ = function (window, $) {
 
 /* Compatibility with RequireJs. */
 if(typeof define === "function" && define.amd) {
-  define("SortingDesk", [ "jquery" ], function ($) {
-    return SortingDesk_(window, $);
+  define("SortingDesk", [ "jquery", "cryptojs" ], function ($, CryptoJS) {
+    return SortingDesk_(window, $, CryptoJS);
   });
 } else
-  window.SortingDesk = SortingDesk_(window, $);
+  window.SortingDesk = SortingDesk_(window, $, CryptoJS);
