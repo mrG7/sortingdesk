@@ -227,8 +227,7 @@ var SortingDesk_ = function (window, $, Api) {
         }
       } );
 
-      if(bins instanceof Array && bins.length > 0)
-        this.initialiseBins_(bins, activeBinId);
+      this.initialiseBins_(bins, activeBinId);
 
       this.initialised_ = true;
       console.log("Sorting Desk UI initialised");
@@ -239,9 +238,6 @@ var SortingDesk_ = function (window, $, Api) {
       var self = this,
           bin;
 
-      if(!(bins instanceof Array) || bins.length === 0)
-        throw "Bins array container invalid or empty";
-
       if(this.bins_)
         this.bins_.reset();
 
@@ -249,6 +245,9 @@ var SortingDesk_ = function (window, $, Api) {
 
       (this.bins_ = this.sortingQueue_.instantiate('ControllerBins', this))
         .initialise();
+
+      if(!(bins instanceof Array) || bins.length === 0)
+        return;
 
       bins.forEach(function (descriptor) {
         var bin = self.sortingQueue_.instantiate(
