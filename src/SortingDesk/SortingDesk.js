@@ -515,25 +515,23 @@ var SortingDesk_ = function (window, $, Api) {
 
   ControllerBins.prototype.setActive = function (bin)
   {
-    var self = this;
-
     /* Don't activate bin if currently active already. */
     if(this.active_ === bin)
       return;
 
     /* Invoke API to activate the bin. If successful, update UI state and force
      * a redraw of the items container. */
-    if(self.active_)
-      self.active_.deactivate();
+    if(this.active_)
+      this.active_.deactivate();
 
-    self.active_ = bin;
+    this.active_ = bin;
 
     if(bin) {
       bin.activate();
 
       if(this.owner_.initialised) {
-        self.owner_.api.setQueryContentId(bin.id);
-        self.owner_.sortingQueue.items.redraw();
+        this.owner_.api.setQueryContentId(bin.id);
+        this.owner_.sortingQueue.items.redraw();
       }
 
       /* Ensure bin is visible. */
