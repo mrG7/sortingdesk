@@ -867,29 +867,8 @@ var SortingDesk_ = function (window, $, Api) {
     var self = this,
         parentOwner = this.owner_.owner;
 
-    /* TODO: The following block is disabled because it is not possible to
-     * generate a subtopic id. Creation of bins can only be done if content is
-     * attached to them, such as snippets of text or images. */
-    /*
-    this.node_ = parentOwner.options.nodes.add
-      .on( {
-        click: function () {
-          var bin,
-              id = parentOwner.api.makeId(Url.encode(window.location.href));
-
-          bin = parentOwner.bins.getById(id);
-
-          if(!bin) {
-            bin = self.add(id, window.document.title.trim()
-                               || '&lt; no-name &gt;');
-          }
-
-          parentOwner.bins.setActive(bin);
-
-          return false;
-        }
-      } );
-     */
+    this.node_ = parentOwner.options.nodes.add;
+    
     this.droppable_ = new SortingQueue.Droppable(this.node_, {
       classHover: parentOwner.options.css.droppableHover,
       scopes: function (scope) { return !scope; },
