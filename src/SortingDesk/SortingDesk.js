@@ -939,7 +939,7 @@ var SortingDesk_ = function (window, $, Api) {
 
     this.nodes_.table = this.nodes_.items.find('TABLE');
 
-    (new (api.getClass('LabelFetcher'))(api))
+    (new (api.getClass('LabelFetcher'))(api.getApi()))
       .cid(this.bin_.id)
       .which('positive')
       .get()
