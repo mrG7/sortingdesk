@@ -92,10 +92,37 @@ var ChromeExtensionUi = (function () {
             visibleItems: 10,
             itemsDraggable: false,
             activeBinId: result.activeBinId
-          }, $.extend(true, { },
-                      Api,
-                      self.requests_.callbacks,
-                      self.transceiver_.callbacks ) );
+          }, $.extend(
+            true,
+            {
+              onLabelBrowserInitialised: function (container) {
+                var position = self.nodes_.sorter.position(),
+                    win = $(window);
+                
+                switch(self.positioner_.current) {
+                case Positioner.TOP_RIGHT:
+                  container.css( {
+                    top: position.top,
+                    left: position.top
+                  } );
+
+                  container.width(win.width() - self.nodes_.sorter.outerWidth()
+                                  - (position.top << 1)
+                                  - container.outerWidth()
+                                  + container.innerWidth());
+                  container.height(win.height() -
+                                   (position.top << 1));
+                  
+                  return;
+                  
+                default:
+                  throw "Current position invalid or not implemented"; 
+                }
+              }
+            },
+            Api,
+            self.requests_.callbacks,
+            self.transceiver_.callbacks ) );
         } );
       } );
   };
@@ -342,6 +369,8 @@ var ChromeExtensionUi = (function () {
 
   Positioner.prototype = {
     current_: null,
+
+    get current() { return this.current_; },
 
     position: function (target)
     {
