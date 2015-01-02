@@ -158,6 +158,11 @@ var Api = (function() {
             : null;
     };
 
+    var getApi = function ()
+    {
+        return api;
+    };
+
     return $.extend({}, qitems.callbacks(), {
         setDomain: setDomain,
         getDomain: getDomain,
@@ -169,7 +174,8 @@ var Api = (function() {
         mergeBins: mergeBins,
         generateId: generateId,
         makeId: makeId,
-        getClass: getClass
+        getClass: getClass,
+        getApi: getApi
     });
 } )();
 
