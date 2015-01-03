@@ -312,6 +312,7 @@
   opacity: 0;
   box-shadow: 1px 1px 1px 0 rgba(50, 50, 50, 0.75);
   transition: all 200ms;
+  z-index: 1000001;
 }
 
 .sd-bin:hover .sd-bin-browser-icon {
