@@ -162,7 +162,7 @@ var SortingDesk_ = function (window, $, Api) {
           content;
       
       if(scope) {
-        console.log("Drop event not special case");
+        console.log("Drop event not special case: ignored");
         return null;
       }
 
@@ -282,7 +282,7 @@ var SortingDesk_ = function (window, $, Api) {
 
       /* Attempt to recover if we've been given an invalid id to activate. */
       if(!bin) {
-        console.log("Failed to set the active bin: id=%s: setting first",
+        console.log("Failed to set the active bin: setting first (id=%s)",
                     activeBinId);
 
         bin = bins[0];
@@ -522,7 +522,7 @@ var SortingDesk_ = function (window, $, Api) {
         return self.doAddLabel_(label);
       },
       function () {
-        console.log("Unable to add label between %s and %s: "
+        console.log("Unable to add label between '%s' and '%s': "
                     + "feature collection not found",
                     bin.id,
                     descriptor.content_id);
@@ -665,7 +665,8 @@ var SortingDesk_ = function (window, $, Api) {
     /* Attempt to retrieve the feature collection for the bin's content id. */
     return api.getFeatureCollection(descriptor.content_id)
       .then(function (fc) {
-        console.log("Feature collection GET success:", fc);
+        console.log("Feature collection GET successful (id=%s)",
+                    descriptor.content_id, fc);
         
         /* A feature collection was received. No further operations are carried
          * out if `exists´ is true since it means `descriptor´ is actually a bin
@@ -688,7 +689,8 @@ var SortingDesk_ = function (window, $, Api) {
          * loaded from local storage and therefore its feature collection
          * shouldn't be created. */
         if(exists) {
-          console.log("Feature collection GET failed: NOT creating new");
+          console.log("Feature collection GET failed: NOT creating new"
+                      + "(id=%s)", descriptor.content_id);
           return null;
         }
         
@@ -699,7 +701,8 @@ var SortingDesk_ = function (window, $, Api) {
           snippetBow: api.mapWordCount(descriptor.content)
         } );
         
-        console.log("Feature collection GET failed: creating new:", fc);
+        console.log("Feature collection GET failed: creating new (id=%s)",
+                    descriptor.content_id, fc);
 
         api.setFeatureCollectionContent(
           fc, descriptor.subtopic_id, descriptor.content,
@@ -713,11 +716,11 @@ var SortingDesk_ = function (window, $, Api) {
   {
     return this.owner_.api.putFeatureCollection(content_id, fc)
       .done(function () {
-        console.log("Feature collection PUT successful: '%s'",
+        console.log("Feature collection PUT successful (id=%s)",
                     content_id, fc);
       } )
       .fail(function () {
-        console.log("Feature collection PUT failed: '%s'",
+        console.log("Feature collection PUT failed (id=%s)",
                     content_id, fc);
       } );
   };
@@ -726,11 +729,11 @@ var SortingDesk_ = function (window, $, Api) {
   {
     return this.owner_.api.addLabel(label)
       .done(function () {
-        console.log("Label add successful: '%s' == '%s'",
+        console.log("Label ADD successful: '%s' == '%s'",
                     label.cid1, label.cid2);
       } )
       .fail(function () {
-        console.log("Label add failed: '%s' AND '%s'",
+        console.log("Label ADD failed: '%s' ∧ '%s'",
                     label.cid1, label.cid2);
       } );
   };
@@ -1107,11 +1110,12 @@ var SortingDesk_ = function (window, $, Api) {
             
             api.getFeatureCollection(cid)
               .done(function(fc) {
-                console.log('retrieved FC:', fc);
+                console.log('Feature collection GET successful (id=%s)',
+                            cid, fc);
                 fnGetNext();
               } )
               .fail(function () {
-                console.log('Failed to retrieve feature collection (id=%s)',
+                console.log('Feature collection PUT failed (id=%s)',
                             cid);
                 fnGetNext();
               } );
