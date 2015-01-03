@@ -1104,7 +1104,7 @@ var SortingDesk_ = function (window, $, Api) {
       .which('positive')
       .get()
       .done(function (labels) {
-        console.log('retrieved LABEL:', labels.slice());
+        console.log('Label GET successful:', labels.slice());
 
         var getNext = function () {
           if(labels.length === 0) {
