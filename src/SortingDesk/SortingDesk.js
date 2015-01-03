@@ -1104,7 +1104,7 @@ var SortingDesk_ = function (window, $, Api) {
       .done(function (labels) {
         console.log('retrieved LABEL:', labels.slice());
 
-        var fnGetNext = function () {
+        var getNext = function () {
           if(labels.length) {
             var cid = labels.shift().cid2;
             
@@ -1112,18 +1112,18 @@ var SortingDesk_ = function (window, $, Api) {
               .done(function(fc) {
                 console.log('Feature collection GET successful (id=%s)',
                             cid, fc);
-                fnGetNext();
+                getNext();
               } )
               .fail(function () {
                 console.log('Feature collection PUT failed (id=%s)',
                             cid);
-                fnGetNext();
+                getNext();
               } );
           } else
             console.log('Done loading feature collections');
         };
 
-        fnGetNext();
+        getNext();
       } )
       .fail(function () {
         console.log('Failed to retrieve labels');
