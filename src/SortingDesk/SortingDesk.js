@@ -1148,7 +1148,20 @@ var SortingDesk_ = function (window, $, Api) {
 
   LabelBrowser.prototype.reset = function ()
   {
-    /* TODO: implement! */
+    /* Remove all children nodes. */
+    this.nodes_.heading.children().remove();
+    this.nodes_.table.children().remove();
+
+    /* Resolve promise if one still exists. */
+    if(this.deferred_)
+      this.deferred_.resolve();
+
+    /* Detach all events. */
+    this.nodes_.buttonClose.off();
+
+    this.deferred_ = this.bin_ = this.rows_ = this.nodes_ = null;
+
+    console.log("Label Browser component reset");
   };
 
   LabelBrowser.prototype.show = function ()
@@ -1166,8 +1179,11 @@ var SortingDesk_ = function (window, $, Api) {
         transform: 'scale(.2,.2)',
         opacity: 0
       } );
-    
-    this.deferred_.resolve();
+
+    if(this.deferred_) {
+      this.deferred_.resolve();
+      this.deferred_ = null;
+    }
   };
 
 
