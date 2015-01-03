@@ -173,7 +173,9 @@ var _DossierJS = function(window, $) {
     //
     // This function returns a jQuery promise that resolves when the web
     // service responds.
-    API.prototype.addLabel = function(cid1, cid2, annotator, coref_value) {
+    API.prototype.addLabel = function(
+        /* <cid1, cid2, annotator, coref_value> | <label> */ )
+    {
         var label;
         if (arguments.length == 4) {
             label = new Label(arguments[0], arguments[1],
