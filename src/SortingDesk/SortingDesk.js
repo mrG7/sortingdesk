@@ -695,8 +695,8 @@ var SortingDesk_ = function (window, $, Api) {
         }
         
         var fc = new (api.getClass('FeatureCollection'))( {
-          title: '',
-          titleBow: { },
+          title: window.document.title,
+          titleBow: api.mapWordCount(window.document.title),
           snippet: descriptor.content,
           snippetBow: api.mapWordCount(descriptor.content)
         } );
