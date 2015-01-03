@@ -178,7 +178,8 @@ var SortingDesk_ = function (window, $, Api) {
 
         if(content) {
           result.is_image = true;
-          result.subtopic_id = this.api_.generateSubtopicId(content);
+          result.subtopic_id = this.api_.makeRawImageId(
+            this.api_.generateSubtopicId(content));
           result.content = content;
         } else
           console.log("Unable to retrieve valid `src´ attribute");
@@ -193,12 +194,13 @@ var SortingDesk_ = function (window, $, Api) {
            * just to be sure, current system timestamp. This id is
            * subsequently used to generate a unique and collision free
            * unique subtopic id (see below). */
-          result.subtopic_id = this.api_.generateSubtopicId(
-            [ str,
-              Html.getXpathSimple(content.anchorNode),
-              content.anchorOffset,
-              str.length,
-              Date.now() ].join('|'));
+          result.subtopic_id = this.api_.makeRawTextId(
+            this.api_.generateSubtopicId(
+              [ str,
+                Html.getXpathSimple(content.anchorNode),
+                content.anchorOffset,
+                str.length,
+                Date.now() ].join('|') ) );
           
           result.content = str;
           result.is_image = false;

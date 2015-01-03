@@ -79,7 +79,7 @@ var Api_ = (function (window, $, CryptoJS) {
       throw "Invalid subtopic id";
     }
     
-    fc.raw[makeRawId(subtopic_id, is_image)] = content;
+    fc.raw[subtopic_id] = content;
   };
 
   var addLabel = function (label)
