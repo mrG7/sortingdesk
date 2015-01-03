@@ -287,6 +287,11 @@
   border-color: #349950;
 }
 
+.sd-bin.sd-unknown {
+  background-color: #ba3a3a !important;
+  border-color: #ab4949 !important;
+}
+
 .sd-bin.sd-active:hover {
   color: #E6FFD6;
   background-color: #92E29F;
