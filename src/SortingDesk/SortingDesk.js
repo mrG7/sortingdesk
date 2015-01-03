@@ -176,37 +176,33 @@ var SortingDesk_ = function (window, $, Api) {
       if(this.draggable_.activeNode) {
         content = this.draggable_.activeNode.attr('src');
 
-        if(content) result.is_image = true;
-        else console.log("Unable to retrieve valid `src´ attribute");
-      } else {
-        if(typeof window.getSelection === 'function') {
-          content = window.getSelection();
+        if(content) {
+          result.is_image = true;
+          result.subtopic_id = this.api_.generateSubtopicId(content);
+          result.content = content;
+        } else
+          console.log("Unable to retrieve valid `src´ attribute");
+      } else if(typeof window.getSelection === 'function') {
+        content = window.getSelection();
 
-          if(content) {
-            if(content.baseNode) {
-              var str = content.toString();
+        if(content && content.anchorNode) {
+          var str = content.toString();
 
-              /* Craft a unique id for this text snippet based on its content,
-               * Xpath representation, offset from selection start, length and,
-               * just to be sure, current system timestamp. This id is
-               * subsequently used to generate a unique and collision free
-               * unique subtopic id (see below). */
-              content = [ str,
-                          Html.getXpathSimple(content.anchorNode),
-                          content.anchorOffset,
-                          str.length,
-                          Date.now() ].join('|');
-            } else
-              content = null;
-          }
+          /* Craft a unique id for this text snippet based on its content,
+           * Xpath representation, offset from selection start, length and,
+           * just to be sure, current system timestamp. This id is
+           * subsequently used to generate a unique and collision free
+           * unique subtopic id (see below). */
+          result.subtopic_id = this.api_.generateSubtopicId(
+            [ str,
+              Html.getXpathSimple(content.anchorNode),
+              content.anchorOffset,
+              str.length,
+              Date.now() ].join('|'));
+          
+          result.content = str;
+          result.is_image = false;
         }
-
-        if(content) result.is_image = false;
-      }
-
-      if(content) {
-        result.subtopic_id = this.api_.generateSubtopicId(content);
-        result.content = content;
       }
       
       /* Clear the currently active node. */
