@@ -179,10 +179,27 @@ var SortingDesk_ = function (window, $, Api) {
         if(content) result.is_image = true;
         else console.log("Unable to retrieve valid `src´ attribute");
       } else {
-        if(window.getSelection)
-          content = window.getSelection().toString();
-        else if(document.selection && document.selection.type !== "Control")
-          content = document.selection.createRange().text;
+        if(typeof window.getSelection === 'function') {
+          content = window.getSelection();
+
+          if(content) {
+            if(content.baseNode) {
+              var str = content.toString();
+
+              /* Craft a unique id for this text snippet based on its content,
+               * Xpath representation, offset from selection start, length and,
+               * just to be sure, current system timestamp. This id is
+               * subsequently used to generate a unique and collision free
+               * unique subtopic id (see below). */
+              content = [ str,
+                          Html.getXpathSimple(content.anchorNode),
+                          content.anchorOffset,
+                          str.length,
+                          Date.now() ].join('|');
+            } else
+              content = null;
+          }
+        }
 
         if(content) result.is_image = false;
       }
@@ -1154,6 +1171,28 @@ var SortingDesk_ = function (window, $, Api) {
   };
 
   LabelBrowserRow.prototype = {
+  };
+
+
+  /**
+   * @class
+   * */
+  var Html = {
+    getXpathSimple: function (node)
+    {
+      var result = [ ];
+
+      if(node instanceof $)
+        node = node.get(0);
+
+      if(node) {
+        do {
+          result.push(node.nodeName);
+        } while( (node = node.parentNode) );
+      }
+
+      return result.reverse().join('/');
+    }
   };
 
 
