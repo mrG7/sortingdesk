@@ -134,7 +134,7 @@ var _DossierJS = function(window, $) {
             type: 'PUT',
             contentType: 'application/json',
             url: url,
-            data: JSON.stringify(fc.raw),
+            data: JSON.stringify(fc.raw)
         }).fail(function() {
             console.log(fc);
             console.log("Could not save feature collection " +
