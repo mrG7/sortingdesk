@@ -69,7 +69,7 @@ var SortingDesk_ = function (window, $, Api) {
     this.options_ = $.extend(true, $.extend(true, {}, defaults_), opts);
     this.sortingQueue_ = new SortingQueue.Sorter(
       this.options_,
-      $.extend(cbs, this.api_.getCallbacks()));
+      $.extend(this.api_.getCallbacks(), cbs));
 
     /* Restore state from local storage. */
     this.load_()
