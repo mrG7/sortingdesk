@@ -1074,10 +1074,16 @@ var SortingDesk_ = function (window, $, Api) {
     var self = this,
         api = this.owner_.owner.api;
 
+    console.log("Initializing Label Browser component");
+
+    var onEndInitialise = function () {
+      console.log("Label Browser component initialized");
+    };
+    
     this.deferred_ = $.Deferred();
 
     this.nodes_.container = $('[data-sd-purpose="container-label-browser"]');
-    
+
     this.nodes_.buttonClose = this.nodes_.container
       .find('[data-sd-purpose="label-browser-close"]')
       .click( function () {
@@ -1101,28 +1107,32 @@ var SortingDesk_ = function (window, $, Api) {
         console.log('retrieved LABEL:', labels.slice());
 
         var getNext = function () {
-          if(labels.length) {
-            var cid = labels.shift().cid2;
-            
-            api.getFeatureCollection(cid)
-              .done(function(fc) {
-                console.log('Feature collection GET successful (id=%s)',
-                            cid, fc);
-                getNext();
-              } )
-              .fail(function () {
-                console.log('Feature collection PUT failed (id=%s)',
-                            cid);
-                getNext();
-              } );
-          } else
-            console.log('Done loading feature collections');
+          if(labels.length === 0) {
+            onEndInitialise();
+            return;
+          }
+          
+          var cid = labels.shift().cid2;
+
+          api.getFeatureCollection(cid)
+            .done(function(fc) {
+              console.log('Feature collection GET successful (id=%s)',
+                          cid, fc);
+              getNext();
+            } )
+            .fail(function () {
+              console.log('Feature collection GET failed (id=%s)',
+                          cid);
+              getNext();
+            } );
         };
 
+        /* Retrieve feature collection for the first label. */
         getNext();
       } )
       .fail(function () {
         console.log('Failed to retrieve labels');
+        onEndInitialise();
       } );
 
     /* NOTE: This should really be an event. */
