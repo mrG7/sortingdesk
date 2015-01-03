@@ -13,16 +13,18 @@
 
 
 var Api_ = (function (window, $, CryptoJS) {
+  
   /* Constants */
   var DEFAULT_DOSSIER_STACK_API_URL = 'http://54.174.195.250:8080';
 
 
   /* Attributes */
-  var sortingDesk_ = null,
+  var sortingDesk_,
       api_,
       qitems_;
 
 
+  /* Interface */
   var initialize = function (sortingDesk_, url)
   {
     sortingDesk_ = sortingDesk_;
