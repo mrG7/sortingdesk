@@ -21,7 +21,8 @@ var Api_ = (function (window, $, CryptoJS) {
   /* Attributes */
   var sortingDesk_,
       api_,
-      qitems_;
+      qitems_,
+      annotator_;
 
 
   /* Interface */
@@ -29,33 +30,66 @@ var Api_ = (function (window, $, CryptoJS) {
   {
     sortingDesk_ = sortingDesk_;
     api_ = new DossierJS.API(url || DEFAULT_DOSSIER_STACK_API_URL);
-    qitems_ = new DossierJS.SortingQueueItems(api_, 'index_scan', '', 'unknown');
+    annotator_ = 'unknown';
+    
+    qitems_ = new DossierJS.SortingQueueItems(
+      api_, 'index_scan', '', annotator_);
 
     /* Return module public API -- post initialization */
     return {
-      getCallbacks: getCallbacks,
+      getFeatureCollection: getFeatureCollection,
+      putFeatureCollection: putFeatureCollection,
+      setFeatureCollectionContent: setFeatureCollectionContent,
+      addLabel: addLabel,
       setQueryContentId: setQueryContentId,
       setSearchEngine: setSearchEngine,
       getSearchEngine: getSearchEngine,
-      updateQueryFc: updateQueryFc,
-      addLabel: addLabel,
-      mergeBins: mergeBins,
       generateContentId: generateContentId,
       generateSubtopicId: generateSubtopicId,
-      makeId: makeId,
+      makeRawId: makeRawId,
+      mapWordCount: mapWordCount,
+      getAnnotator: getAnnotator,
       getClass: getClass,
-      getApi: getApi
+      getApi: getApi,
+      getCallbacks: getCallbacks,
+
+      /* Constants */
+      COREF_VALUE_POSITIVE: DossierJS.COREF_VALUE_POSITIVE,
+      COREF_VALUE_UNKNOWN: DossierJS.COREF_VALUE_UNKNOWN,
+      COREF_VALUE_NEGATIVE: DossierJS.COREF_VALUE_NEGATIVE
     };
   };
 
-  var getCallbacks = function ()
+  var getFeatureCollection = function (content_id)
   {
-    return qitems_.callbacks();
+    return api_.fcGet(content_id);
+  };
+
+  var putFeatureCollection = function (content_id, fc)
+  {
+    return api_.fcPut(content_id, fc);
+  };
+
+  var setFeatureCollectionContent = function (
+    fc, subtopic_id, content, is_image)
+  {
+    if(typeof content !== 'string' || content.length === 0)
+      throw "Invalid bin content";
+    else if(typeof subtopic_id !== 'string' || subtopic_id === 0) {
+      throw "Invalid subtopic id";
+    }
+    
+    fc.raw[makeRawId(subtopic_id, is_image)] = content;
+  };
+
+  var addLabel = function (label)
+  {
+    return api_.addLabel(label);
   };
 
   var setQueryContentId = function (id)
   {
-    if(!id)
+    if(typeof id !== 'string' || id.length === 0)
       throw "Invalid engine content id";
 
     qitems_.query_content_id = id;
@@ -70,60 +104,72 @@ var Api_ = (function (window, $, CryptoJS) {
   {
     return qitems_.engine_name;
   };
-
-  var addLabel = function (id, bin)
+  
+  var generateContentId = function (content)
   {
-    return api_.addLabel(bin.id, id, qitems_.annotator, 1);
+    if(typeof content !== "string" || content.length === 0)
+      throw "Invalid content specified";
+
+    return [ 'web', CryptoJS.MD5(content).toString() ].join('|');
   };
 
-  var mergeBins = function (ibin, jbin)
+  var generateSubtopicId = function (content)
   {
-    return api_.addLabel(ibin.id, jbin.id, qitems_.annotator, 1);
+    return CryptoJS.MD5(content).toString();
   };
 
-  var updateQueryFc = function (
-    content_id, /* the text snippet or image content id */
-    data        /* the text snippet text or image URL */ )
+  var makeRawId = function (subtopic_id, is_image)
   {
-    /* NOTE: Why return a promise when `addLabel´ or `mergeBins´
-     * don't? */
-    var deferred = $.Deferred();
-
-    window.setTimeout(function () {
-      console.log("updating query FC:",
-                  qitems_.query_content_id,
-                  content_id,
-                  data);
-
-      deferred.resolve({ });
-    }, 0);
-
-    return deferred.promise();
+    return is_image
+      ? makeRawImageId(subtopic_id)
+      : makeRawTextId(subtopic_id);
+  };
+  
+  var makeRawTextId = function (subtopic_id)
+  {
+    return [ 'subtopic', 'text', subtopic_id ].join('|');
   };
 
-  var generateContentId = function (value)
+  var makeRawImageId = function (subtopic_id)
   {
-    if(typeof value !== "string" || value.length === 0)
-      return 0;
-
-    var hash = 0;
-
-    for(var i = 0, len = value.length; i < len; i++)
-      hash = ((hash << 5) - hash) + value.charCodeAt(i);
-
-    /* Return hash and convert to UINT32. */
-    return makeId(hash >>> 0);
+    return [ 'subtopic', 'image', subtopic_id ].join('|');
   };
 
-  var generateSubtopicId = function ()
+  var mapWordCount = function (string)
   {
+    if(typeof string !== "string")
+      throw "Invalid string specified";
+
+    var words = string.toLowerCase().trim().match(/\S+/g),
+        map = { };
+
+    /* Create a map of every word, where each key is a word in `string´ that
+     * maps to the count said word occurs in `string´.
+     *
+     * This method is O(n^2). */
+    words.forEach(function (word) {
+      /* Ignore word if it has been processed. */
+      if(map.hasOwnProperty(word))
+        return;
+
+      /* Count times word occurs. */
+      map[word] = (function () {
+        var count = 0;
+
+        words.forEach(function (wi) { if(wi === word) ++count; } );
+
+        return count;
+      } )();
+    } );
+
+    return map;
   };
 
-  var makeId = function (id)
+  var getAnnotator = function ()
   {
-    return ["web", id].join("|");
+    return annotator_;
   };
-
+  
   var getClass = function (cl)
   {
     return DossierJS.hasOwnProperty(cl)
@@ -135,6 +181,11 @@ var Api_ = (function (window, $, CryptoJS) {
   var getApi = function ()
   {
     return api_;
+  };
+
+  var getCallbacks = function ()
+  {
+    return qitems_.callbacks();
   };
 
 
