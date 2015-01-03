@@ -274,7 +274,7 @@ var SortingDesk_ = function (window, $, Api) {
           self.bins_,
           descriptor);
 
-        self.bins_.add(bin, false);
+        self.bins_.add(bin, false, true);
       } );
       
       /* Now manually set the active bin. */
@@ -452,7 +452,7 @@ var SortingDesk_ = function (window, $, Api) {
 
   ControllerBins.prototype.add = function (bin,
                                            activate /* = true */,
-                                           exists   /* = true */)
+                                           exists   /* = false */)
   {
     /* Ensure a bin with the same id isn't already contained. */
     if(this.getById(bin.id))
@@ -474,7 +474,7 @@ var SortingDesk_ = function (window, $, Api) {
      * unknown if it is supposed to exist in the backend (`exists´ is true,
      * which means it is being loaded from local storage) but a feature
      * collection was not retrieved. */
-    this.update_(bin.data, exists)
+    this.update_(bin.data, exists === true)
       .fail(function () {
         if(exists)
           bin.setUnknown();
