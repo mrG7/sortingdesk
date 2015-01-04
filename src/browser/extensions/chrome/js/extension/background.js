@@ -93,8 +93,7 @@ var Background = function ()
           console.log("Invoking message handler [type="
                       + request.operation + "]");
           
-          methods[request.operation].call(
-            self, request, sender, callback);
+          methods[request.operation].call(self, request, sender, callback);
         }
 
         return true;
@@ -109,9 +108,7 @@ var Background = function ()
         url: chrome.extension.getURL(request.identifier),
         dataType: "html",
         success: function () {
-          console.log("Successfully read file: "
-                      + request.identifier);
-          
+          console.log("Successfully read file: " + request.identifier);
           callback.apply(null, arguments);
         }
       } );
@@ -120,17 +117,13 @@ var Background = function ()
     onSaveState_: function (request, sender, callback)
     {
       var result = save_(sender.tab.id, request.state);
-      
-      if(callback)
-        callback(result);
+      if(callback) callback(result);
     },
 
     onSetActiveBin_: function (request, sender, callback)
     {
-      activeBinId_ = request.bin ? request.bin.id : null;
-
-      if(callback)
-        callback();
+      activeBinId_ = request.id;
+      if(callback) callback();
     },
 
     onGetMeta_: function (request, sender, callback)
