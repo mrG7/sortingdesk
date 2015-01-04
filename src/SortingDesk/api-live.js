@@ -46,7 +46,9 @@ var Api_ = (function (window, $, CryptoJS) {
       getSearchEngine: getSearchEngine,
       generateContentId: generateContentId,
       generateSubtopicId: generateSubtopicId,
-      makeRawId: makeRawId,
+      makeRawTextId: makeRawTextId,
+      makeRawImageId: makeRawImageId,
+      getSubtopicType: getSubtopicType,
       mapWordCount: mapWordCount,
       getAnnotator: getAnnotator,
       getClass: getClass,
@@ -70,8 +72,7 @@ var Api_ = (function (window, $, CryptoJS) {
     return api_.fcPut(content_id, fc);
   };
 
-  var setFeatureCollectionContent = function (
-    fc, subtopic_id, content, is_image)
+  var setFeatureCollectionContent = function (fc, subtopic_id, content)
   {
     if(typeof content !== 'string' || content.length === 0)
       throw "Invalid bin content";
@@ -117,13 +118,6 @@ var Api_ = (function (window, $, CryptoJS) {
   {
     return CryptoJS.MD5(content).toString();
   };
-
-  var makeRawId = function (subtopic_id, is_image)
-  {
-    return is_image
-      ? makeRawImageId(subtopic_id)
-      : makeRawTextId(subtopic_id);
-  };
   
   var makeRawTextId = function (subtopic_id)
   {
@@ -133,6 +127,21 @@ var Api_ = (function (window, $, CryptoJS) {
   var makeRawImageId = function (subtopic_id)
   {
     return [ 'subtopic', 'image', subtopic_id ].join('|');
+  };
+
+  var getSubtopicType = function (subtopic_id)
+  {
+    var type;
+
+    if(typeof subtopic_id !== 'string')
+      throw "Invalid subtopic id specified";
+
+    type = subtopic_id.match(/^subtopic\|(\w+)\|.+/);
+
+    if(!type || type.length !== 2)
+      throw "Invalid format for subtopic id";
+    
+    return type[1];
   };
 
   var mapWordCount = function (string)

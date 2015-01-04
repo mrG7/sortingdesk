@@ -177,7 +177,6 @@ var SortingDesk_ = function (window, $, Api) {
         content = this.draggable_.activeNode.attr('src');
 
         if(content) {
-          result.is_image = true;
           result.subtopic_id = this.api_.makeRawImageId(
             this.api_.generateSubtopicId(content));
           result.content = content;
@@ -203,7 +202,6 @@ var SortingDesk_ = function (window, $, Api) {
                 Date.now() ].join('|') ) );
           
           result.content = str;
-          result.is_image = false;
         }
       }
       
@@ -267,12 +265,7 @@ var SortingDesk_ = function (window, $, Api) {
         return;
 
       bins.forEach(function (descriptor) {
-        var bin = self.sortingQueue_.instantiate(
-          descriptor.is_image ? 'BinImage' : 'Bin',
-          self.bins_,
-          descriptor);
-
-        self.bins_.add(bin, false, true);
+        self.bins_.add(self.bins_.construct(descriptor), false, true);
       } );
       
       /* Now manually set the active bin. */
@@ -428,8 +421,7 @@ var SortingDesk_ = function (window, $, Api) {
           'Bin', self, { data: input }, null).render();
       },
       function (descriptor) {
-        return self.owner_.bins.add(self.owner_.sortingQueue.instantiate(
-          descriptor.is_image ? 'BinImage' : 'Bin', self, descriptor) );
+        return self.add(self.construct(descriptor));
       } );
   };
 
@@ -440,6 +432,28 @@ var SortingDesk_ = function (window, $, Api) {
     this.spawner_.initialise();
   };
 
+  ControllerBins.prototype.construct = function (descriptor)
+  {
+    var map = { 'text': 'Bin',
+                'image': 'BinImage' },
+        type;
+
+    if(!descriptor)
+      throw "Invalid bin descriptor";
+
+    /* Extract bin type. */
+    type = this.owner_.api.getSubtopicType(descriptor.subtopic_id);
+
+    if(!map.hasOwnProperty(type))
+      throw "Invalid bin type: " + type;
+
+    /* Finaly instantiate correct Bin class. */
+    return this.owner_.sortingQueue.instantiate(
+      map[type],
+      this,
+      descriptor);
+  };
+  
   ControllerBins.prototype.reset = function ()
   {
     this.spawner_.reset();
@@ -672,8 +686,7 @@ var SortingDesk_ = function (window, $, Api) {
          * collection shouldn't be updated. */
         if(!exists) {
           api.setFeatureCollectionContent(
-            fc, descriptor.subtopic_id, descriptor.content,
-            descriptor.is_image);
+            fc, descriptor.subtopic_id, descriptor.content);
 
           return self.doUpdateFc_(descriptor.content_id, fc);
         }
@@ -703,8 +716,7 @@ var SortingDesk_ = function (window, $, Api) {
                     descriptor.content_id, fc);
 
         api.setFeatureCollectionContent(
-          fc, descriptor.subtopic_id, descriptor.content,
-          descriptor.is_image);
+          fc, descriptor.subtopic_id, descriptor.content);
 
         return self.doUpdateFc_(descriptor.content_id, fc);
       } );
@@ -947,15 +959,6 @@ var SortingDesk_ = function (window, $, Api) {
       return false;
     } );
 
-  };
-
-  BinImageDefault.prototype.serialise = function ()
-  {
-    return {
-      id: this.data_.id,
-      data: this.data_.data,
-      is_image: true
-    };
   };
 
   BinImageDefault.prototype.render = function ()
