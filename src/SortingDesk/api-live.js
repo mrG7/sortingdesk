@@ -38,6 +38,7 @@ var Api_ = (function (window, $, CryptoJS) {
     /* Return module public API -- post initialization */
     return {
       getFeatureCollection: getFeatureCollection,
+      getAllFeatureCollections: getAllFeatureCollections,
       putFeatureCollection: putFeatureCollection,
       setFeatureCollectionContent: setFeatureCollectionContent,
       addLabel: addLabel,
@@ -67,6 +68,45 @@ var Api_ = (function (window, $, CryptoJS) {
   var getFeatureCollection = function (content_id)
   {
     return api_.fcGet(content_id);
+  };
+
+  var getAllFeatureCollections = function (ids)
+  {
+    if(!(ids instanceof Array))
+      throw "Invalid ids array container";
+    
+    var self = this,
+        deferred = $.Deferred(),
+        index = 0,
+        result = [ ];
+    
+    var getNext = function () {
+      if(index >= ids.length) {
+        deferred.resolve(result);
+        return;
+      }
+      
+      var cid = ids[ index ++ ];
+
+      self.getFeatureCollection(cid)
+        .done(function(fc) {
+          console.log('Feature collection GET successful (id=%s)',
+                      cid, fc);
+
+          result.push(fc);
+          getNext();
+        } )
+        .fail(function () {
+          console.log('Feature collection GET failed (id=%s)',
+                      cid);
+          getNext();
+        } );
+    };
+
+    /* Retrieve feature collection for the first id. */
+    getNext();
+
+    return deferred.promise();
   };
 
   var putFeatureCollection = function (content_id, fc)
