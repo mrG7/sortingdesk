@@ -618,7 +618,7 @@ var SortingDesk_ = function (window, $, Api) {
       bin.activate();
 
       if(this.owner_.initialised) {
-        this.owner_.api.setQueryContentId(bin.id);
+        this.owner_.api.setQueryContentId(bin.data.content_id);
         this.owner_.sortingQueue.items.redraw();
       }
 
