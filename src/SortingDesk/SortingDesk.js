@@ -280,7 +280,7 @@ var SortingDesk_ = function (window, $, Api) {
         console.log("Failed to set the active bin: setting first (id=%s)",
                     activeBinId);
 
-        bin = bins[0];
+        bin = self.bins_.getAt(0);
       }
 
       this.bins_.setActive(bin);
