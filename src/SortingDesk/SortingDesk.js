@@ -927,9 +927,12 @@ var SortingDesk_ = function (window, $, Api) {
   BinDefault.prototype.render = function ()
   {
     var css = this.owner_.owner.options.css,
-        caption = this.data_.content,
-        node = $('<div class="' + css.bin + '"><div class="' + css.binName
-                 + '">' + caption + '</div></div>');
+        node = $('<div></div>').addClass(css.bin);
+
+    $('<div></div>')
+      .appendTo(node)
+      .addClass(css.binName)
+      .html(this.data_.content);
 
     return this.renderBrowserIcon(node);
   };
@@ -964,10 +967,14 @@ var SortingDesk_ = function (window, $, Api) {
   BinImageDefault.prototype.render = function ()
   {
     var css = this.owner_.owner.options.css,
-        src = this.data_.content;
+        node = $('<div></div>').addClass([ css.bin, css.binImage ].join(' '));
 
-    return $('<div class="' + css.bin + '"><div class="' + css.binName + '">'
-             + '<img draggable="false" src="' + src + '"/></div></div>');
+    $('<div></div>')
+      .addClass(css.binName)
+      .appendTo(node)
+      .html('<img draggable="false" src="' + this.data_.content + '"/>');
+
+    return this.renderBrowserIcon(node);
   };
 
 
@@ -1243,6 +1250,7 @@ var SortingDesk_ = function (window, $, Api) {
       itemSelected: 'sd-selected',
       itemDragging: 'sd-dragging',
       bin: 'sd-bin',
+      binImage: 'sd-bin-image',
       binName: 'sd-bin-name',
       binAnimateAssign: 'sd-assign',
       binAdding: 'sd-adding',
