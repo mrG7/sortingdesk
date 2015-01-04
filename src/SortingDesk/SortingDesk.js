@@ -58,8 +58,7 @@ var SortingDesk_ = function (window, $, Api) {
    * */
   var Sorter = function (opts, cbs)
   {
-    var self = this,
-        queryId;
+    var self = this;
 
     console.log("Initialising Sorting Desk UI");
     
@@ -74,31 +73,36 @@ var SortingDesk_ = function (window, $, Api) {
     /* Restore state from local storage. */
     this.load_()
       .done(function (bins) {
+        var bin;
+        
         /* If bins were retrieved from local storage, activate the bin that is
          * the currently active one (as specified in `options.activeBinId´) or,
          * if one isn't yet active, use the first element as the active bin. */
         if(bins && bins.length > 0) {
           var index = -1;
 
-          /* Look for the active bin, if one has been specified, and set query
-           * id accordingly. */
           if(opts.activeBinId) {
             bins.some(function (bin, position) {
-              if(bin.subtopic_id === opts.activeBinId) {
+              if(Bin.makeId(bin) === opts.activeBinId) {
                 index = position;
                 return true;
               }
             } );
           }
 
-          queryId = bins[index === -1 ? 0 : index].subtopic_id;
+          if(index === -1) {
+            console.log("Failed to set query id to active bin's content id: "
+                        + "using first bin");
+          }
+          
+          bin = bins[index === -1 ? 0 : index];
 
           /* Set query content before initialising SortingQueue to ensure
            * correct contexts for items retrieved. */
-          self.api_.setQueryContentId(queryId);
+          self.api_.setQueryContentId(bin.content_id);
         }
 
-        self.initialise_(bins, queryId);
+        self.initialise_(bins, bin && Bin.makeId(bin) || null);
       } );
   };
 
@@ -625,7 +629,7 @@ var SortingDesk_ = function (window, $, Api) {
     }
 
     /* Let the extension know that the active bin has changed. */
-    this.owner_.sortingQueue.callbacks.invoke('setActiveBin', bin.data);
+    this.owner_.sortingQueue.callbacks.invoke('setActiveBin', bin.id);
   };
 
   ControllerBins.prototype.browse = function (bin)
@@ -765,17 +769,23 @@ var SortingDesk_ = function (window, $, Api) {
     /* Invoke super constructor. */
     SortingQueue.Drawable.call(this, owner);
 
+    this.id_ = Bin.makeId(descriptor);
     this.data_ = descriptor;
     this.node_ = null;
 
     /* Define getters. */
+    this.__defineGetter__("id",   function () { return this.id_;   } );
     this.__defineGetter__("data", function () { return this.data_; } );
     this.__defineGetter__("node", function () { return this.node_; } );
-    
-    this.__defineGetter__("id",
-                          function () { return this.data_.subtopic_id; } );
   };
 
+  /* Static methods */
+  Bin.makeId = function (descriptor)
+  {
+    return descriptor.content_id + '+' + descriptor.subtopic_id;
+  }
+
+  /* Class interface */
   Bin.prototype = Object.create(SortingQueue.Drawable.prototype);
 
   Bin.prototype.initialise = function ()
