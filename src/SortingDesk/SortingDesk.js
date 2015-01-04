@@ -528,7 +528,7 @@ var SortingDesk_ = function (window, $, Api) {
       .then(function (fc) {
         /* Create label between snippet/image and bin. */
         var label = new (api.getClass('Label'))(
-          bin.id,
+          bin.data.content_id,
           descriptor.content_id,
           api.getAnnotator(),
           api.COREF_VALUE_POSITIVE,
