@@ -1112,6 +1112,7 @@ var SortingDesk_ = function (window, $, Api) {
     
     this.deferred_ = $.Deferred();
 
+    /* Set up nodes. */
     this.nodes_.container = $('[data-sd-purpose="container-label-browser"]');
 
     this.nodes_.buttonClose = this.nodes_.container
@@ -1129,39 +1130,23 @@ var SortingDesk_ = function (window, $, Api) {
 
     this.nodes_.table = this.nodes_.items.find('TABLE');
 
-    (new (api.getClass('LabelFetcher'))(api.getApi()))
-      .cid(this.bin_.id)
-      .which('positive')
-      .get()
-      .done(function (labels) {
-        console.log('Label GET successful:', labels.slice());
-
-        var getNext = function () {
-          if(labels.length === 0) {
+    /* Retrieve all existing labels for the bin's `content_id´. */
+    api.getLabelsUniqueById(this.bin_.data.content_id)
+      .then(function (ids) {
+        console.log("Got labels' unique ids:", ids);
+        
+        api.getAllFeatureCollections(ids)
+          .done(function (ids) {
+            console.log("Unique labels' content id collection GET successful:",
+                        ids.slice());
+          } )
+          .fail(function () {
+            console.log('Failed to retrieve all feature collections');
             onEndInitialise();
-            return;
-          }
-          
-          var cid = labels.shift().cid2;
-
-          api.getFeatureCollection(cid)
-            .done(function(fc) {
-              console.log('Feature collection GET successful (id=%s)',
-                          cid, fc);
-              getNext();
-            } )
-            .fail(function () {
-              console.log('Feature collection GET failed (id=%s)',
-                          cid);
-              getNext();
-            } );
-        };
-
-        /* Retrieve feature collection for the first label. */
-        getNext();
+          } );
       } )
       .fail(function () {
-        console.log('Failed to retrieve labels');
+        console.log('Failed to load state');
         onEndInitialise();
       } );
 
