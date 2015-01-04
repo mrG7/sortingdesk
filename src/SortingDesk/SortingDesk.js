@@ -582,6 +582,14 @@ var SortingDesk_ = function (window, $, Api) {
       this.setActive(this.bins_.length && this.bins_[0] || null);
   };
 
+  ControllerBins.prototype.getAt = function (index)
+  {
+    if(index < 0 || index >= this.bins_.length)
+      throw "Invalid bin index";
+
+    return this.bins_[index];
+  };
+
   ControllerBins.prototype.getById = function (id)
   {
     return this.find(function (bin) {
