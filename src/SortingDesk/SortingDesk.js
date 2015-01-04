@@ -1165,7 +1165,7 @@ var SortingDesk_ = function (window, $, Api) {
   {
     /* Remove all children nodes. */
     this.nodes_.heading.children().remove();
-    this.nodes_.table.children().remove();
+    this.nodes_.table.children(':not(:first-child)').remove();
 
     /* Resolve promise if one still exists. */
     if(this.deferred_)
