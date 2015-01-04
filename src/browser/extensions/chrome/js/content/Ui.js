@@ -71,7 +71,7 @@ var ChromeExtensionUi = (function () {
             self.center('empty');
           }
           self.nodes_.sorter.hide();
-          
+
           /* Initialise API and instantiate `SortingDesk´ class. */
           self.sortingDesk_ = new SortingDesk.Sorter( {
             nodes: {
@@ -85,7 +85,8 @@ var ChromeExtensionUi = (function () {
             },
             visibleItems: 10,
             itemsDraggable: false,
-            activeBinId: result.activeBinId
+            activeBinId: result.activeBinId,
+            dossierUrl: result.config.dossierUrl
           }, $.extend(
             true,
             {

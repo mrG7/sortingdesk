@@ -63,7 +63,7 @@ var SortingDesk_ = function (window, $, Api) {
     console.log("Initialising Sorting Desk UI");
     
     /* TODO: must pass in Dossier API URL. */
-    this.api_ = Api.initialize(this);
+    this.api_ = Api.initialize(this, opts.dossierUrl);
 
     this.options_ = $.extend(true, $.extend(true, {}, defaults_), opts);
     this.sortingQueue_ = new SortingQueue.Sorter(
