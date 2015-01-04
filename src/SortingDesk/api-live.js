@@ -41,6 +41,8 @@ var Api_ = (function (window, $, CryptoJS) {
       putFeatureCollection: putFeatureCollection,
       setFeatureCollectionContent: setFeatureCollectionContent,
       addLabel: addLabel,
+      getLabelsUniqueById: getLabelsUniqueById,
+      dedupLabelsById: dedupLabelsById,
       setQueryContentId: setQueryContentId,
       setSearchEngine: setSearchEngine,
       getSearchEngine: getSearchEngine,
@@ -88,6 +90,43 @@ var Api_ = (function (window, $, CryptoJS) {
     return api_.addLabel(label);
   };
 
+  var getLabelsUniqueById = function (content_id,
+                                      which       /* = "positive" */)
+  {
+    if(typeof content_id !== 'string' || content_id.length === 0)
+      throw "Invalid content id";
+    else if(!_opt_arg_good(which) && typeof which !== 'string')
+      throw "Invalid type for specified `which´ value";
+    
+    var self = this;
+
+    console.log('LabelFetcher GET (id=%s)', content_id);
+    
+    return (new DossierJS.LabelFetcher(api_))
+      .cid(content_id)
+      .which(which || 'positive')
+      .get()
+      .then(function (labels) {
+        console.log('LabelFetcher GET successful:', labels);
+        return self.dedupLabelsById(labels);
+      } );
+  };
+
+  var dedupLabelsById = function (labels)
+  {
+    if(!(labels instanceof Array))
+      throw "Labels collection not an array";
+
+    var result = [ ];
+
+    labels.forEach(function (label, i) {
+      if(result.indexOf(label.cid1) === -1)
+        result.push(label.cid1);
+    } );
+
+    return result;
+  };
+  
   var setQueryContentId = function (id)
   {
     if(typeof id !== 'string' || id.length === 0)
@@ -195,6 +234,15 @@ var Api_ = (function (window, $, CryptoJS) {
   var getCallbacks = function ()
   {
     return qitems_.callbacks();
+  };
+
+
+  /* Private interface */
+  var _opt_arg_good = function (a)
+  {
+    /* True (valid) if optional argument `a´ is not given at all or has a value
+     * of `null´. */
+    return a === null || typeof a === 'undefined';
   };
 
 
