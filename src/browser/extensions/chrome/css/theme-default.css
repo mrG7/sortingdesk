@@ -334,6 +334,10 @@
 .sd-bin-name IMG {
   border: 0 none;
   height: 19px;
+  display: block;
+  margin: 0;
+  padding: 0;
+  line-height: 0;
 }
 
 /* Text item */
