@@ -280,11 +280,11 @@ var ChromeExtensionUi = (function () {
       return deferred.promise();
     },
 
-    onSetActiveBin_: function (bin)
+    onSetActiveBin_: function (id)
     {
       chrome.runtime.sendMessage( {
         operation: 'set-active-bin',
-        bin: bin
+        id: id
       } );
     },
 
