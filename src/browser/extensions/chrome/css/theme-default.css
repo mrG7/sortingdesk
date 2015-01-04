@@ -210,6 +210,7 @@
   overflow-x: auto;
   overflow-y: hidden;
   white-space: nowrap;
+  vertical-align: middle;
 }
 
 #sd-queue {
@@ -262,7 +263,12 @@
   text-shadow: 1px 1px 1px rgba(150, 150, 150, 1);
   transition: background-color 175ms, color 100ms;
   max-width: 200px;
-  line-height: 19px;
+  line-height: 16px;
+}
+
+.sd-bin.sd-bin-image {
+  padding: 1px;
+  top: 4px;
 }
 
 .sd-bin:hover:not(.sd-adding) {
@@ -275,12 +281,17 @@
 .sd-bin.sd-mousedown:not(.sd-adding),
 .sd-bin.sd-assign {
   position: relative;
-  top: 3px;
-  left: 3px;
+  top: 2px;
+  left: 2px;
   box-shadow: none;
   transition: background-color 175ms, color 100ms;
 }
 
+.sd-bin.sd-bin-image.sd-mousedown:not(.sd-adding),
+.sd-bin.sd-bin-image.sd-assign {
+  top: 6px;
+}
+  
 .sd-bin.sd-active {
   color: #E6FFD6;
   background-color: #83c78e;
@@ -333,11 +344,12 @@
 
 .sd-bin-name IMG {
   border: 0 none;
-  height: 19px;
+  height: 24px;
   display: block;
   margin: 0;
   padding: 0;
   line-height: 0;
+  border-radius: 6px;
 }
 
 /* Text item */
