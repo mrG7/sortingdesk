@@ -77,7 +77,10 @@ var SortingDesk_ = function (window, $, Api) {
         
         /* If bins were retrieved from local storage, activate the bin that is
          * the currently active one (as specified in `options.activeBinId´) or,
-         * if one isn't yet active, use the first element as the active bin. */
+         * if one isn't yet active, use the first element as the active bin.
+         *
+         * If no bins exist in local storage, don't do anything and keep the
+         * current query content id null. */
         if(bins && bins.length > 0) {
           var index = -1;
 
