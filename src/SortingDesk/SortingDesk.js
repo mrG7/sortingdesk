@@ -146,19 +146,17 @@ var SortingDesk_ = function (window, $, Api) {
       if(!this.initialised_ || this.sortingQueue_.resetting())
         return this.sortingQueue_.reset();
 
-      var self = this,
-          reset = this.sortingQueue_.reset();
+      var self = this;
 
-      reset.done(function () {
-        self.bins_.reset();
+      return this.sortingQueue_.reset()
+        .done(function () {
+          self.bins_.reset();
 
-        self.bins_ = self.options_ = self.sortingQueue_ = null;
-        self.initialised_ = false;
+          self.bins_ = self.options_ = self.sortingQueue_ = null;
+          self.initialised_ = false;
 
-        console.log("Sorting Desk UI reset");
-      } );
-
-      return reset;
+          console.log("Sorting Desk UI reset");
+        } );
     },
 
     onDropSpecial: function (scope)
