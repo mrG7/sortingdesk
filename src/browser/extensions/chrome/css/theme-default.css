@@ -262,6 +262,7 @@
   box-shadow: 1px 1px 1px 0 rgba(50, 50, 50, 0.75);
   text-shadow: 1px 1px 1px rgba(150, 150, 150, 1);
   transition: background-color 175ms, color 100ms;
+  min-width: 50px;
   max-width: 200px;
   line-height: 16px;
 }
