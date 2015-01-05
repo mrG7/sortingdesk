@@ -356,10 +356,9 @@ var SortingDesk_ = function (window, $, Api) {
   /**
    * @class
    * */
-  var ControllerBins = function (owner, bins, activeBinId)
+  var ControllerBins = function (owner)
   {
-    var self = this,
-        bin;
+    var self = this;
 
     /* Invoke base class constructor. */
     SortingQueue.Controller.call(this, owner);
@@ -402,7 +401,17 @@ var SortingDesk_ = function (window, $, Api) {
       function (descriptor) {
         return self.add(self.construct(descriptor));
       } );
+  };
 
+  ControllerBins.prototype = Object.create(SortingQueue.Controller.prototype);
+
+  ControllerBins.prototype.initialise = function (bins, activeBinId)
+  {
+    var self = this,
+        bin;
+    
+    this.spawner_.initialise();
+    
     /* Load initial bin state, if bins exist. */
     if(!(bins instanceof Array) || bins.length === 0)
       return;
@@ -423,13 +432,6 @@ var SortingDesk_ = function (window, $, Api) {
     }
 
     this.setActive(bin);
-  };
-
-  ControllerBins.prototype = Object.create(SortingQueue.Controller.prototype);
-
-  ControllerBins.prototype.initialise = function ()
-  {
-    this.spawner_.initialise();
   };
 
   ControllerBins.prototype.construct = function (descriptor)
