@@ -619,13 +619,25 @@ A.sd-text-item-title:hover {
 }
 
 .sd-lb-heading {
-  font-size: 16px;
   padding: 10px 5px 8px 5px;
   border: 1px solid #dbdbdb;
   border-radius: 8px 8px 0 0;
   background-color: #e5e4ef;
-  color: #5d6c9b;
   margin: 0;
+  text-shadow: 1px 1px 2px rgba(150, 150, 150, 1);
+}
+
+.sd-lb-heading-title {
+  font-size: 16px;
+  border: none;
+  margin: 0 0 5px 0;
+}
+
+.sd-lb-heading-content {
+  font-size: 14px;
+  font-style: italic;
+  color: #5d6c9b;
+  color: #444;
 }
 
 .sd-lb-items {
@@ -647,14 +659,14 @@ A.sd-text-item-title:hover {
   font-size: 14px;
 }
 
-.sd-lb-items TABLE TH {
+.sd-lb-items TABLE TD {
   font-size: 13px;
 }
 
 .sd-lb-items TABLE TH,
 .sd-lb-items TABLE TD {
   border: 1px solid;
-  border-color: white white silver white;
+  border-color: white #fcfcfc #f0f0f0 white;
   padding: 5px;
 }
 
@@ -663,10 +675,63 @@ A.sd-text-item-title:hover {
   color: #50505c;
 }
 
-.sd-lb-items TABLE TD:nth-child(odd) {
+.sd-lb-items TABLE TR:nth-child(odd) {
+  background-color: #fafafa;
+}
+
+.sd-lb-items TABLE TR:nth-child(even) {
   background-color: #f6f6f6;
 }
 
-.sd-lb-items TABLE TD:nth-child(even) {
+.sd-lb-items TABLE TR:hover TD {
+  background-color: #f0f8ff;
+  cursor: default;
+}
+
+.sd-lb-items-id {
+  font-family: monospace;
+  width: 255px;
+}
+
+.sd-lb-toolbar {
+  float: right;
+}
+
+.sd-lb-toolbar-button {
+  float: left;
+  padding: 4px;
+  margin-left: 5px;
+  border: 1px solid #c0c0c0;
+  border-radius: 3px;
   background-color: #f0f0f0;
+  text-shadow: none;
+  height: 18px;
+  width: 18px;
+  text-align: center;
+}
+
+.sd-lb-toolbar-button:hover {
+  background-color: #e0e0e0;
+}
+
+.sd-lb-toolbar-button SPAN {
+  position: relative;
+  top: 2px;
+  display: inline-block;
+  font-family: 'Glyphicons Halflings';
+  font-style: normal;
+  font-weight: normal;
+  line-height: 16px;
+  font-size: 16px;
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.sd-lb-toolbar-button .sd-lb-toolbar-button-list:before {
+  content: "\e012";
+}
+
+.sd-lb-toolbar-button .sd-lb-toolbar-button-group:before {
+  content: "\e032";
 }
