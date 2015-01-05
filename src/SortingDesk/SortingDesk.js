@@ -224,12 +224,13 @@ var SortingDesk_ = function (window, $, Api) {
       /* Begin instantiating and initialising controllers.
        *
        * Start by explicitly initialising SortingQueue's instance and proceed to
-       * initialising our own instance.. */
+       * initialising our own instance. */
       this.sortingQueue_.initialise();
 
       (this.draggable_ = new ControllerDraggableImage(this))
         .initialise();
 
+      /* Register for a bin dismissal event and process it accordingly. */
       this.sortingQueue_.dismiss.register('bin', function (e, id, scope) {
         var bin = self.bins_.getById(id);
 
@@ -247,6 +248,8 @@ var SortingDesk_ = function (window, $, Api) {
         }
       } );
 
+      /* Once the bins controller has been instantiated and initialised, we're
+       * all good. */
       this.initialiseBins_(bins, activeBinId);
 
       this.initialised_ = true;
@@ -258,11 +261,14 @@ var SortingDesk_ = function (window, $, Api) {
       var self = this,
           bin;
 
+      /* Force reset of the bins controller, if an instance currently exists. */
       if(this.bins_)
         this.bins_.reset();
 
+      /* Clear the items queue list. */
       this.sortingQueue_.items.removeAll();
 
+      /* (Re-)instantiate the bins controller. */
       (this.bins_ = this.sortingQueue_.instantiate('ControllerBins', this))
         .initialise();
 
