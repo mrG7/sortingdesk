@@ -53,6 +53,7 @@ var Api_ = (function (window, $, CryptoJS) {
       makeRawImageId: makeRawImageId,
       isSubtopic: isSubtopic,
       getSubtopicType: getSubtopicType,
+      extractSubtopicId: extractSubtopicId,
       mapWordCount: mapWordCount,
       getAnnotator: getAnnotator,
       getClass: getClass,
@@ -228,6 +229,14 @@ var Api_ = (function (window, $, CryptoJS) {
       throw "Invalid format for subtopic id";
     
     return type[1];
+  };
+
+  var extractSubtopicId = function (subtopic_id)
+  {
+    var match = typeof subtopic_id === 'string'
+          && subtopic_id.match(/^subtopic\|\w+\|(.+)/);
+
+    return match && match[1];
   };
 
   var mapWordCount = function (string)
