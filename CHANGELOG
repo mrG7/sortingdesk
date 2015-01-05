@@ -1,3 +1,32 @@
+2015-01-05  Miguel Guedes  <miguel@miguelguedes.org>
+
+	* Sorting Desk:
+
+	Created a prototype component, the Label Browser, that allows for
+	the contents of feature collections to be visualised.
+
+	What works:
+
+	+ viewing the subtopics of feature collections that have positive
+	coreference.
+
+	What doesn't:
+
+	+ there is only one view mode, which consists of showing all
+	subtopics from all feature collections retrieved. Another view
+	mode could allow for subtopics to be shown in groups, with each
+	feature collection becoming a group.
+
+	+ toolbar; it's there merely as a suggestion of the direction the
+	UI could go.
+
+	+ subtopics whose content is an image aren't shown as images yet.
+
+	+ the Sorting Desk main component remains active alongside the
+	browser, which means that it is possible to for the user to change
+	the state of entities; these changes aren't reflected in the
+	browser (nor is it understood at present if they should).
+
 2014-12-24  Diffeo  <support@diffeo.com>
 
 	* all:
