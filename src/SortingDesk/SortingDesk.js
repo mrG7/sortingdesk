@@ -235,14 +235,6 @@ var SortingDesk_ = function (window, $, Api) {
         var bin = self.bins_.getById(id);
 
         if(bin) {
-          /* Disallow removal of last bin. */
-          if(self.bins_.bins.length === 1)
-          {
-            console.log("Disallowing removal of last bin when items' queue"
-                        + " empty");
-            return;
-          }
-
           self.bins_.removeAt(self.bins_.indexOf(bin));
           self.save();
         }
