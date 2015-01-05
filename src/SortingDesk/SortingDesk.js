@@ -250,9 +250,6 @@ var SortingDesk_ = function (window, $, Api) {
 
     initialiseBins_: function (bins, activeBinId)
     {
-      var self = this,
-          bin;
-
       /* Force reset of the bins controller, if an instance currently exists. */
       if(this.bins_)
         this.bins_.reset();
@@ -262,27 +259,7 @@ var SortingDesk_ = function (window, $, Api) {
 
       /* (Re-)instantiate the bins controller. */
       (this.bins_ = this.sortingQueue_.instantiate('ControllerBins', this))
-        .initialise();
-
-      if(!(bins instanceof Array) || bins.length === 0)
-        return;
-
-      bins.forEach(function (descriptor) {
-        self.bins_.add(self.bins_.construct(descriptor), false, true);
-      } );
-      
-      /* Now manually set the active bin. */
-      bin = this.bins_.getById(activeBinId);
-
-      /* Attempt to recover if we've been given an invalid id to activate. */
-      if(!bin) {
-        console.log("Failed to set the active bin: setting first (id=%s)",
-                    activeBinId);
-
-        bin = self.bins_.getAt(0);
-      }
-
-      this.bins_.setActive(bin);
+        .initialise(bins, activeBinId);
     },
 
     load_: function ()
@@ -381,9 +358,10 @@ var SortingDesk_ = function (window, $, Api) {
   /**
    * @class
    * */
-  var ControllerBins = function (owner)
+  var ControllerBins = function (owner, bins, activeBinId)
   {
-    var self = this;
+    var self = this,
+        bin;
 
     /* Invoke base class constructor. */
     SortingQueue.Controller.call(this, owner);
@@ -426,6 +404,27 @@ var SortingDesk_ = function (window, $, Api) {
       function (descriptor) {
         return self.add(self.construct(descriptor));
       } );
+
+    /* Load initial bin state, if bins exist. */
+    if(!(bins instanceof Array) || bins.length === 0)
+      return;
+
+    bins.forEach(function (descriptor) {
+      self.add(self.construct(descriptor), false, true);
+    } );
+    
+    /* Now manually set the active bin. */
+    bin = this.getById(activeBinId);
+
+    /* Attempt to recover if we've been given an invalid id to activate. */
+    if(!bin) {
+      console.log("Failed to set the active bin: setting first (id=%s)",
+                  activeBinId);
+
+      bin = self.bins_.getAt(0);
+    }
+
+    this.setActive(bin);
   };
 
   ControllerBins.prototype = Object.create(SortingQueue.Controller.prototype);
