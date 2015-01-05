@@ -51,6 +51,10 @@ Example:
 The HTML element representation of an item, as created by =SortingQueue=, will *always* be given the CSS class =sd-text-item= and this class name can *not* be changed or configured, ever.
 
 *** TODO Replace methods with (prefix) string =initialis= for =initializ=
+
+**** TODO Request feedback from Diffeo about other British-isms and use American English variations
+This may be of particular concern given the sensitive nature of the project.
+
 *** TODO Document code
 First iteration would include modules and classes.
 
@@ -91,7 +95,7 @@ This component is sorely needed.
 *** TODO Remove code handling keyboard events
   
 ** =SortingDesk= [0%]
-*** =LabelBrowser= [20%]
+*** =LabelBrowser= [16%]
 **** TODO =set_heading_title_=: using reference bin's own content rather than snippet from retrieved feature collection
 Assess if correct.
 
@@ -100,13 +104,16 @@ Rationale behind decision was so the bins' snippet/image presented actually matc
 **** TODO =LabelBrowserViewList=: currently merging subtopics from all feature collections
 Must assess if this is necessary.
 
-**** TODO Use Bootstrap
 **** TODO Show labels ungrouped or grouped by feature collection (=content_id=)
 **** TODO As it stands there can only be ONE Label Browser HTML container
 We can keep the declarative manner in which nodes are found but the component will have to receive a container node so that querying for nodes can be conducted in the container node's subtree.
 
 **** TODO Decouple component from =SortingDesk.js=
 Component needs to stand on its own, have its own set of options, callbacks and so on. Being so tightly coupled with the =SortingDesk= module means that currently the =options= structure is logically nonsensical and it is unable to receive notifications for loading events, among other problems.
+
+**** CANCELED Use Bootstrap
+- State "CANCELED"   from "TODO"       [2015-01-05 Mon 14:26] \\
+  Can't be done. Bootstrap screws up/overwrites existing page styles.
 
 *** TODO Instantiation of API must pass in Dossier API URL
 *** TODO Revisit =options=
