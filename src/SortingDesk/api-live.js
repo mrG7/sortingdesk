@@ -51,6 +51,7 @@ var Api_ = (function (window, $, CryptoJS) {
       generateSubtopicId: generateSubtopicId,
       makeRawTextId: makeRawTextId,
       makeRawImageId: makeRawImageId,
+      isSubtopic: isSubtopic,
       getSubtopicType: getSubtopicType,
       mapWordCount: mapWordCount,
       getAnnotator: getAnnotator,
@@ -206,6 +207,12 @@ var Api_ = (function (window, $, CryptoJS) {
   var makeRawImageId = function (subtopic_id)
   {
     return [ 'subtopic', 'image', subtopic_id ].join('|');
+  };
+
+  var isSubtopic = function (subtopic_id)
+  {
+    return typeof subtopic_id === 'string'
+      && /^subtopic\|\w+\|.+/.test(subtopic_id);
   };
 
   var getSubtopicType = function (subtopic_id)
