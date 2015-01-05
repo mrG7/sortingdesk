@@ -458,8 +458,10 @@ var SortingDesk_ = function (window, $, Api) {
   
   ControllerBins.prototype.reset = function ()
   {
+    /* Reset bin spawner controller and remove all children nodes inside the
+     * bins HTML container. */
     this.spawner_.reset();
-    this.node.children().remove();
+    this.owner_.options.nodes.bins.children().remove();
 
     this.bins_ = this.hover_ = this.active_ = this.spawner_ = null;
   };
