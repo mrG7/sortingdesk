@@ -634,12 +634,17 @@ var SortingDesk_ = function (window, $, Api) {
 
   ControllerBins.prototype.browse = function (bin)
   {
-    var self = this;
+    var self = this,
+        opts = this.owner_.options;
     
     if(!this.haveBrowser_)
       throw "Label Browser component unavailable";
     else if(this.browser_)
       throw "Label Browser already active";
+
+    /* Disable browser icons. */
+    opts.nodes.bins.find('.' + opts.css.iconLabelBrowser)
+      .addClass(opts.css.disabled);
 
     (this.browser_ = this.owner_.sortingQueue.instantiate(
       'LabelBrowser', this, this.owner_.api, bin))
@@ -647,6 +652,10 @@ var SortingDesk_ = function (window, $, Api) {
       .done(function () {
         self.browser_.reset();
         self.browser_ = null;
+
+        /* Re-enable browser icons. */
+        opts.nodes.bins.find('.' + opts.css.iconLabelBrowser)
+          .removeClass(opts.css.disabled);
       } );
   };
 
@@ -1492,7 +1501,8 @@ var SortingDesk_ = function (window, $, Api) {
       buttonAdd: 'sd-button-add',
       droppableHover: 'sd-droppable-hover',
       mouseDown: 'sd-mousedown',
-      iconLabelBrowser: 'sd-bin-browser-icon'
+      iconLabelBrowser: 'sd-bin-browser-icon',
+      disabled: 'sd-disabled'   /* Indicates something is disabled. */
     },
     delays: {                   /* In milliseconds.     */
       binRemoval: 200,          /* Bin is removed from container. */
