@@ -90,10 +90,8 @@ var SortingDesk_ = function (window, $, Api) {
             } );
           }
 
-          if(index === -1) {
-            console.log("Failed to set query id to active bin's content id: "
-                        + "using first bin");
-          }
+          if(index === -1)
+            console.log("Unable to find active bin: using first bin");
           
           bin = bins[index === -1 ? 0 : index];
 

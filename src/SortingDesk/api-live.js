@@ -339,7 +339,7 @@ var Api_ = (function (window, $, CryptoJS) {
   };
 
 
-  /* return module public API -- pre-initialization*/
+  /* return module public API -- pre-initialization */
   return {
     initialize: initialize
   };
