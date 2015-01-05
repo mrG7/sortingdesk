@@ -26,6 +26,21 @@ var ChromeExtensionUi = (function () {
 
     this.nodes_ = { };
 
+    /* Load custom font */
+    /* TODO: perhaps create a resource loader? This is just too hacky. */
+    {
+      var style = document.createElement('style');
+      style.type = 'text/css';
+      style.textContent = [
+        "@font-face {",
+        "font-family: 'Glyphicons Halflings';",
+        "src: url('",
+        chrome.extension.getURL('lib/bootstrap/fonts/glyphicons-halflings-regular.woff'),
+        "'); }" ].join('');
+      
+      document.head.appendChild(style);
+    }
+
     chrome.runtime.sendMessage(
       { operation: "get-meta" },
       function (result)
