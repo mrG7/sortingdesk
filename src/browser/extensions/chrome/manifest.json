@@ -10,7 +10,8 @@
     "lib/SortingDesk/*.js",
     "lib/dossier.js/*.js",
     "html/container.html",
-    "media/*"
+    "media/*",
+    "lib/bootstrap/fonts/*"
   ],
 
   "content_scripts": [
