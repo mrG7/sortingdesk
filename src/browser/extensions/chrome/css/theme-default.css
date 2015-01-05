@@ -327,13 +327,13 @@
   z-index: 1000001;
 }
 
-.sd-bin:hover .sd-bin-browser-icon {
+.sd-bin:hover .sd-bin-browser-icon:not(.sd-disabled) {
   display: block;
   background-color: white;
   opacity: 1;
 }
 
-.sd-bin-browser-icon:not(.sd-bin-browser-icon-disable):hover {
+.sd-bin-browser-icon:not(.sd-disabled):hover {
   background-color: #ececec;
 }
 
