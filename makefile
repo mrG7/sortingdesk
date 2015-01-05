@@ -2,8 +2,6 @@
 #
 # Copyright (c) 2014 Diffeo
 #
-# Author: Miguel Guedes <miguel@miguelguedes.org>
-#
 # Comments:
 #
 
@@ -22,26 +20,28 @@ all: build man
 help:
 	echo "Usage: make [ build | man | clean | deps ]"
 
-build:
-	>&2 echo "E: minification of javascript files not yet implemented" \
-		&& exit 1
-	# test -d "$(DIR_OUTPUT_SRC)" || mkdir -p "$(DIR_OUTPUT_SRC)"
+build: minify ext-chrome
 
 man:
 	test -d "$(DIR_OUTPUT_DOC)" || mkdir -p "$(DIR_OUTPUT_DOC)"
 	$(JSDOC) -c="$(JSDOC_CONF)" -d="$(DIR_OUTPUT_DOC)" $(JSDOC_SOURCES)
 
 clean:
-	echo I: removing output directory
+	echo "I: removing output directory"
 	rm -vfr "$(DIR_OUTPUT)"
-	echo I: deleting extraneous files
+	echo "I: deleting extraneous files"
 	find -type f \( -name '*~' -or -name '\#*' -or -name '.\#*' \) -exec rm -fv {} +
 
 deps:
-	echo I: updating dependencies
+	echo "I: updating dependencies"
 	sh/update-deps
 
+minify:
+	>&2 echo "W: minification of javascript files not yet implemented"
+	# test -d "$(DIR_OUTPUT_SRC)" || mkdir -p "$(DIR_OUTPUT_SRC)"
+
 ext-chrome:
+	echo "I: packaging chrome extension"
 	(cd src/browser/extensions && zip -r sortingdesk_chrome.zip chrome)
 	mv src/browser/extensions/sortingdesk_chrome.zip ./
 

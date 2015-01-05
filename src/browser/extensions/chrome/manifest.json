@@ -9,13 +9,15 @@
     "lib/SortingQueue/*.js",
     "lib/SortingDesk/*.js",
     "lib/dossier.js/*.js",
-    "html/container.html"
+    "html/container.html",
+    "media/*",
+    "lib/bootstrap/fonts/*"
   ],
 
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": [ "lib/jquery-2.1.1.min.js", "lib/dossier.js/Dossier.js", "lib/SortingQueue/SortingQueue.js", "lib/SortingDesk/api-live.js", "lib/SortingDesk/SortingDesk.js", "js/content/Ui.js" ],
+      "js": [ "lib/jquery-2.1.1.min.js", "lib/CryptoJS/md5.js", "lib/dossier.js/Dossier.js", "lib/SortingQueue/SortingQueue.js", "lib/SortingDesk/api-live.js", "lib/SortingDesk/SortingDesk.js", "js/content/Ui.js" ],
       "css": [ "css/theme-default.css" ]
     }
   ],

@@ -4,8 +4,6 @@
  * 
  * @copyright 2014 Diffeo
  *
- * @author Miguel Guedes <miguel@miguelguedes.org>
- *
  * Comments:
  * Uses the `SortingDesk' component.
  *
@@ -28,6 +26,21 @@ var ChromeExtensionUi = (function () {
 
     this.nodes_ = { };
 
+    /* Load custom font */
+    /* TODO: perhaps create a resource loader? This is just too hacky. */
+    {
+      var style = document.createElement('style');
+      style.type = 'text/css';
+      style.textContent = [
+        "@font-face {",
+        "font-family: 'Glyphicons Halflings';",
+        "src: url('",
+        chrome.extension.getURL('lib/bootstrap/fonts/glyphicons-halflings-regular.woff'),
+        "'); }" ].join('');
+      
+      document.head.appendChild(style);
+    }
+
     chrome.runtime.sendMessage(
       { operation: "get-meta" },
       function (result)
@@ -42,19 +55,15 @@ var ChromeExtensionUi = (function () {
           operation: "read-file",
           identifier: "html/container.html"
         }, function (html) {
-          /* TODO: domain is hardcoded. */
-          /* Set current domain. */
-          Api.setDomain("mydomain");
-          
           $('body').append(html);
 
           /* Cache jQuery references to nodes used. */
           self.nodes_ = {
-            container: $('#sdw-container'),
-            sorter: $('#sdw-sorter'),
-            activator: $('#sdw-activator'),
-            loading: $('#sdw-load'),
-            empty: $('#sdw-empty')
+            container: $('#sd-container'),
+            sorter: $('#sd-sorter'),
+            activator: $('#sd-activator'),
+            loading: $('#sd-load'),
+            empty: $('#sd-empty')
           };
 
           /* Instantiate class components. */
@@ -67,35 +76,62 @@ var ChromeExtensionUi = (function () {
            * 
            * Note that both the main container and the element(s) to be centered
            * MUST be visible or their widths can't be computed and thus
-           * centering fails. By the way, even though several elements are shown
-           * and hidden in quick succession, no flicker occurs because painting
-           * only takes place once the script returns execution to the
-           * browser. */
+           * centering fails. Even though several elements are shown and hidden
+           * in quick succession, no flicker occurs because painting only takes
+           * place once the script returns execution to the browser. */
           self.nodes_.sorter.show();
           {
             self.center('loading');
             self.center('empty');
           }
           self.nodes_.sorter.hide();
-          
+
           /* Initialise API and instantiate `SortingDesk´ class. */
           self.sortingDesk_ = new SortingDesk.Sorter( {
             nodes: {
-              items: $('#sdw-queue'),
-              bins: $('#sdw-bins'),
-              add: $('#sdw-button-add'),
-              buttonDismiss: $("#sdw-button-dismiss")
+              items: $('#sd-queue'),
+              bins: $('#sd-bins'),
+              add: $('#sd-button-add'),
+              buttonDismiss: $("#sd-button-dismiss")
             },
             constructors: {
               Item: ItemLinkify
             },
             visibleItems: 10,
             itemsDraggable: false,
-            activeBinId: result.activeBinId
-          }, $.extend(true, { },
-                      Api,
-                      self.requests_.callbacks,
-                      self.transceiver_.callbacks ) );
+            activeBinId: result.activeBinId,
+            dossierUrl: result.config.dossierUrl
+          }, $.extend(
+            true,
+            {
+              onLabelBrowserInitialised: function (container) {
+                var position = self.nodes_.sorter.position(),
+                    win = $(window);
+                
+                switch(self.positioner_.current) {
+                case Positioner.TOP_RIGHT:
+                  container.css( {
+                    top: position.top,
+                    left: position.top
+                  } );
+
+                  container.width(win.width() - self.nodes_.sorter.outerWidth()
+                                  - (position.top << 1)
+                                  - container.outerWidth()
+                                  + container.innerWidth());
+                  container.height(win.height() -
+                                   (position.top << 1));
+                  
+                  return;
+                  
+                default:
+                  throw "Current position invalid or not implemented"; 
+                }
+              }
+            },
+            Api,
+            self.requests_.callbacks,
+            self.transceiver_.callbacks ) );
         } );
       } );
   };
@@ -210,7 +246,7 @@ var ChromeExtensionUi = (function () {
     {
       var self = this;
       
-      return Api.moreTexts(n)
+      return ui_.sortingDesk.api.getCallbacks().moreTexts(n)
         .done(function (items) {
           if(!items || !(items instanceof Array) || items.length === 0)
             ui_.nodes.empty.fadeIn('slow');
@@ -259,11 +295,11 @@ var ChromeExtensionUi = (function () {
       return deferred.promise();
     },
 
-    onSetActiveBin_: function (bin)
+    onSetActiveBin_: function (id)
     {
       chrome.runtime.sendMessage( {
         operation: 'set-active-bin',
-        bin: bin
+        id: id
       } );
     },
 
@@ -286,7 +322,7 @@ var ChromeExtensionUi = (function () {
         width = nodes.activator.width();
     
     nodes.activator.click(function () {
-      if(nodes.container.hasClass('sdw-active')) {
+      if(nodes.container.hasClass('sd-active')) {
         nodes.sorter
           .stop(true, true)
           .fadeOut( { duration: 200, queue: false } );
@@ -296,9 +332,9 @@ var ChromeExtensionUi = (function () {
             $(this).html(self.html_);
           } );
         
-        nodes.container.removeClass('sdw-active');
+        nodes.container.removeClass('sd-active');
       } else {
-        nodes.container.addClass('sdw-active');
+        nodes.container.addClass('sd-active');
         
         self.html_ = nodes.activator.html();
         nodes.activator
@@ -334,14 +370,16 @@ var ChromeExtensionUi = (function () {
   Positioner.BOTTOM_LEFT  = 3;
   Positioner.BOTTOM_RIGHT = 4;
   Positioner.TARGET_CLASSES = [
-    'sdw-top-left',
-    'sdw-top-right',
-    'sdw-bottom-left',
-    'sdw-bottom-right'
+    'sd-top-left',
+    'sd-top-right',
+    'sd-bottom-left',
+    'sd-bottom-right'
   ];
 
   Positioner.prototype = {
     current_: null,
+
+    get current() { return this.current_; },
 
     position: function (target)
     {

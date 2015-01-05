@@ -374,7 +374,7 @@ restarts).
 
 All URLs below should be prefixed with:
 
-    http://dev5.diffeo.com:10982/namespaces/miguel_sorting_desk
+    http://dev5.diffeo.com:10982/namespaces/xyz_sorting_desk
 
 
 ### Create a new bin
@@ -466,7 +466,7 @@ You can now execute cross-domain AJAX in SortingDesk by prepending URLs with
 with:
 
     curl -s -X POST \
-      'http://localhost:8080/proxy/http://dev5.diffeo.com:10983/namespaces/miguel_sorting_desk/bins/123/statements/'
+      'http://localhost:8080/proxy/http://dev5.diffeo.com:10983/namespaces/xyz_sorting_desk/bins/123/statements/'
     # Output: {"statement_id": 3}
 
 

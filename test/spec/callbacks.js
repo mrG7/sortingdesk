@@ -1,7 +1,6 @@
 /**
  * @file Test specification: callbacks.
  * @copyright 2014 Diffeo
- * @author Miguel Guedes <miguel@miguelguedes.org>
  *
  * Comments:
  *

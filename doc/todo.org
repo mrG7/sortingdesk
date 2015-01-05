@@ -1,17 +1,74 @@
-* To do items [0%]
-** *ALL* [33%]
+* To do items
+** *ALL* [0%]
+*** TODO Create standard function that can be assigned to abstract methods
+This would enable the following:
+
+#+BEGIN_SRC javascript
+var _abs_met = function ()
+{
+  throw "Abstract method not implemented";
+};
+
+var MyClass = function () { ... };
+
+MyClass.prototype = {
+  anAbstractMethod: _abs_met
+};
+#+END_SRC
+
+Ideally the =_abs_met_= above would be part of a specific namespace of class utilities, e.g.:
+
+#+BEGIN_SRC javascript
+var MetaClass = {
+  abstract: function ()
+  { throw "Abstract method not implemented"; }
+};
+#+END_SRC  
+
+**** TODO Integrate into module
+Parent feature could even be integrated in a module of its own (name suggestion: =Utilitas=, old Latin for “utility”) containing other similar basic utilities/tools (e.g. RFC standards compliant string encode/decode utility), with the Sorting Queue, Desk, and other modules, all depending on it.
+
+In addition, certain classes could be moved into this new module. Examples of this are the =Controller= class that is specialised by various classes in different modules. It doesn't really make sense that, say, the =LabelBrowser= module has to depend on =SortingQueue= just because it requires access to its =Controller= base class; it should depend directly on the utility module suggested here.
+
+*** TODO Implement HTML declarative form as mechanism of assigning context
+See Sorting Desk's =LabelBrowser= and how it uses HTML5 =data=-prefixed tags to give DOM nodes a context. Essentially, this mechanism would allow us to avoid forcing the client to pass jQuery object references to DOM nodes needed, thereby simplifying the process. We should still require *either* a reference to a main/container node in a set of different supported types. This main/container node would enable looking up nodes in declarative form within its subtree, thus owned by it, and not globally in the DOM tree, and would make it possible for multiple instances of the component to exist simultaneously. The main/container node could be allowed to specified in the following types:
+
++ jQuery reference, with only the first element used
+  
++ string assumed to be containing its id; or perhaps, for even greater flexibility, the string could be allowed to be *anything* that jQuery *and* =document.querySelector= understand?
+  
++ direct reference to an =Element= instance
+
+*Question*: AngularJS uses the prefix =ng-= for its many HTML tags, so not prefixed with =data-=. Perhaps we could mirror this practice and thus not have to rely on HTML5's =data-= prefixed tags as we currently do? Is it a standards compliant way, however?
+
+Follow-up to above: see http://stackoverflow.com/questions/12107504/angularjs-tags-attributes; it seems AngularJS *also* accepts =data-= prefixed HTML tags.
+
+*** TODO Do *NOT* allow CSS classes to be specified in =options=
+This actually makes no sense and borders on the nonsensical. The assumption should be that the (different) components all use a *fixed* set of CSS classes, which are properly prefixed thus creating a namespace of sorts, which the client can then provide custom styling for. The CSS class names themselves should *not* be allowed to change.
+
+Example:
+
+The HTML element representation of an item, as created by =SortingQueue=, will *always* be given the CSS class =sd-text-item= and this class name can *not* be changed or configured, ever.
+
+*** TODO Replace methods with (prefix) string =initialis= for =initializ=
+
+**** TODO Request feedback from Diffeo about other British-isms and use American English variations
+This may be of particular concern given the sensitive nature of the project.
+
 *** TODO Document code
 First iteration would include modules and classes.
 
 *** TODO Document required options
 =SortingQueue=, =SortingDesk= and possibly other components, could do with documentation about required and optional options, callbacks and so on.
 
-*** DONE Rename components
-- State "DONE"       from "TODO"       [2014-12-24 Wed 13:37]
-+ Rename existing =SortingDesk= component to =SortingBinsExample= and its source file to =sorting-bins-example.js=.
-+ Rename =SortingDossier= component to =SortingDesk=.
-  
 ** =SortingQueue= [0%]
+*** TODO =ControllerButtonDismiss= already employs a very specific pubsub method (=register=)
+This is bad. A generic and extensible mechanism that can be used by *ALL* components should be in place instead.
+
+*** TODO Move =onDropSpecial= to =ControllerBins=
+*** TODO Create controller responsible for constructors
+The method =instantiate= should be moved there and a new method  =hasConstructor= created.
+
 *** TODO Rename CSS class names alluding to the old concept of text item
 Some CSS class names are still in use which employ the old concept of text item. These should be renamed such that the "text" word is removed.
 
@@ -20,28 +77,65 @@ See =ProtarchBinSpawner=. Specifically, there are instances where the events att
 
 *** TODO =ControllerItems=: disable all other dragging-related events
 
+*** TODO Implement Events controller based on the publisher-subscriber design pattern
+- State "TODO"       from "WAIT"       [2015-01-02 Fri 12:49]
+- State "WAIT"       from "TODO"       [2014-10-23 Thu 14:42]
+
+This component is sorely needed.
+
 *** TODO Create a list of interesting events to advertise via an Events controller
 
 *** TODO Items controller to notify client when no more items available
 
-*** TODO [#B] Prefix text-items' node ids
+*** TODO Prefix text-items' node ids
 - State "TODO"       from "WAIT"       [2014-09-07 Sun 08:16]
 - State "WAIT"       from "TODO"       [2014-09-05 Fri 10:41] \\
   Currently waiting to hear from support as to whether ids are guaranteed to always be unique.
   
 *** TODO Remove code handling keyboard events
-*** WAIT Implement Events controller based on the publisher-subscriber design pattern
-- State "WAIT"       from "TODO"       [2014-10-23 Thu 14:42]
   
-** =SortingDesk= [28%]
+** =SortingDesk= [0%]
+*** =LabelBrowser= [16%]
+**** TODO =set_heading_title_=: using reference bin's own content rather than snippet from retrieved feature collection
+Assess if correct.
+
+Rationale behind decision was so the bins' snippet/image presented actually matched what the user used to create the bin in the first place. After all, a different user could have created a feature collection for the same page, thus replacing its snippet/image.
+
+**** TODO =LabelBrowserViewList=: currently merging subtopics from all feature collections
+Must assess if this is necessary.
+
+**** TODO Show labels ungrouped or grouped by feature collection (=content_id=)
+**** TODO As it stands there can only be ONE Label Browser HTML container
+We can keep the declarative manner in which nodes are found but the component will have to receive a container node so that querying for nodes can be conducted in the container node's subtree.
+
+**** TODO Decouple component from =SortingDesk.js=
+Component needs to stand on its own, have its own set of options, callbacks and so on. Being so tightly coupled with the =SortingDesk= module means that currently the =options= structure is logically nonsensical and it is unable to receive notifications for loading events, among other problems.
+
+**** CANCELED Use Bootstrap
+- State "CANCELED"   from "TODO"       [2015-01-05 Mon 14:26] \\
+  Can't be done. Bootstrap screws up/overwrites existing page styles.
+
+*** TODO Instantiation of API must pass in Dossier API URL
+*** TODO Revisit =options=
+Sorter and Label Browser's options reside together but Sorter's options are not prefixed.
+
+*** TODO =options.nodes.add=
+Inconsistency: =buttonDismissed= is prefixed but =add= isn't.
+
+*** TODO Assess whether instance should keep reference to =options= object
+Should it rely on =SortingQueue= instead?
+
+*** TODO Time to think about decoupling =SortingDesk.js=
+
+*** TODO Throw exception when instantiating if not on valid page
+URL of page must have a valid HTTP[S] protocol. Disallow on any other page and throw exception.
+
 *** TODO Allow specialisation of =ControllerButtonDismiss=
 
 *** TODO Tentative: allow =SortingDesk='s constructor to receive a deferred object
 Allow the constructor of =SortingDesk= to receive an *optional* deferred object provided, and which is under the responsibility of the user, that can be actioned upon depending on the result of the initialisation sequence.
 
-Ultimately this optional mechanism would allow the user to receive perfectly timed notifications regarding Sorting Desk's initialisation state as and when they happen.
-
-*** TODO =ControllerBins=: =onItemDropped= unused
+Ultimately this optional mechanism would allow the client to receive a perfectly timed notification regarding Sorting Desk's initialisation state as and when it happens.
 
 *** TODO =ControllerBinSpawner=: =addManual= can't be supported as it stands
 + API requires knowledge of the bin's =label=.
@@ -50,25 +144,18 @@ Ultimately this optional mechanism would allow the user to receive perfectly tim
 *** TODO Display of the bins should be minimal
 Ideally, each bin should look like the item that was first dropped to create that bin.
 
-*** TODO [#B] Prefix bins' node ids
-- State "TODO"       from "WAIT"       [2014-09-07 Sun 08:16]
-- State "WAIT"       from "TODO"       [2014-09-05 Fri 10:41] \\
-  Currently waiting to hear from support as to whether ids are guaranteed to always be unique.
-  
-*** TODO =itemDroppedInBin=: should it be optional?
-
 *** WAIT Implement keyboard auto-repeat with configurable frequency
 - State "WAIT"       from "TODO"       [2014-10-15 Wed 13:56] \\
   Probable unwanted feature.
   
-*** WAIT [#A] Allow bin statements to be edited
+*** WAIT Allow bin statements to be edited
 - State "WAIT"       from "TODO"       [2014-10-10 Fri 16:11] \\
   This will most likely require involvement of the client via a callback.
 - State "TODO"       from "WAIT"       [2014-09-05 Fri 10:42]
 - State "WAIT"       from "TODO"       [2014-08-22 Fri 13:24] \\
   Not proceeding with this until it's clear whether bins based on existing text items are even editable.
   
-*** WAIT [#B] Do not allow duplicate bins
+*** WAIT Do not allow duplicate bins
 - State "WAIT"       from "CANCELED"   [2014-11-26 Wed 09:09] \\
   Reissuing TODO item as there is validity in the concept.
 - State "CANCELED"   from "WAIT"       [2014-09-04 Thu 13:02] \\
@@ -77,48 +164,36 @@ Ideally, each bin should look like the item that was first dropped to create tha
   Specifications aren't clear as to how bins that are based on existing text items
   are created.
   
-*** DONE Append string `live´ to API source file
-- State "DONE"       from "TODO"       [2014-12-24 Wed 13:46]
+** Extension [0%]
+*** All [100%]
+*** Chrome [0%]
+**** TODO Custom font should really be loaded by a resource manager
+See =Ui= constructor, before =get-meta= message is sent.
 
-*** DONE Handle removal of currently active bin
-- State "DONE"       from "TODO"       [2014-11-26 Wed 16:26]
-  
-*** CANCELED =addBin=: how to deal with the =ranker= argument?
-- State "CANCELED"   from "TODO"       [2014-11-26 Wed 15:07] \\
-  =addBin= callback no longer used.
-  
-*** CANCELED Ensure =addBin= callback exists when the 'bin add' button exists
-- State "CANCELED"   from "TODO"       [2014-11-26 Wed 15:06] \\
-  =addBin= callback no longer used.
-  
-** =SortingDossier= [100%]
-*** DONE Remove browser-specific statements from =SortingDossier= module
-- State "DONE"       from "TODO"       [2014-12-23 Tue 11:59]
-  
-*** DONE Decouple from Datawake
-- State "DONE"       from "TODO"       [2014-12-22 Mon 18:11]
-  
-*** DONE Rename to =SortingDossier=
-- State "DONE"       from "TODO"       [2014-12-22 Mon 18:11]
-  
-*** DONE Realign loading and queue empty notifications when both present
-- State "DONE"       from "TODO"       [2014-12-22 Mon 18:11]
-  
+**** TODO Do not show activator when not on valid page
+URL of page must have a valid HTTP[S] protocol. Disallow on any other page.
+
+**** TODO [#A] Add option: Dossier stack API URL
 ** API [0%]
 *** All [0%]
 **** TODO Move all API-related files into respective component directory
 
 **** TODO Add timeout to AJAX calls
 
-*** Live [100%]
-**** DONE =getRandomLabel=: rename to =getRandomItem=
-- State "DONE"       from "TODO"       [2014-12-06 Sat 11:42]
-  
-*** Mock [100%]
+*** Live [0%]
+**** TODO Place methods in relevant namespaces
+For instance all methods pertaining to feature collection should be in a `fc´ or `featureCollection´ namespace of their own.
 
-** Examples [33%]
+**** TODO Force clients of the =Api= module to instantiate it
+As it stands, the =Api= module can only be used by one client at a time.
+
+**** TODO Remove bypass of =DossierJS.SortingQueueItems.prototype._moreTexts=
+The bypass was created do deliver items in the format expected by =SortingQueue= but this should instead be integrated in DossierJS. Better still, IMHO, would be to integrate what is now the =SortingQueueItems= class in =Api=.
+
+** Mock [100%]
+
+** Examples [0%]
 *** TODO Fix broken examples
-It seems only the =sorting_desk-live= example works at the moment.
 
 *** WAIT Create examples [0%]
 - State "WAIT"       from "TODO"       [2014-11-25 Tue 06:39] \\
@@ -126,18 +201,11 @@ It seems only the =sorting_desk-live= example works at the moment.
   
 **** TODO No content ids
 
-*** DONE Revisit =sorting_desk-live.html= example
-- State "DONE"       from "TODO"       [2014-12-06 Sat 11:42]
-It no longer runs and its CSS is invalid compared to the =sorting_desk-mock-default.html= example.
-
 ** CSS [0%]
 *** TODO Ensure CSS contained by Sorting Desk and Queue components is (still) valid
 Many changes have been made which must have surely affected the CSS.
 
-** Tests [9%]
-*** DONE init: enforce test compartmentalisation through cloning of nodes
-- State "DONE"       from "TODO"       [2014-12-06 Sat 11:43]
-  
+** Tests [0%]
 *** TODO instance: ensure reset doesn't run twice
 
 *** TODO instance: require =visibleItems= to be greater than 0
@@ -194,7 +262,7 @@ This is meant to resolve the problem that parent elements can't be styled depend
 - State "WAIT"       from "TODO"       [2014-10-15 Wed 13:57] \\
   To be done when Sorting Desk has reached a significant milestone.
   
-*** WAIT [#C] Implement user notifications
+*** WAIT Implement user notifications
 - State "WAIT"       from "CANCELED"   [2014-11-26 Wed 09:08] \\
   Requires explicit approval.
 - State "CANCELED"   from "WAIT"       [2014-10-09 Thu 10:43] \\

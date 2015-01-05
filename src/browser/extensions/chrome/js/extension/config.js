@@ -2,8 +2,6 @@
  * @file Module responsible for the extension's configuration state.
  * @copyright 2014 Diffeo
  *
- * @author Miguel Guedes <miguel@miguelguedes.org>
- *
  * Comments:
  *
  */
@@ -12,8 +10,9 @@
 /*global chrome, $ */
 
 
-Config = (function () {
+var Config = (function () {
   var defaults_ = {
+    dossierUrl: 'http://54.174.195.250:8080',
     active: true
   };
 
@@ -36,6 +35,10 @@ Config = (function () {
   };
 
   var save = function (options, callback) {
+    /* Ensure options have default values when none provided by user. */
+    if(!options.dossierUrl)
+      options.dossierUrl = defaults_.dossierUrl;
+
     chrome.storage.local.set( { "config": options }, function () {
       console.log("Configuration saved");
       

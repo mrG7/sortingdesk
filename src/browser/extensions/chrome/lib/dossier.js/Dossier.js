@@ -2,8 +2,6 @@
  *
  * Copyright (C) 2014 Diffeo
  *
- * Author: Andrew Gallant <andrew@diffeo.com>
- *
  * Comments:
  *
  *
@@ -136,7 +134,7 @@ var _DossierJS = function(window, $) {
             type: 'PUT',
             contentType: 'application/json',
             url: url,
-            data: JSON.stringify(fc.raw),
+            data: JSON.stringify(fc.raw)
         }).fail(function() {
             console.log(fc);
             console.log("Could not save feature collection " +
@@ -175,7 +173,9 @@ var _DossierJS = function(window, $) {
     //
     // This function returns a jQuery promise that resolves when the web
     // service responds.
-    API.prototype.addLabel = function(cid1, cid2, annotator, coref_value) {
+    API.prototype.addLabel = function(
+        /* <cid1, cid2, annotator, coref_value> | <label> */ )
+    {
         var label;
         if (arguments.length == 4) {
             label = new Label(arguments[0], arguments[1],
@@ -214,9 +214,10 @@ var _DossierJS = function(window, $) {
     //          .method("expanded")
     //          .page(5)
     //          .perpage(10)
-    //          .get(function(labels) {
-    //              console.log('retrieved ' + labels.length + ' labels');
-    //          });
+    //          .get()
+    //            .done(function(labels) {
+    //               console.log('retrieved ' + labels.length + ' labels');
+    //            });
     var LabelFetcher = function(api) {
         this.api = api;
         this._cid = null;
@@ -286,16 +287,16 @@ var _DossierJS = function(window, $) {
     // to an array of `Label`s.
     LabelFetcher.prototype.get = function() {
         if (!this._cid) {
-            throw new "query content id is not set";
+            throw "query content id is not set";
         }
         if (['direct', 'positive', 'negative'].indexOf(this._which) === -1) {
-            throw new "unrecognized web service: " + this._which;
+            throw "unrecognized web service: " + this._which;
         }
         if ([undefined, 'connected', 'expanded'].indexOf(this._method) === -1) {
-            throw new "unrecognize positive label method: " + this._method;
+            throw "unrecognized positive label method: " + this._method;
         }
         if (!und(this._method) && this._which != 'positive') {
-            throw new "method can only be used with positive labels";
+            throw "method can only be used with positive labels";
         }
         var cid = encodeURIComponent(serialize(this._cid)),
             endpoint = 'label/' + cid + '/' + this._which,
@@ -495,12 +496,17 @@ var _DossierJS = function(window, $) {
     SortingQueueItems.prototype._moreTexts = function() {
         var self = this;
 
-        if (self._processing) {
+        if (self._processing || !self.query_content_id) {
             var deferred = $.Deferred();
 
             window.setTimeout(function () {
-                console.log('moreTexts in progress, ignoring new request');
-                deferred.reject( { error: "Request in progress" } );
+                if(self._processing) {
+                    console.log('moreTexts in progress, ignoring new request');
+                    deferred.reject( { error: "Request in progress" } );
+                } else {
+                    console.log('Query content id not yet set');
+                    deferred.reject( { error: "No query content id" } );
+                }
             } );
 
             return deferred.promise();

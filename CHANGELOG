@@ -1,4 +1,33 @@
-2014-12-24  Miguel Guedes  <miguel@miguelguedes.org>
+2015-01-05  Miguel Guedes  <miguel@miguelguedes.org>
+
+	* Sorting Desk:
+
+	Created a prototype component, the Label Browser, that allows for
+	the contents of feature collections to be visualised.
+
+	What works:
+
+	+ viewing the subtopics of feature collections that have positive
+	coreference.
+
+	What doesn't:
+
+	+ there is only one view mode, which consists of showing all
+	subtopics from all feature collections retrieved. Another view
+	mode could allow for subtopics to be shown in groups, with each
+	feature collection becoming a group.
+
+	+ toolbar; it's there merely as a suggestion of the direction the
+	UI could go.
+
+	+ subtopics whose content is an image aren't shown as images yet.
+
+	+ the Sorting Desk main component remains active alongside the
+	browser, which means that it is possible to for the user to change
+	the state of entities; these changes aren't reflected in the
+	browser (nor is it understood at present if they should).
+
+2014-12-24  Diffeo  <support@diffeo.com>
 
 	* all:
 
@@ -14,7 +43,7 @@
 	"live" to `SortingDesk's´ api source file name. All existing
 	references have been updated.
 
-2014-12-23  Miguel Guedes  <miguel@miguelguedes.org>
+2014-12-23  Diffeo  <support@diffeo.com>
 
 	* src/SortingDossier.js:
 
@@ -30,7 +59,7 @@
 
 	Improved styling of activator button.
 
-2014-12-22  Miguel Guedes  <miguel@miguelguedes.org>
+2014-12-22  Diffeo  <support@diffeo.com>
 
 	* src/SortingDossier.js:
 
@@ -44,14 +73,14 @@
 	Created standalone Google Chrome browser extension employing the
 	`SortingDossier´ component.
 
-2014-12-16  Miguel Guedes  <miguel@miguelguedes.org>
+2014-12-16  Diffeo  <support@diffeo.com>
 
 	* src/SortingQueue/SortingQueue.js:
 
 	A small change was made to the `Droppable´ class to ensure that
 	all events are properly dettached when the instance is reset.
 
-2014-12-15  Miguel Guedes  <miguel@miguelguedes.org>
+2014-12-15  Diffeo  <support@diffeo.com>
 
 	* src/SortingQueue/SortingQueue.js:
 	* src/SortingDesk/SortingDesk.js:
@@ -60,7 +89,7 @@
 
 	Reworked way modules are declared in global namespace.
 
-2014-12-10  Miguel Guedes  <miguel@miguelguedes.org>
+2014-12-10  Diffeo  <support@diffeo.com>
 
 	* src/SortingQueue/SortingQueue.js:
 	* src/SortingDesk/SortingDesk.js:
@@ -88,7 +117,7 @@
 
 	Added emacs hints.
 
-2014-12-06  Miguel Guedes  <miguel@miguelguedes.org>
+2014-12-06  Diffeo  <support@diffeo.com>
 
 	* tests:
 
@@ -114,7 +143,7 @@
 
 	A few minor improvements to code.
 
-2014-12-05  Miguel Guedes  <miguel@miguelguedes.org>
+2014-12-05  Diffeo  <support@diffeo.com>
 
 	* tests:
 
@@ -136,7 +165,7 @@
 	specification is now much cleaner and the underlying
 	infrastructure much more reliable and solid.
 
-2014-11-26  Miguel Guedes  <miguel@miguelguedes.org>
+2014-11-26  Diffeo  <support@diffeo.com>
 
 	* SortingDesk:
 
@@ -159,7 +188,7 @@
 
 	MANY improvements to the code.
 
-2014-11-25  Miguel Guedes  <miguel@miguelguedes.org>
+2014-11-25  Diffeo  <support@diffeo.com>
 
 	* src/SortingQueue/SortingQueue.js:
 
@@ -206,7 +235,7 @@
 
 	Many minor improvements.
 
-2014-11-24  Miguel Guedes  <miguel@miguelguedes.org>
+2014-11-24  Diffeo  <support@diffeo.com>
 
 	* mock APIs:
 
@@ -248,7 +277,7 @@
 
 	Several improvements.
 
-2014-11-22  Miguel Guedes  <miguel@miguelguedes.org>
+2014-11-22  Diffeo  <support@diffeo.com>
 
 	* all:
 
@@ -272,7 +301,7 @@
 	Created a specialised class that handles keyboard input events
 	specific to the `SortingDesk' component.
 
-2014-11-21  Miguel Guedes  <miguel@miguelguedes.org>
+2014-11-21  Diffeo  <support@diffeo.com>
 
 	* all:
 
@@ -326,7 +355,7 @@
 	(and applications alike) to craft classes sharing the same base
 	classes that `SortingQueue' uses.
 
-2014-10-15  Miguel Guedes  <miguel@miguelguedes.org>
+2014-10-15  Diffeo  <support@diffeo.com>
 
 	* src/main/SortingDesk.js:
 
@@ -366,7 +395,7 @@
 	Several improvements to code.
 
 
-2014-10-10  Miguel Guedes  <miguel@miguelguedes.org>
+2014-10-10  Diffeo  <support@diffeo.com>
 
 	* src/main/SortingDesk.js:
 
@@ -400,7 +429,7 @@
 
 	Added support for initialisation and querying of sub bin data.
 
-2014-10-09  Miguel Guedes  <miguel@miguelguedes.org>
+2014-10-09  Diffeo  <support@diffeo.com>
 
 	* src/main/SortingDesk.js:
 
@@ -425,7 +454,7 @@
 
 	Deleted extraneous examples.
 
-2014-10-02  Miguel Guedes  <miguel@miguelguedes.org>
+2014-10-02  Diffeo  <support@diffeo.com>
 
 	* src/main/SortingDesk.js:
 
@@ -489,7 +518,7 @@
 
 	Additional improvements to styling.
 
-2014-10-01  Miguel Guedes  <miguel@miguelguedes.org>
+2014-10-01  Diffeo  <support@diffeo.com>
 
 	* all:
 
@@ -531,7 +560,7 @@
 
 	Simplified instantiation of the component in all examples.
 
-2014-09-30  Miguel Guedes  <miguel@miguelguedes.org>
+2014-09-30  Diffeo  <support@diffeo.com>
 
 	* all:
 
@@ -554,7 +583,7 @@
 
 	Fix failing tests.
 
-2014-09-18  Miguel Guedes  <miguel@miguelguedes.org>
+2014-09-18  Diffeo  <support@diffeo.com>
 
 	* test:
 
@@ -571,7 +600,7 @@
 
 	Various minor improvements and fixes.
 
-2014-09-16  Miguel Guedes  <miguel@miguelguedes.org>
+2014-09-16  Diffeo  <support@diffeo.com>
 
 	* jasmine:
 
@@ -590,7 +619,7 @@
 
 	Several minor improvements and fixes, as usual.
 
-2014-09-15  Miguel Guedes  <miguel@miguelguedes.org>
+2014-09-15  Diffeo  <support@diffeo.com>
 
 	* all:
 
@@ -612,7 +641,7 @@
 
 	Added check to ensure `reset' isn't called multiple times.
 
-2014-09-12  Miguel Guedes  <miguel@miguelguedes.org>
+2014-09-12  Diffeo  <support@diffeo.com>
 
 	* all:
 
@@ -636,7 +665,7 @@
 
 	Various minor improvements.
 
-2014-09-09  Miguel Guedes  <miguel@miguelguedes.org>
+2014-09-09  Diffeo  <support@diffeo.com>
 
 	* test:
 
@@ -654,7 +683,7 @@
 
 	Other minor improvements.
 
-2014-09-06  Miguel Guedes  <miguel@miguelguedes.org>
+2014-09-06  Diffeo  <support@diffeo.com>
 
 	* src/main/SortingDesk.js:
 
@@ -667,7 +696,7 @@
 
 	Several minor improvements.
 
-2014-09-05  Miguel Guedes  <miguel@miguelguedes.org>
+2014-09-05  Diffeo  <support@diffeo.com>
 
 	* src/main/SortingDesk.js:
 
@@ -692,7 +721,7 @@
 
 	Several improvements and minor fixes.
 
-2014-08-22  Miguel Guedes  <miguel@miguelguedes.org>
+2014-08-22  Diffeo  <support@diffeo.com>
 
 	* all:
 
@@ -716,7 +745,7 @@
 	Fixed `removeSecondaryBin' actually not deleting bin from fake
 	data repository.
 
-2014-08-21  Miguel Guedes  <miguel@miguelguedes.org>
+2014-08-21  Diffeo  <support@diffeo.com>
 
 	* all:
 
@@ -753,7 +782,7 @@
 	Various improvements to code.
 
 
-2014-08-20  Miguel Guedes  <miguel@miguelguedes.org>
+2014-08-20  Diffeo  <support@diffeo.com>
 
 	* all:
 
@@ -779,7 +808,7 @@
 	current primary bin's node id. Editing the field and exiting it
 	triggers the new primary node id to take effect.
 
-2014-08-14  Miguel Guedes  <miguel@miguelguedes.org>
+2014-08-14  Diffeo  <support@diffeo.com>
 
 	* src/SortingDesk.js:
 
