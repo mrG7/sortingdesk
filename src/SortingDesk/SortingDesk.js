@@ -642,7 +642,7 @@ var SortingDesk_ = function (window, $, Api) {
       throw "Label Browser already active";
 
     (this.browser_ = this.owner_.sortingQueue.instantiate(
-      'LabelBrowser', this, bin))
+      'LabelBrowser', this, this.owner_.api, bin))
       .initialise()
       .done(function () {
         self.browser_.reset();
@@ -1082,27 +1082,45 @@ var SortingDesk_ = function (window, $, Api) {
   /**
    * @class
    * */
-  var LabelBrowser = function (owner, bin)
+  var LabelBrowser = function (owner, api, bin)
   {
     /* Invoke super-constructor. */
     SortingQueue.Controller.call(this, owner);
 
     /* Attributes */
+    this.api_ = api;
     this.deferred_ = null;
     this.nodes_ = { };
-    this.bin_ = bin;
-    this.rows_ = [ ];
+    this.ref_bin_ = bin;
+    this.ref_fc_ = null;
+    this.eqv_fcs_ = [ ];
+    this.view_ = null;
+    this.viewType_ = LabelBrowser.VIEW_DEFAULT;
 
     /* Getters */
+    this.__defineGetter__('api', function () { return this.api_; } );
     this.__defineGetter__('nodes', function () { return this.nodes_; } );
+    this.__defineGetter__('ref_bin', function () { return this.ref_bin_; } );
+    this.__defineGetter__('ref_fc', function () { return this.ref_fc_; } );
+    this.__defineGetter__('eqv_fcs', function () { return this.eqv_fcs_; } );
+    this.__defineGetter__('viewType', function () { return this.viewType_; } );
+    this.__defineGetter__('view', function () { return this.view_; } );
   };
 
+  /* Constants
+   * --
+   * View types */
+  LabelBrowser.VIEW_LIST = 0x01;
+  LabelBrowser.VIEW_GROUPED = 0x02;
+  LabelBrowser.VIEW_DEFAULT = LabelBrowser.VIEW_LIST;
+
+  /* Interface */
   LabelBrowser.prototype = Object.create(SortingQueue.Controller.prototype);
 
   LabelBrowser.prototype.initialise = function ()
   {
     var self = this,
-        api = this.owner_.owner.api;
+        els = this.nodes_;
 
     console.log("Initializing Label Browser component");
 
@@ -1112,33 +1130,45 @@ var SortingDesk_ = function (window, $, Api) {
     
     this.deferred_ = $.Deferred();
 
-    /* Set up nodes. */
-    this.nodes_.container = $('[data-sd-purpose="container-label-browser"]');
+    /* Begin set up nodes. */
+    els.container = $('[data-sd-scope="container-label-browser"]');
 
-    this.nodes_.buttonClose = this.nodes_.container
-      .find('[data-sd-purpose="label-browser-close"]')
-      .click( function () {
-        self.close();
-      } );
-    
-    this.nodes_.heading = this.nodes_.container
-      .find('[data-sd-purpose="label-browser-heading"]')
-      .html(this.bin_.data.content);
-    
-    this.nodes_.items = this.nodes_.container
-      .find('[data-sd-purpose="label-browser-items"]');
+    els.buttonClose = this.find_node_('close')
+      .click( function () { self.close(); } );
 
-    this.nodes_.table = this.nodes_.items.find('TABLE');
+    els.toolbar = {
+      view: {
+        list: this.find_node_('toolbar-list'),
+        group: this.find_node_('toolbar-group')
+      }
+    };
+
+    els.heading = {
+      title: this.find_node_('heading-title'),
+      content: this.find_node_('heading-content')
+    };
+
+    els.items = this.find_node_('items');
+    els.table = els.items.find('TABLE');
+    /* End setup up nodes. */
+
+    /* Retrieve feature collection for the bin's `content_id´. */
+    this.api_.getFeatureCollection(this.ref_bin_.data.content_id)
+      .done(function (fc) { self.set_heading_(fc); } )
+      .fail(function () { self.set_heading_(null); } );
 
     /* Retrieve all existing labels for the bin's `content_id´. */
-    api.getLabelsUniqueById(this.bin_.data.content_id)
+    this.api_.getLabelsUniqueById(this.ref_bin_.data.content_id)
       .then(function (ids) {
         console.log("Got labels' unique ids:", ids);
         
-        api.getAllFeatureCollections(ids)
-          .done(function (ids) {
+        self.api_.getAllFeatureCollections(ids)
+          .done(function (fcs) {
             console.log("Unique labels' content id collection GET successful:",
-                        ids.slice());
+                        fcs);
+
+            self.eqv_fcs_ = fcs instanceof Array ? fcs : [ ];
+            self.render_();
           } )
           .fail(function () {
             console.log('Failed to retrieve all feature collections');
@@ -1164,8 +1194,9 @@ var SortingDesk_ = function (window, $, Api) {
   LabelBrowser.prototype.reset = function ()
   {
     /* Remove all children nodes. */
-    this.nodes_.heading.children().remove();
-    this.nodes_.table.children(':not(:first-child)').remove();
+    this.nodes_.heading.title.children().remove();
+    this.nodes_.heading.content.children().remove();
+    this.nodes_.table.find('TR:not(:first-child)').remove();
 
     /* Resolve promise if one still exists. */
     if(this.deferred_)
@@ -1174,7 +1205,8 @@ var SortingDesk_ = function (window, $, Api) {
     /* Detach all events. */
     this.nodes_.buttonClose.off();
 
-    this.deferred_ = this.bin_ = this.rows_ = this.nodes_ = null;
+    this.deferred_ = this.ref_bin_ = this.view_ = this.nodes_ = null;
+    this.ref_fc_ = this.eqv_fcs_ = this.viewType_ = this.api_ = null;
 
     console.log("Label Browser component reset");
   };
@@ -1201,17 +1233,204 @@ var SortingDesk_ = function (window, $, Api) {
     }
   };
 
-
-  var LabelBrowserRow = function (owner, label)
+  /* Private methods */
+  LabelBrowser.prototype.render_ = function ()
   {
-    var row = $('<tr><td>' + label.cid2 + '</td>'
-                + '<td>undefined</td>'
-                + '<td>' + label.annotator_id + '</td>');
+    if(this.view_) {
+      this.view_.reset();
+      this.view_ = null;
+    }
     
-    owner.nodes.table.append(row);
+    switch(this.viewType_) {
+    case LabelBrowser.VIEW_LIST:
+      this.view_ = new LabelBrowserViewList(this, this.eqv_fcs_);
+      break;
+
+    default:
+      throw "Invalid view type or view unsupported: " + this.viewType_;
+    }
+
+    /* Render view. */
+    this.view_.render();
   };
 
-  LabelBrowserRow.prototype = {
+  LabelBrowser.prototype.set_heading_ = function (fc)
+  {
+    this.nodes_.heading.title
+      .html(typeof fc === 'object'
+            && typeof fc.raw === 'object'
+            && typeof fc.raw.title === 'string'
+            && fc.raw.title
+            || "<unknown title>");
+
+    /* TODO: using reference bin's own content rather than snippet from
+     * retrieved feature collection. */
+    this.nodes_.heading.content.html(this.ref_bin_.data.content);
+  };
+
+  LabelBrowser.prototype.find_node_ = function (scope,
+                                                parent /* = container */)
+  {
+    var p;
+
+    if(parent instanceof $)
+      p = parent;
+    else if(typeof parent === 'string')
+      p = this.find_node_(parent);
+    else
+      p = this.nodes_.container;
+
+    return p.find( [ '[data-sd-scope="label-browser-', scope, '"]' ].join(''));
+  };
+
+
+  /**
+   * @class
+   * */
+  var LabelBrowserView = function (owner, fcs)
+  {
+    /* Invoke super constructor. */
+    SortingQueue.Drawable.call(this, owner);
+    
+    /* Check `fcs' argument IS an array. */
+    if(!(fcs instanceof Array))
+      throw "Invalid feature collection array specified";
+
+    /* Attributes */
+    this.fcs_ = fcs;
+
+    /* Getters */
+    this.__defineGetter__('fcs', function () { return this.fcs_; } );
+  };
+
+  LabelBrowserView.prototype = Object.create(SortingQueue.Drawable.prototype);
+
+
+  /**
+   * @class
+   * */
+  var LabelBrowserRowGroup = function (owner, fc)
+  {
+    /* Invoke super constructor. */
+    SortingQueue.Drawable.call(this, owner);
+
+    /* Attributes */
+    this.fc_ = fc;
+
+    /* Getters */
+    this.__defineGetter__("fc", function () { return this.fc_; } );
+  };
+
+  LabelBrowserRowGroup = Object.create(SortingQueue.Drawable.prototype);
+
+
+  /**
+   * @class
+   * */
+  var LabelBrowserRow = function (owner, id, content)
+  {
+    /* Invoke super constructor. */
+    SortingQueue.Drawable.call(this, owner);
+    
+    /* Attributes */
+    this.id_ = id;
+    this.content_ = content;
+
+    /* Getters */
+    this.__defineGetter__('id', function () { return this.id_; } );
+    this.__defineGetter__('content', function () { return this.content_; } );
+  };
+
+  LabelBrowserRow.prototype = Object.create(SortingQueue.Drawable.prototype);
+  
+
+  /**
+   * @class
+   * */
+  var LabelBrowserViewList = function (owner, fcs)
+  {
+    /* Invoke super constructor. */
+    LabelBrowserView.call(this, owner, fcs);
+
+    /* Attributes */
+    this.rows_ = [ ];
+    this.subtopics_ = { };
+
+    var self = this,
+        api = owner.api,
+        count = 0;
+
+    /* TODO: below we are merging subtopics from all feature collections to
+     * avoid duplicates. Is this really necessary or would it be best to just
+     * show them all, regardless? */
+    
+    /* Merge subtopics from all feature collections. */
+    fcs.forEach(function (fc) {
+      if(typeof fc.raw !== 'object') {
+        console.log("Feature collection `raw´ attribute not found or invalid",
+                    fc);
+        return;
+      }
+
+      /* Contain entries in the feature collection's `raw´ attribute that are
+       * subtopics. If an entry with the same key exists, it is replaced. */
+      for(var k in fc.raw) {
+        if(api.isSubtopic(k)) {
+          self.subtopics_[k] = fc.raw[k];
+          ++count;
+        }
+      }
+    } );
+
+    console.log("Merged subtopics from %d feature collection(s): count=%d",
+                fcs.length,
+                count,
+                this.subtopics_);
+  };
+
+  LabelBrowserViewList.prototype = Object.create(LabelBrowserView.prototype);
+
+  LabelBrowserViewList.prototype.render = function (fcs)
+  {
+    /* Finally create and render rows. */
+    for(var k in this.subtopics_) {
+      var row = new LabelBrowserViewListRow(
+        this,
+        this.owner_.api.extractSubtopicId(k),
+        this.subtopics_[k]);
+      
+      this.rows_.push(row);
+      row.render();
+    }
+  };
+
+
+  /**
+   * @class
+   * */
+  var LabelBrowserViewListRow = function (owner, id, content)
+  {
+    /* Invoke super constructor. */
+    LabelBrowserRow.call(this, owner, id, content);
+  };
+
+  LabelBrowserViewListRow.prototype = Object.create(LabelBrowserRow.prototype);
+
+  LabelBrowserViewListRow.prototype.render = function ()
+  {
+    var row = $('<tr></tr>');
+
+    $('<td></td>')
+      .addClass(Css.LabelBrowser.items.id)
+      .html(this.id_)
+      .appendTo(row);
+
+    $('<td></td>')
+      .addClass(Css.LabelBrowser.items.content)
+      .html(this.content_)
+      .appendTo(row);
+      
+    row.insertAfter(this.owner_.owner.nodes.table.find('TR:last-child'));
   };
 
 
@@ -1233,6 +1452,17 @@ var SortingDesk_ = function (window, $, Api) {
       }
 
       return result.reverse().join('/');
+    }
+  };
+
+
+  /* CSS class names used. */
+  var Css = {
+    LabelBrowser: {
+      items: {
+        id: 'sd-lb-items-id',
+        content: 'sd-lb-items-content'
+      }
     }
   };
 
