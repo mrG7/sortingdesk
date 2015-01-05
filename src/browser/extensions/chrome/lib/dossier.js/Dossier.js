@@ -2,8 +2,6 @@
  *
  * Copyright (C) 2014 Diffeo
  *
- * Author: Andrew Gallant <andrew@diffeo.com>
- *
  * Comments:
  *
  *
@@ -136,7 +134,7 @@ var _DossierJS = function(window, $) {
             type: 'PUT',
             contentType: 'application/json',
             url: url,
-            data: JSON.stringify(fc.raw),
+            data: JSON.stringify(fc.raw)
         }).fail(function() {
             console.log(fc);
             console.log("Could not save feature collection " +
@@ -175,7 +173,9 @@ var _DossierJS = function(window, $) {
     //
     // This function returns a jQuery promise that resolves when the web
     // service responds.
-    API.prototype.addLabel = function(cid1, cid2, annotator, coref_value) {
+    API.prototype.addLabel = function(
+        /* <cid1, cid2, annotator, coref_value> | <label> */ )
+    {
         var label;
         if (arguments.length == 4) {
             label = new Label(arguments[0], arguments[1],
@@ -496,12 +496,17 @@ var _DossierJS = function(window, $) {
     SortingQueueItems.prototype._moreTexts = function() {
         var self = this;
 
-        if (self._processing) {
+        if (self._processing || !self.query_content_id) {
             var deferred = $.Deferred();
 
             window.setTimeout(function () {
-                console.log('moreTexts in progress, ignoring new request');
-                deferred.reject( { error: "Request in progress" } );
+                if(self._processing) {
+                    console.log('moreTexts in progress, ignoring new request');
+                    deferred.reject( { error: "Request in progress" } );
+                } else {
+                    console.log('Query content id not yet set');
+                    deferred.reject( { error: "No query content id" } );
+                }
             } );
 
             return deferred.promise();

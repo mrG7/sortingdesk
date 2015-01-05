@@ -2,18 +2,16 @@
  * @file Sorting Desk component.
  * @copyright 2014 Diffeo
  *
- * @author Miguel Guedes <miguel@miguelguedes.org>
- *
  * Comments:
  * Uses the `SortingQueue' component.
  *
  */
 
 
-/*global SortingQueue, $, define */
+/*global SortingQueue, define */
 /*jshint laxbreak:true */
 
-// Notes from Miguel on abstracting out the use of `chrome` in this file:
+// Notes from the contractor on abstracting out the use of `chrome` in this file:
 //
 // + a mechanism to send notifications whenever in need of saving state. I
 // thought we could use the existing (outwards facing) callbacks and extending
@@ -35,7 +33,7 @@
  *
  * @returns an object containing the module's public interface.
  * */
-var SortingDesk_ = function (window, $) {
+var SortingDesk_ = function (window, $, Api) {
 
   var Url = {
     encode: function (s)
@@ -56,66 +54,56 @@ var SortingDesk_ = function (window, $) {
    * @param   {Object}    opts  Initialisation options (please refer to
    *                            `defaults_' at the end of this source file)
    * @param   {Object}    cbs   Map of all callbacks in a key to function
-   *                            manner. These are: 
-   *                            + makeId
-   *                            + setQueryContentId
-   *                            + generateId
-   *                            + mergeBins
-   *                            + updateQueryFc
-   *                            + addLabel
-   *                            + getBins
-   *                            + setBins
-   *                            + setActiveBin
+   *                            manner.
    * */
   var Sorter = function (opts, cbs)
   {
-    var self = this,
-        queryId;
+    var self = this;
 
     console.log("Initialising Sorting Desk UI");
+    
+    /* TODO: must pass in Dossier API URL. */
+    this.api_ = Api.initialize(this, opts.dossierUrl);
 
     this.options_ = $.extend(true, $.extend(true, {}, defaults_), opts);
-    this.sortingQueue_ = new SortingQueue.Sorter(this.options_, cbs);
+    this.sortingQueue_ = new SortingQueue.Sorter(
+      this.options_,
+      $.extend(this.api_.getCallbacks(), cbs));
 
     /* Restore state from local storage. */
     this.load_()
       .done(function (bins) {
-        /* If no bins were retrievable from local storage, create a default bin
-         * for the current page.  Otherwise, activate the bin that is the
-         * currently active one (as specified in `options.activeBinId´) or, if
-         * one isn't yet active, use the first element as the active bin. */
-        if(!bins || bins.length === 0) {
-          /* Set `queryId´ accordingly. */
-          queryId = self.sortingQueue_.callbacks
-            .invoke('makeId', (Url.encode(window.location.href)));
-
-          bins = [ { id: queryId,
-                     data: window.document.title.trim()
-                           || '&lt; no-name &gt;' } ];
-
-          /* Forcefully save state since a bin was added by default. */
-          window.setTimeout(function () { self.save(); });
-        } else {
+        var bin;
+        
+        /* If bins were retrieved from local storage, activate the bin that is
+         * the currently active one (as specified in `options.activeBinId´) or,
+         * if one isn't yet active, use the first element as the active bin.
+         *
+         * If no bins exist in local storage, don't do anything and keep the
+         * current query content id null. */
+        if(bins && bins.length > 0) {
           var index = -1;
 
-          /* Look for the active bin, if one has been specified, and set query
-           * id accordingly. */
           if(opts.activeBinId) {
             bins.some(function (bin, position) {
-              if(bin.id === opts.activeBinId) {
+              if(Bin.makeId(bin) === opts.activeBinId) {
                 index = position;
                 return true;
               }
             } );
           }
 
-          queryId = bins[index === -1 ? 0 : index].id;
+          if(index === -1)
+            console.log("Unable to find active bin: using first bin");
+          
+          bin = bins[index === -1 ? 0 : index];
+
+          /* Set query content before initialising SortingQueue to ensure
+           * correct contexts for items retrieved. */
+          self.api_.setQueryContentId(bin.content_id);
         }
 
-        /* Set query content before initialising SortingQueue to ensure correct
-         * contexts for items retrieved. */
-        self.sortingQueue_.callbacks.invoke('setQueryContentId', queryId);
-        self.initialise_(bins, queryId);
+        self.initialise_(bins, bin && Bin.makeId(bin) || null);
       } );
   };
 
@@ -124,6 +112,7 @@ var SortingDesk_ = function (window, $) {
     options_: null,
 
     /* Instances */
+    api_: null,
     sortingQueue_: null,
     bins_: null,
     draggable_: null,
@@ -157,61 +146,72 @@ var SortingDesk_ = function (window, $) {
       if(!this.initialised_ || this.sortingQueue_.resetting())
         return this.sortingQueue_.reset();
 
-      var self = this,
-          reset = this.sortingQueue_.reset();
+      var self = this;
 
-      reset.done(function () {
-        self.bins_.reset();
+      return this.sortingQueue_.reset()
+        .done(function () {
+          self.bins_.reset();
 
-        self.bins_ = self.options_ = self.sortingQueue_ = null;
-        self.initialised_ = false;
+          self.bins_ = self.options_ = self.sortingQueue_ = null;
+          self.initialised_ = false;
 
-        console.log("Sorting Desk UI reset");
-      } );
-
-      return reset;
+          console.log("Sorting Desk UI reset");
+        } );
     },
 
     onDropSpecial: function (scope)
     {
-      var result = { };
-
+      var result = { },
+          content;
+      
       if(scope) {
-        console.log("Drop event not special case");
+        console.log("Drop event not special case: ignored");
         return null;
       }
 
+      result.content_id = this.api_.generateContentId(window.location.href);
+      result.raw = { };
+      
       /* Process this drop event separately for text snippets and images. We
        * assume that this event originates in an image if the active
        * `ControllerDraggableImage´ instance has an active node. Otherwise,
        * we attempt to retrieve a text snippet. */
       if(this.draggable_.activeNode) {
-        result.isImage = true;
-        result.data = this.draggable_.activeNode.attr('src');
+        content = this.draggable_.activeNode.attr('src');
 
-        if(result.data) {
-          result.id = this.sortingQueue_.callbacks
-            .invoke('generateId', result.data);
+        if(content) {
+          result.subtopic_id = this.api_.makeRawImageId(
+            this.api_.generateSubtopicId(content));
+          result.content = content;
         } else
           console.log("Unable to retrieve valid `src´ attribute");
-      } else {
-        result.isImage = false;
+      } else if(typeof window.getSelection === 'function') {
+        content = window.getSelection();
 
-        if(window.getSelection)
-          result.data = window.getSelection().toString();
-        else if(document.selection && document.selection.type !== "Control")
-          result.data = document.selection.createRange().text;
+        if(content && content.anchorNode) {
+          var str = content.toString();
 
-        if(result.data) {
-          result.id = this.sortingQueue_.callbacks
-            .invoke('generateId', result.data);
+          /* Craft a unique id for this text snippet based on its content,
+           * Xpath representation, offset from selection start, length and,
+           * just to be sure, current system timestamp. This id is
+           * subsequently used to generate a unique and collision free
+           * unique subtopic id (see below). */
+          result.subtopic_id = this.api_.makeRawTextId(
+            this.api_.generateSubtopicId(
+              [ str,
+                Html.getXpathSimple(content.anchorNode),
+                content.anchorOffset,
+                str.length,
+                Date.now() ].join('|') ) );
+          
+          result.content = str;
         }
       }
-
+      
       /* Clear the currently active node. */
       this.draggable_.clear();
 
-      return result.id && result;
+      return result.subtopic_id && result;
     },
 
     /* Private methods */
@@ -222,29 +222,24 @@ var SortingDesk_ = function (window, $) {
       /* Begin instantiating and initialising controllers.
        *
        * Start by explicitly initialising SortingQueue's instance and proceed to
-       * initialising our own instance.. */
+       * initialising our own instance. */
       this.sortingQueue_.initialise();
 
       (this.draggable_ = new ControllerDraggableImage(this))
         .initialise();
 
+      /* Register for a bin dismissal event and process it accordingly. */
       this.sortingQueue_.dismiss.register('bin', function (e, id, scope) {
-        var bin = self.bins_.getById(decodeURIComponent(id));
+        var bin = self.bins_.getById(id);
 
         if(bin) {
-          /* Disallow removal of last bin. */
-          if(self.bins_.bins.length === 1)
-          {
-            console.log("Disallowing removal of last bin when items' queue"
-                        + " empty");
-            return;
-          }
-
           self.bins_.removeAt(self.bins_.indexOf(bin));
           self.save();
         }
       } );
 
+      /* Once the bins controller has been instantiated and initialised, we're
+       * all good. */
       this.initialiseBins_(bins, activeBinId);
 
       this.initialised_ = true;
@@ -253,41 +248,16 @@ var SortingDesk_ = function (window, $) {
 
     initialiseBins_: function (bins, activeBinId)
     {
-      var self = this,
-          bin;
-
-      if(!(bins instanceof Array) || bins.length === 0)
-        throw "Bins array container invalid or empty";
-
+      /* Force reset of the bins controller, if an instance currently exists. */
       if(this.bins_)
         this.bins_.reset();
 
+      /* Clear the items queue list. */
       this.sortingQueue_.items.removeAll();
 
+      /* (Re-)instantiate the bins controller. */
       (this.bins_ = this.sortingQueue_.instantiate('ControllerBins', this))
-        .initialise();
-
-      bins.forEach(function (descriptor) {
-        var bin = self.sortingQueue_.instantiate(
-          descriptor.isImage ? 'BinImage' : 'Bin',
-          self.bins_,
-          descriptor);
-
-        self.bins_.add(bin, false);
-      } );
-
-      /* Now manually set the active bin. */
-      bin = this.bins_.getById(activeBinId);
-
-      /* Attempt to recover if we've been given an invalid id to activate. */
-      if(!bin) {
-        console.log("Failed to set the active bin: id=%s: setting first",
-                    activeBinId);
-
-        bin = bins[0];
-      }
-
-      this.bins_.setActive(bin);
+        .initialise(bins, activeBinId);
     },
 
     load_: function ()
@@ -308,6 +278,9 @@ var SortingDesk_ = function (window, $) {
      * */
     get initialised ()
     { return this.initialised_; },
+
+    get api ()
+    { return this.api_; },
 
     get resetting ()
     { return this.sortingQueue_.resetting(); },
@@ -425,31 +398,77 @@ var SortingDesk_ = function (window, $) {
         return self.owner_.sortingQueue.instantiate(
           'Bin', self, { data: input }, null).render();
       },
-      function (id, data, hasImage) {
-        return self.owner_.bins.add(self.owner_.sortingQueue.instantiate(
-          hasImage ? 'BinImage' : 'Bin',
-          self, {
-            id: id,
-            data: data } ) );
+      function (descriptor) {
+        return self.add(self.construct(descriptor));
       } );
   };
 
   ControllerBins.prototype = Object.create(SortingQueue.Controller.prototype);
 
-  ControllerBins.prototype.initialise = function ()
+  ControllerBins.prototype.initialise = function (bins, activeBinId)
   {
+    var self = this,
+        bin;
+    
     this.spawner_.initialise();
+    
+    /* Load initial bin state, if bins exist. */
+    if(!(bins instanceof Array) || bins.length === 0)
+      return;
+
+    bins.forEach(function (descriptor) {
+      self.add(self.construct(descriptor), false, true);
+    } );
+    
+    /* Now manually set the active bin. */
+    bin = this.getById(activeBinId);
+
+    /* Attempt to recover if we've been given an invalid id to activate. */
+    if(!bin) {
+      console.log("Failed to set the active bin: setting first (id=%s)",
+                  activeBinId);
+
+      bin = self.bins_.getAt(0);
+    }
+
+    this.setActive(bin);
   };
 
+  ControllerBins.prototype.construct = function (descriptor)
+  {
+    var map = { 'text': 'Bin',
+                'image': 'BinImage' },
+        type;
+
+    if(!descriptor)
+      throw "Invalid bin descriptor";
+
+    /* Extract bin type. */
+    type = this.owner_.api.getSubtopicType(descriptor.subtopic_id);
+
+    if(!map.hasOwnProperty(type))
+      throw "Invalid bin type: " + type;
+
+    /* Finaly instantiate correct Bin class. */
+    return this.owner_.sortingQueue.instantiate(
+      map[type],
+      this,
+      descriptor);
+  };
+  
   ControllerBins.prototype.reset = function ()
   {
+    /* Reset bin spawner controller and remove all children nodes inside the
+     * bins HTML container. */
     this.spawner_.reset();
-    this.node.children().remove();
+    this.owner_.options.nodes.bins.children().remove();
 
     this.bins_ = this.hover_ = this.active_ = this.spawner_ = null;
   };
 
-  ControllerBins.prototype.add = function (bin, activate /* = true */)
+  ControllerBins.prototype.add = function (bin,
+                                           activate /* = true */,
+                                           exists   /* = false */)
   {
     /* Ensure a bin with the same id isn't already contained. */
     if(this.getById(bin.id))
@@ -459,7 +478,7 @@ var SortingDesk_ = function (window, $) {
     bin.initialise();
 
     /* Contain bin and append its HTML node. */
-    this.append(bin.node);
+    this.append_(bin.node);
     this.bins_.push(bin);
 
     /* If first bin to be contained, activate it by default, unless told not to
@@ -467,17 +486,63 @@ var SortingDesk_ = function (window, $) {
     if(activate !== false && !this.active_)
       this.setActive(bin);
 
+    /* Request update of the bin's feature collection. Set the bin's state to
+     * unknown if it is supposed to exist in the backend (`exists´ is true,
+     * which means it is being loaded from local storage) but a feature
+     * collection was not retrieved. */
+    this.update_(bin.data, exists === true)
+      .fail(function () {
+        if(exists)
+          bin.setUnknown();
+      } );
+
     return bin;
   };
 
-  /* overridable */ ControllerBins.prototype.append = function (node)
+  ControllerBins.prototype.merge = function (dropped, dragged)
   {
-    /* Add bin node to the very top of the container if aren't any yet,
-     * otherwise insert it after the last contained bin. */
-    if(!this.bins_.length)
-      this.owner_.options.nodes.bins.prepend(node);
-    else
-      this.bins_[this.bins_.length - 1].node.after(node);
+    var api = this.owner_.api,
+        label = new (api.getClass('Label'))(
+          dropped.id,
+          dragged.id,
+          api.getAnnotator(),
+          api.COREF_VALUE_POSITIVE,
+          dropped.data.subtopic_id,
+          dragged.data.subtopic_id);
+
+    /* NOTE: since bins are UI creations and don't exist as such in the backend,
+     * we always remove the bin regardless what the result is from adding the
+     * label. */
+    this.removeAt(this.indexOf(dragged));
+    this.owner_.save();
+
+    return this.doAddLabel_(label);
+  };
+
+  ControllerBins.prototype.addLabel = function (bin, descriptor)
+  {
+    var self = this,
+        api = this.owner_.api;
+
+    return this.update_(descriptor)
+      .then(function (fc) {
+        /* Create label between snippet/image and bin. */
+        var label = new (api.getClass('Label'))(
+          bin.data.content_id,
+          descriptor.content_id,
+          api.getAnnotator(),
+          api.COREF_VALUE_POSITIVE,
+          bin.data.subtopic_id,
+          descriptor.subtopic_id);
+
+        return self.doAddLabel_(label);
+      },
+      function () {
+        console.log("Unable to add label between '%s' and '%s': "
+                    + "feature collection not found",
+                    bin.id,
+                    descriptor.content_id);
+      } );
   };
 
   ControllerBins.prototype.find = function (callback)
@@ -517,38 +582,44 @@ var SortingDesk_ = function (window, $) {
 
     bin.node.remove();
 
-    if(bin == this.active_)
+    if(bin === this.active_)
       this.setActive(this.bins_.length && this.bins_[0] || null);
+  };
+
+  ControllerBins.prototype.getAt = function (index)
+  {
+    if(index < 0 || index >= this.bins_.length)
+      throw "Invalid bin index";
+
+    return this.bins_[index];
   };
 
   ControllerBins.prototype.getById = function (id)
   {
     return this.find(function (bin) {
-      return bin.id == id;
+      return bin.id === id;
     } );
   };
 
   ControllerBins.prototype.setActive = function (bin)
   {
-    var self = this;
-
     /* Don't activate bin if currently active already. */
-    if(this.active_ == bin)
+    if(this.active_ === bin)
       return;
 
     /* Invoke API to activate the bin. If successful, update UI state and force
      * a redraw of the items container. */
-    if(self.active_)
-      self.active_.deactivate();
+    if(this.active_)
+      this.active_.deactivate();
 
-    self.active_ = bin;
+    this.active_ = bin;
 
     if(bin) {
       bin.activate();
 
       if(this.owner_.initialised) {
-        self.owner_.sortingQueue.callbacks.invoke("setQueryContentId", bin.id);
-        self.owner_.sortingQueue.items.redraw();
+        this.owner_.api.setQueryContentId(bin.data.content_id);
+        this.owner_.sortingQueue.items.redraw();
       }
 
       /* Ensure bin is visible. */
@@ -558,25 +629,33 @@ var SortingDesk_ = function (window, $) {
     }
 
     /* Let the extension know that the active bin has changed. */
-    this.owner_.sortingQueue.callbacks.invoke('setActiveBin', bin.data);
+    this.owner_.sortingQueue.callbacks.invoke('setActiveBin', bin.id);
   };
 
   ControllerBins.prototype.browse = function (bin)
   {
-    var self = this;
+    var self = this,
+        opts = this.owner_.options;
     
     if(!this.haveBrowser_)
       throw "Label Browser component unavailable";
     else if(this.browser_)
       throw "Label Browser already active";
 
-    (this.browser_ = this.owner_.sortingQueue.instantiate('LabelBrowser',
-                                                          this,
-                                                          bin))
+    /* Disable browser icons. */
+    opts.nodes.bins.find('.' + opts.css.iconLabelBrowser)
+      .addClass(opts.css.disabled);
+
+    (this.browser_ = this.owner_.sortingQueue.instantiate(
+      'LabelBrowser', this, this.owner_.api, bin))
       .initialise()
       .done(function () {
         self.browser_.reset();
         self.browser_ = null;
+
+        /* Re-enable browser icons. */
+        opts.nodes.bins.find('.' + opts.css.iconLabelBrowser)
+          .removeClass(opts.css.disabled);
       } );
   };
 
@@ -593,30 +672,129 @@ var SortingDesk_ = function (window, $) {
   };
 
   /* Protected methods */
+  /* overridable */ ControllerBins.prototype.append_ = function (node)
+  {
+    /* Add bin node to the very top of the container if aren't any yet,
+     * otherwise insert it after the last contained bin. */
+    if(!this.bins_.length)
+      this.owner_.options.nodes.bins.prepend(node);
+    else
+      this.bins_[this.bins_.length - 1].node.after(node);
+  };
+
   ControllerBins.prototype.onMouseEnter_ = function (bin)
   { this.hover_ = bin; };
 
   ControllerBins.prototype.onMouseLeave_ = function ()
   { this.hover_ = null; };
 
+  /* Private methods */
+  ControllerBins.prototype.update_ = function (descriptor,
+                                               exists /* = false */)
+  {
+    var self = this,
+        api = this.owner_.api;
+    
+    /* Attempt to retrieve the feature collection for the bin's content id. */
+    return api.getFeatureCollection(descriptor.content_id)
+      .then(function (fc) {
+        console.log("Feature collection GET successful (id=%s)",
+                    descriptor.content_id, fc);
+        
+        /* A feature collection was received. No further operations are carried
+         * out if `exists´ is true since it means `descriptor´ is actually a bin
+         * is being loaded from local storage and therefore its feature
+         * collection shouldn't be updated. */
+        if(!exists) {
+          api.setFeatureCollectionContent(
+            fc, descriptor.subtopic_id, descriptor.content);
+
+          return self.doUpdateFc_(descriptor.content_id, fc);
+        }
+
+        return fc;
+      },
+      function () {
+        /* It was not possible to retrieve the feature collection for this
+         * descriptor's content id. No further operations are carried out if
+         * `exists´ is true since it means `descriptor´ is actually a bin being
+         * loaded from local storage and therefore its feature collection
+         * shouldn't be created. */
+        if(exists) {
+          console.log("Feature collection GET failed: NOT creating new"
+                      + "(id=%s)", descriptor.content_id);
+          return null;
+        }
+        
+        var fc = new (api.getClass('FeatureCollection'))( {
+          title: window.document.title,
+          titleBow: api.mapWordCount(window.document.title),
+          snippet: descriptor.content,
+          snippetBow: api.mapWordCount(descriptor.content)
+        } );
+        
+        console.log("Feature collection GET failed: creating new (id=%s)",
+                    descriptor.content_id, fc);
+
+        api.setFeatureCollectionContent(
+          fc, descriptor.subtopic_id, descriptor.content);
+
+        return self.doUpdateFc_(descriptor.content_id, fc);
+      } );
+  };
+
+  ControllerBins.prototype.doUpdateFc_ = function (content_id, fc)
+  {
+    return this.owner_.api.putFeatureCollection(content_id, fc)
+      .done(function () {
+        console.log("Feature collection PUT successful (id=%s)",
+                    content_id, fc);
+      } )
+      .fail(function () {
+        console.log("Feature collection PUT failed (id=%s)",
+                    content_id, fc);
+      } );
+  };
+
+  ControllerBins.prototype.doAddLabel_ = function (label)
+  {
+    return this.owner_.api.addLabel(label)
+      .done(function () {
+        console.log("Label ADD successful: '%s' == '%s'",
+                    label.cid1, label.cid2);
+      } )
+      .fail(function () {
+        console.log("Label ADD failed: '%s' ∧ '%s'",
+                    label.cid1, label.cid2);
+      } );
+  };
+
 
   /**
    * @class
    * */
-  var Bin = function (owner, data)
+  var Bin = function (owner, descriptor)
   {
     /* Invoke super constructor. */
     SortingQueue.Drawable.call(this, owner);
 
-    this.data_ = data;
+    this.id_ = Bin.makeId(descriptor);
+    this.data_ = descriptor;
     this.node_ = null;
 
     /* Define getters. */
+    this.__defineGetter__("id",   function () { return this.id_;   } );
     this.__defineGetter__("data", function () { return this.data_; } );
-    this.__defineGetter__("id", function () { return this.data_.id; } );
     this.__defineGetter__("node", function () { return this.node_; } );
   };
 
+  /* Static methods */
+  Bin.makeId = function (descriptor)
+  {
+    return descriptor.content_id + '+' + descriptor.subtopic_id;
+  }
+
+  /* Class interface */
   Bin.prototype = Object.create(SortingQueue.Drawable.prototype);
 
   Bin.prototype.initialise = function ()
@@ -627,7 +805,7 @@ var SortingDesk_ = function (window, $) {
     (this.node_ = this.render())
       .attr( {
         'data-scope': 'bin',
-        'id': encodeURIComponent(this.id)
+        'id': this.id
       } )
       .on( {
         mouseenter: function () {
@@ -653,7 +831,7 @@ var SortingDesk_ = function (window, $) {
       drop: function (e, id, scope) {
         switch(scope) {
         case 'bin':
-          var bin = self.owner_.getById(decodeURIComponent(id));
+          var bin = self.owner_.getById(id);
 
           /* Ensure dragged bin exists since it is being DRAGGED and disable
            * dropping bin onto self. */
@@ -662,8 +840,9 @@ var SortingDesk_ = function (window, $) {
           else if(bin === self)
             break;
 
-          parentOwner.sortingQueue.callbacks.invoke("mergeBins", self, bin);
-          self.owner_.removeAt(self.owner_.indexOf(bin));
+          /* Request merge of dropped bin (`bin´) with this Bin instance
+           * (`self´). */
+          self.owner_.merge(self, bin);
 
           /* Important: DOM node is destroyed above, which means the `dragend'
            * event won't be triggered, leaving the dismissal button visible. */
@@ -675,18 +854,9 @@ var SortingDesk_ = function (window, $) {
           var result = parentOwner.onDropSpecial(scope);
 
           /* If we received a map object, assume a valid drop. */
-          if(result) {
-            /* Create label between snippet/image and bin. */
-            parentOwner.sortingQueue.callbacks
-              .invoke("addLabel", result.id, self);
-
-            /* Update query FC. */
-            parentOwner.sortingQueue.callbacks
-              .invoke("updateQueryFc", result.id, result.data)
-              .fail(function () {
-                console.log("Failed to update query FC");
-              } );
-          } else
+          if(result)
+            self.owner_.addLabel(self, result);
+          else
             console.log("Invalid drop: not text or image");
 
           break;
@@ -723,12 +893,15 @@ var SortingDesk_ = function (window, $) {
     this.node.removeClass(this.owner_.owner.options.css.binActive);
   };
 
+  Bin.prototype.setUnknown = function (state /* = true */)
+  {
+    this.node.toggleClass(this.owner_.owner.options.css.binUnknown,
+                          typeof state === 'undefined' || state === true);
+  };
+
   /* overridable */ Bin.prototype.serialise = function ()
   {
-    return {
-      id: this.data_.id,
-      data: this.data_.data
-    };
+    return this.data_;
   };
 
   /* overridable */ Bin.prototype.renderBrowserIcon = function (node)
@@ -755,10 +928,10 @@ var SortingDesk_ = function (window, $) {
   /**
    * @class
    * */
-  var BinDefault = function (owner, bin)
+  var BinDefault = function (owner, descriptor)
   {
     /* Invoke super constructor. */
-    Bin.call(this, owner, bin);
+    Bin.call(this, owner, descriptor);
   };
 
   BinDefault.prototype = Object.create(Bin.prototype);
@@ -781,8 +954,12 @@ var SortingDesk_ = function (window, $) {
   BinDefault.prototype.render = function ()
   {
     var css = this.owner_.owner.options.css,
-        node = $('<div class="' + css.bin + '"><div class="' + css.binName + '">'
-                 + this.data_.data + '</div></div>');
+        node = $('<div></div>').addClass(css.bin);
+
+    $('<div></div>')
+      .appendTo(node)
+      .addClass(css.binName)
+      .html(this.data_.content);
 
     return this.renderBrowserIcon(node);
   };
@@ -814,22 +991,17 @@ var SortingDesk_ = function (window, $) {
 
   };
 
-  BinImageDefault.prototype.serialise = function ()
-  {
-    return {
-      id: this.data_.id,
-      data: this.data_.data,
-      isImage: true
-    };
-  };
-
   BinImageDefault.prototype.render = function ()
   {
-    var css = this.owner_.owner.options.css;
+    var css = this.owner_.owner.options.css,
+        node = $('<div></div>').addClass([ css.bin, css.binImage ].join(' '));
 
-    return $('<div class="' + css.bin + '"><div class="' + css.binName + '">'
-             + '<img draggable="false" src="' + this.data_.data
-             + '"/></div></div>');
+    $('<div></div>')
+      .addClass(css.binName)
+      .appendTo(node)
+      .html('<img draggable="false" src="' + this.data_.content + '"/>');
+
+    return this.renderBrowserIcon(node);
   };
 
 
@@ -853,12 +1025,14 @@ var SortingDesk_ = function (window, $) {
     this.fnRender_ = this.fnAdd_ = null;
   };
 
-  ControllerBinSpawner.prototype.add = function (id, data, hasImage)
+  ControllerBinSpawner.prototype.add = function (descriptor)
   {
-    if(!id)
-      throw "An id was not specified";
-
-    var bin = this.fnAdd_(id, data, hasImage);
+    if(!descriptor || !descriptor.content_id || !descriptor.subtopic_id
+       || !descriptor.content) {
+      throw "Invalid descriptor specified";
+    }
+    
+    var bin = this.fnAdd_(descriptor);
     this.owner_.owner.save();
 
     return bin;
@@ -886,26 +1060,8 @@ var SortingDesk_ = function (window, $) {
     var self = this,
         parentOwner = this.owner_.owner;
 
-    this.node_ = parentOwner.options.nodes.add
-      .on( {
-        click: function () {
-          var bin,
-              id = parentOwner.sortingQueue.callbacks
-                .invoke('makeId', (Url.encode(window.location.href)));
-
-          bin = parentOwner.bins.getById(id);
-
-          if(!bin) {
-            bin = self.add(id, window.document.title.trim()
-                               || '&lt; no-name &gt;');
-          }
-
-          parentOwner.bins.setActive(bin);
-
-          return false;
-        }
-      } );
-
+    this.node_ = parentOwner.options.nodes.add;
+    
     this.droppable_ = new SortingQueue.Droppable(this.node_, {
       classHover: parentOwner.options.css.droppableHover,
       scopes: function (scope) { return !scope; },
@@ -914,7 +1070,7 @@ var SortingDesk_ = function (window, $) {
 
         /* If we received a map object, assume a valid drop. */
         if(result)
-          self.add(result.id, result.data, result.isImage);
+          self.add(result);
 
         self.node_.removeClass(parentOwner.options.css.droppableHover);
 
@@ -935,88 +1091,133 @@ var SortingDesk_ = function (window, $) {
   /**
    * @class
    * */
-  var LabelBrowser = function (owner, bin)
+  var LabelBrowser = function (owner, api, bin)
   {
     /* Invoke super-constructor. */
     SortingQueue.Controller.call(this, owner);
 
     /* Attributes */
+    this.api_ = api;
     this.deferred_ = null;
     this.nodes_ = { };
-    this.bin_ = bin;
-    this.rows_ = [ ];
+    this.ref_bin_ = bin;
+    this.ref_fc_ = null;
+    this.eqv_fcs_ = [ ];
+    this.view_ = null;
+    this.viewType_ = LabelBrowser.VIEW_DEFAULT;
 
     /* Getters */
+    this.__defineGetter__('api', function () { return this.api_; } );
     this.__defineGetter__('nodes', function () { return this.nodes_; } );
+    this.__defineGetter__('ref_bin', function () { return this.ref_bin_; } );
+    this.__defineGetter__('ref_fc', function () { return this.ref_fc_; } );
+    this.__defineGetter__('eqv_fcs', function () { return this.eqv_fcs_; } );
+    this.__defineGetter__('viewType', function () { return this.viewType_; } );
+    this.__defineGetter__('view', function () { return this.view_; } );
   };
 
+  /* Constants
+   * --
+   * View types */
+  LabelBrowser.VIEW_LIST = 0x01;
+  LabelBrowser.VIEW_GROUPED = 0x02;
+  LabelBrowser.VIEW_DEFAULT = LabelBrowser.VIEW_LIST;
+
+  /* Interface */
   LabelBrowser.prototype = Object.create(SortingQueue.Controller.prototype);
 
   LabelBrowser.prototype.initialise = function ()
   {
-    var self = this;
+    var self = this,
+        els = this.nodes_;
 
+    console.log("Initializing Label Browser component");
+
+    var onEndInitialise = function () {
+      console.log("Label Browser component initialized");
+    };
+    
     this.deferred_ = $.Deferred();
 
-    this.nodes_.container = $('[data-sd-purpose="container-label-browser"]');
-    
-    this.nodes_.buttonClose = this.nodes_.container
-      .find('[data-sd-purpose="label-browser-close"]')
-      .click( function () {
-        self.close();
-      } );
-    
-    this.nodes_.heading = this.nodes_.container
-      .find('[data-sd-purpose="label-browser-heading"]')
-      .html(this.bin_.data.data);
-    
-    this.nodes_.items = this.nodes_.container
-      .find('[data-sd-purpose="label-browser-items"]');
+    /* Begin set up nodes. */
+    els.container = $('[data-sd-scope="container-label-browser"]');
 
-    this.nodes_.table = this.nodes_.items.find('TABLE');
+    els.buttonClose = this.find_node_('close')
+      .click( function () { self.close(); } );
 
-    this.show();
+    els.toolbar = {
+      view: {
+        list: this.find_node_('toolbar-list'),
+        group: this.find_node_('toolbar-group')
+      }
+    };
 
-    var cbs = this.owner_.owner.sortingQueue.callbacks,
-        api = cbs.invoke('getApi');
+    els.heading = {
+      title: this.find_node_('heading-title'),
+      content: this.find_node_('heading-content')
+    };
 
-    (new (cbs.invoke('getClass', 'LabelFetcher'))(api))
-      .cid(this.bin_.id)
-      .which('positive')
-      .get()
-      .done(function (labels) {
-        console.log('retrieved LABEL:', labels.slice());
+    els.items = this.find_node_('items');
+    els.table = els.items.find('TABLE');
+    /* End setup up nodes. */
 
-        var fnGetNext = function () {
-          if(labels.length) {
-            var cid = labels.shift().cid2;
-            
-            api.fcGet(cid)
-              .done(function(fc) {
-                console.log('retrieved FC:', fc);
-                fnGetNext();
-              } )
-              .fail(function () {
-                console.log('Failed to retrieve feature collection (id=%s)',
-                            cid);
-              } );
-          } else
-            console.log('Done loading feature collections');
-        };
+    /* Retrieve feature collection for the bin's `content_id´. */
+    this.api_.getFeatureCollection(this.ref_bin_.data.content_id)
+      .done(function (fc) { self.set_heading_(fc); } )
+      .fail(function () { self.set_heading_(null); } );
 
-        fnGetNext();
+    /* Retrieve all existing labels for the bin's `content_id´. */
+    this.api_.getLabelsUniqueById(this.ref_bin_.data.content_id)
+      .then(function (ids) {
+        console.log("Got labels' unique ids:", ids);
+        
+        self.api_.getAllFeatureCollections(ids)
+          .done(function (fcs) {
+            console.log("Unique labels' content id collection GET successful:",
+                        fcs);
+
+            self.eqv_fcs_ = fcs instanceof Array ? fcs : [ ];
+            self.render_();
+          } )
+          .fail(function () {
+            console.log('Failed to retrieve all feature collections');
+            onEndInitialise();
+          } );
       } )
       .fail(function () {
-        console.log('Failed to retrieve labels');
+        console.log('Failed to load state');
+        onEndInitialise();
       } );
 
+    /* NOTE: This should really be an event. */
+    this.owner_.owner.sortingQueue.callbacks.invoke({
+      name: "onLabelBrowserInitialised",
+      mandatory: false
+    }, this.nodes_.container);
+
+    this.show();
 
     return this.deferred_.promise();
   };
 
   LabelBrowser.prototype.reset = function ()
   {
-    /* TODO: implement! */
+    /* Remove all children nodes. */
+    this.nodes_.heading.title.children().remove();
+    this.nodes_.heading.content.children().remove();
+    this.nodes_.table.find('TR:not(:first-child)').remove();
+
+    /* Resolve promise if one still exists. */
+    if(this.deferred_)
+      this.deferred_.resolve();
+
+    /* Detach all events. */
+    this.nodes_.buttonClose.off();
+
+    this.deferred_ = this.ref_bin_ = this.view_ = this.nodes_ = null;
+    this.ref_fc_ = this.eqv_fcs_ = this.viewType_ = this.api_ = null;
+
+    console.log("Label Browser component reset");
   };
 
   LabelBrowser.prototype.show = function ()
@@ -1034,21 +1235,244 @@ var SortingDesk_ = function (window, $) {
         transform: 'scale(.2,.2)',
         opacity: 0
       } );
-    
-    this.deferred_.resolve();
+
+    if(this.deferred_) {
+      this.deferred_.resolve();
+      this.deferred_ = null;
+    }
   };
 
-
-  var LabelBrowserRow = function (owner, label)
+  /* Private methods */
+  LabelBrowser.prototype.render_ = function ()
   {
-    var row = $('<tr><td>' + label.cid2 + '</td>'
-                + '<td>undefined</td>'
-                + '<td>' + label.annotator_id + '</td>');
+    if(this.view_) {
+      this.view_.reset();
+      this.view_ = null;
+    }
     
-    owner.nodes.table.append(row);
+    switch(this.viewType_) {
+    case LabelBrowser.VIEW_LIST:
+      this.view_ = new LabelBrowserViewList(this, this.eqv_fcs_);
+      break;
+
+    default:
+      throw "Invalid view type or view unsupported: " + this.viewType_;
+    }
+
+    /* Render view. */
+    this.view_.render();
   };
 
-  LabelBrowserRow.prototype = {
+  LabelBrowser.prototype.set_heading_ = function (fc)
+  {
+    this.nodes_.heading.title
+      .html(typeof fc === 'object'
+            && typeof fc.raw === 'object'
+            && typeof fc.raw.title === 'string'
+            && fc.raw.title
+            || "<unknown title>");
+
+    /* TODO: using reference bin's own content rather than snippet from
+     * retrieved feature collection. */
+    this.nodes_.heading.content.html(this.ref_bin_.data.content);
+  };
+
+  LabelBrowser.prototype.find_node_ = function (scope,
+                                                parent /* = container */)
+  {
+    var p;
+
+    if(parent instanceof $)
+      p = parent;
+    else if(typeof parent === 'string')
+      p = this.find_node_(parent);
+    else
+      p = this.nodes_.container;
+
+    return p.find( [ '[data-sd-scope="label-browser-', scope, '"]' ].join(''));
+  };
+
+
+  /**
+   * @class
+   * */
+  var LabelBrowserView = function (owner, fcs)
+  {
+    /* Invoke super constructor. */
+    SortingQueue.Drawable.call(this, owner);
+    
+    /* Check `fcs' argument IS an array. */
+    if(!(fcs instanceof Array))
+      throw "Invalid feature collection array specified";
+
+    /* Attributes */
+    this.fcs_ = fcs;
+
+    /* Getters */
+    this.__defineGetter__('fcs', function () { return this.fcs_; } );
+  };
+
+  LabelBrowserView.prototype = Object.create(SortingQueue.Drawable.prototype);
+
+
+  /**
+   * @class
+   * */
+  var LabelBrowserRowGroup = function (owner, fc)
+  {
+    /* Invoke super constructor. */
+    SortingQueue.Drawable.call(this, owner);
+
+    /* Attributes */
+    this.fc_ = fc;
+
+    /* Getters */
+    this.__defineGetter__("fc", function () { return this.fc_; } );
+  };
+
+  LabelBrowserRowGroup = Object.create(SortingQueue.Drawable.prototype);
+
+
+  /**
+   * @class
+   * */
+  var LabelBrowserRow = function (owner, id, content)
+  {
+    /* Invoke super constructor. */
+    SortingQueue.Drawable.call(this, owner);
+    
+    /* Attributes */
+    this.id_ = id;
+    this.content_ = content;
+
+    /* Getters */
+    this.__defineGetter__('id', function () { return this.id_; } );
+    this.__defineGetter__('content', function () { return this.content_; } );
+  };
+
+  LabelBrowserRow.prototype = Object.create(SortingQueue.Drawable.prototype);
+  
+
+  /**
+   * @class
+   * */
+  var LabelBrowserViewList = function (owner, fcs)
+  {
+    /* Invoke super constructor. */
+    LabelBrowserView.call(this, owner, fcs);
+
+    /* Attributes */
+    this.rows_ = [ ];
+    this.subtopics_ = { };
+
+    var self = this,
+        api = owner.api,
+        count = 0;
+
+    /* TODO: below we are merging subtopics from all feature collections to
+     * avoid duplicates. Is this really necessary or would it be best to just
+     * show them all, regardless? */
+    
+    /* Merge subtopics from all feature collections. */
+    fcs.forEach(function (fc) {
+      if(typeof fc.raw !== 'object') {
+        console.log("Feature collection `raw´ attribute not found or invalid",
+                    fc);
+        return;
+      }
+
+      /* Contain entries in the feature collection's `raw´ attribute that are
+       * subtopics. If an entry with the same key exists, it is replaced. */
+      for(var k in fc.raw) {
+        if(api.isSubtopic(k)) {
+          self.subtopics_[k] = fc.raw[k];
+          ++count;
+        }
+      }
+    } );
+
+    console.log("Merged subtopics from %d feature collection(s): count=%d",
+                fcs.length,
+                count,
+                this.subtopics_);
+  };
+
+  LabelBrowserViewList.prototype = Object.create(LabelBrowserView.prototype);
+
+  LabelBrowserViewList.prototype.render = function (fcs)
+  {
+    /* Finally create and render rows. */
+    for(var k in this.subtopics_) {
+      var row = new LabelBrowserViewListRow(
+        this,
+        this.owner_.api.extractSubtopicId(k),
+        this.subtopics_[k]);
+      
+      this.rows_.push(row);
+      row.render();
+    }
+  };
+
+
+  /**
+   * @class
+   * */
+  var LabelBrowserViewListRow = function (owner, id, content)
+  {
+    /* Invoke super constructor. */
+    LabelBrowserRow.call(this, owner, id, content);
+  };
+
+  LabelBrowserViewListRow.prototype = Object.create(LabelBrowserRow.prototype);
+
+  LabelBrowserViewListRow.prototype.render = function ()
+  {
+    var row = $('<tr></tr>');
+
+    $('<td></td>')
+      .addClass(Css.LabelBrowser.items.id)
+      .html(this.id_)
+      .appendTo(row);
+
+    $('<td></td>')
+      .addClass(Css.LabelBrowser.items.content)
+      .html(this.content_)
+      .appendTo(row);
+      
+    row.insertAfter(this.owner_.owner.nodes.table.find('TR:last-child'));
+  };
+
+
+  /**
+   * @class
+   * */
+  var Html = {
+    getXpathSimple: function (node)
+    {
+      var result = [ ];
+
+      if(node instanceof $)
+        node = node.get(0);
+
+      if(node) {
+        do {
+          result.push(node.nodeName);
+        } while( (node = node.parentNode) );
+      }
+
+      return result.reverse().join('/');
+    }
+  };
+
+
+  /* CSS class names used. */
+  var Css = {
+    LabelBrowser: {
+      items: {
+        id: 'sd-lb-items-id',
+        content: 'sd-lb-items-content'
+      }
+    }
   };
 
 
@@ -1068,14 +1492,17 @@ var SortingDesk_ = function (window, $) {
       itemSelected: 'sd-selected',
       itemDragging: 'sd-dragging',
       bin: 'sd-bin',
+      binImage: 'sd-bin-image',
       binName: 'sd-bin-name',
       binAnimateAssign: 'sd-assign',
       binAdding: 'sd-adding',
       binActive: 'sd-active',
+      binUnkown: 'sd-unknown',
       buttonAdd: 'sd-button-add',
       droppableHover: 'sd-droppable-hover',
       mouseDown: 'sd-mousedown',
-      iconLabelBrowser: 'sd-bin-browser-icon'
+      iconLabelBrowser: 'sd-bin-browser-icon',
+      disabled: 'sd-disabled'   /* Indicates something is disabled. */
     },
     delays: {                   /* In milliseconds.     */
       binRemoval: 200,          /* Bin is removed from container. */
@@ -1108,8 +1535,8 @@ var SortingDesk_ = function (window, $) {
 
 /* Compatibility with RequireJs. */
 if(typeof define === "function" && define.amd) {
-  define("SortingDesk", [ "jquery" ], function ($) {
-    return SortingDesk_(window, $);
+  define("SortingDesk", [ "jquery", "api" ], function ($, Api) {
+    return SortingDesk_(window, $, Api);
   });
 } else
-  window.SortingDesk = SortingDesk_(window, $);
+  window.SortingDesk = SortingDesk_(window, $, Api);

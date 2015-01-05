@@ -2,8 +2,6 @@
  * @file Sorting Queue component.
  * @copyright 2014 Diffeo
  *
- * @author Miguel Guedes <miguel@miguelguedes.org>
- *
  * Comments:
  *
  *
@@ -412,6 +410,20 @@ var SortingQueue_ = function (window, $) {
   ControllerCallbacks.prototype.exists = function (callback)
   { return this.callbacks_.hasOwnProperty(callback); };
 
+  /** Invoke a callback with optional parameters.
+   * @param {(string|object)} descriptor Name of callback to invoke or object
+   * containing the following two attributes:
+   * 
+   * <pre><code>{
+   *   name: {string}
+   *   mandatory: {boolean}
+   * }</code></pre>
+   *
+   * In the first form, where a string containing the callback's name is passed,
+   * the callback must exist; if it doesn't, an exception is thrown. The second
+   * form allows an object to be passed which results in the specified callback
+   * being invoked if it is defined, otherwise no exceptions are thrown.
+   * @param {*}               parameters Parameters to pass to callback. */
   ControllerCallbacks.prototype.invoke = function ()
   {
     var result = this.call_.apply(this, arguments);
@@ -436,13 +448,36 @@ var SortingQueue_ = function (window, $) {
 
   ControllerCallbacks.prototype.call_ = function ()
   {
-    if(arguments.length < 1)
-      throw "Callback name required";
-    else if(!this.callbacks_.hasOwnProperty(arguments[0]))
-      throw "Callback non existent: " + arguments[0];
+    var name,
+        mandatory = true;
 
-    return this.callbacks_[arguments[0]]
-      .apply(null, [].slice.call(arguments, 1));
+    /* First argument must exist. */
+    if(arguments.length < 1)
+      throw "Callback name or descriptor required";
+
+    /* First argument can either be a string describing the callback's name or
+     * an object containing two attributes, `name´ and `mandatory´. `name´
+     * refers to the name of the callback to invoke, whereas `mandatory´
+     * specifies whether the callback is required to exist or whether it is
+     * allowed to be optional. If allowed to be optional and it doesn't exist,
+     * `null´ is returned.
+     *
+     * If the callback doesn't exist and it isn't allowed to be optional, an
+     * exception is thrown. */
+    if(typeof arguments[0] === 'object') {
+      name = arguments[0].name;
+      mandatory = arguments[0].mandatory;
+    } else
+      name = arguments[0];
+    
+    if(!this.callbacks_.hasOwnProperty(name)) {
+      if(mandatory)
+        throw "Callback non existent: " + name;
+
+      return null;
+    }
+
+    return this.callbacks_[name].apply(null, [].slice.call(arguments, 1));
   };
 
 
@@ -502,7 +537,7 @@ var SortingQueue_ = function (window, $) {
     if(this.requests_.hasOwnProperty(id)) {
       /* Delete request from internal collection if last one, otherwise
        * decrement reference count. */
-      if(this.requests_[id] == 1)
+      if(this.requests_[id] === 1)
         delete this.requests_[id];
       else if(this.requests_[id] > 1)
         --this.requests_[id];
@@ -662,7 +697,7 @@ var SortingQueue_ = function (window, $) {
 
     options.nodes.buttonDismiss.stop().fadeIn(
       options.delays.dismissButtonShow,
-      typeof callback == 'function' ? callback : null);
+      typeof callback === 'function' ? callback : null);
   };
 
   ControllerButtonDismiss.prototype.deactivate = function ()
@@ -817,7 +852,7 @@ var SortingQueue_ = function (window, $) {
 
   ControllerItems.prototype.remove = function (item)
   {
-    if(typeof item == 'undefined') {
+    if(typeof item === 'undefined') {
       var selected = this.selected();
       if (!selected) {
         this.check();
@@ -875,7 +910,7 @@ var SortingQueue_ = function (window, $) {
     var result = null;
 
     this.items_.some(function (item) {
-      if(item.content.node_id == id) {
+      if(item.content.node_id === id) {
         result = item;
         return true;
       }
@@ -906,10 +941,10 @@ var SortingQueue_ = function (window, $) {
     if(!this.node_.children().length)
       return;
 
-    if(typeof variant == 'undefined') {
+    if(typeof variant === 'undefined') {
       variant = this.node_.find('.' + csel);
 
-      if(variant.length == 0)
+      if(variant.length === 0)
         variant = this.node_.children().eq(0);
       else if(variant.length > 1) {
         /* We should never reach here. */
@@ -917,7 +952,7 @@ var SortingQueue_ = function (window, $) {
 
         variant = variant.eq(0);
       }
-    } else if(typeof variant == 'number') {
+    } else if(typeof variant === 'number') {
       if(variant < 0)
         variant = 0;
       else if(variant > this.node_.children().length - 1)
@@ -1105,7 +1140,7 @@ var SortingQueue_ = function (window, $) {
     },
 
     onDragEnd: function (event) {
-      if(DragDropManager.activeNode_ == (event.originalEvent || event).target) {
+      if(DragDropManager.activeNode_=== (event.originalEvent || event).target) {
         DragDropManager.activeNode_ = null;
       }
     },
