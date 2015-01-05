@@ -76,10 +76,9 @@ var ChromeExtensionUi = (function () {
            * 
            * Note that both the main container and the element(s) to be centered
            * MUST be visible or their widths can't be computed and thus
-           * centering fails. By the way, even though several elements are shown
-           * and hidden in quick succession, no flicker occurs because painting
-           * only takes place once the script returns execution to the
-           * browser. */
+           * centering fails. Even though several elements are shown and hidden
+           * in quick succession, no flicker occurs because painting only takes
+           * place once the script returns execution to the browser. */
           self.nodes_.sorter.show();
           {
             self.center('loading');
