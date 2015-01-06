@@ -1,11 +1,11 @@
 #!/bin/bash
 # update-deps --- Updates external dependencies used by this project's different
 # components
-# 
+#
 # Copyright (c) 2014 Diffeo
-# 
+#
 # Comments:
-# 
+#
 
 set -e
 
@@ -35,7 +35,7 @@ mkdir lib/bootstrap/js -vp
 cp -v "$dir_root/src/SortingQueue/SortingQueue.js" lib/SortingQueue/
 cp -v "$dir_root/src/SortingDesk/SortingDesk.js" lib/SortingDesk/
 cp -v "$dir_root/src/SortingDesk/api-live.js" lib/SortingDesk/
-cp -v "$dir_root/dossier.js/Dossier.js" lib/dossier.js/
+cp -v "$dir_root/src/dossier.js/Dossier.js" lib/dossier.js/
 cp -v "$dir_root/lib/jquery-2.1.1.min.js" lib/
 cp -v "$dir_root/lib/CryptoJS-3.1.2/rollups/md5.js" lib/CryptoJS/
 cp -v "$dir_root/lib/bootstrap-3.3.1/css/"*.min.css lib/bootstrap/css/
