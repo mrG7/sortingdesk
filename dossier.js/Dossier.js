@@ -244,15 +244,25 @@ var _DossierJS = function(window, $) {
     var LabelFetcher = function(api) {
         this.api = api;
         this._cid = null;
+        this._subtopic_id = null;
         this._which = 'direct';
         this._page = 1;
         this._perpage = 30;
         return this;
     };
 
-    // Set the query content id for labels.
+    // Set the query content id for labels. This is required.
     LabelFetcher.prototype.cid = function(cid) {
         this._cid = cid;
+        return this;
+    };
+
+    // Set the subtopic id for labels. This is optional.
+    //
+    // When a subtopic id is set, all label traversals are subtopic
+    // traversals.
+    LabelFetcher.prototype.subtopic = function(subtopic_id) {
+        this._subtopic_id = subtopic_id;
         return this;
     };
 
@@ -313,9 +323,14 @@ var _DossierJS = function(window, $) {
             throw "unrecognized web service: " + this._which;
         }
         var cid = encodeURIComponent(serialize(this._cid)),
-            endpoint = 'label/' + cid + '/' + this._which,
+            endpoint = ['label', cid, this._which].join('/'),
             params = {};
 
+        if (this._subtopic_id !== null) {
+            endpoint = [
+                'label', cid, 'subtopic', this._subtopic_id, this._which,
+            ].join('/');
+        }
         if (this._page) params.page = this._page;
         if (this._perpage) params.perpage = this._perpage;
         var url = this.api.url(endpoint, params);
