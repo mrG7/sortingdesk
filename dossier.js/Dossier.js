@@ -201,6 +201,29 @@ var _DossierJS = function(window, $) {
         }).promise();
     };
 
+    API.prototype.addLabels = function(labels) {
+        var promises = [],
+            def = $.Deferred(),
+            to_resolve = labels.length;
+        for (var i = 0; i < labels.length; i++) {
+            var label = labels[i];
+            console.log("adding label:", label);
+            promises.push(this.addLabel(label)
+                .done(function() {
+                    to_resolve -= 1;
+                    if (to_resolve === 0) {
+                        def.resolve();
+                    }
+                })
+                .fail(function(jqXHR, textStatus, errorThrown) {
+                    console.log("Failed to add label: " + label);
+                    def.reject(jqXHR, textStatus, errorThrown, label);
+                })
+            );
+        }
+        return def.promise();
+    };
+
     // A convenience class for fetching labels.
     //
     // Since querying labels can be complex, constructing a query follow the
