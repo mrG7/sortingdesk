@@ -73,7 +73,7 @@ describe('DossierJS.API', function() {
     it('adds a negative label and is inferred', function(done) {
         var lab = new DossierJS.Label('a', 'b', 'tester',
                                       DossierJS.COREF_VALUE_NEGATIVE);
-        var fetcher = function(f) { return f.which('negative'); };
+        var fetcher = function(f) { return f.which('negative-inference'); };
         api.addLabel(lab)
             .fail(function() { failed(done); })
             .done(function() { labelExists(api, lab, done, fetcher); });
@@ -82,7 +82,7 @@ describe('DossierJS.API', function() {
     it('adds a negative label and is not part of positives', function(done) {
         var lab = new DossierJS.Label('x', 'y', 'tester',
                                       DossierJS.COREF_VALUE_NEGATIVE);
-        var fetcher = function(f) { return f.which('positive'); };
+        var fetcher = function(f) { return f.which('connected'); };
         api.addLabel(lab)
             .fail(function() { failed(done); })
             .done(function() { labelExists(api, lab, done, fetcher, true); });
@@ -103,7 +103,7 @@ describe('DossierJS.API', function() {
                                       DossierJS.COREF_VALUE_POSITIVE,
                                       'subm', 'subn');
         var fetcher = function(f) {
-            return f.which('positive').method('expanded');
+            return f.which('expanded');
         };
         api.addLabel(lab)
             .fail(function() { failed(done); })
