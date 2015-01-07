@@ -236,7 +236,8 @@ var LabelBrowser_ = function (window, SortingQueue, $)
   Browser.prototype.set_heading_ = function (fc)
   {
     this.nodes_.heading.title
-      .html(typeof fc === 'object'
+      .html(fc                  /* WTF: `typeof null´ returns 'object' */
+            && typeof fc === 'object'
             && typeof fc.raw === 'object'
             && typeof fc.raw.title === 'string'
             && fc.raw.title
