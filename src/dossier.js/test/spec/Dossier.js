@@ -53,13 +53,13 @@ describe('DossierJS.API', function() {
     it('adds a label', function(done) {
         api.addLabel(lab.cid1, lab.cid2, lab.annotator_id, lab.coref_value)
             .fail(function() { failed(done); })
-            .done(function() { labelExists(api, lab, done); });
+            .done(function() { labelExists(api, lab.cid1, lab, done); });
     });
 
     it('adds a label 2', function(done) {
         api.addLabel(lab)
             .fail(function() { failed(done); })
-            .done(function() { labelExists(api, lab, done); });
+            .done(function() { labelExists(api, lab.cid1, lab, done); });
     });
 
     it('adds a negative label', function(done) {
@@ -67,25 +67,29 @@ describe('DossierJS.API', function() {
                                       DossierJS.COREF_VALUE_NEGATIVE);
         api.addLabel(lab)
             .fail(function() { failed(done); })
-            .done(function() { labelExists(api, lab, done); });
+            .done(function() { labelExists(api, lab.cid1, lab, done); });
     });
 
     it('adds a negative label and is inferred', function(done) {
         var lab = new DossierJS.Label('a', 'b', 'tester',
                                       DossierJS.COREF_VALUE_NEGATIVE);
-        var fetcher = function(f) { return f.which('negative'); };
+        var fetcher = function(f) { return f.which('negative-inference'); };
         api.addLabel(lab)
             .fail(function() { failed(done); })
-            .done(function() { labelExists(api, lab, done, fetcher); });
+            .done(function() {
+                labelExists(api, lab.cid1, lab, done, fetcher);
+            });
     });
 
     it('adds a negative label and is not part of positives', function(done) {
         var lab = new DossierJS.Label('x', 'y', 'tester',
                                       DossierJS.COREF_VALUE_NEGATIVE);
-        var fetcher = function(f) { return f.which('positive'); };
+        var fetcher = function(f) { return f.which('connected'); };
         api.addLabel(lab)
             .fail(function() { failed(done); })
-            .done(function() { labelExists(api, lab, done, fetcher, true); });
+            .done(function() {
+                labelExists(api, lab.cid1, lab, done, fetcher, true);
+            });
     });
 
     it('adds labels with subtopics', function(done) {
@@ -94,7 +98,7 @@ describe('DossierJS.API', function() {
                                       'subs', 'subt');
         api.addLabel(lab)
             .fail(function() { failed(done); })
-            .done(function() { labelExists(api, lab, done); });
+            .done(function() { labelExists(api, lab.cid1, lab, done); });
     });
 
     it('adds labels with subtopics that are part of an expansion',
@@ -103,11 +107,33 @@ describe('DossierJS.API', function() {
                                       DossierJS.COREF_VALUE_POSITIVE,
                                       'subm', 'subn');
         var fetcher = function(f) {
-            return f.which('positive').method('expanded');
+            return f.which('expanded');
         };
         api.addLabel(lab)
             .fail(function() { failed(done); })
-            .done(function() { labelExists(api, lab, done); });
+            .done(function() { labelExists(api, lab.cid1, lab, done); });
+    });
+
+    it('adds labels with subtopics that are NOT part of a label traversal',
+       function(done) {
+        var mk = function(id1, id2, subid1, subid2) {
+            return new DossierJS.Label(id1, id2, 'tester',
+                                       DossierJS.COREF_VALUE_POSITIVE,
+                                       subid1, subid2);
+        };
+        var labels = [
+            mk('A', 'B', 'A1', 'B2'),
+            mk('B', 'C', 'B2', 'C3'),
+            mk('B', 'C', 'B4', 'C5'),
+        ];
+        var fetcher = function(f) {
+            return f.subtopic('A1').which('connected');
+        };
+        api.addLabels(labels)
+            .fail(function() { failed(done); })
+            .done(function() {
+                labelExists(api, 'A', labels[2], done, fetcher, true);
+            });
     });
 
     it('paginates labels', function(done) {
@@ -122,8 +148,8 @@ describe('DossierJS.API', function() {
                 api.addLabel(lab2)
                     .fail(function() { failed(done); })
                     .done(function() {
-                        labelExists(api, lab1, done, fetcher, true);
-                        labelExists(api, lab2, done, fetcher);
+                        labelExists(api, 'p', lab1, done, fetcher, true);
+                        labelExists(api, 'p', lab2, done, fetcher);
                     });
             });
     });
@@ -159,11 +185,11 @@ describe('DossierJS.FeatureCollection', function() {
     });
 });
 
-function labelExists(api, label, done, fetcher, invert) {
+function labelExists(api, cid, label, done, fetcher, invert) {
     if (typeof fetcher === 'undefined') {
         fetcher = function(v) { return v; };
     }
-    fetcher(new DossierJS.LabelFetcher(api).cid(label.cid1)).get()
+    fetcher(new DossierJS.LabelFetcher(api).cid(cid)).get()
         .fail(function() { failed(done); })
         .done(function(labels) {
             for (var i = 0; i < labels.length; i++) {

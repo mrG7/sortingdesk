@@ -127,6 +127,8 @@ var _DossierJS = function(window, $) {
     //
     // This returns a jQuery promise which resolves when the web server
     // responds.
+    //
+    // TODO: This needs to support 'PUT'ing HTML. Or add another method. ---AG
     API.prototype.fcPut = function(content_id, fc) {
         var url = this.url('feature-collection/'
                            + encodeURIComponent(serialize(content_id)));
@@ -174,8 +176,7 @@ var _DossierJS = function(window, $) {
     // This function returns a jQuery promise that resolves when the web
     // service responds.
     API.prototype.addLabel = function(
-        /* <cid1, cid2, annotator, coref_value> | <label> */ )
-    {
+        /* <cid1, cid2, annotator, coref_value> | <label> */ ) {
         var label;
         if (arguments.length == 4) {
             label = new Label(arguments[0], arguments[1],
@@ -200,6 +201,29 @@ var _DossierJS = function(window, $) {
         }).promise();
     };
 
+    API.prototype.addLabels = function(labels) {
+        var promises = [],
+            def = $.Deferred(),
+            to_resolve = labels.length;
+        for (var i = 0; i < labels.length; i++) {
+            var label = labels[i];
+            console.log("adding label:", label);
+            promises.push(this.addLabel(label)
+                .done(function() {
+                    to_resolve -= 1;
+                    if (to_resolve === 0) {
+                        def.resolve();
+                    }
+                })
+                .fail(function(jqXHR, textStatus, errorThrown) {
+                    console.log("Failed to add label: " + label);
+                    def.reject(jqXHR, textStatus, errorThrown, label);
+                })
+            );
+        }
+        return def.promise();
+    };
+
     // A convenience class for fetching labels.
     //
     // Since querying labels can be complex, constructing a query follow the
@@ -210,8 +234,7 @@ var _DossierJS = function(window, $) {
     //   var api = new DossierJS.API(...);
     //   var fetcher = new LabelFetcher(api);
     //   fetcher.cid("abc")
-    //          .which("positive")
-    //          .method("expanded")
+    //          .which("expanded")
     //          .page(5)
     //          .perpage(10)
     //          .get()
@@ -221,39 +244,43 @@ var _DossierJS = function(window, $) {
     var LabelFetcher = function(api) {
         this.api = api;
         this._cid = null;
-        this._method = undefined;
+        this._subtopic_id = null;
         this._which = 'direct';
         this._page = 1;
         this._perpage = 30;
         return this;
     };
 
-    // Set the query content id for labels.
+    // Set the query content id for labels. This is required.
     LabelFetcher.prototype.cid = function(cid) {
         this._cid = cid;
         return this;
     };
 
-    // Indicate the kind of label query you want to do. There are three
+    // Set the subtopic id for labels. This is optional.
+    //
+    // When a subtopic id is set, all label traversals are subtopic
+    // traversals.
+    LabelFetcher.prototype.subtopic = function(subtopic_id) {
+        this._subtopic_id = subtopic_id;
+        return this;
+    };
+
+    // Indicate the kind of label query you want to do. There are a few
     // choices:
     //
-    //  direct   - Finds all directly connected labels to the query.
-    //             This includes positive, negative and unknown labels.
-    //  positive - Finds all positive labels via a connected component
-    //             or label expansion (toggled with `method`).
-    //  negative - Finds all negatively inferred labels.
+    //  direct             - Finds all directly connected labels to the query.
+    //                       This includes positive, negative and unknown
+    //                       labels.
+    //  connected          - Finds all positive labels via a connected
+    //                       component.
+    //  expanded           - Finds all positive labels via an expansion of a
+    //                       connected component.
+    //  negative-inference - Finds all negatively inferred labels.
     LabelFetcher.prototype.which = function(which) {
         this._which = which;
         return this;
     }
-
-    // Set an auxiliary method for the search.
-    //
-    // Currently, only a 'positive' search supports 'connected' and 'expanded'.
-    LabelFetcher.prototype.method = function(method) {
-        this._method = method;
-        return this;
-    };
 
     // Move to the next page.
     LabelFetcher.prototype.next = function() {
@@ -286,23 +313,24 @@ var _DossierJS = function(window, $) {
     // Launch a search and return a promise. The promise, on success, resolves
     // to an array of `Label`s.
     LabelFetcher.prototype.get = function() {
+        var allowed_search_types = [
+            'direct', 'connected', 'expanded', 'negative-inference',
+        ];
         if (!this._cid) {
             throw "query content id is not set";
         }
-        if (['direct', 'positive', 'negative'].indexOf(this._which) === -1) {
+        if (allowed_search_types.indexOf(this._which) === -1) {
             throw "unrecognized web service: " + this._which;
         }
-        if ([undefined, 'connected', 'expanded'].indexOf(this._method) === -1) {
-            throw "unrecognized positive label method: " + this._method;
-        }
-        if (!und(this._method) && this._which != 'positive') {
-            throw "method can only be used with positive labels";
-        }
         var cid = encodeURIComponent(serialize(this._cid)),
-            endpoint = 'label/' + cid + '/' + this._which,
+            endpoint = ['label', cid, this._which].join('/'),
             params = {};
 
-        if (this._method) params.method = this._method;
+        if (this._subtopic_id !== null) {
+            endpoint = [
+                'label', cid, 'subtopic', this._subtopic_id, this._which,
+            ].join('/');
+        }
         if (this._page) params.page = this._page;
         if (this._perpage) params.perpage = this._perpage;
         var url = this.api.url(endpoint, params);

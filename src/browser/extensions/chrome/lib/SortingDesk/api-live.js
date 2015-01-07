@@ -13,7 +13,7 @@
 
 
 var Api_ = (function (window, $, CryptoJS) {
-  
+
   /* Constants */
   var DEFAULT_DOSSIER_STACK_API_URL = 'http://54.174.195.250:8080';
 
@@ -31,7 +31,7 @@ var Api_ = (function (window, $, CryptoJS) {
     sortingDesk_ = sortingDesk_;
     api_ = new DossierJS.API(url || DEFAULT_DOSSIER_STACK_API_URL);
     annotator_ = 'unknown';
-    
+
     qitems_ = new DossierJS.SortingQueueItems(
       api_, 'index_scan', '', annotator_);
 
@@ -76,18 +76,18 @@ var Api_ = (function (window, $, CryptoJS) {
   {
     if(!(ids instanceof Array))
       throw "Invalid ids array container";
-    
+
     var self = this,
         deferred = $.Deferred(),
         index = 0,
         result = [ ];
-    
+
     var getNext = function () {
       if(index >= ids.length) {
         deferred.resolve(result);
         return;
       }
-      
+
       var cid = ids[ index ++ ];
 
       self.getFeatureCollection(cid)
@@ -123,7 +123,7 @@ var Api_ = (function (window, $, CryptoJS) {
     else if(typeof subtopic_id !== 'string' || subtopic_id === 0) {
       throw "Invalid subtopic id";
     }
-    
+
     fc.raw[subtopic_id] = content;
   };
 
@@ -133,20 +133,20 @@ var Api_ = (function (window, $, CryptoJS) {
   };
 
   var getLabelsUniqueById = function (content_id,
-                                      which       /* = "positive" */)
+                                      which       /* = "connected" */)
   {
     if(typeof content_id !== 'string' || content_id.length === 0)
       throw "Invalid content id";
     else if(!_opt_arg_good(which) && typeof which !== 'string')
       throw "Invalid type for specified `which´ value";
-    
+
     var self = this;
 
     console.log('LabelFetcher GET (id=%s)', content_id);
-    
+
     return (new DossierJS.LabelFetcher(api_))
       .cid(content_id)
-      .which(which || 'positive')
+      .which(which || 'connected')
       .get()
       .then(function (labels) {
         console.log('LabelFetcher GET successful:', labels);
@@ -168,7 +168,7 @@ var Api_ = (function (window, $, CryptoJS) {
 
     return result;
   };
-  
+
   var setQueryContentId = function (id)
   {
     if(typeof id !== 'string' || id.length === 0)
@@ -186,7 +186,7 @@ var Api_ = (function (window, $, CryptoJS) {
   {
     return qitems_.engine_name;
   };
-  
+
   var generateContentId = function (content)
   {
     if(typeof content !== "string" || content.length === 0)
@@ -199,7 +199,7 @@ var Api_ = (function (window, $, CryptoJS) {
   {
     return CryptoJS.MD5(content).toString();
   };
-  
+
   var makeRawTextId = function (subtopic_id)
   {
     return [ 'subtopic', 'text', subtopic_id ].join('|');
@@ -227,7 +227,7 @@ var Api_ = (function (window, $, CryptoJS) {
 
     if(!type || type.length !== 2)
       throw "Invalid format for subtopic id";
-    
+
     return type[1];
   };
 
@@ -273,7 +273,7 @@ var Api_ = (function (window, $, CryptoJS) {
   {
     return annotator_;
   };
-  
+
   var getClass = function (cl)
   {
     return DossierJS.hasOwnProperty(cl)

@@ -3,14 +3,14 @@
 ;; Copyright (C) 2014 Diffeo
 ;;
 ;; Comments:
-;; 
+;;
 ;; Simple ELISP program that automatically executes a configurable shell command
 ;; whenever a buffer is saved whose file name is in the
 ;; `watch-deps-file-list'. The file name compared against in
 ;; `watch-deps-watch-hook' is constructed by prepending
 ;; `watch-deps-base-dir'. This latter variable thus refers to the project's root
 ;; directory.
-;; 
+;;
 ;; The buffer specified by `watch-deps-output-buffer' is shown if the executed
 ;; command, specified by the `watch-deps-command' variable produces any output
 ;; to STDERR.
@@ -23,7 +23,7 @@
 ;; Deps Command´, without which this program will not run. Note that the value
 ;; for `Watch Deps Base Dir´ does require to be wrapped within double quotes as
 ;; its type is directory.
-;; 
+;;
 
 
 (defgroup watch-deps nil
@@ -40,7 +40,7 @@ are saved."
                                   "src/SortingDesk/LabelBrowser.js"
                                   "src/SortingDesk/api-live.js"
                                   "src/SortingQueue/SortingQueue.js"
-                                  "dossier.js/Dossier.js")
+                                  "src/dossier.js/Dossier.js")
   "Relative path of each file to watch out for changes. Saving any of the files
 in the list will result in the shell command defined in `watch-deps-command'
 being executed."
@@ -92,7 +92,7 @@ group.")
               (when (string-match "^Wrote" msg)
                 (message "%s %s" msg "[dependencies updated]"))))
           (return))))))
-            
+
 (add-hook 'after-save-hook 'watch-deps-watch-hook)
 
 (provide 'watch-deps)
