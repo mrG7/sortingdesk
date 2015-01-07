@@ -106,10 +106,6 @@ var LabelBrowser_ = function (window, SortingQueue, $)
     els.table = els.items.find('TABLE');
     /* End set up up nodes. */
 
-    /* Set the items list's height so a scrollbar is shown when it overflows
-     * vertically. */
-    els.items.css('height', els.container.innerHeight());
-
     /* Retrieve feature collection for the bin's `content_id´. */
     this.api_.getFeatureCollection(this.ref_bin_.data.content_id)
       .done(function (fc) { self.set_heading_(fc); } )
@@ -186,15 +182,23 @@ var LabelBrowser_ = function (window, SortingQueue, $)
     console.log("Label Browser component reset");
   };
 
-  Browser.prototype.show = function ()
+  /* overridable */ Browser.prototype.show = function ()
   {
-    this.nodes_.container.css( {
+    var els = this.nodes_;
+
+    els.container.css( {
       transform: 'scale(1,1)',
       opacity: 1
     } );
+
+    /* Set the items list's height so a scrollbar is shown when it overflows
+     * vertically. */
+    els.items.css('height', els.container.innerHeight()
+                  - this.find_node_('heading').outerHeight()
+                  - (els.items.outerHeight(true) - els.items.innerHeight()));
   };
 
-  Browser.prototype.close = function ()
+  /* overridable */ Browser.prototype.close = function ()
   {
     this.nodes_.container
       .css( {

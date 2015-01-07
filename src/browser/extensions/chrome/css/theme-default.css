@@ -20,6 +20,11 @@
   color: black;
 }
 
+#sd-container * {
+  box-sizing: content-box;
+  -webkit-box-sizing: content-box;
+}
+
 
 /* Positioning of master container (#sd-container)
  * Note: null rule-set placeholders. */
@@ -345,6 +350,7 @@
 
 .sd-bin-name IMG {
   border: 0 none;
+  width: auto;
   height: 24px;
   display: block;
   margin: 0;
@@ -578,6 +584,7 @@ A.sd-text-item-title:hover {
   color: #FFF5F5;
 }
 
+
 /* Label Browser */
 .sd-label-browser {
   position: fixed;
@@ -594,11 +601,15 @@ A.sd-text-item-title:hover {
   transition: transform 300ms ease-in-out, opacity 150ms ease-in;
 }
 
+.sd-label-browser * {
+  box-sizing: content-box;
+  -webkit-box-sizing: content-box;
+}  
+
 .sd-lb-container-inner {
 }
 
 .sd-lb-container-content {
-  margin: 5px;
   overflow: hidden;
 }
 
@@ -635,12 +646,14 @@ A.sd-text-item-title:hover {
 
 .sd-lb-heading-title {
   font-size: 16px;
+  line-height: 16px;
   border: none;
   margin: 0 0 5px 0;
 }
 
 .sd-lb-heading-content {
   font-size: 14px;
+  line-height: 14px;
   font-style: italic;
   color: #5d6c9b;
   color: #444;
@@ -652,7 +665,8 @@ A.sd-text-item-title:hover {
 }
 
 .sd-lb-items {
-  overflow-y: scroll;
+  margin: 5px;
+  overflow-y: auto;
   overflow-x: hidden;
 }
 
@@ -720,26 +734,69 @@ A.sd-text-item-title:hover {
   float: right;
 }
 
-.sd-lb-toolbar-button {
-  float: left;
-  padding: 4px;
-  margin-left: 5px;
-  border: 1px solid #c0c0c0;
-  border-radius: 3px;
-  background-color: #f0f0f0;
-  text-shadow: none;
-  height: 18px;
-  width: 18px;
-  text-align: center;
+
+/* Bin Explorer */
+.sd-bin-explorer * {
+  box-sizing: content-box;
+  -webkit-box-sizing: content-box;
 }
 
-.sd-lb-toolbar-button:hover {
-  background-color: #e0e0e0;
-}
 
-.sd-lb-toolbar-button SPAN {
+/* Toolbar  */
+.sd-toolbar-button-group > .sd-toolbar-button {
   position: relative;
-  top: 2px;
+  float: left;
+  margin: 0;
+}
+
+.sd-toolbar-button-group > .sd-toolbar-button:first-child:not(:last-child) {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.sd-toolbar-button-group > .sd-toolbar-button:last-child:not(first-child) {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.sd-toolbar-button {
+  display: inline-block;
+  padding: 6px 12px;
+  margin-bottom: 0;
+  font-weight: 400;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  cursor: pointer;
+  background-image: none;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  outline: 1px auto #ccc;
+  line-height: normal;
+  height: 34px;
+
+  color: #333;
+  background-color: white;
+  
+  user-select: none;
+  box-sizing: border-box;
+}
+
+.sd-toolbar-button:hover {
+  background-color: #ccc;
+  border-color: #ccc;
+  z-index: 2;
+}
+
+.sd-toolbar-button:focus {
+  outline: 2px solid #a9bef3;
+  outline-offset: -1px;
+  z-index: 2;
+}
+
+.sd-toolbar-button > SPAN {
+  position: relative;
+  top: 1px;
   display: inline-block;
   font-family: 'Glyphicons Halflings';
   font-style: normal;
@@ -751,10 +808,22 @@ A.sd-text-item-title:hover {
   -moz-osx-font-smoothing: grayscale;
 }
 
-.sd-lb-toolbar-button .sd-lb-toolbar-button-list:before {
+.sd-glyph-plus:before {
+  content: "\2b"
+}
+
+.sd-glyph-remove:before {
+  content: "\e014";
+}
+
+.sd-glyph-list:before {
   content: "\e012";
 }
 
-.sd-lb-toolbar-button .sd-lb-toolbar-button-group:before {
+.sd-glyph-group:before {
   content: "\e032";
+}
+
+.sd-glyph-wrench:before {
+  content:"\e136"
 }
