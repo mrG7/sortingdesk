@@ -40,6 +40,10 @@ var LabelBrowser_ = function (window, SortingQueue, $)
     this.view_ = null;
     this.viewType_ = Browser.VIEW_DEFAULT;
 
+    /* Check for mandatory options. */
+    if(!this.ref_bin_)
+      throw "Reference bin's descriptor required";
+
     /* Getters */
     this.__defineGetter__('api', function () { return this.api_; } );
     this.__defineGetter__('nodes', function () { return this.nodes_; } );
