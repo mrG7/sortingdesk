@@ -159,61 +159,6 @@ var SortingDesk_ = function (window, $, Api) {
         } );
     },
 
-    onDropSpecial: function (scope)
-    {
-      var result = { },
-          content;
-      
-      if(scope) {
-        console.log("Drop event not special case: ignored");
-        return null;
-      }
-
-      result.content_id = this.api_.generateContentId(window.location.href);
-      result.raw = { };
-      
-      /* Process this drop event separately for text snippets and images. We
-       * assume that this event originates in an image if the active
-       * `ControllerDraggableImage´ instance has an active node. Otherwise,
-       * we attempt to retrieve a text snippet. */
-      if(this.draggable_.activeNode) {
-        content = this.draggable_.activeNode.attr('src');
-
-        if(content) {
-          result.subtopic_id = this.api_.makeRawImageId(
-            this.api_.generateSubtopicId(content));
-          result.content = content;
-        } else
-          console.log("Unable to retrieve valid `src´ attribute");
-      } else if(typeof window.getSelection === 'function') {
-        content = window.getSelection();
-
-        if(content && content.anchorNode) {
-          var str = content.toString();
-
-          /* Craft a unique id for this text snippet based on its content,
-           * Xpath representation, offset from selection start, length and,
-           * just to be sure, current system timestamp. This id is
-           * subsequently used to generate a unique and collision free
-           * unique subtopic id (see below). */
-          result.subtopic_id = this.api_.makeRawTextId(
-            this.api_.generateSubtopicId(
-              [ str,
-                Html.getXpathSimple(content.anchorNode),
-                content.anchorOffset,
-                str.length,
-                Date.now() ].join('|') ) );
-          
-          result.content = str;
-        }
-      }
-      
-      /* Clear the currently active node. */
-      this.draggable_.clear();
-
-      return result.subtopic_id && result;
-    },
-
     /* Private methods */
     initialise_: function (bins, activeBinId)
     {
@@ -671,6 +616,63 @@ var SortingDesk_ = function (window, $, Api) {
     return bins;
   };
 
+  /* Events */
+  ControllerBins.prototype.onDropSpecial = function (scope)
+  {
+    var api = this.owner_.api,
+        result = { },
+        content;
+    
+    if(scope) {
+      console.log("Drop event not special case: ignored");
+      return null;
+    }
+
+    result.content_id = api.generateContentId(window.location.href);
+    result.raw = { };
+    
+    /* Process this drop event separately for text snippets and images. We
+     * assume that this event originates in an image if the active
+     * `ControllerDraggableImage´ instance has an active node. Otherwise,
+     * we attempt to retrieve a text snippet. */
+    if(this.owner_.draggable.activeNode) {
+      content = this.owner_.draggable.activeNode.attr('src');
+
+      if(content) {
+        result.subtopic_id = api.makeRawImageId(
+          api.generateSubtopicId(content));
+        result.content = content;
+      } else
+        console.log("Unable to retrieve valid `src´ attribute");
+    } else if(typeof window.getSelection === 'function') {
+      content = window.getSelection();
+
+      if(content && content.anchorNode) {
+        var str = content.toString();
+
+        /* Craft a unique id for this text snippet based on its content,
+         * Xpath representation, offset from selection start, length and,
+         * just to be sure, current system timestamp. This id is
+         * subsequently used to generate a unique and collision free
+         * unique subtopic id (see below). */
+        result.subtopic_id = api.makeRawTextId(
+          api.generateSubtopicId(
+            [ str,
+              Html.getXpathSimple(content.anchorNode),
+              content.anchorOffset,
+              str.length,
+              Date.now() ].join('|') ) );
+        
+        result.content = str;
+      }
+    }
+    
+    /* Clear the currently active node. */
+    this.owner_.draggable.clear();
+
+    return result.subtopic_id && result;
+  };
+
   /* Protected methods */
   /* overridable */ ControllerBins.prototype.append_ = function (node)
   {
@@ -851,7 +853,7 @@ var SortingDesk_ = function (window, $, Api) {
           break;
 
         case null:
-          var result = parentOwner.onDropSpecial(scope);
+          var result = self.owner_.onDropSpecial(scope);
 
           /* If we received a map object, assume a valid drop. */
           if(result)
@@ -1066,7 +1068,7 @@ var SortingDesk_ = function (window, $, Api) {
       classHover: parentOwner.options.css.droppableHover,
       scopes: function (scope) { return !scope; },
       drop: function (e, id, scope) {
-        var result = parentOwner.onDropSpecial(scope);
+        var result = self.owner_.onDropSpecial(scope);
 
         /* If we received a map object, assume a valid drop. */
         if(result)
