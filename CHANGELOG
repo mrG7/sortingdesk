@@ -33,8 +33,8 @@
 
 	Re-classified `SortingDesk´ component. The `SortingDesk´ component
 	is now an *example* and has, therefore, been moved to the
-	`examples´ directory. The component itself was removed to
-	`SortingBinsExample´, as per instructions received. All existing
+	`examples´ directory. The component itself was renamed to
+	`sorting-bins-example´, as per instructions received. All existing
 	examples using the old `SortingDesk´ component have been
 	updated. API source files and mock data pertaining to
 	`SortingDesk´ have also been moved to the `examples´ directory.
