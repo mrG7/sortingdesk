@@ -95,7 +95,13 @@ This component is sorely needed.
 *** TODO Remove code handling keyboard events
   
 ** =SortingDesk= [0%]
-*** =LabelBrowser= [16%]
+*** =LabelBrowser= [12%]
+**** TODO =Browwser=: should the active =SortingDesk= instance be passed as a stand-alone argument or as part of the =options= object map?
+
+**** TODO Don't derive =Browser= from =SortingQueue.Controller=
+It must be possible to run it on its own.
+
+**** TODO Show appropriate message when items list empty
 **** TODO =set_heading_title_=: using reference bin's own content rather than snippet from retrieved feature collection
 Assess if correct.
 
@@ -167,6 +173,7 @@ Ideally, each bin should look like the item that was first dropped to create tha
 ** Extension [0%]
 *** All [100%]
 *** Chrome [0%]
+**** TODO =Activator=: using an adhoc event subscriber
 **** TODO Custom font should really be loaded by a resource manager
 See =Ui= constructor, before =get-meta= message is sent.
 
