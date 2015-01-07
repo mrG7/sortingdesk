@@ -164,7 +164,7 @@ var LabelBrowser_ = function (window, SortingQueue, $)
     console.log("Label Browser component reset");
   };
 
-  Browser.prototype.show = function ()
+  /* overridable */ Browser.prototype.show = function ()
   {
     var els = this.nodes_;
     
@@ -180,7 +180,7 @@ var LabelBrowser_ = function (window, SortingQueue, $)
                   - (els.items.outerHeight(true) - els.items.innerHeight()));
   };
   
-  Browser.prototype.close = function ()
+  /* overridable */ Browser.prototype.close = function ()
   {
     this.nodes_.container
       .css( {
