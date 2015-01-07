@@ -76,39 +76,7 @@ var Api_ = (function (window, $, CryptoJS) {
   {
     if(!(ids instanceof Array))
       throw "Invalid ids array container";
-
-    var self = this,
-        deferred = $.Deferred(),
-        index = 0,
-        result = [ ];
-
-    var getNext = function () {
-      if(index >= ids.length) {
-        deferred.resolve(result);
-        return;
-      }
-
-      var cid = ids[ index ++ ];
-
-      self.getFeatureCollection(cid)
-        .done(function(fc) {
-          console.log('Feature collection GET successful (id=%s)',
-                      cid, fc);
-
-          result.push(fc);
-          getNext();
-        } )
-        .fail(function () {
-          console.log('Feature collection GET failed (id=%s)',
-                      cid);
-          getNext();
-        } );
-    };
-
-    /* Retrieve feature collection for the first id. */
-    getNext();
-
-    return deferred.promise();
+    return api_.fcGetAll(ids);
   };
 
   var putFeatureCollection = function (content_id, fc)
