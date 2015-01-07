@@ -84,7 +84,8 @@ var _DossierJS = function(window, $) {
         ].join('/'), params);
         return $.getJSON(url).promise().then(function(data) {
             for (var i = 0; i < data.results.length; i++) {
-                data.results[i].fc = new FeatureCollection(data.results[i].fc);
+                data.results[i].fc = new FeatureCollection(
+                    data.results[i].content_id, data.results[i].fc);
             }
             return data;
         });
@@ -114,8 +115,49 @@ var _DossierJS = function(window, $) {
         var url = this.url('feature-collection/'
                            + encodeURIComponent(serialize(content_id)));
         return $.getJSON(url).promise().then(function(data) {
-            return new FeatureCollection(data);
+            return new FeatureCollection(content_id, data);
         });
+    };
+
+    // Fetch a set of feature collections asynchronously for the given
+    // content ids.
+    //
+    // The returned feature collections may not be in the same order as the
+    // content ids given.
+    //
+    // This returns a promise that never fails. Namely, if one or more feature
+    // collections could not be retrieved, then a message is logged to the
+    // console and the next id is processed. This implies that if there are
+    // errors, the results returned will have fewer entries than the number
+    // of content ids given.
+    //
+    // TODO: An alternate error handling strategy is to fill `null` into the
+    // array returned for FCs that could not be retrieved. This would
+    // return an array that is always in correspondence with the given content
+    // ids. I guess it depends on the common use case. ---AG
+    API.prototype.fcGetAll = function(content_ids) {
+        var def = $.Deferred(),
+            to_resolve = content_ids.length,
+            fcs = [],
+            next_idx = 0;
+        for (var i = 0; i < content_ids.length; i++) {
+          var cid = content_ids[i];
+          this.fcGet(cid)
+              .done(function(fc) {
+                  fcs[next_idx] = fc;
+                  next_idx += 1;
+              })
+              .fail(function() {
+                  console.log('Could not fetch FC for ' + cid)
+              })
+              .always(function() {
+                  to_resolve -= 1;
+                  if (to_resolve === 0) {
+                    def.resolve(fcs);
+                  }
+              });
+        }
+        return def.promise();
     };
 
     // Stores a feature collection in the database with the given content id.
@@ -152,7 +194,7 @@ var _DossierJS = function(window, $) {
     API.prototype.fcRandomGet = function() {
         var url = this.url('random/feature-collection');
         return $.getJSON(url).promise().then(function(data) {
-            return [data[0], new FeatureCollection(data[1])];
+            return [data[0], new FeatureCollection(data[0], data[1])];
         });
     };
 
@@ -403,7 +445,8 @@ var _DossierJS = function(window, $) {
     //
     // Instances of FeatureCollection have one public attribute: `raw`, which
     // returns the underlying object.
-    var FeatureCollection = function(obj) {
+    var FeatureCollection = function(content_id, obj) {
+        this.content_id = content_id;
         this.raw = obj || {};
     };
 
