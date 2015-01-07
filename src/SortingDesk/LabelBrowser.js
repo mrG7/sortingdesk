@@ -85,8 +85,6 @@ var LabelBrowser_ = function (window, SortingQueue, $)
       console.log("Label Browser component initialized");
     };
 
-    this.deferred_ = $.Deferred();
-
     /* Begin set up nodes. */
     els.container = $('[data-sd-scope="label-browser-container"]');
 
@@ -160,29 +158,28 @@ var LabelBrowser_ = function (window, SortingQueue, $)
       mandatory: false
     }, this.nodes_.container);
 
-    this.show();
     this.initialised_ = true;
 
-    return this.deferred_.promise();
+    return this.show();
   };
 
   Browser.prototype.reset = function ()
   {
     this.check_init_();
     
+    /* Resolve promise if one still exists. */
+    if(this.deferred_)
+      this.close();
+
     /* Remove all children nodes. */
     this.nodes_.heading.title.children().remove();
     this.nodes_.heading.content.children().remove();
     this.nodes_.table.find('TR:not(:first-child)').remove();
 
-    /* Resolve promise if one still exists. */
-    if(this.deferred_)
-      this.deferred_.resolve();
-
     /* Detach all events. */
     this.nodes_.buttonClose.off();
 
-    this.deferred_ = this.ref_bin_ = this.view_ = this.nodes_ = null;
+    this.ref_bin_ = this.view_ = this.nodes_ = null;
     this.ref_fc_ = this.eqv_fcs_ = this.viewType_ = this.api_ = null;
     this.initialised_ = false;
 
@@ -205,6 +202,10 @@ var LabelBrowser_ = function (window, SortingQueue, $)
     els.items.css('height', els.container.innerHeight()
                   - this.find_node_('heading').outerHeight()
                   - (els.items.outerHeight(true) - els.items.innerHeight()));
+
+    this.deferred_ = $.Deferred();
+
+    return this.deferred_.promise();
   };
 
   /* overridable */ Browser.prototype.close = function ()
