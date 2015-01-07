@@ -38,6 +38,7 @@ var LabelBrowser_ = function (window, SortingQueue, $)
     this.ref_bin_ = options.ref_bin;
     this.ref_fc_ = null;
     this.eqv_fcs_ = [ ];
+    this.subtopics_ = { }; // content id |--> [subtopic id]
     this.view_ = null;
     this.viewType_ = Browser.VIEW_DEFAULT;
 
@@ -53,6 +54,8 @@ var LabelBrowser_ = function (window, SortingQueue, $)
     this.__defineGetter__('ref_bin', function () { return this.ref_bin_; } );
     this.__defineGetter__('ref_fc', function () { return this.ref_fc_; } );
     this.__defineGetter__('eqv_fcs', function () { return this.eqv_fcs_; } );
+    this.__defineGetter__('subtopics',
+                          function () { return this.subtopics_; } );
     this.__defineGetter__('viewType', function () { return this.viewType_; } );
     this.__defineGetter__('view', function () { return this.view_; } );
   };
@@ -78,7 +81,7 @@ var LabelBrowser_ = function (window, SortingQueue, $)
     var onEndInitialise = function () {
       console.log("Label Browser component initialized");
     };
-    
+
     this.deferred_ = $.Deferred();
 
     /* Begin set up nodes. */
@@ -106,18 +109,33 @@ var LabelBrowser_ = function (window, SortingQueue, $)
     /* Set the items list's height so a scrollbar is shown when it overflows
      * vertically. */
     els.items.css('height', els.container.innerHeight());
-    
+
     /* Retrieve feature collection for the bin's `content_id´. */
     this.api_.getFeatureCollection(this.ref_bin_.data.content_id)
       .done(function (fc) { self.set_heading_(fc); } )
       .fail(function () { self.set_heading_(null); } );
 
     /* Retrieve all existing labels for the bin's `content_id´. */
-    this.api_.getLabelsUniqueById(this.ref_bin_.data.content_id)
-      .then(function (ids) {
-        console.log("Got labels' unique ids:", ids);
-        
-        self.api_.getAllFeatureCollections(ids)
+    this.api_.getLabelsUniqueById(this.ref_bin_.data.content_id,
+                                  this.ref_bin_.data.subtopic_id)
+      .then(function (subtopics) {
+        console.log("Got labels' subtopic unique ids:", subtopics);
+
+        var cids = [ ];
+        self.subtopics_ = { };
+        for (var i = 0; i < subtopics.length; i++) {
+          var cid = subtopics[i].cid,
+              subid = subtopics[i].subid;
+          if (cids.indexOf(cid) === -1) {
+            cids.push(cid);
+          }
+          if (typeof self.subtopics_[cid] === 'undefined') {
+            self.subtopics_[cid] = [ ];
+          }
+          self.subtopics_[cid].push(subid);
+        }
+
+        self.api_.getAllFeatureCollections(cids)
           .done(function (fcs) {
             console.log("Unique labels' content id collection GET successful:",
                         fcs);
@@ -175,7 +193,7 @@ var LabelBrowser_ = function (window, SortingQueue, $)
       opacity: 1
     } );
   };
-  
+
   Browser.prototype.close = function ()
   {
     this.nodes_.container
@@ -197,10 +215,10 @@ var LabelBrowser_ = function (window, SortingQueue, $)
       this.view_.reset();
       this.view_ = null;
     }
-    
+
     switch(this.viewType_) {
     case Browser.VIEW_LIST:
-      this.view_ = new ViewList(this, this.eqv_fcs_);
+      this.view_ = new ViewList(this, this.eqv_fcs_, this.subtopics_);
       break;
 
     default:
@@ -251,7 +269,7 @@ var LabelBrowser_ = function (window, SortingQueue, $)
   {
     /* Invoke super constructor. */
     SortingQueue.Drawable.call(this, owner);
-    
+
     /* Check `fcs' argument IS an array. */
     if(!(fcs instanceof Array))
       throw "Invalid feature collection array specified";
@@ -293,7 +311,7 @@ var LabelBrowser_ = function (window, SortingQueue, $)
     SortingQueue.Drawable.call(this, owner);
 
     var api = owner.owner.api;
-    
+
     /* Attributes */
     this.id_ = api.extractSubtopicId(subtopic_id);
     this.content_ = content;
@@ -313,19 +331,19 @@ var LabelBrowser_ = function (window, SortingQueue, $)
       ? [ '<img src="', this.content_, '" />' ].join('')
       : this.content_;
   };
-  
+
 
   /**
    * @class
    * */
-  var ViewList = function (owner, fcs)
+  var ViewList = function (owner, fcs, subtopics)
   {
     /* Invoke super constructor. */
     View.call(this, owner, fcs);
 
     /* Attributes */
     this.rows_ = [ ];
-    this.subtopics_ = { };
+    this.subtopic_content_ = { };
 
     var self = this,
         api = owner.api,
@@ -334,7 +352,13 @@ var LabelBrowser_ = function (window, SortingQueue, $)
     /* TODO: below we are merging subtopics from all feature collections to
      * avoid duplicates. Is this really necessary or would it be best to just
      * show them all, regardless? */
-    
+    /* We want to show all subtopics explicitly created by the user, which
+     * is isomorphic to fetching a unique list of all pairs of
+     * (content_id, subtopic_id) from a connected component. ---AG */
+
+    console.log(fcs);
+    console.log(subtopics);
+
     /* Merge subtopics from all feature collections. */
     fcs.forEach(function (fc) {
       if(typeof fc.raw !== 'object') {
@@ -343,20 +367,20 @@ var LabelBrowser_ = function (window, SortingQueue, $)
         return;
       }
 
-      /* Contain entries in the feature collection's `raw´ attribute that are
-       * subtopics. If an entry with the same key exists, it is replaced. */
-      for(var k in fc.raw) {
-        if(api.isSubtopic(k)) {
-          self.subtopics_[k] = fc.raw[k];
-          ++count;
-        }
+      /* Only show subtopics from this FC that correspond to a label.
+       * This FC may contain other subtopics, but they belong in different
+       * subfolders. ---AG */
+      for (var i = 0; i < subtopics[fc.content_id].length; i++) {
+        var subid = subtopics[fc.content_id][i];
+        self.subtopic_content_[subid] = fc.value(subid);
+        count++;
       }
     } );
 
     console.log("Merged subtopics from %d feature collection(s): count=%d",
                 fcs.length,
                 count,
-                this.subtopics_);
+                this.subtopic_content_);
   };
 
   ViewList.prototype = Object.create(View.prototype);
@@ -364,9 +388,9 @@ var LabelBrowser_ = function (window, SortingQueue, $)
   ViewList.prototype.render = function (fcs)
   {
     /* Finally create and render rows. */
-    for(var k in this.subtopics_) {
-      var row = new ViewListRow(this, k, this.subtopics_[k]);
-      
+    for(var k in this.subtopic_content_) {
+      var row = new ViewListRow(this, k, this.subtopic_content_[k]);
+
       this.rows_.push(row);
       row.render();
     }
@@ -399,7 +423,7 @@ var LabelBrowser_ = function (window, SortingQueue, $)
       .addClass(Css.items.content)
       .html(this.htmlizeContent())
       .appendTo(row);
-      
+
     row.insertAfter(this.owner_.owner.nodes.table.find('TR:last-child'));
   };
 
@@ -427,7 +451,7 @@ var LabelBrowser_ = function (window, SortingQueue, $)
     ViewList: ViewList,
     ViewListRow: ViewListRow
   };
-  
+
 };
 
 
