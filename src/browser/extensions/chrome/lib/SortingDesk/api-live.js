@@ -15,7 +15,7 @@
 var Api_ = (function (window, $, CryptoJS) {
 
   /* Constants */
-  var DEFAULT_DOSSIER_STACK_API_URL = 'http://54.174.195.250:8080';
+  var DEFAULT_DOSSIER_STACK_API_URL = 'http://10.3.2.42:9090';
 
 
   /* Attributes */
