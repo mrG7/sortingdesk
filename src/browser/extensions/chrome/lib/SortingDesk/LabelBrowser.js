@@ -27,19 +27,27 @@ var LabelBrowser_ = function (window, SortingQueue, $)
   {
     /* Invoke super-constructor. */
     SortingQueue.Controller.call(this, sortingDesk);
-    console.log(sortingDesk, sortingDesk.api);
+
     /* Attributes */
     this.options_ = options;
+
+    this.sortingDesk_ = sortingDesk;
     this.api_ = sortingDesk.api;
     this.deferred_ = null;
     this.nodes_ = { };
-    this.ref_bin_ = bin;
+    this.ref_bin_ = options.ref_bin;
     this.ref_fc_ = null;
     this.eqv_fcs_ = [ ];
     this.view_ = null;
     this.viewType_ = Browser.VIEW_DEFAULT;
 
+    /* Check for mandatory options. */
+    if(!this.ref_bin_)
+      throw "Reference bin's descriptor required";
+
     /* Getters */
+    this.__defineGetter__('sortingDesk',
+                          function () { return this.sortingDesk_; } );
     this.__defineGetter__('api', function () { return this.api_; } );
     this.__defineGetter__('nodes', function () { return this.nodes_; } );
     this.__defineGetter__('ref_bin', function () { return this.ref_bin_; } );
@@ -66,6 +74,7 @@ var LabelBrowser_ = function (window, SortingQueue, $)
 
     console.log("Initializing Label Browser component");
 
+    /* Lambda called when initialisation is over, successfully or not. */
     var onEndInitialise = function () {
       console.log("Label Browser component initialized");
     };
@@ -73,7 +82,7 @@ var LabelBrowser_ = function (window, SortingQueue, $)
     this.deferred_ = $.Deferred();
 
     /* Begin set up nodes. */
-    els.container = $('[data-sd-scope="container-label-browser"]');
+    els.container = $('[data-sd-scope="label-browser-container"]');
 
     els.buttonClose = this.find_node_('close')
       .click( function () { self.close(); } );
@@ -92,8 +101,12 @@ var LabelBrowser_ = function (window, SortingQueue, $)
 
     els.items = this.find_node_('items');
     els.table = els.items.find('TABLE');
-    /* End setup up nodes. */
+    /* End set up up nodes. */
 
+    /* Set the items list's height so a scrollbar is shown when it overflows
+     * vertically. */
+    els.items.css('height', els.container.innerHeight());
+    
     /* Retrieve feature collection for the bin's `content_id´. */
     this.api_.getFeatureCollection(this.ref_bin_.data.content_id)
       .done(function (fc) { self.set_heading_(fc); } )
@@ -209,7 +222,10 @@ var LabelBrowser_ = function (window, SortingQueue, $)
 
     /* TODO: using reference bin's own content rather than snippet from
      * retrieved feature collection. */
-    this.nodes_.heading.content.html(this.ref_bin_.data.content);
+    this.nodes_.heading.content.html(
+      this.api_.getSubtopicType(this.ref_bin_.data.subtopic_id) === 'image'
+        ? [ '<img src="', this.ref_bin_.data.content, '"/>' ].join('')
+        : this.ref_bin_.data.content);
   };
 
   Browser.prototype.find_node_ = function (scope,
@@ -271,21 +287,32 @@ var LabelBrowser_ = function (window, SortingQueue, $)
   /**
    * @class
    * */
-  var Row = function (owner, id, content)
+  var Row = function (owner, subtopic_id, content)
   {
     /* Invoke super constructor. */
     SortingQueue.Drawable.call(this, owner);
+
+    var api = owner.owner.api;
     
     /* Attributes */
-    this.id_ = id;
+    this.id_ = api.extractSubtopicId(subtopic_id);
     this.content_ = content;
+    this.type_ = api.getSubtopicType(subtopic_id);
 
     /* Getters */
     this.__defineGetter__('id', function () { return this.id_; } );
     this.__defineGetter__('content', function () { return this.content_; } );
+    this.__defineGetter__('type', function () { return this.type_; } );
   };
 
   Row.prototype = Object.create(SortingQueue.Drawable.prototype);
+
+  Row.prototype.htmlizeContent = function ()
+  {
+    return this.type_ === 'image'
+      ? [ '<img src="', this.content_, '" />' ].join('')
+      : this.content_;
+  };
   
 
   /**
@@ -338,10 +365,7 @@ var LabelBrowser_ = function (window, SortingQueue, $)
   {
     /* Finally create and render rows. */
     for(var k in this.subtopics_) {
-      var row = new ViewListRow(
-        this,
-        this.owner_.api.extractSubtopicId(k),
-        this.subtopics_[k]);
+      var row = new ViewListRow(this, k, this.subtopics_[k]);
       
       this.rows_.push(row);
       row.render();
@@ -352,10 +376,10 @@ var LabelBrowser_ = function (window, SortingQueue, $)
   /**
    * @class
    * */
-  var ViewListRow = function (owner, id, content)
+  var ViewListRow = function (owner, subtopic_id, content)
   {
     /* Invoke super constructor. */
-    Row.call(this, owner, id, content);
+    Row.call(this, owner, subtopic_id, content);
   };
 
   ViewListRow.prototype = Object.create(Row.prototype);
@@ -364,14 +388,16 @@ var LabelBrowser_ = function (window, SortingQueue, $)
   {
     var row = $('<tr></tr>');
 
+    /* Id */
     $('<td></td>')
       .addClass(Css.items.id)
-      .html(this.id_)
+      .html(this.id)
       .appendTo(row);
 
+    /* Content */
     $('<td></td>')
       .addClass(Css.items.content)
-      .html(this.content_)
+      .html(this.htmlizeContent())
       .appendTo(row);
       
     row.insertAfter(this.owner_.owner.nodes.table.find('TR:last-child'));
