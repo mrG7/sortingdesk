@@ -37,6 +37,7 @@ are saved."
   :group 'watch-deps)
 
 (defcustom watch-deps-file-list '("src/SortingDesk/SortingDesk.js"
+                                  "src/SortingDesk/LabelBrowser.js"
                                   "src/SortingDesk/api-live.js"
                                   "src/SortingQueue/SortingQueue.js"
                                   "dossier.js/Dossier.js")

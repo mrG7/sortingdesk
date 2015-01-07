@@ -10,7 +10,7 @@
  */
 
 
-/*global chrome, $, SortingDesk, SortingQueue, Api, DossierJS */
+/*global chrome, $, SortingDesk, LabelBrowser, SortingQueue, Api, DossierJS */
 /*jshint laxbreak:true */
 
 
@@ -95,7 +95,10 @@ var ChromeExtensionUi = (function () {
               buttonDismiss: $("#sd-button-dismiss")
             },
             constructors: {
-              Item: ItemLinkify
+              Item: ItemLinkify,
+              createLabelBrowser: function (sortingDesk, bin) {
+                return new LabelBrowser.Browser({ }, sortingDesk, bin);
+              }
             },
             visibleItems: 10,
             itemsDraggable: false,
