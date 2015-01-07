@@ -43,7 +43,7 @@ var Api_ = (function (window, $, CryptoJS) {
       setFeatureCollectionContent: setFeatureCollectionContent,
       addLabel: addLabel,
       getLabelsUniqueById: getLabelsUniqueById,
-      dedupLabelsById: dedupLabelsById,
+      dedupLabelsBySubtopic: dedupLabelsBySubtopic,
       setQueryContentId: setQueryContentId,
       setSearchEngine: setSearchEngine,
       getSearchEngine: getSearchEngine,
@@ -76,39 +76,7 @@ var Api_ = (function (window, $, CryptoJS) {
   {
     if(!(ids instanceof Array))
       throw "Invalid ids array container";
-
-    var self = this,
-        deferred = $.Deferred(),
-        index = 0,
-        result = [ ];
-
-    var getNext = function () {
-      if(index >= ids.length) {
-        deferred.resolve(result);
-        return;
-      }
-
-      var cid = ids[ index ++ ];
-
-      self.getFeatureCollection(cid)
-        .done(function(fc) {
-          console.log('Feature collection GET successful (id=%s)',
-                      cid, fc);
-
-          result.push(fc);
-          getNext();
-        } )
-        .fail(function () {
-          console.log('Feature collection GET failed (id=%s)',
-                      cid);
-          getNext();
-        } );
-    };
-
-    /* Retrieve feature collection for the first id. */
-    getNext();
-
-    return deferred.promise();
+    return api_.fcGetAll(ids);
   };
 
   var putFeatureCollection = function (content_id, fc)
@@ -132,7 +100,7 @@ var Api_ = (function (window, $, CryptoJS) {
     return api_.addLabel(label);
   };
 
-  var getLabelsUniqueById = function (content_id,
+  var getLabelsUniqueById = function (content_id, subtopic_id,
                                       which       /* = "connected" */)
   {
     if(typeof content_id !== 'string' || content_id.length === 0)
@@ -146,26 +114,35 @@ var Api_ = (function (window, $, CryptoJS) {
 
     return (new DossierJS.LabelFetcher(api_))
       .cid(content_id)
+      .subtopic(subtopic_id)
       .which(which || 'connected')
       .get()
       .then(function (labels) {
         console.log('LabelFetcher GET successful:', labels);
-        return self.dedupLabelsById(labels);
+        return self.dedupLabelsBySubtopic(labels);
       } );
   };
 
-  var dedupLabelsById = function (labels)
+  var dedupLabelsBySubtopic = function (labels)
   {
     if(!(labels instanceof Array))
       throw "Labels collection not an array";
 
-    var result = [ ];
+    var result = [ ],
+        seen = { };
 
-    labels.forEach(function (label, i) {
-      if(result.indexOf(label.cid1) === -1)
-        result.push(label.cid1);
+    labels.forEach(function (label) {
+      var pair1 = [label.cid1, label.subtopic_id1],
+          pair2 = [label.cid2, label.subtopic_id2];
+      if (!seen[pair1]) {
+        result.push({cid: pair1[0], subid: pair1[1]});
+        seen[pair1] = true;
+      }
+      if (!seen[pair2]) {
+        result.push({cid: pair2[0], subid: pair2[1]});
+        seen[pair2] = true;
+      }
     } );
-
     return result;
   };
 

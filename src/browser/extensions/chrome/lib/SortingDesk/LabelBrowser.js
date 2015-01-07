@@ -185,31 +185,18 @@ var LabelBrowser_ = function (window, SortingQueue, $)
   /* overridable */ Browser.prototype.show = function ()
   {
     var els = this.nodes_;
-<<<<<<< HEAD
-    
-=======
-
->>>>>>> 43de9ec3621d0fbe13a4a36766bd9fd579898024
     els.container.css( {
       transform: 'scale(1,1)',
       opacity: 1
     } );
-<<<<<<< HEAD
-    
-=======
 
->>>>>>> 43de9ec3621d0fbe13a4a36766bd9fd579898024
     /* Set the items list's height so a scrollbar is shown when it overflows
      * vertically. */
     els.items.css('height', els.container.innerHeight()
                   - this.find_node_('heading').outerHeight()
                   - (els.items.outerHeight(true) - els.items.innerHeight()));
   };
-<<<<<<< HEAD
-  
-=======
 
->>>>>>> 43de9ec3621d0fbe13a4a36766bd9fd579898024
   /* overridable */ Browser.prototype.close = function ()
   {
     this.nodes_.container

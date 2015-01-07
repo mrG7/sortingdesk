@@ -10,7 +10,7 @@ var passed = function(done) { expect(true).toEqual(true); if (done) done(); }
 var failed = function(done) { expect(true).toEqual(false); if (done) done(); }
 
 var content_id = 'abc';
-var fc = new DossierJS.FeatureCollection({'NAME': {'foo': 1}});
+var fc = new DossierJS.FeatureCollection(content_id, {'NAME': {'foo': 1}});
 var lab = new DossierJS.Label('a', 'b', 'tester',
                               DossierJS.COREF_VALUE_POSITIVE);
 
@@ -165,12 +165,12 @@ describe('DossierJS.API', function() {
 
 describe('DossierJS.FeatureCollection', function() {
     it('returns correct StringCounter values', function() {
-        var fc = new DossierJS.FeatureCollection({'NAME': {'foo': 1}});
+        var fc = new DossierJS.FeatureCollection('a', {'NAME': {'foo': 1}});
         expect(fc.value('NAME')).toEqual('foo');
     });
 
     it('returns correct string values', function() {
-        var fc = new DossierJS.FeatureCollection({'NAME': 'foo'});
+        var fc = new DossierJS.FeatureCollection('a', {'NAME': 'foo'});
         expect(fc.value('NAME')).toEqual('foo');
     });
 
