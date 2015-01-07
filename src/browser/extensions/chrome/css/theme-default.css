@@ -348,6 +348,8 @@
   height: 24px;
   display: block;
   margin: 0;
+  margin-left: auto;
+  margin-right: auto;
   padding: 0;
   line-height: 0;
   border-radius: 6px;
