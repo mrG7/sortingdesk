@@ -345,6 +345,7 @@
 
 .sd-bin-name IMG {
   border: 0 none;
+  width: auto;
   height: 24px;
   display: block;
   margin: 0;
@@ -577,6 +578,7 @@ A.sd-text-item-title:hover {
   border-color: #7A4747;
   color: #FFF5F5;
 }
+
 
 /* Label Browser */
 .sd-label-browser {
