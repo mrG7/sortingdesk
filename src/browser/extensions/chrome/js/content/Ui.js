@@ -10,7 +10,7 @@
  */
 
 
-/*global chrome, $, SortingDesk, LabelBrowser, SortingQueue, Api, DossierJS */
+/*global chrome, $, SortingDesk, LabelBrowser, BinExplorer, SortingQueue, Api */
 /*jshint laxbreak:true */
 
 
@@ -96,8 +96,9 @@ var ChromeExtensionUi = (function () {
             },
             constructors: {
               Item: ItemLinkify,
-              createLabelBrowser: function (sortingDesk, bin) {
-                return new LabelBrowser.Browser({ }, sortingDesk, bin);
+              createLabelBrowser: function (options, sortingDesk) {
+                /* The `options´ map isn't touched *yet*. */
+                return new LabelBrowser.Browser(options, sortingDesk);
               }
             },
             visibleItems: 10,
