@@ -722,26 +722,62 @@ A.sd-text-item-title:hover {
   float: right;
 }
 
-.sd-lb-toolbar-button {
-  float: left;
-  padding: 4px;
-  margin-left: 5px;
-  border: 1px solid #c0c0c0;
-  border-radius: 3px;
-  background-color: #f0f0f0;
-  text-shadow: none;
-  height: 18px;
-  width: 18px;
-  text-align: center;
-}
 
-.sd-lb-toolbar-button:hover {
-  background-color: #e0e0e0;
-}
-
-.sd-lb-toolbar-button SPAN {
+/* Toolbar  */
+.sd-toolbar-button-group > .sd-toolbar-button {
   position: relative;
-  top: 2px;
+  float: left;
+  margin: 0;
+}
+
+.sd-toolbar-button-group > .sd-toolbar-button:first-child:not(:last-child) {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.sd-toolbar-button-group > .sd-toolbar-button:last-child:not(first-child) {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.sd-toolbar-button {
+  display: inline-block;
+  padding: 6px 12px;
+  margin-bottom: 0;
+  font-weight: 400;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  cursor: pointer;
+  background-image: none;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  outline: 1px auto #ccc;
+  line-height: normal;
+  height: 34px;
+
+  color: #333;
+  background-color: white;
+  
+  user-select: none;
+  box-sizing: border-box;
+}
+
+.sd-toolbar-button:hover {
+  background-color: #ccc;
+  border-color: #ccc;
+  z-index: 2;
+}
+
+.sd-toolbar-button:focus {
+  outline: 2px solid #a9bef3;
+  outline-offset: -1px;
+  z-index: 2;
+}
+
+.sd-toolbar-button > SPAN {
+  position: relative;
+  top: 1px;
   display: inline-block;
   font-family: 'Glyphicons Halflings';
   font-style: normal;
@@ -753,10 +789,10 @@ A.sd-text-item-title:hover {
   -moz-osx-font-smoothing: grayscale;
 }
 
-.sd-lb-toolbar-button .sd-lb-toolbar-button-list:before {
+.sd-glyph-list:before {
   content: "\e012";
 }
 
-.sd-lb-toolbar-button .sd-lb-toolbar-button-group:before {
+.sd-glyph-group:before {
   content: "\e032";
 }
