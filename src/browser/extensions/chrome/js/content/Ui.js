@@ -41,103 +41,18 @@ var ChromeExtensionUi = (function () {
       document.head.appendChild(style);
     }
 
-    chrome.runtime.sendMessage(
-      { operation: "get-meta" },
-      function (result)
-      {
-        /* Do not instantiate SortingDesk if not currently enabled or
-         * current tab not active. */
-        if(!result.config.active || !result.tab.active)
-          return;
-        
-        /* Load container HTML. */
-        chrome.runtime.sendMessage( {
-          operation: "read-file",
-          identifier: "html/container.html"
-        }, function (html) {
-          $('body').append(html);
-
-          /* Cache jQuery references to nodes used. */
-          self.nodes_ = {
-            container: $('#sd-container'),
-            sorter: $('#sd-sorter'),
-            activator: $('#sd-activator'),
-            loading: $('#sd-load'),
-            empty: $('#sd-empty')
-          };
-
-          /* Instantiate class components. */
-          self.activator_ = new Activator();
-          self.positioner_ = new Positioner();
-          self.requests_ = new Requests();
-          self.transceiver_ = new Transceiver();
-
-          /* Center the `loading´ and `empty´ notifications.
-           * 
-           * Note that both the main container and the element(s) to be centered
-           * MUST be visible or their widths can't be computed and thus
-           * centering fails. Even though several elements are shown and hidden
-           * in quick succession, no flicker occurs because painting only takes
-           * place once the script returns execution to the browser. */
-          self.nodes_.sorter.show();
-          {
-            self.center('loading');
-            self.center('empty');
-          }
-          self.nodes_.sorter.hide();
-
-          /* Initialise API and instantiate `SortingDesk´ class. */
-          self.sortingDesk_ = new SortingDesk.Sorter( {
-            nodes: {
-              items: $('#sd-queue'),
-              bins: $('#sd-bins'),
-              add: $('#sd-button-add'),
-              buttonDismiss: $("#sd-button-dismiss")
-            },
-            constructors: {
-              Item: ItemLinkify,
-              createLabelBrowser: function (options, sortingDesk) {
-                /* The `options´ map isn't touched *yet*. */
-                return new LabelBrowser.Browser(options, sortingDesk);
-              }
-            },
-            visibleItems: 10,
-            itemsDraggable: false,
-            activeBinId: result.activeBinId,
-            dossierUrl: result.config.dossierUrl
-          }, $.extend(
-            true,
-            {
-              onLabelBrowserInitialised: function (container) {
-                var position = self.nodes_.sorter.position(),
-                    win = $(window);
-                
-                switch(self.positioner_.current) {
-                case Positioner.TOP_RIGHT:
-                  container.css( {
-                    top: position.top,
-                    left: position.top
-                  } );
-
-                  container.width(win.width() - self.nodes_.sorter.outerWidth()
-                                  - (position.top << 1)
-                                  - container.outerWidth()
-                                  + container.innerWidth());
-                  container.height(win.height() -
-                                   (position.top << 1));
-                  
-                  return;
-                  
-                default:
-                  throw "Current position invalid or not implemented"; 
-                }
-              }
-            },
-            Api,
-            self.requests_.callbacks,
-            self.transceiver_.callbacks ) );
-        } );
-      } );
+    chrome.runtime.sendMessage({ operation: "get-meta" }, function (result) {
+      /* Do not instantiate SortingDesk if not currently enabled or
+       * current tab not active. */
+      if(!result.config.active || !result.tab.active)
+        return;
+      
+      /* Load container HTML. */
+      chrome.runtime.sendMessage( {
+        operation: "read-file",
+        identifier: "html/container.html"
+      }, function (html) { self.initialise_(result, html); } );
+    } );
   };
   
   Ui.prototype = {
@@ -159,8 +74,99 @@ var ChromeExtensionUi = (function () {
     get nodes() { return this.nodes_; },
     node: function (key) { return this.nodes_[key]; },
 
-    /* Public interface */
-    center: function (node)
+    /* Private methods */
+    initialise_: function (meta, html)
+    {
+      var self = this;
+      
+      $('body').append(html);
+
+      /* Cache jQuery references to nodes used. */
+      self.nodes_ = {
+        container: $('#sd-container'),
+        sorter: $('#sd-sorter'),
+        activator: $('#sd-activator'),
+        loading: $('#sd-load'),
+        empty: $('#sd-empty')
+      };
+
+      /* Instantiate class components. */
+      self.activator_ = new Activator();
+      self.positioner_ = new Positioner();
+      self.requests_ = new Requests();
+      self.transceiver_ = new Transceiver();
+
+      /* Center the `loading´ and `empty´ notifications.
+       * 
+       * Note that both the main container and the element(s) to be centered
+       * MUST be visible or their widths can't be computed and thus
+       * centering fails. Even though several elements are shown and hidden
+       * in quick succession, no flicker occurs because painting only takes
+       * place once the script returns execution to the browser. */
+      self.nodes_.sorter.show();
+      {
+        self.center_('loading');
+        self.center_('empty');
+      }
+      self.nodes_.sorter.hide();
+
+      /* Initialise API and instantiate `SortingDesk´ class. */
+      self.sortingDesk_ = new SortingDesk.Sorter( {
+        nodes: {
+          items: $('#sd-queue'),
+          bins: $('#sd-bins'),
+          add: $('#sd-button-add'),
+          buttonDismiss: $("#sd-button-dismiss")
+        },
+        constructors: {
+          Item: ItemLinkify,
+          createLabelBrowser: function (options, sortingDesk) {
+            /* The `options´ map isn't touched *yet*. */
+            return new LabelBrowser.Browser(options, sortingDesk);
+          },
+          createBinExplorer: function (options, sortingDesk) {
+            /* The `options´ map isn't touched *yet*. */
+            return new BinExplorer.Explorer(options, sortingDesk);
+          }
+        },
+        visibleItems: 10,
+        itemsDraggable: false,
+        activeBinId: meta.activeBinId,
+        dossierUrl: meta.config.dossierUrl
+      }, $.extend(
+        true,
+        {
+          onLabelBrowserInitialised: function (container) {
+            var position = self.nodes_.sorter.position(),
+                win = $(window);
+            
+            switch(self.positioner_.current) {
+            case Positioner.TOP_RIGHT:
+              container.css( {
+                top: position.top,
+                left: position.top
+              } );
+
+              container.width(win.width() - self.nodes_.sorter.outerWidth()
+                              - (position.top << 1)
+                              - container.outerWidth()
+                              + container.innerWidth());
+              container.height(win.height() -
+                               (position.top << 1));
+              
+              return;
+              
+            default:
+              throw "Current position invalid or not implemented"; 
+            }
+          }
+        },
+        Api,
+        self.requests_.callbacks,
+        self.transceiver_.callbacks ) );
+    },
+    
+    center_: function (node)
     {
       if((node = this.nodes_[node])) {
         /* Both the node and main container must be visible if the node's width
@@ -321,8 +327,10 @@ var ChromeExtensionUi = (function () {
   /**
    * @class
    * */
-  var Activator = function () {
-    var nodes = ui_.nodes,
+  var Activator = function ()
+  {
+    var self = this,
+        nodes = ui_.nodes,
         width = nodes.activator.width();
     
     nodes.activator.click(function () {
