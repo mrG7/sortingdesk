@@ -1139,7 +1139,7 @@ var SortingDesk_ = function (window, $, Api) {
       binAnimateAssign: 'sd-assign',
       binAdding: 'sd-adding',
       binActive: 'sd-active',
-      binUnkown: 'sd-unknown',
+      binUnknown: 'sd-unknown',
       buttonAdd: 'sd-button-add',
       droppableHover: 'sd-droppable-hover',
       mouseDown: 'sd-mousedown',
