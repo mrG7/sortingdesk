@@ -61,7 +61,7 @@ var ChromeExtensionUi = (function () {
     positioner_: null,
     requests_: null,
     transceiver_: null,
-    sortingDesk_: null,
+    sorter_: null,
     /* Nodes */
     nodes_: null,
 
@@ -70,7 +70,7 @@ var ChromeExtensionUi = (function () {
     get positioner() { return this.positioner_; },
     get requests() { return this.requests_; },
     get transceiver() { return this.transceiver_; },
-    get sortingDesk() { return this.sortingDesk_; },
+    get sorter() { return this.sorter_; },
     get nodes() { return this.nodes_; },
     node: function (key) { return this.nodes_[key]; },
 
@@ -111,7 +111,7 @@ var ChromeExtensionUi = (function () {
       self.nodes_.sorter.hide();
 
       /* Initialise API and instantiate `SortingDesk´ class. */
-      self.sortingDesk_ = new SortingDesk.Sorter( {
+      self.sorter_ = new SortingDesk.Sorter( {
         nodes: {
           items: $('#sd-queue'),
           bins: $('#sd-bins'),
@@ -120,13 +120,13 @@ var ChromeExtensionUi = (function () {
         },
         constructors: {
           Item: ItemLinkify,
-          createLabelBrowser: function (options, sortingDesk) {
+          createLabelBrowser: function (options, sorter) {
             /* The `options´ map isn't touched *yet*. */
-            return new LabelBrowser.Browser(options, sortingDesk);
+            return new LabelBrowser.Browser(options, sorter);
           },
-          createBinExplorer: function (options, sortingDesk) {
+          createBinExplorer: function (options, sorter) {
             /* The `options´ map isn't touched *yet*. */
-            return new BinExplorer.Explorer(options, sortingDesk);
+            return new BinExplorer.Explorer(options, sorter);
           }
         },
         visibleItems: 10,
@@ -256,7 +256,7 @@ var ChromeExtensionUi = (function () {
     {
       var self = this;
       
-      return ui_.sortingDesk.api.getCallbacks().moreTexts(n)
+      return ui_.sorter.api.getCallbacks().moreTexts(n)
         .done(function (items) {
           if(!items || !(items instanceof Array) || items.length === 0)
             ui_.nodes.empty.fadeIn('slow');
@@ -318,7 +318,7 @@ var ChromeExtensionUi = (function () {
     {
       console.log("Refreshing state");
 
-      ui_.sortingDesk.load(request.activeBinId);
+      ui_.sorter.load(request.activeBinId);
       if(callback) callback();
     }
   };
