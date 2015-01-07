@@ -23,16 +23,16 @@ var LabelBrowser_ = function (window, SortingQueue, $)
   /**
    * @class
    * */
-  var Browser = function (sortingDesk, options)
+  var Browser = function (sorter, options)
   {
     /* Invoke super-constructor. */
-    SortingQueue.Controller.call(this, sortingDesk);
+    SortingQueue.Controller.call(this, sorter);
 
     /* Attributes */
     this.options_ = options;
 
-    this.sortingDesk_ = sortingDesk;
-    this.api_ = sortingDesk.api;
+    this.sorter_ = sorter;
+    this.api_ = sorter.api;
     this.deferred_ = null;
     this.nodes_ = { };
     this.ref_bin_ = options.ref_bin;
@@ -47,8 +47,8 @@ var LabelBrowser_ = function (window, SortingQueue, $)
       throw "Reference bin's descriptor required";
 
     /* Getters */
-    this.__defineGetter__('sortingDesk',
-                          function () { return this.sortingDesk_; } );
+    this.__defineGetter__('sorter',
+                          function () { return this.sorter_; } );
     this.__defineGetter__('api', function () { return this.api_; } );
     this.__defineGetter__('nodes', function () { return this.nodes_; } );
     this.__defineGetter__('ref_bin', function () { return this.ref_bin_; } );
