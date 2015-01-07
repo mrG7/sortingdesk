@@ -589,12 +589,15 @@ A.sd-text-item-title:hover {
   height: 400px;
   background-color: white;
   border: 5px solid silver;
-  border-radius: 15px;
+  border-radius: 15px;  
   transform: scale(0.2,0.2);
   transition: transform 300ms ease-in-out, opacity 150ms ease-in;
 }
 
 .sd-lb-container-inner {
+}
+
+.sd-lb-container-content {
   margin: 5px;
   overflow: hidden;
 }
@@ -626,6 +629,7 @@ A.sd-text-item-title:hover {
   border-radius: 8px 8px 0 0;
   background-color: #e5e4ef;
   margin: 0;
+  height: 57px;
   text-shadow: 1px 1px 2px rgba(150, 150, 150, 1);
 }
 
@@ -642,8 +646,14 @@ A.sd-text-item-title:hover {
   color: #444;
 }
 
+.sd-lb-heading-content IMG {
+  width: auto;
+  max-height: 50px;
+}
+
 .sd-lb-items {
-  overflow: auto;
+  overflow-y: scroll;
+  overflow-x: hidden;
 }
 
 .sd-lb-items TABLE TR {
@@ -693,6 +703,17 @@ A.sd-text-item-title:hover {
 .sd-lb-items-id {
   font-family: monospace;
   width: 255px;
+  vertical-align: top;
+}
+
+.sd-lb-items-content IMG {
+  width: auto;
+  max-height: 50px;
+  transition: all 250ms;
+}
+
+.sd-lb-items-content IMG:hover {
+  max-height: none;
 }
 
 .sd-lb-toolbar {
