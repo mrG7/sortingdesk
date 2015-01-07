@@ -29,8 +29,8 @@ var LabelBrowser_ = function (window, SortingQueue, $)
     SortingQueue.Controller.call(this, sorter);
 
     /* Attributes */
+    this.initialised_ = false;
     this.options_ = options;
-
     this.sorter_ = sorter;
     this.api_ = sorter.api;
     this.deferred_ = null;
@@ -74,6 +74,9 @@ var LabelBrowser_ = function (window, SortingQueue, $)
   {
     var self = this,
         els = this.nodes_;
+
+    if(this.initialised_)
+      throw "Label Browser component already initialised";
 
     console.log("Initializing Label Browser component");
 
@@ -158,12 +161,15 @@ var LabelBrowser_ = function (window, SortingQueue, $)
     }, this.nodes_.container);
 
     this.show();
+    this.initialised_ = true;
 
     return this.deferred_.promise();
   };
 
   Browser.prototype.reset = function ()
   {
+    this.check_init_();
+    
     /* Remove all children nodes. */
     this.nodes_.heading.title.children().remove();
     this.nodes_.heading.content.children().remove();
@@ -178,6 +184,7 @@ var LabelBrowser_ = function (window, SortingQueue, $)
 
     this.deferred_ = this.ref_bin_ = this.view_ = this.nodes_ = null;
     this.ref_fc_ = this.eqv_fcs_ = this.viewType_ = this.api_ = null;
+    this.initialised_ = false;
 
     console.log("Label Browser component reset");
   };
@@ -185,6 +192,8 @@ var LabelBrowser_ = function (window, SortingQueue, $)
   /* overridable */ Browser.prototype.show = function ()
   {
     var els = this.nodes_;
+
+    this.check_init_();
 
     els.container.css( {
       transform: 'scale(1,1)',
@@ -200,6 +209,8 @@ var LabelBrowser_ = function (window, SortingQueue, $)
 
   /* overridable */ Browser.prototype.close = function ()
   {
+    this.check_init_();
+    
     this.nodes_.container
       .css( {
         transform: 'scale(.2,.2)',
@@ -213,6 +224,14 @@ var LabelBrowser_ = function (window, SortingQueue, $)
   };
 
   /* Private methods */
+
+    /* Private methods */
+  Browser.prototype.check_init_ = function ()
+  {
+    if(!this.initialised_)
+      throw "Component not yet initialised or already reset";
+  };
+  
   Browser.prototype.render_ = function ()
   {
     if(this.view_) {
