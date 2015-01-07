@@ -40,6 +40,7 @@ var Api_ = (function (window, $, CryptoJS) {
       getFeatureCollection: getFeatureCollection,
       getAllFeatureCollections: getAllFeatureCollections,
       putFeatureCollection: putFeatureCollection,
+      createFeatureCollection: createFeatureCollection,
       setFeatureCollectionContent: setFeatureCollectionContent,
       addLabel: addLabel,
       getLabelsUniqueById: getLabelsUniqueById,
@@ -82,6 +83,24 @@ var Api_ = (function (window, $, CryptoJS) {
   var putFeatureCollection = function (content_id, fc)
   {
     return api_.fcPut(content_id, fc);
+  };
+
+  var createFeatureCollection = function (content_id, html)
+  {
+    var self = this;
+    var url = api_.url('feature-collection/'
+                       + encodeURIComponent(content_id));
+    return $.ajax({
+      type: 'PUT',
+      contentType: 'text/html',
+      url: url,
+      data: html
+    }).fail(function() {
+      console.log("Could not save feature collection " +
+                  "(content id: '" + content_id + "')");
+    }).then(function(fc) {
+      return new (self.getClass('FeatureCollection'))(content_id, fc);
+    });
   };
 
   var setFeatureCollectionContent = function (fc, subtopic_id, content)
