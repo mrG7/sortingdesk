@@ -98,7 +98,7 @@
   display: inline-block;
   background-color: #3D3C3C;
   color: white;
-  border: 1px solid #B0B0B0;
+  border: 1px solid #777;
   padding: 5px;
   cursor: pointer;
   border-radius: 20px;
@@ -109,12 +109,20 @@
   overflow: hidden;
   white-space: nowrap;
   text-align: center;
+  text-shadow: 1px 1px 2px #aaa;
   transition: opacity 250ms;
-  
-  /* box sizing */
-  -moz-box-sizing: content-box;
-  -webkit-box-sizing: content-box;
-  box-sizing: content-box;
+}
+
+#sd-activator > * {
+  display: inline-block;
+}
+
+#sd-activator > *:not(last-child) {
+  margin-right: 10px;
+}
+
+#sd-settings SPAN {
+  color: white;
 }
 
 #sd-container.sd-top-left #sd-activator,
@@ -599,6 +607,11 @@ A.sd-text-item-title:hover {
   border-radius: 15px;  
   transform: scale(0.2,0.2);
   transition: transform 300ms ease-in-out, opacity 150ms ease-in;
+
+  /* box-shadow */
+  -webkit-box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.6);
+  -moz-box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.6);
+  box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.6);
 }
 
 .sd-label-browser * {
@@ -794,6 +807,7 @@ A.sd-text-item-title:hover {
   z-index: 2;
 }
 
+.sd-button > SPAN,
 .sd-toolbar-button > SPAN {
   position: relative;
   top: 1px;
@@ -806,6 +820,11 @@ A.sd-text-item-title:hover {
 
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.sd-button.sd-small > SPAN,
+.sd-toolbar-button.sd-small > SPAN {
+  font-size: 14px;
 }
 
 .sd-glyph-plus:before {
@@ -826,4 +845,19 @@ A.sd-text-item-title:hover {
 
 .sd-glyph-wrench:before {
   content:"\e136"
+}
+
+/* Button: round */
+.sd-button-round {
+  background-color: #6490d5;
+}
+
+.sd-button-round.sd-small {
+  padding: 2px 4px 2px 4px;
+  border-radius: 12px;
+  border-color: white !important;
+}
+
+.sd-button-round:hover {
+  background-color: #94b6ec;
 }

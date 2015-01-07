@@ -62,6 +62,7 @@ var ChromeExtensionUi = (function () {
     requests_: null,
     transceiver_: null,
     sorter_: null,
+    explorer_: null,
     /* Nodes */
     nodes_: null,
 
@@ -95,6 +96,24 @@ var ChromeExtensionUi = (function () {
       self.positioner_ = new Positioner();
       self.requests_ = new Requests();
       self.transceiver_ = new Transceiver();
+
+      /* Register for click events on the 'settings' button inside the extension
+       * activator button. */
+      self.activator_.register(function () {
+        if(self.explorer_)
+          return;
+
+        /* Instantiate the Bin Explorer component and initialise it. */
+        self.explorer_ = new BinExplorer.Explorer(
+          { },
+          self.sorter_.api);
+
+        /* Hold on to promise so that we can clean state up once it exits. */
+        self.explorer_.initialise()
+          .done(function () {
+            self.explorer_ = null;
+          } );
+      } );
 
       /* Center the `loading´ and `empty´ notifications.
        * 
@@ -350,8 +369,15 @@ var ChromeExtensionUi = (function () {
         
         self.html_ = nodes.activator.html();
         nodes.activator
-          .html('Sorting Desk')
-          .animate( { width: '105px' }, 150);
+          .html('<DIV id="sd-settings" class="sd-button sd-button-round sd-small"><SPAN class="sd-glyph-wrench"></SPAN></DIV>Sorting Desk')
+          .animate( { width: '120px' }, 150);
+        
+        $('#sd-settings').click(function () {
+          if(typeof self.callback_ === 'function')
+            self.callback_();
+          
+          return false;
+        } );
         
         nodes.sorter
           .stop(true, true)
@@ -363,7 +389,14 @@ var ChromeExtensionUi = (function () {
   };
 
   Activator.prototype = {
-    html_: null
+    html_: null,
+    callback_: null,
+
+    /* TODO: don't use an adhoc event subscriber. */
+    register: function (callback)
+    {
+      this.callback_ = callback;
+    }
   };
 
 
