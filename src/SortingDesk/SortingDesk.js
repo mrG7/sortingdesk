@@ -8,7 +8,7 @@
  */
 
 
-/*global SortingQueue, define */
+/*global $, SortingQueue, Api, define */
 /*jshint laxbreak:true */
 
 // Notes from the contractor on abstracting out the use of `chrome` in this file:
