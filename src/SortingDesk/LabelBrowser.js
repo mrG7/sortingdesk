@@ -215,7 +215,10 @@ var LabelBrowser_ = function (window, SortingQueue, $)
 
     /* TODO: using reference bin's own content rather than snippet from
      * retrieved feature collection. */
-    this.nodes_.heading.content.html(this.ref_bin_.data.content);
+    this.nodes_.heading.content.html(
+      this.api_.getSubtopicType(this.ref_bin_.data.subtopic_id) === 'image'
+        ? [ '<img src="', this.ref_bin_.data.content, '"/>' ].join('')
+        : this.ref_bin_.data.content);
   };
 
   Browser.prototype.find_node_ = function (scope,
@@ -277,21 +280,32 @@ var LabelBrowser_ = function (window, SortingQueue, $)
   /**
    * @class
    * */
-  var Row = function (owner, id, content)
+  var Row = function (owner, subtopic_id, content)
   {
     /* Invoke super constructor. */
     SortingQueue.Drawable.call(this, owner);
+
+    var api = owner.owner.api;
     
     /* Attributes */
-    this.id_ = id;
+    this.id_ = api.extractSubtopicId(subtopic_id);
     this.content_ = content;
+    this.type_ = api.getSubtopicType(subtopic_id);
 
     /* Getters */
     this.__defineGetter__('id', function () { return this.id_; } );
     this.__defineGetter__('content', function () { return this.content_; } );
+    this.__defineGetter__('type', function () { return this.type_; } );
   };
 
   Row.prototype = Object.create(SortingQueue.Drawable.prototype);
+
+  Row.prototype.htmlizeContent = function ()
+  {
+    return this.type_ === 'image'
+      ? [ '<img src="', this.content_, '" />' ].join('')
+      : this.content_;
+  };
   
 
   /**
@@ -344,10 +358,7 @@ var LabelBrowser_ = function (window, SortingQueue, $)
   {
     /* Finally create and render rows. */
     for(var k in this.subtopics_) {
-      var row = new ViewListRow(
-        this,
-        this.owner_.api.extractSubtopicId(k),
-        this.subtopics_[k]);
+      var row = new ViewListRow(this, k, this.subtopics_[k]);
       
       this.rows_.push(row);
       row.render();
@@ -358,10 +369,10 @@ var LabelBrowser_ = function (window, SortingQueue, $)
   /**
    * @class
    * */
-  var ViewListRow = function (owner, id, content)
+  var ViewListRow = function (owner, subtopic_id, content)
   {
     /* Invoke super constructor. */
-    Row.call(this, owner, id, content);
+    Row.call(this, owner, subtopic_id, content);
   };
 
   ViewListRow.prototype = Object.create(Row.prototype);
@@ -370,14 +381,16 @@ var LabelBrowser_ = function (window, SortingQueue, $)
   {
     var row = $('<tr></tr>');
 
+    /* Id */
     $('<td></td>')
       .addClass(Css.items.id)
-      .html(this.id_)
+      .html(this.id)
       .appendTo(row);
 
+    /* Content */
     $('<td></td>')
       .addClass(Css.items.content)
-      .html(this.content_)
+      .html(this.htmlizeContent())
       .appendTo(row);
       
     row.insertAfter(this.owner_.owner.nodes.table.find('TR:last-child'));
