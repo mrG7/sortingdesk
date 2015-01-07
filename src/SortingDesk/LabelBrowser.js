@@ -27,9 +27,10 @@ var LabelBrowser_ = function (window, SortingQueue, $)
   {
     /* Invoke super-constructor. */
     SortingQueue.Controller.call(this, sortingDesk);
-    console.log(sortingDesk, sortingDesk.api);
+
     /* Attributes */
     this.options_ = options;
+    
     this.api_ = sortingDesk.api;
     this.deferred_ = null;
     this.nodes_ = { };
