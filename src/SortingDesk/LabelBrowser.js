@@ -82,7 +82,7 @@ var LabelBrowser_ = function (window, SortingQueue, $)
     this.deferred_ = $.Deferred();
 
     /* Begin set up nodes. */
-    els.container = $('[data-sd-scope="container-label-browser"]');
+    els.container = $('[data-sd-scope="label-browser-container"]');
 
     els.buttonClose = this.find_node_('close')
       .click( function () { self.close(); } );
