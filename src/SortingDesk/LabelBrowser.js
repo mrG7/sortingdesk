@@ -23,7 +23,7 @@ var LabelBrowser_ = function (window, SortingQueue, $)
   /**
    * @class
    * */
-  var Browser = function (options, sortingDesk, bin)
+  var Browser = function (sortingDesk, options)
   {
     /* Invoke super-constructor. */
     SortingQueue.Controller.call(this, sortingDesk);
@@ -240,7 +240,7 @@ var LabelBrowser_ = function (window, SortingQueue, $)
             && typeof fc.raw === 'object'
             && typeof fc.raw.title === 'string'
             && fc.raw.title
-            || "<unknown title>");
+            || "&lt;unknown title&gt;");
 
     /* TODO: using reference bin's own content rather than snippet from
      * retrieved feature collection. */
