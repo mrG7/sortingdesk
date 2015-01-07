@@ -443,8 +443,7 @@ var SortingDesk_ = function (window, $, Api) {
      * collection was not retrieved. */
     this.update_(bin.data, exists === true)
       .fail(function () {
-        if(exists)
-          bin.setUnknown();
+        bin.setUnknown();
       } );
 
     return bin;
