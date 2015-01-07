@@ -533,7 +533,7 @@ var SortingDesk_ = function (window, $, Api) {
     bin.node.remove();
 
     if(bin === this.active_)
-      this.setActive(this.bins_.length && this.bins_[0] || null);
+      this.setActive(this.bins_.length > 0 && this.bins_[0] || null);
   };
 
   ControllerBins.prototype.getAt = function (index)
@@ -579,7 +579,7 @@ var SortingDesk_ = function (window, $, Api) {
     }
 
     /* Let the extension know that the active bin has changed. */
-    this.owner_.sortingQueue.callbacks.invoke('setActiveBin', bin.id);
+    this.owner_.sortingQueue.callbacks.invoke('setActiveBin', bin && bin.id);
   };
 
   ControllerBins.prototype.browse = function (bin)

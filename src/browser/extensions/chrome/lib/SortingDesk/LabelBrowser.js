@@ -185,7 +185,6 @@ var LabelBrowser_ = function (window, SortingQueue, $)
   /* overridable */ Browser.prototype.show = function ()
   {
     var els = this.nodes_;
-
     els.container.css( {
       transform: 'scale(1,1)',
       opacity: 1
