@@ -61,7 +61,7 @@ var SortingDesk_ = function (window, $, Api) {
     var self = this;
 
     console.log("Initialising Sorting Desk UI");
-    
+
     /* TODO: must pass in Dossier API URL. */
     this.api_ = Api.initialize(this, opts.dossierUrl);
 
@@ -74,7 +74,7 @@ var SortingDesk_ = function (window, $, Api) {
     this.load_()
       .done(function (bins) {
         var bin;
-        
+
         /* If bins were retrieved from local storage, activate the bin that is
          * the currently active one (as specified in `options.activeBinId´) or,
          * if one isn't yet active, use the first element as the active bin.
@@ -95,7 +95,7 @@ var SortingDesk_ = function (window, $, Api) {
 
           if(index === -1)
             console.log("Unable to find active bin: using first bin");
-          
+
           bin = bins[index === -1 ? 0 : index];
 
           /* Set query content before initialising SortingQueue to ensure
@@ -328,7 +328,7 @@ var SortingDesk_ = function (window, $, Api) {
       .hasOwnProperty('createLabelBrowser')
       && !owner.sortingQueue.options.constructors
       .hasOwnProperty('LabelBrowser');
-                
+
     /* Define getters. */
     this.__defineGetter__("bins", function () { return this.bins_; } );
     this.__defineGetter__("hover", function () { return this.hover_; } );
@@ -336,7 +336,7 @@ var SortingDesk_ = function (window, $, Api) {
     this.__defineGetter__("node", function () {
       return this.owner_.options.nodes.bins;
     } );
-    
+
     this.__defineGetter__("haveBrowser", function () {
       return this.haveBrowser_;
     } );
@@ -360,9 +360,9 @@ var SortingDesk_ = function (window, $, Api) {
   {
     var self = this,
         bin;
-    
+
     this.spawner_.initialise();
-    
+
     /* Load initial bin state, if bins exist. */
     if(!(bins instanceof Array) || bins.length === 0)
       return;
@@ -370,7 +370,7 @@ var SortingDesk_ = function (window, $, Api) {
     bins.forEach(function (descriptor) {
       self.add(self.construct(descriptor), false, true);
     } );
-    
+
     /* Now manually set the active bin. */
     bin = this.getById(activeBinId);
 
@@ -406,7 +406,7 @@ var SortingDesk_ = function (window, $, Api) {
       this,
       descriptor);
   };
-  
+
   ControllerBins.prototype.reset = function ()
   {
     /* Reset bin spawner controller and remove all children nodes inside the
@@ -586,7 +586,7 @@ var SortingDesk_ = function (window, $, Api) {
   {
     var self = this,
         opts = this.owner_.options;
-    
+
     if(!this.haveBrowser_)
       throw "Label Browser component unavailable";
     else if(this.browser_)
@@ -627,7 +627,7 @@ var SortingDesk_ = function (window, $, Api) {
     var api = this.owner_.api,
         result = { },
         content;
-    
+
     if(scope) {
       console.log("Drop event not special case: ignored");
       return null;
@@ -635,7 +635,7 @@ var SortingDesk_ = function (window, $, Api) {
 
     result.content_id = api.generateContentId(window.location.href);
     result.raw = { };
-    
+
     /* Process this drop event separately for text snippets and images. We
      * assume that this event originates in an image if the active
      * `ControllerDraggableImage´ instance has an active node. Otherwise,
@@ -667,11 +667,11 @@ var SortingDesk_ = function (window, $, Api) {
               content.anchorOffset,
               str.length,
               Date.now() ].join('|') ) );
-        
+
         result.content = str;
       }
     }
-    
+
     /* Clear the currently active node. */
     this.owner_.draggable.clear();
 
@@ -701,13 +701,14 @@ var SortingDesk_ = function (window, $, Api) {
   {
     var self = this,
         api = this.owner_.api;
-    
+    console.log('DESCRIPTOR', descriptor);
+
     /* Attempt to retrieve the feature collection for the bin's content id. */
     return api.getFeatureCollection(descriptor.content_id)
       .then(function (fc) {
         console.log("Feature collection GET successful (id=%s)",
                     descriptor.content_id, fc);
-        
+
         /* A feature collection was received. No further operations are carried
          * out if `exists´ is true since it means `descriptor´ is actually a bin
          * is being loaded from local storage and therefore its feature
@@ -732,21 +733,19 @@ var SortingDesk_ = function (window, $, Api) {
                       + "(id=%s)", descriptor.content_id);
           return null;
         }
-        
-        var fc = new (api.getClass('FeatureCollection'))( {
-          title: window.document.title,
-          titleBow: api.mapWordCount(window.document.title),
-          snippet: descriptor.content,
-          snippetBow: api.mapWordCount(descriptor.content)
-        } );
-        
+
         console.log("Feature collection GET failed: creating new (id=%s)",
-                    descriptor.content_id, fc);
-
-        api.setFeatureCollectionContent(
-          fc, descriptor.subtopic_id, descriptor.content);
-
-        return self.doUpdateFc_(descriptor.content_id, fc);
+                    descriptor.content_id);
+        return api.createFeatureCollection(descriptor.content_id,
+                                           document.documentElement.outerHTML)
+          .done(function(fc) {
+            console.log('Feature collection created:', fc);
+            api.setFeatureCollectionContent(
+              fc, descriptor.subtopic_id, descriptor.content);
+            api.setFeatureCollectionContent(
+              fc, 'meta_url', window.location.toString());
+            return self.doUpdateFc_(descriptor.content_id, fc);
+          });
       } );
   };
 
@@ -924,7 +923,7 @@ var SortingDesk_ = function (window, $, Api) {
                 return false;
               }
             } );
-      
+
       node.prepend(icon);
     }
 
@@ -1038,7 +1037,7 @@ var SortingDesk_ = function (window, $, Api) {
        || !descriptor.content) {
       throw "Invalid descriptor specified";
     }
-    
+
     var bin = this.fnAdd_(descriptor);
     this.owner_.owner.save();
 
@@ -1068,7 +1067,7 @@ var SortingDesk_ = function (window, $, Api) {
         parentOwner = this.owner_.owner;
 
     this.node_ = parentOwner.options.nodes.add;
-    
+
     this.droppable_ = new SortingQueue.Droppable(this.node_, {
       classHover: parentOwner.options.css.droppableHover,
       scopes: function (scope) { return !scope; },
