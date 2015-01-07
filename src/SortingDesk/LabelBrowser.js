@@ -96,6 +96,10 @@ var LabelBrowser_ = function (window, SortingQueue, $)
     els.table = els.items.find('TABLE');
     /* End set up up nodes. */
 
+    /* Set the items list's height so a scrollbar is shown when it overflows
+     * vertically. */
+    els.items.css('height', els.container.innerHeight());
+    
     /* Retrieve feature collection for the bin's `content_id´. */
     this.api_.getFeatureCollection(this.ref_bin_.data.content_id)
       .done(function (fc) { self.set_heading_(fc); } )
