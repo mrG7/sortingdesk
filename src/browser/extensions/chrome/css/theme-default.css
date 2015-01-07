@@ -20,6 +20,11 @@
   color: black;
 }
 
+#sd-container * {
+  box-sizing: content-box;
+  -webkit-box-sizing: content-box;
+}
+
 
 /* Positioning of master container (#sd-container)
  * Note: null rule-set placeholders. */
@@ -596,11 +601,15 @@ A.sd-text-item-title:hover {
   transition: transform 300ms ease-in-out, opacity 150ms ease-in;
 }
 
+.sd-label-browser * {
+  box-sizing: content-box;
+  -webkit-box-sizing: content-box;
+}  
+
 .sd-lb-container-inner {
 }
 
 .sd-lb-container-content {
-  margin: 5px;
   overflow: hidden;
 }
 
@@ -637,12 +646,14 @@ A.sd-text-item-title:hover {
 
 .sd-lb-heading-title {
   font-size: 16px;
+  line-height: 16px;
   border: none;
   margin: 0 0 5px 0;
 }
 
 .sd-lb-heading-content {
   font-size: 14px;
+  line-height: 14px;
   font-style: italic;
   color: #5d6c9b;
   color: #444;
@@ -654,7 +665,8 @@ A.sd-text-item-title:hover {
 }
 
 .sd-lb-items {
-  overflow-y: scroll;
+  margin: 5px;
+  overflow-y: auto;
   overflow-x: hidden;
 }
 
@@ -720,6 +732,13 @@ A.sd-text-item-title:hover {
 
 .sd-lb-toolbar {
   float: right;
+}
+
+
+/* Bin Explorer */
+.sd-bin-explorer * {
+  box-sizing: content-box;
+  -webkit-box-sizing: content-box;
 }
 
 
@@ -789,10 +808,22 @@ A.sd-text-item-title:hover {
   -moz-osx-font-smoothing: grayscale;
 }
 
+.sd-glyph-plus:before {
+  content: "\2b"
+}
+
+.sd-glyph-remove:before {
+  content: "\e014";
+}
+
 .sd-glyph-list:before {
   content: "\e012";
 }
 
 .sd-glyph-group:before {
   content: "\e032";
+}
+
+.sd-glyph-wrench:before {
+  content:"\e136"
 }
