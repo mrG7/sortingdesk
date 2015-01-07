@@ -272,7 +272,7 @@ var LabelBrowser_ = function (window, SortingQueue, $)
   };
 
   Browser.prototype.find_node_ = function (scope,
-                                                parent /* = container */)
+                                           parent /* = container */)
   {
     var p;
 
