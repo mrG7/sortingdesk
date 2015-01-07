@@ -30,7 +30,8 @@ var LabelBrowser_ = function (window, SortingQueue, $)
 
     /* Attributes */
     this.options_ = options;
-    
+
+    this.sortingDesk_ = sortingDesk;
     this.api_ = sortingDesk.api;
     this.deferred_ = null;
     this.nodes_ = { };
@@ -45,6 +46,8 @@ var LabelBrowser_ = function (window, SortingQueue, $)
       throw "Reference bin's descriptor required";
 
     /* Getters */
+    this.__defineGetter__('sortingDesk',
+                          function () { return this.sortingDesk_; } );
     this.__defineGetter__('api', function () { return this.api_; } );
     this.__defineGetter__('nodes', function () { return this.nodes_; } );
     this.__defineGetter__('ref_bin', function () { return this.ref_bin_; } );
