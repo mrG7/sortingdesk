@@ -67,6 +67,7 @@ var LabelBrowser_ = function (window, SortingQueue, $)
 
     console.log("Initializing Label Browser component");
 
+    /* Lambda called when initialisation is over, successfully or not. */
     var onEndInitialise = function () {
       console.log("Label Browser component initialized");
     };
@@ -93,7 +94,7 @@ var LabelBrowser_ = function (window, SortingQueue, $)
 
     els.items = this.find_node_('items');
     els.table = els.items.find('TABLE');
-    /* End setup up nodes. */
+    /* End set up up nodes. */
 
     /* Retrieve feature collection for the bin's `content_id´. */
     this.api_.getFeatureCollection(this.ref_bin_.data.content_id)
