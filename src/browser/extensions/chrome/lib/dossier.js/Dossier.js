@@ -84,7 +84,8 @@ var _DossierJS = function(window, $) {
         ].join('/'), params);
         return $.getJSON(url).promise().then(function(data) {
             for (var i = 0; i < data.results.length; i++) {
-                data.results[i].fc = new FeatureCollection(data.results[i].fc);
+                data.results[i].fc = new FeatureCollection(
+                    data.results[i].content_id, data.results[i].fc);
             }
             return data;
         });
@@ -114,7 +115,7 @@ var _DossierJS = function(window, $) {
         var url = this.url('feature-collection/'
                            + encodeURIComponent(serialize(content_id)));
         return $.getJSON(url).promise().then(function(data) {
-            return new FeatureCollection(data);
+            return new FeatureCollection(content_id, data);
         });
     };
 
@@ -152,7 +153,7 @@ var _DossierJS = function(window, $) {
     API.prototype.fcRandomGet = function() {
         var url = this.url('random/feature-collection');
         return $.getJSON(url).promise().then(function(data) {
-            return [data[0], new FeatureCollection(data[1])];
+            return [data[0], new FeatureCollection(data[0], data[1])];
         });
     };
 
@@ -403,7 +404,8 @@ var _DossierJS = function(window, $) {
     //
     // Instances of FeatureCollection have one public attribute: `raw`, which
     // returns the underlying object.
-    var FeatureCollection = function(obj) {
+    var FeatureCollection = function(content_id, obj) {
+        this.content_id = content_id;
         this.raw = obj || {};
     };
 
