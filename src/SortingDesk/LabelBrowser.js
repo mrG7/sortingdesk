@@ -271,8 +271,7 @@ var LabelBrowser_ = function (window, SortingQueue, $)
         : this.ref_bin_.data.content);
   };
 
-  Browser.prototype.find_node_ = function (scope,
-                                           parent /* = container */)
+  Browser.prototype.find_node_ = function (scope, parent /* = container */)
   {
     var p;
 
