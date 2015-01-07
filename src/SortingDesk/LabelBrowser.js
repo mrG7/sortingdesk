@@ -23,7 +23,7 @@ var LabelBrowser_ = function (window, SortingQueue, $)
   /**
    * @class
    * */
-  var Browser = function (options, sortingDesk, bin)
+  var Browser = function (sortingDesk, options)
   {
     /* Invoke super-constructor. */
     SortingQueue.Controller.call(this, sortingDesk);

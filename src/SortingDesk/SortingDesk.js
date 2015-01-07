@@ -597,7 +597,7 @@ var SortingDesk_ = function (window, $, Api) {
       .addClass(opts.css.disabled);
 
     (this.browser_ = this.owner_.sortingQueue.instantiate(
-      'LabelBrowser', { ref_bin: bin }, this.owner_))
+      'LabelBrowser', this.owner_, { ref_bin: bin }))
       .initialise()
       .done(function () {
         self.browser_.reset();
