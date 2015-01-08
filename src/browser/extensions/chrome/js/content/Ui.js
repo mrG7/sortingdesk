@@ -135,7 +135,6 @@ var ChromeExtensionUi = (function () {
         },
         visibleItems: 10,
         itemsDraggable: false,
-        activeBinId: meta.activeBinId,
         dossierUrl: meta.config.dossierUrl
       }, $.extend(
         true,
