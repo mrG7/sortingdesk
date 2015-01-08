@@ -550,6 +550,8 @@ var ChromeExtensionUi = (function () {
       nodes.container.add(nodes.add)
         .addClass(Positioner.TARGET_CLASSES[target - 1] );
 
+      /* TODO: two statements below setting height with added hardcoded margin.
+       * */
       nodes.sorter.height($(window).height()
                           - nodes.activator.outerHeight()
                           - (nodes.sorter.outerHeight()
