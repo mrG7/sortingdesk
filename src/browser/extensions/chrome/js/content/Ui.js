@@ -281,7 +281,6 @@ var ChromeExtensionUi = (function () {
   {
     var self = this,
         methods = {
-          "load-state": this.onLoadState_,
           "folder-removed": this.onFolderRemoved_
         };
 
@@ -361,7 +360,8 @@ var ChromeExtensionUi = (function () {
       var deferred = $.Deferred();
 
       chrome.runtime.sendMessage(
-        { operation: 'load-folder' },
+        { operation: 'load-folder',
+          id: id },
         function (folder) {
           if(folder && typeof folder === 'object') deferred.resolve(folder);
           else deferred.reject();
@@ -388,12 +388,12 @@ var ChromeExtensionUi = (function () {
     },
 
     /* Events initiated by the extension outbound to `SortingDesk´ */
-    onLoadState_: function (request, sender, callback)
+    onFolderRemoved_: function (request, sender, callback)
     {
-      console.log("Refreshing state");
+      console.log("Folder removed: id=%s", request.id);
 
-      ui_.sorter.load(request.activeBinId);
-      if(callback) callback(request.activeBinId);
+      if(ui_.sorter && ui_.sorter.folder.id === request.id)
+        ui_.sorter.close();
     }
   };
 
