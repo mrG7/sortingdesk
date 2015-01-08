@@ -102,7 +102,8 @@ var Background = function ()
           "load-folders": this.onLoadFolders_,
           "load-folder": this.onLoadFolder_,
           "save-folder": this.onSaveFolder_,
-          "save-folders": this.onSaveFolders_
+          "save-folders": this.onSaveFolders_,
+          "remove-folder": this.onRemoveFolder_
         };
     
     /* Handler of messages originating in content scripts. */
@@ -245,6 +246,46 @@ var Background = function ()
 
       if(typeof callback === 'function')
         callback();
+    },
+
+    onRemoveFolder_: function (request, sender, callback)
+    {
+      if(!request.hasOwnProperty('id'))
+        throw "No folder id specified";
+      
+      /* Load folder state from extension's local storage. */
+      chrome.storage.local.get('folders', function (folders) {
+        var index = -1;
+        
+        if(chrome.runtime.lastError) {
+          console.log("Error occurred whilst loading folders: "
+                      + chrome.runtime.lastError.message);
+        } else {
+          folders = folders.hasOwnProperty('folders') ? folders.folders : [ ];
+          index = indexOfFolder_(folders, request.id);
+
+          /* Replace or add new. */
+          if(index >= 0) {
+            folders.splice(index, 1);
+
+            /* De-select active folder if removed. */
+            if(active_ && active_.id === request.id)
+              active_ = null;
+            
+            /* Save new state. */
+            chrome.storage.local.set( { "folders": folders }, function () {
+              console.log("Folder removed: id=%s", request.id);
+              handlerTabs_.broadcast( { operation: 'folder-removed',
+                                        id: request.id } );
+            } );
+          }
+          else
+            console.log("Unable to remove folder: not found: id=%s", request.id);
+        }
+
+        if(typeof callback === 'function')
+          callback(index >= 0);
+      } );
     }
   };
 

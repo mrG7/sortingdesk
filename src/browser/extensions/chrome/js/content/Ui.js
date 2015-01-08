@@ -280,7 +280,8 @@ var ChromeExtensionUi = (function () {
   {
     var self = this,
         methods = {
-          "load-state": this.onLoadState_
+          "load-state": this.onLoadState_,
+          "folder-removed": this.onFolderRemoved_
         };
 
     /* Handle messages whose `operation´ is defined above in `methods´. */
@@ -411,6 +412,12 @@ var ChromeExtensionUi = (function () {
     {
       chrome.runtime.sendMessage( { operation: 'save-folders',
                                     folders: folders} );
+    },
+
+    removeFolder_: function (id)
+    {
+      chrome.runtime.sendMessage( { operation: 'remove-folder',
+                                    id: id } );
     },
 
     /* Events initiated by the extension outbound to `SortingDesk´ */
