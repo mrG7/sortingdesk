@@ -337,45 +337,9 @@ var ChromeExtensionUi = (function () {
         } );
     },
 
-    getBins_: function ()
+    setActive_: function (id)
     {
-      var self = this,
-          deferred = $.Deferred();
-
-      chrome.storage.local.get('bins', function (result) {
-        if(!result.hasOwnProperty('bins') || !(result.bins instanceof Array)) {
-          deferred.resolve( [] );
-          return;
-        }
-
-        console.log("Loaded state: %d bin(s)", result.bins.length);
-        deferred.resolve(result.bins);
-      } );
-
-      return deferred.promise();
-    },
-
-    setBins_: function (state)
-    {
-      var deferred = $.Deferred();
-      
-      chrome.runtime.sendMessage( {
-        operation: 'save-state',
-        state: state
-      }, function (result) {
-        if(result) deferred.resolve();
-        else {
-          console.log("Failed to save state");
-          deferred.reject();
-        }
-      } );
-
-      return deferred.promise();
-    },
-
-    setActiveBin_: function (id)
-    {
-      chrome.runtime.sendMessage( { operation: 'set-active-bin', id: id } );
+      chrome.runtime.sendMessage( { operation: 'set-active', id: id } );
     },
 
     loadFolders_: function ()

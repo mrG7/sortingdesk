@@ -28,53 +28,7 @@ var Background = function ()
     handlerTabs_ = new MessageHandlerTabs();
   };
 
-  var save_ = function (tabId, state)
-  {
-    /* Clear timeout if a state is currently scheduled to be saved. */
-    if(savingState_)
-      window.clearTimeout(savingState_.id);
-
-    /* Create new or replace existing saving state descriptor. */
-    savingState_ = {
-      timeoutId: window.setTimeout(function () {
-        do_save_(savingState_.tabId); }, TIMEOUT_SAVE),
-      tabId: tabId,
-      state: state
-    };
-
-    return true;
-  };
-
-  var do_save_ = function (tabId)
-  {
-    /* Ensure a saving state descriptor exists. */
-    if(!savingState_) {
-      console.log("No saving state exists: aborting");
-      return;
-    }
-
-    console.log("Saving state:", savingState_.state);
-
-    /* Save state to extension's local storage. */
-    chrome.storage.local.set(savingState_.state, function () {
-      if(chrome.runtime.lastError) {
-        console.log("Error occurred whilst saving state: "
-                    + chrome.runtime.lastError.message);
-      } else
-        console.log("State saved successfully");
-    } );
-
-    /* Finally request all tabs in every window to update their states. */
-    handlerTabs_.broadcast( {
-      operation: 'load-state',
-      activeBinId: activeBinId_
-    }, tabId);
-
-    /* Clear saving state descriptor. */
-    savingState_ = null;
-  };
-
-  var getFolderById_ = function (folders, id)
+  var indexOfFolder_ = function (folders, id)
   {
     var index;
     
