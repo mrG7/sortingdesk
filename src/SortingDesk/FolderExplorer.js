@@ -472,6 +472,9 @@ var FolderExplorer_ = function (window, SortingQueue, $)
 
     nf.getNodeInput()
       .focus()
+      .keypress(function (ev) {
+        if(ev.keyCode === 13) $(this).trigger('blur');
+      } )
       .blur(function() {
         var value = this.value.trim();
         
