@@ -552,7 +552,6 @@ var FolderExplorer_ = function (window, SortingQueue, $)
       throw "Max folder containment reached";
 
     item.render(this.node_);
-    console.log(item.node.position().top);
     this.owner_.owner.nodes.view.animate(
       { scrollTop: item.node.offset().top },
       250 );
