@@ -259,7 +259,6 @@
   position: relative;
   border: 2px solid #7582C9;
   background-color: #D0DDFF;
-  color: #5C7CCA;
   border-radius: 8px;
   padding: 5px;
   margin: 5px 5px 5px 0;
@@ -300,10 +299,17 @@
 }
 
 .sd-bin.sd-active {
-  color: #E6FFD6;
   background-color: #83c78e;
   border-color: #349950;
 }
+
+.sd-bin .sd-bin-name {
+  color: #5C7CCA;
+}  
+
+.sd-bin.sd-active .sd-bin-name {
+  color: #E6FFD6;
+}  
 
 .sd-bin.sd-unknown {
   background-color: #d24949 !important;
