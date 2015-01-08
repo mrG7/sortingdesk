@@ -8,6 +8,7 @@
 
 
 /*global chrome, Config */
+/*jshint laxbreak:true */
 
 
 var Background = function ()
@@ -73,6 +74,20 @@ var Background = function ()
     savingState_ = null;
   };
 
+  var getFolderById_ = function (folders, id)
+  {
+    var index;
+    
+    folders.some(function (f, ndx) {
+      if(f.id === id) {
+        index = ndx;
+        return true;
+      }
+    } );
+
+    return typeof index === 'undefined' ? -1 : index;
+  };
+
   
   /**
    * @class
@@ -83,7 +98,10 @@ var Background = function ()
           "read-file": this.onReadFile_,
           "save-state": this.onSaveState_,
           "set-active-bin": this.onSetActiveBin_,
-          "get-meta": this.onGetMeta_
+          "get-meta": this.onGetMeta_,
+          "load-folders": this.onLoadFolders_,
+          "load-folder": this.onLoadFolder_,
+          "save-folder": this.onSaveFolder_
         };
     
     /* Handler of messages originating in content scripts. */
@@ -128,15 +146,91 @@ var Background = function ()
 
     onGetMeta_: function (request, sender, callback)
     {
-      if(callback) {
-        Config.load(function (options) {
-          callback( {
-            config: options,
-            tab: sender.tab,
-            activeBinId: activeBinId_
-          } );
+      if(typeof callback !== 'function')
+        return;
+      
+      Config.load(function (options) {
+        callback( {
+          config: options,
+          tab: sender.tab,
+          activeBinId: activeBinId_
         } );
+      } );
+    },
+
+    onLoadFolders_: function (request, sender, callback)
+    {
+      if(typeof callback !== 'function') return;
+
+      /* Load folder state from extension's local storage. */
+      chrome.storage.local.get('folders', function (result) {
+        if(chrome.runtime.lastError) {
+          console.log("Error occurred whilst loading folders: "
+                      + chrome.runtime.lastError.message);
+        } else
+          console.log("Loaded folders successfully", result);
+          
+        /* TODO: we should be using a map for folders instead of an array. */
+        callback(result.hasOwnProperty('folders') ? result.folders : [ ]);
+      } );
+    },
+
+    onLoadFolder_: function (request, sender, callback)
+    {
+      if(typeof callback !== 'function')
+        return;
+
+      /* Load folder state from extension's local storage. */
+      chrome.storage.local.get('folders', function (folders) {
+        var index = -1;
+        
+        if(chrome.runtime.lastError) {
+          console.log("Error occurred whilst loading folders: "
+                      + chrome.runtime.lastError.message);
+        } else {
+          /* TODO: we should be using a map for folders instead of an array. */
+          folders = folders.hasOwnProperty('folders') ? folders.folders : [ ];
+          index = getFolderById_(folders, request.id);
+
+          if(index) console.log("Loaded folder: id=%s", request.id);
+          else console.log("Folder not found: id=%s", request.id);
+        }
+        
+        callback(index >= 0 ? folders[index] : null);
+      } );
+    },
+
+    onSaveFolder_: function (request, sender, callback)
+    {
+      if(!(request.folder instanceof Object)
+         || !request.folder.hasOwnProperty('id')) {
+        throw "No folder specified or invalid folder descriptor";
       }
+      
+      /* Load folder state from extension's local storage. */
+      chrome.storage.local.get('folders', function (folders) {
+        var index = -1;
+        
+        if(chrome.runtime.lastError) {
+          console.log("Error occurred whilst loading folders: "
+                      + chrome.runtime.lastError.message);
+        } else {
+          folders = folders.hasOwnProperty('folders') ? folders.folders : [ ];
+          index = getFolderById_(folders, request.folder.id);
+
+          /* Replace or add new. */
+          if(index >= 0) folders[index] = request.folder;
+          else folders.push(request.folder);
+
+          /* Save new state. */
+          chrome.storage.local.set( { "folders": folders }, function () {
+            console.log("Folder saved: id=%s", request.folder.id);
+          } );
+        }
+
+        if(typeof callback === 'function')
+          callback(index >= 0);
+      } );
     }
   };
 

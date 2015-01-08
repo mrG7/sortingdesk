@@ -140,8 +140,8 @@ var ChromeExtensionUi = (function () {
       }, $.extend(
         true,
         Api,
-        self.requests_.callbacks,
-        self.transceiver_.callbacks ) );
+        self.requests_.callbacks.sorter,
+        self.transceiver_.callbacks.sorter ) );
     },
     
     center_: function (node)
@@ -198,6 +198,15 @@ var ChromeExtensionUi = (function () {
       return {
         onInitialised: function (container) {
           self.positionWindow_(container);
+        },
+        loadFolders: function () {
+          return self.transceiver_.loadFolders_();
+        },
+        loadFolder: function (id) {
+          return self.transceiver_.loadFolder_(id);
+        },
+        saveFolder: function (folder) {
+          return self.transceiver_.saveFolder_(folder);
         }
       };
     },
@@ -259,8 +268,10 @@ var ChromeExtensionUi = (function () {
     get callbacks ()
     {
       return {
-        onRequestStart: this.onRequestStart.bind(this),
-        onRequestStop: this.onRequestStop.bind(this)
+        sorter: {
+          onRequestStart: this.onRequestStart.bind(this),
+          onRequestStop: this.onRequestStop.bind(this)
+        }
       };
     }
   };
@@ -295,15 +306,22 @@ var ChromeExtensionUi = (function () {
     get callbacks ()
     {
       return {
-        moreTexts: this.onMoreTexts_.bind(this),
-        getBins: this.onGetBins_.bind(this),
-        setBins: this.onSetBins_.bind(this),
-        setActiveBin: this.onSetActiveBin_.bind(this)
+        sorter: {
+          moreTexts: this.moreTexts_.bind(this),
+          getBins: this.getBins_.bind(this),
+          setBins: this.setBins_.bind(this),
+          setActiveBin: this.setActiveBin_.bind(this)
+        },
+        explorer: {
+          loadFolders: this.loadFolders_.bind(this),
+          loadFolder: this.loadFolder_.bind(this),
+          saveFolder: this.saveFolder_.bind(this)
+        }
       };
     },
     
     /* Inbound events initiated by `SortingDesk´ */
-    onMoreTexts_: function (n)
+    moreTexts_: function (n)
     {
       var self = this;
       
@@ -319,7 +337,7 @@ var ChromeExtensionUi = (function () {
         } );
     },
 
-    onGetBins_: function ()
+    getBins_: function ()
     {
       var self = this,
           deferred = $.Deferred();
@@ -337,7 +355,7 @@ var ChromeExtensionUi = (function () {
       return deferred.promise();
     },
 
-    onSetBins_: function (state)
+    setBins_: function (state)
     {
       var deferred = $.Deferred();
       
@@ -345,9 +363,8 @@ var ChromeExtensionUi = (function () {
         operation: 'save-state',
         state: state
       }, function (result) {
-        if(result) {
-          deferred.resolve();
-        } else {
+        if(result) deferred.resolve();
+        else {
           console.log("Failed to save state");
           deferred.reject();
         }
@@ -356,12 +373,39 @@ var ChromeExtensionUi = (function () {
       return deferred.promise();
     },
 
-    onSetActiveBin_: function (id)
+    setActiveBin_: function (id)
     {
-      chrome.runtime.sendMessage( {
-        operation: 'set-active-bin',
-        id: id
-      } );
+      chrome.runtime.sendMessage( { operation: 'set-active-bin', id: id } );
+    },
+
+    loadFolders_: function ()
+    {
+      var deferred = $.Deferred();
+
+      chrome.runtime.sendMessage(
+        { operation: 'load-folders' },
+        function (folders) { deferred.resolve(folders); } );
+
+      return deferred.promise();
+    },
+
+    loadFolder_: function (id)
+    {
+      var deferred = $.Deferred();
+
+      chrome.runtime.sendMessage(
+        { operation: 'load-folder' },
+        function (folder) {
+          if(folder && typeof folder === 'object') deferred.resolve(folder);
+          else deferred.reject();
+        } );
+
+      return deferred.promise();
+    },
+
+    saveFolder_: function (folder)
+    {
+      chrome.runtime.sendMessage( { operation: 'save-folder', folder: folder} );
     },
 
     /* Events initiated by the extension outbound to `SortingDesk´ */
@@ -370,7 +414,7 @@ var ChromeExtensionUi = (function () {
       console.log("Refreshing state");
 
       ui_.sorter.load(request.activeBinId);
-      if(callback) callback();
+      if(callback) callback(request.activeBinId);
     }
   };
 
