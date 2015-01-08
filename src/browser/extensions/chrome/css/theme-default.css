@@ -949,10 +949,13 @@ INPUT.sd-fe-input {
   padding: 4px 5px 4px 5px;
   border-radius: 16px;
   border: 1px solid #a5bacd;
-  color: white;
-  text-shadow: none;
   transition: all 200ms;
   line-height: normal;
+}
+
+.sd-button-round SPAN {
+  color: white;
+  text-shadow: none;
 }
 
 .sd-button-round.sd-small {
