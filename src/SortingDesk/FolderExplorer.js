@@ -148,29 +148,13 @@ var FolderExplorer_ = function (window, SortingQueue, $)
       /* End set up up nodes. */
 
       /* Retrieve all folders. */
-      this.invoke("loadFolders")
+      this.invoke("loadAll")
         .done(function (folders) {
           if(!(folders instanceof Array))
             throw "Folders state array invalid";
 
           self.folders_ = folders;
           console.log("Got folders state successfully", self.folders_);
-
-          /* TODO: DEBUG: remove below */
-          var ji = 0;
-          self.folders_ = [ ];
-          for(var i = 0; i < 20; ++i) {
-            var bins = [ ];
-            
-            for(var j = 0; j < 20; ++j) {
-              bins.push( {
-                id: ++ji,
-                name: "Bin caption " + ji
-              } );
-            }
-
-            self.folders_.push({ id: i, name: "Massive folder caption " + i, bins: bins });
-          }
           
           self.render_();
         } );
