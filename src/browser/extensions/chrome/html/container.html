@@ -29,8 +29,8 @@
     <!-- Buttons: window close -->
     <div class="sd-button-close" data-sd-scope="label-browser-close">X</div>
 
-    <!-- Heading: id and content, and toolbar -->
-    <div class="sd-heading sd-lb-heading" data-sd-scope="label-browser-heading">
+    <!-- Header: id and content, and toolbar -->
+    <div class="sd-header sd-lb-header" data-sd-scope="label-browser-header">
       <!-- Toolbar -->
       <div class="sd-toolbar sd-lb-toolbar" data-sd-scope="label-browser-toolbar">
         <div class="sd-toolbar-button-group">
@@ -41,15 +41,15 @@
 
       <!-- Reference bin's id and content -->
       <div>
-        <h1 class="sd-heading-title sd-lb-heading-title" data-sd-scope="label-browser-heading-title"></h1>
-        <div class="sd-lb-heading-content" data-sd-scope="label-browser-heading-content"></div>
+        <h1 class="sd-header-title sd-lb-header-title" data-sd-scope="label-browser-header-title"></h1>
+        <div class="sd-lb-header-content" data-sd-scope="label-browser-header-content"></div>
       </div>
       
     </div>
 
     <!-- Content container -->
     <div class="sd-lb-container-content sd-container-content">
-      <div class="sd-lb-items" data-sd-scope="label-browser-items">
+      <div class="sd-container-view sd-lb-items" data-sd-scope="label-browser-items">
         <table>
           <tr>
             <th>Id</th>
@@ -67,8 +67,8 @@
     <!-- Buttons: window close -->
     <div class="sd-button-close" data-sd-scope="bin-explorer-close">X</div>
 
-    <!-- Heading: id and content, and toolbar -->
-    <div class="sd-heading sd-be-heading" data-sd-scope="bin-explorer-heading">
+    <!-- Header: id and content, and toolbar -->
+    <div class="sd-header sd-be-header" data-sd-scope="bin-explorer-header">
       <!-- Toolbar -->
       <div class="sd-toolbar sd-be-toolbar" data-sd-scope="bin-explorer-toolbar">
         <div class="sd-toolbar-button-group">
@@ -84,25 +84,31 @@
         </div>
         
         <div class="sd-toolbar-button-group">
+          <button class="sd-toolbar-button" data-sd-scope="bin-explorer-toolbar-icons">
+            <span class="sd-glyph-icons"></span>
+          </button>
           <button class="sd-toolbar-button" data-sd-scope="bin-explorer-toolbar-list">
             <span class="sd-glyph-list"></span>
-          </button>
-          <button class="sd-toolbar-button" data-sd-scope="bin-explorer-toolbar-group">
-            <span class="sd-glyph-group"></span>
           </button>
         </div>
       </div>
 
       <!-- Reference bin's id and content -->
       <div>
-        <h1 class="sd-heading-title sd-be-heading-title">Bin Explorer</h1>
+        <h1 class="sd-header-title sd-be-header-title">Bin Explorer</h1>
+        <div class="sd-be-header-folder" data-sd-scope="bin-explorer-header-folder">
+          <div class="sd-button sd-button-round" data-sd-scope="bin-explorer-button-back">
+            <span class="sd-glyph-chevron-left"></span>
+          </div>
+          <div class="sd-be-header-folder-title" data-sd-scope="bin-explorer-folder-title">&nbsp;</div>
+        </div>
       </div>
       
     </div>
 
     <!-- Content container -->
-    <div class="sd-be-container-content">
-      <div class="sd-be-items" data-sd-scope="bin-explorer-items">
+    <div class="sd-container-content sd-be-container-content">
+      <div class="sd-container-view sd-be-view" data-sd-scope="bin-explorer-view">
       </div>
     </div>
   </div>
