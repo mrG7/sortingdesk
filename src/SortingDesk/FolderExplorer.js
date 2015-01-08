@@ -132,13 +132,16 @@ var FolderExplorer_ = function (window, SortingQueue, $)
       /* Remove item when toolbar button clicked. */
       els.toolbar.actions.remove.click(function () {
         if(self.selected_ && self.selected_ instanceof ItemIconicFolder) {
+          var id;
+          
           if(self.folders_.some(function (folder, index) {
             if(folder === self.selected_.item) {
+              id = folder.id;
               self.folders_.splice(index, 1);
               return true;
             }
           } ) ) {
-            self.invoke('saveAll', self.folders_);
+            self.invoke('remove', id);
             self.refresh();
           } else
             console.log("Failed to remove selected item: ", self.selected_);
