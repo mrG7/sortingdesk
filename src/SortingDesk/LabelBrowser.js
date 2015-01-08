@@ -420,7 +420,7 @@ var LabelBrowser_ = function (window, SortingQueue, $)
 
   ViewList.prototype = Object.create(View.prototype);
 
-  ViewList.prototype.render = function (fcs)
+  ViewList.prototype.render = function ()
   {
     /* Finally create and render rows. */
     for(var k in this.subtopic_content_) {
