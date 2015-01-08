@@ -138,6 +138,7 @@ var FolderExplorer_ = function (window, SortingQueue, $)
               return true;
             }
           } ) ) {
+            self.invoke('saveAll', self.folders_);
             self.refresh();
           } else
             console.log("Failed to remove selected item: ", self.selected_);
@@ -277,6 +278,7 @@ var FolderExplorer_ = function (window, SortingQueue, $)
     {
       this.folders_.push(folder);
       this.refresh();
+      this.invoke('save', folder);
     },
 
     /* Private methods */
