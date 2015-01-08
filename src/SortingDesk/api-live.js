@@ -33,7 +33,7 @@ var Api_ = (function (window, $, CryptoJS) {
     annotator_ = 'unknown';
 
     qitems_ = new DossierJS.SortingQueueItems(
-      api_, 'index_scan', '', annotator_);
+      api_, 'similar', '', annotator_);
     DossierJS.SortingQueueItems.prototype._itemDismissed = function(cobj) {
       console.log('Adding a negative label between ' + cobj.content_id
                   + ' and ...');
