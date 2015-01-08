@@ -208,7 +208,7 @@ var Api_ = (function (window, $, CryptoJS) {
 
   var setQueryContentId = function (id)
   {
-    if(typeof id !== 'string' || id.length === 0)
+    if(id !== null && (typeof id !== 'string' || id.length === 0))
       throw "Invalid engine content id";
 
     qitems_.query_content_id = id;

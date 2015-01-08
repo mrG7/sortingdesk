@@ -124,40 +124,7 @@ var SortingDesk_ = function (window, $, Api) {
       $.extend(this.api_.getCallbacks(), cbs));
 
     /* Restore state from local storage. */
-    this.load_()
-      .done(function (bins) {
-        var bin;
-
-        /* If bins were retrieved from local storage, activate the bin that is
-         * the currently active one (as specified in `options.activeBinId´) or,
-         * if one isn't yet active, use the first element as the active bin.
-         *
-         * If no bins exist in local storage, don't do anything and keep the
-         * current query content id null. */
-        if(bins && bins.length > 0) {
-          var index = -1;
-
-          if(opts.activeBinId) {
-            bins.some(function (bin, position) {
-              if(Bin.makeId(bin) === opts.activeBinId) {
-                index = position;
-                return true;
-              }
-            } );
-          }
-
-          if(index === -1)
-            console.log("Unable to find active bin: using first bin");
-
-          bin = bins[index === -1 ? 0 : index];
-
-          /* Set query content before initialising SortingQueue to ensure
-           * correct contexts for items retrieved. */
-          self.api_.setQueryContentId(bin.content_id);
-        }
-
-        self.initialise_(bins, bin && Bin.makeId(bin) || null);
-      } );
+    window.setTimeout(function () { self.initialise_(); } );
   };
 
   Sorter.prototype = {
@@ -167,24 +134,39 @@ var SortingDesk_ = function (window, $, Api) {
     /* Instances */
     api_: null,
     sortingQueue_: null,
-    bins_: null,
+    folder_: null,
     draggable_: null,
 
-    load: function (activeBinId)
+    open: function (folder)
     {
       var self = this;
 
-      return this.load_()
-        .done(function (bins) {
-          self.initialiseBins_(bins, activeBinId);
-        } );
+      if(typeof folder === 'object')
+        this.initialiseFolder_(folder);
+      else if(folder) {         /* assume id */
+        this.sortingQueue_.callbacks.invoke('load', folder)
+          .done(function (f) { self.initialiseFolder_(f); } );
+      }
     },
 
+    close: function ()
+    {
+      /* Force reset of the bins controller, if an instance currently exists. */
+      if(this.folder_) {
+        this.folder_.reset();
+        this.folder_ = null;
+      }
+
+      /* Clear the items queue list. */
+      this.sortingQueue_.items.removeAll();
+    },
+    
     save: function ()
     {
-      return this.sortingQueue_.callbacks.invoke(
-        'setBins',
-        { bins: this.bins_.serialise() } );
+      if(this.folder_) {
+        return this.sortingQueue_.callbacks.invoke(
+          'save', this.folder_.serialise() );
+      }
     },
 
     /**
@@ -203,9 +185,9 @@ var SortingDesk_ = function (window, $, Api) {
 
       return this.sortingQueue_.reset()
         .done(function () {
-          self.bins_.reset();
+          self.folder_.reset();
 
-          self.bins_ = self.options_ = self.sortingQueue_ = null;
+          self.folder_ = self.options_ = self.sortingQueue_ = null;
           self.initialised_ = false;
 
           console.log("Sorting Desk UI reset");
@@ -213,7 +195,7 @@ var SortingDesk_ = function (window, $, Api) {
     },
 
     /* Private methods */
-    initialise_: function (bins, activeBinId)
+    initialise_: function ()
     {
       var self = this;
 
@@ -228,39 +210,28 @@ var SortingDesk_ = function (window, $, Api) {
 
       /* Register for a bin dismissal event and process it accordingly. */
       this.sortingQueue_.dismiss.register('bin', function (e, id, scope) {
-        var bin = self.bins_.getById(id);
+        var bin = self.folder_.getById(id);
 
         if(bin) {
-          self.bins_.removeAt(self.bins_.indexOf(bin));
+          self.folder_.removeAt(self.folder_.indexOf(bin));
           self.save();
         }
       } );
 
-      /* Once the bins controller has been instantiated and initialised, we're
-       * all good. */
-      this.initialiseBins_(bins, activeBinId);
-
       this.initialised_ = true;
       console.log("Sorting Desk UI initialised");
+
+      if(this.options.active)
+        this.open(this.options.active);
     },
 
-    initialiseBins_: function (bins, activeBinId)
+    initialiseFolder_: function (folder)
     {
-      /* Force reset of the bins controller, if an instance currently exists. */
-      if(this.bins_)
-        this.bins_.reset();
-
-      /* Clear the items queue list. */
-      this.sortingQueue_.items.removeAll();
-
+      this.close();
+      
       /* (Re-)instantiate the bins controller. */
-      (this.bins_ = this.sortingQueue_.instantiate('ControllerBins', this))
-        .initialise(bins, activeBinId);
-    },
-
-    load_: function ()
-    {
-      return this.sortingQueue_.callbacks.invoke('getBins');
+      (this.folder_ = this.sortingQueue_.instantiate('ControllerFolder', this))
+        .initialise(folder);
     },
 
     /* Getter methods */
@@ -286,8 +257,8 @@ var SortingDesk_ = function (window, $, Api) {
     get options ()
     { return this.options_; },
 
-    get bins ()
-    { return this.bins_; },
+    get folder ()
+    { return this.folder_; },
 
     get draggable ()
     { return this.draggable_; }
@@ -354,13 +325,15 @@ var SortingDesk_ = function (window, $, Api) {
   /**
    * @class
    * */
-  var ControllerBins = function (owner)
+  var ControllerFolder = function (owner)
   {
     var self = this;
 
     /* Invoke base class constructor. */
     SortingQueue.Controller.call(this, owner);
 
+    this.id_ = null;
+    this.name_ = null;
     this.bins_ = [ ];
     this.hover_ = null;
     this.active_ = null;
@@ -383,6 +356,8 @@ var SortingDesk_ = function (window, $, Api) {
       .hasOwnProperty('LabelBrowser');
 
     /* Define getters. */
+    this.__defineGetter__("id", function () { return this.id_; } );
+    this.__defineGetter__("name", function () { return this.name_; } );
     this.__defineGetter__("bins", function () { return this.bins_; } );
     this.__defineGetter__("hover", function () { return this.hover_; } );
     this.__defineGetter__("active", function () { return this.active_; } );
@@ -407,38 +382,50 @@ var SortingDesk_ = function (window, $, Api) {
       } );
   };
 
-  ControllerBins.prototype = Object.create(SortingQueue.Controller.prototype);
+  ControllerFolder.prototype = Object.create(SortingQueue.Controller.prototype);
 
-  ControllerBins.prototype.initialise = function (bins, activeBinId)
+  ControllerFolder.prototype.initialise = function (folder)
   {
     var self = this,
         bin;
 
     this.spawner_.initialise();
 
-    /* Load initial bin state, if bins exist. */
-    if(!(bins instanceof Array) || bins.length === 0)
+    if(!(folder instanceof Object)
+       || !folder.hasOwnProperty('bins')
+       || !(folder.bins instanceof Array)) {
+      console.log("Invalid or no folder descriptor given");
+      return;
+    }
+
+    this.id_ = folder.id;
+    this.name_ = folder.name;
+
+    console.log("Folder opened: id=%s | name=%s", this.id_, this.name_);
+    
+    if(folder.bins.length === 0)
       return;
 
-    bins.forEach(function (descriptor) {
+    folder.bins.forEach(function (descriptor) {
       self.add(self.construct(descriptor), false, true);
     } );
 
     /* Now manually set the active bin. */
-    bin = this.getById(activeBinId);
+    if(folder.active)
+      bin = this.getById(folder.active);
 
     /* Attempt to recover if we've been given an invalid id to activate. */
     if(!bin) {
       console.log("Failed to set the active bin: setting first (id=%s)",
-                  activeBinId);
+                  folder.active || null);
 
-      bin = self.bins_.getAt(0);
+      bin = this.bins_.getAt(0);
     }
 
     this.setActive(bin);
   };
 
-  ControllerBins.prototype.construct = function (descriptor)
+  ControllerFolder.prototype.construct = function (descriptor)
   {
     var map = { 'text': 'Bin',
                 'image': 'BinImage' },
@@ -460,17 +447,21 @@ var SortingDesk_ = function (window, $, Api) {
       descriptor);
   };
 
-  ControllerBins.prototype.reset = function ()
+  ControllerFolder.prototype.reset = function ()
   {
     /* Reset bin spawner controller and remove all children nodes inside the
      * bins HTML container. */
     this.spawner_.reset();
     this.owner_.options.nodes.bins.children().remove();
+    this.owner_.api.setQueryContentId(null);
 
+    console.log("Folder closed: id=%s, name=%s", this.id_, this.name_);
+
+    this.id_ = this.name_ = null;
     this.bins_ = this.hover_ = this.active_ = this.spawner_ = null;
   };
 
-  ControllerBins.prototype.add = function (bin,
+  ControllerFolder.prototype.add = function (bin,
                                            activate /* = true */,
                                            exists   /* = false */)
   {
@@ -502,7 +493,7 @@ var SortingDesk_ = function (window, $, Api) {
     return bin;
   };
 
-  ControllerBins.prototype.merge = function (dropped, dragged)
+  ControllerFolder.prototype.merge = function (dropped, dragged)
   {
     var api = this.owner_.api,
         label = new (api.getClass('Label'))(
@@ -522,7 +513,7 @@ var SortingDesk_ = function (window, $, Api) {
     return this.doAddLabel_(label);
   };
 
-  ControllerBins.prototype.addLabel = function (bin, descriptor)
+  ControllerFolder.prototype.addLabel = function (bin, descriptor)
   {
     var self = this,
         api = this.owner_.api;
@@ -548,7 +539,7 @@ var SortingDesk_ = function (window, $, Api) {
       } );
   };
 
-  ControllerBins.prototype.find = function (callback)
+  ControllerFolder.prototype.find = function (callback)
   {
     var result = null;
 
@@ -562,18 +553,18 @@ var SortingDesk_ = function (window, $, Api) {
     return result;
   };
 
-  ControllerBins.prototype.indexOf = function (bin)
+  ControllerFolder.prototype.indexOf = function (bin)
   {
     /* Note: returns the index of top level bins only. */
     return this.bins_.indexOf(bin);
   };
 
-  ControllerBins.prototype.remove = function (bin)
+  ControllerFolder.prototype.remove = function (bin)
   {
     return this.removeAt(this.bins_.indexOf(bin));
   };
 
-  ControllerBins.prototype.removeAt = function (index)
+  ControllerFolder.prototype.removeAt = function (index)
   {
     var bin;
 
@@ -589,7 +580,7 @@ var SortingDesk_ = function (window, $, Api) {
       this.setActive(this.bins_.length > 0 && this.bins_[0] || null);
   };
 
-  ControllerBins.prototype.getAt = function (index)
+  ControllerFolder.prototype.getAt = function (index)
   {
     if(index < 0 || index >= this.bins_.length)
       throw "Invalid bin index";
@@ -597,14 +588,14 @@ var SortingDesk_ = function (window, $, Api) {
     return this.bins_[index];
   };
 
-  ControllerBins.prototype.getById = function (id)
+  ControllerFolder.prototype.getById = function (id)
   {
     return this.find(function (bin) {
       return bin.id === id;
     } );
   };
 
-  ControllerBins.prototype.setActive = function (bin)
+  ControllerFolder.prototype.setActive = function (bin)
   {
     /* Don't activate bin if currently active already. */
     if(this.active_ === bin)
@@ -627,15 +618,14 @@ var SortingDesk_ = function (window, $, Api) {
 
       /* Ensure bin is visible. */
       this.owner_.options.nodes.bins.animate(
-        { scrollLeft: bin.node.position().left },
+        { scrollLeft: bin.node.offset().left },
         250);
-    }
 
-    /* Let the extension know that the active bin has changed. */
-    this.owner_.sortingQueue.callbacks.invoke('setActiveBin', bin && bin.id);
+      this.owner_.sortingQueue.callbacks.invoke('setActive', this.id);
+    }
   };
 
-  ControllerBins.prototype.browse = function (bin)
+  ControllerFolder.prototype.browse = function (bin)
   {
     var self = this,
         opts = this.owner_.options;
@@ -662,7 +652,7 @@ var SortingDesk_ = function (window, $, Api) {
       } );
   };
 
-  /* overridable */ ControllerBins.prototype.serialise = function ()
+  /* overridable */ ControllerFolder.prototype.serialise = function ()
   {
     var bins = [ ];
 
@@ -671,11 +661,16 @@ var SortingDesk_ = function (window, $, Api) {
       bins.push(bin.serialise());
     } );
 
-    return bins;
+    return {
+      id: this.id_,
+      name: this.name_,
+      bins: bins,
+      active: this.active_ ? this.active_.id : null
+    };
   };
 
   /* Events */
-  ControllerBins.prototype.onDropSpecial = function (scope)
+  ControllerFolder.prototype.onDropSpecial = function (scope)
   {
     var api = this.owner_.api,
         result = { },
@@ -732,7 +727,7 @@ var SortingDesk_ = function (window, $, Api) {
   };
 
   /* Protected methods */
-  /* overridable */ ControllerBins.prototype.append_ = function (node)
+  /* overridable */ ControllerFolder.prototype.append_ = function (node)
   {
     /* Add bin node to the very top of the container if aren't any yet,
      * otherwise insert it after the last contained bin. */
@@ -742,14 +737,14 @@ var SortingDesk_ = function (window, $, Api) {
       this.bins_[this.bins_.length - 1].node.after(node);
   };
 
-  ControllerBins.prototype.onMouseEnter_ = function (bin)
+  ControllerFolder.prototype.onMouseEnter_ = function (bin)
   { this.hover_ = bin; };
 
-  ControllerBins.prototype.onMouseLeave_ = function ()
+  ControllerFolder.prototype.onMouseLeave_ = function ()
   { this.hover_ = null; };
 
   /* Private methods */
-  ControllerBins.prototype.update_ = function (descriptor,
+  ControllerFolder.prototype.update_ = function (descriptor,
                                                exists /* = false */)
   {
     var self = this,
@@ -801,7 +796,7 @@ var SortingDesk_ = function (window, $, Api) {
       } );
   };
 
-  ControllerBins.prototype.doUpdateFc_ = function (content_id, fc)
+  ControllerFolder.prototype.doUpdateFc_ = function (content_id, fc)
   {
     return this.owner_.api.putFeatureCollection(content_id, fc)
       .done(function () {
@@ -814,7 +809,7 @@ var SortingDesk_ = function (window, $, Api) {
       } );
   };
 
-  ControllerBins.prototype.doAddLabel_ = function (label)
+  ControllerFolder.prototype.doAddLabel_ = function (label)
   {
     return this.owner_.api.addLabel(label)
       .done(function () {
@@ -1201,7 +1196,7 @@ var SortingDesk_ = function (window, $, Api) {
       addBinShow: 200           /* Fade in of temporary bin when adding. */
     },
     constructors: {
-      ControllerBins: ControllerBins,
+      ControllerFolder: ControllerFolder,
       Bin: BinDefault,
       BinImage: BinImageDefault,
       ControllerBinSpawner: ControllerBinSpawnerDefault
@@ -1212,7 +1207,7 @@ var SortingDesk_ = function (window, $, Api) {
   /* Module public API */
   return {
     Sorter: Sorter,
-    ControllerBins: ControllerBins,
+    ControllerFolder: ControllerFolder,
     Bin: Bin,
     BinDefault: BinDefault,
     BinImageDefault: BinImageDefault,

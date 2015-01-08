@@ -259,7 +259,6 @@
   position: relative;
   border: 2px solid #7582C9;
   background-color: #D0DDFF;
-  color: #5C7CCA;
   border-radius: 8px;
   padding: 5px;
   margin: 5px 5px 5px 0;
@@ -300,10 +299,17 @@
 }
 
 .sd-bin.sd-active {
-  color: #E6FFD6;
   background-color: #83c78e;
   border-color: #349950;
 }
+
+.sd-bin .sd-bin-name {
+  color: #5C7CCA;
+}  
+
+.sd-bin.sd-active .sd-bin-name {
+  color: #E6FFD6;
+}  
 
 .sd-bin.sd-unknown {
   background-color: #d24949 !important;
@@ -601,7 +607,7 @@ A.sd-text-item-title:hover {
 
 .sd-lb-header-content IMG {
   width: auto;
-  max-height: 50px;
+  max-height: 40px;
 }
 
 .sd-lb-items TABLE TR {
@@ -654,7 +660,7 @@ A.sd-text-item-title:hover {
 .sd-lb-items-content IMG {
   font-size: 14px;
   width: auto;
-  max-height: 50px;
+  max-height: 40px;
   transition: all 250ms;
 }
 
@@ -693,23 +699,39 @@ A.sd-text-item-title:hover {
   padding: 10px;
   text-align: center;
   font-size: 14px;
+  line-height: 15px;
   border: 1px solid transparent;
   border-radius: 4px;
   cursor: pointer;
   transition: all 250ms;
+  vertical-align: top;
+}
+
+.sd-fe-icon.sd-selected {
+  border-color: #8aa9da;
+  background-color: aliceblue;
 }
 
 .sd-fe-icon > DIV {
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: normal;
   text-align: center;
   width: 120px;
-}
+  max-height: 45px;
+} 
 
-.sd-fe-icon:hover {
+.sd-fe-icon:hover:not(.sd-selected) {
   border: 1px solid silver;
   background-color: #f0f0f0;
+}
+
+INPUT.sd-fe-input {
+  width: 110px;
+  border: 1px solid #8aa9da;
+  padding: 2px;
+  border-radius: 4px;
+  outline: none;
 }
 
 
@@ -730,7 +752,7 @@ A.sd-text-item-title:hover {
   /* box-shadow */
   -webkit-box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.6);
   -moz-box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.6);
-  box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.6);
+  box-shadow: 5px 5px 5px 0tespx rgba(0,0,0,0.6);
 }
 
 .sd-header {
@@ -931,10 +953,13 @@ A.sd-text-item-title:hover {
   padding: 4px 5px 4px 5px;
   border-radius: 16px;
   border: 1px solid #a5bacd;
-  color: white;
-  text-shadow: none;
   transition: all 200ms;
   line-height: normal;
+}
+
+.sd-button-round SPAN {
+  color: white;
+  text-shadow: none;
 }
 
 .sd-button-round.sd-small {
