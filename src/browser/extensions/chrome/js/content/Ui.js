@@ -135,7 +135,8 @@ var ChromeExtensionUi = (function () {
         },
         visibleItems: 10,
         itemsDraggable: false,
-        dossierUrl: meta.config.dossierUrl
+        dossierUrl: meta.config.dossierUrl,
+        active: meta.active
       }, $.extend(
         true,
         Api,
@@ -306,13 +307,15 @@ var ChromeExtensionUi = (function () {
         sorter: {
           moreTexts: this.moreTexts_.bind(this),
           load: this.loadFolder_.bind(this),
-          save: this.saveFolder_.bind(this)
+          save: this.saveFolder_.bind(this),
+          setActive: this.setActive_.bind(this)
         },
         explorer: {
           load: this.loadFolder_.bind(this),
           loadAll: this.loadFolders_.bind(this),
           save: this.saveFolder_.bind(this),
-          saveAll: this.saveFolders_.bind(this)
+          saveAll: this.saveFolders_.bind(this),
+          remove: this.removeFolder_.bind(this)
         }
       };
     },

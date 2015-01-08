@@ -18,8 +18,7 @@ var Background = function ()
 
   /* Attributes */
   var handlerTabs_,
-      savingState_ = { },
-      activeBinId_ = null;
+      active_ = null;           /* active folder Id */
 
   
   var initialize_ = function ()
@@ -50,8 +49,7 @@ var Background = function ()
     var self = this,
         methods = {
           "read-file": this.onReadFile_,
-          "save-state": this.onSaveState_,
-          "set-active-bin": this.onSetActiveBin_,
+          "set-active": this.onSetActive_,
           "get-meta": this.onGetMeta_,
           "load-folders": this.onLoadFolders_,
           "load-folder": this.onLoadFolder_,
@@ -94,9 +92,10 @@ var Background = function ()
       if(callback) callback(result);
     },
 
-    onSetActiveBin_: function (request, sender, callback)
+    onSetActive_: function (request, sender, callback)
     {
-      activeBinId_ = request.id;
+      console.log("Set active folder: id=%s", request.id);
+      active_ = request.id;
       if(callback) callback();
     },
 
@@ -108,7 +107,8 @@ var Background = function ()
       Config.load(function (options) {
         callback( {
           config: options,
-          tab: sender.tab
+          tab: sender.tab,
+          active: active_
         } );
       } );
     },
@@ -192,6 +192,10 @@ var Background = function ()
     {
       if(!(request.folders instanceof Array))
         throw "No folder specified or invalid folder descriptor";
+
+      /* De-select active folder if removed. */
+      if(active_ && indexOfFolder_(request.folders, active_) === -1)
+        active_ = null;
       
       /* Save new state. */
       chrome.storage.local.set( { "folders": request.folders }, function () {
