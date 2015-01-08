@@ -265,7 +265,7 @@ var Background = function ()
           chrome.tabs.getAllInWindow(window.id, function (tabs) {
             tabs.forEach(function (tab) {
               /* This particular tab iteration: */
-              if(excludeTabId && tab.id !== excludeTabId)
+              if(!excludeTabId || tab.id !== excludeTabId)
                 chrome.tabs.sendMessage(tab.id, data);
             } );
           } );
