@@ -100,9 +100,9 @@ var LabelBrowser_ = function (window, SortingQueue, $)
       }
     };
 
-    els.heading = {
-      title: this.find_node_('heading-title'),
-      content: this.find_node_('heading-content')
+    els.header = {
+      title: this.find_node_('header-title'),
+      content: this.find_node_('header-content')
     };
 
     els.items = this.find_node_('items');
@@ -111,8 +111,8 @@ var LabelBrowser_ = function (window, SortingQueue, $)
 
     /* Retrieve feature collection for the bin's `content_id´. */
     this.api_.getFeatureCollection(this.ref_bin_.data.content_id)
-      .done(function (fc) { self.set_heading_(fc); } )
-      .fail(function () { self.set_heading_(null); } );
+      .done(function (fc) { self.set_header_(fc); } )
+      .fail(function () { self.set_header_(null); } );
 
     /* Retrieve all existing labels for the bin's `content_id´. */
     this.api_.getLabelsUniqueById(this.ref_bin_.data.content_id,
@@ -169,8 +169,8 @@ var LabelBrowser_ = function (window, SortingQueue, $)
     }
 
     /* Remove all children nodes. */
-    this.nodes_.heading.title.children().remove();
-    this.nodes_.heading.content.children().remove();
+    this.nodes_.header.title.children().remove();
+    this.nodes_.header.content.children().remove();
     this.nodes_.table.find('TR:not(:first-child)').remove();
 
     /* Detach all events. */
@@ -197,7 +197,7 @@ var LabelBrowser_ = function (window, SortingQueue, $)
     /* Set the items list's height so a scrollbar is shown when it overflows
      * vertically. */
     els.items.css('height', els.container.innerHeight()
-                  - this.find_node_('heading').outerHeight()
+                  - this.find_node_('header').outerHeight()
                   - (els.items.outerHeight(true) - els.items.innerHeight()));
 
     this.deferred_ = $.Deferred();
@@ -264,9 +264,9 @@ var LabelBrowser_ = function (window, SortingQueue, $)
     this.view_.render();
   };
 
-  Browser.prototype.set_heading_ = function (fc)
+  Browser.prototype.set_header_ = function (fc)
   {
-    this.nodes_.heading.title
+    this.nodes_.header.title
       .html(fc                  /* WTF: `typeof null´ returns 'object' */
             && typeof fc === 'object'
             && typeof fc.raw === 'object'
@@ -276,7 +276,7 @@ var LabelBrowser_ = function (window, SortingQueue, $)
 
     /* TODO: using reference bin's own content rather than snippet from
      * retrieved feature collection. */
-    this.nodes_.heading.content.html(
+    this.nodes_.header.content.html(
       this.api_.getSubtopicType(this.ref_bin_.data.subtopic_id) === 'image'
         ? [ '<img src="', this.ref_bin_.data.content, '"/>' ].join('')
         : this.ref_bin_.data.content);
