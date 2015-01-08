@@ -597,7 +597,7 @@ var SortingDesk_ = function (window, $, Api) {
       .addClass(opts.css.disabled);
 
     (this.browser_ = this.owner_.sortingQueue.instantiate(
-      'LabelBrowser', { ref_bin: bin }, this.owner_))
+      'LabelBrowser', { api: this.owner_.api, ref_bin: bin } ) )
       .initialise()
       .done(function () {
         self.browser_.reset();
@@ -701,7 +701,6 @@ var SortingDesk_ = function (window, $, Api) {
   {
     var self = this,
         api = this.owner_.api;
-    console.log('DESCRIPTOR', descriptor);
 
     /* Attempt to retrieve the feature collection for the bin's content id. */
     return api.getFeatureCollection(descriptor.content_id)

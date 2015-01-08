@@ -35,7 +35,7 @@ mkdir lib/bootstrap/js -v
 cp -v "$dir_root/src/SortingQueue/SortingQueue.js" lib/SortingQueue/
 cp -v "$dir_root/src/SortingDesk/SortingDesk.js" lib/SortingDesk/
 cp -v "$dir_root/src/SortingDesk/LabelBrowser.js" lib/SortingDesk/
-cp -v "$dir_root/src/SortingDesk/BinExplorer.js" lib/SortingDesk/
+cp -v "$dir_root/src/SortingDesk/FolderExplorer.js" lib/SortingDesk/
 cp -v "$dir_root/src/SortingDesk/api-live.js" lib/SortingDesk/
 cp -v "$dir_root/src/dossier.js/Dossier.js" lib/dossier.js/
 cp -v "$dir_root/lib/jquery-2.1.1.min.js" lib/

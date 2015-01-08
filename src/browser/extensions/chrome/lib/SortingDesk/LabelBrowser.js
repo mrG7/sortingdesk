@@ -23,16 +23,22 @@ var LabelBrowser_ = function (window, SortingQueue, $)
   /**
    * @class
    * */
-  var Browser = function (options, sortingDesk, bin)
+  var Browser = function (options, callbacks)
   {
-    /* Invoke super-constructor. */
-    SortingQueue.Controller.call(this, sortingDesk);
+    if(typeof options !== 'object')
+      throw "Invalid `options´ object map specified";
+    else if(typeof callbacks !== 'object')
+      throw "Invalid `callbacks´ object map specified";
+    else if(typeof options.api !== 'object')
+      throw "Reference to `API´ instance not found";
+    else if(typeof options.ref_bin !== 'object')
+      throw "Reference bin not found"; /* not validating if valid. */
 
     /* Attributes */
+    this.initialised_ = false;
     this.options_ = options;
-
-    this.sortingDesk_ = sortingDesk;
-    this.api_ = sortingDesk.api;
+    this.callbacks_ = callbacks;
+    this.api_ = options.api;
     this.deferred_ = null;
     this.nodes_ = { };
     this.ref_bin_ = options.ref_bin;
@@ -47,8 +53,6 @@ var LabelBrowser_ = function (window, SortingQueue, $)
       throw "Reference bin's descriptor required";
 
     /* Getters */
-    this.__defineGetter__('sortingDesk',
-                          function () { return this.sortingDesk_; } );
     this.__defineGetter__('api', function () { return this.api_; } );
     this.__defineGetter__('nodes', function () { return this.nodes_; } );
     this.__defineGetter__('ref_bin', function () { return this.ref_bin_; } );
@@ -68,12 +72,13 @@ var LabelBrowser_ = function (window, SortingQueue, $)
   Browser.VIEW_DEFAULT = Browser.VIEW_LIST;
 
   /* Interface */
-  Browser.prototype = Object.create(SortingQueue.Controller.prototype);
-
   Browser.prototype.initialise = function ()
   {
     var self = this,
         els = this.nodes_;
+
+    if(this.initialised_)
+      throw "Label Browser component already initialised";
 
     console.log("Initializing Label Browser component");
 
@@ -81,8 +86,6 @@ var LabelBrowser_ = function (window, SortingQueue, $)
     var onEndInitialise = function () {
       console.log("Label Browser component initialized");
     };
-
-    this.deferred_ = $.Deferred();
 
     /* Begin set up nodes. */
     els.container = $('[data-sd-scope="label-browser-container"]');
@@ -97,9 +100,9 @@ var LabelBrowser_ = function (window, SortingQueue, $)
       }
     };
 
-    els.heading = {
-      title: this.find_node_('heading-title'),
-      content: this.find_node_('heading-content')
+    els.header = {
+      title: this.find_node_('header-title'),
+      content: this.find_node_('header-content')
     };
 
     els.items = this.find_node_('items');
@@ -108,8 +111,8 @@ var LabelBrowser_ = function (window, SortingQueue, $)
 
     /* Retrieve feature collection for the bin's `content_id´. */
     this.api_.getFeatureCollection(this.ref_bin_.data.content_id)
-      .done(function (fc) { self.set_heading_(fc); } )
-      .fail(function () { self.set_heading_(null); } );
+      .done(function (fc) { self.set_header_(fc); } )
+      .fail(function () { self.set_header_(null); } );
 
     /* Retrieve all existing labels for the bin's `content_id´. */
     this.api_.getLabelsUniqueById(this.ref_bin_.data.content_id,
@@ -149,35 +152,33 @@ var LabelBrowser_ = function (window, SortingQueue, $)
         onEndInitialise();
       } );
 
-    /* TODO: We should NOT be invoking a callback owned by the active Sorting
-     * Queue instance. The `LabelBrowser´ component should instead have its own
-     * set of callbacks and events that clients can specify and register for. */
-    this.owner_.sortingQueue.callbacks.invoke({
-      name: "onLabelBrowserInitialised",
-      mandatory: false
-    }, this.nodes_.container);
+    this.initialised_ = true;
+    this.invoke("onInitialised", els.container);
 
-    this.show();
-
-    return this.deferred_.promise();
+    return this.show();
   };
 
   Browser.prototype.reset = function ()
   {
-    /* Remove all children nodes. */
-    this.nodes_.heading.title.children().remove();
-    this.nodes_.heading.content.children().remove();
-    this.nodes_.table.find('TR:not(:first-child)').remove();
-
+    this.check_init_();
+    
     /* Resolve promise if one still exists. */
-    if(this.deferred_)
-      this.deferred_.resolve();
+    if(this.deferred_) {
+      this.close();
+      if(!this.initialised_) return;
+    }
+
+    /* Remove all children nodes. */
+    this.nodes_.header.title.children().remove();
+    this.nodes_.header.content.children().remove();
+    this.nodes_.table.find('TR:not(:first-child)').remove();
 
     /* Detach all events. */
     this.nodes_.buttonClose.off();
 
-    this.deferred_ = this.ref_bin_ = this.view_ = this.nodes_ = null;
+    this.ref_bin_ = this.view_ = this.nodes_ = null;
     this.ref_fc_ = this.eqv_fcs_ = this.viewType_ = this.api_ = null;
+    this.initialised_ = false;
 
     console.log("Label Browser component reset");
   };
@@ -185,6 +186,8 @@ var LabelBrowser_ = function (window, SortingQueue, $)
   /* overridable */ Browser.prototype.show = function ()
   {
     var els = this.nodes_;
+
+    this.check_init_();
 
     els.container.css( {
       transform: 'scale(1,1)',
@@ -194,12 +197,18 @@ var LabelBrowser_ = function (window, SortingQueue, $)
     /* Set the items list's height so a scrollbar is shown when it overflows
      * vertically. */
     els.items.css('height', els.container.innerHeight()
-                  - this.find_node_('heading').outerHeight()
+                  - this.find_node_('header').outerHeight()
                   - (els.items.outerHeight(true) - els.items.innerHeight()));
+
+    this.deferred_ = $.Deferred();
+
+    return this.deferred_.promise();
   };
 
   /* overridable */ Browser.prototype.close = function ()
   {
+    this.check_init_();
+    
     this.nodes_.container
       .css( {
         transform: 'scale(.2,.2)',
@@ -212,7 +221,29 @@ var LabelBrowser_ = function (window, SortingQueue, $)
     }
   };
 
+  /* TODO: Needs a callbacks handler BADLY. */
+  Browser.prototype.invoke = function ( /* name, ... */ )
+  {
+    if(arguments.length < 1)
+      throw "Callback name not provided";
+    
+    var cb = this.callbacks_[arguments[0]];
+    
+    if(typeof cb !== 'function')
+      throw "Callback invalid or not existent: " + arguments[0];
+
+    return cb.apply(null, [].slice.call(arguments, 1));
+  };
+
   /* Private methods */
+
+    /* Private methods */
+  Browser.prototype.check_init_ = function ()
+  {
+    if(!this.initialised_)
+      throw "Component not yet initialised or already reset";
+  };
+  
   Browser.prototype.render_ = function ()
   {
     if(this.view_) {
@@ -233,25 +264,25 @@ var LabelBrowser_ = function (window, SortingQueue, $)
     this.view_.render();
   };
 
-  Browser.prototype.set_heading_ = function (fc)
+  Browser.prototype.set_header_ = function (fc)
   {
-    this.nodes_.heading.title
-      .html(typeof fc === 'object'
+    this.nodes_.header.title
+      .html(fc                  /* WTF: `typeof null´ returns 'object' */
+            && typeof fc === 'object'
             && typeof fc.raw === 'object'
             && typeof fc.raw.title === 'string'
             && fc.raw.title
-            || "<unknown title>");
+            || "&lt;unknown title&gt;");
 
     /* TODO: using reference bin's own content rather than snippet from
      * retrieved feature collection. */
-    this.nodes_.heading.content.html(
+    this.nodes_.header.content.html(
       this.api_.getSubtopicType(this.ref_bin_.data.subtopic_id) === 'image'
         ? [ '<img src="', this.ref_bin_.data.content, '"/>' ].join('')
         : this.ref_bin_.data.content);
   };
 
-  Browser.prototype.find_node_ = function (scope,
-                                                parent /* = container */)
+  Browser.prototype.find_node_ = function (scope, parent /* = container */)
   {
     var p;
 
@@ -389,7 +420,7 @@ var LabelBrowser_ = function (window, SortingQueue, $)
 
   ViewList.prototype = Object.create(View.prototype);
 
-  ViewList.prototype.render = function (fcs)
+  ViewList.prototype.render = function ()
   {
     /* Finally create and render rows. */
     for(var k in this.subtopic_content_) {

@@ -10,7 +10,7 @@
  */
 
 
-/*global chrome, $, SortingDesk, LabelBrowser, BinExplorer, SortingQueue, Api */
+/*global chrome, $, SortingDesk, LabelBrowser, FolderExplorer, SortingQueue, Api */
 /*jshint laxbreak:true */
 
 
@@ -168,9 +168,9 @@ var ChromeExtensionUi = (function () {
         throw "Sorting Desk instance not active";
 
       /* Instantiate the Bin Explorer component and initialise it. */
-      this.explorer_ = new BinExplorer.Explorer(
+      this.explorer_ = new FolderExplorer.Explorer(
         { api: this.sorter_.api },
-        this.getBinExplorerCallbacks_() );
+        this.getFolderExplorerCallbacks_() );
 
       /* Hold on to promise so that we can clean state up once it exits. */
       this.explorer_.initialise()
@@ -191,7 +191,7 @@ var ChromeExtensionUi = (function () {
       };
     },
 
-    getBinExplorerCallbacks_: function ()
+    getFolderExplorerCallbacks_: function ()
     {
       var self = this;
       

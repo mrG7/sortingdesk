@@ -95,6 +95,10 @@ This component is sorely needed.
 *** TODO Remove code handling keyboard events
   
 ** =SortingDesk= [0%]
+*** =BinExplorer= [0%]
+**** TODO Currently contains base64 encoding of icon images
+**** TODO Needs a callbacks handler BADLY
+
 *** =LabelBrowser= [12%]
 **** TODO =Browwser=: should the active =SortingDesk= instance be passed as a stand-alone argument or as part of the =options= object map?
 
@@ -120,6 +124,12 @@ Component needs to stand on its own, have its own set of options, callbacks and 
 **** CANCELED Use Bootstrap
 - State "CANCELED"   from "TODO"       [2015-01-05 Mon 14:26] \\
   Can't be done. Bootstrap screws up/overwrites existing page styles.
+
+*** TODO Should be using a map to contain bins
+Also see TODO about folders being kept in an array.
+
+*** TODO Window management class
+A class for managing windows used by the different components is needed so as to prevent code duplication. Currently, the components =LabelBrowser= and =BinExplorer= share (duplicate) functionality that ought to be in a specialised class for this purpose.
 
 *** TODO Instantiation of API must pass in Dossier API URL
 *** TODO Revisit =options=
@@ -173,6 +183,8 @@ Ideally, each bin should look like the item that was first dropped to create tha
 ** Extension [0%]
 *** All [100%]
 *** Chrome [0%]
+**** TODO Should be using a map to contain folders
+
 **** TODO =Activator=: using an adhoc event subscriber
 **** TODO Custom font should really be loaded by a resource manager
 See =Ui= constructor, before =get-meta= message is sent.

@@ -16,7 +16,7 @@
  * The Bin Explorer module.
  *
  * @returns an object containing the module's public interface. */
-var BinExplorer_ = function (window, SortingQueue, $)
+var FolderExplorer_ = function (window, SortingQueue, $)
 {
 
 
@@ -71,7 +71,7 @@ var BinExplorer_ = function (window, SortingQueue, $)
       console.log("Initialising Bin Explorer component");
 
       /* Begin set up nodes. */
-      els.container = $('[data-sd-scope="bin-explorer-container"]');
+      els.container = $('[data-sd-scope="folder-explorer-container"]');
 
       els.buttonClose = this.find_node_('close')
         .click( function () { self.close(); } );
@@ -231,7 +231,8 @@ var BinExplorer_ = function (window, SortingQueue, $)
       else
         p = this.nodes_.container;
 
-      return p.find( [ '[data-sd-scope="bin-explorer-', scope, '"]' ].join(''));
+      return p.find( [ '[data-sd-scope="folder-explorer-', scope, '"]' ]
+                     .join(''));
     },
     
     render_: function (folder)
@@ -593,11 +594,11 @@ var BinExplorer_ = function (window, SortingQueue, $)
 
   /* CSS class names used. */
   var Css = {
-    icon: "sd-be-icon",
-    rowFolder: "sd-be-row-folder",
-    rowBin: "sd-be-row-bin",
-    iconFolder: "sd-be-icon-folder",
-    iconBin: "sd-be-icon-bin"
+    icon: "sd-fe-icon",
+    rowFolder: "sd-fe-row-folder",
+    rowBin: "sd-fe-row-bin",
+    iconFolder: "sd-fe-icon-folder",
+    iconBin: "sd-fe-icon-bin"
   };
 
   /* TODO: remove base64-encoded images! */
@@ -633,8 +634,8 @@ var BinExplorer_ = function (window, SortingQueue, $)
 
 /* Compatibility with RequireJs. */
 if(typeof define === "function" && define.amd) {
-  define("BinExplorer", [ "jquery" ], function (SortingQueue, $) {
-    return BinExplorer_(window, SortingQueue, $, Api);
+  define("FolderExplorer", [ "jquery" ], function (SortingQueue, $) {
+    return FolderExplorer_(window, SortingQueue, $, Api);
   });
 } else
-  window.BinExplorer = BinExplorer_(window, SortingQueue, $);
+  window.FolderExplorer = FolderExplorer_(window, SortingQueue, $);

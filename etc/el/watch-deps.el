@@ -38,7 +38,7 @@ are saved."
 
 (defcustom watch-deps-file-list '("src/SortingDesk/SortingDesk.js"
                                   "src/SortingDesk/LabelBrowser.js"
-                                  "src/SortingDesk/BinExplorer.js"
+                                  "src/SortingDesk/FolderExplorer.js"
                                   "src/SortingDesk/api-live.js"
                                   "src/SortingQueue/SortingQueue.js"
                                   "src/dossier.js/Dossier.js")

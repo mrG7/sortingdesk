@@ -664,30 +664,30 @@ A.sd-text-item-title:hover {
 }
 
 
-/* Bin Explorer */
-.sd-be-header {
+/* Folder Explorer */
+.sd-fe-header {
   height: 45px;
 }
 
-.sd-be-header-folder {
+.sd-fe-header-folder {
   display: none;
 }
 
-.sd-be-header-folder > DIV {
+.sd-fe-header-folder > DIV {
   float: left;
 }
 
-.sd-be-header-folder-title {
+.sd-fe-header-folder-title {
   font-size: 14px;
   margin: 5px 0 0 10px;
 }
 
-.sd-be-button-explorer {
+.sd-fe-button-explorer {
   float: left;
   margin-right: 15px;
 }
 
-.sd-be-icon {
+.sd-fe-icon {
   display: inline-block;
   min-width: 100px;
   margin: 10px;
@@ -700,7 +700,7 @@ A.sd-text-item-title:hover {
   transition: all 250ms;
 }
 
-.sd-be-icon > DIV {
+.sd-fe-icon > DIV {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -708,13 +708,13 @@ A.sd-text-item-title:hover {
   width: 120px;
 } 
 
-.sd-be-icon:hover {
+.sd-fe-icon:hover {
   border: 1px solid silver;
   background-color: #f0f0f0;
 }
 
 
-/* Common styling to Label Browser and Bin Explorer components */
+/* Common styling to Label Browser and Folder Explorer components */
 .sd-container.sd-component {
   top: 100px;
   left: 100px;
@@ -768,7 +768,7 @@ A.sd-text-item-title:hover {
 }
 
 .sd-lb-toolbar,
-.sd-be-toolbar {
+.sd-fe-toolbar {
   float: right;
 }
 
