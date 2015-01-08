@@ -320,13 +320,16 @@ var ChromeExtensionUi = (function () {
     moreTexts_: function (n)
     {
       var self = this;
-      
+
+      /* Hide message just before a new request is initiated. */
+      ui_.nodes.empty.stop().fadeOut(100);
+
       return ui_.sorter.api.getCallbacks().moreTexts(n)
         .done(function (items) {
           if(!items || !(items instanceof Array) || items.length === 0)
-            ui_.nodes.empty.fadeIn('slow');
+            ui_.nodes.empty.stop().fadeIn('slow');
           else
-            ui_.nodes.empty.fadeOut(100);
+            ui_.nodes.empty.stop().fadeOut(100);
         } )
         .fail(function () {
           ui_.nodes.empty.show();
