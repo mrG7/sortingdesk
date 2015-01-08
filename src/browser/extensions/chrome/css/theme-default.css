@@ -601,7 +601,7 @@ A.sd-text-item-title:hover {
 
 .sd-lb-header-content IMG {
   width: auto;
-  max-height: 50px;
+  max-height: 40px;
 }
 
 .sd-lb-items TABLE TR {
@@ -656,7 +656,7 @@ A.sd-text-item-title:hover {
 
 .sd-lb-items-content IMG {
   width: auto;
-  max-height: 50px;
+  max-height: 40px;
   transition: all 250ms;
 }
 
@@ -714,7 +714,7 @@ A.sd-text-item-title:hover {
   white-space: normal;
   text-align: center;
   width: 120px;
-  max-height: 30px;
+  max-height: 45px;
 } 
 
 .sd-fe-icon:hover:not(.sd-selected) {
