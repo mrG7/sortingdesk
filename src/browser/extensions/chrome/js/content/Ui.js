@@ -194,23 +194,17 @@ var ChromeExtensionUi = (function () {
     {
       var self = this;
       
-      return {
-        onInitialised: function (container) {
-          self.positionWindow_(container);
+      return $.extend(
+        {
+          onInitialised: function (container) {
+            self.positionWindow_(container);
+          },
+          open: function (folder) {
+            self.sorter_.open(folder);
+            self.explorer_.close();
+          }
         },
-        load: function (id) {
-          return self.transceiver_.loadFolder_(id);
-        },
-        loadAll: function () {
-          return self.transceiver_.loadFolders_();
-        },
-        save: function (folder) {
-          return self.transceiver_.saveFolder_(folder);
-        },
-        saveAll: function (folders) {
-          return self.transceiver_.saveFolders_(folders);
-        }
-      };
+        this.transceiver_.callbacks.explorer );
     },
 
     positionWindow_: function (container)
@@ -310,15 +304,14 @@ var ChromeExtensionUi = (function () {
       return {
         sorter: {
           moreTexts: this.moreTexts_.bind(this),
-          getBins: this.getBins_.bind(this),
-          setBins: this.setBins_.bind(this),
-          setActiveBin: this.setActiveBin_.bind(this)
+          load: this.loadFolder_.bind(this),
+          save: this.saveFolder_.bind(this)
         },
         explorer: {
-          loadFolder: this.loadFolder_.bind(this),
-          loadFolders: this.loadFolders_.bind(this),
-          saveFolder: this.saveFolder_.bind(this),
-          saveFolders: this.saveFolders_.bind(this)
+          load: this.loadFolder_.bind(this),
+          loadAll: this.loadFolders_.bind(this),
+          save: this.saveFolder_.bind(this),
+          saveAll: this.saveFolders_.bind(this)
         }
       };
     },
