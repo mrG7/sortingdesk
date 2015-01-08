@@ -574,7 +574,7 @@ var SortingDesk_ = function (window, $, Api) {
 
       /* Ensure bin is visible. */
       this.owner_.options.nodes.bins.animate(
-        { scrollLeft: bin.node.position().left },
+        { scrollLeft: bin.node.offset().left },
         250);
     }
 
