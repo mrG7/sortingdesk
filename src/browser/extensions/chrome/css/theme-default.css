@@ -695,23 +695,39 @@ A.sd-text-item-title:hover {
   padding: 10px;
   text-align: center;
   font-size: 14px;
+  line-height: 15px;
   border: 1px solid transparent;
   border-radius: 4px;
   cursor: pointer;
   transition: all 250ms;
+  vertical-align: top;
+}
+
+.sd-fe-icon.sd-selected {
+  border-color: #8aa9da;
+  background-color: aliceblue;
 }
 
 .sd-fe-icon > DIV {
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: normal;
   text-align: center;
   width: 120px;
+  max-height: 30px;
 } 
 
-.sd-fe-icon:hover {
+.sd-fe-icon:hover:not(.sd-selected) {
   border: 1px solid silver;
   background-color: #f0f0f0;
+}
+
+INPUT.sd-fe-input {
+  width: 110px;
+  border: 1px solid #8aa9da;
+  padding: 2px;
+  border-radius: 4px;
+  outline: none;
 }
 
 
@@ -732,7 +748,7 @@ A.sd-text-item-title:hover {
   /* box-shadow */
   -webkit-box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.6);
   -moz-box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.6);
-  box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.6);
+  box-shadow: 5px 5px 5px 0tespx rgba(0,0,0,0.6);
 }
 
 .sd-header {
