@@ -384,7 +384,7 @@
 
 .sd-text-item-content {
   overflow: hidden;
-  max-height: 130px;
+  max-height: 1000px;
   text-overflow: ellipsis;
 }
 
@@ -423,22 +423,22 @@
   background-color: #FFF5F8;
 }
 
-.sd-text-item.sd-selected {
-  border: 2px solid #8EB4DA;
-  background-color: #f0f8ff;
-}
+/* .sd-text-item.sd-selected { */
+  /* border: 2px solid #8EB4DA; */
+  /* background-color: #f0f8ff; */
+/* } */
 
 .sd-text-item:selected .sd-text-item-title {
   background-color: #FFF5F8;
 }
 
-.sd-text-item.sd-selected:hover {
-  background-color: inherit;
-}
+/* .sd-text-item.sd-selected:hover { */
+  /* background-color: inherit; */
+/* } */
 
-.sd-text-item.sd-selected .sd-text-item-content A {
-  color: #465C94 !important;
-}
+/* .sd-text-item.sd-selected .sd-text-item-content A { */
+  /* color: #465C94 !important; */
+/* } */
 
 .sd-more, .sd-less {
   float: right;
@@ -707,7 +707,7 @@ A.sd-text-item-title:hover {
   white-space: nowrap;
   text-align: center;
   width: 120px;
-} 
+}
 
 .sd-fe-icon:hover {
   border: 1px solid silver;
@@ -725,7 +725,7 @@ A.sd-text-item-title:hover {
   height: 400px;
   background-color: white;
   border: 5px solid silver;
-  border-radius: 15px;  
+  border-radius: 15px;
   transform: scale(0.2,0.2);
   transition: transform 300ms ease-in-out, opacity 150ms ease-in;
 
@@ -738,10 +738,10 @@ A.sd-text-item-title:hover {
 .sd-header {
   padding: 10px 5px 8px 5px;
   margin: 0;
-  
+
   border: 1px solid #dbdbdb;
   border-radius: 8px 8px 0 0;
-  
+
   color: #333;
   background-color: #e5e4ef;
   text-shadow: 1px 1px 2px white;
@@ -752,7 +752,7 @@ A.sd-text-item-title:hover {
   font-weight: bold;
   font-family: arial,sans-serif;
   line-height: 16px;
-  
+
   border: none;
   margin: 0 0 5px 0;
   padding: 0;
