@@ -228,7 +228,7 @@ var LabelBrowser_ = function (window, SortingQueue, $)
     var cb = this.callbacks_[arguments[0]];
     
     if(typeof cb !== 'function')
-      throw "Callback invalid or not existent";
+      throw "Callback invalid or not existent: " + arguments[0];
 
     return cb.apply(null, [].slice.call(arguments, 1));
   };
