@@ -23,16 +23,22 @@ var LabelBrowser_ = function (window, SortingQueue, $)
   /**
    * @class
    * */
-  var Browser = function (sorter, options)
+  var Browser = function (options, callbacks)
   {
-    /* Invoke super-constructor. */
-    SortingQueue.Controller.call(this, sorter);
+    if(typeof options !== 'object')
+      throw "Invalid `options´ object map specified";
+    else if(typeof callbacks !== 'object')
+      throw "Invalid `callbacks´ object map specified";
+    else if(typeof options.api !== 'object')
+      throw "Reference to `API´ instance not found";
+    else if(typeof options.ref_bin !== 'object')
+      throw "Reference bin not found"; /* not validating if valid. */
 
     /* Attributes */
     this.initialised_ = false;
     this.options_ = options;
-    this.sorter_ = sorter;
-    this.api_ = sorter.api;
+    this.callbacks_ = callbacks;
+    this.api_ = options.api;
     this.deferred_ = null;
     this.nodes_ = { };
     this.ref_bin_ = options.ref_bin;
@@ -47,8 +53,6 @@ var LabelBrowser_ = function (window, SortingQueue, $)
       throw "Reference bin's descriptor required";
 
     /* Getters */
-    this.__defineGetter__('sorter',
-                          function () { return this.sorter_; } );
     this.__defineGetter__('api', function () { return this.api_; } );
     this.__defineGetter__('nodes', function () { return this.nodes_; } );
     this.__defineGetter__('ref_bin', function () { return this.ref_bin_; } );
@@ -68,8 +72,6 @@ var LabelBrowser_ = function (window, SortingQueue, $)
   Browser.VIEW_DEFAULT = Browser.VIEW_LIST;
 
   /* Interface */
-  Browser.prototype = Object.create(SortingQueue.Controller.prototype);
-
   Browser.prototype.initialise = function ()
   {
     var self = this,
@@ -151,14 +153,7 @@ var LabelBrowser_ = function (window, SortingQueue, $)
       } );
 
     this.initialised_ = true;
-
-    /* TODO: We should NOT be invoking a callback owned by the active Sorting
-     * Queue instance. The `LabelBrowser´ component should instead have its own
-     * set of callbacks and events that clients can specify and register for. */
-    this.owner_.sortingQueue.callbacks.invoke({
-      name: "onLabelBrowserInitialised",
-      mandatory: false
-    }, this.nodes_.container);
+    this.invoke("onInitialised", els.container);
 
     return this.show();
   };
@@ -222,6 +217,20 @@ var LabelBrowser_ = function (window, SortingQueue, $)
       this.deferred_.resolve();
       this.deferred_ = null;
     }
+  };
+
+  /* TODO: Needs a callbacks handler BADLY. */
+  Browser.prototype.invoke = function ( /* name, ... */ )
+  {
+    if(arguments.length < 1)
+      throw "Callback name not provided";
+    
+    var cb = this.callbacks_[arguments[0]];
+    
+    if(typeof cb !== 'function')
+      throw "Callback invalid or not existent";
+
+    return cb.apply(null, [].slice.call(arguments, 1));
   };
 
   /* Private methods */

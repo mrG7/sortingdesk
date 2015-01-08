@@ -139,13 +139,11 @@ var ChromeExtensionUi = (function () {
         },
         constructors: {
           Item: ItemLinkify,
-          createLabelBrowser: function (options, sorter) {
+          createLabelBrowser: function (options) {
             /* The `options´ map isn't touched *yet*. */
-            return new LabelBrowser.Browser(options, sorter);
-          },
-          createBinExplorer: function (options, sorter) {
-            /* The `options´ map isn't touched *yet*. */
-            return new BinExplorer.Explorer(options, sorter);
+            return new LabelBrowser.Browser(
+              options,
+              self.getLabelBrowserCallbacks_());
           }
         },
         visibleItems: 10,
@@ -154,32 +152,6 @@ var ChromeExtensionUi = (function () {
         dossierUrl: meta.config.dossierUrl
       }, $.extend(
         true,
-        {
-          onLabelBrowserInitialised: function (container) {
-            var position = self.nodes_.sorter.position(),
-                win = $(window);
-            
-            switch(self.positioner_.current) {
-            case Positioner.TOP_RIGHT:
-              container.css( {
-                top: position.top,
-                left: position.top
-              } );
-
-              container.width(win.width() - self.nodes_.sorter.outerWidth()
-                              - (position.top << 1)
-                              - container.outerWidth()
-                              + container.innerWidth());
-              container.height(win.height() -
-                               (position.top << 1));
-              
-              return;
-              
-            default:
-              throw "Current position invalid or not implemented"; 
-            }
-          }
-        },
         Api,
         self.requests_.callbacks,
         self.transceiver_.callbacks ) );
@@ -196,6 +168,46 @@ var ChromeExtensionUi = (function () {
                ((this.nodes_.sorter.width() - node.outerWidth()) / 2) + 'px')
           .hide();
       }
+    },
+
+    getLabelBrowserCallbacks_: function ()
+    {
+      var self = this;
+      
+      return {
+        onInitialised: function (container) {
+          /* Position Label Browser window correctly, depending on where the
+           * extension activator button is. */
+          var position = self.nodes_.sorter.position(),
+              win = $(window);
+          
+          switch(self.positioner_.current) {
+          case Positioner.TOP_RIGHT:
+            container.css( {
+              top: position.top,
+              left: position.top
+            } );
+
+            container.width(win.width() - self.nodes_.sorter.outerWidth()
+                            - (position.top << 1)
+                            - container.outerWidth()
+                            + container.innerWidth());
+            container.height(win.height() -
+                             (position.top << 1));
+            
+            return;
+            
+          default:
+            throw "Current position invalid or not implemented"; 
+          }
+        }
+      };
+    },
+
+    getBinExplorerCallbacks_: function ()
+    {
+      return {
+      };
     }
   };
 
