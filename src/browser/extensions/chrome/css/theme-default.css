@@ -390,7 +390,7 @@
 
 .sd-text-item-content {
   overflow: hidden;
-  max-height: 130px;
+  max-height: 1000px;
   text-overflow: ellipsis;
 }
 
@@ -429,22 +429,22 @@
   background-color: #FFF5F8;
 }
 
-.sd-text-item.sd-selected {
-  border: 2px solid #8EB4DA;
-  background-color: #f0f8ff;
-}
+/* .sd-text-item.sd-selected { */
+  /* border: 2px solid #8EB4DA; */
+  /* background-color: #f0f8ff; */
+/* } */
 
 .sd-text-item:selected .sd-text-item-title {
   background-color: #FFF5F8;
 }
 
-.sd-text-item.sd-selected:hover {
-  background-color: inherit;
-}
+/* .sd-text-item.sd-selected:hover { */
+  /* background-color: inherit; */
+/* } */
 
-.sd-text-item.sd-selected .sd-text-item-content A {
-  color: #465C94 !important;
-}
+/* .sd-text-item.sd-selected .sd-text-item-content A { */
+  /* color: #465C94 !important; */
+/* } */
 
 .sd-more, .sd-less {
   float: right;
@@ -625,10 +625,6 @@ A.sd-text-item-title:hover {
   font-size: 14px;
 }
 
-.sd-lb-items TABLE TD {
-  font-size: 13px;
-}
-
 .sd-lb-items TABLE TH,
 .sd-lb-items TABLE TD {
   border: 1px solid;
@@ -656,11 +652,13 @@ A.sd-text-item-title:hover {
 
 .sd-lb-items-id {
   font-family: monospace;
-  width: 255px;
+  font-size: 10px;
+  width: 150px;
   vertical-align: top;
 }
 
 .sd-lb-items-content IMG {
+  font-size: 14px;
   width: auto;
   max-height: 40px;
   transition: all 250ms;
@@ -747,7 +745,7 @@ INPUT.sd-fe-input {
   height: 400px;
   background-color: white;
   border: 5px solid silver;
-  border-radius: 15px;  
+  border-radius: 15px;
   transform: scale(0.2,0.2);
   transition: transform 300ms ease-in-out, opacity 150ms ease-in;
 
@@ -760,10 +758,10 @@ INPUT.sd-fe-input {
 .sd-header {
   padding: 10px 5px 8px 5px;
   margin: 0;
-  
+
   border: 1px solid #dbdbdb;
   border-radius: 8px 8px 0 0;
-  
+
   color: #333;
   background-color: #e5e4ef;
   text-shadow: 1px 1px 2px white;
@@ -774,7 +772,7 @@ INPUT.sd-fe-input {
   font-weight: bold;
   font-family: arial,sans-serif;
   line-height: 16px;
-  
+
   border: none;
   margin: 0 0 5px 0;
   padding: 0;

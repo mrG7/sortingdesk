@@ -161,7 +161,7 @@ var LabelBrowser_ = function (window, SortingQueue, $)
   Browser.prototype.reset = function ()
   {
     this.check_init_();
-    
+
     /* Resolve promise if one still exists. */
     if(this.deferred_) {
       this.close();
@@ -208,7 +208,7 @@ var LabelBrowser_ = function (window, SortingQueue, $)
   /* overridable */ Browser.prototype.close = function ()
   {
     this.check_init_();
-    
+
     this.nodes_.container
       .css( {
         transform: 'scale(.2,.2)',
@@ -226,9 +226,9 @@ var LabelBrowser_ = function (window, SortingQueue, $)
   {
     if(arguments.length < 1)
       throw "Callback name not provided";
-    
+
     var cb = this.callbacks_[arguments[0]];
-    
+
     if(typeof cb !== 'function')
       throw "Callback invalid or not existent: " + arguments[0];
 
@@ -243,7 +243,7 @@ var LabelBrowser_ = function (window, SortingQueue, $)
     if(!this.initialised_)
       throw "Component not yet initialised or already reset";
   };
-  
+
   Browser.prototype.render_ = function ()
   {
     if(this.view_) {
@@ -340,7 +340,7 @@ var LabelBrowser_ = function (window, SortingQueue, $)
   /**
    * @class
    * */
-  var Row = function (owner, subtopic_id, content)
+  var Row = function (owner, subtopic_id, fc)
   {
     /* Invoke super constructor. */
     SortingQueue.Drawable.call(this, owner);
@@ -348,13 +348,18 @@ var LabelBrowser_ = function (window, SortingQueue, $)
     var api = owner.owner.api;
 
     /* Attributes */
-    this.id_ = api.extractSubtopicId(subtopic_id);
-    this.content_ = content;
+    // This code used to "extract" the subtopic id. The problem is, labels
+    // are being created with an id of `subtopic|{text,image}|hash` which
+    // implies that the *whole* thing *is* the subtopic id. Labels really
+    // should be created with just the `hash` as the subtopic id.
+    // So I'm going to remove this extraction for now. ---AG
+    this.id_ = subtopic_id;
+    this.fc_ = fc;
     this.type_ = api.getSubtopicType(subtopic_id);
 
     /* Getters */
     this.__defineGetter__('id', function () { return this.id_; } );
-    this.__defineGetter__('content', function () { return this.content_; } );
+    this.__defineGetter__('fc', function () { return this.fc_; } );
     this.__defineGetter__('type', function () { return this.type_; } );
   };
 
@@ -362,9 +367,10 @@ var LabelBrowser_ = function (window, SortingQueue, $)
 
   Row.prototype.htmlizeContent = function ()
   {
+    var content = this.fc_.value(this.id_);
     return this.type_ === 'image'
-      ? [ '<img src="', this.content_, '" />' ].join('')
-      : this.content_;
+      ? [ '<img src="', content, '" />' ].join('')
+      : content;
   };
 
 
@@ -378,7 +384,8 @@ var LabelBrowser_ = function (window, SortingQueue, $)
 
     /* Attributes */
     this.rows_ = [ ];
-    this.subtopic_content_ = { };
+    this.subtopic_fcs_ = { }; // subtopic_id |--> FeatureCollection
+    // N.B. The subtopic "content" is at `fc.value(subtopic_id)`. ---AG
 
     var self = this,
         api = owner.api,
@@ -407,7 +414,7 @@ var LabelBrowser_ = function (window, SortingQueue, $)
        * subfolders. ---AG */
       for (var i = 0; i < subtopics[fc.content_id].length; i++) {
         var subid = subtopics[fc.content_id][i];
-        self.subtopic_content_[subid] = fc.value(subid);
+        self.subtopic_fcs_[subid] = fc;
         count++;
       }
     } );
@@ -415,7 +422,7 @@ var LabelBrowser_ = function (window, SortingQueue, $)
     console.log("Merged subtopics from %d feature collection(s): count=%d",
                 fcs.length,
                 count,
-                this.subtopic_content_);
+                this.subtopic_fcs_);
   };
 
   ViewList.prototype = Object.create(View.prototype);
@@ -423,9 +430,8 @@ var LabelBrowser_ = function (window, SortingQueue, $)
   ViewList.prototype.render = function ()
   {
     /* Finally create and render rows. */
-    for(var k in this.subtopic_content_) {
-      var row = new ViewListRow(this, k, this.subtopic_content_[k]);
-
+    for(var subid in this.subtopic_fcs_) {
+      var row = new ViewListRow(this, subid, this.subtopic_fcs_[subid]);
       this.rows_.push(row);
       row.render();
     }
@@ -435,22 +441,28 @@ var LabelBrowser_ = function (window, SortingQueue, $)
   /**
    * @class
    * */
-  var ViewListRow = function (owner, subtopic_id, content)
+  var ViewListRow = function (owner, subtopic_id, fc)
   {
     /* Invoke super constructor. */
-    Row.call(this, owner, subtopic_id, content);
+    Row.call(this, owner, subtopic_id, fc);
   };
 
   ViewListRow.prototype = Object.create(Row.prototype);
 
   ViewListRow.prototype.render = function ()
   {
-    var row = $('<tr></tr>');
+    var row = $('<tr></tr>'),
+        source = this.fc.value('meta_url');
+    if (!source) {
+      source = 'unknown';
+    } else {
+      source = '<a href="' + source + '">' + source + '</a>';
+    }
 
-    /* Id */
+    /* Source */
     $('<td></td>')
       .addClass(Css.items.id)
-      .html(this.id)
+      .html(source)
       .appendTo(row);
 
     /* Content */

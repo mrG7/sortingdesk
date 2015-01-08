@@ -47,6 +47,55 @@ var SortingDesk_ = function (window, $, Api) {
     }
   };
 
+  var TextItem = function(owner, item) {
+    if (!owner.owner.initialised) {
+      return;
+    }
+    SortingQueue.Item.call(this, owner, item);
+  };
+
+  TextItem.prototype = Object.create(SortingQueue.Item.prototype);
+
+  TextItem.prototype.render = function(text, view, less) {
+    var fc = this.content_.fc;
+    var desc = fc.value('meta_clean_visible').trim();
+    desc = desc.replace(/\s+/g, ' ');
+    desc = desc.slice(0, 200);
+    var title = fc.value('title') || (desc.slice(0, 50) + '...');
+    var url = fc.value('meta_url');
+
+    var ntitle = $(
+      '<p style="font-size: 12pt; margin: 0 0 8px 0;">'
+      + '<strong></strong>'
+      + '</p>'
+    );
+    ntitle.find('strong').text(title);
+
+    var ndesc = $('<p style="font-size: 8pt; display: block; margin: 0;" />');
+    ndesc.text(desc + '...');
+
+    var nurl = $(
+      '<p style="margin: 8px 0 0 0; display: block;">'
+      + '<a style="color: #349950;" href="' + url + '">' + url + '</a>'
+      + '</p>'
+    );
+
+    this.content_.text = $('<div style="margin: 0;" />');
+    this.content_.text.append(ntitle);
+    this.content_.text.append(ndesc);
+    this.content_.text.append(nurl);
+
+    if (typeof this.content_.raw.probability !== 'undefined') {
+      var score = this.content_.raw.probability.toFixed(4);
+      this.content_.text.append($(
+        '<p style="margin: 8px 0 0 0; display: block;">'
+        + 'Score: ' + score
+        + '</p>'
+      ));
+    }
+    return SortingQueue.Item.prototype.render.call(this);
+  };
+
 
   /**
    * @class
@@ -67,7 +116,11 @@ var SortingDesk_ = function (window, $, Api) {
 
     this.options_ = $.extend(true, $.extend(true, {}, defaults_), opts);
     this.sortingQueue_ = new SortingQueue.Sorter(
-      this.options_,
+      $.extend(true, this.options_, {
+        constructors: {
+          Item: TextItem
+        }
+      }),
       $.extend(this.api_.getCallbacks(), cbs));
 
     /* Restore state from local storage. */
