@@ -281,7 +281,8 @@ var ChromeExtensionUi = (function () {
   {
     var self = this,
         methods = {
-          "folder-removed": this.onFolderRemoved_
+          "folder-removed": this.onFolderRemoved_,
+          "folder-updated": this.onFolderUpdated_
         };
 
     /* Handle messages whose `operation´ is defined above in `methods´. */
@@ -392,8 +393,22 @@ var ChromeExtensionUi = (function () {
     {
       console.log("Folder removed: id=%s", request.id);
 
-      if(ui_.sorter && ui_.sorter.folder.id === request.id)
+      if(ui_.sorter && ui_.sorter.folder
+         && ui_.sorter.folder.id === request.id) {
+        console.log("Forcing folder closed");
         ui_.sorter.close();
+      }
+    },
+
+    onFolderUpdated_: function (request, sender, callback)
+    {
+      console.log("Folder updated: id=%s", request.folder.id);
+
+      if(ui_.sorter && ui_.sorter.folder
+         && ui_.sorter.folder.id === request.folder.id) {
+        console.log("Forcing folder refresh");
+        ui_.sorter.open(request.folder);
+      }
     }
   };
 

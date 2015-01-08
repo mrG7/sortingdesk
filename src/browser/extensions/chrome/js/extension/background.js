@@ -181,6 +181,10 @@ var Background = function ()
           chrome.storage.local.set( { "folders": folders }, function () {
             console.log("Folder saved: id=%s", request.folder.id);
           } );
+
+          handlerTabs_.broadcast( { operation: 'folder-updated',
+                                    folder: request.folder },
+                                  sender.tab.id);
         }
 
         if(typeof callback === 'function')
