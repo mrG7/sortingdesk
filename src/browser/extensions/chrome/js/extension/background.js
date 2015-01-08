@@ -145,7 +145,7 @@ var Background = function ()
         } else {
           /* TODO: we should be using a map for folders instead of an array. */
           folders = folders.hasOwnProperty('folders') ? folders.folders : [ ];
-          index = getFolderById_(folders, request.id);
+          index = indexOfFolder_(folders, request.id);
 
           if(index) console.log("Loaded folder: id=%s", request.id);
           else console.log("Folder not found: id=%s", request.id);
@@ -171,7 +171,7 @@ var Background = function ()
                       + chrome.runtime.lastError.message);
         } else {
           folders = folders.hasOwnProperty('folders') ? folders.folders : [ ];
-          index = getFolderById_(folders, request.folder.id);
+          index = indexOfFolder_(folders, request.folder.id);
 
           /* Replace or add new. */
           if(index >= 0) folders[index] = request.folder;
