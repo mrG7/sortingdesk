@@ -174,6 +174,7 @@ var ChromeExtensionUi = (function () {
       /* Hold on to promise so that we can clean state up once it exits. */
       this.explorer_.initialise()
         .done(function () {
+          self.explorer_.reset();
           self.explorer_ = null;
         } );
     },
