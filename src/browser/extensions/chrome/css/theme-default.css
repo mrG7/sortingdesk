@@ -117,10 +117,6 @@
   margin-right: 10px;
 }
 
-#sd-settings SPAN {
-  color: white;
-}
-
 #sd-sorting-desk.sd-top-left #sd-activator,
 #sd-sorting-desk.sd-bottom-left #sd-activator {
   float: left;
@@ -590,11 +586,11 @@ A.sd-text-item-title:hover {
 
 
 /* Label Browser */
-.sd-lb-heading {
+.sd-lb-header {
   height: 57px;
 }
 
-.sd-lb-heading-content {
+.sd-lb-header-content {
   font-size: 14px;
   line-height: 14px;
   font-style: italic;
@@ -602,15 +598,9 @@ A.sd-text-item-title:hover {
   color: #444;
 }
 
-.sd-lb-heading-content IMG {
+.sd-lb-header-content IMG {
   width: auto;
   max-height: 50px;
-}
-
-.sd-lb-items {
-  margin: 5px;
-  overflow-y: auto;
-  overflow-x: hidden;
 }
 
 .sd-lb-items TABLE TR {
@@ -675,8 +665,52 @@ A.sd-text-item-title:hover {
 
 
 /* Bin Explorer */
-.sd-be-heading {
-  height: 30px;
+.sd-be-header {
+  height: 45px;
+}
+
+.sd-be-header-folder {
+  display: none;
+}
+
+.sd-be-header-folder > DIV {
+  float: left;
+}
+
+.sd-be-header-folder-title {
+  font-size: 14px;
+  margin: 5px 0 0 10px;
+}
+
+.sd-be-button-explorer {
+  float: left;
+  margin-right: 15px;
+}
+
+.sd-be-icon {
+  display: inline-block;
+  min-width: 100px;
+  margin: 10px;
+  padding: 10px;
+  text-align: center;
+  font-size: 14px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 250ms;
+}
+
+.sd-be-icon > DIV {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+  width: 120px;
+} 
+
+.sd-be-icon:hover {
+  border: 1px solid silver;
+  background-color: #f0f0f0;
 }
 
 
@@ -700,7 +734,7 @@ A.sd-text-item-title:hover {
   box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.6);
 }
 
-.sd-heading {
+.sd-header {
   padding: 10px 5px 8px 5px;
   margin: 0;
   
@@ -712,7 +746,7 @@ A.sd-text-item-title:hover {
   text-shadow: 1px 1px 2px white;
 }
 
-.sd-heading-title {
+.sd-header-title {
   font-size: 16px;
   font-weight: bold;
   font-family: arial,sans-serif;
@@ -720,6 +754,13 @@ A.sd-text-item-title:hover {
   
   border: none;
   margin: 0 0 5px 0;
+  padding: 0;
+}
+
+.sd-container-view {
+  margin: 5px;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .sd-container-content {
@@ -782,9 +823,9 @@ A.sd-text-item-title:hover {
   border-bottom-left-radius: 0;
 }
 
+.sd-button,
 .sd-toolbar-button {
   display: inline-block;
-  padding: 6px 12px;
   margin-bottom: 0;
   font-weight: 400;
   text-align: center;
@@ -792,6 +833,11 @@ A.sd-text-item-title:hover {
   vertical-align: middle;
   cursor: pointer;
   background-image: none;
+  user-select: none;
+}
+
+.sd-toolbar-button {
+  padding: 6px 12px;
   border: 1px solid transparent;
   border-radius: 4px;
   outline: 1px auto #ccc;
@@ -800,8 +846,6 @@ A.sd-text-item-title:hover {
 
   color: #333;
   background-color: white;
-  
-  user-select: none;
   box-sizing: border-box;
 }
 
@@ -832,6 +876,12 @@ A.sd-text-item-title:hover {
   -moz-osx-font-smoothing: grayscale;
 }
 
+.sd-button > SPAN,
+.sd-button.sd-normal > SPAN,
+.sd-toolbar-button.sd-normal > SPAN {
+  font-size: 16px;
+}
+
 .sd-button.sd-small > SPAN,
 .sd-toolbar-button.sd-small > SPAN {
   font-size: 14px;
@@ -860,18 +910,33 @@ A.sd-text-item-title:hover {
 }
 
 .sd-glyph-wrench:before {
-  content: "\e136"
+  content: "\e136";
+}
+
+.sd-glyph-icons:before {
+  content:"\e011";
+}
+
+.sd-glyph-chevron-left:before {
+  content:"\e079";
 }
 
 /* Button: round */
-.sd-button-round {
+.sd-button-round,
+.sd-button-round.sd-normal {
   background-color: #6490d5;
+  padding: 4px 5px 4px 5px;
+  border-radius: 16px;
+  border: 1px solid #a5bacd;
+  color: white;
+  text-shadow: none;
+  transition: all 200ms;
+  line-height: normal;
 }
 
 .sd-button-round.sd-small {
   padding: 2px 4px 2px 4px;
   border-radius: 12px;
-  border-color: white !important;
 }
 
 .sd-button-round:hover {
