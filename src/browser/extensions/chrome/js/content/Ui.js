@@ -185,30 +185,7 @@ var ChromeExtensionUi = (function () {
       
       return {
         onInitialised: function (container) {
-          /* Position Label Browser window correctly, depending on where the
-           * extension activator button is. */
-          var position = self.nodes_.sorter.position(),
-              win = $(window);
-          
-          switch(self.positioner_.current) {
-          case Positioner.TOP_RIGHT:
-            container.css( {
-              top: position.top,
-              left: position.top
-            } );
-
-            container.width(win.width() - self.nodes_.sorter.outerWidth()
-                            - (position.top << 1)
-                            - container.outerWidth()
-                            + container.innerWidth());
-            container.height(win.height() -
-                             (position.top << 1));
-            
-            return;
-            
-          default:
-            throw "Current position invalid or not implemented"; 
-          }
+          self.positionWindow_(container);
         }
       };
     },
@@ -218,7 +195,38 @@ var ChromeExtensionUi = (function () {
       var self = this;
       
       return {
+        onInitialised: function (container) {
+          self.positionWindow_(container);
+        }
       };
+    },
+
+    positionWindow_: function (container)
+    {
+      /* Position window given by `container´ correctly, depending on where the
+       * extension activator button is. */
+      var position = this.nodes_.sorter.position(),
+          win = $(window);
+      
+      switch(this.positioner_.current) {
+      case Positioner.TOP_RIGHT:
+        container.css( {
+          top: position.top,
+          left: position.top
+        } );
+
+        container.width(win.width() - this.nodes_.sorter.outerWidth()
+                        - (position.top << 1)
+                        - container.outerWidth()
+                        + container.innerWidth());
+        container.height(win.height() -
+                         (position.top << 1));
+        
+        return;
+        
+      default:
+        throw "Current position invalid or not implemented"; 
+      }
     }
   };
 
