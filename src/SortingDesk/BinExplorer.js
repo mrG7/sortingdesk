@@ -600,6 +600,7 @@ var BinExplorer_ = function (window, SortingQueue, $)
     iconBin: "sd-be-icon-bin"
   };
 
+  /* TODO: remove base64-encoded images! */
   var Images = {
     icons: {
       folder:
