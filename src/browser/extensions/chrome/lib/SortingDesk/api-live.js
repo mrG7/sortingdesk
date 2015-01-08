@@ -33,7 +33,28 @@ var Api_ = (function (window, $, CryptoJS) {
     annotator_ = 'unknown';
 
     qitems_ = new DossierJS.SortingQueueItems(
-      api_, 'index_scan', '', annotator_);
+      api_, 'similar', '', annotator_);
+    DossierJS.SortingQueueItems.prototype._itemDismissed = function(cobj) {
+      console.log('Adding a negative label between ' + cobj.content_id
+                  + ' and ...');
+      for (var i = 0; i < sortingDesk_.bins_.bins_.length; i++) {
+        var bin = sortingDesk_.bins_.bins_[i];
+        (new DossierJS.LabelFetcher(api_))
+          .cid(bin.data_.content_id)
+          .which('connected')
+          .get()
+          .done(function(labels) {
+            cids = uniqueContentIdsFromLabels(labels);
+            console.log('... these content ids:', cids);
+
+            api_.addLabels(cids.map(function(cid) {
+              return new DossierJS.Label(
+                cobj.content_id, cid, annotator_,
+                DossierJS.COREF_VALUE_NEGATIVE);
+            }));
+          });
+      }
+    };
 
     /* Return module public API -- post initialization */
     return {
@@ -45,6 +66,7 @@ var Api_ = (function (window, $, CryptoJS) {
       addLabel: addLabel,
       getLabelsUniqueById: getLabelsUniqueById,
       dedupLabelsBySubtopic: dedupLabelsBySubtopic,
+      uniqueContentIdsFromLabels: uniqueContentIdsFromLabels,
       setQueryContentId: setQueryContentId,
       setSearchEngine: setSearchEngine,
       getSearchEngine: getSearchEngine,
@@ -163,6 +185,25 @@ var Api_ = (function (window, $, CryptoJS) {
       }
     } );
     return result;
+  };
+
+  var uniqueContentIdsFromLabels = function(labels)
+  {
+    var seen = { },
+        cids = [ ];
+    for (var i = 0; i < labels.length; i++) {
+      var cid1 = labels[i].cid1,
+          cid2 = labels[i].cid2;
+      if (!seen[cid1]) {
+        seen[cid1] = true;
+        cids.push(cid1);
+      }
+      if (!seen[cid2]) {
+        seen[cid2] = true;
+        cids.push(cid2);
+      }
+    }
+    return cids;
   };
 
   var setQueryContentId = function (id)
@@ -307,31 +348,6 @@ var Api_ = (function (window, $, CryptoJS) {
   DossierJS.SortingQueueItems.prototype._moreTexts = function() {
     var self = this;
 
-    // Gah, I know this doesn't belong here, but the integration with
-    // SortingQueue is so messed up. (And that's DossierJS's fault, mostly.)
-    // ---AG
-    var formatSearchResult = function(cobj) {
-      var desc = cobj.fc.value('meta_clean_visible').trim();
-      desc = desc.replace(/\s+/g, ' ');
-      desc = desc.slice(0, 200);
-
-      var title = cobj.fc.value('title') || (desc.slice(0, 50) + '...');
-      // inline css... don't shoot me.
-      var html = '<p style="font-size: 12pt; margin: 0 0 8px 0;">'
-                 + '<strong>' + title + '</strong>'
-                 + '</p>';
-      html += '<p style="font-size: 8pt; display: block; margin: 0;">'
-              + desc
-              + '...'
-              + '</p>';
-
-      var url = cobj.fc.value('meta_url');
-      html += '<p style="margin: 8px 0 0 0;>'
-              + '<a style="color: #349950;" href="' + url + '">' + url + '</a>'
-              + '</p>';
-      return html;
-    };
-
     if (self._processing || !qitems_.query_content_id) {
       var deferred = $.Deferred();
 
@@ -357,11 +373,11 @@ var Api_ = (function (window, $, CryptoJS) {
           var idparts = cobj.content_id.split("|"),
               url = idparts[idparts.length - 1];
           items.push({
+            raw: cobj,
             content_id: cobj.content_id,
             fc: cobj.fc,
             node_id: cobj.content_id,
             name: '',
-            text: formatSearchResult(cobj),
             url: cobj.fc.value('meta_url')
           });
         });
