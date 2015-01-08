@@ -101,7 +101,8 @@ var Background = function ()
           "get-meta": this.onGetMeta_,
           "load-folders": this.onLoadFolders_,
           "load-folder": this.onLoadFolder_,
-          "save-folder": this.onSaveFolder_
+          "save-folder": this.onSaveFolder_,
+          "save-folders": this.onSaveFolders_
         };
     
     /* Handler of messages originating in content scripts. */
@@ -231,6 +232,20 @@ var Background = function ()
         if(typeof callback === 'function')
           callback(index >= 0);
       } );
+    },
+
+    onSaveFolders_: function (request, sender, callback)
+    {
+      if(!(request.folders instanceof Array))
+        throw "No folder specified or invalid folder descriptor";
+      
+      /* Save new state. */
+      chrome.storage.local.set( { "folders": request.folders }, function () {
+        console.log("Folders saved");
+      } );
+
+      if(typeof callback === 'function')
+        callback();
     }
   };
 

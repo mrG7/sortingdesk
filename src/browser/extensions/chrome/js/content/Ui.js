@@ -199,14 +199,17 @@ var ChromeExtensionUi = (function () {
         onInitialised: function (container) {
           self.positionWindow_(container);
         },
-        loadFolders: function () {
-          return self.transceiver_.loadFolders_();
-        },
-        loadFolder: function (id) {
+        load: function (id) {
           return self.transceiver_.loadFolder_(id);
         },
-        saveFolder: function (folder) {
+        loadAll: function () {
+          return self.transceiver_.loadFolders_();
+        },
+        save: function (folder) {
           return self.transceiver_.saveFolder_(folder);
+        },
+        saveAll: function (folders) {
+          return self.transceiver_.saveFolders_(folders);
         }
       };
     },
@@ -313,9 +316,10 @@ var ChromeExtensionUi = (function () {
           setActiveBin: this.setActiveBin_.bind(this)
         },
         explorer: {
-          loadFolders: this.loadFolders_.bind(this),
           loadFolder: this.loadFolder_.bind(this),
-          saveFolder: this.saveFolder_.bind(this)
+          loadFolders: this.loadFolders_.bind(this),
+          saveFolder: this.saveFolder_.bind(this),
+          saveFolders: this.saveFolders_.bind(this)
         }
       };
     },
@@ -406,6 +410,12 @@ var ChromeExtensionUi = (function () {
     saveFolder_: function (folder)
     {
       chrome.runtime.sendMessage( { operation: 'save-folder', folder: folder} );
+    },
+
+    saveFolders_: function (folders)
+    {
+      chrome.runtime.sendMessage( { operation: 'save-folders',
+                                    folders: folders} );
     },
 
     /* Events initiated by the extension outbound to `SortingDesk´ */
