@@ -169,7 +169,7 @@ var ChromeExtensionUi = (function () {
       /* Instantiate the Bin Explorer component and initialise it. */
       this.explorer_ = new BinExplorer.Explorer(
         { api: this.sorter_.api },
-        this.getBinExplorerCallbacks() );
+        this.getBinExplorerCallbacks_() );
 
       /* Hold on to promise so that we can clean state up once it exits. */
       this.explorer_.initialise()
@@ -214,6 +214,8 @@ var ChromeExtensionUi = (function () {
 
     getBinExplorerCallbacks_: function ()
     {
+      var self = this;
+      
       return {
       };
     }
