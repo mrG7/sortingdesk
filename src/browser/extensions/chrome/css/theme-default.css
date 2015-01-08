@@ -13,20 +13,21 @@
 
 
 /* Common default settings */
-.sd-label-browser,
-#sd-container {
+.sd-container {
+  position: fixed;
   font-family: arial,sans-serif;
-  z-index: 1000000;
+  font-size: 12px;
   color: black;
+  z-index: 1000000;
 }
 
-#sd-container * {
+.sd-container * {
   box-sizing: content-box;
   -webkit-box-sizing: content-box;
 }
 
 
-/* Positioning of master container (#sd-container)
+/* Positioning of master container (#sd-sorting-desk)
  * Note: null rule-set placeholders. */
 .sd-bottom-right { }
 .sd-bottom-left { }
@@ -34,27 +35,22 @@
 .sd-top-right { }
 
 /* Master container */
-#sd-container {
-  position: fixed;
-  font-size: 12px;
-}
-
-#sd-container.sd-top-left {
+#sd-sorting-desk.sd-top-left {
   top: 5px;
   left: 5px;
 }
 
-#sd-container.sd-top-right {
+#sd-sorting-desk.sd-top-right {
   top: 5px;
   right: 5px;
 }
 
-#sd-container.sd-bottom-right {
+#sd-sorting-desk.sd-bottom-right {
   bottom: 5px;
   right: 5px;
 }
 
-#sd-container.sd-bottom-left {
+#sd-sorting-desk.sd-bottom-left {
   bottom: 5px;
   left: 5px;
 }
@@ -73,19 +69,19 @@
   box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.6);
 }
 
-#sd-container.sd-top-left #sd-sorter {
+#sd-sorting-desk.sd-top-left #sd-sorter {
   border-radius: 0 10px 10px 10px;
 }
 
-#sd-container.sd-top-right #sd-sorter {
+#sd-sorting-desk.sd-top-right #sd-sorter {
   border-radius: 10px 0 10px 10px;
 }
 
-#sd-container.sd-bottom-right #sd-sorter {
+#sd-sorting-desk.sd-bottom-right #sd-sorter {
   border-radius: 10px 10px 0 10px;
 }
 
-#sd-container.sd-bottom-left #sd-sorter {
+#sd-sorting-desk.sd-bottom-left #sd-sorter {
   border-radius: 10px 10px 10px 0;
 }
 
@@ -125,17 +121,17 @@
   color: white;
 }
 
-#sd-container.sd-top-left #sd-activator,
-#sd-container.sd-bottom-left #sd-activator {
+#sd-sorting-desk.sd-top-left #sd-activator,
+#sd-sorting-desk.sd-bottom-left #sd-activator {
   float: left;
 }
 
-#sd-container.sd-top-right #sd-activator,
-#sd-container.sd-bottom-right #sd-activator {
+#sd-sorting-desk.sd-top-right #sd-activator,
+#sd-sorting-desk.sd-bottom-right #sd-activator {
   float: right;
 }
 
-#sd-container.sd-active #sd-activator {
+#sd-sorting-desk.sd-active #sd-activator {
   border-radius: 0;
   opacity: 1;
 }
@@ -172,19 +168,19 @@
   line-height: 25px;
 }
 
-#sd-container.sd-top-left #sd-button-add,
-#sd-container.sd-bottom-left #sd-button-add {
+#sd-sorting-desk.sd-top-left #sd-button-add,
+#sd-sorting-desk.sd-bottom-left #sd-button-add {
   top: 33px;
   right: -25px;
 }
 
-#sd-container.sd-top-right #sd-button-add,
-#sd-container.sd-bottom-right #sd-button-add {
+#sd-sorting-desk.sd-top-right #sd-button-add,
+#sd-sorting-desk.sd-bottom-right #sd-button-add {
   top: 33px;
   left: -25px;
 }
 
-#sd-container.sd-active #sd-button-add {
+#sd-sorting-desk.sd-active #sd-button-add {
   display: block;
 }
 
@@ -192,13 +188,13 @@
   position: relative;
 }
 
-#sd-container.sd-top-left #sd-button-add SPAN,
-#sd-container.sd-bottom-left #sd-button-add SPAN {
+#sd-sorting-desk.sd-top-left #sd-button-add SPAN,
+#sd-sorting-desk.sd-bottom-left #sd-button-add SPAN {
   margin-right: -10px;
 }
 
-#sd-container.sd-top-right #sd-button-add SPAN,
-#sd-container.sd-bottom-right #sd-button-add SPAN {
+#sd-sorting-desk.sd-top-right #sd-button-add SPAN,
+#sd-sorting-desk.sd-bottom-right #sd-button-add SPAN {
   margin-left: -10px;
 }
 
@@ -555,14 +551,14 @@ A.sd-text-item-title:hover {
   line-height: 25px;
 }
 
-#sd-container.sd-top-left #sd-button-dismiss,
-#sd-container.sd-bottom-left #sd-button-dismiss {
+#sd-sorting-desk.sd-top-left #sd-button-dismiss,
+#sd-sorting-desk.sd-bottom-left #sd-button-dismiss {
   top: 33px;
   right: -25px;
 }
 
-#sd-container.sd-top-right #sd-button-dismiss,
-#sd-container.sd-bottom-right #sd-button-dismiss {
+#sd-sorting-desk.sd-top-right #sd-button-dismiss,
+#sd-sorting-desk.sd-bottom-right #sd-button-dismiss {
   top: 33px;
   left: -25px;
 }
@@ -571,13 +567,13 @@ A.sd-text-item-title:hover {
   position: relative;
 }
 
-#sd-container.sd-top-left #sd-button-dismiss SPAN,
-#sd-container.sd-bottom-left #sd-button-dismiss SPAN {
+#sd-sorting-desk.sd-top-left #sd-button-dismiss SPAN,
+#sd-sorting-desk.sd-bottom-left #sd-button-dismiss SPAN {
   margin-right: -10px;
 }
 
-#sd-container.sd-top-right #sd-button-dismiss SPAN,
-#sd-container.sd-bottom-right #sd-button-dismiss SPAN {
+#sd-sorting-desk.sd-top-right #sd-button-dismiss SPAN,
+#sd-sorting-desk.sd-bottom-right #sd-button-dismiss SPAN {
   margin-left: -10px;
 }
 
@@ -593,77 +589,9 @@ A.sd-text-item-title:hover {
 }
 
 
-/* Common to components */
-.sd-button-close {
-  position: absolute;
-  top: -12px;
-  right: -12px;
-  width: 20px;
-  height: 20px;
-  background-color: white;
-  border: 1px solid grey;
-  border-radius: 10px;
-  text-align: center;
-  font-size: 13px;
-  line-height: 19px;
-  box-shadow: 1px 1px 2px 0 rgba(50, 50, 50, 0.75);
-  cursor: pointer;
-  transition: all 200ms;
-}
-
-.sd-button-close:hover {
-  background-color: #ececec;
-}
-
-
 /* Label Browser */
-.sd-label-browser {
-  position: fixed;
-  top: 100px;
-  left: 100px;
-  opacity: 0;
-  display: block;
-  width: 400px;
-  height: 400px;
-  background-color: white;
-  border: 5px solid silver;
-  border-radius: 15px;  
-  transform: scale(0.2,0.2);
-  transition: transform 300ms ease-in-out, opacity 150ms ease-in;
-
-  /* box-shadow */
-  -webkit-box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.6);
-  -moz-box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.6);
-  box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.6);
-}
-
-.sd-label-browser * {
-  box-sizing: content-box;
-  -webkit-box-sizing: content-box;
-}  
-
-.sd-lb-container-inner {
-}
-
-.sd-lb-container-content {
-  overflow: hidden;
-}
-
 .sd-lb-heading {
-  padding: 10px 5px 8px 5px;
-  border: 1px solid #dbdbdb;
-  border-radius: 8px 8px 0 0;
-  background-color: #e5e4ef;
-  margin: 0;
   height: 57px;
-  text-shadow: 1px 1px 2px rgba(150, 150, 150, 1);
-}
-
-.sd-lb-heading-title {
-  font-size: 16px;
-  line-height: 16px;
-  border: none;
-  margin: 0 0 5px 0;
 }
 
 .sd-lb-heading-content {
@@ -745,14 +673,15 @@ A.sd-text-item-title:hover {
   max-height: none;
 }
 
-.sd-lb-toolbar {
-  float: right;
+
+/* Bin Explorer */
+.sd-be-heading {
+  height: 30px;
 }
 
 
-/* Bin Explorer */
-.sd-bin-explorer {
-  position: fixed;
+/* Common styling to Label Browser and Bin Explorer components */
+.sd-container.sd-component {
   top: 100px;
   left: 100px;
   opacity: 0;
@@ -771,37 +700,72 @@ A.sd-text-item-title:hover {
   box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.6);
 }
 
-.sd-bin-explorer * {
-  box-sizing: content-box;
-  -webkit-box-sizing: content-box;
-}  
-
-.sd-be-heading {
+.sd-heading {
   padding: 10px 5px 8px 5px;
+  margin: 0;
+  
   border: 1px solid #dbdbdb;
   border-radius: 8px 8px 0 0;
+  
+  color: #333;
   background-color: #e5e4ef;
-  margin: 0;
-  height: 25px;
-  text-shadow: 1px 1px 2px rgba(150, 150, 150, 1);
+  text-shadow: 1px 1px 2px white;
 }
 
-.sd-be-heading-title {
+.sd-heading-title {
   font-size: 16px;
+  font-weight: bold;
+  font-family: arial,sans-serif;
   line-height: 16px;
+  
   border: none;
   margin: 0 0 5px 0;
 }
 
-.sd-be-container-inner {
-}
-
-.sd-be-container-content {
+.sd-container-content {
   overflow: hidden;
 }
 
+.sd-lb-toolbar,
+.sd-be-toolbar {
+  float: right;
+}
 
-/* Toolbar  */
+.sd-button-close {
+  position: absolute;
+  top: -12px;
+  right: -12px;
+  width: 20px;
+  height: 20px;
+  background-color: white;
+  border: 1px solid grey;
+  border-radius: 10px;
+  text-align: center;
+  font-size: 13px;
+  line-height: 19px;
+  box-shadow: 1px 1px 2px 0 rgba(50, 50, 50, 0.75);
+  cursor: pointer;
+  transition: all 200ms;
+}
+
+.sd-button-close:hover {
+  background-color: #ececec;
+}
+
+
+/* Toolbar & buttons */
+.sd-toolbar-button-group {
+  float: left;
+}
+
+.sd-toolbar-button-group {
+  margin-left: 5px;
+}
+
+.sd-toolbar-button-group:last-child:first-child {
+  margin-left: 0;
+}
+
 .sd-toolbar-button-group > .sd-toolbar-button {
   position: relative;
   float: left;
@@ -873,12 +837,18 @@ A.sd-text-item-title:hover {
   font-size: 14px;
 }
 
+
+/* Glyphs */
 .sd-glyph-plus:before {
   content: "\2b"
 }
 
 .sd-glyph-remove:before {
   content: "\e014";
+}
+
+.sd-glyph-rename:before {
+  content: "\270f";
 }
 
 .sd-glyph-list:before {
@@ -890,7 +860,7 @@ A.sd-text-item-title:hover {
 }
 
 .sd-glyph-wrench:before {
-  content:"\e136"
+  content: "\e136"
 }
 
 /* Button: round */

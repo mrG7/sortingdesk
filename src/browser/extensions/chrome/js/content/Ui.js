@@ -84,7 +84,7 @@ var ChromeExtensionUi = (function () {
 
       /* Cache jQuery references to nodes used. */
       self.nodes_ = {
-        container: $('#sd-container'),
+        container: $('#sd-sorting-desk'),
         sorter: $('#sd-sorter'),
         activator: $('#sd-activator'),
         loading: $('#sd-load'),
