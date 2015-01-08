@@ -12,15 +12,15 @@
 
 var Config = (function () {
   var defaults_ = {
-    dossierUrl: 'http://54.174.195.250:8080',
+    dossierUrl: 'http://10.3.2.42:9090',
     active: true
   };
 
-  
+
   var load = function (callback) {
     chrome.storage.local.get('config', function (state) {
       console.log("Configuration loaded");
-      
+
       /* If a configuration state has not been found, save an initial default
        * one. */
       if(!state.hasOwnProperty("config")) {
@@ -41,7 +41,7 @@ var Config = (function () {
 
     chrome.storage.local.set( { "config": options }, function () {
       console.log("Configuration saved");
-      
+
       if(callback)
         callback();
     } );

@@ -297,7 +297,7 @@
 .sd-bin.sd-bin-image.sd-assign {
   top: 6px;
 }
-  
+
 .sd-bin.sd-active {
   color: #E6FFD6;
   background-color: #83c78e;
@@ -383,7 +383,7 @@
 
 .sd-text-item-content {
   overflow: hidden;
-  max-height: 65px;
+  max-height: 130px;
   text-overflow: ellipsis;
 }
 
@@ -496,7 +496,7 @@ A.sd-text-item-title:hover {
 .sd-text-item-close,
 .sd-text-item-close:visited {
   color: grey !important;
-}  
+}
 
 .sd-text-item-close:hover {
   color: black;
