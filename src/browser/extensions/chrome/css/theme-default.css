@@ -619,10 +619,6 @@ A.sd-text-item-title:hover {
   font-size: 14px;
 }
 
-.sd-lb-items TABLE TD {
-  font-size: 13px;
-}
-
 .sd-lb-items TABLE TH,
 .sd-lb-items TABLE TD {
   border: 1px solid;
@@ -650,11 +646,13 @@ A.sd-text-item-title:hover {
 
 .sd-lb-items-id {
   font-family: monospace;
-  width: 255px;
+  font-size: 10px;
+  width: 150px;
   vertical-align: top;
 }
 
 .sd-lb-items-content IMG {
+  font-size: 14px;
   width: auto;
   max-height: 50px;
   transition: all 250ms;
