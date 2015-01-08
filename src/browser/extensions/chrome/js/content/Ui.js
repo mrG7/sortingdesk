@@ -99,21 +99,7 @@ var ChromeExtensionUi = (function () {
 
       /* Register for click events on the 'settings' button inside the extension
        * activator button. */
-      self.activator_.register(function () {
-        if(self.explorer_)
-          return;
-
-        /* Instantiate the Bin Explorer component and initialise it. */
-        self.explorer_ = new BinExplorer.Explorer(
-          { },
-          self.sorter_.api);
-
-        /* Hold on to promise so that we can clean state up once it exits. */
-        self.explorer_.initialise()
-          .done(function () {
-            self.explorer_ = null;
-          } );
-      } );
+      self.activator_.register(this.onClickSettings_.bind(this));
 
       /* Center the `loading´ and `empty´ notifications.
        * 
@@ -168,6 +154,28 @@ var ChromeExtensionUi = (function () {
                ((this.nodes_.sorter.width() - node.outerWidth()) / 2) + 'px')
           .hide();
       }
+    },
+
+    onClickSettings_: function ()
+    {
+      if(this.explorer_)
+        return;
+
+      var self = this;
+
+      if(!this.sorter_)
+        throw "Sorting Desk instance not active";
+
+      /* Instantiate the Bin Explorer component and initialise it. */
+      this.explorer_ = new BinExplorer.Explorer(
+        { api: this.sorter_.api },
+        this.getBinExplorerCallbacks() );
+
+      /* Hold on to promise so that we can clean state up once it exits. */
+      this.explorer_.initialise()
+        .done(function () {
+          self.explorer_ = null;
+        } );
     },
 
     getLabelBrowserCallbacks_: function ()
