@@ -921,6 +921,10 @@ A.sd-text-item-title:hover {
   content:"\e079";
 }
 
+.sd-glyph-floppy-open:before {
+  content:"\e176";
+}
+
 /* Button: round */
 .sd-button-round,
 .sd-button-round.sd-normal {
