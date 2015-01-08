@@ -163,8 +163,10 @@ var LabelBrowser_ = function (window, SortingQueue, $)
     this.check_init_();
     
     /* Resolve promise if one still exists. */
-    if(this.deferred_)
+    if(this.deferred_) {
       this.close();
+      if(!this.initialised_) return;
+    }
 
     /* Remove all children nodes. */
     this.nodes_.heading.title.children().remove();
