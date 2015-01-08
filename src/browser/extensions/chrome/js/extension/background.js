@@ -153,8 +153,7 @@ var Background = function ()
       Config.load(function (options) {
         callback( {
           config: options,
-          tab: sender.tab,
-          activeBinId: activeBinId_
+          tab: sender.tab
         } );
       } );
     },
