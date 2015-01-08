@@ -111,7 +111,7 @@ var FolderExplorer_ = function (window, SortingQueue, $)
       /* Load currently selected item when toolbar button clicked. */
       els.toolbar.actions.load.click(function () {
         if(self.selected_ && self.selected_ instanceof ItemIconicFolder) {
-          self.load(self.selected_);
+          self.open(self.selected_.item);
           self.select(null);
         }
 
@@ -204,9 +204,9 @@ var FolderExplorer_ = function (window, SortingQueue, $)
         this.selected_ = null;
     },
     
-    load: function (folder)
+    open: function (folder)
     {
-      this.invoke('onLoad', folder);
+      this.invoke('open', folder);
     },
 
     viewFolder: function (folder)
@@ -684,7 +684,7 @@ var FolderExplorer_ = function (window, SortingQueue, $)
                this.item_.name,
                '</div>' ].join('') )
       .dblclick(function () {
-        self.owner.owner.owner.load(self.item_);
+        self.owner.owner.owner.open(self.item_);
       } );
 
     this.node_.appendTo(container);
