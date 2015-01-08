@@ -216,6 +216,7 @@
   overflow-y: hidden;
   white-space: nowrap;
   vertical-align: middle;
+  border-bottom: 1px dashed silver;
 }
 
 #sd-queue {

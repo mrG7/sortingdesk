@@ -555,6 +555,11 @@ var ChromeExtensionUi = (function () {
                           - (nodes.sorter.outerHeight()
                              - nodes.sorter.innerHeight() )
                           - 10);
+
+      /* TODO: addressing node by its Id. */
+      $('#sd-queue').height(nodes.sorter.innerHeight()
+                            - $('#sd-bins').outerHeight(true)
+                            - 10);
       
       this.current_ = target;
     }
