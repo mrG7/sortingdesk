@@ -593,6 +593,29 @@ A.sd-text-item-title:hover {
 }
 
 
+/* Common to components */
+.sd-button-close {
+  position: absolute;
+  top: -12px;
+  right: -12px;
+  width: 20px;
+  height: 20px;
+  background-color: white;
+  border: 1px solid grey;
+  border-radius: 10px;
+  text-align: center;
+  font-size: 13px;
+  line-height: 19px;
+  box-shadow: 1px 1px 2px 0 rgba(50, 50, 50, 0.75);
+  cursor: pointer;
+  transition: all 200ms;
+}
+
+.sd-button-close:hover {
+  background-color: #ececec;
+}
+
+
 /* Label Browser */
 .sd-label-browser {
   position: fixed;
@@ -624,27 +647,6 @@ A.sd-text-item-title:hover {
 
 .sd-lb-container-content {
   overflow: hidden;
-}
-
-.sd-lb-close {
-  position: absolute;
-  top: -12px;
-  right: -12px;
-  width: 20px;
-  height: 20px;
-  background-color: white;
-  border: 1px solid grey;
-  border-radius: 10px;
-  text-align: center;
-  font-size: 13px;
-  line-height: 19px;
-  box-shadow: 1px 1px 2px 0 rgba(50, 50, 50, 0.75);
-  cursor: pointer;
-  transition: all 200ms;
-}
-
-.sd-lb-close:hover {
-  background-color: #ececec;
 }
 
 .sd-lb-heading {
