@@ -34,6 +34,27 @@ var Api_ = (function (window, $, CryptoJS) {
 
     qitems_ = new DossierJS.SortingQueueItems(
       api_, 'index_scan', '', annotator_);
+    DossierJS.SortingQueueItems.prototype._itemDismissed = function(cobj) {
+      console.log('Adding a negative label between ' + cobj.content_id
+                  + ' and ...');
+      for (var i = 0; i < sortingDesk_.bins_.bins_.length; i++) {
+        var bin = sortingDesk_.bins_.bins_[i];
+        (new DossierJS.LabelFetcher(api_))
+          .cid(bin.data_.content_id)
+          .which('connected')
+          .get()
+          .done(function(labels) {
+            cids = uniqueContentIdsFromLabels(labels);
+            console.log('... these content ids:', cids);
+
+            api_.addLabels(cids.map(function(cid) {
+              return new DossierJS.Label(
+                cobj.content_id, cid, annotator_,
+                DossierJS.COREF_VALUE_NEGATIVE);
+            }));
+          });
+      }
+    };
 
     /* Return module public API -- post initialization */
     return {
@@ -45,6 +66,7 @@ var Api_ = (function (window, $, CryptoJS) {
       addLabel: addLabel,
       getLabelsUniqueById: getLabelsUniqueById,
       dedupLabelsBySubtopic: dedupLabelsBySubtopic,
+      uniqueContentIdsFromLabels: uniqueContentIdsFromLabels,
       setQueryContentId: setQueryContentId,
       setSearchEngine: setSearchEngine,
       getSearchEngine: getSearchEngine,
@@ -163,6 +185,25 @@ var Api_ = (function (window, $, CryptoJS) {
       }
     } );
     return result;
+  };
+
+  var uniqueContentIdsFromLabels = function(labels)
+  {
+    var seen = { },
+        cids = [ ];
+    for (var i = 0; i < labels.length; i++) {
+      var cid1 = labels[i].cid1,
+          cid2 = labels[i].cid2;
+      if (!seen[cid1]) {
+        seen[cid1] = true;
+        cids.push(cid1);
+      }
+      if (!seen[cid2]) {
+        seen[cid2] = true;
+        cids.push(cid2);
+      }
+    }
+    return cids;
   };
 
   var setQueryContentId = function (id)
