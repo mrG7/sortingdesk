@@ -183,6 +183,11 @@ Ideally, each bin should look like the item that was first dropped to create tha
 ** Extension [0%]
 *** All [100%]
 *** Chrome [0%]
+**** TODO =Positioner:position=: setting height with added hardcoded margin
+
+**** TODO =Positioner:position=: addressing node by its id
+All other nodes are addressed via the `nodes´ object map.
+
 **** TODO Should be using a map to contain folders
 
 **** TODO =Activator=: using an adhoc event subscriber
