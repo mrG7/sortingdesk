@@ -150,6 +150,8 @@ var LabelBrowser_ = function (window, SortingQueue, $)
         onEndInitialise();
       } );
 
+    this.initialised_ = true;
+
     /* TODO: We should NOT be invoking a callback owned by the active Sorting
      * Queue instance. The `LabelBrowser´ component should instead have its own
      * set of callbacks and events that clients can specify and register for. */
@@ -157,8 +159,6 @@ var LabelBrowser_ = function (window, SortingQueue, $)
       name: "onLabelBrowserInitialised",
       mandatory: false
     }, this.nodes_.container);
-
-    this.initialised_ = true;
 
     return this.show();
   };
