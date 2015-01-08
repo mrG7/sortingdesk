@@ -125,6 +125,8 @@ Component needs to stand on its own, have its own set of options, callbacks and 
 - State "CANCELED"   from "TODO"       [2015-01-05 Mon 14:26] \\
   Can't be done. Bootstrap screws up/overwrites existing page styles.
 
+*** TODO Toolbar: border radius is broken
+
 *** TODO Should be using a map to contain bins
 Also see TODO about folders being kept in an array.
 
