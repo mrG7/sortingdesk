@@ -114,6 +114,7 @@ var ChromeExtensionUi = (function () {
         self.center_('empty');
       }
       self.nodes_.sorter.hide();
+      self.activator_.show();
 
       /* Initialise API and instantiate `SortingDesk´ class. */
       self.sorter_ = new SortingDesk.Sorter( {
@@ -379,54 +380,79 @@ var ChromeExtensionUi = (function () {
    * */
   var Activator = function ()
   {
-    var self = this,
-        nodes = ui_.nodes,
-        width = nodes.activator.width();
+    var self = this;
     
-    nodes.activator.click(function () {
-      if(nodes.container.hasClass('sd-active')) {
-        nodes.sorter
-          .stop(true, true)
-          .fadeOut( { duration: 200, queue: false } );
-        
-        nodes.activator
-          .animate( { width: width + 'px' }, 150, function () {
-            $(this).html(self.html_);
-          } );
-        
-        nodes.container.removeClass('sd-active');
-      } else {
-        nodes.container.addClass('sd-active');
-        
-        self.html_ = nodes.activator.html();
-        nodes.activator
-          .html('<DIV id="sd-settings" class="sd-button sd-button-round sd-small"><SPAN class="sd-glyph-wrench"></SPAN></DIV>Sorting Desk')
-          .animate( { width: '120px' }, 150);
-        
-        $('#sd-settings').click(function () {
-          if(typeof self.callback_ === 'function')
-            self.callback_();
-          
-          return false;
-        } );
-        
-        nodes.sorter
-          .stop(true, true)
-          .fadeIn( { duration: 100, queue: false } );
-      }
-      
+    ui_.nodes.activator.click(function () {
+      self.toggleShow();
       return false;
     } );
   };
 
   Activator.prototype = {
     html_: null,
+    width_: null,
     callback_: null,
 
     /* TODO: don't use an adhoc event subscriber. */
     register: function (callback)
     {
       this.callback_ = callback;
+    },
+
+    toggleShow: function ()
+    {
+      if(ui_.nodes.container.hasClass('sd-active'))
+        this.hide();
+      else
+        this.show();
+    },
+
+    show: function ()
+    {
+      var self = this,
+          nodes = ui_.nodes;
+      
+      if(nodes.container.hasClass('sd-active'))
+        return;
+      
+      nodes.container.addClass('sd-active');
+      
+      self.html_ = nodes.activator.html();
+      self.width_ = nodes.activator.width();
+      nodes.activator
+        .html('<DIV id="sd-settings" class="sd-button sd-button-round sd-small"><SPAN class="sd-glyph-wrench"></SPAN></DIV>Sorting Desk')
+        .animate( { width: '120px' }, 150);
+      
+      $('#sd-settings').click(function () {
+        if(typeof self.callback_ === 'function')
+          self.callback_();
+        
+        return false;
+      } );
+        
+      nodes.sorter
+        .stop(true, true)
+        .fadeIn( { duration: 100, queue: false } );
+    },
+
+    hide: function ()
+    {
+      var self = this,
+          nodes = ui_.nodes;
+
+      if(!nodes.container.hasClass('sd-active'))
+        return;
+      
+      nodes.sorter
+        .stop(true, true)
+        .fadeOut( { duration: 200, queue: false } );
+      
+      nodes.activator
+        .animate( { width: self.width_ + 'px' }, 150, function () {
+          $(this).html(self.html_);
+        } );
+      
+      nodes.container.removeClass('sd-active');
     }
   };
 
@@ -479,6 +505,12 @@ var ChromeExtensionUi = (function () {
 
       nodes.container.add(nodes.add)
         .addClass(Positioner.TARGET_CLASSES[target - 1] );
+
+      nodes.sorter.height($(window).height()
+                          - nodes.activator.outerHeight()
+                          - (nodes.sorter.outerHeight()
+                             - nodes.sorter.innerHeight() )
+                          - 10);
       
       this.current_ = target;
     }
