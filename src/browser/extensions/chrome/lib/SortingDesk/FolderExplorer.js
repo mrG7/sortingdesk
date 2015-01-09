@@ -144,8 +144,6 @@ var FolderExplorer_ = function (window, SortingQueue, $)
             self.refresh();
           } else
             console.log("Failed to remove selected item: ", self.selected_);
-
-          self.select(null);
         }
 
         return false;
