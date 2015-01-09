@@ -790,7 +790,9 @@ INPUT.sd-fe-input {
   font-weight: bold;
   font-family: arial,sans-serif;
   line-height: 16px;
-
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
   border: none;
   margin: 0 0 5px 0;
   padding: 0;
@@ -836,9 +838,6 @@ INPUT.sd-fe-input {
 /* Toolbar & buttons */
 .sd-toolbar-button-group {
   float: left;
-}
-
-.sd-toolbar-button-group {
   margin-left: 5px;
 }
 
@@ -857,9 +856,13 @@ INPUT.sd-fe-input {
   border-bottom-right-radius: 0;
 }
 
-.sd-toolbar-button-group > .sd-toolbar-button:last-child:not(first-child) {
+.sd-toolbar-button-group > .sd-toolbar-button:last-child:not(:first-child) {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
+}
+
+.sd-toolbar-button-group > .sd-toolbar-button:not(:first-child):not(:last-child) {
+  border-radius: 0;
 }
 
 .sd-button,
@@ -878,30 +881,34 @@ INPUT.sd-fe-input {
 .sd-toolbar-button {
   padding: 6px 12px;
   border: 1px solid transparent;
-  border-radius: 4px;
+  border-radius: 6px;
   outline: 1px auto #ccc;
   line-height: normal;
-  height: 34px;
+  height: 22px;
 
   color: #333;
   background-color: white;
-  box-sizing: border-box;
+  transition: all 150ms;
 }
 
-.sd-toolbar-button:hover {
+.sd-toolbar-button.sd-disabled {
+  color: #ccc;
+  cursor: default;
+}
+
+.sd-toolbar-button:hover:not(.sd-disabled) {
   background-color: #ccc;
   border-color: #ccc;
   z-index: 2;
 }
 
-.sd-toolbar-button:focus {
+.sd-toolbar-button:focus:not(.sd-disabled) {
   outline: 2px solid #a9bef3;
   outline-offset: -1px;
   z-index: 2;
 }
 
-.sd-button > SPAN,
-.sd-toolbar-button > SPAN {
+.sd-glyph {
   position: relative;
   top: 1px;
   display: inline-block;
@@ -915,14 +922,14 @@ INPUT.sd-fe-input {
   -moz-osx-font-smoothing: grayscale;
 }
 
-.sd-button > SPAN,
-.sd-button.sd-normal > SPAN,
-.sd-toolbar-button.sd-normal > SPAN {
+.sd-button > *,
+.sd-button.sd-normal > *,
+.sd-toolbar-button.sd-normal > * {
   font-size: 16px;
 }
 
-.sd-button.sd-small > SPAN,
-.sd-toolbar-button.sd-small > SPAN {
+.sd-button.sd-small > *,
+.sd-toolbar-button.sd-small > * {
   font-size: 14px;
 }
 
