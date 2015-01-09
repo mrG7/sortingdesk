@@ -123,9 +123,8 @@ var FolderExplorer_ = function (window, SortingQueue, $)
 
       /* Add item when toolbar button clicked. */
       els.toolbar.actions.add.click(function () {
-        if(self.view_)
-          self.view_.onCreate();
-
+        self.select(null);
+        if(self.view_) self.view_.onCreate();
         return false;
       } );
       
