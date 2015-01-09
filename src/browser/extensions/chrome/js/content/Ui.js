@@ -86,10 +86,11 @@ var ChromeExtensionUi = (function () {
       self.nodes_ = {
         container: $('#sd-sorting-desk'),
         sorter: $('#sd-sorter'),
-        activator: $('#sd-activator'),
-        loading: $('#sd-load'),
-        empty: $('#sd-empty')
+        activator: $('#sd-activator')
       };
+
+      self.nodes_.loading = this.nodes_.container.find('.sd-loading');
+      self.nodes_.empty = this.nodes_.container.find('.sd-empty');
 
       /* Instantiate class components. */
       self.activator_ = new Activator();
@@ -100,20 +101,6 @@ var ChromeExtensionUi = (function () {
       /* Register for click events on the 'settings' button inside the extension
        * activator button. */
       self.activator_.register(this.onClickSettings_.bind(this));
-
-      /* Center the `loading´ and `empty´ notifications.
-       * 
-       * Note that both the main container and the element(s) to be centered
-       * MUST be visible or their widths can't be computed and thus
-       * centering fails. Even though several elements are shown and hidden
-       * in quick succession, no flicker occurs because painting only takes
-       * place once the script returns execution to the browser. */
-      self.nodes_.sorter.show();
-      {
-        self.center_('loading');
-        self.center_('empty');
-      }
-      self.nodes_.sorter.hide();
       self.activator_.show();
 
       /* Initialise API and instantiate `SortingDesk´ class. */
@@ -142,19 +129,6 @@ var ChromeExtensionUi = (function () {
         Api,
         self.requests_.callbacks.sorter,
         self.transceiver_.callbacks.sorter ) );
-    },
-    
-    center_: function (node)
-    {
-      if((node = this.nodes_[node])) {
-        /* Both the node and main container must be visible if the node's width
-         * is to be known. */
-        node
-          .show()
-          .css('left',
-               ((this.nodes_.sorter.width() - node.outerWidth()) / 2) + 'px')
-          .hide();
-      }
     },
 
     onClickSettings_: function ()
@@ -186,7 +160,15 @@ var ChromeExtensionUi = (function () {
       
       return {
         onInitialised: function (container) {
+          $('.sd-label-browser .sd-empty').hide();
+          $('.sd-label-browser .sd-loading').show();
           self.positionWindow_(container);
+        },
+        onReady: function (count) {
+          $('.sd-label-browser .sd-loading').hide();
+          
+          if(count === 0)
+            $('.sd-label-browser .sd-empty').fadeIn();
         }
       };
     },
@@ -258,7 +240,7 @@ var ChromeExtensionUi = (function () {
     
     onRequestStop: function () {
       if(--this.count_ === 0)
-        ui_.nodes.loading.stop().fadeOut();
+        ui_.nodes.loading.stop().fadeOut(100);
     },
     
     /* Getter methods */
@@ -458,7 +440,9 @@ var ChromeExtensionUi = (function () {
       self.html_ = nodes.activator.html();
       self.width_ = nodes.activator.width();
       nodes.activator
-        .html('<DIV id="sd-settings" class="sd-button sd-button-round sd-small"><SPAN class="sd-glyph-wrench"></SPAN></DIV>Sorting Desk')
+        .html('<DIV id="sd-settings" class="sd-button sd-button-round'
+              + ' sd-small"><SPAN class="sd-glyph sd-glyph-wrench">'
+              + '</SPAN></DIV>Sorting Desk')
         .animate( { width: '120px' }, 150);
       
       $('#sd-settings').click(function () {

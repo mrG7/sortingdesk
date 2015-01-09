@@ -37,8 +37,8 @@ var Api_ = (function (window, $, CryptoJS) {
     DossierJS.SortingQueueItems.prototype._itemDismissed = function(cobj) {
       console.log('Adding a negative label between ' + cobj.content_id
                   + ' and ...');
-      for (var i = 0; i < sortingDesk_.bins_.bins_.length; i++) {
-        var bin = sortingDesk_.bins_.bins_[i];
+      for (var i = 0; i < sortingDesk_.folder_.bins_.length; i++) {
+        var bin = sortingDesk_.folder_.bins_[i];
         (new DossierJS.LabelFetcher(api_))
           .cid(bin.data_.content_id)
           .which('connected')
@@ -99,6 +99,7 @@ var Api_ = (function (window, $, CryptoJS) {
   {
     if(!(ids instanceof Array))
       throw "Invalid ids array container";
+
     return api_.fcGetAll(ids);
   };
 
