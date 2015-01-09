@@ -240,7 +240,7 @@ var ChromeExtensionUi = (function () {
     
     onRequestStop: function () {
       if(--this.count_ === 0)
-        ui_.nodes.loading.stop().fadeOut();
+        ui_.nodes.loading.stop().fadeOut(100);
     },
     
     /* Getter methods */
