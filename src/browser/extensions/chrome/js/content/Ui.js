@@ -86,10 +86,11 @@ var ChromeExtensionUi = (function () {
       self.nodes_ = {
         container: $('#sd-sorting-desk'),
         sorter: $('#sd-sorter'),
-        activator: $('#sd-activator'),
-        loading: $('#sd-load'),
-        empty: $('#sd-empty')
+        activator: $('#sd-activator')
       };
+
+      self.nodes_.loading = this.nodes_.container.find('.sd-loading');
+      self.nodes_.empty = this.nodes_.container.find('.sd-empty');
 
       /* Instantiate class components. */
       self.activator_ = new Activator();
