@@ -348,6 +348,7 @@ var FolderExplorer_ = function (window, SortingQueue, $)
 
       /* Render view. */
       this.view_.render();
+      this.select(null);
     },
 
     /* Getters */
