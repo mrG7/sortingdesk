@@ -204,6 +204,11 @@ var FolderExplorer_ = function (window, SortingQueue, $)
         this.selected_.node.addClass(Css.selected);
       } else
         this.selected_ = null;
+
+      var flag = this.selected_ === null,
+          els = this.nodes_.toolbar;
+      els.actions.load.toggleClass('sd-disabled', flag);
+      els.actions.remove.toggleClass('sd-disabled', flag);
     },
     
     open: function (folder)
