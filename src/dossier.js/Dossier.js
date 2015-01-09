@@ -136,32 +136,27 @@ var _DossierJS = function(window, $) {
     // return an array that is always in correspondence with the given content
     // ids. I guess it depends on the common use case. ---AG
     API.prototype.fcGetAll = function(content_ids) {
-        if(!(content_ids instanceof Array))
-            throw "Invalid or no array containing content ids";
-
-        var self = this,
-            def = $.Deferred(),
-            fcs = [];
-
-        var fc_get = function (idx) {
-            if(idx >= content_ids.length) {
-                def.resolve(fcs);
-                return;
-            }
-
-            var cid = content_ids[idx];
-            self.fcGet(cid)
-                .done(function(fc) {
-                    fcs[idx] = fc;
-                    fc_get(idx + 1);
-                })
-                .fail(function() {
-                    console.log('Could not fetch FC for ' + cid);
-                });
-        };
-
-        fc_get(0);
-
+        var def = $.Deferred(),
+            to_resolve = content_ids.length,
+            fcs = [],
+            next_idx = 0;
+        for (var i = 0; i < content_ids.length; i++) {
+          var cid = content_ids[i];
+          this.fcGet(cid)
+              .done(function(fc) {
+                  fcs[next_idx] = fc;
+                  next_idx += 1;
+              })
+              .fail(function() {
+                  console.log('Could not fetch FC for ' + cid)
+              })
+              .always(function() {
+                  to_resolve -= 1;
+                  if (to_resolve === 0) {
+                    def.resolve(fcs);
+                  }
+              });
+        }
         return def.promise();
     };
 
