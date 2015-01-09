@@ -123,9 +123,8 @@ var FolderExplorer_ = function (window, SortingQueue, $)
 
       /* Add item when toolbar button clicked. */
       els.toolbar.actions.add.click(function () {
-        if(self.view_)
-          self.view_.onCreate();
-
+        self.select(null);
+        if(self.view_) self.view_.onCreate();
         return false;
       } );
       
@@ -145,6 +144,8 @@ var FolderExplorer_ = function (window, SortingQueue, $)
             self.refresh();
           } else
             console.log("Failed to remove selected item: ", self.selected_);
+
+          self.select(null);
         }
 
         return false;
@@ -205,6 +206,11 @@ var FolderExplorer_ = function (window, SortingQueue, $)
         this.selected_.node.addClass(Css.selected);
       } else
         this.selected_ = null;
+
+      var flag = this.selected_ === null,
+          els = this.nodes_.toolbar;
+      els.actions.load.toggleClass('sd-disabled', flag);
+      els.actions.remove.toggleClass('sd-disabled', flag);
     },
     
     open: function (folder)
@@ -344,6 +350,7 @@ var FolderExplorer_ = function (window, SortingQueue, $)
 
       /* Render view. */
       this.view_.render();
+      this.select(null);
     },
 
     /* Getters */
@@ -552,7 +559,6 @@ var FolderExplorer_ = function (window, SortingQueue, $)
       throw "Max folder containment reached";
 
     item.render(this.node_);
-    console.log(item.node.position().top);
     this.owner_.owner.nodes.view.animate(
       { scrollTop: item.node.offset().top },
       250 );
@@ -711,7 +717,7 @@ var FolderExplorer_ = function (window, SortingQueue, $)
     var self = this;
     
     this.node_ = $('<div></div>')
-      .addClass([ Css.icon, Css.iconFolder ].join(' '))
+      .addClass([ Css.icon, Css.iconFolder, Css.new ].join(' '))
       .html( [ '<img src="data:image/png;base64,',
                Images.icons.folder,
                '" /><div><input class="',
@@ -719,7 +725,10 @@ var FolderExplorer_ = function (window, SortingQueue, $)
                '" type="text" placeholder="New folder"/>',
                '</div>' ].join('') );
 
-    this.node_.appendTo(container);
+    this.node_
+      .appendTo(container)
+      .css('opacity', 0)
+      .animate( { 'opacity': 1 }, 100 );
   };
 
   ItemIconicFolderNew.prototype.getNodeInput = function ()
@@ -762,7 +771,8 @@ var FolderExplorer_ = function (window, SortingQueue, $)
     iconFolder: "sd-fe-icon-folder",
     iconBin: "sd-fe-icon-bin",
     input: "sd-fe-input",
-    selected: "sd-selected"
+    selected: "sd-selected",
+    new: "sd-new"
   };
 
   /* TODO: remove base64-encoded images! */
