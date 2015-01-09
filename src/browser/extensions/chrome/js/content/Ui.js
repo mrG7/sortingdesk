@@ -100,20 +100,6 @@ var ChromeExtensionUi = (function () {
       /* Register for click events on the 'settings' button inside the extension
        * activator button. */
       self.activator_.register(this.onClickSettings_.bind(this));
-
-      /* Center the `loading´ and `empty´ notifications.
-       * 
-       * Note that both the main container and the element(s) to be centered
-       * MUST be visible or their widths can't be computed and thus
-       * centering fails. Even though several elements are shown and hidden
-       * in quick succession, no flicker occurs because painting only takes
-       * place once the script returns execution to the browser. */
-      self.nodes_.sorter.show();
-      {
-        self.center_('loading');
-        self.center_('empty');
-      }
-      self.nodes_.sorter.hide();
       self.activator_.show();
 
       /* Initialise API and instantiate `SortingDesk´ class. */
@@ -142,19 +128,6 @@ var ChromeExtensionUi = (function () {
         Api,
         self.requests_.callbacks.sorter,
         self.transceiver_.callbacks.sorter ) );
-    },
-    
-    center_: function (node)
-    {
-      if((node = this.nodes_[node])) {
-        /* Both the node and main container must be visible if the node's width
-         * is to be known. */
-        node
-          .show()
-          .css('left',
-               ((this.nodes_.sorter.width() - node.outerWidth()) / 2) + 'px')
-          .hide();
-      }
     },
 
     onClickSettings_: function ()
