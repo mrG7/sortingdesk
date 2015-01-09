@@ -440,7 +440,9 @@ var ChromeExtensionUi = (function () {
       self.html_ = nodes.activator.html();
       self.width_ = nodes.activator.width();
       nodes.activator
-        .html('<DIV id="sd-settings" class="sd-button sd-button-round sd-small"><SPAN class="sd-glyph-wrench"></SPAN></DIV>Sorting Desk')
+        .html('<DIV id="sd-settings" class="sd-button sd-button-round'
+              + ' sd-small"><SPAN class="sd-glyph sd-glyph-wrench">'
+              + '</SPAN></DIV>Sorting Desk')
         .animate( { width: '120px' }, 150);
       
       $('#sd-settings').click(function () {
