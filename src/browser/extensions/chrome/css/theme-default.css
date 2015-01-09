@@ -735,17 +735,20 @@ A.sd-text-item-title:hover {
   max-height: 45px;
 } 
 
-.sd-fe-icon:hover:not(.sd-selected) {
+.sd-fe-icon:hover:not(.sd-selected):not(.sd-new) {
   border: 1px solid silver;
   background-color: #f0f0f0;
 }
 
+.sd-fe-icon.sd-new {
+  cursor: default;
+}
+
 INPUT.sd-fe-input {
   width: 110px;
-  border: 1px solid #8aa9da;
-  padding: 2px;
-  border-radius: 4px;
-  outline: none;
+  outline: 2px groove #a9bef3;
+  border: none;
+  padding: 4px;
 }
 
 
@@ -774,6 +777,7 @@ INPUT.sd-fe-input {
   margin: 0;
 
   border: 1px solid #dbdbdb;
+  border-bottom-color: #cacaca;
   border-radius: 8px 8px 0 0;
 
   color: #333;
