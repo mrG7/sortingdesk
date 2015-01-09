@@ -138,18 +138,19 @@ var _DossierJS = function(window, $) {
     API.prototype.fcGetAll = function(content_ids) {
         if(!(content_ids instanceof Array))
             throw "Invalid or no array containing content ids";
-        
-        var def = $.Deferred(),
+
+        var self = this,
+            def = $.Deferred(),
             fcs = [];
-        
+
         var fc_get = function (idx) {
             if(idx >= content_ids.length) {
                 def.resolve(fcs);
                 return;
             }
-            
+
             var cid = content_ids[idx];
-            this.fcGet(cid)
+            self.fcGet(cid)
                 .done(function(fc) {
                     fcs[idx] = fc;
                     fc_get(idx + 1);
@@ -158,9 +159,9 @@ var _DossierJS = function(window, $) {
                     console.log('Could not fetch FC for ' + cid);
                 });
         };
-        
+
         fc_get(0);
-        
+
         return def.promise();
     };
 
