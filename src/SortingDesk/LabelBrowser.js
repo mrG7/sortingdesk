@@ -142,6 +142,7 @@ var LabelBrowser_ = function (window, SortingQueue, $)
 
             self.eqv_fcs_ = fcs instanceof Array ? fcs : [ ];
             self.render_();
+            onEndInitialise();
           } )
           .fail(function () {
             console.log('Failed to retrieve all feature collections');
