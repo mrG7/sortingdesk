@@ -99,6 +99,7 @@ var Api_ = (function (window, $, CryptoJS) {
   {
     if(!(ids instanceof Array))
       throw "Invalid ids array container";
+
     return api_.fcGetAll(ids);
   };
 
