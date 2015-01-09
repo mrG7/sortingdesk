@@ -715,7 +715,7 @@ var FolderExplorer_ = function (window, SortingQueue, $)
     var self = this;
     
     this.node_ = $('<div></div>')
-      .addClass([ Css.icon, Css.iconFolder ].join(' '))
+      .addClass([ Css.icon, Css.iconFolder, Css.new ].join(' '))
       .html( [ '<img src="data:image/png;base64,',
                Images.icons.folder,
                '" /><div><input class="',
@@ -723,7 +723,10 @@ var FolderExplorer_ = function (window, SortingQueue, $)
                '" type="text" placeholder="New folder"/>',
                '</div>' ].join('') );
 
-    this.node_.appendTo(container);
+    this.node_
+      .appendTo(container)
+      .css('opacity', 0)
+      .animate( { 'opacity': 1 }, 100 );
   };
 
   ItemIconicFolderNew.prototype.getNodeInput = function ()
@@ -766,7 +769,8 @@ var FolderExplorer_ = function (window, SortingQueue, $)
     iconFolder: "sd-fe-icon-folder",
     iconBin: "sd-fe-icon-bin",
     input: "sd-fe-input",
-    selected: "sd-selected"
+    selected: "sd-selected",
+    new: "sd-new"
   };
 
   /* TODO: remove base64-encoded images! */
