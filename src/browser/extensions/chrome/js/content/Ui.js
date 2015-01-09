@@ -160,7 +160,15 @@ var ChromeExtensionUi = (function () {
       
       return {
         onInitialised: function (container) {
+          $('.sd-label-browser .sd-empty').hide();
+          $('.sd-label-browser .sd-loading').show();
           self.positionWindow_(container);
+        },
+        onReady: function (count) {
+          $('.sd-label-browser .sd-loading').hide();
+          
+          if(count === 0)
+            $('.sd-label-browser .sd-empty').fadeIn();
         }
       };
     },
