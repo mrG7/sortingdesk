@@ -26,26 +26,29 @@ var ChromeExtensionUi = (function () {
 
     this.nodes_ = { };
 
-    /* Load custom font */
-    /* TODO: perhaps create a resource loader? This is just too hacky. */
-    {
-      var style = document.createElement('style');
-      style.type = 'text/css';
-      style.textContent = [
-        "@font-face {",
-        "font-family: 'Glyphicons Halflings';",
-        "src: url('",
-        chrome.extension.getURL('lib/bootstrap/fonts/glyphicons-halflings-regular.woff'),
-        "'); }" ].join('');
-      
-      document.head.appendChild(style);
-    }
-
     chrome.runtime.sendMessage({ operation: "get-meta" }, function (result) {
       /* Do not instantiate SortingDesk if not currently enabled or
        * current tab not active. */
-      if(!result.config.active || !result.tab.active)
+      if(!result.config.active || !result.tab.active || !window.location.href
+         || (/^https:\/\//.test(window.location.href)
+             && !result.config.activateHttps)) {
         return;
+      }
+
+      /* Load custom font */
+      /* TODO: perhaps create a resource loader? This is just too hacky. */
+      {
+        var style = document.createElement('style');
+        style.type = 'text/css';
+        style.textContent = [
+          "@font-face {",
+          "font-family: 'Glyphicons Halflings';",
+          "src: url('",
+          chrome.extension.getURL('lib/bootstrap/fonts/glyphicons-halflings-regular.woff'),
+          "'); }" ].join('');
+        
+        document.head.appendChild(style);
+      }
       
       /* Load container HTML. */
       chrome.runtime.sendMessage( {

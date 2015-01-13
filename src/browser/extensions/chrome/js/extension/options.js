@@ -18,7 +18,8 @@ var Options = (function (window, $) {
         $('#save').click(function () {
           Config.save( {
             dossierUrl: $('#dossier-url').val(),
-            active: $('#active').is(':checked')
+            active: $('#active').is(':checked'),
+            activateHttps: $('#activate-https').is(':checked')
           } );
 
           /* Force reload of options as some may have acquired default state. */
@@ -35,6 +36,7 @@ var Options = (function (window, $) {
     Config.load(function (state) {
       $('#dossier-url').val(state.dossierUrl);
       $('#active').prop('checked', state.active);
+      $('#activate-https').prop('checked', state.activateHttps);
 
       deferred.resolve();
     } );

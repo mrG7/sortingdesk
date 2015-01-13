@@ -13,7 +13,8 @@
 var Config = (function () {
   var defaults_ = {
     dossierUrl: 'http://10.3.2.42:9090',
-    active: true
+    active: true,
+    activateHttps: false
   };
 
 
