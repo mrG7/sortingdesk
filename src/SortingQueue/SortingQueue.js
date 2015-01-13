@@ -576,7 +576,7 @@ var SortingQueue_ = function (window, $, std) {
 
     options.nodes.buttonDismiss.stop().fadeIn(
       options.delays.dismissButtonShow,
-      typeof callback === 'function' ? callback : null);
+      std.is_fn(callback) ? callback : null);
   };
 
   ControllerButtonDismiss.prototype.deactivate = function ()
@@ -731,7 +731,7 @@ var SortingQueue_ = function (window, $, std) {
 
   ControllerItems.prototype.remove = function (item)
   {
-    if(typeof item === 'undefined') {
+    if(std.is_und(item)) {
       var selected = this.selected();
       if (!selected) {
         this.check();
@@ -820,7 +820,7 @@ var SortingQueue_ = function (window, $, std) {
     if(!this.node_.children().length)
       return;
 
-    if(typeof variant === 'undefined') {
+    if(std.is_und(variant)) {
       variant = this.node_.find('.' + csel);
 
       if(variant.length === 0)
@@ -831,7 +831,7 @@ var SortingQueue_ = function (window, $, std) {
 
         variant = variant.eq(0);
       }
-    } else if(typeof variant === 'number') {
+    } else if(std.is_num(variant)) {
       if(variant < 0)
         variant = 0;
       else if(variant > this.node_.children().length - 1)
@@ -1029,7 +1029,7 @@ var SortingQueue_ = function (window, $, std) {
       if(!scopes)
         return true;
 
-      var isFilter = (typeof scopes === 'function');
+      var isFilter = std.is_fn(scopes);
 
       if(!DragDropManager.activeNode_)
         return isFilter && scopes(null);

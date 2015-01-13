@@ -26,7 +26,7 @@ var FolderExplorer_ = function (window, $, sq, std)
       var i = n[k];
 
       if(i instanceof $) i.off();
-      else if(typeof i === 'object') detachAllEventsIn_(i);
+      else if(std.is_obj(i)) detachAllEventsIn_(i);
     }
   };
 
@@ -36,7 +36,7 @@ var FolderExplorer_ = function (window, $, sq, std)
    * */
   var Explorer = function (options, callbacks)
   {
-    if(!options || typeof options !== 'object')
+    if(!std.is_obj(options))
       throw "Invalid options object map specified";
     
     /* Attributes */
@@ -46,7 +46,7 @@ var FolderExplorer_ = function (window, $, sq, std)
     this.viewType_ = Explorer.VIEW_ICONIC;
     this.nodes_ = { };
 
-    if(!this.api_ || typeof this.api_ !== 'object')
+    if(!std.like_obj(this.api_))
       throw "Invalid API reference specified";
 
     this.initialised_ = false;
@@ -274,7 +274,7 @@ var FolderExplorer_ = function (window, $, sq, std)
       
       var cb = this.callbacks_[arguments[0]];
       
-      if(typeof cb !== 'function')
+      if(!std.is_fn(cb))
         throw "Callback invalid or not existent: " + arguments[0];
 
       return cb.apply(null, [].slice.call(arguments, 1));
@@ -301,7 +301,7 @@ var FolderExplorer_ = function (window, $, sq, std)
 
       if(parent instanceof $)
         p = parent;
-      else if(typeof parent === 'string')
+      else if(std.is_str(parent))
         p = this.find_node_(parent);
       else
         p = this.nodes_.container;
@@ -649,7 +649,7 @@ var FolderExplorer_ = function (window, $, sq, std)
     /* Invoke super constructor. */
     std.Drawable.call(this, owner);
 
-    if(typeof item !== 'object')
+    if(!std.is_obj(item))
       throw "Invalid reference to item object";
 
     /* Attributes */

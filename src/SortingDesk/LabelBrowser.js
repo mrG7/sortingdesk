@@ -25,13 +25,13 @@ var LabelBrowser_ = function (window, $, sq, std)
    * */
   var Browser = function (options, callbacks)
   {
-    if(typeof options !== 'object')
+    if(!std.is_obj(options))
       throw "Invalid `options´ object map specified";
-    else if(typeof callbacks !== 'object')
+    else if(!std.is_obj(callbacks))
       throw "Invalid `callbacks´ object map specified";
-    else if(typeof options.api !== 'object')
+    else if(!std.like_obj(options.api))
       throw "Reference to `API´ instance not found";
-    else if(typeof options.ref_bin !== 'object')
+    else if(!std.is_obj(options.ref_bin))
       throw "Reference bin not found"; /* not validating if valid. */
 
     /* Attributes */
@@ -131,9 +131,9 @@ var LabelBrowser_ = function (window, $, sq, std)
           if (cids.indexOf(cid) === -1) {
             cids.push(cid);
           }
-          if (typeof self.subtopics_[cid] === 'undefined') {
+          if (std.is_und(self.subtopics_[cid])) 
             self.subtopics_[cid] = [ ];
-          }
+
           self.subtopics_[cid].push(subid);
         }
 
@@ -240,7 +240,7 @@ var LabelBrowser_ = function (window, $, sq, std)
 
     var cb = this.callbacks_[arguments[0]];
 
-    if(typeof cb !== 'function')
+    if(!std.is_fn(cb))
       throw "Callback invalid or not existent: " + arguments[0];
 
     return cb.apply(null, [].slice.call(arguments, 1));
@@ -278,10 +278,9 @@ var LabelBrowser_ = function (window, $, sq, std)
   Browser.prototype.set_header_ = function (fc)
   {
     this.nodes_.header.title
-      .html(fc                  /* WTF: `typeof null´ returns 'object' */
-            && typeof fc === 'object'
-            && typeof fc.raw === 'object'
-            && typeof fc.raw.title === 'string'
+      .html(std.is_obj(fc)
+            && std.is_obj(fc.raw)
+            && std.is_str(fc.raw.title)
             && fc.raw.title
             || "&lt;unknown title&gt;");
 
@@ -299,7 +298,7 @@ var LabelBrowser_ = function (window, $, sq, std)
 
     if(parent instanceof $)
       p = parent;
-    else if(typeof parent === 'string')
+    else if(std.is_str(parent))
       p = this.find_node_(parent);
     else
       p = this.nodes_.container;
@@ -414,7 +413,7 @@ var LabelBrowser_ = function (window, $, sq, std)
 
     /* Merge subtopics from all feature collections. */
     fcs.forEach(function (fc) {
-      if(typeof fc.raw !== 'object') {
+      if(!std.is_obj(fc.raw)) {
         console.log("Feature collection `raw´ attribute not found or invalid",
                     fc);
         return;

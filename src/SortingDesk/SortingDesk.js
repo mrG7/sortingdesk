@@ -69,7 +69,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.content_.text.append(ndesc);
     this.content_.text.append(nurl);
 
-    if (typeof this.content_.raw.probability !== 'undefined') {
+    if (!std.is_und(this.content_.raw.probability)) {
       var score = this.content_.raw.probability.toFixed(4);
       this.content_.text.append($(
         '<p style="margin: 8px 0 0 0; display: block;">'
@@ -125,7 +125,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     {
       var self = this;
 
-      if(typeof folder === 'object')
+      if(std.is_obj(folder))
         this.initialiseFolder_(folder);
       else if(folder) {         /* assume id */
         this.sortingQueue_.callbacks.invoke('load', folder)
@@ -679,7 +679,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
         result.content = content;
       } else
         console.log("Unable to retrieve valid `src´ attribute");
-    } else if(typeof window.getSelection === 'function') {
+    } else if(std.is_fn(window.getSelection)) {
       content = window.getSelection();
 
       if(content && content.anchorNode) {
@@ -947,7 +947,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   Bin.prototype.setUnknown = function (state /* = true */)
   {
     this.node.toggleClass(this.owner_.owner.options.css.binUnknown,
-                          typeof state === 'undefined' || state === true);
+                          std.is_und(state) || state === true);
   };
 
   /* overridable */ Bin.prototype.serialise = function ()
