@@ -1,3 +1,27 @@
+2015-01-13  Miguel Guedes  <miguel@miguelguedes.org>
+
+	* Chrome Extension:
+
+	Added option to extension to ignore HTTPS pages.
+
+	Created a resource loader class, which at present, supports
+	injection of custom fonts into the active tab's DOM, but can be
+	extended to other resource types.
+
+	* Sorting Common:
+
+	Created the module Sorting Common. This module's main aim is to
+	support Sorting Desk's growing number of modules and
+	components. It features a number of utility classes and functions,
+	and base classes intended for specialisation.
+
+	* All:
+
+	Removed unused files and reorganised stray source files.
+
+	NUMEROUS improvements to code and user experience, and several
+	issues resolved.
+
 2015-01-09  Miguel Guedes  <miguel@miguelguedes.org>
 
 	* Sorting Desk:
