@@ -138,24 +138,28 @@ var _DossierJS = function(window, $) {
     API.prototype.fcGetAll = function(content_ids) {
         var def = $.Deferred(),
             to_resolve = content_ids.length,
-            fcs = [],
-            next_idx = 0;
+            fcs = [];
+
+        if(content_ids.length === 0) {
+            console.log("No content ids to fetch");
+            window.setTimeout(function () { def.resolve(fcs); } );
+        }
+        
         for (var i = 0; i < content_ids.length; i++) {
-          var cid = content_ids[i];
-          this.fcGet(cid)
-              .done(function(fc) {
-                  fcs[next_idx] = fc;
-                  next_idx += 1;
-              })
-              .fail(function() {
-                  console.log('Could not fetch FC for ' + cid)
-              })
-              .always(function() {
-                  to_resolve -= 1;
-                  if (to_resolve === 0) {
-                    def.resolve(fcs);
-                  }
-              });
+            var cid = content_ids[i];
+            this.fcGet(cid)
+                .done(function(fc) {
+                    fcs.push(fc);
+                })
+                .fail(function() {
+                    console.log('Could not fetch FC for ' + cid);
+                })
+                .always(function() {
+                    to_resolve -= 1;
+                    if (to_resolve === 0) {
+                        def.resolve(fcs);
+                    }
+                });
         }
         return def.promise();
     };

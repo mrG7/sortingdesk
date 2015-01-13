@@ -3,29 +3,13 @@
  * @copyright 2014 Diffeo
  *
  * Comments:
- * Uses the `SortingQueue' component.
+ * Uses the `SortingCommon´ component.
  *
  */
 
 
-/*global $, SortingQueue, Api, define */
+/*global $, define */
 /*jshint laxbreak:true */
-
-// Notes from the contractor on abstracting out the use of `chrome` in this file:
-//
-// + a mechanism to send notifications whenever in need of saving state. I
-// thought we could use the existing (outwards facing) callbacks and extending
-// it so the component can communicate with the owning instance, which in
-// Chrome's case is the script `Ui.js´, but you may have a different strategy
-// in mind.
-//
-// + a mechanism that enables `SortingDesk´ to *receive* notifications;
-// presently this is required so it knows when to update state when, for
-// instance, state changes in a different tab. In essence, this is the opposite
-// of the callbacks mechanism in place now; instead of issuing notifications,
-// it needs to receive them. My suggestion would be to create a method in the
-// `SortingDesk.Sorter´, part of the module's public API, that returns an
-// object containing its (inwards facing) callbacks.
 
 
 /**
@@ -33,7 +17,7 @@
  *
  * @returns an object containing the module's public interface.
  * */
-var SortingDesk_ = function (window, $, Api) {
+var SortingDesk_ = function (window, $, sq, std, Api) {
 
   var Url = {
     encode: function (s)
@@ -51,10 +35,10 @@ var SortingDesk_ = function (window, $, Api) {
     if (!owner.owner.initialised) {
       return;
     }
-    SortingQueue.Item.call(this, owner, item);
+    sq.Item.call(this, owner, item);
   };
 
-  TextItem.prototype = Object.create(SortingQueue.Item.prototype);
+  TextItem.prototype = Object.create(sq.Item.prototype);
 
   TextItem.prototype.render = function(text, view, less) {
     var fc = this.content_.fc;
@@ -85,7 +69,7 @@ var SortingDesk_ = function (window, $, Api) {
     this.content_.text.append(ndesc);
     this.content_.text.append(nurl);
 
-    if (typeof this.content_.raw.probability !== 'undefined') {
+    if (!std.is_und(this.content_.raw.probability)) {
       var score = this.content_.raw.probability.toFixed(4);
       this.content_.text.append($(
         '<p style="margin: 8px 0 0 0; display: block;">'
@@ -93,7 +77,7 @@ var SortingDesk_ = function (window, $, Api) {
         + '</p>'
       ));
     }
-    return SortingQueue.Item.prototype.render.call(this);
+    return sq.Item.prototype.render.call(this);
   };
 
 
@@ -115,7 +99,7 @@ var SortingDesk_ = function (window, $, Api) {
     this.api_ = Api.initialize(this, opts.dossierUrl);
 
     this.options_ = $.extend(true, $.extend(true, {}, defaults_), opts);
-    this.sortingQueue_ = new SortingQueue.Sorter(
+    this.sortingQueue_ = new sq.Sorter(
       $.extend(true, this.options_, {
         constructors: {
           Item: TextItem
@@ -141,7 +125,7 @@ var SortingDesk_ = function (window, $, Api) {
     {
       var self = this;
 
-      if(typeof folder === 'object')
+      if(std.is_obj(folder))
         this.initialiseFolder_(folder);
       else if(folder) {         /* assume id */
         this.sortingQueue_.callbacks.invoke('load', folder)
@@ -271,14 +255,14 @@ var SortingDesk_ = function (window, $, Api) {
   var ControllerDraggableImage = function (owner)
   {
     /* Invoke super constructor. */
-    SortingQueue.Controller.call(this, owner);
+    std.Controller.call(this, owner);
     /* Define getters. */
     this.__defineGetter__("activeNode",
                           function () { return this.activeNode_; } );
   };
 
   ControllerDraggableImage.prototype = Object.create(
-    SortingQueue.Controller.prototype);
+    std.Controller.prototype);
 
   /* Attributes */
   ControllerDraggableImage.prototype.saveCursor_ = null;
@@ -330,7 +314,7 @@ var SortingDesk_ = function (window, $, Api) {
     var self = this;
 
     /* Invoke base class constructor. */
-    SortingQueue.Controller.call(this, owner);
+    std.Controller.call(this, owner);
 
     this.id_ = null;
     this.name_ = null;
@@ -382,7 +366,7 @@ var SortingDesk_ = function (window, $, Api) {
       } );
   };
 
-  ControllerFolder.prototype = Object.create(SortingQueue.Controller.prototype);
+  ControllerFolder.prototype = Object.create(std.Controller.prototype);
 
   ControllerFolder.prototype.initialise = function (folder)
   {
@@ -636,8 +620,7 @@ var SortingDesk_ = function (window, $, Api) {
       throw "Label Browser already active";
 
     /* Disable browser icons. */
-    opts.nodes.bins.find('.' + opts.css.iconLabelBrowser)
-      .addClass(opts.css.disabled);
+    this.disableBrowser();
 
     (this.browser_ = this.owner_.sortingQueue.instantiate(
       'LabelBrowser', { api: this.owner_.api, ref_bin: bin } ) )
@@ -647,8 +630,7 @@ var SortingDesk_ = function (window, $, Api) {
         self.browser_ = null;
 
         /* Re-enable browser icons. */
-        opts.nodes.bins.find('.' + opts.css.iconLabelBrowser)
-          .removeClass(opts.css.disabled);
+        self.enableBrowser();
       } );
   };
 
@@ -697,7 +679,7 @@ var SortingDesk_ = function (window, $, Api) {
         result.content = content;
       } else
         console.log("Unable to retrieve valid `src´ attribute");
-    } else if(typeof window.getSelection === 'function') {
+    } else if(std.is_fn(window.getSelection)) {
       content = window.getSelection();
 
       if(content && content.anchorNode) {
@@ -725,6 +707,22 @@ var SortingDesk_ = function (window, $, Api) {
 
     return result.subtopic_id && result;
   };
+
+  /* overridable */ ControllerFolder.prototype.enableBrowser = function ()
+  {
+    var opts = this.owner_.options;
+    
+    opts.nodes.bins.find('.' + opts.css.iconLabelBrowser)
+      .removeClass(opts.css.disabled);
+  };    
+
+  /* overridable */ ControllerFolder.prototype.disableBrowser = function ()
+  {
+    var opts = this.owner_.options;
+    
+    opts.nodes.bins.find('.' + opts.css.iconLabelBrowser)
+      .addClass(opts.css.disabled);
+  };    
 
   /* Protected methods */
   /* overridable */ ControllerFolder.prototype.append_ = function (node)
@@ -829,7 +827,7 @@ var SortingDesk_ = function (window, $, Api) {
   var Bin = function (owner, descriptor)
   {
     /* Invoke super constructor. */
-    SortingQueue.Drawable.call(this, owner);
+    std.Drawable.call(this, owner);
 
     this.id_ = Bin.makeId(descriptor);
     this.data_ = descriptor;
@@ -848,7 +846,7 @@ var SortingDesk_ = function (window, $, Api) {
   }
 
   /* Class interface */
-  Bin.prototype = Object.create(SortingQueue.Drawable.prototype);
+  Bin.prototype = Object.create(std.Drawable.prototype);
 
   Bin.prototype.initialise = function ()
   {
@@ -877,7 +875,7 @@ var SortingDesk_ = function (window, $, Api) {
         }
       } );
 
-    new SortingQueue.Droppable(this.node_, {
+    new sq.Droppable(this.node_, {
       classHover: parentOwner.options.css.droppableHover,
       scopes: function (scope) { return scope === 'bin' || scope === null; },
 
@@ -923,7 +921,7 @@ var SortingDesk_ = function (window, $, Api) {
     /* We must defer initialisation of D'n'D because owning object's `bin'
      * attribute will have not yet been set. */
     window.setTimeout(function () {
-      new SortingQueue.Draggable(self.node_, {
+      new sq.Draggable(self.node_, {
         dragstart: function (e) {
           parentOwner.sortingQueue.dismiss.activate();
         },
@@ -949,7 +947,7 @@ var SortingDesk_ = function (window, $, Api) {
   Bin.prototype.setUnknown = function (state /* = true */)
   {
     this.node.toggleClass(this.owner_.owner.options.css.binUnknown,
-                          typeof state === 'undefined' || state === true);
+                          std.is_und(state) || state === true);
   };
 
   /* overridable */ Bin.prototype.serialise = function ()
@@ -1064,14 +1062,14 @@ var SortingDesk_ = function (window, $, Api) {
   var ControllerBinSpawner = function (owner, fnRender, fnAdd)
   {
     /* Invoke super constructor. */
-    SortingQueue.Controller.call(this, owner);
+    std.Controller.call(this, owner);
 
     this.fnRender_ = fnRender;
     this.fnAdd_ = fnAdd;
   };
 
   ControllerBinSpawner.prototype =
-    Object.create(SortingQueue.Controller.prototype);
+    Object.create(std.Controller.prototype);
 
   ControllerBinSpawner.prototype.reset = function ()
   {
@@ -1115,7 +1113,7 @@ var SortingDesk_ = function (window, $, Api) {
 
     this.node_ = parentOwner.options.nodes.add;
 
-    this.droppable_ = new SortingQueue.Droppable(this.node_, {
+    this.droppable_ = new sq.Droppable(this.node_, {
       classHover: parentOwner.options.css.droppableHover,
       scopes: function (scope) { return !scope; },
       drop: function (e, id, scope) {
@@ -1220,8 +1218,8 @@ var SortingDesk_ = function (window, $, Api) {
 
 /* Compatibility with RequireJs. */
 if(typeof define === "function" && define.amd) {
-  define("SortingDesk", [ "jquery", "api" ], function ($, Api) {
-    return SortingDesk_(window, $, Api);
+  define("SortingDesk", [ "jquery", "SortingQueue", "SortingCommon", "API" ], function ($, sq, std, api) {
+    return SortingDesk_(window, $, sq, std, api);
   });
 } else
-  window.SortingDesk = SortingDesk_(window, $, Api);
+  window.SortingDesk = SortingDesk_(window, $, SortingQueue, SortingCommon, Api);

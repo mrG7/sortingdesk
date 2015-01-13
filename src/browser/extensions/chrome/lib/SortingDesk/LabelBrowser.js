@@ -8,7 +8,7 @@
  */
 
 
-/*global SortingQueue, define */
+/*global define */
 /*jshint laxbreak:true */
 
 
@@ -16,7 +16,7 @@
  * The Label Browser module.
  *
  * @returns an object containing the module's public interface. */
-var LabelBrowser_ = function (window, SortingQueue, $)
+var LabelBrowser_ = function (window, $, sq, std)
 {
 
 
@@ -25,13 +25,13 @@ var LabelBrowser_ = function (window, SortingQueue, $)
    * */
   var Browser = function (options, callbacks)
   {
-    if(typeof options !== 'object')
+    if(!std.is_obj(options))
       throw "Invalid `options´ object map specified";
-    else if(typeof callbacks !== 'object')
+    else if(!std.is_obj(callbacks))
       throw "Invalid `callbacks´ object map specified";
-    else if(typeof options.api !== 'object')
+    else if(!std.like_obj(options.api))
       throw "Reference to `API´ instance not found";
-    else if(typeof options.ref_bin !== 'object')
+    else if(!std.is_obj(options.ref_bin))
       throw "Reference bin not found"; /* not validating if valid. */
 
     /* Attributes */
@@ -84,8 +84,10 @@ var LabelBrowser_ = function (window, SortingQueue, $)
 
     /* Lambda called when initialisation is over, successfully or not. */
     var onEndInitialise = function () {
-      console.log("Label Browser component initialized");
-      self.invoke('onReady', self.eqv_fcs_.length);
+      if(self.ref_bin_ !== null) {
+        console.log("Label Browser component initialized");
+        self.invoke('onReady', self.eqv_fcs_.length);
+      }
     };
 
     /* Begin set up nodes. */
@@ -129,9 +131,9 @@ var LabelBrowser_ = function (window, SortingQueue, $)
           if (cids.indexOf(cid) === -1) {
             cids.push(cid);
           }
-          if (typeof self.subtopics_[cid] === 'undefined') {
+          if (std.is_und(self.subtopics_[cid])) 
             self.subtopics_[cid] = [ ];
-          }
+
           self.subtopics_[cid].push(subid);
         }
 
@@ -140,9 +142,16 @@ var LabelBrowser_ = function (window, SortingQueue, $)
             console.log("Unique labels' content id collection GET successful:",
                         fcs);
 
-            self.eqv_fcs_ = fcs instanceof Array ? fcs : [ ];
-            self.render_();
-            onEndInitialise();
+            /* Ensure that the instance hasn't been reset during the time spent
+             * loading data. This can be done by inspecting the contents of
+             * `ref_bin_´. If it is `null´, it can be safely assumed that the
+             * instance has been reset. */
+            if(self.ref_bin_ !== null) {
+              self.eqv_fcs_ = fcs instanceof Array ? fcs : [ ];
+              self.render_();
+              
+              onEndInitialise();
+            }
           } )
           .fail(function () {
             console.log('Failed to retrieve all feature collections');
@@ -231,7 +240,7 @@ var LabelBrowser_ = function (window, SortingQueue, $)
 
     var cb = this.callbacks_[arguments[0]];
 
-    if(typeof cb !== 'function')
+    if(!std.is_fn(cb))
       throw "Callback invalid or not existent: " + arguments[0];
 
     return cb.apply(null, [].slice.call(arguments, 1));
@@ -268,11 +277,15 @@ var LabelBrowser_ = function (window, SortingQueue, $)
 
   Browser.prototype.set_header_ = function (fc)
   {
+    /* Don't set the header if somehow this instance has been reset and is thus
+     * not valid anymore. */
+    if(!this.nodes_.ref_bin_)
+      return;
+    
     this.nodes_.header.title
-      .html(fc                  /* WTF: `typeof null´ returns 'object' */
-            && typeof fc === 'object'
-            && typeof fc.raw === 'object'
-            && typeof fc.raw.title === 'string'
+      .html(std.is_obj(fc)
+            && std.is_obj(fc.raw)
+            && std.is_str(fc.raw.title)
             && fc.raw.title
             || "&lt;unknown title&gt;");
 
@@ -290,7 +303,7 @@ var LabelBrowser_ = function (window, SortingQueue, $)
 
     if(parent instanceof $)
       p = parent;
-    else if(typeof parent === 'string')
+    else if(std.is_str(parent))
       p = this.find_node_(parent);
     else
       p = this.nodes_.container;
@@ -305,7 +318,7 @@ var LabelBrowser_ = function (window, SortingQueue, $)
   var View = function (owner, fcs)
   {
     /* Invoke super constructor. */
-    SortingQueue.Drawable.call(this, owner);
+    std.Drawable.call(this, owner);
 
     /* Check `fcs' argument IS an array. */
     if(!(fcs instanceof Array))
@@ -318,7 +331,7 @@ var LabelBrowser_ = function (window, SortingQueue, $)
     this.__defineGetter__('fcs', function () { return this.fcs_; } );
   };
 
-  View.prototype = Object.create(SortingQueue.Drawable.prototype);
+  View.prototype = Object.create(std.Drawable.prototype);
 
 
   /**
@@ -327,7 +340,7 @@ var LabelBrowser_ = function (window, SortingQueue, $)
   var RowGroup = function (owner, fc)
   {
     /* Invoke super constructor. */
-    SortingQueue.Drawable.call(this, owner);
+    std.Drawable.call(this, owner);
 
     /* Attributes */
     this.fc_ = fc;
@@ -336,7 +349,7 @@ var LabelBrowser_ = function (window, SortingQueue, $)
     this.__defineGetter__("fc", function () { return this.fc_; } );
   };
 
-  RowGroup = Object.create(SortingQueue.Drawable.prototype);
+  RowGroup = Object.create(std.Drawable.prototype);
 
 
   /**
@@ -345,7 +358,7 @@ var LabelBrowser_ = function (window, SortingQueue, $)
   var Row = function (owner, subtopic_id, fc)
   {
     /* Invoke super constructor. */
-    SortingQueue.Drawable.call(this, owner);
+    std.Drawable.call(this, owner);
 
     var api = owner.owner.api;
 
@@ -365,7 +378,7 @@ var LabelBrowser_ = function (window, SortingQueue, $)
     this.__defineGetter__('type', function () { return this.type_; } );
   };
 
-  Row.prototype = Object.create(SortingQueue.Drawable.prototype);
+  Row.prototype = Object.create(std.Drawable.prototype);
 
   Row.prototype.htmlizeContent = function ()
   {
@@ -405,7 +418,7 @@ var LabelBrowser_ = function (window, SortingQueue, $)
 
     /* Merge subtopics from all feature collections. */
     fcs.forEach(function (fc) {
-      if(typeof fc.raw !== 'object') {
+      if(!std.is_obj(fc.raw)) {
         console.log("Feature collection `raw´ attribute not found or invalid",
                     fc);
         return;
@@ -506,8 +519,8 @@ var LabelBrowser_ = function (window, SortingQueue, $)
 
 /* Compatibility with RequireJs. */
 if(typeof define === "function" && define.amd) {
-  define("LabelBrowser", [ "jquery" ], function (SortingQueue, $) {
-    return LabelBrowser_(window, SortingQueue, $, Api);
+  define("LabelBrowser", [ "jquery", "SortingQueue", "SortingCommon" ], function ($, sq, std) {
+    return LabelBrowser_(window, $, sq, std);
   });
 } else
-  window.LabelBrowser = LabelBrowser_(window, SortingQueue, $);
+  window.LabelBrowser = LabelBrowser_(window, $, SortingQueue, SortingCommon);
