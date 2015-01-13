@@ -11,22 +11,6 @@
 /*global $, SortingQueue, Api, define */
 /*jshint laxbreak:true */
 
-// Notes from the contractor on abstracting out the use of `chrome` in this file:
-//
-// + a mechanism to send notifications whenever in need of saving state. I
-// thought we could use the existing (outwards facing) callbacks and extending
-// it so the component can communicate with the owning instance, which in
-// Chrome's case is the script `Ui.js´, but you may have a different strategy
-// in mind.
-//
-// + a mechanism that enables `SortingDesk´ to *receive* notifications;
-// presently this is required so it knows when to update state when, for
-// instance, state changes in a different tab. In essence, this is the opposite
-// of the callbacks mechanism in place now; instead of issuing notifications,
-// it needs to receive them. My suggestion would be to create a method in the
-// `SortingDesk.Sorter´, part of the module's public API, that returns an
-// object containing its (inwards facing) callbacks.
-
 
 /**
  * The Sorting Desk module.
