@@ -23,63 +23,25 @@ var ChromeExtensionUi = (function () {
   /**
    * @class
    * */
-  var Ui = function ()
+  var Ui = function (meta)
   {
     var self = this,
         requests = 0;
 
     this.nodes_ = { };
 
-    chrome.runtime.sendMessage({ operation: "get-meta" }, function (result) {
-      /* Do not instantiate SortingDesk if not currently enabled, current tab
-       * not active or current page's URL is secure (using HTTPS) and Sorting
-       * Desk is set to not be activated on secure pages. */
-      if(!result.config.active || !result.tab.active || !window.location.href
-         || (/^https:\/\//.test(window.location.href)
-             && !result.config.activateHttps)) {
-        return;
-      }
-
-      /* Load custom font */
-      Resource.inject( [ {
-        url: 'lib/bootstrap/fonts/glyphicons-halflings-regular.woff',
-        family: 'Glyphicons Halflings',
-        type: 'font'
-      } ] );
-      
-      /* Load container HTML. */
-      chrome.runtime.sendMessage( {
-        operation: "read-file",
-        identifier: "html/container.html"
-      }, function (html) { self.initialise_(result, html); } );
-    } );
-  };
-  
-  Ui.prototype = {
-    /* Class instances */
-    activator_: null,
-    positioner_: null,
-    requests_: null,
-    transceiver_: null,
-    sorter_: null,
-    explorer_: null,
-    /* Nodes */
-    nodes_: null,
-
-    /* Getter methods */
-    get activator() { return this.activator_; },
-    get positioner() { return this.positioner_; },
-    get requests() { return this.requests_; },
-    get transceiver() { return this.transceiver_; },
-    get sorter() { return this.sorter_; },
-    get nodes() { return this.nodes_; },
-    node: function (key) { return this.nodes_[key]; },
-
-    /* Private methods */
-    initialise_: function (meta, html)
-    {
-      var self = this;
-      
+    /* Load custom font */
+    Resource.inject( [ {
+      url: 'lib/bootstrap/fonts/glyphicons-halflings-regular.woff',
+      family: 'Glyphicons Halflings',
+      type: 'font'
+    } ] );
+    
+    /* Load container HTML. */
+    chrome.runtime.sendMessage( {
+      operation: "read-file",
+      identifier: "html/container.html"
+    }, function (html) {
       $('body').append(html);
 
       /* Cache jQuery references to nodes used. */
@@ -89,8 +51,8 @@ var ChromeExtensionUi = (function () {
         activator: $('#sd-activator')
       };
 
-      self.nodes_.loading = this.nodes_.container.find('.sd-loading');
-      self.nodes_.empty = this.nodes_.container.find('.sd-empty');
+      self.nodes_.loading = self.nodes_.container.find('.sd-loading');
+      self.nodes_.empty = self.nodes_.container.find('.sd-empty');
 
       /* Instantiate class components. */
       self.activator_ = new Activator();
@@ -100,7 +62,7 @@ var ChromeExtensionUi = (function () {
 
       /* Register for click events on the 'settings' button inside the extension
        * activator button. */
-      self.activator_.register(this.onClickSettings_.bind(this));
+      self.activator_.register(self.onClickSettings_.bind(self));
       self.activator_.show();
 
       /* Initialise API and instantiate `SortingDesk´ class. */
@@ -129,8 +91,30 @@ var ChromeExtensionUi = (function () {
         Api,
         self.requests_.callbacks.sorter,
         self.transceiver_.callbacks.sorter ) );
-    },
+    } );
+  };
+  
+  Ui.prototype = {
+    /* Class instances */
+    activator_: null,
+    positioner_: null,
+    requests_: null,
+    transceiver_: null,
+    sorter_: null,
+    explorer_: null,
+    /* Nodes */
+    nodes_: null,
 
+    /* Getter methods */
+    get activator() { return this.activator_; },
+    get positioner() { return this.positioner_; },
+    get requests() { return this.requests_; },
+    get transceiver() { return this.transceiver_; },
+    get sorter() { return this.sorter_; },
+    get nodes() { return this.nodes_; },
+    node: function (key) { return this.nodes_[key]; },
+
+    /* Private methods */
     onClickSettings_: function ()
     {
       if(this.explorer_)
@@ -624,7 +608,19 @@ var ChromeExtensionUi = (function () {
   };
 
 
-  /* Initialize extension class responsible for the UI. */
-  ui_ = new Ui();
+  /* Attempt to initialize extension class responsible for the UI. */
+  chrome.runtime.sendMessage({ operation: "get-meta" }, function (result) {
+    /* Do not proceed with UI initialisation if extension not currently enabled,
+     * current tab not active or current page's URL is secure (using HTTPS) and
+     * extension is set to not be activated on secure pages. */
+    if(!result.config.active || !result.tab.active || !window.location.href
+       || (/^https:\/\//.test(window.location.href)
+           && !result.config.activateHttps))
+    {
+      console.log("Skipping activation: inactive or unsupported");
+    } else
+      ui_ = new Ui(result);
+  } );
 
+  
 })();
