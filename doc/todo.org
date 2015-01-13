@@ -100,14 +100,20 @@ This component is sorely needed.
   
 *** TODO Remove code handling keyboard events
   
-** =SortingDesk= [7%]
+** =SortingDesk= [0%]
 *** =FolderExplorer= [0%]
+**** TODO =detachAllEventsIn_=: move to =SortingCommon=?
+**** TODO Do not require constructor to =LabelBrowser= component
+Trigger an event instead and let client deal with it.
+
 **** TODO Selecting folder should also switch Sorting Desk's active folder but not close window
 **** TODO Implement folder renaming
-**** TODO Currently contains base64 encoding of icon images
 **** TODO Needs a callbacks handler BADLY
 
 *** =LabelBrowser= [12%]
+**** TODO Must fire event in the event that the content id's FC could not be fetched
+This is so the client can update state should loading of state fail. Right now, if the referential FC fails to load, the Label Browser's window shows the strings "Loading" and "Please wait" because the =Ui= instance isn't aware loading actually failed.
+
 **** TODO =Browser=: should the active =SortingDesk= instance be passed as a stand-alone argument or as part of the =options= object map?
 
 **** TODO Show appropriate message when items list empty
@@ -123,9 +129,14 @@ We can keep the declarative manner in which nodes are found but the component wi
 **** TODO Decouple component from =SortingDesk.js=
 Component needs to stand on its own, have its own set of options, callbacks and so on. Being so tightly coupled with the =SortingDesk= module means that currently the =options= structure is logically nonsensical and it is unable to receive notifications for loading events, among other problems.
 
-**** CANCELED Use Bootstrap
-- State "CANCELED"   from "TODO"       [2015-01-05 Mon 14:26] \\
-  Can't be done. Bootstrap screws up/overwrites existing page styles.
+*** TODO Encode images to base64
+Relevant links to research:
+
++ [[https://developer.mozilla.org/en-US/docs/Web/API/ImageData][ImageData]]
++ [[http://stackoverflow.com/questions/934012/get-image-data-in-javascript][Get image data in Javascript]]
++ [[http://stackoverflow.com/questions/10754661/javascript-getting-imagedata-without-canvas][Getting image data without canvas]]
+
+It basically relies on using the =canvas= element to get the image data. Then, it's just a matter of encoding the image data to base64 and stuff it into the subtopic value for that image. Afterwards it's only a matter of showing the image as a [[https://developer.mozilla.org/en-US/docs/Web/HTTP/data_URIs][data URI]].
 
 *** TODO Should be using a map to contain bins
 Also see TODO about folders being kept in an array.
