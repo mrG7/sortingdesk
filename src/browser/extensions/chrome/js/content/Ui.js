@@ -76,6 +76,10 @@ var ChromeExtensionUi = (function () {
         constructors: {
           Item: ItemLinkify,
           createLabelBrowser: function (options) {
+            $('[data-sd-scope="label-browser-header-title"]').html("Loading");
+            $('[data-sd-scope="label-browser-header-content"]')
+              .html("Please wait...");
+            
             /* The `options´ map isn't touched *yet*. */
             return new LabelBrowser.Browser(
               options,
