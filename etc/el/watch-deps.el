@@ -41,6 +41,7 @@ are saved."
                                   "src/SortingDesk/FolderExplorer.js"
                                   "src/SortingDesk/api-live.js"
                                   "src/SortingQueue/SortingQueue.js"
+                                  "src/SortingCommon/SortingCommon.js"
                                   "src/dossier.js/Dossier.js")
   "Relative path of each file to watch out for changes. Saving any of the files
 in the list will result in the shell command defined in `watch-deps-command'

@@ -16,7 +16,7 @@
  * The Label Browser module.
  *
  * @returns an object containing the module's public interface. */
-var LabelBrowser_ = function (window, $, sq)
+var LabelBrowser_ = function (window, $, sq, std)
 {
 
 
@@ -305,7 +305,7 @@ var LabelBrowser_ = function (window, $, sq)
   var View = function (owner, fcs)
   {
     /* Invoke super constructor. */
-    sq.Drawable.call(this, owner);
+    std.Drawable.call(this, owner);
 
     /* Check `fcs' argument IS an array. */
     if(!(fcs instanceof Array))
@@ -318,7 +318,7 @@ var LabelBrowser_ = function (window, $, sq)
     this.__defineGetter__('fcs', function () { return this.fcs_; } );
   };
 
-  View.prototype = Object.create(sq.Drawable.prototype);
+  View.prototype = Object.create(std.Drawable.prototype);
 
 
   /**
@@ -327,7 +327,7 @@ var LabelBrowser_ = function (window, $, sq)
   var RowGroup = function (owner, fc)
   {
     /* Invoke super constructor. */
-    sq.Drawable.call(this, owner);
+    std.Drawable.call(this, owner);
 
     /* Attributes */
     this.fc_ = fc;
@@ -336,7 +336,7 @@ var LabelBrowser_ = function (window, $, sq)
     this.__defineGetter__("fc", function () { return this.fc_; } );
   };
 
-  RowGroup = Object.create(sq.Drawable.prototype);
+  RowGroup = Object.create(std.Drawable.prototype);
 
 
   /**
@@ -345,7 +345,7 @@ var LabelBrowser_ = function (window, $, sq)
   var Row = function (owner, subtopic_id, fc)
   {
     /* Invoke super constructor. */
-    sq.Drawable.call(this, owner);
+    std.Drawable.call(this, owner);
 
     var api = owner.owner.api;
 
@@ -365,7 +365,7 @@ var LabelBrowser_ = function (window, $, sq)
     this.__defineGetter__('type', function () { return this.type_; } );
   };
 
-  Row.prototype = Object.create(sq.Drawable.prototype);
+  Row.prototype = Object.create(std.Drawable.prototype);
 
   Row.prototype.htmlizeContent = function ()
   {
@@ -506,8 +506,8 @@ var LabelBrowser_ = function (window, $, sq)
 
 /* Compatibility with RequireJs. */
 if(typeof define === "function" && define.amd) {
-  define("LabelBrowser", [ "jquery", "SortingQueue" ], function ($, sq) {
-    return LabelBrowser_(window, $, sq);
+  define("LabelBrowser", [ "jquery", "SortingQueue", "SortingCommon" ], function ($, sq, std) {
+    return LabelBrowser_(window, $, sq, std);
   });
 } else
-  window.LabelBrowser = LabelBrowser_(window, $, SortingQueue);
+  window.LabelBrowser = LabelBrowser_(window, $, SortingQueue, SortingCommon);

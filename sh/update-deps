@@ -21,6 +21,7 @@ cd "$dir_root/src/browser/extensions/chrome"
 [ -d lib ] && rm lib -rfv
 mkdir -vp lib
 
+mkdir lib/SortingCommon -v
 mkdir lib/SortingQueue -v
 mkdir lib/SortingDesk -v
 mkdir lib/dossier.js -v
@@ -32,6 +33,7 @@ mkdir lib/bootstrap/js -v
 # Note: Google Chrom(e|ium) browsers do not support symlinks (!). There is no
 # other option but to actually copy, and thus duplicate, the external
 # dependencies we need.
+cp -v "$dir_root/src/SortingCommon/SortingCommon.js" lib/SortingCommon/
 cp -v "$dir_root/src/SortingQueue/SortingQueue.js" lib/SortingQueue/
 cp -v "$dir_root/src/SortingDesk/SortingDesk.js" lib/SortingDesk/
 cp -v "$dir_root/src/SortingDesk/LabelBrowser.js" lib/SortingDesk/

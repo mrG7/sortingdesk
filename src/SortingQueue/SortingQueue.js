@@ -3,7 +3,7 @@
  * @copyright 2014 Diffeo
  *
  * Comments:
- *
+ * Uses the `SortingCommon´ component.
  *
  */
 
@@ -17,7 +17,7 @@
  *
  * @returns an object containing class constructors.
  * */
-var SortingQueue_ = function (window, $) {
+var SortingQueue_ = function (window, $, std) {
 
   /**
    * @class
@@ -76,19 +76,19 @@ var SortingQueue_ = function (window, $) {
     this.options_ = $.extend(true, $.extend(true, {}, defaults_), opts);
 
     /* Begin instantiating and initialising controllers. */
-    (this.callbacks_ = new ControllerCallbacks(
-      this,
+    (this.requests_ = new ControllerRequests(this))
+      .initialise();
+    
+    (this.callbacks_ = new Callbacks(
       $.extend(true, {
         itemDismissed: function() {},
         itemSelected: function() {},
         itemDeselected: function() {},
         onRequestStart: function() {},
         onRequestStop: function() {}
-      }, cbs)))
+      }, cbs),
+      this.requests_))
         .initialise();
-
-    (this.requests_ = new ControllerRequests(this))
-      .initialise();
   };
 
   Sorter.prototype = {
@@ -345,70 +345,19 @@ var SortingQueue_ = function (window, $) {
   /**
    * @class
    * */
-  var /* abstract */ Owned = function (owner)
-  {
-    this.owner_ = owner;
-  };
-
-  Owned.prototype = {
-    get owner ()
-    { return this.owner_; }
-  };
-
-
-  /**
-   * @class
-   * */
-  var /* abstract */ Controller = function (owner)
-  {
-    /* Invoke super constructor. */
-    Owned.call(this, owner);
-  };
-
-  Controller.prototype = Object.create(Owned.prototype);
-
-  /* Following method to allow for deferred initialisation. */
-  /* abstract */ Controller.prototype.initialise = function ()
-  { throw "Abstract method not implemented"; };
-
-  /* abstract */ Controller.prototype.reset = function ()
-  { throw "Abstract method not implemented"; };
-
-
-  /**
-   * @class
-   * */
-  var /* abstract */ Drawable = function (owner)
-  {
-    /* Invoke super constructor. */
-    Owned.call(this, owner);
-  };
-
-  Drawable.prototype = Object.create(Owned.prototype);
-
-  /* abstract */ Drawable.prototype.render = function ()
-  { throw "Abstract method not implemented"; };
-
-
-  /**
-   * @class
-   * */
-  var ControllerCallbacks = function (owner, callbacks)
+  var Callbacks = function (callbacks, requests)
   {
     /* invoke super constructor. */
-    Controller.call(this, owner);
+    std.Callbacks.call(this, callbacks);
 
-    /* Set initial state. */
-    this.callbacks_ = callbacks;
+    /* Attributes */
+    this.requests_ = requests;
   };
 
-  ControllerCallbacks.prototype = Object.create(Controller.prototype);
+  Callbacks.prototype = Object.create(std.Callbacks.prototype);
 
-  ControllerCallbacks.prototype.initialise = function () { };
-  ControllerCallbacks.prototype.reset = function () { };
-
-  ControllerCallbacks.prototype.exists = function (callback)
-  { return this.callbacks_.hasOwnProperty(callback); };
+  Callbacks.prototype.initialise = function () { };
+  Callbacks.prototype.reset = function () { };
 
   /** Invoke a callback with optional parameters.
    * @param {(string|object)} descriptor Name of callback to invoke or object
@@ -424,60 +373,26 @@ var SortingQueue_ = function (window, $) {
    * form allows an object to be passed which results in the specified callback
    * being invoked if it is defined, otherwise no exceptions are thrown.
    * @param {*}               parameters Parameters to pass to callback. */
-  ControllerCallbacks.prototype.invoke = function ()
+  Callbacks.prototype.invoke = function ()
   {
-    var result = this.call_.apply(this, arguments);
+    var result = std.Callbacks.prototype.invoke.apply(this, arguments);
 
     if(result && result.hasOwnProperty('always')) {
       var self = this;
 
-      this.owner_.requests.begin(result);
+      this.requests_.begin(result);
 
       result.always(function () {
-        self.owner_.requests.end(result);
+        self.requests_.end(result);
       } );
     }
 
     return result;
   };
 
-  ControllerCallbacks.prototype.passThrough = function ()
+  Callbacks.prototype.passThrough = function ()
   {
-    return this.call_.apply(this, arguments);
-  };
-
-  ControllerCallbacks.prototype.call_ = function ()
-  {
-    var name,
-        mandatory = true;
-
-    /* First argument must exist. */
-    if(arguments.length < 1)
-      throw "Callback name or descriptor required";
-
-    /* First argument can either be a string describing the callback's name or
-     * an object containing two attributes, `name´ and `mandatory´. `name´
-     * refers to the name of the callback to invoke, whereas `mandatory´
-     * specifies whether the callback is required to exist or whether it is
-     * allowed to be optional. If allowed to be optional and it doesn't exist,
-     * `null´ is returned.
-     *
-     * If the callback doesn't exist and it isn't allowed to be optional, an
-     * exception is thrown. */
-    if(typeof arguments[0] === 'object') {
-      name = arguments[0].name;
-      mandatory = arguments[0].mandatory;
-    } else
-      name = arguments[0];
-    
-    if(!this.callbacks_.hasOwnProperty(name)) {
-      if(mandatory)
-        throw "Callback non existent: " + name;
-
-      return null;
-    }
-
-    return this.callbacks_[name].apply(null, [].slice.call(arguments, 1));
+    return std.Callbacks.prototype.invoke.apply(this, arguments);
   };
 
 
@@ -487,7 +402,7 @@ var SortingQueue_ = function (window, $) {
   var ControllerRequests = function (owner)
   {
     /* invoke super constructor. */
-    Controller.call(this, owner);
+    std.Controller.call(this, owner);
 
     /* Set initial state. */
     this.requests_ = { };
@@ -497,7 +412,7 @@ var SortingQueue_ = function (window, $) {
     this.__defineGetter__("count", function () { return this.count_; } );
   };
 
-  ControllerRequests.prototype = Object.create(Controller.prototype);
+  ControllerRequests.prototype = Object.create(std.Controller.prototype);
 
   ControllerRequests.prototype.initialise = function () {  };
   ControllerRequests.prototype.reset = function ()
@@ -557,50 +472,14 @@ var SortingQueue_ = function (window, $) {
   /**
    * @class
    * */
-  var ControllerKeyboardBase = function (owner)
-  {
-    /* Invoke super constructor. */
-    Controller.call(this, owner);
-  };
-
-  ControllerKeyboardBase.prototype = Object.create(Controller.prototype);
-
-  ControllerKeyboardBase.prototype.fnEventKeyUp = null;
-
-  /* Required: */
-  /* abstract */ ControllerKeyboardBase.prototype.onKeyUp = null;
-
-  ControllerKeyboardBase.prototype.initialise = function ()
-  {
-    var self = this;
-
-    /* Save event handler function so we are able to remove it when resetting
-     * the instance. */
-    this.fnEventKeyUp = function (evt) { self.onKeyUp(evt); };
-
-    /* Set up listener for keyboard up events. */
-    $('body').bind('keyup', this.fnEventKeyUp);
-  };
-
-  ControllerKeyboardBase.prototype.reset = function ()
-  {
-    /* Remove keyboard up event listener. */
-    $('body').unbind('keyup', this.fnEventKeyUp);
-    this.fnEventKeyUp = null;
-  };
-
-
-  /**
-   * @class
-   * */
   var ControllerKeyboard = function (owner)
   {
     /* Invoke super constructor. */
-    ControllerKeyboardBase.call(this, owner);
+    std.ControllerGlobalKeyboard.call(this, owner);
   };
 
   ControllerKeyboard.prototype =
-    Object.create(ControllerKeyboardBase.prototype);
+    Object.create(std.ControllerGlobalKeyboard.prototype);
 
   ControllerKeyboard.prototype.onKeyUp = function (evt)
   {
@@ -639,12 +518,12 @@ var SortingQueue_ = function (window, $) {
   var ControllerButtonDismiss = function (owner)
   {
     /* Invoke super constructor. */
-    Controller.call(this, owner);
+    std.Controller.call(this, owner);
 
     this.handlers_ = [ ];
   };
 
-  ControllerButtonDismiss.prototype = Object.create(Controller.prototype);
+  ControllerButtonDismiss.prototype = Object.create(std.Controller.prototype);
 
   ControllerButtonDismiss.prototype.droppable_ = null;
   ControllerButtonDismiss.prototype.handlers_ = null;
@@ -715,7 +594,7 @@ var SortingQueue_ = function (window, $) {
   var ControllerItems = function (owner)
   {
     /* Invoke super constructor. */
-    Controller.call(this, owner);
+    std.Controller.call(this, owner);
 
     this.node_ = this.owner_.options.nodes.items;
     this.items_ = [ ];
@@ -725,7 +604,7 @@ var SortingQueue_ = function (window, $) {
     this.__defineGetter__("items", function () { return this.items_; } );
   };
 
-  ControllerItems.prototype = Object.create(Controller.prototype);
+  ControllerItems.prototype = Object.create(std.Controller.prototype);
 
   ControllerItems.prototype.initialise = function ()
   {
@@ -1013,7 +892,7 @@ var SortingQueue_ = function (window, $) {
     }
 
     /* Invoke super constructor. */
-    Drawable.call(this, owner);
+    std.Drawable.call(this, owner);
 
     this.content_ = item;
     this.node_ = null;
@@ -1027,7 +906,7 @@ var SortingQueue_ = function (window, $) {
     owner.owner.options.nodes.items.append(this.node_);
   };
 
-  Item.prototype = Object.create(Drawable.prototype);
+  Item.prototype = Object.create(std.Drawable.prototype);
 
   Item.prototype.initialise = function()
   {
@@ -1377,12 +1256,6 @@ var SortingQueue_ = function (window, $) {
   /**
    * Module public interface. */
   return {
-    /* Base */
-    Owned: Owned,
-    Controller: Controller,
-    Drawable: Drawable,
-    ControllerKeyboardBase: ControllerKeyboardBase,
-
     /* Drag and drop */
     DragDropManager: DragDropManager,
     Draggable: Draggable,
@@ -1398,8 +1271,8 @@ var SortingQueue_ = function (window, $) {
 
 /* Compatibility with RequireJs. */
 if(typeof define === "function" && define.amd) {
-  define("SortingQueue", [ "jquery" ], function ($) {
-    return SortingQueue_(window, $);
+  define("SortingQueue", [ "jquery", "SortingCommon" ], function ($, std) {
+    return SortingQueue_(window, $, std);
   });
 } else
-  window.SortingQueue = SortingQueue_(window, $);
+  window.SortingQueue = SortingQueue_(window, $, SortingCommon);

@@ -3,7 +3,7 @@
  * @copyright 2014 Diffeo
  *
  * Comments:
- * Uses the `SortingQueue' component.
+ * Uses the `SortingCommon´ component.
  *
  */
 
@@ -17,7 +17,7 @@
  *
  * @returns an object containing the module's public interface.
  * */
-var SortingDesk_ = function (window, $, sq, Api) {
+var SortingDesk_ = function (window, $, sq, std, Api) {
 
   var Url = {
     encode: function (s)
@@ -255,14 +255,14 @@ var SortingDesk_ = function (window, $, sq, Api) {
   var ControllerDraggableImage = function (owner)
   {
     /* Invoke super constructor. */
-    sq.Controller.call(this, owner);
+    std.Controller.call(this, owner);
     /* Define getters. */
     this.__defineGetter__("activeNode",
                           function () { return this.activeNode_; } );
   };
 
   ControllerDraggableImage.prototype = Object.create(
-    sq.Controller.prototype);
+    std.Controller.prototype);
 
   /* Attributes */
   ControllerDraggableImage.prototype.saveCursor_ = null;
@@ -314,7 +314,7 @@ var SortingDesk_ = function (window, $, sq, Api) {
     var self = this;
 
     /* Invoke base class constructor. */
-    sq.Controller.call(this, owner);
+    std.Controller.call(this, owner);
 
     this.id_ = null;
     this.name_ = null;
@@ -366,7 +366,7 @@ var SortingDesk_ = function (window, $, sq, Api) {
       } );
   };
 
-  ControllerFolder.prototype = Object.create(sq.Controller.prototype);
+  ControllerFolder.prototype = Object.create(std.Controller.prototype);
 
   ControllerFolder.prototype.initialise = function (folder)
   {
@@ -827,7 +827,7 @@ var SortingDesk_ = function (window, $, sq, Api) {
   var Bin = function (owner, descriptor)
   {
     /* Invoke super constructor. */
-    sq.Drawable.call(this, owner);
+    std.Drawable.call(this, owner);
 
     this.id_ = Bin.makeId(descriptor);
     this.data_ = descriptor;
@@ -846,7 +846,7 @@ var SortingDesk_ = function (window, $, sq, Api) {
   }
 
   /* Class interface */
-  Bin.prototype = Object.create(sq.Drawable.prototype);
+  Bin.prototype = Object.create(std.Drawable.prototype);
 
   Bin.prototype.initialise = function ()
   {
@@ -1062,14 +1062,14 @@ var SortingDesk_ = function (window, $, sq, Api) {
   var ControllerBinSpawner = function (owner, fnRender, fnAdd)
   {
     /* Invoke super constructor. */
-    sq.Controller.call(this, owner);
+    std.Controller.call(this, owner);
 
     this.fnRender_ = fnRender;
     this.fnAdd_ = fnAdd;
   };
 
   ControllerBinSpawner.prototype =
-    Object.create(sq.Controller.prototype);
+    Object.create(std.Controller.prototype);
 
   ControllerBinSpawner.prototype.reset = function ()
   {
@@ -1218,8 +1218,8 @@ var SortingDesk_ = function (window, $, sq, Api) {
 
 /* Compatibility with RequireJs. */
 if(typeof define === "function" && define.amd) {
-  define("SortingDesk", [ "jquery", "SortingQueue", "API" ], function ($, sq, api) {
-    return SortingDesk_(window, $, sq, api);
+  define("SortingDesk", [ "jquery", "SortingQueue", "SortingCommon", "API" ], function ($, sq, std, api) {
+    return SortingDesk_(window, $, sq, std, api);
   });
 } else
-  window.SortingDesk = SortingDesk_(window, $, SortingQueue, Api);
+  window.SortingDesk = SortingDesk_(window, $, SortingQueue, SortingCommon, Api);
