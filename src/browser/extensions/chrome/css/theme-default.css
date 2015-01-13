@@ -892,9 +892,13 @@ INPUT.sd-fe-input {
 }
 
 .sd-toolbar-button.sd-disabled {
-  color: #ccc;
   cursor: default;
 }
+
+.sd-toolbar-button.sd-disabled * {
+  color: #ccc;
+}
+  
 
 .sd-toolbar-button:hover:not(.sd-disabled) {
   background-color: #ccc;
