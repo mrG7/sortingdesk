@@ -8,7 +8,7 @@
  */
 
 
-/*global $, SortingQueue, Api, define */
+/*global $, define */
 /*jshint laxbreak:true */
 
 
@@ -16,7 +16,7 @@
  * The Bin Explorer module.
  *
  * @returns an object containing the module's public interface. */
-var FolderExplorer_ = function (window, SortingQueue, $)
+var FolderExplorer_ = function (window, $, sq)
 {
 
   /* Module-wide function */
@@ -368,7 +368,7 @@ var FolderExplorer_ = function (window, SortingQueue, $)
   var View = function (owner, collection)
   {
     /* Invoke super constructor. */
-    SortingQueue.Drawable.call(this, owner);
+    sq.Drawable.call(this, owner);
 
     /* Check `folders' argument IS an array. */
     if(!(collection instanceof Array))
@@ -385,7 +385,7 @@ var FolderExplorer_ = function (window, SortingQueue, $)
                           function () { return this.collection_; } );
   };
 
-  View.prototype = Object.create(SortingQueue.Drawable.prototype);
+  View.prototype = Object.create(sq.Drawable.prototype);
 
   /* overridable */ View.prototype.render = function ()
   {
@@ -525,7 +525,7 @@ var FolderExplorer_ = function (window, SortingQueue, $)
   var Row = function (owner)
   {
     /* Invoke super constructor. */
-    SortingQueue.Owned.call(this, owner);
+    sq.Owned.call(this, owner);
 
     /* Attributes */
     this.items_ = [ ];
@@ -537,7 +537,7 @@ var FolderExplorer_ = function (window, SortingQueue, $)
   };
 
   /* Interface */
-  Row.prototype = Object.create(SortingQueue.Owned.prototype);
+  Row.prototype = Object.create(sq.Owned.prototype);
 
   /* overridable */ Row.prototype.add = function (descriptor)
   {
@@ -647,7 +647,7 @@ var FolderExplorer_ = function (window, SortingQueue, $)
   var Item = function (owner, item)
   {
     /* Invoke super constructor. */
-    SortingQueue.Drawable.call(this, owner);
+    sq.Drawable.call(this, owner);
 
     if(typeof item !== 'object')
       throw "Invalid reference to item object";
@@ -664,7 +664,7 @@ var FolderExplorer_ = function (window, SortingQueue, $)
   };
 
   /* Interface */
-  Item.prototype = Object.create(SortingQueue.Drawable.prototype);
+  Item.prototype = Object.create(sq.Drawable.prototype);
   
 
   /**
@@ -807,8 +807,8 @@ var FolderExplorer_ = function (window, SortingQueue, $)
 
 /* Compatibility with RequireJs. */
 if(typeof define === "function" && define.amd) {
-  define("FolderExplorer", [ "jquery" ], function (SortingQueue, $) {
-    return FolderExplorer_(window, SortingQueue, $, Api);
+  define("FolderExplorer", [ "jquery", "SortingQueue" ], function ($, sq) {
+    return FolderExplorer_(window, $, sq);
   });
 } else
-  window.FolderExplorer = FolderExplorer_(window, SortingQueue, $);
+  window.FolderExplorer = FolderExplorer_(window, $, SortingQueue);

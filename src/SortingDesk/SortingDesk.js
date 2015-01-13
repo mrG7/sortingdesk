@@ -8,7 +8,7 @@
  */
 
 
-/*global $, SortingQueue, Api, define */
+/*global $, define */
 /*jshint laxbreak:true */
 
 
@@ -17,7 +17,7 @@
  *
  * @returns an object containing the module's public interface.
  * */
-var SortingDesk_ = function (window, $, Api) {
+var SortingDesk_ = function (window, $, sq, Api) {
 
   var Url = {
     encode: function (s)
@@ -35,10 +35,10 @@ var SortingDesk_ = function (window, $, Api) {
     if (!owner.owner.initialised) {
       return;
     }
-    SortingQueue.Item.call(this, owner, item);
+    sq.Item.call(this, owner, item);
   };
 
-  TextItem.prototype = Object.create(SortingQueue.Item.prototype);
+  TextItem.prototype = Object.create(sq.Item.prototype);
 
   TextItem.prototype.render = function(text, view, less) {
     var fc = this.content_.fc;
@@ -77,7 +77,7 @@ var SortingDesk_ = function (window, $, Api) {
         + '</p>'
       ));
     }
-    return SortingQueue.Item.prototype.render.call(this);
+    return sq.Item.prototype.render.call(this);
   };
 
 
@@ -99,7 +99,7 @@ var SortingDesk_ = function (window, $, Api) {
     this.api_ = Api.initialize(this, opts.dossierUrl);
 
     this.options_ = $.extend(true, $.extend(true, {}, defaults_), opts);
-    this.sortingQueue_ = new SortingQueue.Sorter(
+    this.sortingQueue_ = new sq.Sorter(
       $.extend(true, this.options_, {
         constructors: {
           Item: TextItem
@@ -255,14 +255,14 @@ var SortingDesk_ = function (window, $, Api) {
   var ControllerDraggableImage = function (owner)
   {
     /* Invoke super constructor. */
-    SortingQueue.Controller.call(this, owner);
+    sq.Controller.call(this, owner);
     /* Define getters. */
     this.__defineGetter__("activeNode",
                           function () { return this.activeNode_; } );
   };
 
   ControllerDraggableImage.prototype = Object.create(
-    SortingQueue.Controller.prototype);
+    sq.Controller.prototype);
 
   /* Attributes */
   ControllerDraggableImage.prototype.saveCursor_ = null;
@@ -314,7 +314,7 @@ var SortingDesk_ = function (window, $, Api) {
     var self = this;
 
     /* Invoke base class constructor. */
-    SortingQueue.Controller.call(this, owner);
+    sq.Controller.call(this, owner);
 
     this.id_ = null;
     this.name_ = null;
@@ -366,7 +366,7 @@ var SortingDesk_ = function (window, $, Api) {
       } );
   };
 
-  ControllerFolder.prototype = Object.create(SortingQueue.Controller.prototype);
+  ControllerFolder.prototype = Object.create(sq.Controller.prototype);
 
   ControllerFolder.prototype.initialise = function (folder)
   {
@@ -813,7 +813,7 @@ var SortingDesk_ = function (window, $, Api) {
   var Bin = function (owner, descriptor)
   {
     /* Invoke super constructor. */
-    SortingQueue.Drawable.call(this, owner);
+    sq.Drawable.call(this, owner);
 
     this.id_ = Bin.makeId(descriptor);
     this.data_ = descriptor;
@@ -832,7 +832,7 @@ var SortingDesk_ = function (window, $, Api) {
   }
 
   /* Class interface */
-  Bin.prototype = Object.create(SortingQueue.Drawable.prototype);
+  Bin.prototype = Object.create(sq.Drawable.prototype);
 
   Bin.prototype.initialise = function ()
   {
@@ -861,7 +861,7 @@ var SortingDesk_ = function (window, $, Api) {
         }
       } );
 
-    new SortingQueue.Droppable(this.node_, {
+    new sq.Droppable(this.node_, {
       classHover: parentOwner.options.css.droppableHover,
       scopes: function (scope) { return scope === 'bin' || scope === null; },
 
@@ -907,7 +907,7 @@ var SortingDesk_ = function (window, $, Api) {
     /* We must defer initialisation of D'n'D because owning object's `bin'
      * attribute will have not yet been set. */
     window.setTimeout(function () {
-      new SortingQueue.Draggable(self.node_, {
+      new sq.Draggable(self.node_, {
         dragstart: function (e) {
           parentOwner.sortingQueue.dismiss.activate();
         },
@@ -1048,14 +1048,14 @@ var SortingDesk_ = function (window, $, Api) {
   var ControllerBinSpawner = function (owner, fnRender, fnAdd)
   {
     /* Invoke super constructor. */
-    SortingQueue.Controller.call(this, owner);
+    sq.Controller.call(this, owner);
 
     this.fnRender_ = fnRender;
     this.fnAdd_ = fnAdd;
   };
 
   ControllerBinSpawner.prototype =
-    Object.create(SortingQueue.Controller.prototype);
+    Object.create(sq.Controller.prototype);
 
   ControllerBinSpawner.prototype.reset = function ()
   {
@@ -1099,7 +1099,7 @@ var SortingDesk_ = function (window, $, Api) {
 
     this.node_ = parentOwner.options.nodes.add;
 
-    this.droppable_ = new SortingQueue.Droppable(this.node_, {
+    this.droppable_ = new sq.Droppable(this.node_, {
       classHover: parentOwner.options.css.droppableHover,
       scopes: function (scope) { return !scope; },
       drop: function (e, id, scope) {
@@ -1204,8 +1204,8 @@ var SortingDesk_ = function (window, $, Api) {
 
 /* Compatibility with RequireJs. */
 if(typeof define === "function" && define.amd) {
-  define("SortingDesk", [ "jquery", "api" ], function ($, Api) {
-    return SortingDesk_(window, $, Api);
+  define("SortingDesk", [ "jquery", "SortingQueue", "API" ], function ($, sq, api) {
+    return SortingDesk_(window, $, sq, api);
   });
 } else
-  window.SortingDesk = SortingDesk_(window, $, Api);
+  window.SortingDesk = SortingDesk_(window, $, SortingQueue, Api);

@@ -8,7 +8,7 @@
  */
 
 
-/*global SortingQueue, define */
+/*global define */
 /*jshint laxbreak:true */
 
 
@@ -16,7 +16,7 @@
  * The Label Browser module.
  *
  * @returns an object containing the module's public interface. */
-var LabelBrowser_ = function (window, SortingQueue, $)
+var LabelBrowser_ = function (window, $, sq)
 {
 
 
@@ -305,7 +305,7 @@ var LabelBrowser_ = function (window, SortingQueue, $)
   var View = function (owner, fcs)
   {
     /* Invoke super constructor. */
-    SortingQueue.Drawable.call(this, owner);
+    sq.Drawable.call(this, owner);
 
     /* Check `fcs' argument IS an array. */
     if(!(fcs instanceof Array))
@@ -318,7 +318,7 @@ var LabelBrowser_ = function (window, SortingQueue, $)
     this.__defineGetter__('fcs', function () { return this.fcs_; } );
   };
 
-  View.prototype = Object.create(SortingQueue.Drawable.prototype);
+  View.prototype = Object.create(sq.Drawable.prototype);
 
 
   /**
@@ -327,7 +327,7 @@ var LabelBrowser_ = function (window, SortingQueue, $)
   var RowGroup = function (owner, fc)
   {
     /* Invoke super constructor. */
-    SortingQueue.Drawable.call(this, owner);
+    sq.Drawable.call(this, owner);
 
     /* Attributes */
     this.fc_ = fc;
@@ -336,7 +336,7 @@ var LabelBrowser_ = function (window, SortingQueue, $)
     this.__defineGetter__("fc", function () { return this.fc_; } );
   };
 
-  RowGroup = Object.create(SortingQueue.Drawable.prototype);
+  RowGroup = Object.create(sq.Drawable.prototype);
 
 
   /**
@@ -345,7 +345,7 @@ var LabelBrowser_ = function (window, SortingQueue, $)
   var Row = function (owner, subtopic_id, fc)
   {
     /* Invoke super constructor. */
-    SortingQueue.Drawable.call(this, owner);
+    sq.Drawable.call(this, owner);
 
     var api = owner.owner.api;
 
@@ -365,7 +365,7 @@ var LabelBrowser_ = function (window, SortingQueue, $)
     this.__defineGetter__('type', function () { return this.type_; } );
   };
 
-  Row.prototype = Object.create(SortingQueue.Drawable.prototype);
+  Row.prototype = Object.create(sq.Drawable.prototype);
 
   Row.prototype.htmlizeContent = function ()
   {
@@ -506,8 +506,8 @@ var LabelBrowser_ = function (window, SortingQueue, $)
 
 /* Compatibility with RequireJs. */
 if(typeof define === "function" && define.amd) {
-  define("LabelBrowser", [ "jquery" ], function (SortingQueue, $) {
-    return LabelBrowser_(window, SortingQueue, $, Api);
+  define("LabelBrowser", [ "jquery", "SortingQueue" ], function ($, sq) {
+    return LabelBrowser_(window, $, sq);
   });
 } else
-  window.LabelBrowser = LabelBrowser_(window, SortingQueue, $);
+  window.LabelBrowser = LabelBrowser_(window, $, SortingQueue);
