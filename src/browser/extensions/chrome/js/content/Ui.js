@@ -578,18 +578,7 @@ var ChromeExtensionUi = (function () {
   };
 
 
-  /* Public interface */
-  var getUi = function ()
-  { return ui_; };
-  
-
   /* Initialize extension class responsible for the UI. */
   ui_ = new Ui();
-
-
-  /* Return API. */
-  return {
-    get ui() { return ui_; }
-  };
 
 })();
