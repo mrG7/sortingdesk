@@ -19,6 +19,10 @@ var ChromeExtensionUi = (function () {
   /* Variables */
   var ui_;
 
+
+  /**
+   * @class
+   * */
   var Ui = function ()
   {
     var self = this,
