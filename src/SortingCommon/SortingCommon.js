@@ -20,10 +20,16 @@ var SortingCommon_ = function (window, $) {
   /* Module-wide function */
   var abs_ni = function ( ) { throw "Abstract method not implemented"; };
   
-  var is_obj = function (r) { return r instanceof Object; };
+  var is_obj = function (r) { return r !== null && typeof r === 'object'; };
   var is_fn  = function (r) { return typeof r === 'function'; };
   var is_und = function (r) { return typeof r === 'undefined'; };
   var is_arr = function (r) { return r instanceof Array; };
+  
+  var is_str = function (r)
+  { return typeof r === 'string' || r instanceof String; };
+
+  var is_num = function (r)
+  { return typeof r === 'number' || r instanceof Number; };
   
   var is_in  = function (/* r, k | r, k1, k2, ... */)
   {
@@ -32,7 +38,7 @@ var SortingCommon_ = function (window, $) {
     
     var r = arguments[0];
 
-    if(!is_obj(r))
+    if(!like_obj(r))
       throw "Reference provided not an object";
     
     for(var i = 1; i < arguments.length; ++i) {
@@ -42,6 +48,9 @@ var SortingCommon_ = function (window, $) {
 
     return true;
   };
+
+  var like = function (l, r) { return r instanceof Object && l instanceof r; };
+  var like_obj = function (r) { return r instanceof Object; };
 
 
   /**
@@ -277,6 +286,10 @@ var SortingCommon_ = function (window, $) {
     is_fn: is_fn,
     is_und: is_und,
     is_arr: is_arr,
+    is_str: is_str,
+    is_num: is_num,
+    like: like,
+    like_obj: like_obj,
     is_in: is_in,
 
     /* Classes */
