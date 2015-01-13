@@ -1,5 +1,11 @@
 * To do items
 ** *ALL* [0%]
+*** TODO Base module
+There is a need for base module upon which all existing modules can depend.
+
+*** TODO Mechanism for stopping all ongoing AJAX requests
+Behaviour is currently unknown if one switches to a folder while some sort of loading is taking place when the switch occurs (=moreTexts=, getFc=, etc). We need to be able to systematically terminate any and all AJAX requests taking place *before* the switch occurs.
+
 *** TODO Consider using SASS
 *** TODO Create standard function that can be assigned to abstract methods
 This would enable the following:
@@ -66,7 +72,6 @@ First iteration would include modules and classes.
 *** TODO =ControllerButtonDismiss= already employs a very specific pubsub method (=register=)
 This is bad. A generic and extensible mechanism that can be used by *ALL* components should be in place instead.
 
-*** TODO Move =onDropSpecial= to =ControllerBins=
 *** TODO Create controller responsible for constructors
 The method =instantiate= should be moved there and a new method  =hasConstructor= created.
 
@@ -95,25 +100,21 @@ This component is sorely needed.
   
 *** TODO Remove code handling keyboard events
   
-** =SortingDesk= [0%]
-*** =BinExplorer= [0%]
+** =SortingDesk= [7%]
+*** =FolderExplorer= [0%]
+**** TODO Selecting folder should also switch Sorting Desk's active folder but not close window
+**** TODO Implement folder renaming
 **** TODO Currently contains base64 encoding of icon images
 **** TODO Needs a callbacks handler BADLY
 
 *** =LabelBrowser= [12%]
-**** TODO =Browwser=: should the active =SortingDesk= instance be passed as a stand-alone argument or as part of the =options= object map?
-
-**** TODO Don't derive =Browser= from =SortingQueue.Controller=
-It must be possible to run it on its own.
+**** TODO =Browser=: should the active =SortingDesk= instance be passed as a stand-alone argument or as part of the =options= object map?
 
 **** TODO Show appropriate message when items list empty
 **** TODO =set_heading_title_=: using reference bin's own content rather than snippet from retrieved feature collection
 Assess if correct.
 
 Rationale behind decision was so the bins' snippet/image presented actually matched what the user used to create the bin in the first place. After all, a different user could have created a feature collection for the same page, thus replacing its snippet/image.
-
-**** TODO =LabelBrowserViewList=: currently merging subtopics from all feature collections
-Must assess if this is necessary.
 
 **** TODO Show labels ungrouped or grouped by feature collection (=content_id=)
 **** TODO As it stands there can only be ONE Label Browser HTML container
@@ -126,15 +127,12 @@ Component needs to stand on its own, have its own set of options, callbacks and 
 - State "CANCELED"   from "TODO"       [2015-01-05 Mon 14:26] \\
   Can't be done. Bootstrap screws up/overwrites existing page styles.
 
-*** TODO Toolbar: border radius is broken
-
 *** TODO Should be using a map to contain bins
 Also see TODO about folders being kept in an array.
 
 *** TODO Window management class
 A class for managing windows used by the different components is needed so as to prevent code duplication. Currently, the components =LabelBrowser= and =BinExplorer= share (duplicate) functionality that ought to be in a specialised class for this purpose.
 
-*** TODO Instantiation of API must pass in Dossier API URL
 *** TODO Revisit =options=
 Sorter and Label Browser's options reside together but Sorter's options are not prefixed.
 
@@ -143,8 +141,6 @@ Inconsistency: =buttonDismissed= is prefixed but =add= isn't.
 
 *** TODO Assess whether instance should keep reference to =options= object
 Should it rely on =SortingQueue= instead?
-
-*** TODO Time to think about decoupling =SortingDesk.js=
 
 *** TODO Throw exception when instantiating if not on valid page
 URL of page must have a valid HTTP[S] protocol. Disallow on any other page and throw exception.
@@ -160,19 +156,9 @@ Ultimately this optional mechanism would allow the client to receive a perfectly
 + API requires knowledge of the bin's =label=.
 + Several TODO annotations have been created regarding this issue.
   
-*** TODO Display of the bins should be minimal
-Ideally, each bin should look like the item that was first dropped to create that bin.
-
 *** WAIT Implement keyboard auto-repeat with configurable frequency
 - State "WAIT"       from "TODO"       [2014-10-15 Wed 13:56] \\
   Probable unwanted feature.
-  
-*** WAIT Allow bin statements to be edited
-- State "WAIT"       from "TODO"       [2014-10-10 Fri 16:11] \\
-  This will most likely require involvement of the client via a callback.
-- State "TODO"       from "WAIT"       [2014-09-05 Fri 10:42]
-- State "WAIT"       from "TODO"       [2014-08-22 Fri 13:24] \\
-  Not proceeding with this until it's clear whether bins based on existing text items are even editable.
   
 *** WAIT Do not allow duplicate bins
 - State "WAIT"       from "CANCELED"   [2014-11-26 Wed 09:09] \\
@@ -186,6 +172,10 @@ Ideally, each bin should look like the item that was first dropped to create tha
 ** Extension [0%]
 *** All [100%]
 *** Chrome [0%]
+**** TODO Re-calculate sizes (and positions) of UI elements when the browser window is resized
+**** TODO Allow container to be moved to either side of the page
+Attempt mechanism that doesn't show container over the page but alongside it instead.
+
 **** TODO =Positioner:position=: setting height with added hardcoded margin
 
 **** TODO =Positioner:position=: addressing node by its id
@@ -202,9 +192,7 @@ URL of page must have a valid HTTP[S] protocol. Disallow on any other page.
 
 **** TODO [#A] Add option: Dossier stack API URL
 ** API [0%]
-*** All [0%]
-**** TODO Move all API-related files into respective component directory
-
+*** All [50%]
 **** TODO Add timeout to AJAX calls
 
 *** Live [0%]
@@ -217,8 +205,6 @@ As it stands, the =Api= module can only be used by one client at a time.
 **** TODO Remove bypass of =DossierJS.SortingQueueItems.prototype._moreTexts=
 The bypass was created do deliver items in the format expected by =SortingQueue= but this should instead be integrated in DossierJS. Better still, IMHO, would be to integrate what is now the =SortingQueueItems= class in =Api=.
 
-** Mock [100%]
-
 ** Examples [0%]
 *** TODO Fix broken examples
 
@@ -227,10 +213,6 @@ The bypass was created do deliver items in the format expected by =SortingQueue=
   Not a priority at the moment.
   
 **** TODO No content ids
-
-** CSS [0%]
-*** TODO Ensure CSS contained by Sorting Desk and Queue components is (still) valid
-Many changes have been made which must have surely affected the CSS.
 
 ** Tests [0%]
 *** TODO instance: ensure reset doesn't run twice
