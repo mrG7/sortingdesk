@@ -1,3 +1,28 @@
+2015-01-09  Miguel Guedes  <miguel@miguelguedes.org>
+
+	* Sorting Desk:
+
+	Created the Folder Explorer component, which presently supports
+	the following feature set:
+
+	+ create folder
+	+ click selects folder
+	+ remove selected folder
+	+ double click selects folder and closes window
+
+	* Chrome Extension:
+
+	Integrated Folder Explorer into extension. Label Browser now able
+	to notify clients of interesting events such as when loading of
+	labels has terminated.
+
+	Revamped logic responsible to setting and getting state to/from
+	local storage.
+
+	* All:
+
+	Greatly improved styling and code all-round.
+
 2015-01-05  Miguel Guedes  <miguel@miguelguedes.org>
 
 	* Sorting Desk:
