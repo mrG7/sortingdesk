@@ -271,7 +271,15 @@ var SortingCommon_ = function (window, $) {
 
   /* Return public interface. */
   return {
+    /* Functions */
     abs_ni: abs_ni,
+    is_obj: is_obj,
+    is_fn: is_fn,
+    is_und: is_und,
+    is_arr: is_arr,
+    is_in: is_in,
+
+    /* Classes */
     Url: Url,
     Owned: Owned,
     Controller: Controller,
