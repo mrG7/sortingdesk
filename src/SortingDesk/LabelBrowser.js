@@ -84,8 +84,10 @@ var LabelBrowser_ = function (window, $, sq, std)
 
     /* Lambda called when initialisation is over, successfully or not. */
     var onEndInitialise = function () {
-      console.log("Label Browser component initialized");
-      self.invoke('onReady', self.eqv_fcs_.length);
+      if(self.ref_bin_ !== null) {
+        console.log("Label Browser component initialized");
+        self.invoke('onReady', self.eqv_fcs_.length);
+      }
     };
 
     /* Begin set up nodes. */
@@ -140,9 +142,16 @@ var LabelBrowser_ = function (window, $, sq, std)
             console.log("Unique labels' content id collection GET successful:",
                         fcs);
 
-            self.eqv_fcs_ = fcs instanceof Array ? fcs : [ ];
-            self.render_();
-            onEndInitialise();
+            /* Ensure that the instance hasn't been reset during the time spent
+             * loading data. This can be done by inspecting the contents of
+             * `ref_bin_´. If it is `null´, it can be safely assumed that the
+             * instance has been reset. */
+            if(self.ref_bin_ !== null) {
+              self.eqv_fcs_ = fcs instanceof Array ? fcs : [ ];
+              self.render_();
+              
+              onEndInitialise();
+            }
           } )
           .fail(function () {
             console.log('Failed to retrieve all feature collections');
