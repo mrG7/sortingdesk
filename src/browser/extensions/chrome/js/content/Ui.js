@@ -27,8 +27,9 @@ var ChromeExtensionUi = (function () {
     this.nodes_ = { };
 
     chrome.runtime.sendMessage({ operation: "get-meta" }, function (result) {
-      /* Do not instantiate SortingDesk if not currently enabled or
-       * current tab not active. */
+      /* Do not instantiate SortingDesk if not currently enabled, current tab
+       * not active or current page's URL is secure (using HTTPS) and Sorting
+       * Desk is set to not be activated on secure pages. */
       if(!result.config.active || !result.tab.active || !window.location.href
          || (/^https:\/\//.test(window.location.href)
              && !result.config.activateHttps)) {
