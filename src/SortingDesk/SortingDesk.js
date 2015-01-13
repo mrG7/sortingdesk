@@ -620,8 +620,7 @@ var SortingDesk_ = function (window, $, sq, Api) {
       throw "Label Browser already active";
 
     /* Disable browser icons. */
-    opts.nodes.bins.find('.' + opts.css.iconLabelBrowser)
-      .addClass(opts.css.disabled);
+    this.disableBrowser();
 
     (this.browser_ = this.owner_.sortingQueue.instantiate(
       'LabelBrowser', { api: this.owner_.api, ref_bin: bin } ) )
@@ -631,8 +630,7 @@ var SortingDesk_ = function (window, $, sq, Api) {
         self.browser_ = null;
 
         /* Re-enable browser icons. */
-        opts.nodes.bins.find('.' + opts.css.iconLabelBrowser)
-          .removeClass(opts.css.disabled);
+        self.enableBrowser();
       } );
   };
 
@@ -709,6 +707,22 @@ var SortingDesk_ = function (window, $, sq, Api) {
 
     return result.subtopic_id && result;
   };
+
+  /* overridable */ ControllerFolder.prototype.enableBrowser = function ()
+  {
+    var opts = this.owner_.options;
+    
+    opts.nodes.bins.find('.' + opts.css.iconLabelBrowser)
+      .removeClass(opts.css.disabled);
+  };    
+
+  /* overridable */ ControllerFolder.prototype.disableBrowser = function ()
+  {
+    var opts = this.owner_.options;
+    
+    opts.nodes.bins.find('.' + opts.css.iconLabelBrowser)
+      .addClass(opts.css.disabled);
+  };    
 
   /* Protected methods */
   /* overridable */ ControllerFolder.prototype.append_ = function (node)
