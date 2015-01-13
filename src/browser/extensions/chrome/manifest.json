@@ -18,7 +18,7 @@
     {
       "matches": ["<all_urls>"],
       "js": [ "lib/jquery-2.1.1.min.js", "lib/CryptoJS/md5.js", "lib/dossier.js/Dossier.js", "lib/SortingQueue/SortingQueue.js", "lib/SortingDesk/api-live.js", "lib/SortingDesk/SortingDesk.js", "lib/SortingDesk/LabelBrowser.js", "lib/SortingDesk/FolderExplorer.js", "js/content/Ui.js" ],
-      "css": [ "css/theme-default.css" ]
+      "css": [ "css/theme-default.css", "css/theme-default-images.css" ]
     }
   ],
 
