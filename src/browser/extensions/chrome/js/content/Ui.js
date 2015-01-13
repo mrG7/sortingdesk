@@ -37,19 +37,11 @@ var ChromeExtensionUi = (function () {
       }
 
       /* Load custom font */
-      /* TODO: perhaps create a resource loader? This is just too hacky. */
-      {
-        var style = document.createElement('style');
-        style.type = 'text/css';
-        style.textContent = [
-          "@font-face {",
-          "font-family: 'Glyphicons Halflings';",
-          "src: url('",
-          chrome.extension.getURL('lib/bootstrap/fonts/glyphicons-halflings-regular.woff'),
-          "'); }" ].join('');
-        
-        document.head.appendChild(style);
-      }
+      Resource.inject( [ {
+        url: 'lib/bootstrap/fonts/glyphicons-halflings-regular.woff',
+        family: 'Glyphicons Halflings',
+        type: 'font'
+      } ] );
       
       /* Load container HTML. */
       chrome.runtime.sendMessage( {
@@ -579,6 +571,52 @@ var ChromeExtensionUi = (function () {
     node.append(content);
     
     return node;
+  };
+
+
+  /**
+   * @class
+   * */
+  var Resource = {
+    inject: function (urls)
+    {
+      if(!(urls instanceof Object))
+        throw "Invalid urls object given";
+      else if(!(urls instanceof Array))
+        urls = [ urls ];
+
+      urls.forEach(function (res) {
+        switch(res.type.toLowerCase()) {
+        case 'font':
+          if(!res.family)
+            throw "Font family not specified";
+          
+          Resource.injectFont(res.url, res.family);
+          break;
+          
+        default:
+          console.log("Invalid resource type: %s", res.type);
+          return;
+        }
+
+        console.log("Injected resource (%s): %s", res.type, res.url);
+      } );
+    },
+    
+    injectFont: function (url, family)
+    {
+      var style = document.createElement('style');
+      style.type = 'text/css';
+      style.textContent = [
+        "@font-face {",
+        "font-family: '",
+        family,
+        "';src: url('",
+        chrome.extension.getURL(url),
+        "'); }" ].join('');
+      
+      document.head.appendChild(style);
+    }
   };
 
 
