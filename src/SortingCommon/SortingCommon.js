@@ -18,7 +18,7 @@ var SortingCommon_ = function (window, $) {
 
 
   /* Module-wide function */
-  var abs_ni = function ( ) { throw "Abstract method not implemented"; };
+  var absm_noti = function ( ) { throw "Abstract method not implemented"; };
   
   var is_obj = function (r) { return r !== null && typeof r === 'object'; };
   var is_fn  = function (r) { return typeof r === 'function'; };
@@ -94,9 +94,9 @@ var SortingCommon_ = function (window, $) {
   Controller.prototype = Object.create(Owned.prototype);
 
   /* Following method to allow for deferred initialisation. */
-  /* abstract */ Controller.prototype.initialise = abs_ni;
+  /* abstract */ Controller.prototype.initialise = absm_noti;
 
-  /* abstract */ Controller.prototype.reset = abs_ni;
+  /* abstract */ Controller.prototype.reset = absm_noti;
 
 
   /**
@@ -110,7 +110,7 @@ var SortingCommon_ = function (window, $) {
 
   Drawable.prototype = Object.create(Owned.prototype);
 
-  /* abstract */ Drawable.prototype.render = abs_ni;
+  /* abstract */ Drawable.prototype.render = absm_noti;
 
 
   /**
@@ -281,7 +281,7 @@ var SortingCommon_ = function (window, $) {
   /* Return public interface. */
   return {
     /* Functions */
-    abs_ni: abs_ni,
+    absm_noti: absm_noti,
     is_obj: is_obj,
     is_fn: is_fn,
     is_und: is_und,
