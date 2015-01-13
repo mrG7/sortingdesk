@@ -85,10 +85,6 @@
   border-radius: 10px 10px 10px 0;
 }
 
-#sd-sorter > DIV {
-  margin: 5px;
-}
-
 /* Activator button */
 #sd-activator {
   display: inline-block;
@@ -216,6 +212,7 @@
   overflow-y: hidden;
   white-space: nowrap;
   vertical-align: middle;
+  margin: 5px;
   border-bottom: 1px dashed silver;
 }
 
@@ -223,6 +220,7 @@
   position: relative;
   height: 310px;
   overflow-y: auto;
+  margin: 5px;
 }
 
 .sd-clear {
@@ -231,9 +229,9 @@
 }
 
 .sd-loading {
+  display: none;
   position: absolute;
   top: 135px;
-  display: none;
   color: black;
   opacity: .7;
   height: 80px;
