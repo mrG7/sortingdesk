@@ -277,6 +277,11 @@ var LabelBrowser_ = function (window, $, sq, std)
 
   Browser.prototype.set_header_ = function (fc)
   {
+    /* Don't set the header if somehow this instance has been reset and is thus
+     * not valid anymore. */
+    if(!this.nodes_.ref_bin_)
+      return;
+    
     this.nodes_.header.title
       .html(std.is_obj(fc)
             && std.is_obj(fc.raw)
