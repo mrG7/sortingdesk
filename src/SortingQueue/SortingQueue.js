@@ -519,8 +519,6 @@ var SortingQueue_ = function (window, $, std) {
   {
     /* Invoke super constructor. */
     std.Controller.call(this, owner);
-
-    this.handlers_ = [ ];
   };
 
   ControllerButtonDismiss.prototype = Object.create(std.Controller.prototype);
@@ -533,6 +531,8 @@ var SortingQueue_ = function (window, $, std) {
     var self = this,
         options = this.owner_.options;
 
+    this.handlers_ = { };
+    
     this.droppable_ = new Droppable(options.nodes.buttonDismiss, {
       classHover: options.css.droppableHover,
       scopes: [ ],
@@ -552,22 +552,28 @@ var SortingQueue_ = function (window, $, std) {
     } );
   };
 
-  ControllerButtonDismiss.prototype.register = function (scope, fnHandler)
+  ControllerButtonDismiss.prototype.register = function (scope, handler)
   {
+    if(!std.is_fn(handler))
+      throw "Handler callback not a valid function";
     if(!this.droppable_)
       return;
     else if(!this.handlers_.hasOwnProperty(scope))
       this.droppable_.addScope(scope);
 
-    this.handlers_[scope] = fnHandler;
+    this.handlers_[scope] = handler;
+  };
+
+  ControllerButtonDismiss.prototype.deregister = function (scope)
+  {
+    if(this.handlers_.hasOwnProperty(scope))
+      delete this.handlers_[scope];
   };
 
   ControllerButtonDismiss.prototype.reset = function ()
   {
     this.owner_.options.nodes.buttonDismiss.off();
-
-    this.handlers_ = [ ];
-    this.droppable_ = null;
+    this.handlers_ = this.droppable_ = null;
   };
 
   ControllerButtonDismiss.prototype.activate = function (callback)
