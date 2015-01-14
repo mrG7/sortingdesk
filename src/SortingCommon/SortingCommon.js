@@ -213,6 +213,11 @@ var SortingCommon_ = function (window, $) {
     return this.map_.hasOwnProperty(name);
   };
 
+  Constructor.prototype.isConstructor = function (name)
+  {
+    return !this.hasFactoryMethod(name) && this.hasConstructor(name);
+  };
+
   Constructor.prototype.instantiate = function ( /* class, ... */ )
   {
     if(arguments.length < 1)
