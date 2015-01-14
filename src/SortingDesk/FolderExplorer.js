@@ -45,11 +45,23 @@ var FolderExplorer_ = function (window, $, sq, std)
     this.api_ = options.api;
     this.viewType_ = Explorer.VIEW_ICONIC;
     this.nodes_ = { };
+    
+    this.deferred_ = this.view_ = this.mode_ = this.folders_ = null;
+    this.selected_ = null;
 
     if(!std.like_obj(this.api_))
       throw "Invalid API reference specified";
 
     this.initialised_ = false;
+
+    /* Getters */
+    this.__defineGetter__('api', function () { return this.api_; } );
+    this.__defineGetter__('options', function () { return this.options_; } );
+    this.__defineGetter__('nodes', function () { return this.nodes_; } );
+    this.__defineGetter__('mode', function () { return this.mode_; } );
+    this.__defineGetter__('view', function () { return this.view_; } );
+    this.__defineGetter__('folders', function () { return this.folders_; } );
+    this.__defineGetter__('selected', function () { return this.selected_; } );
   };
 
   /* Constants */
@@ -59,306 +71,284 @@ var FolderExplorer_ = function (window, $, sq, std)
   Explorer.MODE_BINS = 0x02;
 
   /* Interface */
-  Explorer.prototype = {
-    initialised_: null,
-    deferred_: null,
-    api_: null,
-    options_: null,
-    nodes_: null,
-    view_: null,
-    viewType_: null,
-    mode_: null,
-    folders_: null,
-    selected_: null,
-    
-    initialise: function ()
-    {
-      if(this.initialised_)
-        throw "Bin Explorer component already initialised";
+  Explorer.prototype.initialise = function ()
+  {
+    if(this.initialised_)
+      throw "Bin Explorer component already initialised";
 
-      var self = this,
-          els = this.nodes_;
+    var self = this,
+        els = this.nodes_;
 
-      console.log("Initialising Bin Explorer component");
+    console.log("Initialising Bin Explorer component");
 
-      /* Begin set up nodes. */
-      els.container = $('[data-sd-scope="folder-explorer-container"]');
+    /* Begin set up nodes. */
+    els.container = $('[data-sd-scope="folder-explorer-container"]');
 
-      els.buttonClose = this.find_node_('close')
-        .click( function () { self.close(); } );
+    els.buttonClose = this.find_node_('close')
+      .click( function () { self.close(); } );
 
-      els.toolbar = {
-        actions: {
-          load: this.find_node_('toolbar-load'),
-          add: this.find_node_('toolbar-add'),
-          remove: this.find_node_('toolbar-remove'),
-          rename: this.find_node_('toolbar-rename')
-        },
-        view: {
-          icons: this.find_node_('toolbar-icons'),
-          list: this.find_node_('toolbar-list')
-        }
-      };
+    els.toolbar = {
+      actions: {
+        load: this.find_node_('toolbar-load'),
+        add: this.find_node_('toolbar-add'),
+        remove: this.find_node_('toolbar-remove'),
+        rename: this.find_node_('toolbar-rename')
+      },
+      view: {
+        icons: this.find_node_('toolbar-icons'),
+        list: this.find_node_('toolbar-list')
+      }
+    };
 
-      els.header = {
-        container: this.find_node_('header-folder'),
-        buttonBack: this.find_node_('button-back'),
-        title: this.find_node_('folder-title')
-      };
+    els.header = {
+      container: this.find_node_('header-folder'),
+      buttonBack: this.find_node_('button-back'),
+      title: this.find_node_('folder-title')
+    };
 
-      els.view = this.find_node_('view');
+    els.view = this.find_node_('view');
 
-      /* Load currently selected item when toolbar button clicked. */
-      els.toolbar.actions.load.click(function () {
-        if(self.selected_ && self.selected_ instanceof ItemIconicFolder) {
-          self.open(self.selected_.item);
-          self.select(null);
-        }
-
-        return false;
-      } );
-
-      /* Deselect currently selected folder when clicked on container. */
-      els.container.click(function () { self.select(null); return false; });
-
-      /* Add item when toolbar button clicked. */
-      els.toolbar.actions.add.click(function () {
+    /* Load currently selected item when toolbar button clicked. */
+    els.toolbar.actions.load.click(function () {
+      if(self.selected_ && self.selected_ instanceof ItemIconicFolder) {
+        self.open(self.selected_.item);
         self.select(null);
-        if(self.view_) self.view_.onCreate();
-        return false;
-      } );
-      
-      /* Remove item when toolbar button clicked. */
-      els.toolbar.actions.remove.click(function () {
-        if(self.selected_ && self.selected_ instanceof ItemIconicFolder) {
-          var id;
-          
-          if(self.folders_.some(function (folder, index) {
-            if(folder === self.selected_.item) {
-              id = folder.id;
-              self.folders_.splice(index, 1);
-              return true;
-            }
-          } ) ) {
-            self.invoke('remove', id);
-            self.refresh();
-          } else
-            console.log("Failed to remove selected item: ", self.selected_);
-        }
-
-        return false;
-      } );
-      /* End set up up nodes. */
-
-      /* Retrieve all folders. */
-      this.invoke("loadAll")
-        .done(function (folders) {
-          if(!(folders instanceof Array))
-            throw "Folders state array invalid";
-
-          self.folders_ = folders;
-          console.log("Got folders state successfully", self.folders_);
-          
-          self.render_();
-        } );
-      
-      this.initialised_ = true;
-      console.log("Bin Explorer component initialised");
-      
-      this.invoke("onInitialised", els.container);
-      
-      return this.show();
-    },
-
-    reset: function ()
-    {
-      this.check_init_();
-      
-      /* Close window if still visible. */
-      if(this.deferred_) {
-        this.close();
-        if(!this.initialised_) return;
       }
+
+      return false;
+    } );
+
+    /* Deselect currently selected folder when clicked on container. */
+    els.container.click(function () { self.select(null); return false; });
+
+    /* Add item when toolbar button clicked. */
+    els.toolbar.actions.add.click(function () {
+      self.select(null);
+      if(self.view_) self.view_.onCreate();
+      return false;
+    } );
     
-      /* Detach events of all nodes. */
-      detachAllEventsIn_(this.nodes_);
-
-      if(this.view_) {
-        this.view_.reset();
-        this.view_ = null;
-      }
-
-      this.api_ = this.options_ = this.nodes_ = null;
-      this.initialised_ = false;
-
-      console.log("Bin Explorer component reset");
-    },
-
-    select: function (item)
-    {
-      if(this.selected_)
-        this.selected_.node.removeClass(Css.selected);
-      
-      if(item && item !== this.selected_) {
-        this.selected_ = item;
-        this.selected_.node.addClass(Css.selected);
-      } else
-        this.selected_ = null;
-
-      var flag = this.selected_ === null,
-          els = this.nodes_.toolbar;
-      els.actions.load.toggleClass('sd-disabled', flag);
-      els.actions.remove.toggleClass('sd-disabled', flag);
-    },
-    
-    open: function (folder)
-    {
-      this.invoke('open', folder);
-    },
-
-    viewFolder: function (folder)
-    {
-      this.render_(folder);
-    },
-
-    refresh: function ()
-    {
-      /* Currently resetting to 'folder' mode. */
-      this.render_();
-      console.log("Refreshed view");
-      
-    },
-
-    /* overridable */ show: function ()
-    {
-      var els = this.nodes_;
-      
-      this.check_init_();
-      this.deferred_ = $.Deferred();
-
-      els.container.css( {
-        transform: 'scale(1,1)',
-        opacity: 1
-      } );
-
-      /* Set the items list's height so a scrollbar is shown when it overflows
-       * vertically. */
-      els.view.css('height', els.container.innerHeight()
-                   - this.find_node_('header').outerHeight()
-                   - (els.view.outerHeight(true) - els.view.innerHeight()));
-
-      return this.deferred_.promise();
-    },
-    
-    /* overridable */ close: function ()
-    {
-      this.check_init_();
-    
-      this.nodes_.container
-        .css( {
-          transform: 'scale(.2,.2)',
-          opacity: 0
-        } );
-      
-      if(this.deferred_) {
-        this.deferred_.resolve();
-        this.deferred_ = null;
-      }
-    },
-
-    /* TODO: Needs a callbacks handler BADLY. */
-    invoke: function ( /* name, ... */ )
-    {
-      if(arguments.length < 1)
-        throw "Callback name not provided";
-      
-      var cb = this.callbacks_[arguments[0]];
-      
-      if(!std.is_fn(cb))
-        throw "Callback invalid or not existent: " + arguments[0];
-
-      return cb.apply(null, [].slice.call(arguments, 1));
-    },
-
-    /* Events */
-    onFolderCreated: function (folder)
-    {
-      this.folders_.push(folder);
-      this.refresh();
-      this.invoke('save', folder);
-    },
-
-    /* Private methods */
-    check_init_: function ()
-    {
-      if(!this.initialised_)
-        throw "Component not yet initialised or already reset";
-    },
-
-    find_node_: function (scope, parent /* = container */ )
-    {
-      var p;
-
-      if(parent instanceof $)
-        p = parent;
-      else if(std.is_str(parent))
-        p = this.find_node_(parent);
-      else
-        p = this.nodes_.container;
-
-      return p.find( [ '[data-sd-scope="folder-explorer-', scope, '"]' ]
-                     .join(''));
-    },
-
-    render_: function (folder)
-    {
-      var self = this,
-          hel = this.nodes_.header;
-      
-      if(this.view_) {
-        this.view_.reset();
-        this.view_ = null;
-      }
-
-      if(folder instanceof Object) {
-        this.mode_ = Explorer.MODE_BINS;
-        hel.title.html(folder.name);
-        hel.container.fadeIn(200);
-        hel.buttonBack.click( function () {
-          self.render_();
-          hel.buttonBack.off();
-        } );
-      } else {
-        folder = null;
-        this.mode_ = Explorer.MODE_FOLDERS;
-        hel.container.fadeOut(200);
-      }
-
-      switch(this.viewType_) {
-      case Explorer.VIEW_ICONIC:
-        this.view_ = folder
-          ? new ViewIconicBins(this, folder.bins)
-          : new ViewIconicFolders(this, this.folders_);
+    /* Remove item when toolbar button clicked. */
+    els.toolbar.actions.remove.click(function () {
+      if(self.selected_ && self.selected_ instanceof ItemIconicFolder) {
+        var id;
         
-        break;
-
-      default:
-        throw "Invalid view type or view unsupported: " + this.viewType_;
+        if(self.folders_.some(function (folder, index) {
+          if(folder === self.selected_.item) {
+            id = folder.id;
+            self.folders_.splice(index, 1);
+            return true;
+          }
+        } ) ) {
+          self.invoke('remove', id);
+          self.refresh();
+        } else
+          console.log("Failed to remove selected item: ", self.selected_);
       }
 
-      /* Render view. */
-      this.view_.render();
-      this.select(null);
-    },
+      return false;
+    } );
+    /* End set up up nodes. */
 
-    /* Getters */
-    get api() { return this.api_; },
-    get options() { return this.options_; },
-    get nodes() { return this.nodes_; },
-    get mode() { return this.mode_; },
-    get view() { return this.view_; },
-    get folders() { return this.folders_; },
-    get selected() { return this.selected_; }
+    /* Retrieve all folders. */
+    this.invoke("loadAll")
+      .done(function (folders) {
+        if(!(folders instanceof Array))
+          throw "Folders state array invalid";
+
+        self.folders_ = folders;
+        console.log("Got folders state successfully", self.folders_);
+        
+        self.render_();
+      } );
+    
+    this.initialised_ = true;
+    console.log("Bin Explorer component initialised");
+    
+    this.invoke("onInitialised", els.container);
+    
+    return this.show();
+  };
+
+  Explorer.prototype.reset = function ()
+  {
+    this.check_init_();
+    
+    /* Close window if still visible. */
+    if(this.deferred_) {
+      this.close();
+      if(!this.initialised_) return;
+    }
+    
+    /* Detach events of all nodes. */
+    detachAllEventsIn_(this.nodes_);
+
+    if(this.view_) {
+      this.view_.reset();
+      this.view_ = null;
+    }
+
+    this.api_ = this.options_ = this.nodes_ = null;
+    this.initialised_ = false;
+
+    console.log("Bin Explorer component reset");
+  };
+
+  Explorer.prototype.select = function (item)
+  {
+    if(this.selected_)
+      this.selected_.node.removeClass(Css.selected);
+    
+    if(item && item !== this.selected_) {
+      this.selected_ = item;
+      this.selected_.node.addClass(Css.selected);
+    } else
+      this.selected_ = null;
+
+    var flag = this.selected_ === null,
+        els = this.nodes_.toolbar;
+    els.actions.load.toggleClass('sd-disabled', flag);
+    els.actions.remove.toggleClass('sd-disabled', flag);
+  };
+    
+  Explorer.prototype.open = function (folder)
+  {
+    this.invoke('open', folder);
+  };
+
+  Explorer.prototype.viewFolder = function (folder)
+  {
+    this.render_(folder);
+  };
+
+  Explorer.prototype.refresh = function ()
+  {
+    /* Currently resetting to 'folder' mode. */
+    this.render_();
+    console.log("Refreshed view");
+    
+  };
+
+  /* overridable */ Explorer.prototype.show = function ()
+  {
+    var els = this.nodes_;
+    
+    this.check_init_();
+    this.deferred_ = $.Deferred();
+
+    els.container.css( {
+      transform: 'scale(1,1)',
+      opacity: 1
+    } );
+
+    /* Set the items list's height so a scrollbar is shown when it overflows
+     * vertically. */
+    els.view.css('height', els.container.innerHeight()
+                 - this.find_node_('header').outerHeight()
+                 - (els.view.outerHeight(true) - els.view.innerHeight()));
+
+    return this.deferred_.promise();
+  };
+    
+  /* overridable */ Explorer.prototype.close = function ()
+  {
+    this.check_init_();
+    
+    this.nodes_.container
+      .css( {
+        transform: 'scale(.2,.2)',
+        opacity: 0
+      } );
+    
+    if(this.deferred_) {
+      this.deferred_.resolve();
+      this.deferred_ = null;
+    }
+  };
+
+  /* TODO: Needs a callbacks handler BADLY. */
+  Explorer.prototype.invoke = function ( /* name, ... */ )
+  {
+    if(arguments.length < 1)
+      throw "Callback name not provided";
+    
+    var cb = this.callbacks_[arguments[0]];
+    
+    if(!std.is_fn(cb))
+      throw "Callback invalid or not existent: " + arguments[0];
+
+    return cb.apply(null, [].slice.call(arguments, 1));
+  };
+
+  /* Events */
+  Explorer.prototype.onFolderCreated = function (folder)
+  {
+    this.folders_.push(folder);
+    this.refresh();
+    this.invoke('save', folder);
+  };
+
+  /* Private methods */
+  Explorer.prototype.check_init_ = function ()
+  {
+    if(!this.initialised_)
+      throw "Component not yet initialised or already reset";
+  };
+
+  Explorer.prototype.find_node_ = function (scope, parent /* = container */ )
+  {
+    var p;
+
+    if(parent instanceof $)
+      p = parent;
+    else if(std.is_str(parent))
+      p = this.find_node_(parent);
+    else
+      p = this.nodes_.container;
+
+    return p.find( [ '[data-sd-scope="folder-explorer-', scope, '"]' ]
+                   .join(''));
+  };
+
+  Explorer.prototype.render_ = function (folder)
+  {
+    var self = this,
+        hel = this.nodes_.header;
+    
+    if(this.view_) {
+      this.view_.reset();
+      this.view_ = null;
+    }
+
+    if(folder instanceof Object) {
+      this.mode_ = Explorer.MODE_BINS;
+      hel.title.html(folder.name);
+      hel.container.fadeIn(200);
+      hel.buttonBack.click( function () {
+        self.render_();
+        hel.buttonBack.off();
+      } );
+    } else {
+      folder = null;
+      this.mode_ = Explorer.MODE_FOLDERS;
+      hel.container.fadeOut(200);
+    }
+
+    switch(this.viewType_) {
+    case Explorer.VIEW_ICONIC:
+      this.view_ = folder
+        ? new ViewIconicBins(this, folder.bins)
+        : new ViewIconicFolders(this, this.folders_);
+      
+      break;
+
+    default:
+      throw "Invalid view type or view unsupported: " + this.viewType_;
+    }
+
+    /* Render view. */
+    this.view_.render();
+    this.select(null);
   };
 
 
