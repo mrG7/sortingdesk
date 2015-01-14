@@ -607,6 +607,12 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
         250);
 
       this.owner_.sortingQueue.callbacks.invoke('setActive', this.id);
+    } else {
+      /* There is no active bin, which means we need to clear the list of items,
+       * but we only do so *after* the query content id has been set since
+       * Sorting Queue will attempt to refresh the items list. */
+      this.owner_.api.setQueryContentId(null);
+      this.owner_.sortingQueue.items.removeAll();
     }
   };
 
