@@ -185,9 +185,10 @@ var SortingCommon_ = function (window, $) {
    * */
   var Constructor = function (map)
   {
-    if(!(map instanceof Object))
+    if(!is_obj(map))
       throw "Invalid map of constructors given";
 
+    /* Ensure all attributes in the map are functions. */
     for(var k in map) {
       if(!is_fn(map[k]))
         throw "Invalid constructor found: " + k;
