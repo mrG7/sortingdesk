@@ -25,8 +25,7 @@ var ChromeExtensionUi = (function ($, std) {
    * */
   var Ui = function (meta)
   {
-    var self = this,
-        requests = 0;
+    var self = this;
 
     this.nodes_ = { };
 
@@ -54,11 +53,10 @@ var ChromeExtensionUi = (function ($, std) {
       self.nodes_.loading = self.nodes_.container.find('.sd-loading');
       self.nodes_.empty = self.nodes_.container.find('.sd-empty');
 
-      /* Instantiate class components. */
+      /* Instantiate and or initialise class components. */
       self.activator_ = new Activator();
       self.positioner_ = new Positioner();
-      self.requests_ = new Requests();
-      self.transceiver_ = new Transceiver();
+      BackgroundListener.initialise();
 
       /* Register for click events on the 'settings' button inside the extension
        * activator button. */
@@ -92,7 +90,7 @@ var ChromeExtensionUi = (function ($, std) {
       }, $.extend(
         true,
         Api,
-        self.requests_.callbacks.sorter,
+        Requests.callbacks,
         HandlerCallbacks.callbacks.sorter ) ) ).initialise();
     } );
   };
@@ -101,8 +99,6 @@ var ChromeExtensionUi = (function ($, std) {
     /* Class instances */
     activator_: null,
     positioner_: null,
-    requests_: null,
-    transceiver_: null,
     sorter_: null,
     explorer_: null,
     /* Nodes */
@@ -111,8 +107,6 @@ var ChromeExtensionUi = (function ($, std) {
     /* Getter methods */
     get activator() { return this.activator_; },
     get positioner() { return this.positioner_; },
-    get requests() { return this.requests_; },
-    get transceiver() { return this.transceiver_; },
     get sorter() { return this.sorter_; },
     get nodes() { return this.nodes_; },
     node: function (key) { return this.nodes_[key]; },
@@ -210,37 +204,29 @@ var ChromeExtensionUi = (function ($, std) {
   /**
    * @class
    * */
-  var Requests = function ()
-  {
-    this.count_ = 0;
-  };
+  var Requests = (function () {
+    var count_ = null;
 
-  Requests.prototype = {
-    count_: null,
-
-    /* Events */
-    onRequestStart: function ()
+    /* Event handlers */
+    var onRequestStart_ = function ()
     {
-      if(this.count_++ === 0)
+      if(count_++ === 0)
         ui_.nodes.loading.stop().fadeIn();
-    },
+    };
     
-    onRequestStop: function () {
-      if(--this.count_ === 0)
+    var onRequestStop_ = function () {
+      if(--count_ === 0)
         ui_.nodes.loading.stop().fadeOut(100);
-    },
-    
-    /* Getter methods */
-    get callbacks ()
-    {
-      return {
-        sorter: {
-          onRequestStart: this.onRequestStart.bind(this),
-          onRequestStop: this.onRequestStop.bind(this)
-        }
-      };
-    }
-  };
+    };
+
+    /* Public interface */
+    return {
+      callbacks: {              /* Acts like a getter. */
+        onRequestStart: onRequestStart_,
+        onRequestStop: onRequestStop_
+      }
+    };
+  } )();
 
 
   /**
@@ -311,7 +297,6 @@ var ChromeExtensionUi = (function ($, std) {
       chrome.runtime.sendMessage( { operation: 'remove-folder', id: id } );
     };
     
-
     /* Interface */
     return {
       callbacks: {
@@ -337,31 +322,10 @@ var ChromeExtensionUi = (function ($, std) {
   /**
    * @class
    * */
-  var Transceiver = function ()
-  {
-    var self = this,
-        methods = {
-          "folder-removed": this.onFolderRemoved_,
-          "folder-updated": this.onFolderUpdated_
-        };
+  var BackgroundListener = (function () {
 
-    /* Handle messages whose `operation´ is defined above in `methods´. */
-    chrome.runtime.onMessage.addListener(
-      function (request, sender, callback) {
-        if(methods.hasOwnProperty(request.operation)) {
-          console.log("Invoking message handler [type="
-                      + request.operation + "]");
-
-          methods[request.operation].call(
-            self, request, sender, callback);
-        }
-      }
-    );
-  };
-
-  Transceiver.prototype = {
-    /* Events initiated by the extension outbound to `SortingDesk´ */
-    onFolderRemoved_: function (request, sender, callback)
+    /* Handlers of messages sent by the extension (background.js). */
+    var onFolderRemoved_ = function (request, sender, callback)
     {
       console.log("Folder removed: id=%s", request.id);
 
@@ -370,9 +334,9 @@ var ChromeExtensionUi = (function ($, std) {
         console.log("Forcing folder closed");
         ui_.sorter.close();
       }
-    },
+    };
 
-    onFolderUpdated_: function (request, sender, callback)
+    var onFolderUpdated_ = function (request, sender, callback)
     {
       console.log("Folder updated: id=%s", request.folder.id);
 
@@ -381,8 +345,36 @@ var ChromeExtensionUi = (function ($, std) {
         console.log("Forcing folder refresh");
         ui_.sorter.open(request.folder);
       }
-    }
-  };
+    };
+
+    /* Map message operations to handlers. */
+    var methods_ = {
+      "folder-removed": onFolderRemoved_,
+      "folder-updated": onFolderUpdated_
+    };
+
+    /* Interface */
+    var initialise = function () {
+      /* Handle messages whose `operation´ is defined above in `methods_´. */
+      chrome.runtime.onMessage.addListener(
+        function (request, sender, callback) {
+          if(methods_.hasOwnProperty(request.operation)) {
+            console.log("Invoking message handler [type="
+                        + request.operation + "]");
+
+            /* Invoke handler. */
+            methods_[request.operation].call(window, request, sender, callback);
+          }
+        }
+      );
+    };
+
+    /* Public interface */
+    return {
+      initialise: initialise
+    };
+    
+  } )();
 
 
   /**
@@ -539,8 +531,9 @@ var ChromeExtensionUi = (function ($, std) {
   /**
    * @class
    * */
-  var Resource = {
-    inject: function (urls)
+  var Resource = (function () {
+    /* Interface */
+    var inject = function (urls)
     {
       if(!(urls instanceof Object))
         throw "Invalid urls object given";
@@ -550,10 +543,10 @@ var ChromeExtensionUi = (function ($, std) {
       urls.forEach(function (res) {
         switch(res.type.toLowerCase()) {
         case 'font':
-          if(!res.family)
+          if(!std.is_str(res.family))
             throw "Font family not specified";
           
-          Resource.injectFont(res.url, res.family);
+          injectFont(res.url, res.family);
           break;
           
         default:
@@ -563,9 +556,9 @@ var ChromeExtensionUi = (function ($, std) {
 
         console.log("Injected resource (%s): %s", res.type, res.url);
       } );
-    },
+    };
     
-    injectFont: function (url, family)
+    var injectFont = function (url, family)
     {
       var style = document.createElement('style');
       style.type = 'text/css';
@@ -578,8 +571,13 @@ var ChromeExtensionUi = (function ($, std) {
         "'); }" ].join('');
       
       document.head.appendChild(style);
-    }
-  };
+    };
+
+    /* Public interface */
+    return {
+      inject: inject
+    };
+  } )();
 
 
   /* Attempt to initialize extension class responsible for the UI. */
