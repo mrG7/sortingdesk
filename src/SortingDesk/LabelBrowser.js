@@ -16,7 +16,7 @@
  * The Label Browser module.
  *
  * @returns an object containing the module's public interface. */
-var LabelBrowser_ = function (window, $, sq, std)
+var LabelBrowser_ = function (window, $, std)
 {
 
 
@@ -504,8 +504,8 @@ var LabelBrowser_ = function (window, $, sq, std)
 
 /* Compatibility with RequireJs. */
 if(typeof define === "function" && define.amd) {
-  define("LabelBrowser", [ "jquery", "SortingQueue", "SortingCommon" ], function ($, sq, std) {
-    return LabelBrowser_(window, $, sq, std);
+  define("LabelBrowser", [ "jquery", "SortingCommon" ], function ($, std) {
+    return LabelBrowser_(window, $, std);
   });
 } else
-  window.LabelBrowser = LabelBrowser_(window, $, SortingQueue, SortingCommon);
+  window.LabelBrowser = LabelBrowser_(window, $, SortingCommon);

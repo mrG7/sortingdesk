@@ -16,7 +16,7 @@
  * The Bin Explorer module.
  *
  * @returns an object containing the module's public interface. */
-var FolderExplorer_ = function (window, $, sq, std)
+var FolderExplorer_ = function (window, $, std)
 {
 
   /* Module-wide function */
@@ -799,8 +799,8 @@ var FolderExplorer_ = function (window, $, sq, std)
 
 /* Compatibility with RequireJs. */
 if(typeof define === "function" && define.amd) {
-  define("FolderExplorer", [ "jquery", "SortingQueue", "SortingCommon" ], function ($, sq, std) {
-    return FolderExplorer_(window, $, sq, std);
+  define("FolderExplorer", [ "jquery", "SortingCommon" ], function ($, std) {
+    return FolderExplorer_(window, $, std);
   });
 } else
-  window.FolderExplorer = FolderExplorer_(window, $, SortingQueue, SortingCommon);
+  window.FolderExplorer = FolderExplorer_(window, $, SortingCommon);
