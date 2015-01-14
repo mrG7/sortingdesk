@@ -37,7 +37,7 @@ var LabelBrowser_ = function (window, $, sq, std)
     /* Attributes */
     this.initialised_ = false;
     this.options_ = options;
-    this.callbacks_ = callbacks;
+    this.callbacks_ = new std.Callbacks(callbacks);
     this.api_ = options.api;
     this.deferred_ = null;
     this.nodes_ = { };
@@ -62,6 +62,7 @@ var LabelBrowser_ = function (window, $, sq, std)
                           function () { return this.subtopics_; } );
     this.__defineGetter__('viewType', function () { return this.viewType_; } );
     this.__defineGetter__('view', function () { return this.view_; } );
+    this.__defineGetter__('callbacks', function () { return this.callbacks_; } );
   };
 
   /* Constants
@@ -86,7 +87,7 @@ var LabelBrowser_ = function (window, $, sq, std)
     var onEndInitialise = function () {
       if(self.ref_bin_ !== null) {
         console.log("Label Browser component initialized");
-        self.invoke('onReady', self.eqv_fcs_.length);
+        self.callbacks_.invoke('onReady', self.eqv_fcs_.length);
       }
     };
 
@@ -164,7 +165,7 @@ var LabelBrowser_ = function (window, $, sq, std)
       } );
 
     this.initialised_ = true;
-    this.invoke("onInitialised", els.container);
+    this.callbacks_.invoke("onInitialised", els.container);
 
     return this.show();
   };
@@ -232,23 +233,7 @@ var LabelBrowser_ = function (window, $, sq, std)
     }
   };
 
-  /* TODO: Needs a callbacks handler BADLY. */
-  Browser.prototype.invoke = function ( /* name, ... */ )
-  {
-    if(arguments.length < 1)
-      throw "Callback name not provided";
-
-    var cb = this.callbacks_[arguments[0]];
-
-    if(!std.is_fn(cb))
-      throw "Callback invalid or not existent: " + arguments[0];
-
-    return cb.apply(null, [].slice.call(arguments, 1));
-  };
-
   /* Private methods */
-
-    /* Private methods */
   Browser.prototype.check_init_ = function ()
   {
     if(!this.initialised_)
