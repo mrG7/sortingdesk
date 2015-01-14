@@ -116,7 +116,7 @@ var SortingQueue_ = function (window, $, std) {
         .initialise();
 
       this.dismiss_.register('text-item', function (e, id, scope) {
-        var item = self.items.getById(decodeURIComponent(id));
+        var item = self.items.getById(std.Url.decode(id));
 
         self.callbacks.invoke("itemDismissed", item.content);
         self.items.remove(item);
@@ -718,7 +718,7 @@ var SortingQueue_ = function (window, $, std) {
     if(!node || !node.length)
       return null;
 
-    return this.getById(decodeURIComponent(node.attr('id')));
+    return this.getById(std.Url.decode(node.attr('id')));
   };
 
   ControllerItems.prototype.removeAll = function() {
@@ -781,7 +781,7 @@ var SortingQueue_ = function (window, $, std) {
   };
 
   ControllerItems.prototype.getByNode = function($node) {
-    return this.getById(decodeURIComponent($node.attr('id')));
+    return this.getById(std.Url.decode($node.attr('id')));
   };
 
   ControllerItems.prototype.getById = function (id)
@@ -915,7 +915,7 @@ var SortingQueue_ = function (window, $, std) {
 
     this.node_
       .attr( {
-        id: encodeURIComponent(this.content_.node_id),
+        id: std.Url.encode(this.content_.node_id),
         "data-scope": "text-item"
       } )
       .click(function (ev) {
