@@ -12,7 +12,7 @@
 
 var Config = (function () {
   var defaults_ = {
-    dossierUrl: 'http://10.3.2.42:9090',
+    dossierUrl: 'http://54.174.195.250:8080',
     active: true,
     activateHttps: false
   };
