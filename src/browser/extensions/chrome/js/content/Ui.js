@@ -74,7 +74,6 @@ var ChromeExtensionUi = (function ($, std) {
           buttonDismiss: $("#sd-button-dismiss")
         },
         constructors: {
-          Item: ItemLinkify,
           createLabelBrowser: function (options) {
             $('[data-sd-scope="label-browser-header-title"]').html("Loading");
             $('[data-sd-scope="label-browser-header-content"]')
@@ -531,38 +530,6 @@ var ChromeExtensionUi = (function ($, std) {
       
       this.current_ = target;
     }
-  };
-
-
-  /**
-   * @class
-   * */
-  var ItemLinkify = function (owner, item)
-  {
-    SortingQueue.Item.call(this, owner, item);
-  };
-
-  ItemLinkify.prototype = Object.create(SortingQueue.Item.prototype);
-
-  ItemLinkify.prototype.render = function() {
-    var css = this.owner_.owner.options.css,
-        node = $('<div class="' + css.item + '"/>'),
-        content = $('<div class="' + css.itemContent + '"/>'),
-        anchor = this.content_.name;
-
-    node.append('<a class="' + css.itemClose + '" href="#">x</a>');
-
-    /* Append content and remove all CSS classes from children. */
-    if(this.content_.url) {
-      content.append('<a href="' + decodeURIComponent(this.content_.url)
-                     + '">' + this.content_.text + '</a>');
-    } else
-      content.append(this.content_.text);
-    
-    content.children().removeClass();
-    node.append(content);
-    
-    return node;
   };
 
 
