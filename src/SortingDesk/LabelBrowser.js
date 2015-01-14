@@ -147,7 +147,7 @@ var LabelBrowser_ = function (window, $, sq, std)
              * `ref_bin_´. If it is `null´, it can be safely assumed that the
              * instance has been reset. */
             if(self.ref_bin_ !== null) {
-              self.eqv_fcs_ = fcs instanceof Array ? fcs : [ ];
+              self.eqv_fcs_ = std.is_arr(fcs) ? fcs : [ ];
               self.render_();
               
               onEndInitialise();
@@ -321,7 +321,7 @@ var LabelBrowser_ = function (window, $, sq, std)
     std.Drawable.call(this, owner);
 
     /* Check `fcs' argument IS an array. */
-    if(!(fcs instanceof Array))
+    if(!std.is_arr(fcs))
       throw "Invalid feature collection array specified";
 
     /* Attributes */

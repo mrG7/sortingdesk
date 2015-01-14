@@ -375,9 +375,10 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
     this.spawner_.initialise();
 
-    if(!(folder instanceof Object)
+    if(!std.is_obj(folder)
        || !folder.hasOwnProperty('bins')
-       || !(folder.bins instanceof Array)) {
+       || !std.is_arr(folder.bins))
+    {
       console.log("Invalid or no folder descriptor given");
       return;
     }
@@ -446,8 +447,8 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   };
 
   ControllerFolder.prototype.add = function (bin,
-                                           activate /* = true */,
-                                           exists   /* = false */)
+                                             activate /* = true */,
+                                             exists   /* = false */)
   {
     /* Ensure a bin with the same id isn't already contained. */
     if(this.getById(bin.id))
@@ -743,7 +744,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
   /* Private methods */
   ControllerFolder.prototype.update_ = function (descriptor,
-                                               exists /* = false */)
+                                                 exists /* = false */)
   {
     var self = this,
         api = this.owner_.api;

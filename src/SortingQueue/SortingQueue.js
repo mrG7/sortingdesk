@@ -64,7 +64,7 @@ var SortingQueue_ = function (window, $, std) {
      * the `moreTexts' callback. */
     if(!cbs)
       throw "No callbacks given: some are mandatory";
-    else if(cbs instanceof Function) {
+    else if(std.is_fn(cbs)) {
       cbs = {
         moreTexts: cbs
       };
@@ -290,7 +290,7 @@ var SortingQueue_ = function (window, $, std) {
           count = 0;
 
       entities.forEach(function (e) {
-        if(e instanceof Array)
+        if(std.is_arr(e))
           count += self.countEntities_(e);
         else
           ++count;
@@ -306,7 +306,7 @@ var SortingQueue_ = function (window, $, std) {
 
       entities.forEach(function (e) {
         /* Deal with sub-dependencies if current element is an array. */
-        if(e instanceof Array) {
+        if(std.is_arr(e)) {
           var interval = window.setInterval(function () {
             if(waiting)
               return;
@@ -665,7 +665,7 @@ var SortingQueue_ = function (window, $, std) {
         self.owner_.requests.begin('check-items');
 
         /* Ensure we've received a valid items array. */
-        if(items && items instanceof Array && items.length) {
+        if(std.is_arr(items) && items.length > 0) {
           items = self.dedupItems(items);
           items.forEach(function (item, index) {
             window.setTimeout( function () {
@@ -1050,7 +1050,7 @@ var SortingQueue_ = function (window, $, std) {
 
     hasScope: function (all, target)
     {
-      return (all instanceof Array ? all : [ all ])
+      return (std.is_arr(all) ? all : [ all ])
         .some(function (s) {
           return s === target;
         } );
