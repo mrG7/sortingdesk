@@ -180,16 +180,6 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       (this.draggable_ = new ControllerDraggableImage(this))
         .initialise();
 
-      /* Register for a bin dismissal event and process it accordingly. */
-      this.sortingQueue_.dismiss.register('bin', function (e, id, scope) {
-        var bin = self.folder_.getById(id);
-
-        if(bin) {
-          self.folder_.removeAt(self.folder_.indexOf(bin));
-          self.save();
-        }
-      } );
-
       this.initialised_ = true;
       console.log("Sorting Desk UI initialised");
 
@@ -352,6 +342,16 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       function (descriptor) {
         return self.add(self.construct(descriptor));
       } );
+    
+    /* Register for a bin dismissal event and process it accordingly. */
+    owner.sortingQueue.dismiss.register('bin', function (e, id, scope) {
+      var index = self.indexOfId(id);
+
+      if(index !== -1) {
+        self.removeAt(index);
+        self.owner_.save();
+      }
+    } );
   };
 
   ControllerFolder.prototype = Object.create(std.Controller.prototype);
@@ -427,6 +427,9 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.spawner_.reset();
     this.owner_.options.nodes.bins.children().remove();
     this.owner_.api.setQueryContentId(null);
+
+    /* De-register for events of 'bin' scope. */
+    this.owner_.sortingQueue.dismiss.deregister('bin');
 
     console.log("Folder closed: id=%s, name=%s", this.id_, this.name_);
 
