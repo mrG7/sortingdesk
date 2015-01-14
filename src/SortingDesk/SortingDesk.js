@@ -528,8 +528,17 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
   ControllerFolder.prototype.indexOf = function (bin)
   {
-    /* Note: returns the index of top level bins only. */
     return this.bins_.indexOf(bin);
+  };
+
+  ControllerFolder.prototype.indexOfId = function (id)
+  {
+    for(var i = 0, l = this.bins_.length; i < l; ++i) {
+      if(this.bins_[i].id === id)
+        return i;
+    }
+
+    return -1;
   };
 
   ControllerFolder.prototype.remove = function (bin)
