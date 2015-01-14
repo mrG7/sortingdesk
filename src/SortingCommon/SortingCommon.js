@@ -56,17 +56,23 @@ var SortingCommon_ = function (window, $) {
   /**
    * @class
    * */
-  var Url = {
-    encode: function (s)
-    {
-      /* Taken from: http://goo.gl/kRTxRW
-       * (Javascript's default `encodeURIComponent` does not strictly conform to
-       * RFC 3986.) */
+  var Url = (function () {
+    return {
+      encode: function (s)
+      {
+        /* Taken from: http://goo.gl/kRTxRW
+         * (Javascript's default `encodeURIComponent` does not strictly conform to
+         * RFC 3986.) */
         return encodeURIComponent(s).replace(/[!'()*]/g, function(c) {
           return '%' + c.charCodeAt(0).toString(16);
         });
-    }
-  };
+      },
+      decode: function (s)
+      {
+        return decodeURIComponent(s);
+      }
+    };
+  } )();
 
 
   /**
