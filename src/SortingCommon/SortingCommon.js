@@ -286,6 +286,216 @@ var SortingCommon_ = function (window, $) {
     this.fnEventKeyUp = null;
   };
 
+  
+  /**
+   * @class
+   *
+   * Static class.
+   * */
+  var DragDropManager = (function () {
+    var activeNode = null;
+
+    /* Interface */
+    var isScope = function (event, scopes)
+    {
+      if(!scopes)
+        return true;
+
+      var isFilter = is_fn(scopes);
+
+      if(!activeNode)
+        return isFilter && scopes(null);
+
+      var current = activeNode.getAttribute('data-scope');
+
+      return isFilter
+        ? scopes(current)
+        : hasScope(scopes, current);
+    };
+
+    var getScope = function (event)
+    {
+      return activeNode
+        ? activeNode.getAttribute('data-scope')
+        : null;
+    };
+
+    var hasScope = function (all, target)
+    {
+      return (is_arr(all) ? all : [ all ])
+        .some(function (s) {
+          return s === target;
+        } );
+    };
+    
+    /* Event handlers */
+    var onDragStart = function (event) {
+      activeNode = (event.originalEvent || event).target;
+    };
+
+    var onDragEnd = function (event) {
+      if(activeNode === (event.originalEvent || event).target) {
+        activeNode = null;
+      }
+    };
+
+    var reset = function () { activeNode = null; };
+
+    
+    /* Public interface */
+    return {
+      isScope: isScope,
+      getScope: getScope,
+      hasScope: hasScope,
+      reset: reset,
+      onDragStart: onDragStart,
+      onDragEnd: onDragEnd
+    };
+  } )();
+
+
+  /**
+   * @class
+   * */
+  var Draggable = function (node, options)
+  {
+    node.on( {
+      dragstart: function (e) {
+        /* Note: event propagation needs to be stopped before assignment of
+         * `originalEvent' or some tests will break. */
+        e.stopPropagation();
+        e = e.originalEvent;
+        e.dataTransfer.setData('Text', ' ');
+        e.dataTransfer.setData('DossierId', this.id);
+
+        if(options.classDragging)
+          node.addClass(options.classDragging);
+
+        DragDropManager.onDragStart(e);
+
+        if(options.dragstart)
+          options.dragstart(e);
+      },
+
+      dragend: function (e) {
+        /* Note: event propagation needs to be stopped before assignment of
+         * `originalEvent' or some tests will break. */
+        e.stopPropagation();
+        e = e.originalEvent;
+
+        if(options.classDragging)
+          node.removeClass(options.classDragging);
+
+        DragDropManager.onDragEnd(e);
+
+        if(options.dragend)
+          options.dragend(e);
+      }
+    } ).prop('draggable', true);
+  };
+
+
+  /**
+   * @class
+   * */
+  var Droppable = function (node, options)
+  {
+    var dm = DragDropManager;
+    
+    if(!(node instanceof $))
+      throw "Invalid or no jQuery reference specified";
+
+    /* Attributes */
+    this.options_ = options;
+    this.node_ = node;
+
+    /* Set up events on node provided. */
+    node.on( {
+      dragover: function (e) {
+        if(!dm.isScope(e = e.originalEvent, options.scopes))
+          return;
+
+        /* Drag and drop has a tendency to suffer from flicker in the sense that
+         * the `dragleave' event is fired while the pointer is on a valid drop
+         * target but the `dragenter' event ISN'T fired again, causing the
+         * element to lose its special styling -- given by `options.classHover'
+         * -- and its `dropEffect'. We then need re-set everything in the
+         * `dragover' event. */
+        if(options.classHover)
+          node.addClass(options.classHover);
+
+        e.dropEffect = 'move';
+        return false;
+      },
+
+      dragenter: function (e) {
+        /* IE requires the following special measure. */
+        if(!dm.isScope(e = e.originalEvent, options.scopes))
+          return;
+
+        e.dropEffect = 'move';
+        return false;
+      },
+
+      dragleave: function (e) {
+        if(!dm.isScope(e = e.originalEvent, options.scopes))
+          return;
+
+        if(options.classHover)
+          node.removeClass(options.classHover);
+
+        return false;
+      },
+
+      drop: function (e) {
+        if(!dm.isScope(e = e.originalEvent, options.scopes))
+          return;
+
+        if(options.classHover)
+          node.removeClass(options.classHover);
+
+        if(options.drop) {
+          /* The following try-catch is required to prevent the drop event from
+           * bubbling up, should an error occur inside the handler. */
+          try {
+            options.drop(
+              e,
+              e.dataTransfer && e.dataTransfer.getData('DossierId') || null,
+              dm.getScope());
+          } catch (x) {
+            console.log("Exception occurred:", x);
+          }
+        }
+
+        /* Forcefully reset state as some drag and drop events don't cause the
+         * dragleave event to be fired at the end. */
+        dm.reset();
+
+        return false;
+      }
+    } );
+  };
+
+  Droppable.prototype.addScope = function (scope)
+  {
+    if(!this.options_.scopes)
+      this.options_.scopes = [ ];
+
+    if(!this.options_.scopes.hasOwnProperty(scope))
+      this.options_.scopes.push(scope);
+  };
+
+  Droppable.prototype.reset = function ()
+  {
+    /* Clear all events.
+     *
+     * Note that this may be undesirable since all the events attached to the
+     * element are cleared, including any events the client may have set
+     * up. */
+    this.node_.off();
+    this.node_ = this.options_ = null;
+  };
+
 
   /* Return public interface. */
   return {
@@ -308,7 +518,9 @@ var SortingCommon_ = function (window, $) {
     Drawable: Drawable,
     Callbacks: Callbacks,
     Constructor: Constructor,
-    ControllerGlobalKeyboard: ControllerGlobalKeyboard    
+    ControllerGlobalKeyboard: ControllerGlobalKeyboard,
+    Draggable: Draggable,
+    Droppable: Droppable
   };
 };
 

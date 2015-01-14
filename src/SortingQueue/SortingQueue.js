@@ -533,7 +533,7 @@ var SortingQueue_ = function (window, $, std) {
 
     this.handlers_ = { };
     
-    this.droppable_ = new Droppable(options.nodes.buttonDismiss, {
+    this.droppable_ = new std.Droppable(options.nodes.buttonDismiss, {
       classHover: options.css.droppableHover,
       scopes: [ ],
 
@@ -939,7 +939,7 @@ var SortingQueue_ = function (window, $, std) {
     if(!parentOwner.options.itemsDraggable)
       return;
 
-    new Draggable(this.node_, {
+    new std.Draggable(this.node_, {
       classDragging: parentOwner.options.css.itemDragging,
 
       dragstart: function (e) {
@@ -1012,207 +1012,6 @@ var SortingQueue_ = function (window, $, std) {
   };
 
 
-  /**
-   * @class
-   *
-   * Static class.
-   * */
-  var DragDropManager = {
-    activeNode_: null,
-
-    onDragStart: function (event) {
-      DragDropManager.activeNode_ = (event.originalEvent || event).target;
-    },
-
-    onDragEnd: function (event) {
-      if(DragDropManager.activeNode_=== (event.originalEvent || event).target) {
-        DragDropManager.activeNode_ = null;
-      }
-    },
-
-    isScope: function (event, scopes)
-    {
-      if(!scopes)
-        return true;
-
-      var isFilter = std.is_fn(scopes);
-
-      if(!DragDropManager.activeNode_)
-        return isFilter && scopes(null);
-
-      var current = DragDropManager.activeNode_.getAttribute('data-scope');
-
-      return isFilter
-        ? scopes(current)
-        : DragDropManager.hasScope(scopes, current);
-    },
-
-    getScope: function (event)
-    {
-      return DragDropManager.activeNode_
-        ? DragDropManager.activeNode_.getAttribute('data-scope')
-        : null;
-    },
-
-    hasScope: function (all, target)
-    {
-      return (std.is_arr(all) ? all : [ all ])
-        .some(function (s) {
-          return s === target;
-        } );
-    },
-
-    /* Private methods */
-    reset_: function ()
-    { DragDropManager.activeNode_ = null; }
-  };
-
-
-  /**
-   * @class
-   * */
-  var Draggable = function (node, options)
-  {
-    var self = this;
-
-    node.on( {
-      dragstart: function (e) {
-        /* Note: event propagation needs to be stopped before assignment of
-         * `originalEvent' or some tests will break. */
-        e.stopPropagation();
-        e = e.originalEvent;
-        e.dataTransfer.setData('Text', ' ');
-        e.dataTransfer.setData('DossierId', this.id);
-
-        if(options.classDragging)
-          node.addClass(options.classDragging);
-
-        DragDropManager.onDragStart(e);
-
-        if(options.dragstart)
-          options.dragstart(e);
-      },
-
-      dragend: function (e) {
-        /* Note: event propagation needs to be stopped before assignment of
-         * `originalEvent' or some tests will break. */
-        e.stopPropagation();
-        e = e.originalEvent;
-
-        if(options.classDragging)
-          node.removeClass(options.classDragging);
-
-        DragDropManager.onDragEnd(e);
-
-        if(options.dragend)
-          options.dragend(e);
-      }
-    } ).prop('draggable', true);
-  };
-
-
-  /**
-   * @class
-   * */
-  var Droppable = function (node, options)
-  {
-    var self = this;
-
-    this.options_ = options;
-    this.node_ = node;
-
-    node.on( {
-      dragover: function (e) {
-        if(!DragDropManager.isScope(e = e.originalEvent, options.scopes))
-          return;
-
-        /* Drag and drop has a tendency to suffer from flicker in the sense that
-         * the `dragleave' event is fired while the pointer is on a valid drop
-         * target but the `dragenter' event ISN'T fired again, causing the
-         * element to lose its special styling -- given by `options.classHover'
-         * -- and its `dropEffect'. We then need re-set everything in the
-         * `dragover' event. */
-        if(options.classHover)
-          node.addClass(options.classHover);
-
-        e.dropEffect = 'move';
-        return false;
-      },
-
-      dragenter: function (e) {
-        /* IE requires the following special measure. */
-        if(!DragDropManager.isScope(e = e.originalEvent, options.scopes))
-          return;
-
-        e.dropEffect = 'move';
-        return false;
-      },
-
-      dragleave: function (e) {
-        if(!DragDropManager.isScope(e = e.originalEvent, options.scopes))
-          return;
-
-        if(options.classHover)
-          node.removeClass(options.classHover);
-
-        return false;
-      },
-
-      drop: function (e) {
-        if(!DragDropManager.isScope(e = e.originalEvent, options.scopes))
-          return;
-
-        if(options.classHover)
-          node.removeClass(options.classHover);
-
-        if(options.drop) {
-          /* The following try-catch is required to prevent the drop event from
-           * bubbling up, should an error occur inside the handler. */
-          try {
-            options.drop(
-              e,
-              e.dataTransfer && e.dataTransfer.getData('DossierId') || null,
-              DragDropManager.getScope());
-          } catch (x) {
-            console.log("Exception occurred:", x);
-          }
-        }
-
-        /* Forcefully reset state as some drag and drop events don't cause the
-         * dragleave event to be fired at the end. */
-        DragDropManager.reset_();
-
-        return false;
-      }
-    } );
-  };
-
-  Droppable.prototype = {
-    node_: null,
-    options_: null,
-
-    addScope: function (scope)
-    {
-      if(!this.options_.scopes)
-        this.options_.scopes = [ ];
-
-      if(!this.options_.scopes.hasOwnProperty(scope))
-        this.options_.scopes.push(scope);
-    },
-
-    reset: function ()
-    {
-      /* Clear all events.
-       *
-       * Note that this may be undesirable since all the events attached to the
-       * element are cleared, including any events the client may have set
-       * up. */
-      this.node_.off();
-      this.node_ = this.options_ = null;
-    }
-  };
-
-
   /* ----------------------------------------------------------------------
    *  Default options
    *  Private attribute.
@@ -1262,11 +1061,6 @@ var SortingQueue_ = function (window, $, std) {
   /**
    * Module public interface. */
   return {
-    /* Drag and drop */
-    DragDropManager: DragDropManager,
-    Draggable: Draggable,
-    Droppable: Droppable,
-
     /* SortingQueue proper */
     Sorter: Sorter,
     Item: Item

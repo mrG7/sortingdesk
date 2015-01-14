@@ -879,7 +879,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
         }
       } );
 
-    new sq.Droppable(this.node_, {
+    new std.Droppable(this.node_, {
       classHover: parentOwner.options.css.droppableHover,
       scopes: function (scope) { return scope === 'bin' || scope === null; },
 
@@ -925,7 +925,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     /* We must defer initialisation of D'n'D because owning object's `bin'
      * attribute will have not yet been set. */
     window.setTimeout(function () {
-      new sq.Draggable(self.node_, {
+      new std.Draggable(self.node_, {
         dragstart: function (e) {
           parentOwner.sortingQueue.dismiss.activate();
         },
@@ -1117,7 +1117,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
     this.node_ = parentOwner.options.nodes.add;
 
-    this.droppable_ = new sq.Droppable(this.node_, {
+    this.droppable_ = new std.Droppable(this.node_, {
       classHover: parentOwner.options.css.droppableHover,
       scopes: function (scope) { return !scope; },
       drop: function (e, id, scope) {
