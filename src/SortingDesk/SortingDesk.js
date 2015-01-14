@@ -94,9 +94,6 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
         }
       }),
       $.extend(this.api_.getCallbacks(), cbs));
-
-    /* Restore state from local storage. */
-    window.setTimeout(function () { self.initialise_(); } );
   };
 
   Sorter.prototype = {
@@ -108,6 +105,51 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     sortingQueue_: null,
     folder_: null,
     draggable_: null,
+
+    initialise: function ()
+    {
+      var self = this;
+
+      /* Begin instantiating and initialising controllers.
+       *
+       * Start by explicitly initialising SortingQueue's instance and proceed to
+       * initialising our own instance. */
+      this.sortingQueue_.initialise();
+
+      (this.draggable_ = new ControllerDraggableImage(this))
+        .initialise();
+
+      this.initialised_ = true;
+      console.log("Sorting Desk UI initialised");
+
+      if(this.options.active)
+        this.open(this.options.active);
+    },
+
+    /**
+     * Resets the component to a virgin state. Removes all nodes contained by
+     * `options_.nodes.bins', if any, after the active `SortingQueue' instance
+     * has successfully reset.
+     *
+     * @returns {Promise}   Returns promise that is fulfilled upon successful
+     *                      instance reset. */
+    reset: function ()
+    {
+      if(!this.initialised_ || this.sortingQueue_.resetting())
+        return this.sortingQueue_.reset();
+
+      var self = this;
+
+      return this.sortingQueue_.reset()
+        .done(function () {
+          self.folder_.reset();
+
+          self.folder_ = self.options_ = self.sortingQueue_ = null;
+          self.initialised_ = false;
+
+          console.log("Sorting Desk UI reset");
+        } );
+    },
 
     open: function (folder)
     {
@@ -141,52 +183,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       }
     },
 
-    /**
-     * Resets the component to a virgin state. Removes all nodes contained by
-     * `options_.nodes.bins', if any, after the active `SortingQueue' instance
-     * has successfully reset.
-     *
-     * @returns {Promise}   Returns promise that is fulfilled upon successful
-     *                      instance reset. */
-    reset: function ()
-    {
-      if(!this.initialised_ || this.sortingQueue_.resetting())
-        return this.sortingQueue_.reset();
-
-      var self = this;
-
-      return this.sortingQueue_.reset()
-        .done(function () {
-          self.folder_.reset();
-
-          self.folder_ = self.options_ = self.sortingQueue_ = null;
-          self.initialised_ = false;
-
-          console.log("Sorting Desk UI reset");
-        } );
-    },
-
     /* Private methods */
-    initialise_: function ()
-    {
-      var self = this;
-
-      /* Begin instantiating and initialising controllers.
-       *
-       * Start by explicitly initialising SortingQueue's instance and proceed to
-       * initialising our own instance. */
-      this.sortingQueue_.initialise();
-
-      (this.draggable_ = new ControllerDraggableImage(this))
-        .initialise();
-
-      this.initialised_ = true;
-      console.log("Sorting Desk UI initialised");
-
-      if(this.options.active)
-        this.open(this.options.active);
-    },
-
     initialiseFolder_: function (folder)
     {
       this.close();
