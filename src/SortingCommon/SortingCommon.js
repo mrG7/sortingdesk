@@ -33,13 +33,10 @@ var SortingCommon_ = function (window, $) {
   
   var is_in  = function (/* r, k | r, k1, k2, ... */)
   {
-    if(arguments.length === 0)
-      throw "Object reference not provided";
-    
     var r = arguments[0];
 
     if(!like_obj(r))
-      throw "Reference provided not an object";
+      throw "Reference not provided or not an object";
     
     for(var i = 1; i < arguments.length; ++i) {
       if(!r.hasOwnProperty(arguments[i]))
