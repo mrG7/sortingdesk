@@ -14,7 +14,7 @@
 /*jshint laxbreak:true */
 
 
-var ChromeExtensionUi = (function () {
+var ChromeExtensionUi = (function ($, std) {
 
   /* Variables */
   var ui_;
@@ -334,7 +334,7 @@ var ChromeExtensionUi = (function () {
         { operation: 'load-folder',
           id: id },
         function (folder) {
-          if(folder && typeof folder === 'object') deferred.resolve(folder);
+          if(std.is_obj(folder)) deferred.resolve(folder);
           else deferred.reject();
         } );
 
@@ -434,7 +434,7 @@ var ChromeExtensionUi = (function () {
         .animate( { width: '120px' }, 150);
       
       $('#sd-settings').click(function () {
-        if(typeof self.callback_ === 'function')
+        if(std.is_fn(self.callback_))
           self.callback_();
         
         return false;
@@ -627,4 +627,4 @@ var ChromeExtensionUi = (function () {
   } );
 
   
-})();
+})($, SortingCommon);
