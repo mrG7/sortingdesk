@@ -66,7 +66,7 @@ var ChromeExtensionUi = (function ($, std) {
       self.activator_.show();
 
       /* Initialise API and instantiate `SortingDesk´ class. */
-      self.sorter_ = new SortingDesk.Sorter( {
+      (self.sorter_ = new SortingDesk.Sorter( {
         nodes: {
           items: $('#sd-queue'),
           bins: $('#sd-bins'),
@@ -93,7 +93,7 @@ var ChromeExtensionUi = (function ($, std) {
         true,
         Api,
         self.requests_.callbacks.sorter,
-        self.transceiver_.callbacks.sorter ) );
+        HandlerCallbacks.callbacks.sorter ) ) ).initialise();
     } );
   };
   
@@ -163,7 +163,7 @@ var ChromeExtensionUi = (function ($, std) {
     getFolderExplorerCallbacks_: function ()
     {
       var self = this;
-      
+
       return $.extend(
         {
           onInitialised: function (container) {
@@ -174,7 +174,7 @@ var ChromeExtensionUi = (function ($, std) {
             self.explorer_.close();
           }
         },
-        this.transceiver_.callbacks.explorer );
+        HandlerCallbacks.callbacks.explorer );
     },
 
     positionWindow_: function (container)
@@ -246,6 +246,97 @@ var ChromeExtensionUi = (function ($, std) {
   /**
    * @class
    * */
+  var HandlerCallbacks = (function () {
+    
+    var moreTexts_ = function (n)
+    {
+      /* Hide message just before a new request is initiated. */
+      ui_.nodes.empty.stop().fadeOut(100);
+
+      return ui_.sorter.api.getCallbacks().moreTexts(n)
+        .done(function (items) {
+          if(!items || !(items instanceof Array) || items.length === 0)
+            ui_.nodes.empty.stop().fadeIn('slow');
+          else
+            ui_.nodes.empty.stop().fadeOut(100);
+        } )
+        .fail(function () {
+          ui_.nodes.empty.show();
+        } );
+    };
+
+    var setActive_ = function (id)
+    {
+      chrome.runtime.sendMessage( { operation: 'set-active', id: id } );
+    };
+    
+    var load_ = function (id)
+    {
+      var deferred = $.Deferred();
+
+      chrome.runtime.sendMessage(
+        { operation: 'load-folder', id: id },
+        function (folder) {
+          if(std.is_obj(folder)) deferred.resolve(folder);
+          else deferred.reject();
+        } );
+
+      return deferred.promise();
+    };
+
+    var loadAll_ = function ()
+    {
+      var deferred = $.Deferred();
+
+      chrome.runtime.sendMessage(
+        { operation: 'load-folders' },
+        function (folders) { deferred.resolve(folders); } );
+
+      return deferred.promise();
+    };
+
+    var save_ = function (folder)
+    {
+      chrome.runtime.sendMessage( { operation: 'save-folder', folder: folder} );
+    };
+
+    var saveAll_ = function (folders)
+    {
+      chrome.runtime.sendMessage( { operation: 'save-folders',
+                                    folders:   folders} );
+    };
+
+    var remove_ = function (id)
+    {
+      chrome.runtime.sendMessage( { operation: 'remove-folder', id: id } );
+    };
+    
+
+    /* Interface */
+    return {
+      callbacks: {
+        sorter: {
+          moreTexts: moreTexts_,
+          load: load_,
+          save: save_,
+          setActive: setActive_
+        },
+        explorer: {
+          load: load_,
+          loadAll: loadAll_,
+          save: save_,
+          saveAll: saveAll_,
+          remove: remove_
+        }
+      }
+    };
+
+  } )();
+
+
+  /**
+   * @class
+   * */
   var Transceiver = function ()
   {
     var self = this,
@@ -269,94 +360,6 @@ var ChromeExtensionUi = (function ($, std) {
   };
 
   Transceiver.prototype = {
-    /* Getter methods */
-    get callbacks ()
-    {
-      return {
-        sorter: {
-          moreTexts: this.moreTexts_.bind(this),
-          load: this.loadFolder_.bind(this),
-          save: this.saveFolder_.bind(this),
-          setActive: this.setActive_.bind(this)
-        },
-        explorer: {
-          load: this.loadFolder_.bind(this),
-          loadAll: this.loadFolders_.bind(this),
-          save: this.saveFolder_.bind(this),
-          saveAll: this.saveFolders_.bind(this),
-          remove: this.removeFolder_.bind(this)
-        }
-      };
-    },
-    
-    /* Inbound events initiated by `SortingDesk´ */
-    moreTexts_: function (n)
-    {
-      var self = this;
-
-      /* Hide message just before a new request is initiated. */
-      ui_.nodes.empty.stop().fadeOut(100);
-
-      return ui_.sorter.api.getCallbacks().moreTexts(n)
-        .done(function (items) {
-          if(!items || !(items instanceof Array) || items.length === 0)
-            ui_.nodes.empty.stop().fadeIn('slow');
-          else
-            ui_.nodes.empty.stop().fadeOut(100);
-        } )
-        .fail(function () {
-          ui_.nodes.empty.show();
-        } );
-    },
-
-    setActive_: function (id)
-    {
-      chrome.runtime.sendMessage( { operation: 'set-active', id: id } );
-    },
-
-    loadFolders_: function ()
-    {
-      var deferred = $.Deferred();
-
-      chrome.runtime.sendMessage(
-        { operation: 'load-folders' },
-        function (folders) { deferred.resolve(folders); } );
-
-      return deferred.promise();
-    },
-
-    loadFolder_: function (id)
-    {
-      var deferred = $.Deferred();
-
-      chrome.runtime.sendMessage(
-        { operation: 'load-folder',
-          id: id },
-        function (folder) {
-          if(std.is_obj(folder)) deferred.resolve(folder);
-          else deferred.reject();
-        } );
-
-      return deferred.promise();
-    },
-
-    saveFolder_: function (folder)
-    {
-      chrome.runtime.sendMessage( { operation: 'save-folder', folder: folder} );
-    },
-
-    saveFolders_: function (folders)
-    {
-      chrome.runtime.sendMessage( { operation: 'save-folders',
-                                    folders: folders} );
-    },
-
-    removeFolder_: function (id)
-    {
-      chrome.runtime.sendMessage( { operation: 'remove-folder',
-                                    id: id } );
-    },
-
     /* Events initiated by the extension outbound to `SortingDesk´ */
     onFolderRemoved_: function (request, sender, callback)
     {
