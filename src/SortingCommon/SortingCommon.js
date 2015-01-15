@@ -57,6 +57,32 @@ var SortingCommon_ = function (window, $) {
     };
   };
 
+  
+  /* jQuery-related */
+  var jQueryExtensions = (function () {
+
+    /* Interface
+     * -- */
+    /** Given a map of string -> jQuery instance references, unbind all events
+     * on all nodes. The map can be multiple levels deep, with each level
+     * processed recursively. */
+    var alloff = function (n)
+    {
+      for(var k in n) {
+        var i = n[k];
+
+        if(i instanceof $) i.off();
+        else if(is_obj(i)) alloff(i);
+      }
+    };
+
+    /* Public interface */
+    return {
+      alloff: alloff
+    };
+    
+  } )();
+
 
   /**
    * @class
@@ -582,7 +608,7 @@ var SortingCommon_ = function (window, $) {
       throw "No event descriptor specified";
 
     var ev = arguments[0];
-    
+
     if(arguments.length === 1) {
       /* Expect a map. */
       if(is_obj(ev)) {
@@ -655,7 +681,8 @@ var SortingCommon_ = function (window, $) {
     ControllerGlobalKeyboard: ControllerGlobalKeyboard,
     Draggable: Draggable,
     Droppable: Droppable,
-    Events: Events
+    Events: Events,
+    $: jQueryExtensions
   };
 };
 
