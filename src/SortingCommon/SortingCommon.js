@@ -48,6 +48,14 @@ var SortingCommon_ = function (window, $) {
 
   var like = function (l, r) { return r instanceof Object && l instanceof r; };
   var like_obj = function (r) { return r instanceof Object; };
+  
+  var chainize = function (context, fn)
+  {
+    return function () {
+      fn.apply(context, arguments);
+      return context;
+    };
+  };
 
 
   /**
@@ -510,6 +518,7 @@ var SortingCommon_ = function (window, $) {
     like: like,
     like_obj: like_obj,
     is_in: is_in,
+    chainize: chainize,
 
     /* Classes */
     Url: Url,
