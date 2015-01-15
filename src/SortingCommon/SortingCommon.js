@@ -211,6 +211,10 @@ var SortingCommon_ = function (window, $) {
                       Array.prototype.splice.call(arguments, 2));
   };
 
+  /* overridable */ Callbacks.prototype.onPostCall = function (name, result)
+  { /* nop */ };
+
+  /* Private methods */
   Callbacks.prototype.call_ = function (name, mandatory, args)
   {
     if(!is_str(name))
@@ -224,7 +228,9 @@ var SortingCommon_ = function (window, $) {
       return null;
     }
 
-    return callback.apply(null, args);
+    var result = callback.apply(null, args);
+    this.onPostCall(name, result);
+    return result;
   };
 
 
