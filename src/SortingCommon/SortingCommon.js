@@ -146,13 +146,18 @@ var SortingCommon_ = function (window, $) {
    * }</code></pre>
    *
    * In the first form, where a string containing the callback's name is passed,
-   * the callback must exist; if it doesn't, an exception is thrown. The second
-   * form allows an object to be passed which results in the specified callback
-   * being invoked if it is defined, otherwise no exceptions are thrown.
+   * the callback must exist; if it doesn't, an exception is thrown.
+   *
+   * The second form allows an object to be passed specifying the callback's
+   * name, via the <code>name</code> property, and whether it should exist by
+   * setting the <code>mandatory</code> property appropriately. If
+   * <code>mandatory</code> is set to true, then the callback must exist and, if
+   * it doesn't, an exception is thrown.
+   * 
    * @param {*}               parameters Parameters to pass to callback. */
   Callbacks.prototype.invoke = function ()
   {
-    var name,
+    var arg, name,
         mandatory = true;
 
     /* First argument must exist. */
@@ -168,11 +173,13 @@ var SortingCommon_ = function (window, $) {
      *
      * If the callback doesn't exist and it isn't allowed to be optional, an
      * exception is thrown. */
-    if(typeof arguments[0] === 'object') {
-      name = arguments[0].name;
-      mandatory = arguments[0].mandatory;
+    arg = arguments[0];
+    
+    if(is_obj(arg)) {
+      name = arg.name;
+      mandatory = arg.mandatory;
     } else
-      name = arguments[0];
+      name = arg;
     
     if(!this.map_.hasOwnProperty(name)) {
       if(mandatory)
