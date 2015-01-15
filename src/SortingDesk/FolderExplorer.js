@@ -19,18 +19,6 @@
 var FolderExplorer_ = function (window, $, std)
 {
 
-  /* Module-wide function */
-  var detachAllEventsIn_ = function (n)
-  {
-    for(var k in n) {
-      var i = n[k];
-
-      if(i instanceof $) i.off();
-      else if(std.is_obj(i)) detachAllEventsIn_(i);
-    }
-  };
-
-
   /**
    * @class
    * */
@@ -181,7 +169,7 @@ var FolderExplorer_ = function (window, $, std)
     }
     
     /* Detach events of all nodes. */
-    detachAllEventsIn_(this.nodes_);
+    std.$.alloff(this.nodes_);
 
     if(this.view_) {
       this.view_.reset();
