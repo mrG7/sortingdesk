@@ -129,66 +129,76 @@ var SortingCommon_ = function (window, $) {
    * */
   var Callbacks = function (map)
   {
-    /* Set initial state. */
-    this.map_ = map;
+    if(!is_und(map)) {
+      if(!is_obj(map))
+        throw "Invalid callbacks map specified";
+      
+      /* Ensure all attributes in the map are functions. */
+      for(var k in map) {
+        if(!is_fn(map[k]))
+          throw "Invalid callback found: " + k;
+      }
+
+      this.map_ = map;
+    } else
+      this.map_ = { };
   };
 
   Callbacks.prototype.exists = function (callback)
   { return this.map_.hasOwnProperty(callback); };
 
   /** Invoke a callback with optional parameters.
-   * @param {(string|object)} descriptor Name of callback to invoke or object
-   * containing the following two attributes:
-   * 
-   * <pre><code>{
-   *   name: {string}
-   *   mandatory: {boolean}
-   * }</code></pre>
    *
-   * In the first form, where a string containing the callback's name is passed,
-   * the callback must exist; if it doesn't, an exception is thrown.
-   *
-   * The second form allows an object to be passed specifying the callback's
-   * name, via the <code>name</code> property, and whether it should exist by
-   * setting the <code>mandatory</code> property appropriately. If
-   * <code>mandatory</code> is set to true, then the callback must exist and, if
-   * it doesn't, an exception is thrown.
+   * The callback is always required to exist. If it doesn't exist, an exception
+   * is thrown.
    * 
-   * @param {*}               parameters Parameters to pass to callback. */
-  Callbacks.prototype.invoke = function ()
+   * @param {string} name       - Name of callback to invoke.
+   * @param {*}      parameters - One or more parameters to pass to callback. */
+  Callbacks.prototype.invoke = function ( /* name, arg0...n */ )
   {
-    var arg, name,
-        mandatory = true;
-
-    /* First argument must exist. */
     if(arguments.length < 1)
-      throw "Callback name or descriptor required";
+      throw "Callback name not specified";
 
-    /* First argument can either be a string describing the callback's name or
-     * an object containing two attributes, `name´ and `mandatory´. `name´
-     * refers to the name of the callback to invoke, whereas `mandatory´
-     * specifies whether the callback is required to exist or whether it is
-     * allowed to be optional. If allowed to be optional and it doesn't exist,
-     * `null´ is returned.
-     *
-     * If the callback doesn't exist and it isn't allowed to be optional, an
-     * exception is thrown. */
-    arg = arguments[0];
-    
-    if(is_obj(arg)) {
-      name = arg.name;
-      mandatory = arg.mandatory;
-    } else
-      name = arg;
-    
-    if(!this.map_.hasOwnProperty(name)) {
-      if(mandatory)
-        throw "Callback non existent: " + name;
+    return this.call_(arguments[0], true,
+                      Array.prototype.splice.call(arguments, 1));
+  };
+
+  /** Invoke a callback with optional parameters.
+   *
+   * The callback may optionally <strong>not</strong> be required to exist if
+   * the <code>mandatory</code> argument is <code>true</code>; otherwise,
+   * <code>null</code> is returned instead.
+   * 
+   * @param {string}  name      - Name of callback to invoke.
+   * 
+   * @param {boolean} mandatory - If true, the callback must exist and an
+   * exception is thrown if it doesn't.
+   * 
+   * @param {*}       parameters - One or more parameters to pass to callback.
+   * */
+  Callbacks.prototype.call = function ( /* name, mandatory = true, arg0...n */ )
+  {
+    if(arguments.length < 2)
+      throw "One or more parameters missing (name, mandatory)";
+
+    return this.call_(arguments[0], arguments[1],
+                      Array.prototype.splice.call(arguments, 2));
+  };
+
+  Callbacks.prototype.call_ = function (name, mandatory, args)
+  {
+    if(!is_str(name))
+      throw "Invalid callback name specified";
+
+    var callback = this.map_[name];
+    if(!is_fn(callback)) {
+      if(mandatory === true)
+        throw "Attempting to invoke nonexistent callback: " + name;
 
       return null;
     }
 
-    return this.map_[name].apply(null, [].slice.call(arguments, 1));
+    return callback.apply(null, args);
   };
 
 
