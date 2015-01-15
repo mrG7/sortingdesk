@@ -188,9 +188,8 @@ var ChromeExtensionUi = (function ($, std) {
                         - (position.top << 1)
                         - container.outerWidth()
                         + container.innerWidth());
-        container.height(win.height() -
-                         (position.top << 1));
         
+        container.height(win.height() - (position.top << 1));
         return;
         
       default:
@@ -204,7 +203,7 @@ var ChromeExtensionUi = (function ($, std) {
    * @class
    * */
   var LoadingStatus = (function () {
-    var count_ = null;
+    var count_ = 0;
 
     /* Event handlers */
     var onRequestStart_ = function ()
