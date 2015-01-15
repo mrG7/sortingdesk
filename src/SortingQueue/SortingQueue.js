@@ -79,7 +79,7 @@ var SortingQueue_ = function (window, $, std) {
     (this.requests_ = new ControllerRequests(this))
       .initialise();
     
-    (this.callbacks_ = new Callbacks(
+    this.callbacks_ = new std.Callbacks(
       $.extend(true, {
         itemDismissed: function() {},
         itemSelected: function() {},
@@ -87,8 +87,7 @@ var SortingQueue_ = function (window, $, std) {
         onRequestStart: function() {},
         onRequestStop: function() {}
       }, cbs),
-      this.requests_))
-        .initialise();
+      this.requests_);
   };
 
   Sorter.prototype = {
@@ -339,60 +338,6 @@ var SortingQueue_ = function (window, $, std) {
         }
       } );
     }
-  };
-
-
-  /**
-   * @class
-   * */
-  var Callbacks = function (callbacks, requests)
-  {
-    /* invoke super constructor. */
-    std.Callbacks.call(this, callbacks);
-
-    /* Attributes */
-    this.requests_ = requests;
-  };
-
-  Callbacks.prototype = Object.create(std.Callbacks.prototype);
-
-  Callbacks.prototype.initialise = function () { };
-  Callbacks.prototype.reset = function () { };
-
-  /** Invoke a callback with optional parameters.
-   * @param {(string|object)} descriptor Name of callback to invoke or object
-   * containing the following two attributes:
-   * 
-   * <pre><code>{
-   *   name: {string}
-   *   mandatory: {boolean}
-   * }</code></pre>
-   *
-   * In the first form, where a string containing the callback's name is passed,
-   * the callback must exist; if it doesn't, an exception is thrown. The second
-   * form allows an object to be passed which results in the specified callback
-   * being invoked if it is defined, otherwise no exceptions are thrown.
-   * @param {*}               parameters Parameters to pass to callback. */
-  Callbacks.prototype.invoke = function ()
-  {
-    var result = std.Callbacks.prototype.invoke.apply(this, arguments);
-
-    if(result && result.hasOwnProperty('always')) {
-      var self = this;
-
-      this.requests_.begin(result);
-
-      result.always(function () {
-        self.requests_.end(result);
-      } );
-    }
-
-    return result;
-  };
-
-  Callbacks.prototype.passThrough = function ()
-  {
-    return std.Callbacks.prototype.invoke.apply(this, arguments);
   };
 
 
