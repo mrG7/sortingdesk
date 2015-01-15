@@ -504,6 +504,114 @@ var SortingCommon_ = function (window, $) {
     this.node_ = this.options_ = null;
   };
 
+  
+  /**
+   * @class
+   * */
+  var Events = function (owner, names)
+  {
+    /* Attributes */
+    this.map_ = { };
+
+    /* Initialisation proper
+     * -- */
+    /* Allow `owner´ to have not been specified. If it was specified, however,
+     * add an `on´ and `off´ methods to its prototypal namespace, if each
+     * doesn't already exist. Note that we are not making any checks to ensure
+     * `owner´ is an instantiated prototypal object. */
+    if(like_obj(owner)) {
+      if(!owner.hasOwnProperty('on'))
+        owner.on = chainize(owner, this.register.bind(this));
+
+      if(!owner.hasOwnProperty('off'))
+        owner.off = chainize(owner, this.unregister.bind(this));
+    }
+
+    /* It is assumed that the events a class advertises do not change since they
+     * are directly related to the class' responsibilities and purpose, -- thus
+     * its very identity -- and not state at any particular point in time. We
+     * therefore require an array at instantiation time, given by `names´,
+     * containing a list of event names clients can subsequently register
+     * callbacks to.
+     * -- */
+    /* Prepare event callback containers. */
+    if(!is_arr(names) || names.length === 0)
+      throw "Invalid, empty or no event array";
+
+    var self = this;
+    names.forEach(function (n) { self.map_[n] = [ ]; } );
+  };
+
+  Events.prototype.trigger = function ( /* ev, arg0, arg1... */ )
+  {
+    var ev = arguments[0];
+    
+    if(!is_str(ev) || ev.length === 0)
+      throw "Invalid event name specified";
+
+    var d = this.map_[ev];
+    if(is_arr(d)) {
+      var args = Array.prototype.splice(arguments, 1);
+      
+      d.forEach(function (fn) {
+        fn.apply(null, args);
+      } );
+    }
+  };
+
+  Events.prototype.register = function ( /* event, handler */ )
+  {
+    if(arguments.length === 0)
+      throw "No event descriptor specified";
+
+    var ev = arguments[0];
+    
+    if(arguments.length === 1) {
+      /* Expect a map. */
+      if(is_obj(ev)) {
+        for(var k in ev)
+          this.register_simple_(k, ev[k]);
+      }
+    } else /* arguments >= 2; only first two are used */
+      this.register_single_(ev, arguments[1]);
+  };
+
+  Events.prototype.unregister = function (/* undefined | string | object */ ev)
+  {
+    if(is_str(ev))
+      this.unregister_single_(ev);        /* Unregister single event. */
+    else if(is_arr(ev)) {
+      ev.forEach(function (e) {           /* Unregister multiple events. */
+        this.unregister_simple_(e);
+      } );
+    } else if(is_und(ev))
+      this.map_ = { };                    /* Unregister all.  */
+    else
+      throw "Invalid event(s) descriptor";
+  };
+  
+  /* Private methods */
+  Events.prototype.register_single_ = function (ev, fn)
+  {
+    if(!is_str(ev) || ev.length === 0)
+      throw "Invalid or no event name";
+    else if(!is_fn(fn))
+      throw "Invalid or no event handler specified";
+
+    var callbacks = this.map_[ev];
+    if(is_arr(callbacks))
+      callbacks.push(fn);
+  };
+
+  Events.prototype.unregister_simple_ = function (ev)
+  {
+    if(!is_str(ev) || ev.length === 0)
+      throw "Invalid or no event name";
+
+    if(this.map_.hasOwnProperty(ev))
+      delete this.map_[ev];
+  };
+
 
   /* Return public interface. */
   return {
@@ -529,7 +637,8 @@ var SortingCommon_ = function (window, $) {
     Constructor: Constructor,
     ControllerGlobalKeyboard: ControllerGlobalKeyboard,
     Draggable: Draggable,
-    Droppable: Droppable
+    Droppable: Droppable,
+    Events: Events
   };
 };
 
