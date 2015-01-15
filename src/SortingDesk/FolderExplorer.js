@@ -153,7 +153,7 @@ var FolderExplorer_ = function (window, $, std)
     /* Retrieve all folders. */
     this.invoke("loadAll")
       .done(function (folders) {
-        if(!(folders instanceof Array))
+        if(!std.is_arr(folders))
           throw "Folders state array invalid";
 
         self.folders_ = folders;
@@ -320,7 +320,7 @@ var FolderExplorer_ = function (window, $, std)
       this.view_ = null;
     }
 
-    if(folder instanceof Object) {
+    if(std.like_obj(folder)) {
       this.mode_ = Explorer.MODE_BINS;
       hel.title.html(folder.name);
       hel.container.fadeIn(200);
@@ -361,7 +361,7 @@ var FolderExplorer_ = function (window, $, std)
     std.Drawable.call(this, owner);
 
     /* Check `folders' argument IS an array. */
-    if(!(collection instanceof Array))
+    if(!std.is_arr(collection))
       throw "Invalid collection array specified";
 
     /* Attributes */
