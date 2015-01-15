@@ -85,13 +85,24 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
     /* TODO: must pass in Dossier API URL. */
     this.api_ = Api.initialize(this, opts.dossierUrl);
-
     this.options_ = $.extend(true, $.extend(true, {}, defaults_), opts);
+
+    /* We need to instantiate `SortingQueue´ *now* because it is a dependency;
+     * after all, `SortingDesk´ is built on top of `SortingQueue´, and as such
+     * it only makes sense to instantiate `SortingQueue´ at the same time as
+     * `SortingDesk´. In addition, it may be the case that clients of
+     * `SortingDesk´ expect `SortingQueue´ to be available after instantiation
+     * or need to carry out some sort of processing before invoking the instance
+     * initialisor method, such as set up events. */
     this.sortingQueue_ = new sq.Sorter(
       $.extend(true, this.options_, {
         constructors: {
           Item: TextItem
-        }
+        },
+        loadItemsAtStartup: false /* IMPORTANT: Explicit deny loading of items
+                                   * at startup as this would potentially break
+                                   * request-(start|stop) event handlers set up
+                                   * only *AFTER* this constructor exits. */
       }),
       $.extend(this.api_.getCallbacks(), cbs));
   };
@@ -109,13 +120,13 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     initialise: function ()
     {
       var self = this;
-
+      
       /* Begin instantiating and initialising controllers.
        *
        * Start by explicitly initialising SortingQueue's instance and proceed to
        * initialising our own instance. */
       this.sortingQueue_.initialise();
-
+      
       (this.draggable_ = new ControllerDraggableImage(this))
         .initialise();
 
