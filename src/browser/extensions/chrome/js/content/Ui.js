@@ -30,7 +30,7 @@ var ChromeExtensionUi = (function ($, std) {
     this.nodes_ = { };
 
     /* Load custom font */
-    Resource.inject( [ {
+    ResourceInjector.inject( [ {
       url: 'lib/bootstrap/fonts/glyphicons-halflings-regular.woff',
       family: 'Glyphicons Halflings',
       type: 'font'
@@ -528,7 +528,7 @@ var ChromeExtensionUi = (function ($, std) {
   /**
    * @class
    * */
-  var Resource = (function () {
+  var ResourceInjector = (function () {
     /* Interface */
     var inject = function (urls)
     {
