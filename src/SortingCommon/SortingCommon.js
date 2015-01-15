@@ -557,24 +557,34 @@ var SortingCommon_ = function (window, $) {
   /**
    * @class
    * */
-  var Events = function (owner, names)
+  var Events = function ( /* <owner, names> | <names> */ )
   {
+    var ent;
+
     /* Attributes */
     this.map_ = { };
 
     /* Initialisation proper
      * -- */
-    /* Allow `owner´ to have not been specified. If it was specified, however,
-     * add an `on´ and `off´ methods to its prototypal namespace, if each
+    /* Allow a reference to an owning reference to have not been specified. If
+     * it was specified, add an `on´ and `off´ methods to its instance, if each
      * doesn't already exist. Note that we are not making any checks to ensure
-     * `owner´ is an instantiated prototypal object. */
-    if(like_obj(owner)) {
-      if(!owner.hasOwnProperty('on'))
-        owner.on = chainize(owner, this.register.bind(this));
+     * the owning instance is a valid instantiated prototypal object. */
+    if(arguments.length === 2) {
+      ent = arguments[0];
 
-      if(!owner.hasOwnProperty('off'))
-        owner.off = chainize(owner, this.unregister.bind(this));
-    }
+      if(!like_obj(ent))
+        throw "Invalid owner instance reference specified";
+      
+      if(!ent.hasOwnProperty('on'))
+        ent.on = chainize(ent, this.register.bind(this));
+
+      if(!ent.hasOwnProperty('off'))
+        ent.off = chainize(ent, this.unregister.bind(this));
+
+      ent = arguments[1];
+    } else
+      ent = arguments[0];
 
     /* It is assumed that the events a class advertises do not change since they
      * are directly related to the class' responsibilities and purpose, -- thus
@@ -584,11 +594,11 @@ var SortingCommon_ = function (window, $) {
      * callbacks to.
      * -- */
     /* Prepare event callback containers. */
-    if(!is_arr(names) || names.length === 0)
-      throw "Invalid, empty or no event array";
+    if(!is_arr(ent))
+      throw "Invalid or no event array specified";
 
     var self = this;
-    names.forEach(function (n) { self.map_[n] = [ ]; } );
+    ent.forEach(function (n) { self.map_[n] = [ ]; } );
   };
 
   Events.prototype.trigger = function ( /* ev, arg0, arg1... */ )
