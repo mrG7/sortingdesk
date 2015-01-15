@@ -106,8 +106,6 @@ var ChromeExtensionUi = (function ($, std) {
     nodes_: null,
 
     /* Getter methods */
-    get activator() { return this.activator_; },
-    get positioner() { return this.positioner_; },
     get sorter() { return this.sorter_; },
     get nodes() { return this.nodes_; },
     node: function (key) { return this.nodes_[key]; },
