@@ -178,26 +178,14 @@ var SortingQueue_ = function (window, $, std) {
      * @returns {Boolean}   Returns true if Sorting Queue has been successful
      *                      initialised, false otherwise.
      * */
-    get initialised ()
-    { return this.initialised_; },
-
-    get resetting ()
-    { return !!this.resetter_; },
-
-    get options ()
-    { return this.options_; },
-
-    get callbacks ()
-    { return this.callbacks_; },
-
-    get requests ()
-    { return this.requests_; },
-
-    get dismiss ()
-    { return this.dismiss_; },
-
-    get items ()
-    { return this.items_; },
+    get initialised ()  { return this.initialised_; },
+    get resetting ()    { return !!this.resetter_; },
+    get options ()      { return this.options_; },
+    get callbacks ()    { return this.callbacks_; },
+    get events ()       { return this.events_; },
+    get requests ()     { return this.requests_; },
+    get dismiss ()      { return this.dismiss_; },
+    get items ()        { return this.items_; },
 
     instantiate: function ( /* class, ... */ )
     {
