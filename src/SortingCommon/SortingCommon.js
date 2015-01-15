@@ -577,7 +577,7 @@ var SortingCommon_ = function (window, $) {
       /* Expect a map. */
       if(is_obj(ev)) {
         for(var k in ev)
-          this.register_simple_(k, ev[k]);
+          this.register_single_(k, ev[k]);
       }
     } else /* arguments >= 2; only first two are used */
       this.register_single_(ev, arguments[1]);
@@ -589,7 +589,7 @@ var SortingCommon_ = function (window, $) {
       this.unregister_single_(ev);        /* Unregister single event. */
     else if(is_arr(ev)) {
       ev.forEach(function (e) {           /* Unregister multiple events. */
-        this.unregister_simple_(e);
+        this.unregister_single_(e);
       } );
     } else if(is_und(ev))
       this.map_ = { };                    /* Unregister all.  */
