@@ -91,7 +91,7 @@ var ChromeExtensionUi = (function ($, std) {
       }, $.extend(
         true,
         Api,
-        Requests.callbacks,
+        LoadingStatus.callbacks,
         HandlerCallbacks.callbacks.sorter ) ) ).initialise();
     } );
   };
@@ -205,7 +205,7 @@ var ChromeExtensionUi = (function ($, std) {
   /**
    * @class
    * */
-  var Requests = (function () {
+  var LoadingStatus = (function () {
     var count_ = null;
 
     /* Event handlers */
