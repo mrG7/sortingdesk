@@ -60,8 +60,9 @@ var ChromeExtensionUi = (function ($, std) {
 
       /* Register for click events on the 'settings' button inside the extension
        * activator button. */
-      self.activator_.register(self.onClickSettings_.bind(self));
-      self.activator_.show();
+      self.activator_
+        .on('click-explorer', self.onClickSettings_.bind(self))
+        .show();
 
       /* Initialise API and instantiate `SortingDesk´ class. */
       (self.sorter_ = new SortingDesk.Sorter( {
@@ -380,6 +381,8 @@ var ChromeExtensionUi = (function ($, std) {
   var Activator = function ()
   {
     var self = this;
+
+    this.events_ = new std.Events(this, [ 'click-explorer' ] );
     
     ui_.nodes.activator.click(function () {
       self.toggleShow();
@@ -390,13 +393,7 @@ var ChromeExtensionUi = (function ($, std) {
   Activator.prototype = {
     html_: null,
     width_: null,
-    callback_: null,
-
-    /* TODO: don't use an adhoc event subscriber. */
-    register: function (callback)
-    {
-      this.callback_ = callback;
-    },
+    events_: null,
 
     toggleShow: function ()
     {
@@ -425,9 +422,7 @@ var ChromeExtensionUi = (function ($, std) {
         .animate( { width: '120px' }, 150);
       
       $('#sd-settings').click(function () {
-        if(std.is_fn(self.callback_))
-          self.callback_();
-        
+        self.events_.trigger('click-explorer');
         return false;
       } );
         
