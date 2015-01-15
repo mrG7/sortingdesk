@@ -286,12 +286,6 @@ var ChromeExtensionUi = (function ($, std) {
       chrome.runtime.sendMessage( { operation: 'save-folder', folder: folder} );
     };
 
-    var saveAll_ = function (folders)
-    {
-      chrome.runtime.sendMessage( { operation: 'save-folders',
-                                    folders:   folders} );
-    };
-
     var remove_ = function (id)
     {
       chrome.runtime.sendMessage( { operation: 'remove-folder', id: id } );
@@ -310,7 +304,6 @@ var ChromeExtensionUi = (function ($, std) {
           load: load_,
           loadAll: loadAll_,
           save: save_,
-          saveAll: saveAll_,
           remove: remove_
         }
       }
@@ -354,6 +347,10 @@ var ChromeExtensionUi = (function ($, std) {
     };
 
     /* Interface */
+    
+    /* Require initialisation because the extension may not be active. If that
+     * is the case, it is of no interest to be listening to messages from
+     * background. */
     var initialise = function () {
       /* Handle messages whose `operation´ is defined above in `methods_´. */
       chrome.runtime.onMessage.addListener(
