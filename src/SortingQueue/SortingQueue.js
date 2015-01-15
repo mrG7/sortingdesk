@@ -79,7 +79,7 @@ var SortingQueue_ = function (window, $, std) {
     (this.requests_ = new ControllerRequests(this))
       .initialise();
     
-    this.callbacks_ = new std.Callbacks(
+    this.callbacks_ = new Callbacks(
       $.extend(true, {
         itemDismissed: function() {},
         itemSelected: function() {},
@@ -88,6 +88,8 @@ var SortingQueue_ = function (window, $, std) {
         onRequestStop: function() {}
       }, cbs),
       this.requests_);
+
+    this.events_ = new std.Events(this, [ 'request-start', 'request-stop' ]);
   };
 
   Sorter.prototype = {
@@ -96,6 +98,7 @@ var SortingQueue_ = function (window, $, std) {
     options_: null,
     /* Controllers */
     callbacks_: null,
+    events_: null,
     requests_: null,
     dismiss_: null,
     keyboard_: null,
@@ -117,7 +120,7 @@ var SortingQueue_ = function (window, $, std) {
       this.dismiss_.register('text-item', function (e, id, scope) {
         var item = self.items.getById(std.Url.decode(id));
 
-        self.callbacks.invoke("itemDismissed", item.content);
+        self.events_.trigger("item-dismissed", item.content);
         self.items.remove(item);
       } );
 
@@ -150,14 +153,10 @@ var SortingQueue_ = function (window, $, std) {
         [ this.requests_,
           this.keyboard_,
           this.dismiss_,
-          [ this.items_,
-            [
-              this.callbacks_
-            ]
-          ]
+          [ this.items_ ]
         ] )
         .done(function () {
-          self.options_ = self.callbacks_ = self.items_ = null;
+          self.options_ = self.callbacks_ = self.events_ = self.items_ = null;
           self.requests_ = self.dismiss_ = self.keyboard_ = null;
 
           self.initialised_ = false;
@@ -332,6 +331,35 @@ var SortingQueue_ = function (window, $, std) {
   /**
    * @class
    * */
+  var Callbacks = function (callbacks, requests)
+  {
+    /* invoke super constructor. */
+    std.Callbacks.call(this, callbacks);
+
+    /* Attributes */
+    this.requests_ = requests;
+  };
+
+  Callbacks.prototype = Object.create(std.Callbacks.prototype);
+
+  Callbacks.prototype.onPostCall = function (name, result)
+  {
+    if(std.like_obj(result) && result.hasOwnProperty('always')) {
+      this.requests_.begin(name);
+
+      var self = this;
+      result.always(function () {
+        self.requests_.end(name);
+      } );
+    }
+
+    return result;
+  };
+
+
+  /**
+   * @class
+   * */
   var ControllerRequests = function (owner)
   {
     /* invoke super constructor. */
@@ -375,9 +403,8 @@ var SortingQueue_ = function (window, $, std) {
 
     ++this.count_;
 
-    /* Trigger callback. */
-    if(this.owner_.callbacks.exists("onRequestStart"))
-      this.owner_.callbacks.passThrough("onRequestStart", id);
+    /* Trigger request start. */
+    this.owner_.events.trigger("request-start", id);
   };
 
   ControllerRequests.prototype.end = function (id)
@@ -396,9 +423,8 @@ var SortingQueue_ = function (window, $, std) {
     } else
       console.log("WARNING: unknown request ended:", id);
 
-    /* Trigger callback. */
-    if(this.owner_.callbacks.exists("onRequestStop"))
-      this.owner_.callbacks.passThrough("onRequestStop", id);
+    /* Trigger request end. */
+    this.owner_.events.trigger("request-stop", id);
   };
 
 
@@ -431,8 +457,8 @@ var SortingQueue_ = function (window, $, std) {
         self.owner_.dismiss.deactivate();
       } );
 
-      this.owner_.callbacks.invoke("itemDismissed",
-                                   this.owner_.items.selected().content);
+      this.owner_.events.trigger("item-dismissed",
+                                 this.owner_.items.selected().content);
       this.owner_.items.remove();
 
       break;
@@ -864,7 +890,7 @@ var SortingQueue_ = function (window, $, std) {
 
     this.getNodeClose()
       .click(function () {
-        parentOwner.callbacks.invoke("itemDismissed", self.content_);
+        parentOwner.events.trigger("item-dismissed", self.content_);
         self.owner_.remove(self);
         return false;
       } );
@@ -902,7 +928,7 @@ var SortingQueue_ = function (window, $, std) {
 
   Item.prototype.deselect = function() {
     this.node.removeClass(this.owner_.owner.options.css.itemSelected);
-    this.owner_.owner.callbacks.invoke("itemDeselected", this.content);
+    this.owner_.owner.events.trigger("item-deselected", this.content);
   };
 
   Item.prototype.render = function() {
@@ -942,7 +968,7 @@ var SortingQueue_ = function (window, $, std) {
   /* Private methods */
   Item.prototype.select_ = function (ev) {
     this.node.addClass(this.owner_.owner.options.css.itemSelected);
-    this.owner_.owner.callbacks.invoke("itemSelected", this.content, ev);
+    this.owner_.owner.events.trigger("item-selected", this.content, ev);
   };
 
 
