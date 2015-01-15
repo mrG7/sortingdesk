@@ -27,8 +27,6 @@ var LabelBrowser_ = function (window, $, std)
   {
     if(!std.is_obj(options))
       throw "Invalid `options´ object map specified";
-    else if(!std.is_obj(callbacks))
-      throw "Invalid `callbacks´ object map specified";
     else if(!std.like_obj(options.api))
       throw "Reference to `API´ instance not found";
     else if(!std.is_obj(options.ref_bin))
@@ -38,6 +36,7 @@ var LabelBrowser_ = function (window, $, std)
     this.initialised_ = false;
     this.options_ = options;
     this.callbacks_ = new std.Callbacks(callbacks);
+    this.events_ = new std.Events(this, [ 'initialised', 'ready' ] );
     this.api_ = options.api;
     this.deferred_ = null;
     this.nodes_ = { };
@@ -87,7 +86,7 @@ var LabelBrowser_ = function (window, $, std)
     var onEndInitialise = function () {
       if(self.ref_bin_ !== null) {
         console.log("Label Browser component initialized");
-        self.callbacks_.invoke('onReady', self.eqv_fcs_.length);
+        self.events_.trigger('ready', self.eqv_fcs_.length);
       }
     };
 
@@ -165,7 +164,7 @@ var LabelBrowser_ = function (window, $, std)
       } );
 
     this.initialised_ = true;
-    this.callbacks_.invoke("onInitialised", els.container);
+    this.events_.trigger("initialised", els.container);
 
     return this.show();
   };

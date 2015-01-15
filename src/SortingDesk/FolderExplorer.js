@@ -29,12 +29,15 @@ var FolderExplorer_ = function (window, $, std)
     
     /* Attributes */
     this.options_ = options;
-    this.callbacks_ = callbacks;
+    this.callbacks_ = new std.Callbacks(callbacks);
+    this.events_ = new std.Events(
+      this, [ 'initialised', 'open', 'show', 'hide' ] );
+    
     this.api_ = options.api;
     this.viewType_ = Explorer.VIEW_ICONIC;
     this.nodes_ = { };
     
-    this.deferred_ = this.view_ = this.mode_ = this.folders_ = null;
+    this.view_ = this.mode_ = this.folders_ = null;
     this.selected_ = null;
 
     if(!std.like_obj(this.api_))
@@ -50,6 +53,8 @@ var FolderExplorer_ = function (window, $, std)
     this.__defineGetter__('view', function () { return this.view_; } );
     this.__defineGetter__('folders', function () { return this.folders_; } );
     this.__defineGetter__('selected', function () { return this.selected_; } );
+    this.__defineGetter__('callbacks', function () { return this.callbacks_; });
+    this.__defineGetter__('events', function () { return this.events_; } );
   };
 
   /* Constants */
@@ -73,7 +78,7 @@ var FolderExplorer_ = function (window, $, std)
     els.container = $('[data-sd-scope="folder-explorer-container"]');
 
     els.buttonClose = this.find_node_('close')
-      .click( function () { self.close(); } );
+      .click( function () { self.hide(); } );
 
     els.toolbar = {
       actions: {
@@ -128,7 +133,7 @@ var FolderExplorer_ = function (window, $, std)
             return true;
           }
         } ) ) {
-          self.invoke('remove', id);
+          self.callbacks_.invoke('remove', id);
           self.refresh();
         } else
           console.log("Failed to remove selected item: ", self.selected_);
@@ -139,7 +144,7 @@ var FolderExplorer_ = function (window, $, std)
     /* End set up up nodes. */
 
     /* Retrieve all folders. */
-    this.invoke("loadAll")
+    this.callbacks_.invoke("loadAll")
       .done(function (folders) {
         if(!std.is_arr(folders))
           throw "Folders state array invalid";
@@ -153,7 +158,7 @@ var FolderExplorer_ = function (window, $, std)
     this.initialised_ = true;
     console.log("Bin Explorer component initialised");
     
-    this.invoke("onInitialised", els.container);
+    this.events_.trigger("initialised", els.container);
     
     return this.show();
   };
@@ -162,13 +167,7 @@ var FolderExplorer_ = function (window, $, std)
   {
     this.check_init_();
     
-    /* Close window if still visible. */
-    if(this.deferred_) {
-      this.close();
-      if(!this.initialised_) return;
-    }
-    
-    /* Detach events of all nodes. */
+    /* Detach events on all nodes. */
     std.$.alloff(this.nodes_);
 
     if(this.view_) {
@@ -201,7 +200,7 @@ var FolderExplorer_ = function (window, $, std)
     
   Explorer.prototype.open = function (folder)
   {
-    this.invoke('open', folder);
+    this.events_.trigger('open', folder);
   };
 
   Explorer.prototype.viewFolder = function (folder)
@@ -222,7 +221,6 @@ var FolderExplorer_ = function (window, $, std)
     var els = this.nodes_;
     
     this.check_init_();
-    this.deferred_ = $.Deferred();
 
     els.container.css( {
       transform: 'scale(1,1)',
@@ -235,10 +233,11 @@ var FolderExplorer_ = function (window, $, std)
                  - this.find_node_('header').outerHeight()
                  - (els.view.outerHeight(true) - els.view.innerHeight()));
 
-    return this.deferred_.promise();
+    this.events_.trigger('show');
+    return this;
   };
     
-  /* overridable */ Explorer.prototype.close = function ()
+  /* overridable */ Explorer.prototype.hide = function ()
   {
     this.check_init_();
     
@@ -247,25 +246,9 @@ var FolderExplorer_ = function (window, $, std)
         transform: 'scale(.2,.2)',
         opacity: 0
       } );
-    
-    if(this.deferred_) {
-      this.deferred_.resolve();
-      this.deferred_ = null;
-    }
-  };
 
-  /* TODO: Needs a callbacks handler BADLY. */
-  Explorer.prototype.invoke = function ( /* name, ... */ )
-  {
-    if(arguments.length < 1)
-      throw "Callback name not provided";
-    
-    var cb = this.callbacks_[arguments[0]];
-    
-    if(!std.is_fn(cb))
-      throw "Callback invalid or not existent: " + arguments[0];
-
-    return cb.apply(null, [].slice.call(arguments, 1));
+    this.events_.trigger('hide');
+    return this;
   };
 
   /* Events */
@@ -273,7 +256,7 @@ var FolderExplorer_ = function (window, $, std)
   {
     this.folders_.push(folder);
     this.refresh();
-    this.invoke('save', folder);
+    this.callbacks_.invoke('save', folder);
   };
 
   /* Private methods */
