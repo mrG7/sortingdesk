@@ -79,9 +79,22 @@ var ChromeExtensionUi = (function ($, std) {
               .html("Please wait...");
             
             /* The `options´ map isn't touched *yet*. */
-            return new LabelBrowser.Browser(
+            return (new LabelBrowser.Browser(
               options,
-              self.getLabelBrowserCallbacks_());
+              HandlerCallbacks.callbacks.browser
+            ))
+              .on( {
+                initialised: function (container) {
+                  $('.sd-label-browser .sd-empty').hide();
+                  $('.sd-label-browser .sd-loading').show();
+                  self.positionWindow_(container);
+                },
+                
+                ready: function (count) {
+                  $('.sd-label-browser .sd-loading').hide();
+                  if(count === 0) $('.sd-label-browser .sd-empty').fadeIn();
+                }
+              } );
           }
         },
         visibleItems: 10,
@@ -91,8 +104,10 @@ var ChromeExtensionUi = (function ($, std) {
       }, $.extend(
         true,
         Api,
-        LoadingStatus.callbacks,
-        HandlerCallbacks.callbacks.sorter ) ) ).initialise();
+        HandlerCallbacks.callbacks.sorter ) )
+      ).initialise();
+
+      self.sorter_.sortingQueue.on(LoadingStatus.events);
     } );
   };
   
@@ -122,52 +137,24 @@ var ChromeExtensionUi = (function ($, std) {
         throw "Sorting Desk instance not active";
 
       /* Instantiate the Bin Explorer component and initialise it. */
-      this.explorer_ = new FolderExplorer.Explorer(
+      (this.explorer_ = new FolderExplorer.Explorer(
         { api: this.sorter_.api },
-        this.getFolderExplorerCallbacks_() );
-
-      /* Hold on to promise so that we can clean state up once it exits. */
-      this.explorer_.initialise()
-        .done(function () {
-          self.explorer_.reset();
-          self.explorer_ = null;
-        } );
-    },
-
-    getLabelBrowserCallbacks_: function ()
-    {
-      var self = this;
-      
-      return {
-        onInitialised: function (container) {
-          $('.sd-label-browser .sd-empty').hide();
-          $('.sd-label-browser .sd-loading').show();
-          self.positionWindow_(container);
-        },
-        onReady: function (count) {
-          $('.sd-label-browser .sd-loading').hide();
-          
-          if(count === 0)
-            $('.sd-label-browser .sd-empty').fadeIn();
-        }
-      };
-    },
-
-    getFolderExplorerCallbacks_: function ()
-    {
-      var self = this;
-
-      return $.extend(
-        {
-          onInitialised: function (container) {
+        HandlerCallbacks.callbacks.explorer
+      )
+        .on( {
+          initialised: function (container) {
             self.positionWindow_(container);
           },
           open: function (folder) {
             self.sorter_.open(folder);
-            self.explorer_.close();
+            self.explorer_.hide();
+          },
+          hide: function () {
+            self.explorer_.reset();
+            self.explorer_ = null;
           }
-        },
-        HandlerCallbacks.callbacks.explorer );
+        } ) )
+        .initialise();
     },
 
     positionWindow_: function (container)
@@ -206,22 +193,22 @@ var ChromeExtensionUi = (function ($, std) {
     var count_ = 0;
 
     /* Event handlers */
-    var onRequestStart_ = function ()
+    var onRequestStart_ = function (id)
     {
       if(count_++ === 0)
         ui_.nodes.loading.stop().fadeIn();
     };
     
-    var onRequestStop_ = function () {
+    var onRequestStop_ = function (id) {
       if(--count_ === 0)
         ui_.nodes.loading.stop().fadeOut(100);
     };
 
     /* Public interface */
     return {
-      callbacks: {              /* Acts like a getter. */
-        onRequestStart: onRequestStart_,
-        onRequestStop: onRequestStop_
+      events: {               /* Acts like a getter. */
+        'request-start': onRequestStart_,
+        'request-stop':  onRequestStop_
       }
     };
   } )();
@@ -303,6 +290,8 @@ var ChromeExtensionUi = (function ($, std) {
           loadAll: loadAll_,
           save: save_,
           remove: remove_
+        },
+        browser: {
         }
       }
     };
