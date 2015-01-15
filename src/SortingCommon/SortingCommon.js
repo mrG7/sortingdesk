@@ -558,8 +558,8 @@ var SortingCommon_ = function (window, $) {
 
     var d = this.map_[ev];
     if(is_arr(d)) {
-      var args = Array.prototype.splice(arguments, 1);
-      
+      var args = Array.prototype.splice.call(arguments, 1);
+
       d.forEach(function (fn) {
         fn.apply(null, args);
       } );
