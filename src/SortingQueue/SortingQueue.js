@@ -564,7 +564,8 @@ var SortingQueue_ = function (window, $, std) {
       dragover: this.fnDisableEvent_
     } );
 
-    this.check();
+    if(this.owner_.options.loadItemsAtStartup)
+      this.check();
   };
 
   ControllerItems.prototype.reset = function ()
@@ -999,7 +1000,8 @@ var SortingQueue_ = function (window, $, std) {
     visibleItems: 20,           /* Arbitrary.           */
     binCharsLeft: 25,
     binCharsRight: 25,
-    itemsDraggable: true
+    itemsDraggable: true,
+    loadItemsAtStartup: true    
   };
 
 
