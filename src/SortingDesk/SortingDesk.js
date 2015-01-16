@@ -86,6 +86,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     /* TODO: must pass in Dossier API URL. */
     this.api_ = Api.initialize(this, opts.dossierUrl);
     this.options_ = $.extend(true, $.extend(true, {}, defaults_), opts);
+    this.events_ = new std.Events(this, [ 'open', 'close' ]);
 
     /* We need to instantiate `SortingQueue´ *now* because it is a dependency;
      * after all, `SortingDesk´ is built on top of `SortingQueue´, and as such
@@ -109,6 +110,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
   Sorter.prototype = {
     initialised_: false,
+    events_: null,
     options_: null,
 
     /* Instances */
@@ -179,11 +181,15 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     {
       var self = this;
 
-      if(std.is_obj(folder))
+      if(std.is_obj(folder)) {
         this.initialiseFolder_(folder);
-      else if(folder) {         /* assume id */
+        this.events_.trigger('open', this.folder_);
+      } else if(folder) {         /* assume id */
         this.sortingQueue_.callbacks.invoke('load', folder)
-          .done(function (f) { self.initialiseFolder_(f); } );
+          .done(function (f) {
+            self.initialiseFolder_(f);
+            self.events_.trigger('open', self.folder_);
+          } );
       }
     },
 
@@ -197,6 +203,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
       /* Clear the items queue list. */
       this.sortingQueue_.items.removeAll();
+      this.events_.trigger('close');
     },
     
     save: function ()
