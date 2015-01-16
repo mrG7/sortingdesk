@@ -598,6 +598,65 @@ var SortingCommon_ = function (window, $) {
     this.node_ = this.options_ = null;
   };
 
+
+  /**
+   * @class
+   * */
+  var Observable = function ()
+  {
+    /* Attributes */
+    this.observers_ = [ ];
+  };
+
+  Observable.prototype.register = function (observer)
+  {
+    if(this.exists(observer))
+      throw "Observer already registered";
+    else if(!(observer instanceof Observer))
+      throw "Invalid observer instance reference specified";
+    
+    this.observers_.push(observer);
+  };
+
+  Observable.prototype.unregister = function (observer)
+  {
+    var index = this.observers_.indexOf(observer);
+
+    if(index === -1)
+      throw "Observer not registered";
+    else
+      this.observers_.splice(index, 1);
+  };
+
+  Observable.prototype.notify = function ( /* (arg0..n) */ )
+  {
+    this.observers_.forEach(function (observer) {
+      observer.update.apply(observer, arguments);
+    } );
+  };
+
+
+  /**
+   * @class
+   * */
+  var Observer = function (owner, callback)
+  {
+    Owned.call(this, owner);
+
+    if(!is_fn(callback))
+      throw "Invalid or no callback function specified";
+
+    /* Attributes */
+    this.callback_ = callback;
+  };
+
+  Observer.prototype = Object.create(Owned.prototype);
+
+  Observer.prototype.update = function ( /* (arg0..argn) */ )
+  {
+    this.callback_.apply(null, arguments);
+  };
+  
   
   /**
    * @class
