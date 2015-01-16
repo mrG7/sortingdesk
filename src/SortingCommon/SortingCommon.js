@@ -79,9 +79,22 @@ var SortingCommon_ = function (window, $) {
       }
     };
 
+    var is = function (r)
+    { return r instanceof $; };
+
+    /** Convenient method meant to be used as a means of ensuring a given
+     * variable contains a valid reference to a jQuery instance and that it
+     * isn't empty.
+     *
+     * @param {object} r - Reference to jQuery instance. */
+    var any = function (r)
+    { return is(r) && r.length > 0; };
+
     /* Public interface */
     return {
-      alloff: alloff
+      alloff: alloff,
+      is: is,
+      any: any
     };
     
   } )();
