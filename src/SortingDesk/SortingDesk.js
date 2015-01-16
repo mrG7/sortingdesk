@@ -125,6 +125,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     events_: null,
     constructor_: null,
     options_: null,
+    nodes_: null,
 
     /* Instances */
     api_: null,
@@ -147,8 +148,23 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     /* Interface */
     initialise: function ()
     {
-      var self = this;
+      if(this.initialised_)
+        throw "Sorting Desk component already initialised";
       
+      var finder = new std.NodeFinder('sorting-desk', this.options_.container);
+      
+      /* Find nodes. */
+      this.nodes_ = {
+        container: finder.root(),
+        bins: finder.find('bins'),
+        buttons: {
+          add: finder.find('button-add')
+        },
+        empty: {
+          bins: finder.find('bins-empty')
+        }
+      };
+
       /* Begin instantiating and initialising controllers.
        *
        * Start by explicitly initialising SortingQueue's instance and proceed to
@@ -167,8 +183,8 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
     /**
      * Resets the component to a virgin state. Removes all nodes contained by
-     * `options_.nodes.bins', if any, after the active `SortingQueue' instance
-     * has successfully reset.
+     * `nodes_.bins', if any, after the active `SortingQueue' instance has
+     * successfully reset.
      *
      * @returns {Promise}   Returns promise that is fulfilled upon successful
      *                      instance reset. */
@@ -194,6 +210,9 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     {
       var self = this;
 
+      /* Allow folder to be an object ready for consumption or a string
+       * (containing an id) that can be used to retrieve the folder's
+       * descriptor. */
       if(std.is_obj(folder)) {
         this.initialiseFolder_(folder);
         this.events_.trigger('open', this.folder_);
@@ -325,7 +344,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.__defineGetter__("hover", function () { return this.hover_; } );
     this.__defineGetter__("active", function () { return this.active_; } );
     this.__defineGetter__("node", function () {
-      return this.owner_.options.nodes.bins;
+      return this.owner_.nodes.bins;
     } );
 
     this.__defineGetter__("haveBrowser", function () {
@@ -426,7 +445,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     /* Reset bin spawner controller and remove all children nodes inside the
      * bins HTML container. */
     this.spawner_.reset();
-    this.owner_.options.nodes.bins.children().remove();
+    this.owner_.nodes.bins.children().remove();
     this.owner_.api.setQueryContentId(null);
 
     /* De-register for events of 'bin' scope. */
@@ -603,7 +622,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       }
 
       /* Ensure bin is visible. */
-      this.owner_.options.nodes.bins.animate(
+      this.owner_.nodes.bins.animate(
         { scrollLeft: bin.node.offset().left },
         250);
 
@@ -720,7 +739,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   {
     var opts = this.owner_.options;
     
-    opts.nodes.bins.find('.' + opts.css.iconLabelBrowser)
+    this.owner_.nodes.bins.find('.' + opts.css.iconLabelBrowser)
       .removeClass(opts.css.disabled);
   };    
 
@@ -728,7 +747,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   {
     var opts = this.owner_.options;
     
-    opts.nodes.bins.find('.' + opts.css.iconLabelBrowser)
+    this.owner_.nodes.bins.find('.' + opts.css.iconLabelBrowser)
       .addClass(opts.css.disabled);
   };    
 
@@ -738,7 +757,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     /* Add bin node to the very top of the container if aren't any yet,
      * otherwise insert it after the last contained bin. */
     if(!this.bins_.length)
-      this.owner_.options.nodes.bins.prepend(node);
+      this.owner_.nodes.bins.prepend(node);
     else
       this.bins_[this.bins_.length - 1].node.after(node);
   };
@@ -1119,7 +1138,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     var self = this,
         parentOwner = this.owner_.owner;
 
-    this.node_ = parentOwner.options.nodes.add;
+    this.node_ = parentOwner.nodes.buttons.add;
 
     this.droppable_ = new std.Droppable(this.node_, {
       classHover: parentOwner.options.css.droppableHover,
@@ -1171,19 +1190,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
   /* Default options */
   var defaults_ = {
-    nodes: {
-      items: null,
-      bins: null,
-      add: null,
-      buttonDismiss: null
-    },
     css: {
-      item: 'sd-text-item',
-      itemContent: 'sd-text-item-content',
-      itemTitle: 'sd-text-item-title',
-      itemClose: 'sd-text-item-close',
-      itemSelected: 'sd-selected',
-      itemDragging: 'sd-dragging',
       bin: 'sd-bin',
       binImage: 'sd-bin-image',
       binName: 'sd-bin-name',
@@ -1206,7 +1213,8 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       Bin: BinDefault,
       BinImage: BinImageDefault,
       ControllerBinSpawner: ControllerBinSpawnerDefault
-    }
+    },
+    container: null
   };
 
 
