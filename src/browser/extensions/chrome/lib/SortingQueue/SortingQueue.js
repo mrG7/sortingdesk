@@ -30,14 +30,6 @@ var SortingQueue_ = function (window, $, std) {
    * @param   {Object}    cbs   Map of all callbacks
    *
    * @param   cbs.moreTexts           Retrieve additional text items.
-   * @param   cbs.itemDismissed       Event triggered when a text item is
-   *                                  dismissed.
-   * @param   cbs.itemSelected        Event triggered when a text item is
-   *                                  selected.
-   * @param   cbs.itemDeselected      Event triggered when a text item is
-   *                                  deselected.
-   * @param   cbs.onRequestStart      Executed after request initiated.
-   * @param   cbs.onRequestStop       Executed after request finished.
    * */
   var Sorter = function (opts, cbs)
   {
@@ -46,40 +38,32 @@ var SortingQueue_ = function (window, $, std) {
     /* Allow a jQuery element to be passed in instead of an object containing
      * options. In the case that a jQuery element is detected, it is assumed to
      * be the `nodes.items' element. */
-    if(!opts)
-      throw "No options given: some are mandatory";
-    else if(opts instanceof $) {
-      opts = {
-        nodes: {
-          items: opts
-        }
-      };
-    } else if(!opts.nodes)
-      throw "No nodes options given: `items' required";
-    else if(!opts.nodes.items)
-      throw "Missing `items' nodes option";
+    if(!std.is_obj(opts))
+      throw "Invalid or no options map provided";
+    else if(opts instanceof $)
+      opts = { container: opts };
+    else if(!std.$.is(opts.container))
+      throw "Invalid or no container provided";
 
     /* Allow a function to be passed in instead of an object containing
      * callbacks. In the case that a function is passed in, it is assumed to be
      * the `moreTexts' callback. */
-    if(!cbs)
-      throw "No callbacks given: some are mandatory";
-    else if(cbs instanceof Function) {
-      cbs = {
-        moreTexts: cbs
-      };
-    } else if(!cbs.moreTexts)
+    if(std.is_und(cbs))
+      throw "Invalid or no callbacks map provided";
+    else if(std.is_fn(cbs))
+      cbs = { moreTexts: cbs };
+    else if(!std.is_fn(cbs.moreTexts))
       throw "Mandatory `moreTexts' callback missing";
 
     console.log("Initialising Sorting Queue UI");
 
     this.options_ = $.extend(true, $.extend(true, {}, defaults_), opts);
 
-    /* Begin instantiating and initialising controllers. */
+    /* Begin instantiating and initialising classes needed. */
     (this.requests_ = new ControllerRequests(this))
       .initialise();
     
-    (this.callbacks_ = new Callbacks(
+    this.callbacks_ = new Callbacks(
       $.extend(true, {
         itemDismissed: function() {},
         itemSelected: function() {},
@@ -87,38 +71,64 @@ var SortingQueue_ = function (window, $, std) {
         onRequestStart: function() {},
         onRequestStop: function() {}
       }, cbs),
-      this.requests_))
-        .initialise();
+      this.requests_);
+
+    this.events_ = new std.Events(this, [ 'request-start', 'request-stop' ]);
   };
 
   Sorter.prototype = {
     initialised_: false,
     resetter_: false,
     options_: null,
+    nodes_: null,
     /* Controllers */
     callbacks_: null,
+    events_: null,
     requests_: null,
     dismiss_: null,
     keyboard_: null,
     items_: null,
 
+    /* Getters */
+    get initialised ()  { return this.initialised_; },
+    get resetting ()    { return !!this.resetter_; },
+    get options ()      { return this.options_; },
+    get nodes ()        { return this.nodes_; },
+    get callbacks ()    { return this.callbacks_; },
+    get events ()       { return this.events_; },
+    get requests ()     { return this.requests_; },
+    get dismiss ()      { return this.dismiss_; },
+    get items ()        { return this.items_; },
+
+    /* Interface */
     initialise: function ()
     {
-      var self = this;
-
       if(this.initialised_)
-        throw "Already initialised";
+        throw "Sorting Queue component already initialised";
 
-      if(!this.options_.nodes.buttonDismiss)
-        this.options_.nodes.buttonDismiss = $();
+      var self = this,
+          finder = new std.NodeFinder('sorting-queue',
+                                      this.options_.container);
+
+      /* Find nodes. */
+      this.nodes_ = {
+        container: finder.root(),
+        items: finder.find('items'),
+        buttons: {
+          dismiss: finder.find('button-dismiss')
+        },
+        empty: {
+          items: finder.find('items-empty')
+        }
+      };
 
       (this.dismiss_ = new ControllerButtonDismiss(this))
         .initialise();
 
       this.dismiss_.register('text-item', function (e, id, scope) {
-        var item = self.items.getById(decodeURIComponent(id));
+        var item = self.items.getById(std.Url.decode(id));
 
-        self.callbacks.invoke("itemDismissed", item.content);
+        self.events_.trigger("item-dismissed", item.content);
         self.items.remove(item);
       } );
 
@@ -151,14 +161,10 @@ var SortingQueue_ = function (window, $, std) {
         [ this.requests_,
           this.keyboard_,
           this.dismiss_,
-          [ this.items_,
-            [
-              this.callbacks_
-            ]
-          ]
+          [ this.items_ ]
         ] )
         .done(function () {
-          self.options_ = self.callbacks_ = self.items_ = null;
+          self.options_ = self.callbacks_ = self.events_ = self.items_ = null;
           self.requests_ = self.dismiss_ = self.keyboard_ = null;
 
           self.initialised_ = false;
@@ -171,34 +177,6 @@ var SortingQueue_ = function (window, $, std) {
 
       return this.resetter_;
     },
-
-    /**
-     * Returns a boolean value indicating whether Sorting Queue has been
-     * initialised and is ready to be used.
-     *
-     * @returns {Boolean}   Returns true if Sorting Queue has been successful
-     *                      initialised, false otherwise.
-     * */
-    get initialised ()
-    { return this.initialised_; },
-
-    get resetting ()
-    { return !!this.resetter_; },
-
-    get options ()
-    { return this.options_; },
-
-    get callbacks ()
-    { return this.callbacks_; },
-
-    get requests ()
-    { return this.requests_; },
-
-    get dismiss ()
-    { return this.dismiss_; },
-
-    get items ()
-    { return this.items_; },
 
     instantiate: function ( /* class, ... */ )
     {
@@ -290,7 +268,7 @@ var SortingQueue_ = function (window, $, std) {
           count = 0;
 
       entities.forEach(function (e) {
-        if(e instanceof Array)
+        if(std.is_arr(e))
           count += self.countEntities_(e);
         else
           ++count;
@@ -306,7 +284,7 @@ var SortingQueue_ = function (window, $, std) {
 
       entities.forEach(function (e) {
         /* Deal with sub-dependencies if current element is an array. */
-        if(e instanceof Array) {
+        if(std.is_arr(e)) {
           var interval = window.setInterval(function () {
             if(waiting)
               return;
@@ -356,43 +334,18 @@ var SortingQueue_ = function (window, $, std) {
 
   Callbacks.prototype = Object.create(std.Callbacks.prototype);
 
-  Callbacks.prototype.initialise = function () { };
-  Callbacks.prototype.reset = function () { };
-
-  /** Invoke a callback with optional parameters.
-   * @param {(string|object)} descriptor Name of callback to invoke or object
-   * containing the following two attributes:
-   * 
-   * <pre><code>{
-   *   name: {string}
-   *   mandatory: {boolean}
-   * }</code></pre>
-   *
-   * In the first form, where a string containing the callback's name is passed,
-   * the callback must exist; if it doesn't, an exception is thrown. The second
-   * form allows an object to be passed which results in the specified callback
-   * being invoked if it is defined, otherwise no exceptions are thrown.
-   * @param {*}               parameters Parameters to pass to callback. */
-  Callbacks.prototype.invoke = function ()
+  Callbacks.prototype.onPostCall = function (name, result)
   {
-    var result = std.Callbacks.prototype.invoke.apply(this, arguments);
+    if(std.like_obj(result) && result.hasOwnProperty('always')) {
+      this.requests_.begin(name);
 
-    if(result && result.hasOwnProperty('always')) {
       var self = this;
-
-      this.requests_.begin(result);
-
       result.always(function () {
-        self.requests_.end(result);
+        self.requests_.end(name);
       } );
     }
 
     return result;
-  };
-
-  Callbacks.prototype.passThrough = function ()
-  {
-    return std.Callbacks.prototype.invoke.apply(this, arguments);
   };
 
 
@@ -442,9 +395,8 @@ var SortingQueue_ = function (window, $, std) {
 
     ++this.count_;
 
-    /* Trigger callback. */
-    if(this.owner_.callbacks.exists("onRequestStart"))
-      this.owner_.callbacks.passThrough("onRequestStart", id);
+    /* Trigger request start. */
+    this.owner_.events.trigger("request-start", id);
   };
 
   ControllerRequests.prototype.end = function (id)
@@ -463,9 +415,8 @@ var SortingQueue_ = function (window, $, std) {
     } else
       console.log("WARNING: unknown request ended:", id);
 
-    /* Trigger callback. */
-    if(this.owner_.callbacks.exists("onRequestStop"))
-      this.owner_.callbacks.passThrough("onRequestStop", id);
+    /* Trigger request end. */
+    this.owner_.events.trigger("request-stop", id);
   };
 
 
@@ -498,8 +449,8 @@ var SortingQueue_ = function (window, $, std) {
         self.owner_.dismiss.deactivate();
       } );
 
-      this.owner_.callbacks.invoke("itemDismissed",
-                                   this.owner_.items.selected().content);
+      this.owner_.events.trigger("item-dismissed",
+                                 this.owner_.items.selected().content);
       this.owner_.items.remove();
 
       break;
@@ -519,8 +470,6 @@ var SortingQueue_ = function (window, $, std) {
   {
     /* Invoke super constructor. */
     std.Controller.call(this, owner);
-
-    this.handlers_ = [ ];
   };
 
   ControllerButtonDismiss.prototype = Object.create(std.Controller.prototype);
@@ -530,11 +479,11 @@ var SortingQueue_ = function (window, $, std) {
 
   ControllerButtonDismiss.prototype.initialise = function ()
   {
-    var self = this,
-        options = this.owner_.options;
+    var self = this;
 
-    this.droppable_ = new Droppable(options.nodes.buttonDismiss, {
-      classHover: options.css.droppableHover,
+    this.handlers_ = { };
+    this.droppable_ = new std.Droppable(this.owner_.nodes.buttons.dismiss, {
+      classHover: this.owner_.options.css.droppableHover,
       scopes: [ ],
 
       drop: function (e, id, scope) {
@@ -552,39 +501,41 @@ var SortingQueue_ = function (window, $, std) {
     } );
   };
 
-  ControllerButtonDismiss.prototype.register = function (scope, fnHandler)
+  ControllerButtonDismiss.prototype.reset = function ()
   {
+    this.owner_.nodes.buttons.dismiss.off();
+    this.handlers_ = this.droppable_ = null;
+  };
+
+  ControllerButtonDismiss.prototype.register = function (scope, handler)
+  {
+    if(!std.is_fn(handler))
+      throw "Handler callback not a valid function";
     if(!this.droppable_)
       return;
     else if(!this.handlers_.hasOwnProperty(scope))
       this.droppable_.addScope(scope);
 
-    this.handlers_[scope] = fnHandler;
+    this.handlers_[scope] = handler;
   };
 
-  ControllerButtonDismiss.prototype.reset = function ()
+  ControllerButtonDismiss.prototype.unregister = function (scope)
   {
-    this.owner_.options.nodes.buttonDismiss.off();
-
-    this.handlers_ = [ ];
-    this.droppable_ = null;
+    if(this.handlers_.hasOwnProperty(scope))
+      delete this.handlers_[scope];
   };
 
   ControllerButtonDismiss.prototype.activate = function (callback)
   {
-    var options = this.owner_.options;
-
-    options.nodes.buttonDismiss.stop().fadeIn(
-      options.delays.dismissButtonShow,
+    this.owner_.nodes.buttons.dismiss.stop().fadeIn(
+      this.owner_.options.delays.dismissButtonShow,
       std.is_fn(callback) ? callback : null);
   };
 
   ControllerButtonDismiss.prototype.deactivate = function ()
   {
-    var options = this.owner_.options;
-
-    options.nodes.buttonDismiss.stop().fadeOut(
-      options.delays.dismissButtonHide);
+    this.owner_.nodes.buttons.dismiss.stop().fadeOut(
+      this.owner_.options.delays.dismissButtonHide);
   };
 
 
@@ -596,7 +547,7 @@ var SortingQueue_ = function (window, $, std) {
     /* Invoke super constructor. */
     std.Controller.call(this, owner);
 
-    this.node_ = this.owner_.options.nodes.items;
+    this.node_ = this.owner_.nodes.items;
     this.items_ = [ ];
     this.fnDisableEvent_ = function (e) { return false; };
 
@@ -613,7 +564,8 @@ var SortingQueue_ = function (window, $, std) {
       dragover: this.fnDisableEvent_
     } );
 
-    this.check();
+    if(this.owner_.options.loadItemsAtStartup)
+      this.check();
   };
 
   ControllerItems.prototype.reset = function ()
@@ -665,7 +617,7 @@ var SortingQueue_ = function (window, $, std) {
         self.owner_.requests.begin('check-items');
 
         /* Ensure we've received a valid items array. */
-        if(items && items instanceof Array && items.length) {
+        if(std.is_arr(items) && items.length > 0) {
           items = self.dedupItems(items);
           items.forEach(function (item, index) {
             window.setTimeout( function () {
@@ -718,7 +670,7 @@ var SortingQueue_ = function (window, $, std) {
     if(!node || !node.length)
       return null;
 
-    return this.getById(decodeURIComponent(node.attr('id')));
+    return this.getById(std.Url.decode(node.attr('id')));
   };
 
   ControllerItems.prototype.removeAll = function() {
@@ -781,7 +733,7 @@ var SortingQueue_ = function (window, $, std) {
   };
 
   ControllerItems.prototype.getByNode = function($node) {
-    return this.getById(decodeURIComponent($node.attr('id')));
+    return this.getById(std.Url.decode($node.attr('id')));
   };
 
   ControllerItems.prototype.getById = function (id)
@@ -903,7 +855,7 @@ var SortingQueue_ = function (window, $, std) {
 
     this.node_ = this.render();
     this.initialise();
-    owner.owner.options.nodes.items.append(this.node_);
+    owner.owner.nodes.items.append(this.node_);
   };
 
   Item.prototype = Object.create(std.Drawable.prototype);
@@ -915,7 +867,7 @@ var SortingQueue_ = function (window, $, std) {
 
     this.node_
       .attr( {
-        id: encodeURIComponent(this.content_.node_id),
+        id: std.Url.encode(this.content_.node_id),
         "data-scope": "text-item"
       } )
       .click(function (ev) {
@@ -924,7 +876,7 @@ var SortingQueue_ = function (window, $, std) {
 
     this.getNodeClose()
       .click(function () {
-        parentOwner.callbacks.invoke("itemDismissed", self.content_);
+        parentOwner.events.trigger("item-dismissed", self.content_);
         self.owner_.remove(self);
         return false;
       } );
@@ -933,7 +885,7 @@ var SortingQueue_ = function (window, $, std) {
     if(!parentOwner.options.itemsDraggable)
       return;
 
-    new Draggable(this.node_, {
+    new std.Draggable(this.node_, {
       classDragging: parentOwner.options.css.itemDragging,
 
       dragstart: function (e) {
@@ -962,7 +914,7 @@ var SortingQueue_ = function (window, $, std) {
 
   Item.prototype.deselect = function() {
     this.node.removeClass(this.owner_.owner.options.css.itemSelected);
-    this.owner_.owner.callbacks.invoke("itemDeselected", this.content);
+    this.owner_.owner.events.trigger("item-deselected", this.content);
   };
 
   Item.prototype.render = function() {
@@ -1002,226 +954,14 @@ var SortingQueue_ = function (window, $, std) {
   /* Private methods */
   Item.prototype.select_ = function (ev) {
     this.node.addClass(this.owner_.owner.options.css.itemSelected);
-    this.owner_.owner.callbacks.invoke("itemSelected", this.content, ev);
-  };
-
-
-  /**
-   * @class
-   *
-   * Static class.
-   * */
-  var DragDropManager = {
-    activeNode_: null,
-
-    onDragStart: function (event) {
-      DragDropManager.activeNode_ = (event.originalEvent || event).target;
-    },
-
-    onDragEnd: function (event) {
-      if(DragDropManager.activeNode_=== (event.originalEvent || event).target) {
-        DragDropManager.activeNode_ = null;
-      }
-    },
-
-    isScope: function (event, scopes)
-    {
-      if(!scopes)
-        return true;
-
-      var isFilter = std.is_fn(scopes);
-
-      if(!DragDropManager.activeNode_)
-        return isFilter && scopes(null);
-
-      var current = DragDropManager.activeNode_.getAttribute('data-scope');
-
-      return isFilter
-        ? scopes(current)
-        : DragDropManager.hasScope(scopes, current);
-    },
-
-    getScope: function (event)
-    {
-      return DragDropManager.activeNode_
-        ? DragDropManager.activeNode_.getAttribute('data-scope')
-        : null;
-    },
-
-    hasScope: function (all, target)
-    {
-      return (all instanceof Array ? all : [ all ])
-        .some(function (s) {
-          return s === target;
-        } );
-    },
-
-    /* Private methods */
-    reset_: function ()
-    { DragDropManager.activeNode_ = null; }
-  };
-
-
-  /**
-   * @class
-   * */
-  var Draggable = function (node, options)
-  {
-    var self = this;
-
-    node.on( {
-      dragstart: function (e) {
-        /* Note: event propagation needs to be stopped before assignment of
-         * `originalEvent' or some tests will break. */
-        e.stopPropagation();
-        e = e.originalEvent;
-        e.dataTransfer.setData('Text', ' ');
-        e.dataTransfer.setData('DossierId', this.id);
-
-        if(options.classDragging)
-          node.addClass(options.classDragging);
-
-        DragDropManager.onDragStart(e);
-
-        if(options.dragstart)
-          options.dragstart(e);
-      },
-
-      dragend: function (e) {
-        /* Note: event propagation needs to be stopped before assignment of
-         * `originalEvent' or some tests will break. */
-        e.stopPropagation();
-        e = e.originalEvent;
-
-        if(options.classDragging)
-          node.removeClass(options.classDragging);
-
-        DragDropManager.onDragEnd(e);
-
-        if(options.dragend)
-          options.dragend(e);
-      }
-    } ).prop('draggable', true);
-  };
-
-
-  /**
-   * @class
-   * */
-  var Droppable = function (node, options)
-  {
-    var self = this;
-
-    this.options_ = options;
-    this.node_ = node;
-
-    node.on( {
-      dragover: function (e) {
-        if(!DragDropManager.isScope(e = e.originalEvent, options.scopes))
-          return;
-
-        /* Drag and drop has a tendency to suffer from flicker in the sense that
-         * the `dragleave' event is fired while the pointer is on a valid drop
-         * target but the `dragenter' event ISN'T fired again, causing the
-         * element to lose its special styling -- given by `options.classHover'
-         * -- and its `dropEffect'. We then need re-set everything in the
-         * `dragover' event. */
-        if(options.classHover)
-          node.addClass(options.classHover);
-
-        e.dropEffect = 'move';
-        return false;
-      },
-
-      dragenter: function (e) {
-        /* IE requires the following special measure. */
-        if(!DragDropManager.isScope(e = e.originalEvent, options.scopes))
-          return;
-
-        e.dropEffect = 'move';
-        return false;
-      },
-
-      dragleave: function (e) {
-        if(!DragDropManager.isScope(e = e.originalEvent, options.scopes))
-          return;
-
-        if(options.classHover)
-          node.removeClass(options.classHover);
-
-        return false;
-      },
-
-      drop: function (e) {
-        if(!DragDropManager.isScope(e = e.originalEvent, options.scopes))
-          return;
-
-        if(options.classHover)
-          node.removeClass(options.classHover);
-
-        if(options.drop) {
-          /* The following try-catch is required to prevent the drop event from
-           * bubbling up, should an error occur inside the handler. */
-          try {
-            options.drop(
-              e,
-              e.dataTransfer && e.dataTransfer.getData('DossierId') || null,
-              DragDropManager.getScope());
-          } catch (x) {
-            console.log("Exception occurred:", x);
-          }
-        }
-
-        /* Forcefully reset state as some drag and drop events don't cause the
-         * dragleave event to be fired at the end. */
-        DragDropManager.reset_();
-
-        return false;
-      }
-    } );
-  };
-
-  Droppable.prototype = {
-    node_: null,
-    options_: null,
-
-    addScope: function (scope)
-    {
-      if(!this.options_.scopes)
-        this.options_.scopes = [ ];
-
-      if(!this.options_.scopes.hasOwnProperty(scope))
-        this.options_.scopes.push(scope);
-    },
-
-    reset: function ()
-    {
-      /* Clear all events.
-       *
-       * Note that this may be undesirable since all the events attached to the
-       * element are cleared, including any events the client may have set
-       * up. */
-      this.node_.off();
-      this.node_ = this.options_ = null;
-    }
+    this.owner_.owner.events.trigger("item-selected", this.content, ev);
   };
 
 
   /* ----------------------------------------------------------------------
    *  Default options
    *  Private attribute.
-   * ----------------------------------------------------------------------
-   *
-   * In addition to the properties below, which are obviously optional, the
-   * following attributes are also accepted:
-   *
-   * nodes: {
-   *   items: jQuery-element,           ; mandatory
-   *   buttonDismiss: jQuery-element    ; optional
-   * },
-   * contentIds: array<string>          ; optional
-   *
-   */
+   * ---------------------------------------------------------------------- */
   var defaults_ = {
     css: {
       item: 'sd-text-item',
@@ -1249,18 +989,14 @@ var SortingQueue_ = function (window, $, std) {
     visibleItems: 20,           /* Arbitrary.           */
     binCharsLeft: 25,
     binCharsRight: 25,
-    itemsDraggable: true
+    itemsDraggable: true,
+    loadItemsAtStartup: true    
   };
 
 
   /**
    * Module public interface. */
   return {
-    /* Drag and drop */
-    DragDropManager: DragDropManager,
-    Draggable: Draggable,
-    Droppable: Droppable,
-
     /* SortingQueue proper */
     Sorter: Sorter,
     Item: Item

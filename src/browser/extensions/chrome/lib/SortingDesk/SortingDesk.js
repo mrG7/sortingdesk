@@ -19,18 +19,6 @@
  * */
 var SortingDesk_ = function (window, $, sq, std, Api) {
 
-  var Url = {
-    encode: function (s)
-    {
-      /* Taken from: http://goo.gl/kRTxRW
-       * (Javascript's default `encodeURIComponent` does not strictly conform to
-       * RFC 3986.) */
-        return encodeURIComponent(s).replace(/[!'()*]/g, function(c) {
-          return '%' + c.charCodeAt(0).toString(16);
-        });
-    }
-  };
-
   var TextItem = function(owner, item) {
     if (!owner.owner.initialised) {
       return;
@@ -91,72 +79,112 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
    * */
   var Sorter = function (opts, cbs)
   {
-    var self = this;
+    if(!std.is_obj(opts))
+      throw "Invalid or no options map specified";
+    else if(!std.$.any(opts.container))
+      throw "Invalid or no container specified";
+    else if(!std.is_obj(opts.sortingQueue) || std.$.is(opts.sortingQueue)) {
+      throw "Sorting Queue's options map must be supplied in the form of an"
+        + " object map";
+    }
 
     console.log("Initialising Sorting Desk UI");
 
     /* TODO: must pass in Dossier API URL. */
     this.api_ = Api.initialize(this, opts.dossierUrl);
-
     this.options_ = $.extend(true, $.extend(true, {}, defaults_), opts);
+    this.events_ = new std.Events(this, [ 'open', 'close' ]);
+    this.constructor_ = new std.Constructor(
+      $.extend($.extend({}, defaults_.constructors), opts.constructors));
+
+    /* We need to instantiate `SortingQueue´ *now* because it is a dependency;
+     * after all, `SortingDesk´ is built on top of `SortingQueue´, and as such
+     * it a logical requirement to instantiate `SortingQueue´ at the same time
+     * as `SortingDesk´. In addition, it may be the case that clients of
+     * `SortingDesk´ expect `SortingQueue´ to be available after instantiation
+     * or need to carry out some sort of processing before invoking the instance
+     * initialisor method, such as set up events.
+     *
+     * Sorting Desk requires Sorting Queue's options to be contained in the
+     * attribute `sortingQueue´ of the options map (opts). */
     this.sortingQueue_ = new sq.Sorter(
-      $.extend(true, this.options_, {
+      $.extend(true, this.options_.sortingQueue, {
         constructors: {
           Item: TextItem
-        }
+        },
+        loadItemsAtStartup: false /* IMPORTANT: Explicit deny loading of items
+                                   * at startup as this would potentially break
+                                   * request-(start|stop) event handlers set up
+                                   * only *AFTER* this constructor exits. */
       }),
       $.extend(this.api_.getCallbacks(), cbs));
-
-    /* Restore state from local storage. */
-    window.setTimeout(function () { self.initialise_(); } );
   };
 
   Sorter.prototype = {
     initialised_: false,
+    events_: null,
+    constructor_: null,
     options_: null,
+    nodes_: null,
 
     /* Instances */
     api_: null,
     sortingQueue_: null,
     folder_: null,
     draggable_: null,
-
-    open: function (folder)
-    {
-      var self = this;
-
-      if(std.is_obj(folder))
-        this.initialiseFolder_(folder);
-      else if(folder) {         /* assume id */
-        this.sortingQueue_.callbacks.invoke('load', folder)
-          .done(function (f) { self.initialiseFolder_(f); } );
-      }
-    },
-
-    close: function ()
-    {
-      /* Force reset of the bins controller, if an instance currently exists. */
-      if(this.folder_) {
-        this.folder_.reset();
-        this.folder_ = null;
-      }
-
-      /* Clear the items queue list. */
-      this.sortingQueue_.items.removeAll();
-    },
     
-    save: function ()
+    /* Getters */
+    get sortingQueue () { return this.sortingQueue_; },
+    get initialised ()  { return this.initialised_; },
+    get constructor ()  { return this.constructor_; },
+    get events ()       { return this.events_; },
+    get api ()          { return this.api_; },
+    get resetting ()    { return this.sortingQueue_.resetting(); },
+    get options ()      { return this.options_; },
+    get nodes ()        { return this.nodes_; },
+    get folder ()       { return this.folder_; },
+    get draggable ()    { return this.draggable_; },
+
+    /* Interface */
+    initialise: function ()
     {
-      if(this.folder_) {
-        return this.sortingQueue_.callbacks.invoke(
-          'save', this.folder_.serialise() );
-      }
+      if(this.initialised_)
+        throw "Sorting Desk component already initialised";
+      
+      var finder = new std.NodeFinder('sorting-desk', this.options_.container);
+      
+      /* Find nodes. */
+      this.nodes_ = {
+        container: finder.root(),
+        bins: finder.find('bins'),
+        buttons: {
+          add: finder.find('button-add')
+        },
+        empty: {
+          bins: finder.find('bins-empty')
+        }
+      };
+
+      /* Begin instantiating and initialising controllers.
+       *
+       * Start by explicitly initialising SortingQueue's instance and proceed to
+       * initialising our own instance. */
+      this.sortingQueue_.initialise();
+      
+      (this.draggable_ = new ControllerDraggableImage(this))
+        .initialise();
+
+      this.initialised_ = true;
+      console.log("Sorting Desk UI initialised");
+
+      if(this.options.active)
+        this.open(this.options.active);
     },
 
     /**
      * Resets the component to a virgin state. Removes all nodes contained by
-     * `options_.nodes.bins', if any, after the active `SortingQueue' instance
-     * has successfully reset.
+     * `nodes_.bins', if any, after the active `SortingQueue' instance has
+     * successfully reset.
      *
      * @returns {Promise}   Returns promise that is fulfilled upon successful
      *                      instance reset. */
@@ -178,74 +206,55 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
         } );
     },
 
-    /* Private methods */
-    initialise_: function ()
+    open: function (folder)
     {
       var self = this;
 
-      /* Begin instantiating and initialising controllers.
-       *
-       * Start by explicitly initialising SortingQueue's instance and proceed to
-       * initialising our own instance. */
-      this.sortingQueue_.initialise();
-
-      (this.draggable_ = new ControllerDraggableImage(this))
-        .initialise();
-
-      /* Register for a bin dismissal event and process it accordingly. */
-      this.sortingQueue_.dismiss.register('bin', function (e, id, scope) {
-        var bin = self.folder_.getById(id);
-
-        if(bin) {
-          self.folder_.removeAt(self.folder_.indexOf(bin));
-          self.save();
-        }
-      } );
-
-      this.initialised_ = true;
-      console.log("Sorting Desk UI initialised");
-
-      if(this.options.active)
-        this.open(this.options.active);
+      /* Allow folder to be an object ready for consumption or a string
+       * (containing an id) that can be used to retrieve the folder's
+       * descriptor. */
+      if(std.is_obj(folder)) {
+        this.initialiseFolder_(folder);
+        this.events_.trigger('open', this.folder_);
+      } else if(folder) {         /* assume id */
+        this.sortingQueue_.callbacks.invoke('load', folder)
+          .done(function (f) {
+            self.initialiseFolder_(f);
+            self.events_.trigger('open', self.folder_);
+          } );
+      }
     },
 
+    close: function ()
+    {
+      /* Force reset of the bins controller, if an instance currently exists. */
+      if(this.folder_) {
+        this.folder_.reset();
+        this.folder_ = null;
+      }
+
+      /* Clear the items queue list. */
+      this.sortingQueue_.items.removeAll();
+      this.events_.trigger('close');
+    },
+    
+    save: function ()
+    {
+      if(this.folder_) {
+        return this.sortingQueue_.callbacks.invoke(
+          'save', this.folder_.serialise() );
+      }
+    },
+
+    /* Private methods */
     initialiseFolder_: function (folder)
     {
       this.close();
       
       /* (Re-)instantiate the bins controller. */
-      (this.folder_ = this.sortingQueue_.instantiate('ControllerFolder', this))
+      (this.folder_ = this.constructor_.instantiate('ControllerFolder', this))
         .initialise(folder);
-    },
-
-    /* Getter methods */
-    get sortingQueue ()
-    { return this.sortingQueue_; },
-
-    /**
-     * Returns a boolean value indicating whether Sorting Queue has been
-     * initialised and is ready to be used.
-     *
-     * @returns {Boolean}   Returns true if Sorting Queue has been successful
-     *                      initialised, false otherwise.
-     * */
-    get initialised ()
-    { return this.initialised_; },
-
-    get api ()
-    { return this.api_; },
-
-    get resetting ()
-    { return this.sortingQueue_.resetting(); },
-
-    get options ()
-    { return this.options_; },
-
-    get folder ()
-    { return this.folder_; },
-
-    get draggable ()
-    { return this.draggable_; }
+    }
   };
 
 
@@ -324,20 +333,9 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.spawner_ = null;
     this.browser_ = null;
 
-    /* TODO: at the very least, a `hasConstructor´ method should be created in
-     * the `SortingQueue.Sorter´ class.  Ideally, a controller class responsible
-     * for constructors should be created instead and the `instantiate´ and
-     * `hasContructor´ methods should be placed there. An additional method,
-     * `canInstantiate´ method should be created to query for classes that can
-     * be instantiated indirectly via a constructor method or directly via class
-     * instantiation.
-     *
-     * The `LabelBrowser´ component requires a constructor method since it needs
+    /* The `LabelBrowser´ component requires a factory method since it needs
      * options passed in. */
-    this.haveBrowser_ = owner.sortingQueue.options.constructors
-      .hasOwnProperty('createLabelBrowser')
-      && !owner.sortingQueue.options.constructors
-      .hasOwnProperty('LabelBrowser');
+    this.haveBrowser_ = !owner.constructor.isConstructor('LabelBrowser');
 
     /* Define getters. */
     this.__defineGetter__("id", function () { return this.id_; } );
@@ -346,7 +344,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.__defineGetter__("hover", function () { return this.hover_; } );
     this.__defineGetter__("active", function () { return this.active_; } );
     this.__defineGetter__("node", function () {
-      return this.owner_.options.nodes.bins;
+      return this.owner_.nodes.bins;
     } );
 
     this.__defineGetter__("haveBrowser", function () {
@@ -354,16 +352,26 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     } );
 
     /* Instantiate spawner controller. */
-    this.spawner_ = this.owner_.sortingQueue.instantiate(
+    this.spawner_ = this.owner_.constructor.instantiate(
       'ControllerBinSpawner',
       this,
       function (input) {
-        return self.owner_.sortingQueue.instantiate(
+        return self.owner_.constructor.instantiate(
           'Bin', self, { data: input }, null).render();
       },
       function (descriptor) {
         return self.add(self.construct(descriptor));
       } );
+    
+    /* Register for a bin dismissal event and process it accordingly. */
+    owner.sortingQueue.dismiss.register('bin', function (e, id, scope) {
+      var index = self.indexOfId(id);
+
+      if(index !== -1) {
+        self.removeAt(index);
+        self.owner_.save();
+      }
+    } );
   };
 
   ControllerFolder.prototype = Object.create(std.Controller.prototype);
@@ -375,11 +383,11 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
     this.spawner_.initialise();
 
-    if(!(folder instanceof Object)
+    if(!std.is_obj(folder)
        || !folder.hasOwnProperty('bins')
-       || !(folder.bins instanceof Array)) {
-      console.log("Invalid or no folder descriptor given");
-      return;
+       || !std.is_arr(folder.bins))
+    {
+      throw "Invalid or no folder descriptor given";
     }
 
     this.id_ = folder.id;
@@ -425,7 +433,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       throw "Invalid bin type: " + type;
 
     /* Finaly instantiate correct Bin class. */
-    return this.owner_.sortingQueue.instantiate(
+    return this.owner_.constructor.instantiate(
       map[type],
       this,
       descriptor);
@@ -436,8 +444,11 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     /* Reset bin spawner controller and remove all children nodes inside the
      * bins HTML container. */
     this.spawner_.reset();
-    this.owner_.options.nodes.bins.children().remove();
+    this.owner_.nodes.bins.children().remove();
     this.owner_.api.setQueryContentId(null);
+
+    /* De-register for events of 'bin' scope. */
+    this.owner_.sortingQueue.dismiss.unregister('bin');
 
     console.log("Folder closed: id=%s, name=%s", this.id_, this.name_);
 
@@ -446,8 +457,8 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   };
 
   ControllerFolder.prototype.add = function (bin,
-                                           activate /* = true */,
-                                           exists   /* = false */)
+                                             activate /* = true */,
+                                             exists   /* = false */)
   {
     /* Ensure a bin with the same id isn't already contained. */
     if(this.getById(bin.id))
@@ -539,8 +550,17 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
   ControllerFolder.prototype.indexOf = function (bin)
   {
-    /* Note: returns the index of top level bins only. */
     return this.bins_.indexOf(bin);
+  };
+
+  ControllerFolder.prototype.indexOfId = function (id)
+  {
+    for(var i = 0, l = this.bins_.length; i < l; ++i) {
+      if(this.bins_[i].id === id)
+        return i;
+    }
+
+    return -1;
   };
 
   ControllerFolder.prototype.remove = function (bin)
@@ -601,11 +621,17 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       }
 
       /* Ensure bin is visible. */
-      this.owner_.options.nodes.bins.animate(
+      this.owner_.nodes.bins.animate(
         { scrollLeft: bin.node.offset().left },
         250);
 
       this.owner_.sortingQueue.callbacks.invoke('setActive', this.id);
+    } else {
+      /* There is no active bin, which means we need to clear the list of items,
+       * but we only do so *after* the query content id has been set since
+       * Sorting Queue will attempt to refresh the items list. */
+      this.owner_.api.setQueryContentId(null);
+      this.owner_.sortingQueue.items.removeAll();
     }
   };
 
@@ -622,7 +648,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     /* Disable browser icons. */
     this.disableBrowser();
 
-    (this.browser_ = this.owner_.sortingQueue.instantiate(
+    (this.browser_ = this.owner_.constructor.instantiate(
       'LabelBrowser', { api: this.owner_.api, ref_bin: bin } ) )
       .initialise()
       .done(function () {
@@ -712,7 +738,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   {
     var opts = this.owner_.options;
     
-    opts.nodes.bins.find('.' + opts.css.iconLabelBrowser)
+    this.owner_.nodes.bins.find('.' + opts.css.iconLabelBrowser)
       .removeClass(opts.css.disabled);
   };    
 
@@ -720,7 +746,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   {
     var opts = this.owner_.options;
     
-    opts.nodes.bins.find('.' + opts.css.iconLabelBrowser)
+    this.owner_.nodes.bins.find('.' + opts.css.iconLabelBrowser)
       .addClass(opts.css.disabled);
   };    
 
@@ -730,7 +756,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     /* Add bin node to the very top of the container if aren't any yet,
      * otherwise insert it after the last contained bin. */
     if(!this.bins_.length)
-      this.owner_.options.nodes.bins.prepend(node);
+      this.owner_.nodes.bins.prepend(node);
     else
       this.bins_[this.bins_.length - 1].node.after(node);
   };
@@ -743,7 +769,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
   /* Private methods */
   ControllerFolder.prototype.update_ = function (descriptor,
-                                               exists /* = false */)
+                                                 exists /* = false */)
   {
     var self = this,
         api = this.owner_.api;
@@ -875,7 +901,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
         }
       } );
 
-    new sq.Droppable(this.node_, {
+    new std.Droppable(this.node_, {
       classHover: parentOwner.options.css.droppableHover,
       scopes: function (scope) { return scope === 'bin' || scope === null; },
 
@@ -921,7 +947,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     /* We must defer initialisation of D'n'D because owning object's `bin'
      * attribute will have not yet been set. */
     window.setTimeout(function () {
-      new sq.Draggable(self.node_, {
+      new std.Draggable(self.node_, {
         dragstart: function (e) {
           parentOwner.sortingQueue.dismiss.activate();
         },
@@ -1111,9 +1137,9 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     var self = this,
         parentOwner = this.owner_.owner;
 
-    this.node_ = parentOwner.options.nodes.add;
+    this.node_ = parentOwner.nodes.buttons.add;
 
-    this.droppable_ = new sq.Droppable(this.node_, {
+    this.droppable_ = new std.Droppable(this.node_, {
       classHover: parentOwner.options.css.droppableHover,
       scopes: function (scope) { return !scope; },
       drop: function (e, id, scope) {
@@ -1163,19 +1189,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
   /* Default options */
   var defaults_ = {
-    nodes: {
-      items: null,
-      bins: null,
-      add: null,
-      buttonDismiss: null
-    },
     css: {
-      item: 'sd-text-item',
-      itemContent: 'sd-text-item-content',
-      itemTitle: 'sd-text-item-title',
-      itemClose: 'sd-text-item-close',
-      itemSelected: 'sd-selected',
-      itemDragging: 'sd-dragging',
       bin: 'sd-bin',
       binImage: 'sd-bin-image',
       binName: 'sd-bin-name',
@@ -1198,7 +1212,8 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       Bin: BinDefault,
       BinImage: BinImageDefault,
       ControllerBinSpawner: ControllerBinSpawnerDefault
-    }
+    },
+    container: null
   };
 
 

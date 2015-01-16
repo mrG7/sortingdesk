@@ -16,7 +16,7 @@
  * The Label Browser module.
  *
  * @returns an object containing the module's public interface. */
-var LabelBrowser_ = function (window, $, sq, std)
+var LabelBrowser_ = function (window, $, std)
 {
 
 
@@ -27,8 +27,6 @@ var LabelBrowser_ = function (window, $, sq, std)
   {
     if(!std.is_obj(options))
       throw "Invalid `options´ object map specified";
-    else if(!std.is_obj(callbacks))
-      throw "Invalid `callbacks´ object map specified";
     else if(!std.like_obj(options.api))
       throw "Reference to `API´ instance not found";
     else if(!std.is_obj(options.ref_bin))
@@ -37,16 +35,11 @@ var LabelBrowser_ = function (window, $, sq, std)
     /* Attributes */
     this.initialised_ = false;
     this.options_ = options;
-    this.callbacks_ = callbacks;
+    this.callbacks_ = new std.Callbacks(callbacks);
+    this.events_ = new std.Events(this, [ 'initialised', 'ready' ] );
     this.api_ = options.api;
     this.deferred_ = null;
-    this.nodes_ = { };
     this.ref_bin_ = options.ref_bin;
-    this.ref_fc_ = null;
-    this.eqv_fcs_ = [ ];
-    this.subtopics_ = { }; // content id |--> [subtopic id]
-    this.view_ = null;
-    this.viewType_ = Browser.VIEW_DEFAULT;
 
     /* Check for mandatory options. */
     if(!this.ref_bin_)
@@ -62,6 +55,7 @@ var LabelBrowser_ = function (window, $, sq, std)
                           function () { return this.subtopics_; } );
     this.__defineGetter__('viewType', function () { return this.viewType_; } );
     this.__defineGetter__('view', function () { return this.view_; } );
+    this.__defineGetter__('callbacks', function () { return this.callbacks_; } );
   };
 
   /* Constants
@@ -75,18 +69,26 @@ var LabelBrowser_ = function (window, $, sq, std)
   Browser.prototype.initialise = function ()
   {
     var self = this,
-        els = this.nodes_;
+        els;
 
     if(this.initialised_)
       throw "Label Browser component already initialised";
 
     console.log("Initializing Label Browser component");
 
+    /* Set initial state. */
+    els = this.nodes_ = { };
+    this.ref_fc_ = null;
+    this.eqv_fcs_ = [ ];
+    this.subtopics_ = { }; // content id |--> [subtopic id]
+    this.view_ = null;
+    this.viewType_ = Browser.VIEW_DEFAULT;
+
     /* Lambda called when initialisation is over, successfully or not. */
     var onEndInitialise = function () {
       if(self.ref_bin_ !== null) {
         console.log("Label Browser component initialized");
-        self.invoke('onReady', self.eqv_fcs_.length);
+        self.events_.trigger('ready', self.eqv_fcs_.length);
       }
     };
 
@@ -147,7 +149,7 @@ var LabelBrowser_ = function (window, $, sq, std)
              * `ref_bin_´. If it is `null´, it can be safely assumed that the
              * instance has been reset. */
             if(self.ref_bin_ !== null) {
-              self.eqv_fcs_ = fcs instanceof Array ? fcs : [ ];
+              self.eqv_fcs_ = std.is_arr(fcs) ? fcs : [ ];
               self.render_();
               
               onEndInitialise();
@@ -164,7 +166,7 @@ var LabelBrowser_ = function (window, $, sq, std)
       } );
 
     this.initialised_ = true;
-    this.invoke("onInitialised", els.container);
+    this.events_.trigger("initialised", els.container);
 
     return this.show();
   };
@@ -232,23 +234,7 @@ var LabelBrowser_ = function (window, $, sq, std)
     }
   };
 
-  /* TODO: Needs a callbacks handler BADLY. */
-  Browser.prototype.invoke = function ( /* name, ... */ )
-  {
-    if(arguments.length < 1)
-      throw "Callback name not provided";
-
-    var cb = this.callbacks_[arguments[0]];
-
-    if(!std.is_fn(cb))
-      throw "Callback invalid or not existent: " + arguments[0];
-
-    return cb.apply(null, [].slice.call(arguments, 1));
-  };
-
   /* Private methods */
-
-    /* Private methods */
   Browser.prototype.check_init_ = function ()
   {
     if(!this.initialised_)
@@ -321,7 +307,7 @@ var LabelBrowser_ = function (window, $, sq, std)
     std.Drawable.call(this, owner);
 
     /* Check `fcs' argument IS an array. */
-    if(!(fcs instanceof Array))
+    if(!std.is_arr(fcs))
       throw "Invalid feature collection array specified";
 
     /* Attributes */
@@ -519,8 +505,8 @@ var LabelBrowser_ = function (window, $, sq, std)
 
 /* Compatibility with RequireJs. */
 if(typeof define === "function" && define.amd) {
-  define("LabelBrowser", [ "jquery", "SortingQueue", "SortingCommon" ], function ($, sq, std) {
-    return LabelBrowser_(window, $, sq, std);
+  define("LabelBrowser", [ "jquery", "SortingCommon" ], function ($, std) {
+    return LabelBrowser_(window, $, std);
   });
 } else
-  window.LabelBrowser = LabelBrowser_(window, $, SortingQueue, SortingCommon);
+  window.LabelBrowser = LabelBrowser_(window, $, SortingCommon);
