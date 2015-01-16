@@ -39,13 +39,7 @@ var LabelBrowser_ = function (window, $, std)
     this.events_ = new std.Events(this, [ 'initialised', 'ready' ] );
     this.api_ = options.api;
     this.deferred_ = null;
-    this.nodes_ = { };
     this.ref_bin_ = options.ref_bin;
-    this.ref_fc_ = null;
-    this.eqv_fcs_ = [ ];
-    this.subtopics_ = { }; // content id |--> [subtopic id]
-    this.view_ = null;
-    this.viewType_ = Browser.VIEW_DEFAULT;
 
     /* Check for mandatory options. */
     if(!this.ref_bin_)
@@ -75,12 +69,20 @@ var LabelBrowser_ = function (window, $, std)
   Browser.prototype.initialise = function ()
   {
     var self = this,
-        els = this.nodes_;
+        els;
 
     if(this.initialised_)
       throw "Label Browser component already initialised";
 
     console.log("Initializing Label Browser component");
+
+    /* Set initial state. */
+    els = this.nodes_ = { };
+    this.ref_fc_ = null;
+    this.eqv_fcs_ = [ ];
+    this.subtopics_ = { }; // content id |--> [subtopic id]
+    this.view_ = null;
+    this.viewType_ = Browser.VIEW_DEFAULT;
 
     /* Lambda called when initialisation is over, successfully or not. */
     var onEndInitialise = function () {
