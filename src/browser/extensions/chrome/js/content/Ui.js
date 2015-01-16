@@ -401,7 +401,7 @@ var ChromeExtensionUi = (function ($, std) {
       self.width_ = nodes.activator.width();
       nodes.activator
         .html('<DIV id="sd-settings" class="sd-button sd-button-round'
-              + ' sd-small"><SPAN class="sd-glyph sd-glyph-wrench">'
+              + ' sd-small"><SPAN class="sd-glyph sd-glyph-folder-open">'
               + '</SPAN></DIV>Sorting Desk')
         .animate( { width: '120px' }, 150);
       
