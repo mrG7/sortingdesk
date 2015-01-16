@@ -352,11 +352,11 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     } );
 
     /* Instantiate spawner controller. */
-    this.spawner_ = this.owner_.sortingQueue.instantiate(
+    this.spawner_ = this.owner_.constructor.instantiate(
       'ControllerBinSpawner',
       this,
       function (input) {
-        return self.owner_.sortingQueue.instantiate(
+        return self.owner_.constructor.instantiate(
           'Bin', self, { data: input }, null).render();
       },
       function (descriptor) {
@@ -387,8 +387,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
        || !folder.hasOwnProperty('bins')
        || !std.is_arr(folder.bins))
     {
-      console.log("Invalid or no folder descriptor given");
-      return;
+      throw "Invalid or no folder descriptor given";
     }
 
     this.id_ = folder.id;
@@ -434,7 +433,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       throw "Invalid bin type: " + type;
 
     /* Finaly instantiate correct Bin class. */
-    return this.owner_.sortingQueue.instantiate(
+    return this.owner_.constructor.instantiate(
       map[type],
       this,
       descriptor);
@@ -649,7 +648,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     /* Disable browser icons. */
     this.disableBrowser();
 
-    (this.browser_ = this.owner_.sortingQueue.instantiate(
+    (this.browser_ = this.owner_.constructor.instantiate(
       'LabelBrowser', { api: this.owner_.api, ref_bin: bin } ) )
       .initialise()
       .done(function () {
