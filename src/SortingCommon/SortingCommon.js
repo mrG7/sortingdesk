@@ -770,8 +770,12 @@ var SortingCommon_ = function (window, $) {
       throw "Invalid or no event handler specified";
 
     var callbacks = this.map_[ev];
-    if(is_arr(callbacks))
+    if(is_arr(callbacks)) {
       callbacks.push(fn);
+      return true;
+    }
+
+    return false;
   };
 
   Events.prototype.unregister_simple_ = function (ev)
@@ -779,8 +783,12 @@ var SortingCommon_ = function (window, $) {
     if(!is_str(ev) || ev.length === 0)
       throw "Invalid or no event name";
 
-    if(this.map_.hasOwnProperty(ev))
+    if(this.map_.hasOwnProperty(ev)) {
       delete this.map_[ev];
+      return true;
+    }
+
+    return false;
   };
 
 
