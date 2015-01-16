@@ -153,6 +153,9 @@ var SortingCommon_ = function (window, $) {
    * */
   var /* abstract */ Owned = function (owner)
   {
+    if(!like_obj(owner))
+      throw "Invalid owner instance reference specified";
+    
     this.owner_ = owner;
   };
 
