@@ -116,7 +116,20 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     sortingQueue_: null,
     folder_: null,
     draggable_: null,
+    
+    /* Getters */
+    get sortingQueue () { return this.sortingQueue_; },
+    get initialised ()  { return this.initialised_; },
+    get constructor ()  { return this.constructor_; },
+    get events ()       { return this.events_; },
+    get api ()          { return this.api_; },
+    get resetting ()    { return this.sortingQueue_.resetting(); },
+    get options ()      { return this.options_; },
+    get nodes ()        { return this.nodes_; },
+    get folder ()       { return this.folder_; },
+    get draggable ()    { return this.draggable_; },
 
+    /* Interface */
     initialise: function ()
     {
       var self = this;
@@ -202,36 +215,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       /* (Re-)instantiate the bins controller. */
       (this.folder_ = this.sortingQueue_.instantiate('ControllerFolder', this))
         .initialise(folder);
-    },
-
-    /* Getter methods */
-    get sortingQueue ()
-    { return this.sortingQueue_; },
-
-    /**
-     * Returns a boolean value indicating whether Sorting Queue has been
-     * initialised and is ready to be used.
-     *
-     * @returns {Boolean}   Returns true if Sorting Queue has been successful
-     *                      initialised, false otherwise.
-     * */
-    get initialised ()
-    { return this.initialised_; },
-
-    get api ()
-    { return this.api_; },
-
-    get resetting ()
-    { return this.sortingQueue_.resetting(); },
-
-    get options ()
-    { return this.options_; },
-
-    get folder ()
-    { return this.folder_; },
-
-    get draggable ()
-    { return this.draggable_; }
+    }
   };
 
 

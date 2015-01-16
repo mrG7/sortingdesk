@@ -88,6 +88,18 @@ var SortingQueue_ = function (window, $, std) {
     keyboard_: null,
     items_: null,
 
+    /* Getters */
+    get initialised ()  { return this.initialised_; },
+    get resetting ()    { return !!this.resetter_; },
+    get options ()      { return this.options_; },
+    get nodes ()        { return this.nodes_; },
+    get callbacks ()    { return this.callbacks_; },
+    get events ()       { return this.events_; },
+    get requests ()     { return this.requests_; },
+    get dismiss ()      { return this.dismiss_; },
+    get items ()        { return this.items_; },
+
+    /* Interface */
     initialise: function ()
     {
       var self = this;
@@ -153,22 +165,6 @@ var SortingQueue_ = function (window, $, std) {
 
       return this.resetter_;
     },
-
-    /**
-     * Returns a boolean value indicating whether Sorting Queue has been
-     * initialised and is ready to be used.
-     *
-     * @returns {Boolean}   Returns true if Sorting Queue has been successful
-     *                      initialised, false otherwise.
-     * */
-    get initialised ()  { return this.initialised_; },
-    get resetting ()    { return !!this.resetter_; },
-    get options ()      { return this.options_; },
-    get callbacks ()    { return this.callbacks_; },
-    get events ()       { return this.events_; },
-    get requests ()     { return this.requests_; },
-    get dismiss ()      { return this.dismiss_; },
-    get items ()        { return this.items_; },
 
     instantiate: function ( /* class, ... */ )
     {
