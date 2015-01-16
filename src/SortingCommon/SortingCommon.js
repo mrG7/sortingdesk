@@ -31,7 +31,7 @@ var SortingCommon_ = function (window, $) {
   var is_num = function (r)
   { return typeof r === 'number' || r instanceof Number; };
   
-  var is_in  = function (/* r, k | r, k1, k2, ... */)
+  var is_in  = function (/* (r, k) | (r, k0..n) */)
   {
     var r = arguments[0];
 
@@ -65,7 +65,10 @@ var SortingCommon_ = function (window, $) {
      * -- */
     /** Given a map of identifier -> jQuery instance references, unbind all
      * events on all nodes. The map can be multiple levels deep, with each level
-     * processed recursively. This function can never be a jQuery plugin. */
+     * processed recursively. This function can never be a jQuery plugin.
+     *
+     * @param {object} n - Object containing jQuery instance references and
+     * possibly other objects. */
     var alloff = function (n)
     {
       for(var k in n) {
@@ -180,7 +183,7 @@ var SortingCommon_ = function (window, $) {
    * 
    * @param {string} name       - Name of callback to invoke.
    * @param {*}      parameters - One or more parameters to pass to callback. */
-  Callbacks.prototype.invoke = function ( /* name, arg0...n */ )
+  Callbacks.prototype.invoke = function ( /* (name, arg0..n) */ )
   {
     if(arguments.length < 1)
       throw "Callback name not specified";
@@ -202,7 +205,7 @@ var SortingCommon_ = function (window, $) {
    * 
    * @param {*}       parameters - One or more parameters to pass to callback.
    * */
-  Callbacks.prototype.call = function ( /* name, mandatory = true, arg0...n */ )
+  Callbacks.prototype.call = function (/* (name, mandatory = true, arg0..n) */ )
   {
     if(arguments.length < 2)
       throw "One or more parameters missing (name, mandatory)";
@@ -272,7 +275,7 @@ var SortingCommon_ = function (window, $) {
     return !this.hasFactoryMethod(name) && this.hasConstructor(name);
   };
 
-  Constructor.prototype.instantiate = function ( /* class, ... */ )
+  Constructor.prototype.instantiate = function ( /* (class, arg0..n) */ )
   {
     if(arguments.length < 1)
       throw "Class name required";
@@ -619,7 +622,8 @@ var SortingCommon_ = function (window, $) {
   };
 
   Events.prototype.register = function ( /* (event, handler)
-                                          * | { event: handler } */ )
+                                          * | { event0: handler0
+                                          *     ..n              } */ )
   {
     if(arguments.length === 0)
       throw "No event descriptor specified";
@@ -650,7 +654,7 @@ var SortingCommon_ = function (window, $) {
       throw "Invalid event(s) descriptor";
   };
   
-  /* Private methods */
+  /* Protected methods */
   Events.prototype.register_single_ = function (ev, fn)
   {
     if(!is_str(ev) || ev.length === 0)
