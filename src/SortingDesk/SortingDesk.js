@@ -94,6 +94,8 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.api_ = Api.initialize(this, opts.dossierUrl);
     this.options_ = $.extend(true, $.extend(true, {}, defaults_), opts);
     this.events_ = new std.Events(this, [ 'open', 'close' ]);
+    this.constructor_ = new std.Constructor(
+      $.extend($.extend({}, defaults_.constructors), opts.constructors));
 
     /* We need to instantiate `SortingQueue´ *now* because it is a dependency;
      * after all, `SortingDesk´ is built on top of `SortingQueue´, and as such
@@ -118,6 +120,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   Sorter.prototype = {
     initialised_: false,
     events_: null,
+    constructor_: null,
     options_: null,
 
     /* Instances */
@@ -227,7 +230,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       this.close();
       
       /* (Re-)instantiate the bins controller. */
-      (this.folder_ = this.sortingQueue_.instantiate('ControllerFolder', this))
+      (this.folder_ = this.constructor_.instantiate('ControllerFolder', this))
         .initialise(folder);
     }
   };
@@ -308,20 +311,9 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.spawner_ = null;
     this.browser_ = null;
 
-    /* TODO: at the very least, a `hasConstructor´ method should be created in
-     * the `SortingQueue.Sorter´ class.  Ideally, a controller class responsible
-     * for constructors should be created instead and the `instantiate´ and
-     * `hasContructor´ methods should be placed there. An additional method,
-     * `canInstantiate´ method should be created to query for classes that can
-     * be instantiated indirectly via a constructor method or directly via class
-     * instantiation.
-     *
-     * The `LabelBrowser´ component requires a constructor method since it needs
+    /* The `LabelBrowser´ component requires a factory method since it needs
      * options passed in. */
-    this.haveBrowser_ = owner.sortingQueue.options.constructors
-      .hasOwnProperty('createLabelBrowser')
-      && !owner.sortingQueue.options.constructors
-      .hasOwnProperty('LabelBrowser');
+    this.haveBrowser_ = !owner.constructor.isConstructor('LabelBrowser');
 
     /* Define getters. */
     this.__defineGetter__("id", function () { return this.id_; } );
