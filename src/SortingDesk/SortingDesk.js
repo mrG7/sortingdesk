@@ -99,13 +99,16 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
     /* We need to instantiate `SortingQueue´ *now* because it is a dependency;
      * after all, `SortingDesk´ is built on top of `SortingQueue´, and as such
-     * it only makes sense to instantiate `SortingQueue´ at the same time as
-     * `SortingDesk´. In addition, it may be the case that clients of
+     * it a logical requirement to instantiate `SortingQueue´ at the same time
+     * as `SortingDesk´. In addition, it may be the case that clients of
      * `SortingDesk´ expect `SortingQueue´ to be available after instantiation
      * or need to carry out some sort of processing before invoking the instance
-     * initialisor method, such as set up events. */
+     * initialisor method, such as set up events.
+     *
+     * Sorting Desk requires Sorting Queue's options to be contained in the
+     * attribute `sortingQueue´ of the options map (opts). */
     this.sortingQueue_ = new sq.Sorter(
-      $.extend(true, this.options_, {
+      $.extend(true, this.options_.sortingQueue, {
         constructors: {
           Item: TextItem
         },
