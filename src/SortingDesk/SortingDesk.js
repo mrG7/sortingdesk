@@ -79,7 +79,14 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
    * */
   var Sorter = function (opts, cbs)
   {
-    var self = this;
+    if(!std.is_obj(opts))
+      throw "Invalid or no options map specified";
+    else if(!std.$.any(opts.container))
+      throw "Invalid or no container specified";
+    else if(!std.is_obj(opts.sortingQueue) || std.$.is(opts.sortingQueue)) {
+      throw "Sorting Queue's options map must be supplied in the form of an"
+        + " object map";
+    }
 
     console.log("Initialising Sorting Desk UI");
 
