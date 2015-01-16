@@ -501,6 +501,12 @@ var SortingQueue_ = function (window, $, std) {
     } );
   };
 
+  ControllerButtonDismiss.prototype.reset = function ()
+  {
+    this.owner_.nodes.buttons.dismiss.off();
+    this.handlers_ = this.droppable_ = null;
+  };
+
   ControllerButtonDismiss.prototype.register = function (scope, handler)
   {
     if(!std.is_fn(handler))
@@ -517,12 +523,6 @@ var SortingQueue_ = function (window, $, std) {
   {
     if(this.handlers_.hasOwnProperty(scope))
       delete this.handlers_[scope];
-  };
-
-  ControllerButtonDismiss.prototype.reset = function ()
-  {
-    this.owner_.options.nodes.buttonDismiss.off();
-    this.handlers_ = this.droppable_ = null;
   };
 
   ControllerButtonDismiss.prototype.activate = function (callback)
