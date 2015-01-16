@@ -63,9 +63,9 @@ var SortingCommon_ = function (window, $) {
 
     /* Interface
      * -- */
-    /** Given a map of string -> jQuery instance references, unbind all events
-     * on all nodes. The map can be multiple levels deep, with each level
-     * processed recursively. */
+    /** Given a map of identifier -> jQuery instance references, unbind all
+     * events on all nodes. The map can be multiple levels deep, with each level
+     * processed recursively. This function can never be a jQuery plugin. */
     var alloff = function (n)
     {
       for(var k in n) {
