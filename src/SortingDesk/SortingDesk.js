@@ -437,7 +437,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.owner_.api.setQueryContentId(null);
 
     /* De-register for events of 'bin' scope. */
-    this.owner_.sortingQueue.dismiss.deregister('bin');
+    this.owner_.sortingQueue.dismiss.unregister('bin');
 
     console.log("Folder closed: id=%s, name=%s", this.id_, this.name_);
 

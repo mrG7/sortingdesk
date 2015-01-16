@@ -523,7 +523,7 @@ var SortingQueue_ = function (window, $, std) {
     this.handlers_[scope] = handler;
   };
 
-  ControllerButtonDismiss.prototype.deregister = function (scope)
+  ControllerButtonDismiss.prototype.unregister = function (scope)
   {
     if(this.handlers_.hasOwnProperty(scope))
       delete this.handlers_[scope];
