@@ -64,7 +64,10 @@ var FolderExplorer_ = function (window, $, std)
       throw "Bin Explorer component already initialised";
 
     var self = this,
-        els = this.nodes_;
+        finder = new std.NodeFinder(
+          'folder-explorer',
+          $('[data-sd-scope="folder-explorer-container"]')),
+        els;
 
     console.log("Initialising Bin Explorer component");
 
@@ -76,31 +79,32 @@ var FolderExplorer_ = function (window, $, std)
     this.selected_ = null;
 
     /* Begin set up nodes. */
-    els.container = $('[data-sd-scope="folder-explorer-container"]');
+    els.container = finder.root();
 
-    els.buttonClose = this.find_node_('close')
+    els.buttonClose = finder.find('close')
       .click( function () { self.hide(); } );
 
     els.toolbar = {
       actions: {
-        load: this.find_node_('toolbar-load'),
-        add: this.find_node_('toolbar-add'),
-        remove: this.find_node_('toolbar-remove'),
-        rename: this.find_node_('toolbar-rename')
+        load: finder.find('toolbar-load'),
+        add: finder.find('toolbar-add'),
+        remove: finder.find('toolbar-remove'),
+        rename: finder.find('toolbar-rename')
       },
       view: {
-        icons: this.find_node_('toolbar-icons'),
-        list: this.find_node_('toolbar-list')
+        icons: finder.find('toolbar-icons'),
+        list: finder.find('toolbar-list')
       }
     };
 
     els.header = {
-      container: this.find_node_('header-folder'),
-      buttonBack: this.find_node_('button-back'),
-      title: this.find_node_('folder-title')
+      container: finder.find('header'),
+      folder: finder.find('header-folder'),
+      buttonBack: finder.find('button-back'),
+      title: finder.find('folder-title')
     };
 
-    els.view = this.find_node_('view');
+    els.view = finder.find('view');
 
     /* Load currently selected item when toolbar button clicked. */
     els.toolbar.actions.load.click(function () {
@@ -231,7 +235,7 @@ var FolderExplorer_ = function (window, $, std)
     /* Set the items list's height so a scrollbar is shown when it overflows
      * vertically. */
     els.view.css('height', els.container.innerHeight()
-                 - this.find_node_('header').outerHeight()
+                 - els.header.container.outerHeight()
                  - (els.view.outerHeight(true) - els.view.innerHeight()));
 
     this.events_.trigger('show');
@@ -267,21 +271,6 @@ var FolderExplorer_ = function (window, $, std)
       throw "Component not yet initialised or already reset";
   };
 
-  Explorer.prototype.find_node_ = function (scope, parent /* = container */ )
-  {
-    var p;
-
-    if(parent instanceof $)
-      p = parent;
-    else if(std.is_str(parent))
-      p = this.find_node_(parent);
-    else
-      p = this.nodes_.container;
-
-    return p.find( [ '[data-sd-scope="folder-explorer-', scope, '"]' ]
-                   .join(''));
-  };
-
   Explorer.prototype.render_ = function (folder)
   {
     var self = this,
@@ -295,7 +284,7 @@ var FolderExplorer_ = function (window, $, std)
     if(std.like_obj(folder)) {
       this.mode_ = Explorer.MODE_BINS;
       hel.title.html(folder.name);
-      hel.container.fadeIn(200);
+      hel.folder.fadeIn(200);
       hel.buttonBack.click( function () {
         self.render_();
         hel.buttonBack.off();
@@ -303,7 +292,7 @@ var FolderExplorer_ = function (window, $, std)
     } else {
       folder = null;
       this.mode_ = Explorer.MODE_FOLDERS;
-      hel.container.fadeOut(200);
+      hel.folder.fadeOut(200);
     }
 
     switch(this.viewType_) {
@@ -552,7 +541,7 @@ var FolderExplorer_ = function (window, $, std)
   /* Static interface */
   RowIconicFolder.calculateMaxPerRow = function (owner)
   {
-    var fake = new ItemIconicFolder(null, { "fake": { name: "fake" } }),
+    var fake = new ItemIconicFolder(this, { "fake": { name: "fake" } }),
         result;
 
     fake.render($('body'));
