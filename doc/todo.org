@@ -1,54 +1,13 @@
-* To do items
-** *ALL* [0%]
-*** TODO Base module
-There is a need for base module upon which all existing modules can depend.
+* Generic
+** TODO Ask Andrew what's meant about CSS transaction
+Search emails for "transaction" for context.
 
+* Components
+** *ALL*
 *** TODO Mechanism for stopping all ongoing AJAX requests
 Behaviour is currently unknown if one switches to a folder while some sort of loading is taking place when the switch occurs (=moreTexts=, getFc=, etc). We need to be able to systematically terminate any and all AJAX requests taking place *before* the switch occurs.
 
 *** TODO Consider using SASS
-*** TODO Create standard function that can be assigned to abstract methods
-This would enable the following:
-
-#+BEGIN_SRC javascript
-var _abs_met = function ()
-{
-  throw "Abstract method not implemented";
-};
-
-var MyClass = function () { ... };
-
-MyClass.prototype = {
-  anAbstractMethod: _abs_met
-};
-#+END_SRC
-
-Ideally the =_abs_met_= above would be part of a specific namespace of class utilities, e.g.:
-
-#+BEGIN_SRC javascript
-var MetaClass = {
-  abstract: function ()
-  { throw "Abstract method not implemented"; }
-};
-#+END_SRC  
-
-**** TODO Integrate into module
-Parent feature could even be integrated in a module of its own (name suggestion: =Utilitas=, old Latin for “utility”) containing other similar basic utilities/tools (e.g. RFC standards compliant string encode/decode utility), with the Sorting Queue, Desk, and other modules, all depending on it.
-
-In addition, certain classes could be moved into this new module. Examples of this are the =Controller= class that is specialised by various classes in different modules. It doesn't really make sense that, say, the =LabelBrowser= module has to depend on =SortingQueue= just because it requires access to its =Controller= base class; it should depend directly on the utility module suggested here.
-
-*** TODO Implement HTML declarative form as mechanism of assigning context
-See Sorting Desk's =LabelBrowser= and how it uses HTML5 =data=-prefixed tags to give DOM nodes a context. Essentially, this mechanism would allow us to avoid forcing the client to pass jQuery object references to DOM nodes needed, thereby simplifying the process. We should still require *either* a reference to a main/container node in a set of different supported types. This main/container node would enable looking up nodes in declarative form within its subtree, thus owned by it, and not globally in the DOM tree, and would make it possible for multiple instances of the component to exist simultaneously. The main/container node could be allowed to specified in the following types:
-
-+ jQuery reference, with only the first element used
-  
-+ string assumed to be containing its id; or perhaps, for even greater flexibility, the string could be allowed to be *anything* that jQuery *and* =document.querySelector= understand?
-  
-+ direct reference to an =Element= instance
-
-*Question*: AngularJS uses the prefix =ng-= for its many HTML tags, so not prefixed with =data-=. Perhaps we could mirror this practice and thus not have to rely on HTML5's =data-= prefixed tags as we currently do? Is it a standards compliant way, however?
-
-Follow-up to above: see http://stackoverflow.com/questions/12107504/angularjs-tags-attributes; it seems AngularJS *also* accepts =data-= prefixed HTML tags.
 
 *** TODO Do *NOT* allow CSS classes to be specified in =options=
 This actually makes no sense and borders on the nonsensical. The assumption should be that the (different) components all use a *fixed* set of CSS classes, which are properly prefixed thus creating a namespace of sorts, which the client can then provide custom styling for. The CSS class names themselves should *not* be allowed to change.
@@ -68,12 +27,18 @@ First iteration would include modules and classes.
 *** TODO Document required options
 =SortingQueue=, =SortingDesk= and possibly other components, could do with documentation about required and optional options, callbacks and so on.
 
-** =SortingQueue= [0%]
-*** TODO =ControllerButtonDismiss= already employs a very specific pubsub method (=register=)
-This is bad. A generic and extensible mechanism that can be used by *ALL* components should be in place instead.
+*** TODO Use =std.$.is= instead of =instanceof=
 
-*** TODO Create controller responsible for constructors
-The method =instantiate= should be moved there and a new method  =hasConstructor= created.
+** =SortingCommon=
+
+** =SortingQueue=
+*** TODO Employ use of =Constructor=
+This will imply removing reliance on the =instantiate= variable.
+
+**** TODO Allow specialisation of =ControllerButtonDismiss=
+
+*** TODO =ControllerButtonDismiss=: already employs a very specific pubsub method (=register=)
+This is bad. A generic and extensible mechanism that can be used by *ALL* components should be in place instead.
 
 *** TODO Rename CSS class names alluding to the old concept of text item
 Some CSS class names are still in use which employ the old concept of text item. These should be renamed such that the "text" word is removed.
@@ -83,40 +48,34 @@ See =ProtarchBinSpawner=. Specifically, there are instances where the events att
 
 *** TODO =ControllerItems=: disable all other dragging-related events
 
-*** TODO Implement Events controller based on the publisher-subscriber design pattern
-- State "TODO"       from "WAIT"       [2015-01-02 Fri 12:49]
-- State "WAIT"       from "TODO"       [2014-10-23 Thu 14:42]
-
-This component is sorely needed.
-
-*** TODO Create a list of interesting events to advertise via an Events controller
-
 *** TODO Items controller to notify client when no more items available
 
 *** TODO Prefix text-items' node ids
 - State "TODO"       from "WAIT"       [2014-09-07 Sun 08:16]
 - State "WAIT"       from "TODO"       [2014-09-05 Fri 10:41] \\
   Currently waiting to hear from support as to whether ids are guaranteed to always be unique.
-  
-*** TODO Remove code handling keyboard events
-  
-** =SortingDesk= [0%]
-*** =FolderExplorer= [0%]
-**** TODO =detachAllEventsIn_=: move to =SortingCommon=?
-**** TODO Do not require constructor to =LabelBrowser= component
+    
+** =DossierJS=
+*** TODO Implement a request manager
+
+** =SortingDesk=
+*** =FolderExplorer=
+**** TODO Require a master container node in the options map
+**** TODO Disallow creation of folder with duplicate name
+**** WAIT Do not require constructor to =LabelBrowser= component
+- State "WAIT"       from "TODO"       [2015-01-15 Thu 15:52] \\
+  Need time to assess.
 Trigger an event instead and let client deal with it.
 
 **** TODO Selecting folder should also switch Sorting Desk's active folder but not close window
 **** TODO Implement folder renaming
-**** TODO Needs a callbacks handler BADLY
 
-*** =LabelBrowser= [12%]
+*** =LabelBrowser=
+**** TODO Rename =close= to =hide=
+**** TODO Don't use deferred as means of signalling `close´
 **** TODO Must fire event in the event that the content id's FC could not be fetched
 This is so the client can update state should loading of state fail. Right now, if the referential FC fails to load, the Label Browser's window shows the strings "Loading" and "Please wait" because the =Ui= instance isn't aware loading actually failed.
 
-**** TODO =Browser=: should the active =SortingDesk= instance be passed as a stand-alone argument or as part of the =options= object map?
-
-**** TODO Show appropriate message when items list empty
 **** TODO =set_heading_title_=: using reference bin's own content rather than snippet from retrieved feature collection
 Assess if correct.
 
@@ -126,8 +85,9 @@ Rationale behind decision was so the bins' snippet/image presented actually matc
 **** TODO As it stands there can only be ONE Label Browser HTML container
 We can keep the declarative manner in which nodes are found but the component will have to receive a container node so that querying for nodes can be conducted in the container node's subtree.
 
-**** TODO Decouple component from =SortingDesk.js=
-Component needs to stand on its own, have its own set of options, callbacks and so on. Being so tightly coupled with the =SortingDesk= module means that currently the =options= structure is logically nonsensical and it is unable to receive notifications for loading events, among other problems.
+*** TODO All components to trigger =initialised= and =ready= events
+*** TODO Fire event when no bins exist
+The extension looks too barren and dumb right after a new folder has been created. A mechanism is needed that allows for an event to be fired to communicate this fact.
 
 *** TODO Encode images to base64
 Relevant links to research:
@@ -144,29 +104,6 @@ Also see TODO about folders being kept in an array.
 *** TODO Window management class
 A class for managing windows used by the different components is needed so as to prevent code duplication. Currently, the components =LabelBrowser= and =BinExplorer= share (duplicate) functionality that ought to be in a specialised class for this purpose.
 
-*** TODO Revisit =options=
-Sorter and Label Browser's options reside together but Sorter's options are not prefixed.
-
-*** TODO =options.nodes.add=
-Inconsistency: =buttonDismissed= is prefixed but =add= isn't.
-
-*** TODO Assess whether instance should keep reference to =options= object
-Should it rely on =SortingQueue= instead?
-
-*** TODO Throw exception when instantiating if not on valid page
-URL of page must have a valid HTTP[S] protocol. Disallow on any other page and throw exception.
-
-*** TODO Allow specialisation of =ControllerButtonDismiss=
-
-*** TODO Tentative: allow =SortingDesk='s constructor to receive a deferred object
-Allow the constructor of =SortingDesk= to receive an *optional* deferred object provided, and which is under the responsibility of the user, that can be actioned upon depending on the result of the initialisation sequence.
-
-Ultimately this optional mechanism would allow the client to receive a perfectly timed notification regarding Sorting Desk's initialisation state as and when it happens.
-
-*** TODO =ControllerBinSpawner=: =addManual= can't be supported as it stands
-+ API requires knowledge of the bin's =label=.
-+ Several TODO annotations have been created regarding this issue.
-  
 *** WAIT Implement keyboard auto-repeat with configurable frequency
 - State "WAIT"       from "TODO"       [2014-10-15 Wed 13:56] \\
   Probable unwanted feature.
@@ -180,9 +117,12 @@ Ultimately this optional mechanism would allow the client to receive a perfectly
   Specifications aren't clear as to how bins that are based on existing text items
   are created.
   
-** Extension [0%]
-*** All [100%]
-*** Chrome [0%]
+** Extension
+*** All
+*** Chrome
+**** TODO =DossierJS=: must reside in =background.js=
+Moving =Dossier.JS= into =background.js= would effectively mean the limitations on same-origin policy would no longer apply.
+
 **** TODO Re-calculate sizes (and positions) of UI elements when the browser window is resized
 **** TODO Allow container to be moved to either side of the page
 Attempt mechanism that doesn't show container over the page but alongside it instead.
@@ -194,19 +134,11 @@ All other nodes are addressed via the `nodes´ object map.
 
 **** TODO Should be using a map to contain folders
 
-**** TODO =Activator=: using an adhoc event subscriber
-**** TODO Custom font should really be loaded by a resource manager
-See =Ui= constructor, before =get-meta= message is sent.
-
-**** TODO Do not show activator when not on valid page
-URL of page must have a valid HTTP[S] protocol. Disallow on any other page.
-
-**** TODO [#A] Add option: Dossier stack API URL
-** API [0%]
-*** All [50%]
+** API
+*** All
 **** TODO Add timeout to AJAX calls
 
-*** Live [0%]
+*** Live
 **** TODO Place methods in relevant namespaces
 For instance all methods pertaining to feature collection should be in a `fc´ or `featureCollection´ namespace of their own.
 
@@ -216,7 +148,7 @@ As it stands, the =Api= module can only be used by one client at a time.
 **** TODO Remove bypass of =DossierJS.SortingQueueItems.prototype._moreTexts=
 The bypass was created do deliver items in the format expected by =SortingQueue= but this should instead be integrated in DossierJS. Better still, IMHO, would be to integrate what is now the =SortingQueueItems= class in =Api=.
 
-** Examples [0%]
+** Examples
 *** TODO Fix broken examples
 
 *** WAIT Create examples [0%]
@@ -225,7 +157,7 @@ The bypass was created do deliver items in the format expected by =SortingQueue=
   
 **** TODO No content ids
 
-** Tests [0%]
+** Tests
 *** TODO instance: ensure reset doesn't run twice
 
 *** TODO instance: require =visibleItems= to be greater than 0
@@ -293,7 +225,7 @@ A mechanism for displaying notifications to the user is needed for the purpose
 of providing feedback, in particular in the cases when a user action is invalid
 and results in an error.
 
-* Bugs [0%]
+* Bugs
 ** TODO When items' DIV is selected, scrolling with keyboard both selects next item as well as scroll the DIV contents
 Scrolling on the items' DIV container must be suppressed.
 
