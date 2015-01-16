@@ -80,6 +80,7 @@ var SortingQueue_ = function (window, $, std) {
     initialised_: false,
     resetter_: false,
     options_: null,
+    nodes_: null,
     /* Controllers */
     callbacks_: null,
     events_: null,
@@ -102,13 +103,24 @@ var SortingQueue_ = function (window, $, std) {
     /* Interface */
     initialise: function ()
     {
-      var self = this;
-
       if(this.initialised_)
-        throw "Already initialised";
+        throw "Sorting Queue component already initialised";
 
-      if(!this.options_.nodes.buttonDismiss)
-        this.options_.nodes.buttonDismiss = $();
+      var self = this,
+          finder = new std.NodeFinder('sorting-queue',
+                                      this.options_.container);
+
+      /* Find nodes. */
+      this.nodes_ = {
+        container: finder.root(),
+        items: finder.find('items'),
+        buttons: {
+          dismiss: finder.find('button-dismiss')
+        },
+        empty: {
+          items: finder.find('items-empty')
+        }
+      };
 
       (this.dismiss_ = new ControllerButtonDismiss(this))
         .initialise();
@@ -467,13 +479,11 @@ var SortingQueue_ = function (window, $, std) {
 
   ControllerButtonDismiss.prototype.initialise = function ()
   {
-    var self = this,
-        options = this.owner_.options;
+    var self = this;
 
     this.handlers_ = { };
-    
-    this.droppable_ = new std.Droppable(options.nodes.buttonDismiss, {
-      classHover: options.css.droppableHover,
+    this.droppable_ = new std.Droppable(this.owner_.nodes.buttons.dismiss, {
+      classHover: this.owner_.options.css.droppableHover,
       scopes: [ ],
 
       drop: function (e, id, scope) {
@@ -517,19 +527,15 @@ var SortingQueue_ = function (window, $, std) {
 
   ControllerButtonDismiss.prototype.activate = function (callback)
   {
-    var options = this.owner_.options;
-
-    options.nodes.buttonDismiss.stop().fadeIn(
-      options.delays.dismissButtonShow,
+    this.owner_.nodes.buttons.dismiss.stop().fadeIn(
+      this.owner_.options.delays.dismissButtonShow,
       std.is_fn(callback) ? callback : null);
   };
 
   ControllerButtonDismiss.prototype.deactivate = function ()
   {
-    var options = this.owner_.options;
-
-    options.nodes.buttonDismiss.stop().fadeOut(
-      options.delays.dismissButtonHide);
+    this.owner_.nodes.buttons.dismiss.stop().fadeOut(
+      this.owner_.options.delays.dismissButtonHide);
   };
 
 
@@ -541,7 +547,7 @@ var SortingQueue_ = function (window, $, std) {
     /* Invoke super constructor. */
     std.Controller.call(this, owner);
 
-    this.node_ = this.owner_.options.nodes.items;
+    this.node_ = this.owner_.nodes.items;
     this.items_ = [ ];
     this.fnDisableEvent_ = function (e) { return false; };
 
@@ -849,7 +855,7 @@ var SortingQueue_ = function (window, $, std) {
 
     this.node_ = this.render();
     this.initialise();
-    owner.owner.options.nodes.items.append(this.node_);
+    owner.owner.nodes.items.append(this.node_);
   };
 
   Item.prototype = Object.create(std.Drawable.prototype);
@@ -955,18 +961,7 @@ var SortingQueue_ = function (window, $, std) {
   /* ----------------------------------------------------------------------
    *  Default options
    *  Private attribute.
-   * ----------------------------------------------------------------------
-   *
-   * In addition to the properties below, which are obviously optional, the
-   * following attributes are also accepted:
-   *
-   * nodes: {
-   *   items: jQuery-element,           ; mandatory
-   *   buttonDismiss: jQuery-element    ; optional
-   * },
-   * contentIds: array<string>          ; optional
-   *
-   */
+   * ---------------------------------------------------------------------- */
   var defaults_ = {
     css: {
       item: 'sd-text-item',
