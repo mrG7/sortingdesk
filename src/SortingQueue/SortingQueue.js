@@ -30,14 +30,6 @@ var SortingQueue_ = function (window, $, std) {
    * @param   {Object}    cbs   Map of all callbacks
    *
    * @param   cbs.moreTexts           Retrieve additional text items.
-   * @param   cbs.itemDismissed       Event triggered when a text item is
-   *                                  dismissed.
-   * @param   cbs.itemSelected        Event triggered when a text item is
-   *                                  selected.
-   * @param   cbs.itemDeselected      Event triggered when a text item is
-   *                                  deselected.
-   * @param   cbs.onRequestStart      Executed after request initiated.
-   * @param   cbs.onRequestStop       Executed after request finished.
    * */
   var Sorter = function (opts, cbs)
   {
