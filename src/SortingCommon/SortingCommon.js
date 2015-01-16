@@ -705,7 +705,13 @@ var SortingCommon_ = function (window, $) {
     ent.forEach(function (n) { self.map_[n] = [ ]; } );
   };
 
-  Events.prototype.trigger = function ( /* ev, arg0, arg1... */ )
+  Events.prototype.exists = function (ev)
+  {
+    ev = this.map_[ev];
+    return is_arr(ev) ? ev.length > 0 : false;
+  };
+
+  Events.prototype.trigger = function ( /* (ev, arg0..n) */ )
   {
     var ev = arguments[0];
     
