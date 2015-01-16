@@ -66,12 +66,7 @@ var ChromeExtensionUi = (function ($, std) {
 
       /* Initialise API and instantiate `SortingDesk´ class. */
       (self.sorter_ = new SortingDesk.Sorter( {
-        nodes: {
-          items: $('#sd-queue'),
-          bins: $('#sd-bins'),
-          add: $('#sd-button-add'),
-          buttonDismiss: $("#sd-button-dismiss")
-        },
+        container: $('#sd-sorter'),
         constructors: {
           createLabelBrowser: function (options) {
             $('[data-sd-scope="label-browser-header-title"]').html("Loading");
@@ -97,10 +92,13 @@ var ChromeExtensionUi = (function ($, std) {
               } );
           }
         },
-        visibleItems: 10,
-        itemsDraggable: false,
         dossierUrl: meta.config.dossierUrl,
-        active: meta.active
+        active: meta.active,
+        sortingQueue: {
+          container: $('#sd-sorter'),
+          visibleItems: 10,
+          itemsDraggable: false
+        }
       }, $.extend(
         true,
         Api,
