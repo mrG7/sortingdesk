@@ -34,12 +34,6 @@ var FolderExplorer_ = function (window, $, std)
       this, [ 'initialised', 'open', 'show', 'hide' ] );
     
     this.api_ = options.api;
-    this.viewType_ = Explorer.VIEW_ICONIC;
-    this.nodes_ = { };
-    
-    this.view_ = this.mode_ = this.folders_ = null;
-    this.selected_ = null;
-
     if(!std.like_obj(this.api_))
       throw "Invalid API reference specified";
 
@@ -73,6 +67,13 @@ var FolderExplorer_ = function (window, $, std)
         els = this.nodes_;
 
     console.log("Initialising Bin Explorer component");
+
+    /* Set initial state. */
+    this.viewType_ = Explorer.VIEW_ICONIC;
+    els = this.nodes_ = { };
+    
+    this.view_ = this.mode_ = this.folders_ = null;
+    this.selected_ = null;
 
     /* Begin set up nodes. */
     els.container = $('[data-sd-scope="folder-explorer-container"]');
