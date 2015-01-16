@@ -1,8 +1,8 @@
-2015-01-13  Miguel Guedes  <miguel@miguelguedes.org>
+2015-01-16  Miguel Guedes  <miguel@miguelguedes.org>
 
 	* Chrome Extension:
 
-	Added option to extension to ignore HTTPS pages.
+	Added temporary option to extension to ignore HTTPS pages.
 
 	Created a resource loader class, which at present, supports
 	injection of custom fonts into the active tab's DOM, but can be
@@ -15,12 +15,51 @@
 	components. It features a number of utility classes and functions,
 	and base classes intended for specialisation.
 
+	Crafted mechanism for advertising interesting events that clients
+	can subscribe to for the purpose of receiving notifications as and
+	when these occur. Re-engineered all components so as to use this
+	mechanism.
+
+	Created a class that provides support for callbacks, and includes
+	such features as querying and optional invocation of callbacks.
+
+	Yet another class was created whose purpose is to manage
+	constructors and/or factory methods, and enable clients to invoke
+	these to instantiate classes on demand.
+
+	Moved code related to support of drag-and-drop into this module.
+
+	Added several type introspection and other support functions.
+
+	* Sorting Queue:
+
+	The component now makes use of loose declarative binding of
+	elements and thus does not necessitate that references to nodes be
+	provided any more.
+
+	* Sorting Desk:
+
+	This component, as with Sorting Queue above, now relies on
+	declarative binding of elements and no longer requires references
+	to nodes to be supplied via its options map.
+
+	It now employs the `Constructor´ class through which all
+	instantiation of classes is done.
+
+	Its options map now requires Sorting Queue's options to be kept
+	separate and these are routed through with a minor alteration;
+	this being a new option since added that instructs Sorting Queue
+	to not load the items list at startup.
+
 	* All:
+
+	All components now use the `Events´ class for advertising
+	interesting events and notifying clients when these occur.
 
 	Removed unused files and reorganised stray source files.
 
-	NUMEROUS improvements to code and user experience, and several
-	issues resolved.
+	Code refactoring: NUMEROUS improvements to code, user interface
+	and experience, and SEVERAL issues resolved.
 
 2015-01-09  Miguel Guedes  <miguel@miguelguedes.org>
 
