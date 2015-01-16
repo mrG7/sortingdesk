@@ -100,6 +100,32 @@ var SortingCommon_ = function (window, $) {
   } )();
 
 
+  var NodeFinder = (function (prefix, root) {
+
+    prefix = [ '[data-sd-scope="', prefix, '-' ].join('');
+    
+    var find = function (scope, parent /* = prefix */ )
+    {
+      var p;
+
+      if(parent instanceof $) p = parent;
+      else if(is_str(parent)) p = find(parent);
+      else                    p = root;
+
+      return p.find( [ prefix, scope, '"]' ].join(''));
+    };
+
+    var root_ = function () { return root; };
+    
+    
+    /* Public interface */
+    return {
+      find: find,
+      root: root_
+    };
+  } );
+
+
   /**
    * @class
    * */
@@ -716,6 +742,7 @@ var SortingCommon_ = function (window, $) {
     Draggable: Draggable,
     Droppable: Droppable,
     Events: Events,
+    NodeFinder: NodeFinder,
     $: jQueryExtensions
   };
 };
