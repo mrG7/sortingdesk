@@ -618,7 +618,8 @@ var SortingCommon_ = function (window, $) {
     }
   };
 
-  Events.prototype.register = function ( /* event, handler */ )
+  Events.prototype.register = function ( /* (event, handler)
+                                          * | { event: handler } */ )
   {
     if(arguments.length === 0)
       throw "No event descriptor specified";
