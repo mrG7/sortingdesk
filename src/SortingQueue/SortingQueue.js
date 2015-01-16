@@ -38,36 +38,28 @@ var SortingQueue_ = function (window, $, std) {
     /* Allow a jQuery element to be passed in instead of an object containing
      * options. In the case that a jQuery element is detected, it is assumed to
      * be the `nodes.items' element. */
-    if(!opts)
-      throw "No options given: some are mandatory";
-    else if(opts instanceof $) {
-      opts = {
-        nodes: {
-          items: opts
-        }
-      };
-    } else if(!opts.nodes)
-      throw "No nodes options given: `items' required";
-    else if(!opts.nodes.items)
-      throw "Missing `items' nodes option";
+    if(!std.is_obj(opts))
+      throw "Invalid or no options map provided";
+    else if(opts instanceof $)
+      opts = { container: opts };
+    else if(!std.$.is(opts.container))
+      throw "Invalid or no container provided";
 
     /* Allow a function to be passed in instead of an object containing
      * callbacks. In the case that a function is passed in, it is assumed to be
      * the `moreTexts' callback. */
-    if(!cbs)
-      throw "No callbacks given: some are mandatory";
-    else if(std.is_fn(cbs)) {
-      cbs = {
-        moreTexts: cbs
-      };
-    } else if(!cbs.moreTexts)
+    if(std.is_und(cbs))
+      throw "Invalid or no callbacks map provided";
+    else if(std.is_fn(cbs))
+      cbs = { moreTexts: cbs };
+    else if(!std.is_fn(cbs.moreTexts))
       throw "Mandatory `moreTexts' callback missing";
 
     console.log("Initialising Sorting Queue UI");
 
     this.options_ = $.extend(true, $.extend(true, {}, defaults_), opts);
 
-    /* Begin instantiating and initialising controllers. */
+    /* Begin instantiating and initialising classes needed. */
     (this.requests_ = new ControllerRequests(this))
       .initialise();
     
