@@ -251,6 +251,17 @@
   font-size: 13px;
   text-align: center;
   text-shadow: 1px 1px 1px rgba(150, 150, 150, .75);
+  white-space: normal;
+}
+
+.sd-bins.sd-empty {
+  margin-top: 5px;
+  padding: 5px;
+  border: 1px solid #DDD;
+  border-radius: 4px;
+  background-color: #F9F8E9;
+  color: #555;
+  text-shadow: 1px 1px 1px #dadada;
 }
 
 
