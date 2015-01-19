@@ -689,12 +689,16 @@ var SortingQueue_ = function (window, $, std) {
     return this.getById(std.Url.decode(node.attr('id')));
   };
 
-  ControllerItems.prototype.removeAll = function() {
-    for (var i = 0; i < this.items_.length; i++) {
-        this.items_[i].node.remove();
-    }
+  ControllerItems.prototype.removeAll = function(check /* = true */) {
+    this.removeNodes_();
     this.items_ = [];
-    this.check();
+
+    if(std.is_und(check) || check === true)
+      this.check();
+    else
+      this.updateEmptyNotification_();
+
+    this.owner_.events.trigger('items-updated', 0);
   };
 
   ControllerItems.prototype.remove = function (item)
