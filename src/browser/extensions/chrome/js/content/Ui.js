@@ -197,8 +197,11 @@ var ChromeExtensionUi = (function ($, std) {
         ui_.nodes.loading.stop().fadeIn();
     };
     
-    var onRequestStop_ = function (id) {
-      if(--count_ === 0)
+    var onRequestStop_ = function (id)
+    {
+      if(count_ === 0)
+        console.log("Internal count clear on request stop: %s", id);
+      else if(--count_ === 0)
         ui_.nodes.loading.stop().fadeOut(100);
     };
 
