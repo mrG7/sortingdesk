@@ -784,7 +784,8 @@ var SortingCommon_ = function (window, $) {
       if(is_obj(ev)) {
         for(var k in ev)
           this.register_single_(k, ev[k]);
-      }
+      } else
+        throw "Invalid event(s) descriptor map";
     } else /* arguments >= 2; only first two are used */
       this.register_single_(ev, arguments[1]);
   };
