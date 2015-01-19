@@ -109,16 +109,17 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
      * Sorting Desk requires Sorting Queue's options to be contained in the
      * attribute `sortingQueue´ of the options map (opts). */
     this.sortingQueue_ = new sq.Sorter(
-      $.extend(true, this.options_.sortingQueue, {
+      $.extend(true, this.options_.sortingQueue.options, {
         constructors: {
           Item: TextItem
         },
-        loadItemsAtStartup: false /* IMPORTANT: Explicit deny loading of items
+        loadItemsAtStartup: false /* IMPORTANT: Explicitly deny loading of items
                                    * at startup as this would potentially break
                                    * request-(start|stop) event handlers set up
                                    * only *AFTER* this constructor exits. */
       }),
-      $.extend(this.api_.getCallbacks(), cbs));
+      $.extend(this.api_.getCallbacks(),
+               this.options_.sortingQueue.callbacks || { } ));
   };
 
   Sorter.prototype = {
