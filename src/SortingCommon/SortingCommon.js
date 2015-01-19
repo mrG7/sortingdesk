@@ -578,13 +578,22 @@ var SortingCommon_ = function (window, $) {
     } );
   };
 
-  Droppable.prototype.addScope = function (scope)
+  Droppable.prototype.add = function (scope)
   {
     if(!is_arr(this.options_.scopes))
       this.options_.scopes = [ ];
 
     if(this.options_.scopes.indexOf(scope) === -1)
       this.options_.scopes.push(scope);
+  };
+
+  Droppable.prototype.remove = function (scope)
+  {
+    if(is_arr(this.options_.scopes)) {
+      var index = this.options_.scopes.indexOf(scope);
+      if(index !== -1)
+        this.options_.scopes.splice(index, 1);
+    }
   };
 
   Droppable.prototype.reset = function ()
