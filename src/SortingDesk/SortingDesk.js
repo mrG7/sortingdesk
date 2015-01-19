@@ -106,8 +106,19 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
      * or need to carry out some sort of processing before invoking the instance
      * initialisor method, such as set up events.
      *
-     * Sorting Desk requires Sorting Queue's options to be contained in the
-     * attribute `sortingQueue´ of the options map (opts). */
+     * Sorting Desk requires Sorting Queue's options and callbacks to be
+     * specified inside a map assigned to key `sortingQueue´, as given by:
+     * opts = {
+     *   // Sorting Desk's options
+     *   sortingQueue: {
+     *     options: {
+     *       // Sorting Queue's options
+     *     },
+     *     callbacks: {
+     *       // Sorting Queue's callbacks
+     *     }
+     *   }
+     * } */
     this.sortingQueue_ = new sq.Sorter(
       $.extend(true, this.options_.sortingQueue.options, {
         constructors: {
