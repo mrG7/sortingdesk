@@ -163,8 +163,9 @@
   box-shadow: 1px 1px 2px 0 rgba(50, 50, 50, 0.75);
   text-shadow: 1px 1px 2px rgba(150, 150, 150, 1);
   transition: background-color 175ms, color 100ms;
-  cursor: pointer;
+  cursor: default;
   line-height: 25px;
+  transition: all 175ms;
 }
 
 #sd-sorting-desk.sd-top-left #sd-button-add,
@@ -197,9 +198,9 @@
   margin-left: -10px;
 }
 
-#sd-button-add:hover {
+#sd-button-add.sd-droppable-hover {
   background-color: #DEF3DA;
-  transition: background-color 175ms, color 100ms;
+  border-color: green;
 }
 
 /* NOTE: disabled as we would need to set specific styling for each of the four
@@ -579,7 +580,7 @@ A.sd-text-item-title:hover {
   border-radius: 19px;
   box-shadow: 1px 1px 2px 0 rgba(50, 50, 50, 0.75);
   text-shadow: 1px 1px 2px rgba(150, 150, 150, 1);
-  transition: background-color 175ms, color 100ms;
+  transition: all 175ms;
   cursor: pointer;
   line-height: 25px;
 }
@@ -610,12 +611,7 @@ A.sd-text-item-title:hover {
   margin-left: -10px;
 }
 
-#sd-button-dismiss:hover {
-  background-color: #F3DADA;
-  transition: background-color 175ms, color 100ms;
-}
-
-#sd-button-dismiss.droppable-hover {
+#sd-button-dismiss.sd-droppable-hover {
   background-color: #C04343;
   border-color: #7A4747;
   color: #FFF5F5;
