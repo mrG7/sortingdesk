@@ -387,12 +387,12 @@ var ChromeExtensionUi = (function ($, std) {
       self.html_ = nodes.activator.html();
       self.width_ = nodes.activator.width();
       nodes.activator
-        .html('<DIV id="sd-settings" class="sd-button sd-button-round'
+        .html('<DIV id="sd-explorer" class="sd-button sd-button-round'
               + ' sd-small"><SPAN class="sd-glyph sd-glyph-folder-open">'
               + '</SPAN></DIV>Sorting Desk')
         .animate( { width: '120px' }, 150);
       
-      $('#sd-settings').click(function () {
+      $('#sd-explorer').click(function () {
         self.events_.trigger('click-explorer');
         return false;
       } );
