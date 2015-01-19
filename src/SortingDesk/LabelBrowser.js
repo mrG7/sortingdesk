@@ -69,6 +69,10 @@ var LabelBrowser_ = function (window, $, std)
   Browser.prototype.initialise = function ()
   {
     var self = this,
+        finder = new std.NodeFinder(
+          'label-browser',
+          this.options_.container
+            || $('[data-sd-scope="label-browser-container"]')),
         els;
 
     if(this.initialised_)
@@ -93,24 +97,27 @@ var LabelBrowser_ = function (window, $, std)
     };
 
     /* Begin set up nodes. */
-    els.container = $('[data-sd-scope="label-browser-container"]');
+    els.container = finder.root();
+    if(els.container.length === 0)
+      throw "Unable to find container element";
 
-    els.buttonClose = this.find_node_('close')
+    els.buttonClose = finder.find('close')
       .click( function () { self.hide(); } );
 
     els.toolbar = {
       view: {
-        list: this.find_node_('toolbar-list'),
-        group: this.find_node_('toolbar-group')
+        list: finder.find('toolbar-list'),
+        group: finder.find('toolbar-group')
       }
     };
 
     els.header = {
-      title: this.find_node_('header-title'),
-      content: this.find_node_('header-content')
+      container: finder.find('header'),
+      title: finder.find('header-title'),
+      content: finder.find('header-content')
     };
 
-    els.items = this.find_node_('items');
+    els.items = finder.find('items');
     els.table = els.items.find('TABLE');
     /* End set up up nodes. */
 
@@ -205,7 +212,7 @@ var LabelBrowser_ = function (window, $, std)
     /* Set the items list's height so a scrollbar is shown when it overflows
      * vertically. */
     els.items.css('height', els.container.innerHeight()
-                  - this.find_node_('header').outerHeight()
+                  - els.header.container.outerHeight()
                   - (els.items.outerHeight(true) - els.items.innerHeight()));
 
     this.events_.trigger('show');
@@ -276,20 +283,6 @@ var LabelBrowser_ = function (window, $, std)
       this.api_.getSubtopicType(this.ref_bin_.data.subtopic_id) === 'image'
         ? [ '<img src="', this.ref_bin_.data.content, '"/>' ].join('')
         : this.ref_bin_.data.content);
-  };
-
-  Browser.prototype.find_node_ = function (scope, parent /* = container */)
-  {
-    var p;
-
-    if(std.$.is(parent))
-      p = parent;
-    else if(std.is_str(parent))
-      p = this.find_node_(parent);
-    else
-      p = this.nodes_.container;
-
-    return p.find( [ '[data-sd-scope="label-browser-', scope, '"]' ].join(''));
   };
 
 
