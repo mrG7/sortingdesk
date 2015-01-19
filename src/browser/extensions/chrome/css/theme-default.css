@@ -276,6 +276,7 @@
   background-color: #F9F8E9;
   color: #555;
   text-shadow: 1px 1px 1px #dadada;
+  box-shadow: 1px 1px 1px #888;
 }
 
 #sd-bins .sd-empty.sd-wider {
