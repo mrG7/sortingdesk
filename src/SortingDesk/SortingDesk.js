@@ -94,6 +94,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.api_ = Api.initialize(this, opts.dossierUrl);
     this.options_ = $.extend(true, $.extend(true, {}, defaults_), opts);
     this.events_ = new std.Events(this, [ 'open', 'close' ]);
+    this.callbacks_ = new std.Callbacks(cbs);
     this.constructor_ = new std.Constructor(
       $.extend($.extend({}, defaults_.constructors), opts.constructors));
 
@@ -122,6 +123,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
   Sorter.prototype = {
     initialised_: false,
+    callbacks_: null,
     events_: null,
     constructor_: null,
     options_: null,
@@ -137,6 +139,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     get sortingQueue () { return this.sortingQueue_; },
     get initialised ()  { return this.initialised_; },
     get constructor ()  { return this.constructor_; },
+    get callbacks ()    { return this.callbacks_; },
     get events ()       { return this.events_; },
     get api ()          { return this.api_; },
     get resetting ()    { return this.sortingQueue_.resetting(); },
@@ -217,7 +220,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
         this.initialiseFolder_(folder);
         this.events_.trigger('open', this.folder_);
       } else if(folder) {         /* assume id */
-        this.sortingQueue_.callbacks.invoke('load', folder)
+        this.callbacks_.invoke('load', folder)
           .done(function (f) {
             self.initialiseFolder_(f);
             self.events_.trigger('open', self.folder_);
@@ -240,10 +243,8 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     
     save: function ()
     {
-      if(this.folder_) {
-        return this.sortingQueue_.callbacks.invoke(
-          'save', this.folder_.serialise() );
-      }
+      if(this.folder_)
+        this.callbacks_.invoke('save', this.folder_.serialise() );
     },
 
     /* Private methods */
@@ -463,7 +464,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     /* Ensure a bin with the same id isn't already contained. */
     if(this.getById(bin.id))
       throw "Bin is already contained: " + bin.id;
-
+    
     /* Initialise bin. */
     bin.initialise();
 
@@ -625,7 +626,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
         { scrollLeft: bin.node.offset().left },
         250);
 
-      this.owner_.sortingQueue.callbacks.invoke('setActive', this.id);
+      this.owner_.callbacks.invoke('setActive', this.id);
     } else {
       /* There is no active bin, which means we need to clear the list of items,
        * but we only do so *after* the query content id has been set since
