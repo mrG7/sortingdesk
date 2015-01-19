@@ -75,7 +75,8 @@ var SortingQueue_ = function (window, $, std) {
 
     this.events_ = new std.Events(
       this,
-      [ 'request-start', 'request-stop', 'items-get' ]);
+      [ 'request-start', 'request-stop', 'items-get', 'item-dismissed',
+        'item-deselected', 'item-selected' ]);
   };
 
   Sorter.prototype = {
