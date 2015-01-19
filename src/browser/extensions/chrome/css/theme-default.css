@@ -243,7 +243,7 @@
 .sd-empty {
   display: none;
   position: absolute;
-  top: 250px;
+  top: 150px;
   left: -100px;
   margin-left: 50%;
   width: 200px;
@@ -254,14 +254,24 @@
   white-space: normal;
 }
 
-.sd-bins.sd-empty {
-  margin-top: 5px;
+.sd-empty.sd-wider {
+  left: -150px;
+  width: 300px;
+}
+
+#sd-bins .sd-empty {
+  top: 0;
+  margin-top: 10px;
   padding: 5px;
   border: 1px solid #DDD;
   border-radius: 4px;
   background-color: #F9F8E9;
   color: #555;
   text-shadow: 1px 1px 1px #dadada;
+}
+
+#sd-bins .sd-empty.sd-wider {
+  margin-top: 10px;
 }
 
 
