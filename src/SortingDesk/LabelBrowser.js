@@ -36,9 +36,9 @@ var LabelBrowser_ = function (window, $, std)
     this.initialised_ = false;
     this.options_ = options;
     this.callbacks_ = new std.Callbacks(callbacks);
-    this.events_ = new std.Events(this, [ 'initialised', 'ready' ] );
+    this.events_ = new std.Events(
+      this, [ 'initialised', 'ready', 'show', 'hide' ] );
     this.api_ = options.api;
-    this.deferred_ = null;
     this.ref_bin_ = options.ref_bin;
 
     /* Check for mandatory options. */
@@ -61,9 +61,9 @@ var LabelBrowser_ = function (window, $, std)
   /* Constants
    * --
    * View types */
-  Browser.VIEW_LIST = 0x01;
-  Browser.VIEW_GROUPED = 0x02;
-  Browser.VIEW_DEFAULT = Browser.VIEW_LIST;
+  Browser.VIEW_LIST     = 0x01;
+  Browser.VIEW_GROUPED  = 0x02;
+  Browser.VIEW_DEFAULT  = Browser.VIEW_LIST;
 
   /* Interface */
   Browser.prototype.initialise = function ()
@@ -96,7 +96,7 @@ var LabelBrowser_ = function (window, $, std)
     els.container = $('[data-sd-scope="label-browser-container"]');
 
     els.buttonClose = this.find_node_('close')
-      .click( function () { self.close(); } );
+      .click( function () { self.hide(); } );
 
     els.toolbar = {
       view: {
@@ -173,13 +173,8 @@ var LabelBrowser_ = function (window, $, std)
 
   Browser.prototype.reset = function ()
   {
-    this.check_init_();
-
-    /* Resolve promise if one still exists. */
-    if(this.deferred_) {
-      this.close();
-      if(!this.initialised_) return;
-    }
+    /* Force hide the window. */
+    this.do_hide_();
 
     /* Remove all children nodes. */
     this.nodes_.header.title.children().remove();
@@ -187,8 +182,8 @@ var LabelBrowser_ = function (window, $, std)
     this.nodes_.table.find('TR:not(:first-child)').remove();
 
     /* Detach all events. */
-    this.nodes_.buttonClose.off();
-
+    std.$.alloff(this.nodes_);
+    
     this.ref_bin_ = this.view_ = this.nodes_ = null;
     this.ref_fc_ = this.eqv_fcs_ = this.viewType_ = this.api_ = null;
     this.initialised_ = false;
@@ -213,25 +208,15 @@ var LabelBrowser_ = function (window, $, std)
                   - this.find_node_('header').outerHeight()
                   - (els.items.outerHeight(true) - els.items.innerHeight()));
 
-    this.deferred_ = $.Deferred();
-
-    return this.deferred_.promise();
+    this.events_.trigger('show');
+    return this;
   };
 
-  /* overridable */ Browser.prototype.close = function ()
+  /* overridable */ Browser.prototype.hide = function ()
   {
-    this.check_init_();
-
-    this.nodes_.container
-      .css( {
-        transform: 'scale(.2,.2)',
-        opacity: 0
-      } );
-
-    if(this.deferred_) {
-      this.deferred_.resolve();
-      this.deferred_ = null;
-    }
+    this.do_hide_();
+    this.events_.trigger('hide');
+    return this;
   };
 
   /* Private methods */
@@ -239,6 +224,16 @@ var LabelBrowser_ = function (window, $, std)
   {
     if(!this.initialised_)
       throw "Component not yet initialised or already reset";
+  };
+
+  Browser.prototype.do_hide_ = function ()
+  {
+    this.check_init_();
+    this.nodes_.container
+      .css( {
+        transform: 'scale(.2,.2)',
+        opacity: 0
+      } );
   };
 
   Browser.prototype.render_ = function ()

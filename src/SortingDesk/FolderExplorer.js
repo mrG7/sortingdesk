@@ -173,7 +173,8 @@ var FolderExplorer_ = function (window, $, std)
 
   Explorer.prototype.reset = function ()
   {
-    this.check_init_();
+    /* Force hide the window. */
+    this.do_hide_();
     
     /* Detach events on all nodes. */
     std.$.alloff(this.nodes_);
@@ -247,14 +248,7 @@ var FolderExplorer_ = function (window, $, std)
     
   /* overridable */ Explorer.prototype.hide = function ()
   {
-    this.check_init_();
-    
-    this.nodes_.container
-      .css( {
-        transform: 'scale(.2,.2)',
-        opacity: 0
-      } );
-
+    this.do_hide_();
     this.events_.trigger('hide');
     return this;
   };
@@ -272,6 +266,16 @@ var FolderExplorer_ = function (window, $, std)
   {
     if(!this.initialised_)
       throw "Component not yet initialised or already reset";
+  };
+
+  Explorer.prototype.do_hide_ = function ()
+  {
+    this.check_init_();
+    this.nodes_.container
+      .css( {
+        transform: 'scale(.2,.2)',
+        opacity: 0
+      } );
   };
 
   Explorer.prototype.render_ = function (folder)
