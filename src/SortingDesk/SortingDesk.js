@@ -93,8 +93,8 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     /* TODO: must pass in Dossier API URL. */
     this.api_ = Api.initialize(this, opts.dossierUrl);
     this.options_ = $.extend(true, $.extend(true, {}, defaults_), opts);
-    this.events_ = new std.Events(this, [ 'open', 'close' ]);
     this.callbacks_ = new std.Callbacks(cbs);
+    this.events_ = new std.Events(this, [ 'open', 'close', 'active' ]);
     this.constructor_ = new std.Constructor(
       $.extend($.extend({}, defaults_.constructors), opts.constructors));
 
@@ -634,6 +634,9 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       this.owner_.api.setQueryContentId(null);
       this.owner_.sortingQueue.items.removeAll();
     }
+
+    /* Finally, trigger event. */
+    this.owner_.events.trigger('active', bin);
   };
 
   ControllerFolder.prototype.browse = function (bin)
