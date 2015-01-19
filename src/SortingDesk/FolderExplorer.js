@@ -52,10 +52,10 @@ var FolderExplorer_ = function (window, $, std)
   };
 
   /* Constants */
-  Explorer.VIEW_ICONIC = 0x01;
+  Explorer.VIEW_ICONIC  = 0x01;
   Explorer.VIEW_DEFAULT = Explorer.VIEW_ICONIC;
   Explorer.MODE_FOLDERS = 0x01;
-  Explorer.MODE_BINS = 0x02;
+  Explorer.MODE_BINS    = 0x02;
 
   /* Interface */
   Explorer.prototype.initialise = function ()
@@ -66,7 +66,8 @@ var FolderExplorer_ = function (window, $, std)
     var self = this,
         finder = new std.NodeFinder(
           'folder-explorer',
-          $('[data-sd-scope="folder-explorer-container"]')),
+          this.options_.container
+            || $('[data-sd-scope="folder-explorer-container"]')),
         els;
 
     console.log("Initialising Bin Explorer component");
@@ -80,6 +81,8 @@ var FolderExplorer_ = function (window, $, std)
 
     /* Begin set up nodes. */
     els.container = finder.root();
+    if(els.container.length === 0)
+      throw "Unable to find container element";
 
     els.buttonClose = finder.find('close')
       .click( function () { self.hide(); } );
