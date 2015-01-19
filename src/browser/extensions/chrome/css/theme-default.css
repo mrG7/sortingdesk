@@ -138,6 +138,11 @@
   left: 1px;
 }
 
+#sd-explorer {
+  position: relative;
+  top: -2px;
+}
+
 /* Button: add */
 #sd-button-add {
   display: none;
