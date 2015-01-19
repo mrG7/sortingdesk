@@ -717,6 +717,30 @@ var SortingCommon_ = function (window, $) {
     ent.forEach(function (n) { self.map_[n] = [ ]; } );
   };
 
+  Events.prototype.add = function (ev)
+  {
+    if(!is_str(ev) || ev.length === 0)
+      throw "Invalid or no event name specified";
+    else if(this.map_.hasOwnProperty(ev))
+      throw "Event already exists: " + ev;
+
+    this.map_[ev] = [ ];
+    return true;
+  };
+
+  Events.prototype.remove = function (ev)
+  {
+    if(!is_str(ev) || ev.length === 0)
+      throw "Invalid or no event name specified";
+    else if(this.map_.hasOwnProperty(ev)) {
+      delete this.map_[ev];
+      return true;
+    }
+
+    return false;
+  };
+    
+
   Events.prototype.exists = function (ev)
   {
     ev = this.map_[ev];
