@@ -565,7 +565,7 @@ var SortingCommon_ = function (window, $) {
               e.dataTransfer && e.dataTransfer.getData('DossierId') || null,
               dm.getScope());
           } catch (x) {
-            console.log("Exception occurred:", x);
+            dbg.error("Exception occurred:", x);
           }
         }
 
@@ -578,13 +578,22 @@ var SortingCommon_ = function (window, $) {
     } );
   };
 
-  Droppable.prototype.addScope = function (scope)
+  Droppable.prototype.add = function (scope)
   {
-    if(!this.options_.scopes)
+    if(!is_arr(this.options_.scopes))
       this.options_.scopes = [ ];
 
-    if(!this.options_.scopes.hasOwnProperty(scope))
+    if(this.options_.scopes.indexOf(scope) === -1)
       this.options_.scopes.push(scope);
+  };
+
+  Droppable.prototype.remove = function (scope)
+  {
+    if(is_arr(this.options_.scopes)) {
+      var index = this.options_.scopes.indexOf(scope);
+      if(index !== -1)
+        this.options_.scopes.splice(index, 1);
+    }
   };
 
   Droppable.prototype.reset = function ()
@@ -679,7 +688,10 @@ var SortingCommon_ = function (window, $) {
 
       if(!like_obj(ent))
         throw "Invalid owner instance reference specified";
-      
+
+      /* Decorate owning instance by adding the `on´ and `off´ methods that
+       * clients can conveniently use to attach and deattach events,
+       * respectively. */
       if(!ent.hasOwnProperty('on'))
         ent.on = chainize(ent, this.register.bind(this));
 
@@ -705,10 +717,40 @@ var SortingCommon_ = function (window, $) {
     ent.forEach(function (n) { self.map_[n] = [ ]; } );
   };
 
+  Events.prototype.add = function (ev)
+  {
+    if(!is_str(ev) || ev.length === 0)
+      throw "Invalid or no event name specified";
+    else if(this.map_.hasOwnProperty(ev))
+      throw "Event already exists: " + ev;
+
+    this.map_[ev] = [ ];
+    return true;
+  };
+
+  Events.prototype.remove = function (ev)
+  {
+    if(!is_str(ev) || ev.length === 0)
+      throw "Invalid or no event name specified";
+    else if(this.map_.hasOwnProperty(ev)) {
+      delete this.map_[ev];
+      return true;
+    }
+
+    return false;
+  };
+    
+
   Events.prototype.exists = function (ev)
   {
     ev = this.map_[ev];
     return is_arr(ev) ? ev.length > 0 : false;
+  };
+
+  Events.prototype.count = function (ev)
+  {
+    ev = this.map_[ev];
+    return is_arr(ev) ? ev.length : -1;
   };
 
   Events.prototype.trigger = function ( /* (ev, arg0..n) */ )
@@ -716,7 +758,7 @@ var SortingCommon_ = function (window, $) {
     var ev = arguments[0];
     
     if(!is_str(ev) || ev.length === 0)
-      throw "Invalid event name specified";
+      throw "Invalid or no event name specified";
 
     var d = this.map_[ev];
     if(is_arr(d)) {
@@ -742,19 +784,20 @@ var SortingCommon_ = function (window, $) {
       if(is_obj(ev)) {
         for(var k in ev)
           this.register_single_(k, ev[k]);
-      }
+      } else
+        throw "Invalid event(s) descriptor map";
     } else /* arguments >= 2; only first two are used */
-      this.register_single_(ev, arguments[1]);
+      return this.register_single_(ev, arguments[1]);
   };
 
-  Events.prototype.unregister = function (/* undefined | string | object */ ev)
+  Events.prototype.unregister = function (/* undefined | string | object */
+    ev, fn)
   {
-    if(is_str(ev))
-      this.unregister_single_(ev);        /* Unregister single event. */
-    else if(is_arr(ev)) {
-      ev.forEach(function (e) {           /* Unregister multiple events. */
-        this.unregister_single_(e);
-      } );
+    if(is_str(ev))                        /* Unregister single event. */
+      return this.unregister_single_(ev, fn);
+    else if(is_obj(ev)) {
+      for(var k in ev)                    /* Unregister multiple events. */
+        this.unregister_single_(ev[k]);
     } else if(is_und(ev))
       this.map_ = { };                    /* Unregister all.  */
     else
@@ -778,19 +821,88 @@ var SortingCommon_ = function (window, $) {
     return false;
   };
 
-  Events.prototype.unregister_simple_ = function (ev)
+  Events.prototype.unregister_single_ = function (ev, fn)
   {
     if(!is_str(ev) || ev.length === 0)
       throw "Invalid or no event name";
 
-    if(this.map_.hasOwnProperty(ev)) {
-      delete this.map_[ev];
-      return true;
-    }
+    if(!this.map_.hasOwnProperty(ev))
+      return false;
 
-    return false;
+    if(is_und(fn))
+      this.map_[ev] = [ ];
+    else if(!is_fn(fn))
+      throw "Invalid or no event handler specified";
+    else {
+      var index = this.map_[ev].indexOf(fn);
+      if(index === -1)
+        return false;
+      
+      this.map_splice(index, 1);
+    }
+    
+    return true;
   };
 
+
+  /**
+   * @class
+   * */
+  var View = function (owner)
+  {
+    /* Invoke super constructor. */
+    Drawable.call(this, owner);
+  };
+
+  View.prototype = Object.create(Drawable.prototype);
+
+  View.prototype.reset = absm_noti;
+
+
+  /**
+   * @class
+   * */
+  var dbg = (function () {
+
+    /* Constants */
+    var LEVEL_TRACE = 4,
+        LEVEL_INFO = 3,
+        LEVEL_WARNING = 2,
+        LEVEL_ERROR = 1,
+        LEVEL_NONE = 0,
+        LEVEL_DEFAULT = LEVEL_TRACE;
+
+    /* Attributes */
+    var level = LEVEL_DEFAULT;
+
+    var lvl = function (lvl)
+    {
+      if(is_und(lvl))
+        return level;
+      else if(lvl > LEVEL_TRACE || lvl < LEVEL_NONE)
+        throw "Invalid debug level specified";
+
+      level = lvl;
+    };
+    
+    var trace = function ()
+    { if(level >= LEVEL_TRACE) console.log.apply(console, arguments); };
+    
+    var info = function ()
+    { if(level >= LEVEL_INFO) console.info.apply(console, arguments); };
+    
+    var warn = function ()
+    { if(level >= LEVEL_WARNING) console.warn.apply(console, arguments); };
+    
+    var error = function ()
+    { if(level >= LEVEL_ERROR) console.error.apply(console, arguments); };
+
+
+    /* Public interface */
+    return { trace: trace, info: info, warn: warn, error: error, lvl: lvl };
+    
+  } )();
+  
 
   /* Return public interface. */
   return {
@@ -818,8 +930,10 @@ var SortingCommon_ = function (window, $) {
     Draggable: Draggable,
     Droppable: Droppable,
     Events: Events,
+    View: View,
     NodeFinder: NodeFinder,
-    $: jQueryExtensions
+    $: jQueryExtensions,
+    dbg: dbg
   };
 };
 

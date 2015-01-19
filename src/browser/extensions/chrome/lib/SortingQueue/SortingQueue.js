@@ -40,7 +40,7 @@ var SortingQueue_ = function (window, $, std) {
      * be the `nodes.items' element. */
     if(!std.is_obj(opts))
       throw "Invalid or no options map provided";
-    else if(opts instanceof $)
+    else if(std.$.is(opts))
       opts = { container: opts };
     else if(!std.$.is(opts.container))
       throw "Invalid or no container provided";
@@ -55,13 +55,15 @@ var SortingQueue_ = function (window, $, std) {
     else if(!std.is_fn(cbs.moreTexts))
       throw "Mandatory `moreTexts' callback missing";
 
-    console.log("Initialising Sorting Queue UI");
+    std.dbg.trace("Initialising Sorting Queue UI");
 
     this.options_ = $.extend(true, $.extend(true, {}, defaults_), opts);
 
     /* Begin instantiating and initialising classes needed. */
     (this.requests_ = new ControllerRequests(this))
       .initialise();
+    
+    this.constructor_ = new std.Constructor(this.options_.constructors);
     
     this.callbacks_ = new Callbacks(
       $.extend(true, {
@@ -73,7 +75,10 @@ var SortingQueue_ = function (window, $, std) {
       }, cbs),
       this.requests_);
 
-    this.events_ = new std.Events(this, [ 'request-start', 'request-stop' ]);
+    this.events_ = new std.Events(
+      this,
+      [ 'request-start', 'request-stop', 'items-updated', 'item-dismissed',
+        'item-deselected', 'item-selected' ]);
   };
 
   Sorter.prototype = {
@@ -82,6 +87,7 @@ var SortingQueue_ = function (window, $, std) {
     options_: null,
     nodes_: null,
     /* Controllers */
+    constructor_: null,
     callbacks_: null,
     events_: null,
     requests_: null,
@@ -94,6 +100,7 @@ var SortingQueue_ = function (window, $, std) {
     get resetting ()    { return !!this.resetter_; },
     get options ()      { return this.options_; },
     get nodes ()        { return this.nodes_; },
+    get constructor ()  { return this.constructor_; },
     get callbacks ()    { return this.callbacks_; },
     get events ()       { return this.events_; },
     get requests ()     { return this.requests_; },
@@ -139,7 +146,7 @@ var SortingQueue_ = function (window, $, std) {
         .initialise();
 
       this.initialised_ = true;
-      console.log("Sorting Queue UI initialised");
+      std.dbg.info("Sorting Queue UI initialised");
     },
 
     /**
@@ -169,48 +176,13 @@ var SortingQueue_ = function (window, $, std) {
 
           self.initialised_ = false;
 
-          console.log("Sorting Queue UI reset");
+          std.dbg.info("Sorting Queue UI reset");
         } )
         .always(function () {
           self.resetter_ = false;
         } );
 
       return this.resetter_;
-    },
-
-    instantiate: function ( /* class, ... */ )
-    {
-      if(arguments.length < 1)
-        throw "Class name required";
-
-      /* Invoke factory method to instantiate class, if it exists. */
-      var descriptor = this.options_.constructors['create' + arguments[0]];
-
-      if(descriptor)
-        return descriptor.apply(null, [].slice.call(arguments, 1));
-
-      /* Factory method doesn't exist. Ensure class constructor has been passed
-       * and instantiate it. */
-      descriptor = this.options_.constructors[arguments[0]];
-      
-      if(!descriptor)
-        throw "Class or factory non existent: " + arguments[0];
-
-      /* We don't want to use `eval' so we employ a bit of trickery to
-       * instantiate a class using variable arguments. */
-      var FakeClass = function () { },
-          object;
-
-      /* Instantiate class prototype. */
-      FakeClass.prototype = descriptor.prototype;
-      object = new FakeClass();
-
-      /* Now simply call class constructor directly and keep reference to
-       * correct constructor. */
-      descriptor.apply(object, [].slice.call(arguments, 1));
-      object.constructor = descriptor.constructor;
-
-      return object;
     }
   };
 
@@ -279,7 +251,7 @@ var SortingQueue_ = function (window, $, std) {
 
     resetEntities_: function (entities)
     {
-      var self = this,
+      var self = this, 
           waiting = 0;
 
       entities.forEach(function (e) {
@@ -298,7 +270,7 @@ var SortingQueue_ = function (window, $, std) {
           try {
             result = e.reset();
           } catch(x) {
-            console.log('Exception thrown whilst resetting:', x);
+            std.dbg.error('Exception thrown whilst resetting:', x);
           }
 
           /* Special measure for instances that return a promise. */
@@ -413,7 +385,7 @@ var SortingQueue_ = function (window, $, std) {
 
       --this.count_;
     } else
-      console.log("WARNING: unknown request ended:", id);
+      std.dbg.warn("Unknown request ended:", id);
 
     /* Trigger request end. */
     this.owner_.events.trigger("request-stop", id);
@@ -449,10 +421,12 @@ var SortingQueue_ = function (window, $, std) {
         self.owner_.dismiss.deactivate();
       } );
 
-      this.owner_.events.trigger("item-dismissed",
-                                 this.owner_.items.selected().content);
-      this.owner_.items.remove();
-
+      var sel = this.owner_.items.selected();
+      if(sel) {
+        this.owner_.events.trigger("item-dismissed", sel.content);
+        this.owner_.items.remove();
+      }
+      
       break;
 
     default:
@@ -470,6 +444,9 @@ var SortingQueue_ = function (window, $, std) {
   {
     /* Invoke super constructor. */
     std.Controller.call(this, owner);
+
+    /* Attributes */
+    this.handlers_ = null;
   };
 
   ControllerButtonDismiss.prototype = Object.create(std.Controller.prototype);
@@ -481,16 +458,16 @@ var SortingQueue_ = function (window, $, std) {
   {
     var self = this;
 
-    this.handlers_ = { };
+    this.handlers_ = new std.Events([ ]);
     this.droppable_ = new std.Droppable(this.owner_.nodes.buttons.dismiss, {
       classHover: this.owner_.options.css.droppableHover,
       scopes: [ ],
 
       drop: function (e, id, scope) {
-        if(self.handlers_.hasOwnProperty(scope)) {
-          self.handlers_[scope](e, id, scope);
+        if(self.handlers_.exists(scope)) {
+          self.handlers_.trigger(scope, e, id, scope);
         } else {
-          console.log("Warning: unknown scope: " + scope);
+          std.dbg.warn("Unknown scope: " + scope);
           return;
         }
 
@@ -509,20 +486,32 @@ var SortingQueue_ = function (window, $, std) {
 
   ControllerButtonDismiss.prototype.register = function (scope, handler)
   {
-    if(!std.is_fn(handler))
-      throw "Handler callback not a valid function";
-    if(!this.droppable_)
+    if(this.droppable_ === null)
       return;
-    else if(!this.handlers_.hasOwnProperty(scope))
-      this.droppable_.addScope(scope);
 
-    this.handlers_[scope] = handler;
+    if(!this.handlers_.exists(scope)) {
+      this.handlers_.add(scope);
+      this.droppable_.add(scope);
+    }
+
+    this.handlers_.register(scope, handler);
   };
 
-  ControllerButtonDismiss.prototype.unregister = function (scope)
+  ControllerButtonDismiss.prototype.unregister = function (scope, handler)
   {
-    if(this.handlers_.hasOwnProperty(scope))
-      delete this.handlers_[scope];
+    if(this.droppable_ === null)
+      return;
+    
+    var count = this.handlers_.count(scope);
+
+    if(count > 0) {
+      if(this.handlers_.unregister(scope, handler)) {
+        if(count === 1) {
+          this.handlers_.remove(scope);
+          this.droppable_.remove(scope);
+        }
+      }
+    }
   };
 
   ControllerButtonDismiss.prototype.activate = function (callback)
@@ -566,6 +555,8 @@ var SortingQueue_ = function (window, $, std) {
 
     if(this.owner_.options.loadItemsAtStartup)
       this.check();
+    else
+      this.updateEmptyNotification_();
   };
 
   ControllerItems.prototype.reset = function ()
@@ -575,13 +566,15 @@ var SortingQueue_ = function (window, $, std) {
       dragover: this.fnDisableEvent_
     } );
 
-    this.node_.children().remove();
+    this.owner_.nodes.empty.items.hide();
+
+    this.removeNodes_();
     this.node_ = this.items_ = this.fnDisableEvent_ = null;
   };
 
   ControllerItems.prototype.redraw = function ()
   {
-    this.node_.children().remove();
+    this.removeNodes_();
     this.items_ = [ ];
     this.check();
   };
@@ -611,30 +604,38 @@ var SortingQueue_ = function (window, $, std) {
 
     var self = this;
 
+    this.updateEmptyNotification_(true);
     this.owner_.callbacks.invoke("moreTexts",
                                  this.owner_.options.visibleItems)
       .done(function (items) {
         self.owner_.requests.begin('check-items');
 
         /* Ensure we've received a valid items array. */
-        if(std.is_arr(items) && items.length > 0) {
-          items = self.dedupItems(items);
-          items.forEach(function (item, index) {
-            window.setTimeout( function () {
-              self.items_.push(self.owner_.instantiate('Item', self, item));
-            }, Math.pow(index, 2) * 1.1);
-          } );
+        if(!std.is_arr(items))
+          throw "Invalid or no items array";
 
-          window.setTimeout( function () {
-            self.select();
-          }, 10);
+        items = self.dedupItems(items);
 
-          /* Ensure event is fired after the last item is added. */
+        items.forEach(function (item, index) {
           window.setTimeout( function () {
-            self.owner_.requests.end('check-items');
-          }, Math.pow(items.length - 1, 2) * 1.1 + 10);
-        } else
+            self.items_.push(
+              self.owner_.constructor.instantiate('Item', self, item));
+          }, Math.pow(index, 2) * 1.1);
+        } );
+
+        window.setTimeout( function () {
+          self.select();
+        }, 10);
+        
+        /* Ensure event is fired after the last item is added. */
+        window.setTimeout( function () {
           self.owner_.requests.end('check-items');
+          self.owner_.events.trigger('items-updated', self.items_.length);
+          self.updateEmptyNotification_();
+        }, Math.pow(items.length - 1, 2) * 1.1 + 10);
+      } )
+      .fail(function () {
+        self.updateEmptyNotification_();
       } );
   };
 
@@ -673,12 +674,16 @@ var SortingQueue_ = function (window, $, std) {
     return this.getById(std.Url.decode(node.attr('id')));
   };
 
-  ControllerItems.prototype.removeAll = function() {
-    for (var i = 0; i < this.items_.length; i++) {
-        this.items_[i].node.remove();
-    }
+  ControllerItems.prototype.removeAll = function(check /* = true */) {
+    this.removeNodes_();
     this.items_ = [];
-    this.check();
+
+    if(std.is_und(check) || check === true)
+      this.check();
+    else
+      this.updateEmptyNotification_();
+
+    this.owner_.events.trigger('items-updated', 0);
   };
 
   ControllerItems.prototype.remove = function (item)
@@ -710,7 +715,7 @@ var SortingQueue_ = function (window, $, std) {
       else if(this.items_.length)
         this.select(this.items_[index - 1]);
       else
-        console.log("No more items available");
+        std.dbg.trace("No more items available");
     }
 
     item.node
@@ -728,6 +733,7 @@ var SortingQueue_ = function (window, $, std) {
 
     this.items_.splice(index, 1);
     this.check();
+    this.owner_.events.trigger('items-updated', 0);
 
     return true;
   };
@@ -779,7 +785,7 @@ var SortingQueue_ = function (window, $, std) {
         variant = this.node_.children().eq(0);
       else if(variant.length > 1) {
         /* We should never reach here. */
-        console.log("WARNING! Multiple text items selected:", variant.length);
+        std.dbg.warn("Multiple text items selected:", variant.length);
 
         variant = variant.eq(0);
       }
@@ -829,6 +835,23 @@ var SortingQueue_ = function (window, $, std) {
                            + parseInt(variant.css('paddingBottom')));
     }
   };
+
+  ControllerItems.prototype.updateEmptyNotification_ = function (loading)
+  {
+    this.owner_.nodes.empty.items.stop();
+    if(loading !== true && this.items.length === 0) {
+      this.owner_.nodes.empty.items.fadeIn(
+        this.owner_.options.delays.queueEmptyFadeIn);
+    } else {
+      this.owner_.nodes.empty.items.fadeOut(
+        this.owner_.options.delays.queueEmptyFadeOut);
+    }      
+  };
+
+  ControllerItems.prototype.removeNodes_ = function ()
+  {
+    this.items_.forEach(function (item) { item.node.remove(); } );
+  };    
 
 
   /**
@@ -980,8 +1003,10 @@ var SortingQueue_ = function (window, $, std) {
       animateAssign: 75,        /* Duration of assignment of text item via
                                  * shortcut. */
       slideItemUp: 150,         /* Slide up length of deleted text item. */
-      textItemFade: 100         /* Fade out duration of text item after
+      textItemFade: 100,        /* Fade out duration of text item after
                                  * assignment. */
+      queueEmptyFadeIn: 250,
+      queueEmptyFadeOut: 100
     },
     constructors: {
       Item: Item

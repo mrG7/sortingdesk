@@ -88,14 +88,14 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
         + " object map";
     }
 
-    console.log("Initialising Sorting Desk UI");
+    std.dbg.trace("Initialising Sorting Desk UI");
 
     /* TODO: must pass in Dossier API URL. */
     this.api_ = Api.initialize(this, opts.dossierUrl);
     this.options_ = $.extend(true, $.extend(true, {}, defaults_), opts);
-    this.events_ = new std.Events(this, [ 'open', 'close' ]);
-    this.constructor_ = new std.Constructor(
-      $.extend($.extend({}, defaults_.constructors), opts.constructors));
+    this.callbacks_ = new std.Callbacks(cbs);
+    this.events_ = new std.Events(this, [ 'open', 'close', 'active' ]);
+    this.constructor_ = new std.Constructor(this.options_.constructors);
 
     /* We need to instantiate `SortingQueue´ *now* because it is a dependency;
      * after all, `SortingDesk´ is built on top of `SortingQueue´, and as such
@@ -105,23 +105,36 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
      * or need to carry out some sort of processing before invoking the instance
      * initialisor method, such as set up events.
      *
-     * Sorting Desk requires Sorting Queue's options to be contained in the
-     * attribute `sortingQueue´ of the options map (opts). */
+     * Sorting Desk requires Sorting Queue's options and callbacks to be
+     * specified inside a map assigned to key `sortingQueue´, as given by:
+     * opts = {
+     *   // Sorting Desk's options
+     *   sortingQueue: {
+     *     options: {
+     *       // Sorting Queue's options
+     *     },
+     *     callbacks: {
+     *       // Sorting Queue's callbacks
+     *     }
+     *   }
+     * } */
     this.sortingQueue_ = new sq.Sorter(
-      $.extend(true, this.options_.sortingQueue, {
+      $.extend(true, this.options_.sortingQueue.options, {
         constructors: {
           Item: TextItem
         },
-        loadItemsAtStartup: false /* IMPORTANT: Explicit deny loading of items
+        loadItemsAtStartup: false /* IMPORTANT: Explicitly deny loading of items
                                    * at startup as this would potentially break
                                    * request-(start|stop) event handlers set up
                                    * only *AFTER* this constructor exits. */
       }),
-      $.extend(this.api_.getCallbacks(), cbs));
+      $.extend(this.api_.getCallbacks(),
+               this.options_.sortingQueue.callbacks || { } ));
   };
 
   Sorter.prototype = {
     initialised_: false,
+    callbacks_: null,
     events_: null,
     constructor_: null,
     options_: null,
@@ -137,6 +150,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     get sortingQueue () { return this.sortingQueue_; },
     get initialised ()  { return this.initialised_; },
     get constructor ()  { return this.constructor_; },
+    get callbacks ()    { return this.callbacks_; },
     get events ()       { return this.events_; },
     get api ()          { return this.api_; },
     get resetting ()    { return this.sortingQueue_.resetting(); },
@@ -161,6 +175,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
           add: finder.find('button-add')
         },
         empty: {
+          closed: finder.find('closed'),
           bins: finder.find('bins-empty')
         }
       };
@@ -175,10 +190,12 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
         .initialise();
 
       this.initialised_ = true;
-      console.log("Sorting Desk UI initialised");
+      std.dbg.info("Sorting Desk UI initialised");
 
       if(this.options.active)
         this.open(this.options.active);
+      else
+        this.nodes_.empty.closed.fadeIn();
     },
 
     /**
@@ -202,7 +219,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
           self.folder_ = self.options_ = self.sortingQueue_ = null;
           self.initialised_ = false;
 
-          console.log("Sorting Desk UI reset");
+          std.dbg.info("Sorting Desk UI reset");
         } );
     },
 
@@ -217,39 +234,43 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
         this.initialiseFolder_(folder);
         this.events_.trigger('open', this.folder_);
       } else if(folder) {         /* assume id */
-        this.sortingQueue_.callbacks.invoke('load', folder)
+        this.callbacks_.invoke('load', folder)
           .done(function (f) {
             self.initialiseFolder_(f);
             self.events_.trigger('open', self.folder_);
           } );
-      }
+      } else
+        std.dbg.error('Invalid folder specified', folder);
     },
 
     close: function ()
     {
       /* Force reset of the bins controller, if an instance currently exists. */
-      if(this.folder_) {
-        this.folder_.reset();
-        this.folder_ = null;
+      if(this.folder_ === null) {
+        std.dbg.trace("No folder currently active");
+        return;
       }
-
+      
+      this.folder_.reset();
+      this.folder_ = null;
+      
       /* Clear the items queue list. */
-      this.sortingQueue_.items.removeAll();
+      this.sortingQueue_.items.removeAll(false);
       this.events_.trigger('close');
+      this.nodes_.empty.closed.fadeIn();
     },
     
     save: function ()
     {
-      if(this.folder_) {
-        return this.sortingQueue_.callbacks.invoke(
-          'save', this.folder_.serialise() );
-      }
+      if(this.folder_)
+        this.callbacks_.invoke('save', this.folder_.serialise() );
     },
 
     /* Private methods */
     initialiseFolder_: function (folder)
     {
       this.close();
+      this.nodes_.empty.closed.hide();
       
       /* (Re-)instantiate the bins controller. */
       (this.folder_ = this.constructor_.instantiate('ControllerFolder', this))
@@ -393,28 +414,28 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.id_ = folder.id;
     this.name_ = folder.name;
 
-    console.log("Folder opened: id=%s | name=%s", this.id_, this.name_);
+    std.dbg.trace("Folder opened: id=%s | name=%s", this.id_, this.name_);
     
-    if(folder.bins.length === 0)
-      return;
-
     folder.bins.forEach(function (descriptor) {
       self.add(self.construct(descriptor), false, true);
     } );
 
     /* Now manually set the active bin. */
-    if(folder.active)
-      bin = this.getById(folder.active);
+    if(this.bins_.length > 0) {
+      if(folder.active)
+        bin = this.getById(folder.active);
 
-    /* Attempt to recover if we've been given an invalid id to activate. */
-    if(!bin) {
-      console.log("Failed to set the active bin: setting first (id=%s)",
-                  folder.active || null);
+      /* Attempt to recover if we've been given an invalid id to activate. */
+      if(!bin) {
+        std.dbg.info("Failed to set the active bin: setting first (id=%s)",
+                     folder.active || null);
 
-      bin = this.bins_.getAt(0);
-    }
+        bin = this.getAt(0);
+      }
 
-    this.setActive(bin);
+      this.setActive(bin);
+    } else
+      this.updateEmptyNotification_();
   };
 
   ControllerFolder.prototype.construct = function (descriptor)
@@ -444,13 +465,14 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     /* Reset bin spawner controller and remove all children nodes inside the
      * bins HTML container. */
     this.spawner_.reset();
-    this.owner_.nodes.bins.children().remove();
     this.owner_.api.setQueryContentId(null);
+    this.owner_.nodes.empty.bins.hide();
+    this.bins_.forEach(function (bin) { bin.node.remove(); } );
 
     /* De-register for events of 'bin' scope. */
     this.owner_.sortingQueue.dismiss.unregister('bin');
 
-    console.log("Folder closed: id=%s, name=%s", this.id_, this.name_);
+    std.dbg.trace("Folder closed: id=%s, name=%s", this.id_, this.name_);
 
     this.id_ = this.name_ = null;
     this.bins_ = this.hover_ = this.active_ = this.spawner_ = null;
@@ -463,7 +485,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     /* Ensure a bin with the same id isn't already contained. */
     if(this.getById(bin.id))
       throw "Bin is already contained: " + bin.id;
-
+    
     /* Initialise bin. */
     bin.initialise();
 
@@ -484,6 +506,8 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       .fail(function () {
         bin.setUnknown();
       } );
+
+    this.updateEmptyNotification_();
 
     return bin;
   };
@@ -527,10 +551,10 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
         return self.doAddLabel_(label);
       },
       function () {
-        console.log("Unable to add label between '%s' and '%s': "
-                    + "feature collection not found",
-                    bin.id,
-                    descriptor.content_id);
+        std.dbg.error("Unable to add label between '%s' and '%s': "
+                      + "feature collection not found",
+                      bin.id,
+                      descriptor.content_id);
       } );
   };
 
@@ -582,6 +606,8 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
     if(bin === this.active_)
       this.setActive(this.bins_.length > 0 && this.bins_[0] || null);
+
+    this.updateEmptyNotification_();
   };
 
   ControllerFolder.prototype.getAt = function (index)
@@ -625,14 +651,17 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
         { scrollLeft: bin.node.offset().left },
         250);
 
-      this.owner_.sortingQueue.callbacks.invoke('setActive', this.id);
+      this.owner_.callbacks.invoke('setActive', this.id);
     } else {
       /* There is no active bin, which means we need to clear the list of items,
        * but we only do so *after* the query content id has been set since
        * Sorting Queue will attempt to refresh the items list. */
       this.owner_.api.setQueryContentId(null);
-      this.owner_.sortingQueue.items.removeAll();
+      this.owner_.sortingQueue.items.removeAll(false);
     }
+
+    /* Finally, trigger event. */
+    this.owner_.events.trigger('active', bin);
   };
 
   ControllerFolder.prototype.browse = function (bin)
@@ -650,14 +679,16 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
     (this.browser_ = this.owner_.constructor.instantiate(
       'LabelBrowser', { api: this.owner_.api, ref_bin: bin } ) )
-      .initialise()
-      .done(function () {
-        self.browser_.reset();
-        self.browser_ = null;
+      .on( {
+        hide: function () {
+          self.browser_.reset();
+          self.browser_ = null;
 
-        /* Re-enable browser icons. */
-        self.enableBrowser();
-      } );
+          /* Re-enable browser icons. */
+          self.enableBrowser();
+        }
+      } )
+      .initialise();
   };
 
   /* overridable */ ControllerFolder.prototype.serialise = function ()
@@ -685,7 +716,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
         content;
 
     if(scope) {
-      console.log("Drop event not special case: ignored");
+      std.dbg.trace("Drop event not special case: ignored");
       return null;
     }
 
@@ -704,7 +735,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
           api.generateSubtopicId(content));
         result.content = content;
       } else
-        console.log("Unable to retrieve valid `src´ attribute");
+        std.dbg.error("Unable to retrieve valid `src´ attribute");
     } else if(std.is_fn(window.getSelection)) {
       content = window.getSelection();
 
@@ -777,8 +808,8 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     /* Attempt to retrieve the feature collection for the bin's content id. */
     return api.getFeatureCollection(descriptor.content_id)
       .then(function (fc) {
-        console.log("Feature collection GET successful (id=%s)",
-                    descriptor.content_id, fc);
+        std.dbg.trace("Feature collection GET successful (id=%s)",
+                      descriptor.content_id, fc);
 
         /* A feature collection was received. No further operations are carried
          * out if `exists´ is true since it means `descriptor´ is actually a bin
@@ -800,17 +831,17 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
          * loaded from local storage and therefore its feature collection
          * shouldn't be created. */
         if(exists) {
-          console.log("Feature collection GET failed: NOT creating new"
-                      + "(id=%s)", descriptor.content_id);
+          std.dbg.error("Feature collection GET failed: NOT creating new"
+                        + "(id=%s)", descriptor.content_id);
           return null;
         }
 
-        console.log("Feature collection GET failed: creating new (id=%s)",
-                    descriptor.content_id);
+        std.dbg.info("Feature collection GET failed: creating new (id=%s)",
+                     descriptor.content_id);
         return api.createFeatureCollection(descriptor.content_id,
                                            document.documentElement.outerHTML)
           .done(function(fc) {
-            console.log('Feature collection created:', fc);
+            std.dbg.trace('Feature collection created:', fc);
             api.setFeatureCollectionContent(
               fc, descriptor.subtopic_id, descriptor.content);
             api.setFeatureCollectionContent(
@@ -824,12 +855,12 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   {
     return this.owner_.api.putFeatureCollection(content_id, fc)
       .done(function () {
-        console.log("Feature collection PUT successful (id=%s)",
-                    content_id, fc);
+        std.dbg.trace("Feature collection PUT successful (id=%s)",
+                      content_id, fc);
       } )
       .fail(function () {
-        console.log("Feature collection PUT failed (id=%s)",
-                    content_id, fc);
+        std.dbg.error("Feature collection PUT failed (id=%s)",
+                      content_id, fc);
       } );
   };
 
@@ -837,13 +868,25 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   {
     return this.owner_.api.addLabel(label)
       .done(function () {
-        console.log("Label ADD successful: '%s' == '%s'",
-                    label.cid1, label.cid2);
+        std.dbg.trace("Label ADD successful: '%s' == '%s'",
+                      label.cid1, label.cid2);
       } )
       .fail(function () {
-        console.log("Label ADD failed: '%s' ∧ '%s'",
-                    label.cid1, label.cid2);
+        std.dbg.error("Label ADD failed: '%s' ∧ '%s'",
+                      label.cid1, label.cid2);
       } );
+  };
+
+  ControllerFolder.prototype.updateEmptyNotification_ = function ()
+  {
+    this.owner_.nodes.empty.bins.stop();
+    if(this.bins_.length === 0) {
+      this.owner_.nodes.empty.bins.fadeIn(
+        this.owner_.options.delays.binsEmptyFadeIn);
+    } else {
+      this.owner_.nodes.empty.bins.fadeOut(
+        this.owner_.options.delays.binsEmptyFadeOut);
+    }      
   };
 
 
@@ -934,7 +977,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
           if(result)
             self.owner_.addLabel(self, result);
           else
-            console.log("Invalid drop: not text or image");
+            std.dbg.info("Invalid drop: not text or image");
 
           break;
 
@@ -1173,7 +1216,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     {
       var result = [ ];
 
-      if(node instanceof $)
+      if(std.$.is(node))
         node = node.get(0);
 
       if(node) {
@@ -1205,7 +1248,9 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     },
     delays: {                   /* In milliseconds.     */
       binRemoval: 200,          /* Bin is removed from container. */
-      addBinShow: 200           /* Fade in of temporary bin when adding. */
+      addBinShow: 200,          /* Fade in of temporary bin when adding. */
+      binsEmptyFadeIn: 250,
+      binsEmptyFadeOut: 100
     },
     constructors: {
       ControllerFolder: ControllerFolder,

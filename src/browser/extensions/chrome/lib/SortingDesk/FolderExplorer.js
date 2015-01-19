@@ -52,10 +52,10 @@ var FolderExplorer_ = function (window, $, std)
   };
 
   /* Constants */
-  Explorer.VIEW_ICONIC = 0x01;
+  Explorer.VIEW_ICONIC  = 0x01;
   Explorer.VIEW_DEFAULT = Explorer.VIEW_ICONIC;
   Explorer.MODE_FOLDERS = 0x01;
-  Explorer.MODE_BINS = 0x02;
+  Explorer.MODE_BINS    = 0x02;
 
   /* Interface */
   Explorer.prototype.initialise = function ()
@@ -66,13 +66,14 @@ var FolderExplorer_ = function (window, $, std)
     var self = this,
         finder = new std.NodeFinder(
           'folder-explorer',
-          $('[data-sd-scope="folder-explorer-container"]')),
+          this.options_.container
+            || $('[data-sd-scope="folder-explorer-container"]')),
         els;
 
-    console.log("Initialising Bin Explorer component");
+    std.dbg.trace("Initialising Bin Explorer component");
 
     /* Set initial state. */
-    this.viewType_ = Explorer.VIEW_ICONIC;
+    this.viewType_ = Explorer.VIEW_DEFAULT;
     els = this.nodes_ = { };
     
     this.view_ = this.mode_ = this.folders_ = null;
@@ -80,6 +81,8 @@ var FolderExplorer_ = function (window, $, std)
 
     /* Begin set up nodes. */
     els.container = finder.root();
+    if(els.container.length === 0)
+      throw "Unable to find container element";
 
     els.buttonClose = finder.find('close')
       .click( function () { self.hide(); } );
@@ -141,7 +144,7 @@ var FolderExplorer_ = function (window, $, std)
           self.callbacks_.invoke('remove', id);
           self.refresh();
         } else
-          console.log("Failed to remove selected item: ", self.selected_);
+          std.dbg.error("Failed to remove selected item: ", self.selected_);
       }
 
       return false;
@@ -155,13 +158,13 @@ var FolderExplorer_ = function (window, $, std)
           throw "Folders state array invalid";
 
         self.folders_ = folders;
-        console.log("Got folders state successfully", self.folders_);
+        std.dbg.trace("Got folders state successfully", self.folders_);
         
         self.render_();
       } );
     
     this.initialised_ = true;
-    console.log("Bin Explorer component initialised");
+    std.dbg.info("Bin Explorer component initialised");
     
     this.events_.trigger("initialised", els.container);
     
@@ -170,7 +173,8 @@ var FolderExplorer_ = function (window, $, std)
 
   Explorer.prototype.reset = function ()
   {
-    this.check_init_();
+    /* Force hide the window. */
+    this.do_hide_();
     
     /* Detach events on all nodes. */
     std.$.alloff(this.nodes_);
@@ -183,7 +187,7 @@ var FolderExplorer_ = function (window, $, std)
     this.api_ = this.options_ = this.nodes_ = null;
     this.initialised_ = false;
 
-    console.log("Bin Explorer component reset");
+    std.dbg.info("Bin Explorer component reset");
   };
 
   Explorer.prototype.select = function (item)
@@ -217,7 +221,7 @@ var FolderExplorer_ = function (window, $, std)
   {
     /* Currently resetting to 'folder' mode. */
     this.render_();
-    console.log("Refreshed view");
+    std.dbg.trace("Refreshed view");
     
   };
 
@@ -244,14 +248,7 @@ var FolderExplorer_ = function (window, $, std)
     
   /* overridable */ Explorer.prototype.hide = function ()
   {
-    this.check_init_();
-    
-    this.nodes_.container
-      .css( {
-        transform: 'scale(.2,.2)',
-        opacity: 0
-      } );
-
+    this.do_hide_();
     this.events_.trigger('hide');
     return this;
   };
@@ -269,6 +266,16 @@ var FolderExplorer_ = function (window, $, std)
   {
     if(!this.initialised_)
       throw "Component not yet initialised or already reset";
+  };
+
+  Explorer.prototype.do_hide_ = function ()
+  {
+    this.check_init_();
+    this.nodes_.container
+      .css( {
+        transform: 'scale(.2,.2)',
+        opacity: 0
+      } );
   };
 
   Explorer.prototype.render_ = function (folder)
@@ -319,7 +326,7 @@ var FolderExplorer_ = function (window, $, std)
   var View = function (owner, collection)
   {
     /* Invoke super constructor. */
-    std.Drawable.call(this, owner);
+    std.View.call(this, owner);
 
     /* Check `folders' argument IS an array. */
     if(!std.is_arr(collection))
@@ -336,7 +343,7 @@ var FolderExplorer_ = function (window, $, std)
                           function () { return this.collection_; } );
   };
 
-  View.prototype = Object.create(std.Drawable.prototype);
+  View.prototype = Object.create(std.View.prototype);
 
   /* overridable */ View.prototype.render = function ()
   {
@@ -607,7 +614,7 @@ var FolderExplorer_ = function (window, $, std)
     this.node_ = null;
     this.item_ = item;
 
-    console.log("Created iconic item", this.item_);
+    std.dbg.trace("Created iconic item", this.item_);
 
     /* Getters */
     this.__defineGetter__('node', function () { return this.node_; } );

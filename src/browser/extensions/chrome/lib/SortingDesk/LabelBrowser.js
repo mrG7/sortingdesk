@@ -36,9 +36,9 @@ var LabelBrowser_ = function (window, $, std)
     this.initialised_ = false;
     this.options_ = options;
     this.callbacks_ = new std.Callbacks(callbacks);
-    this.events_ = new std.Events(this, [ 'initialised', 'ready' ] );
+    this.events_ = new std.Events(
+      this, [ 'initialised', 'ready', 'show', 'hide' ] );
     this.api_ = options.api;
-    this.deferred_ = null;
     this.ref_bin_ = options.ref_bin;
 
     /* Check for mandatory options. */
@@ -61,20 +61,24 @@ var LabelBrowser_ = function (window, $, std)
   /* Constants
    * --
    * View types */
-  Browser.VIEW_LIST = 0x01;
-  Browser.VIEW_GROUPED = 0x02;
-  Browser.VIEW_DEFAULT = Browser.VIEW_LIST;
+  Browser.VIEW_LIST     = 0x01;
+  Browser.VIEW_GROUPED  = 0x02;
+  Browser.VIEW_DEFAULT  = Browser.VIEW_LIST;
 
   /* Interface */
   Browser.prototype.initialise = function ()
   {
     var self = this,
+        finder = new std.NodeFinder(
+          'label-browser',
+          this.options_.container
+            || $('[data-sd-scope="label-browser-container"]')),
         els;
 
     if(this.initialised_)
       throw "Label Browser component already initialised";
 
-    console.log("Initializing Label Browser component");
+    std.dbg.trace("Initializing Label Browser component");
 
     /* Set initial state. */
     els = this.nodes_ = { };
@@ -87,30 +91,33 @@ var LabelBrowser_ = function (window, $, std)
     /* Lambda called when initialisation is over, successfully or not. */
     var onEndInitialise = function () {
       if(self.ref_bin_ !== null) {
-        console.log("Label Browser component initialized");
+        std.dbg.info("Label Browser component initialized");
         self.events_.trigger('ready', self.eqv_fcs_.length);
       }
     };
 
     /* Begin set up nodes. */
-    els.container = $('[data-sd-scope="label-browser-container"]');
+    els.container = finder.root();
+    if(els.container.length === 0)
+      throw "Unable to find container element";
 
-    els.buttonClose = this.find_node_('close')
-      .click( function () { self.close(); } );
+    els.buttonClose = finder.find('close')
+      .click( function () { self.hide(); } );
 
     els.toolbar = {
       view: {
-        list: this.find_node_('toolbar-list'),
-        group: this.find_node_('toolbar-group')
+        list: finder.find('toolbar-list'),
+        group: finder.find('toolbar-group')
       }
     };
 
     els.header = {
-      title: this.find_node_('header-title'),
-      content: this.find_node_('header-content')
+      container: finder.find('header'),
+      title: finder.find('header-title'),
+      content: finder.find('header-content')
     };
 
-    els.items = this.find_node_('items');
+    els.items = finder.find('items');
     els.table = els.items.find('TABLE');
     /* End set up up nodes. */
 
@@ -123,7 +130,7 @@ var LabelBrowser_ = function (window, $, std)
     this.api_.getLabelsUniqueById(this.ref_bin_.data.content_id,
                                   this.ref_bin_.data.subtopic_id)
       .then(function (subtopics) {
-        console.log("Got labels' subtopic unique ids:", subtopics);
+        std.dbg.trace("Got labels' subtopic unique ids:", subtopics);
 
         var cids = [ ];
         self.subtopics_ = { };
@@ -141,8 +148,8 @@ var LabelBrowser_ = function (window, $, std)
 
         self.api_.getAllFeatureCollections(cids)
           .done(function (fcs) {
-            console.log("Unique labels' content id collection GET successful:",
-                        fcs);
+            std.dbg.trace(
+              "Unique labels' content id collection GET successful:", fcs);
 
             /* Ensure that the instance hasn't been reset during the time spent
              * loading data. This can be done by inspecting the contents of
@@ -156,12 +163,12 @@ var LabelBrowser_ = function (window, $, std)
             }
           } )
           .fail(function () {
-            console.log('Failed to retrieve all feature collections');
+            std.dbg.error('Failed to retrieve all feature collections');
             onEndInitialise();
           } );
       } )
       .fail(function () {
-        console.log('Failed to load state');
+        std.dbg.error('Failed to load state');
         onEndInitialise();
       } );
 
@@ -173,27 +180,24 @@ var LabelBrowser_ = function (window, $, std)
 
   Browser.prototype.reset = function ()
   {
-    this.check_init_();
-
-    /* Resolve promise if one still exists. */
-    if(this.deferred_) {
-      this.close();
-      if(!this.initialised_) return;
-    }
+    /* Force hide the window. */
+    this.do_hide_();
 
     /* Remove all children nodes. */
     this.nodes_.header.title.children().remove();
     this.nodes_.header.content.children().remove();
-    this.nodes_.table.find('TR:not(:first-child)').remove();
+
+    if(this.view_)
+      this.view_.reset();
 
     /* Detach all events. */
-    this.nodes_.buttonClose.off();
-
+    std.$.alloff(this.nodes_);
+    
     this.ref_bin_ = this.view_ = this.nodes_ = null;
     this.ref_fc_ = this.eqv_fcs_ = this.viewType_ = this.api_ = null;
     this.initialised_ = false;
 
-    console.log("Label Browser component reset");
+    std.dbg.info("Label Browser component reset");
   };
 
   /* overridable */ Browser.prototype.show = function ()
@@ -210,28 +214,18 @@ var LabelBrowser_ = function (window, $, std)
     /* Set the items list's height so a scrollbar is shown when it overflows
      * vertically. */
     els.items.css('height', els.container.innerHeight()
-                  - this.find_node_('header').outerHeight()
+                  - els.header.container.outerHeight()
                   - (els.items.outerHeight(true) - els.items.innerHeight()));
 
-    this.deferred_ = $.Deferred();
-
-    return this.deferred_.promise();
+    this.events_.trigger('show');
+    return this;
   };
 
-  /* overridable */ Browser.prototype.close = function ()
+  /* overridable */ Browser.prototype.hide = function ()
   {
-    this.check_init_();
-
-    this.nodes_.container
-      .css( {
-        transform: 'scale(.2,.2)',
-        opacity: 0
-      } );
-
-    if(this.deferred_) {
-      this.deferred_.resolve();
-      this.deferred_ = null;
-    }
+    this.do_hide_();
+    this.events_.trigger('hide');
+    return this;
   };
 
   /* Private methods */
@@ -239,6 +233,16 @@ var LabelBrowser_ = function (window, $, std)
   {
     if(!this.initialised_)
       throw "Component not yet initialised or already reset";
+  };
+
+  Browser.prototype.do_hide_ = function ()
+  {
+    this.check_init_();
+    this.nodes_.container
+      .css( {
+        transform: 'scale(.2,.2)',
+        opacity: 0
+      } );
   };
 
   Browser.prototype.render_ = function ()
@@ -283,20 +287,6 @@ var LabelBrowser_ = function (window, $, std)
         : this.ref_bin_.data.content);
   };
 
-  Browser.prototype.find_node_ = function (scope, parent /* = container */)
-  {
-    var p;
-
-    if(parent instanceof $)
-      p = parent;
-    else if(std.is_str(parent))
-      p = this.find_node_(parent);
-    else
-      p = this.nodes_.container;
-
-    return p.find( [ '[data-sd-scope="label-browser-', scope, '"]' ].join(''));
-  };
-
 
   /**
    * @class
@@ -304,7 +294,7 @@ var LabelBrowser_ = function (window, $, std)
   var View = function (owner, fcs)
   {
     /* Invoke super constructor. */
-    std.Drawable.call(this, owner);
+    std.View.call(this, owner);
 
     /* Check `fcs' argument IS an array. */
     if(!std.is_arr(fcs))
@@ -317,7 +307,7 @@ var LabelBrowser_ = function (window, $, std)
     this.__defineGetter__('fcs', function () { return this.fcs_; } );
   };
 
-  View.prototype = Object.create(std.Drawable.prototype);
+  View.prototype = Object.create(std.View.prototype);
 
 
   /**
@@ -399,14 +389,14 @@ var LabelBrowser_ = function (window, $, std)
      * is isomorphic to fetching a unique list of all pairs of
      * (content_id, subtopic_id) from a connected component. ---AG */
 
-    console.log(fcs);
-    console.log(subtopics);
-
+    std.dbg.trace("Feature collections:", fcs);
+    std.dbg.trace("Subtopics", subtopics);
+    
     /* Merge subtopics from all feature collections. */
     fcs.forEach(function (fc) {
       if(!std.is_obj(fc.raw)) {
-        console.log("Feature collection `raw´ attribute not found or invalid",
-                    fc);
+        std.dbg.error(
+          "Feature collection `raw´ attribute not found or invalid", fc);
         return;
       }
 
@@ -420,10 +410,9 @@ var LabelBrowser_ = function (window, $, std)
       }
     } );
 
-    console.log("Merged subtopics from %d feature collection(s): count=%d",
-                fcs.length,
-                count,
-                this.subtopic_fcs_);
+    std.dbg.trace("Merged subtopics from %d feature collection(s): count=%d",
+                  fcs.length, count);
+    std.dbg.trace("Subtopic FCs", this.subtopic_fcs_);
   };
 
   ViewList.prototype = Object.create(View.prototype);
@@ -436,6 +425,12 @@ var LabelBrowser_ = function (window, $, std)
       this.rows_.push(row);
       row.render();
     }
+  };
+
+  ViewList.prototype.reset = function ()
+  {
+    this.owner_.nodes.table.find('TR:not(:first-child)').remove();
+    this.rows_ = this.subtopic_fcs_ = null;
   };
 
 
