@@ -498,12 +498,13 @@ var ChromeExtensionUi = (function ($, std) {
     /* Interface */
     var inject = function (urls)
     {
-      if(!(urls instanceof Object))
-        throw "Invalid urls object given";
-      else if(!(urls instanceof Array))
+      if(!std.is_arr(urls))
         urls = [ urls ];
 
       urls.forEach(function (res) {
+        if(!std.is_obj(res))
+          throw "Invalid resource descriptor";
+        
         switch(res.type.toLowerCase()) {
         case 'font':
           if(!std.is_str(res.family))
