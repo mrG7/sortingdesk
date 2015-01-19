@@ -444,6 +444,9 @@ var SortingQueue_ = function (window, $, std) {
   {
     /* Invoke super constructor. */
     std.Controller.call(this, owner);
+
+    /* Attributes */
+    this.handlers_ = null;
   };
 
   ControllerButtonDismiss.prototype = Object.create(std.Controller.prototype);
@@ -455,14 +458,14 @@ var SortingQueue_ = function (window, $, std) {
   {
     var self = this;
 
-    this.handlers_ = { };
+    this.handlers_ = new std.Events([ ]);
     this.droppable_ = new std.Droppable(this.owner_.nodes.buttons.dismiss, {
       classHover: this.owner_.options.css.droppableHover,
       scopes: [ ],
 
       drop: function (e, id, scope) {
-        if(self.handlers_.hasOwnProperty(scope)) {
-          self.handlers_[scope](e, id, scope);
+        if(self.handlers_.exists(scope)) {
+          self.handlers_.trigger(scope, e, id, scope);
         } else {
           console.log("Warning: unknown scope: " + scope);
           return;
@@ -483,20 +486,32 @@ var SortingQueue_ = function (window, $, std) {
 
   ControllerButtonDismiss.prototype.register = function (scope, handler)
   {
-    if(!std.is_fn(handler))
-      throw "Handler callback not a valid function";
-    if(!this.droppable_)
+    if(this.droppable_ === null)
       return;
-    else if(!this.handlers_.hasOwnProperty(scope))
-      this.droppable_.addScope(scope);
 
-    this.handlers_[scope] = handler;
+    if(!this.handlers_.exists(scope)) {
+      this.handlers_.add(scope);
+      this.droppable_.add(scope);
+    }
+
+    this.handlers_.register(scope, handler);
   };
 
-  ControllerButtonDismiss.prototype.unregister = function (scope)
+  ControllerButtonDismiss.prototype.unregister = function (scope, handler)
   {
-    if(this.handlers_.hasOwnProperty(scope))
-      delete this.handlers_[scope];
+    if(this.droppable_ === null)
+      return;
+    
+    var count = this.handlers_.count(scope);
+
+    if(count > 0) {
+      if(this.handlers_.unregister(scope, handler)) {
+        if(count === 1) {
+          this.handlers_.remove(scope);
+          this.droppable_.remove(scope);
+        }
+      }
+    }
   };
 
   ControllerButtonDismiss.prototype.activate = function (callback)
