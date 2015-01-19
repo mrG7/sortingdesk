@@ -61,7 +61,7 @@ var ChromeExtensionUi = (function ($, std) {
       /* Register for click events on the 'settings' button inside the extension
        * activator button. */
       self.activator_
-        .on('click-explorer', self.onClickSettings_.bind(self))
+        .on('click-explorer', self.onClickExplorer_.bind(self))
         .show();
 
       /* Initialise API and instantiate `SortingDesk´ class. */
@@ -124,7 +124,7 @@ var ChromeExtensionUi = (function ($, std) {
     node: function (key) { return this.nodes_[key]; },
 
     /* Private methods */
-    onClickSettings_: function ()
+    onClickExplorer_: function ()
     {
       if(this.explorer_)
         return;
