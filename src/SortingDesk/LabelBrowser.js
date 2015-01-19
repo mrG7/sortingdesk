@@ -186,7 +186,9 @@ var LabelBrowser_ = function (window, $, std)
     /* Remove all children nodes. */
     this.nodes_.header.title.children().remove();
     this.nodes_.header.content.children().remove();
-    this.nodes_.table.find('TR:not(:first-child)').remove();
+
+    if(this.view_)
+      this.view_.reset();
 
     /* Detach all events. */
     std.$.alloff(this.nodes_);
@@ -292,7 +294,7 @@ var LabelBrowser_ = function (window, $, std)
   var View = function (owner, fcs)
   {
     /* Invoke super constructor. */
-    std.Drawable.call(this, owner);
+    std.View.call(this, owner);
 
     /* Check `fcs' argument IS an array. */
     if(!std.is_arr(fcs))
@@ -305,7 +307,7 @@ var LabelBrowser_ = function (window, $, std)
     this.__defineGetter__('fcs', function () { return this.fcs_; } );
   };
 
-  View.prototype = Object.create(std.Drawable.prototype);
+  View.prototype = Object.create(std.View.prototype);
 
 
   /**
@@ -424,6 +426,12 @@ var LabelBrowser_ = function (window, $, std)
       this.rows_.push(row);
       row.render();
     }
+  };
+
+  ViewList.prototype.reset = function ()
+  {
+    this.owner_.nodes.table.find('TR:not(:first-child)').remove();
+    this.rows_ = this.subtopic_fcs_ = null;
   };
 
 

@@ -73,7 +73,7 @@ var FolderExplorer_ = function (window, $, std)
     console.log("Initialising Bin Explorer component");
 
     /* Set initial state. */
-    this.viewType_ = Explorer.VIEW_ICONIC;
+    this.viewType_ = Explorer.VIEW_DEFAULT;
     els = this.nodes_ = { };
     
     this.view_ = this.mode_ = this.folders_ = null;
@@ -326,7 +326,7 @@ var FolderExplorer_ = function (window, $, std)
   var View = function (owner, collection)
   {
     /* Invoke super constructor. */
-    std.Drawable.call(this, owner);
+    std.View.call(this, owner);
 
     /* Check `folders' argument IS an array. */
     if(!std.is_arr(collection))
@@ -343,7 +343,7 @@ var FolderExplorer_ = function (window, $, std)
                           function () { return this.collection_; } );
   };
 
-  View.prototype = Object.create(std.Drawable.prototype);
+  View.prototype = Object.create(std.View.prototype);
 
   /* overridable */ View.prototype.render = function ()
   {
