@@ -747,12 +747,18 @@ var SortingCommon_ = function (window, $) {
     return is_arr(ev) ? ev.length > 0 : false;
   };
 
+  Events.prototype.count = function (ev)
+  {
+    ev = this.map_[ev];
+    return is_arr(ev) ? ev.length : -1;
+  };
+
   Events.prototype.trigger = function ( /* (ev, arg0..n) */ )
   {
     var ev = arguments[0];
     
     if(!is_str(ev) || ev.length === 0)
-      throw "Invalid event name specified";
+      throw "Invalid or no event name specified";
 
     var d = this.map_[ev];
     if(is_arr(d)) {
