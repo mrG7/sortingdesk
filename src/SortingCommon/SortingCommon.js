@@ -845,6 +845,20 @@ var SortingCommon_ = function (window, $) {
   };
 
 
+  /**
+   * @class
+   * */
+  var View = function (owner)
+  {
+    /* Invoke super constructor. */
+    Drawable.call(this, owner);
+  };
+
+  View.prototype = Object.create(Drawable.prototype);
+
+  View.prototype.reset = absm_noti;
+  
+
   /* Return public interface. */
   return {
     /* Functions */
@@ -871,6 +885,7 @@ var SortingCommon_ = function (window, $) {
     Draggable: Draggable,
     Droppable: Droppable,
     Events: Events,
+    View: View,
     NodeFinder: NodeFinder,
     $: jQueryExtensions
   };
