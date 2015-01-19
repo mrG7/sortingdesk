@@ -679,7 +679,10 @@ var SortingCommon_ = function (window, $) {
 
       if(!like_obj(ent))
         throw "Invalid owner instance reference specified";
-      
+
+      /* Decorate owning instance by adding the `on´ and `off´ methods that
+       * clients can conveniently use to attach and deattach events,
+       * respectively. */
       if(!ent.hasOwnProperty('on'))
         ent.on = chainize(ent, this.register.bind(this));
 
