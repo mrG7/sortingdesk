@@ -787,7 +787,7 @@ var SortingCommon_ = function (window, $) {
       } else
         throw "Invalid event(s) descriptor map";
     } else /* arguments >= 2; only first two are used */
-      this.register_single_(ev, arguments[1]);
+      return this.register_single_(ev, arguments[1]);
   };
 
   Events.prototype.unregister = function (/* undefined | string | object */ ev)
