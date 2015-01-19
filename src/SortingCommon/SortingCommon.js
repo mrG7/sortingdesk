@@ -790,14 +790,14 @@ var SortingCommon_ = function (window, $) {
       return this.register_single_(ev, arguments[1]);
   };
 
-  Events.prototype.unregister = function (/* undefined | string | object */ ev)
+  Events.prototype.unregister = function (/* undefined | string | object */
+    ev, fn)
   {
-    if(is_str(ev))
-      this.unregister_single_(ev);        /* Unregister single event. */
-    else if(is_arr(ev)) {
-      ev.forEach(function (e) {           /* Unregister multiple events. */
-        this.unregister_single_(e);
-      } );
+    if(is_str(ev))                        /* Unregister single event. */
+      return this.unregister_single_(ev, fn);
+    else if(is_obj(ev)) {
+      for(var k in ev)                    /* Unregister multiple events. */
+        this.unregister_single_(ev[k]);
     } else if(is_und(ev))
       this.map_ = { };                    /* Unregister all.  */
     else
@@ -821,17 +821,27 @@ var SortingCommon_ = function (window, $) {
     return false;
   };
 
-  Events.prototype.unregister_simple_ = function (ev)
+  Events.prototype.unregister_single_ = function (ev, fn)
   {
     if(!is_str(ev) || ev.length === 0)
       throw "Invalid or no event name";
 
-    if(this.map_.hasOwnProperty(ev)) {
-      delete this.map_[ev];
-      return true;
-    }
+    if(!this.map_.hasOwnProperty(ev))
+      return false;
 
-    return false;
+    if(is_und(fn))
+      this.map_[ev] = [ ];
+    else if(!is_fn(fn))
+      throw "Invalid or no event handler specified";
+    else {
+      var index = this.map_[ev].indexOf(fn);
+      if(index === -1)
+        return false;
+      
+      this.map_splice(index, 1);
+    }
+    
+    return true;
   };
 
 
