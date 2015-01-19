@@ -95,9 +95,11 @@ var ChromeExtensionUi = (function ($, std) {
         dossierUrl: meta.config.dossierUrl,
         active: meta.active,
         sortingQueue: {
-          container: $('#sd-sorter'),
-          visibleItems: 10,
-          itemsDraggable: false
+          options: {
+            container: $('#sd-sorter'),
+            visibleItems: 10,
+            itemsDraggable: false
+          }
         }
       }, $.extend(
         true,
