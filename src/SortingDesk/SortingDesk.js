@@ -241,18 +241,22 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
             self.events_.trigger('open', self.folder_);
           } );
       }
+        console.log('Invalid folder specified', folder);
     },
 
     close: function ()
     {
       /* Force reset of the bins controller, if an instance currently exists. */
-      if(this.folder_) {
-        this.folder_.reset();
-        this.folder_ = null;
+      if(this.folder_ === null) {
+        console.log("No folder currently active");
+        return;
       }
-
+      
+      this.folder_.reset();
+      this.folder_ = null;
+      
       /* Clear the items queue list. */
-      this.sortingQueue_.items.removeAll();
+      this.sortingQueue_.items.removeAll(false);
       this.events_.trigger('close');
       this.nodes_.empty.closed.fadeIn();
     },
