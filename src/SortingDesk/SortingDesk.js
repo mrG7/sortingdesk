@@ -658,7 +658,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
        * but we only do so *after* the query content id has been set since
        * Sorting Queue will attempt to refresh the items list. */
       this.owner_.api.setQueryContentId(null);
-      this.owner_.sortingQueue.items.removeAll();
+      this.owner_.sortingQueue.items.removeAll(false);
     }
 
     /* Finally, trigger event. */
