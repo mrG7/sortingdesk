@@ -571,6 +571,8 @@ var SortingQueue_ = function (window, $, std) {
 
     if(this.owner_.options.loadItemsAtStartup)
       this.check();
+    else
+      this.updateEmptyNotification_();
   };
 
   ControllerItems.prototype.reset = function ()
@@ -579,6 +581,8 @@ var SortingQueue_ = function (window, $, std) {
     this.node_.off( {
       dragover: this.fnDisableEvent_
     } );
+
+    this.owner_.nodes.empty.items.hide();
 
     this.removeNodes_();
     this.node_ = this.items_ = this.fnDisableEvent_ = null;
@@ -616,6 +620,7 @@ var SortingQueue_ = function (window, $, std) {
 
     var self = this;
 
+    this.updateEmptyNotification_(true);
     this.owner_.callbacks.invoke("moreTexts",
                                  this.owner_.options.visibleItems)
       .done(function (items) {
@@ -637,11 +642,15 @@ var SortingQueue_ = function (window, $, std) {
         window.setTimeout( function () {
           self.select();
         }, 10);
-
+        
         /* Ensure event is fired after the last item is added. */
         window.setTimeout( function () {
           self.owner_.requests.end('check-items');
+          self.updateEmptyNotification_();
         }, Math.pow(items.length - 1, 2) * 1.1 + 10);
+      } )
+      .fail(function () {
+        self.updateEmptyNotification_();
       } );
   };
 
@@ -837,6 +846,18 @@ var SortingQueue_ = function (window, $, std) {
     }
   };
 
+  ControllerItems.prototype.updateEmptyNotification_ = function (loading)
+  {
+    this.owner_.nodes.empty.items.stop();
+    if(loading !== true && this.items.length === 0) {
+      this.owner_.nodes.empty.items.fadeIn(
+        this.owner_.options.delays.queueEmptyFadeIn);
+    } else {
+      this.owner_.nodes.empty.items.fadeOut(
+        this.owner_.options.delays.queueEmptyFadeOut);
+    }      
+  };
+
   ControllerItems.prototype.removeNodes_ = function ()
   {
     this.items_.forEach(function (item) { item.node.remove(); } );
@@ -992,8 +1013,10 @@ var SortingQueue_ = function (window, $, std) {
       animateAssign: 75,        /* Duration of assignment of text item via
                                  * shortcut. */
       slideItemUp: 150,         /* Slide up length of deleted text item. */
-      textItemFade: 100         /* Fade out duration of text item after
+      textItemFade: 100,        /* Fade out duration of text item after
                                  * assignment. */
+      queueEmptyFadeIn: 250,
+      queueEmptyFadeOut: 100
     },
     constructors: {
       Item: Item
