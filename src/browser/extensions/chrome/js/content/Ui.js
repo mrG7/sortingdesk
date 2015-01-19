@@ -221,23 +221,6 @@ var ChromeExtensionUi = (function ($, std) {
    * @class
    * */
   var HandlerCallbacks = (function () {
-    
-    var moreTexts_ = function (n)
-    {
-      /* Hide message just before a new request is initiated. */
-      ui_.nodes.empty.stop().fadeOut(100);
-
-      return ui_.sorter.api.getCallbacks().moreTexts(n)
-        .done(function (items) {
-          if(!items || !(items instanceof Array) || items.length === 0)
-            ui_.nodes.empty.stop().fadeIn('slow');
-          else
-            ui_.nodes.empty.stop().fadeOut(100);
-        } )
-        .fail(function () {
-          ui_.nodes.empty.show();
-        } );
-    };
 
     var setActive_ = function (id)
     {
@@ -283,7 +266,6 @@ var ChromeExtensionUi = (function ($, std) {
     return {
       callbacks: {
         sorter: {
-          moreTexts: moreTexts_,
           load: load_,
           save: save_,
           setActive: setActive_
