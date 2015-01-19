@@ -565,7 +565,7 @@ var SortingCommon_ = function (window, $) {
               e.dataTransfer && e.dataTransfer.getData('DossierId') || null,
               dm.getScope());
           } catch (x) {
-            console.log("Exception occurred:", x);
+            dbg.error("Exception occurred:", x);
           }
         }
 

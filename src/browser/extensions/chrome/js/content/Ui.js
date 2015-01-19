@@ -75,7 +75,7 @@ var ChromeExtensionUi = (function ($, std) {
             
             /* The `options´ map isn't touched *yet*. */
             return (new LabelBrowser.Browser(
-              $.extend(options, { container: $('sd-label-browser') } ),
+              $.extend(options, { container: $('#sd-label-browser') } ),
               HandlerCallbacks.callbacks.browser
             ))
               .on( {
@@ -203,7 +203,7 @@ var ChromeExtensionUi = (function ($, std) {
     var onRequestStop_ = function (id)
     {
       if(count_ === 0)
-        console.log("Internal count clear on request stop: %s", id);
+        std.dbg.warn("Internal count clear on request stop: %s", id);
       else if(--count_ === 0)
         ui_.nodes.loading.stop().fadeOut(100);
     };
@@ -293,22 +293,22 @@ var ChromeExtensionUi = (function ($, std) {
     /* Handlers of messages sent by the extension (background.js). */
     var onFolderRemoved_ = function (request, sender, callback)
     {
-      console.log("Folder removed: id=%s", request.id);
+      std.dbg.info("Folder removed: id=%s", request.id);
 
       if(ui_.sorter && ui_.sorter.folder
          && ui_.sorter.folder.id === request.id) {
-        console.log("Forcing folder closed");
+        std.dbg.trace("Forcing folder closed");
         ui_.sorter.close();
       }
     };
 
     var onFolderUpdated_ = function (request, sender, callback)
     {
-      console.log("Folder updated: id=%s", request.folder.id);
+      std.dbg.info("Folder updated: id=%s", request.folder.id);
 
       if(ui_.sorter && ui_.sorter.folder
          && ui_.sorter.folder.id === request.folder.id) {
-        console.log("Forcing folder refresh");
+        std.dbg.trace("Forcing folder refresh");
         ui_.sorter.open(request.folder);
       }
     };
@@ -329,8 +329,8 @@ var ChromeExtensionUi = (function ($, std) {
       chrome.runtime.onMessage.addListener(
         function (request, sender, callback) {
           if(methods_.hasOwnProperty(request.operation)) {
-            console.log("Invoking message handler [type="
-                        + request.operation + "]");
+            std.dbg.trace("Invoking message handler [type="
+                          + request.operation + "]");
 
             /* Invoke handler. */
             methods_[request.operation].call(window, request, sender, callback);
@@ -515,11 +515,11 @@ var ChromeExtensionUi = (function ($, std) {
           break;
           
         default:
-          console.log("Invalid resource type: %s", res.type);
+          std.dbg.error("Invalid resource type: %s", res.type);
           return;
         }
 
-        console.log("Injected resource (%s): %s", res.type, res.url);
+        std.dbg.trace("Injected resource (%s): %s", res.type, res.url);
       } );
     };
     
@@ -554,7 +554,7 @@ var ChromeExtensionUi = (function ($, std) {
        || (/^https:\/\//.test(window.location.href)
            && !result.config.activateHttps))
     {
-      console.log("Skipping activation: inactive or unsupported");
+      std.dbg.info("Skipping activation: inactive or unsupported");
     } else
       ui_ = new Ui(result);
   } );
