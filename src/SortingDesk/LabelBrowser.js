@@ -287,7 +287,7 @@ var LabelBrowser_ = function (window, $, std)
   {
     var p;
 
-    if(parent instanceof $)
+    if(std.$.is(parent))
       p = parent;
     else if(std.is_str(parent))
       p = this.find_node_(parent);

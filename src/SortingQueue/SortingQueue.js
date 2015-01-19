@@ -40,7 +40,7 @@ var SortingQueue_ = function (window, $, std) {
      * be the `nodes.items' element. */
     if(!std.is_obj(opts))
       throw "Invalid or no options map provided";
-    else if(opts instanceof $)
+    else if(std.$.is(opts))
       opts = { container: opts };
     else if(!std.$.is(opts.container))
       throw "Invalid or no container provided";

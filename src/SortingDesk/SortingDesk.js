@@ -1215,7 +1215,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     {
       var result = [ ];
 
-      if(node instanceof $)
+      if(std.$.is(node))
         node = node.get(0);
 
       if(node) {
