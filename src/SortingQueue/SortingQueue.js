@@ -580,13 +580,13 @@ var SortingQueue_ = function (window, $, std) {
       dragover: this.fnDisableEvent_
     } );
 
-    this.node_.children().remove();
+    this.removeNodes_();
     this.node_ = this.items_ = this.fnDisableEvent_ = null;
   };
 
   ControllerItems.prototype.redraw = function ()
   {
-    this.node_.children().remove();
+    this.removeNodes_();
     this.items_ = [ ];
     this.check();
   };
@@ -836,6 +836,11 @@ var SortingQueue_ = function (window, $, std) {
                            + parseInt(variant.css('paddingBottom')));
     }
   };
+
+  ControllerItems.prototype.removeNodes_ = function ()
+  {
+    this.items_.forEach(function (item) { item.node.remove(); } );
+  };    
 
 
   /**
