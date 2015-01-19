@@ -417,26 +417,26 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
     console.log("Folder opened: id=%s | name=%s", this.id_, this.name_);
     
-    if(folder.bins.length === 0)
-      return;
-
     folder.bins.forEach(function (descriptor) {
       self.add(self.construct(descriptor), false, true);
     } );
 
     /* Now manually set the active bin. */
-    if(folder.active)
-      bin = this.getById(folder.active);
+    if(this.bins_.length > 0) {
+      if(folder.active)
+        bin = this.getById(folder.active);
 
-    /* Attempt to recover if we've been given an invalid id to activate. */
-    if(!bin) {
-      console.log("Failed to set the active bin: setting first (id=%s)",
-                  folder.active || null);
+      /* Attempt to recover if we've been given an invalid id to activate. */
+      if(!bin) {
+        console.log("Failed to set the active bin: setting first (id=%s)",
+                    folder.active || null);
 
-      bin = this.bins_.getAt(0);
-    }
+        bin = this.getAt(0);
+      }
 
-    this.setActive(bin);
+      this.setActive(bin);
+    } else
+      this.updateEmptyNotification_();
   };
 
   ControllerFolder.prototype.construct = function (descriptor)
