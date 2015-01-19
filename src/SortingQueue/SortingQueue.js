@@ -75,7 +75,7 @@ var SortingQueue_ = function (window, $, std) {
 
     this.events_ = new std.Events(
       this,
-      [ 'request-start', 'request-stop', 'items-get', 'item-dismissed',
+      [ 'request-start', 'request-stop', 'items-updated', 'item-dismissed',
         'item-deselected', 'item-selected' ]);
   };
 
@@ -631,7 +631,6 @@ var SortingQueue_ = function (window, $, std) {
           throw "Invalid or no items array";
 
         items = self.dedupItems(items);
-        self.owner_.events.trigger('items-get', items.length);
 
         items.forEach(function (item, index) {
           window.setTimeout( function () {
@@ -646,6 +645,7 @@ var SortingQueue_ = function (window, $, std) {
         /* Ensure event is fired after the last item is added. */
         window.setTimeout( function () {
           self.owner_.requests.end('check-items');
+          self.owner_.events.trigger('items-updated', self.items_.length);
           self.updateEmptyNotification_();
         }, Math.pow(items.length - 1, 2) * 1.1 + 10);
       } )
@@ -744,6 +744,7 @@ var SortingQueue_ = function (window, $, std) {
 
     this.items_.splice(index, 1);
     this.check();
+    this.owner_.events.trigger('items-updated', 0);
 
     return true;
   };
