@@ -580,10 +580,10 @@ var SortingCommon_ = function (window, $) {
 
   Droppable.prototype.addScope = function (scope)
   {
-    if(!this.options_.scopes)
+    if(!is_arr(this.options_.scopes))
       this.options_.scopes = [ ];
 
-    if(!this.options_.scopes.hasOwnProperty(scope))
+    if(this.options_.scopes.indexOf(scope) === -1)
       this.options_.scopes.push(scope);
   };
 
