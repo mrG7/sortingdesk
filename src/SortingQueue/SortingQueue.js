@@ -63,6 +63,8 @@ var SortingQueue_ = function (window, $, std) {
     (this.requests_ = new ControllerRequests(this))
       .initialise();
     
+    this.constructor_ = new std.Constructor(this.options_.constructors);
+    
     this.callbacks_ = new Callbacks(
       $.extend(true, {
         itemDismissed: function() {},
@@ -85,6 +87,7 @@ var SortingQueue_ = function (window, $, std) {
     options_: null,
     nodes_: null,
     /* Controllers */
+    constructor_: null,
     callbacks_: null,
     events_: null,
     requests_: null,
@@ -97,6 +100,7 @@ var SortingQueue_ = function (window, $, std) {
     get resetting ()    { return !!this.resetter_; },
     get options ()      { return this.options_; },
     get nodes ()        { return this.nodes_; },
+    get constructor ()  { return this.constructor_; },
     get callbacks ()    { return this.callbacks_; },
     get events ()       { return this.events_; },
     get requests ()     { return this.requests_; },
@@ -179,41 +183,6 @@ var SortingQueue_ = function (window, $, std) {
         } );
 
       return this.resetter_;
-    },
-
-    instantiate: function ( /* class, ... */ )
-    {
-      if(arguments.length < 1)
-        throw "Class name required";
-
-      /* Invoke factory method to instantiate class, if it exists. */
-      var descriptor = this.options_.constructors['create' + arguments[0]];
-
-      if(descriptor)
-        return descriptor.apply(null, [].slice.call(arguments, 1));
-
-      /* Factory method doesn't exist. Ensure class constructor has been passed
-       * and instantiate it. */
-      descriptor = this.options_.constructors[arguments[0]];
-      
-      if(!descriptor)
-        throw "Class or factory non existent: " + arguments[0];
-
-      /* We don't want to use `eval' so we employ a bit of trickery to
-       * instantiate a class using variable arguments. */
-      var FakeClass = function () { },
-          object;
-
-      /* Instantiate class prototype. */
-      FakeClass.prototype = descriptor.prototype;
-      object = new FakeClass();
-
-      /* Now simply call class constructor directly and keep reference to
-       * correct constructor. */
-      descriptor.apply(object, [].slice.call(arguments, 1));
-      object.constructor = descriptor.constructor;
-
-      return object;
     }
   };
 
@@ -634,7 +603,8 @@ var SortingQueue_ = function (window, $, std) {
 
         items.forEach(function (item, index) {
           window.setTimeout( function () {
-            self.items_.push(self.owner_.instantiate('Item', self, item));
+            self.items_.push(
+              self.owner_.constructor.instantiate('Item', self, item));
           }, Math.pow(index, 2) * 1.1);
         } );
 
