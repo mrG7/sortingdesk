@@ -75,7 +75,7 @@ var ChromeExtensionUi = (function ($, std) {
             
             /* The `options´ map isn't touched *yet*. */
             return (new LabelBrowser.Browser(
-              options,
+              $.extend(options, { container: $('sd-label-browser') } ),
               HandlerCallbacks.callbacks.browser
             ))
               .on( {
@@ -138,7 +138,8 @@ var ChromeExtensionUi = (function ($, std) {
 
       /* Instantiate the Bin Explorer component and initialise it. */
       (this.explorer_ = new FolderExplorer.Explorer(
-        { api: this.sorter_.api },
+        { api: this.sorter_.api,
+          container: $('#sd-folder-explorer') },
         HandlerCallbacks.callbacks.explorer
       )
         .on( {
