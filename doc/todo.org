@@ -1,7 +1,4 @@
 * Generic
-** TODO Ask Andrew what's meant about CSS transaction
-Search emails for "transaction" for context.
-
 * Components
 ** *ALL*
 *** TODO Mechanism for stopping all ongoing AJAX requests
@@ -27,19 +24,9 @@ First iteration would include modules and classes.
 *** TODO Document required options
 =SortingQueue=, =SortingDesk= and possibly other components, could do with documentation about required and optional options, callbacks and so on.
 
-*** TODO Use =std.$.is= instead of =instanceof=
-
 ** =SortingCommon=
 
 ** =SortingQueue=
-*** TODO Employ use of =Constructor=
-This will imply removing reliance on the =instantiate= variable.
-
-**** TODO Allow specialisation of =ControllerButtonDismiss=
-
-*** TODO =ControllerButtonDismiss=: already employs a very specific pubsub method (=register=)
-This is bad. A generic and extensible mechanism that can be used by *ALL* components should be in place instead.
-
 *** TODO Rename CSS class names alluding to the old concept of text item
 Some CSS class names are still in use which employ the old concept of text item. These should be renamed such that the "text" word is removed.
 
@@ -47,8 +34,6 @@ Some CSS class names are still in use which employ the old concept of text item.
 See =ProtarchBinSpawner=. Specifically, there are instances where the events attached by =Droppable= need to be unbound at destruction time; i.e. when a =Droppable= instance is created on the DOM's own body.
 
 *** TODO =ControllerItems=: disable all other dragging-related events
-
-*** TODO Items controller to notify client when no more items available
 
 *** TODO Prefix text-items' node ids
 - State "TODO"       from "WAIT"       [2014-09-07 Sun 08:16]
@@ -60,7 +45,6 @@ See =ProtarchBinSpawner=. Specifically, there are instances where the events att
 
 ** =SortingDesk=
 *** =FolderExplorer=
-**** TODO Require a master container node in the options map
 **** TODO Disallow creation of folder with duplicate name
 **** WAIT Do not require constructor to =LabelBrowser= component
 - State "WAIT"       from "TODO"       [2015-01-15 Thu 15:52] \\
@@ -71,21 +55,10 @@ Trigger an event instead and let client deal with it.
 **** TODO Implement folder renaming
 
 *** =LabelBrowser=
-**** TODO Rename =close= to =hide=
-**** TODO Don't use deferred as means of signalling `close´
-**** TODO Must fire event in the event that the content id's FC could not be fetched
+**** TODO Must fire event when the content id's FC could not be fetched
 This is so the client can update state should loading of state fail. Right now, if the referential FC fails to load, the Label Browser's window shows the strings "Loading" and "Please wait" because the =Ui= instance isn't aware loading actually failed.
 
-**** TODO =set_heading_title_=: using reference bin's own content rather than snippet from retrieved feature collection
-Assess if correct.
-
-Rationale behind decision was so the bins' snippet/image presented actually matched what the user used to create the bin in the first place. After all, a different user could have created a feature collection for the same page, thus replacing its snippet/image.
-
 **** TODO Show labels ungrouped or grouped by feature collection (=content_id=)
-**** TODO As it stands there can only be ONE Label Browser HTML container
-We can keep the declarative manner in which nodes are found but the component will have to receive a container node so that querying for nodes can be conducted in the container node's subtree.
-
-*** TODO All components to trigger =initialised= and =ready= events
 *** TODO Fire event when no bins exist
 The extension looks too barren and dumb right after a new folder has been created. A mechanism is needed that allows for an event to be fired to communicate this fact.
 
@@ -97,12 +70,6 @@ Relevant links to research:
 + [[http://stackoverflow.com/questions/10754661/javascript-getting-imagedata-without-canvas][Getting image data without canvas]]
 
 It basically relies on using the =canvas= element to get the image data. Then, it's just a matter of encoding the image data to base64 and stuff it into the subtopic value for that image. Afterwards it's only a matter of showing the image as a [[https://developer.mozilla.org/en-US/docs/Web/HTTP/data_URIs][data URI]].
-
-*** TODO Should be using a map to contain bins
-Also see TODO about folders being kept in an array.
-
-*** TODO Window management class
-A class for managing windows used by the different components is needed so as to prevent code duplication. Currently, the components =LabelBrowser= and =BinExplorer= share (duplicate) functionality that ought to be in a specialised class for this purpose.
 
 *** WAIT Implement keyboard auto-repeat with configurable frequency
 - State "WAIT"       from "TODO"       [2014-10-15 Wed 13:56] \\
@@ -126,13 +93,6 @@ Moving =Dossier.JS= into =background.js= would effectively mean the limitations 
 **** TODO Re-calculate sizes (and positions) of UI elements when the browser window is resized
 **** TODO Allow container to be moved to either side of the page
 Attempt mechanism that doesn't show container over the page but alongside it instead.
-
-**** TODO =Positioner:position=: setting height with added hardcoded margin
-
-**** TODO =Positioner:position=: addressing node by its id
-All other nodes are addressed via the `nodes´ object map.
-
-**** TODO Should be using a map to contain folders
 
 ** API
 *** All
@@ -161,16 +121,6 @@ The bypass was created do deliver items in the format expected by =SortingQueue=
 *** TODO instance: ensure reset doesn't run twice
 
 *** TODO instance: require =visibleItems= to be greater than 0
-
-*** TODO callbacks: removed test for =renderAddButton=
-
-*** TODO callbacks: removed test for =renderPrimaryBin=
-
-*** TODO callbacks: removed test for =renderSecondaryBin=
-
-*** TODO callbacks: removed test for =addPrimarySubBin=
-
-*** TODO callbacks: removed test for =addSecondaryBin=
 
 *** TODO interface: ensure 'bin add' button is created prior to using it
 
