@@ -452,10 +452,12 @@ var SortingQueue_ = function (window, $, std) {
         self.owner_.dismiss.deactivate();
       } );
 
-      this.owner_.events.trigger("item-dismissed",
-                                 this.owner_.items.selected().content);
-      this.owner_.items.remove();
-
+      var sel = this.owner_.items.selected();
+      if(sel) {
+        this.owner_.events.trigger("item-dismissed", sel.content);
+        this.owner_.items.remove();
+      }
+      
       break;
 
     default:
