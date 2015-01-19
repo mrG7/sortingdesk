@@ -95,8 +95,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.options_ = $.extend(true, $.extend(true, {}, defaults_), opts);
     this.callbacks_ = new std.Callbacks(cbs);
     this.events_ = new std.Events(this, [ 'open', 'close', 'active' ]);
-    this.constructor_ = new std.Constructor(
-      $.extend($.extend({}, defaults_.constructors), opts.constructors));
+    this.constructor_ = new std.Constructor(this.options_.constructors);
 
     /* We need to instantiate `SortingQueue´ *now* because it is a dependency;
      * after all, `SortingDesk´ is built on top of `SortingQueue´, and as such
