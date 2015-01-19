@@ -1,3 +1,41 @@
+2015-01-19  Miguel Guedes  <miguel@miguelguedes.org>
+
+	* Sorting Common:
+
+	Added a base class for views, as used by some components, notably
+	Label Browser and Folder Explorer, which does not do anything for
+	now apart from ensuring views inherit a common interface.
+
+	Created a small debugging support class built on top of the
+	browser's standard `console´ object. It has only one purpose and
+	that is to allow for filtering of messages.
+
+	* Label Browser:
+
+	Remaining duplicate code refactored such that support classes in Sorting
+	Common are used instead.
+
+	* Chrome extension:
+
+	Further polished user interface.
+
+	* All:
+
+	The Sorting Desk/Queue modules now fully support optional
+	notification messages, shown in the following scenarios:
+	  + no folder open
+	  + folder open, but no bins created yet
+	  + items queue empty
+
+	ALL components can now coexist with multiple instances, if needs
+	be. This was done by ensuring that each component accepts a root
+	container, which relevant nodes are assumed to exist in its DOM
+	sub-tree.
+
+	Code refactoring: NUMEROUS improvements to code, user interface
+	and experience, and SEVERAL issues resolved.
+
+
 2015-01-16  Miguel Guedes  <miguel@miguelguedes.org>
 
 	* Chrome Extension:
