@@ -176,6 +176,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
           add: finder.find('button-add')
         },
         empty: {
+          closed: finder.find('closed'),
           bins: finder.find('bins-empty')
         }
       };
@@ -194,6 +195,8 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
       if(this.options.active)
         this.open(this.options.active);
+      else
+        this.nodes_.empty.closed.fadeIn();
     },
 
     /**
@@ -251,6 +254,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       /* Clear the items queue list. */
       this.sortingQueue_.items.removeAll();
       this.events_.trigger('close');
+      this.nodes_.empty.closed.fadeIn();
     },
     
     save: function ()
@@ -263,6 +267,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     initialiseFolder_: function (folder)
     {
       this.close();
+      this.nodes_.empty.closed.hide();
       
       /* (Re-)instantiate the bins controller. */
       (this.folder_ = this.constructor_.instantiate('ControllerFolder', this))
@@ -498,6 +503,8 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
         bin.setUnknown();
       } );
 
+    this.updateEmptyNotification_();
+
     return bin;
   };
 
@@ -595,6 +602,8 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
     if(bin === this.active_)
       this.setActive(this.bins_.length > 0 && this.bins_[0] || null);
+
+    this.updateEmptyNotification_();
   };
 
   ControllerFolder.prototype.getAt = function (index)
@@ -860,6 +869,18 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
         console.log("Label ADD failed: '%s' ∧ '%s'",
                     label.cid1, label.cid2);
       } );
+  };
+
+  ControllerFolder.prototype.updateEmptyNotification_ = function ()
+  {
+    this.owner_.nodes.empty.bins.stop();
+    if(this.bins_.length === 0) {
+      this.owner_.nodes.empty.bins.fadeIn(
+        this.owner_.options.delays.binsEmptyFadeIn);
+    } else {
+      this.owner_.nodes.empty.bins.fadeOut(
+        this.owner_.options.delays.binsEmptyFadeOut);
+    }      
   };
 
 
@@ -1221,7 +1242,9 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     },
     delays: {                   /* In milliseconds.     */
       binRemoval: 200,          /* Bin is removed from container. */
-      addBinShow: 200           /* Fade in of temporary bin when adding. */
+      addBinShow: 200,          /* Fade in of temporary bin when adding. */
+      binsEmptyFadeIn: 250,
+      binsEmptyFadeOut: 100
     },
     constructors: {
       ControllerFolder: ControllerFolder,
