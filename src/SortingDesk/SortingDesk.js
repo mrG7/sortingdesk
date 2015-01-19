@@ -679,14 +679,16 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
     (this.browser_ = this.owner_.constructor.instantiate(
       'LabelBrowser', { api: this.owner_.api, ref_bin: bin } ) )
-      .initialise()
-      .done(function () {
-        self.browser_.reset();
-        self.browser_ = null;
+      .on( {
+        hide: function () {
+          self.browser_.reset();
+          self.browser_ = null;
 
-        /* Re-enable browser icons. */
-        self.enableBrowser();
-      } );
+          /* Re-enable browser icons. */
+          self.enableBrowser();
+        }
+      } )
+      .initialise();
   };
 
   /* overridable */ ControllerFolder.prototype.serialise = function ()
