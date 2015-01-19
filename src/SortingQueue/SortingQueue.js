@@ -73,7 +73,9 @@ var SortingQueue_ = function (window, $, std) {
       }, cbs),
       this.requests_);
 
-    this.events_ = new std.Events(this, [ 'request-start', 'request-stop' ]);
+    this.events_ = new std.Events(
+      this,
+      [ 'request-start', 'request-stop', 'items-get' ]);
   };
 
   Sorter.prototype = {
@@ -279,7 +281,7 @@ var SortingQueue_ = function (window, $, std) {
 
     resetEntities_: function (entities)
     {
-      var self = this,
+      var self = this, 
           waiting = 0;
 
       entities.forEach(function (e) {
@@ -617,24 +619,26 @@ var SortingQueue_ = function (window, $, std) {
         self.owner_.requests.begin('check-items');
 
         /* Ensure we've received a valid items array. */
-        if(std.is_arr(items) && items.length > 0) {
-          items = self.dedupItems(items);
-          items.forEach(function (item, index) {
-            window.setTimeout( function () {
-              self.items_.push(self.owner_.instantiate('Item', self, item));
-            }, Math.pow(index, 2) * 1.1);
-          } );
+        if(!std.is_arr(items))
+          throw "Invalid or no items array";
 
-          window.setTimeout( function () {
-            self.select();
-          }, 10);
+        items = self.dedupItems(items);
+        self.owner_.events.trigger('items-get', items.length);
 
-          /* Ensure event is fired after the last item is added. */
+        items.forEach(function (item, index) {
           window.setTimeout( function () {
-            self.owner_.requests.end('check-items');
-          }, Math.pow(items.length - 1, 2) * 1.1 + 10);
-        } else
+            self.items_.push(self.owner_.instantiate('Item', self, item));
+          }, Math.pow(index, 2) * 1.1);
+        } );
+
+        window.setTimeout( function () {
+          self.select();
+        }, 10);
+
+        /* Ensure event is fired after the last item is added. */
+        window.setTimeout( function () {
           self.owner_.requests.end('check-items');
+        }, Math.pow(items.length - 1, 2) * 1.1 + 10);
       } );
   };
 
