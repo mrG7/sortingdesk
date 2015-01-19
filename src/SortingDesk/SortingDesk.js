@@ -466,8 +466,9 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     /* Reset bin spawner controller and remove all children nodes inside the
      * bins HTML container. */
     this.spawner_.reset();
-    this.owner_.nodes.bins.children().remove();
     this.owner_.api.setQueryContentId(null);
+    this.owner_.nodes.empty.bins.hide();
+    this.bins_.forEach(function (bin) { bin.node.remove(); } );
 
     /* De-register for events of 'bin' scope. */
     this.owner_.sortingQueue.dismiss.unregister('bin');
