@@ -11,7 +11,7 @@
 /*jshint laxbreak:true */
 
 
-var Background = function ()
+var Background = function (window, chrome, $, std)
 {
   /* Constants */
   var TIMEOUT_SAVE = 1000;
@@ -281,4 +281,5 @@ var Background = function ()
   
   /* Initialise instance. */
   initialize_();
-}();
+  
+}(window, chrome, $, SortingCommon);
