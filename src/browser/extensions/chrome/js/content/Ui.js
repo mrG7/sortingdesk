@@ -262,6 +262,12 @@ var ChromeExtensionUi = (function ($, std) {
     {
       chrome.runtime.sendMessage( { operation: 'remove-folder', id: id } );
     };
+
+    var imageToBase64_ = function (src)
+    {
+      chrome.runtime.sendMessage( { operation: 'get-image-base64',
+                                    src: src } );
+    };
     
     /* Interface */
     return {
@@ -269,7 +275,8 @@ var ChromeExtensionUi = (function ($, std) {
         sorter: {
           load: load_,
           save: save_,
-          setActive: setActive_
+          setActive: setActive_,
+          imageToBase64: imageToBase64_
         },
         explorer: {
           load: load_,
