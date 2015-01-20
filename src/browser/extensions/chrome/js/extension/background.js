@@ -23,8 +23,7 @@ var Background = function (window, chrome, $, std)
   
   var initialize_ = function ()
   {
-    new MessageHandler();
-    handlerTabs_ = new MessageHandlerTabs();
+    handlerTabs_ = MessageHandlerTabs;
   };
 
   var indexOfFolder_ = function (folders, id)
@@ -38,43 +37,16 @@ var Background = function (window, chrome, $, std)
       }
     } );
 
-    return typeof index === 'undefined' ? -1 : index;
+    return std.is_und(index) ? -1 : index;
   };
 
   
   /**
    * @class
    * */
-  var MessageHandler = function () {
-    var self = this,
-        methods = {
-          "read-file": this.onReadFile_,
-          "set-active": this.onSetActive_,
-          "get-meta": this.onGetMeta_,
-          "load-folders": this.onLoadFolders_,
-          "load-folder": this.onLoadFolder_,
-          "save-folder": this.onSaveFolder_,
-          "save-folders": this.onSaveFolders_,
-          "remove-folder": this.onRemoveFolder_
-        };
-    
-    /* Handler of messages originating in content scripts. */
-    chrome.runtime.onMessage.addListener(
-      function (request, sender, callback) {
-        if(methods.hasOwnProperty(request.operation)) {
-          console.log("Invoking message handler [type="
-                      + request.operation + "]");
-          
-          methods[request.operation].call(self, request, sender, callback);
-        }
+  var MessageHandler = (function () {
 
-        return true;
-      }
-    );
-  };
-
-  MessageHandler.prototype = {
-    onReadFile_: function (request, sender, callback)
+    var onReadFile_ = function (request, sender, callback)
     {
       $.ajax( {
         url: chrome.extension.getURL(request.identifier),
@@ -84,25 +56,18 @@ var Background = function (window, chrome, $, std)
           callback.apply(null, arguments);
         }
       } );
-    },
+    };
 
-    onSaveState_: function (request, sender, callback)
-    {
-      var result = save_(sender.tab.id, request.state);
-      if(callback) callback(result);
-    },
-
-    onSetActive_: function (request, sender, callback)
+    var onSetActive_ = function (request, sender, callback)
     {
       console.log("Set active folder: id=%s", request.id);
       active_ = request.id;
       if(callback) callback();
-    },
+    };
 
-    onGetMeta_: function (request, sender, callback)
+    var onGetMeta_ = function (request, sender, callback)
     {
-      if(typeof callback !== 'function')
-        return;
+      if(!std.is_fn(callback)) return;
       
       Config.load(function (options) {
         callback( {
@@ -111,54 +76,52 @@ var Background = function (window, chrome, $, std)
           active: active_
         } );
       } );
-    },
+    };
 
-    onLoadFolders_: function (request, sender, callback)
+    var onLoadFolders_ = function (request, sender, callback)
     {
-      if(typeof callback !== 'function') return;
+      if(!std.is_fn(callback)) return;
 
       /* Load folder state from extension's local storage. */
       chrome.storage.local.get('folders', function (result) {
         if(chrome.runtime.lastError) {
-          console.log("Error occurred whilst loading folders: "
-                      + chrome.runtime.lastError.message);
+          console.error("Error occurred whilst loading folders: "
+                        + chrome.runtime.lastError.message);
         } else
           console.log("Loaded folders successfully", result);
           
         /* TODO: we should be using a map for folders instead of an array. */
         callback(result.hasOwnProperty('folders') ? result.folders : [ ]);
       } );
-    },
+    };
 
-    onLoadFolder_: function (request, sender, callback)
+    var onLoadFolder_ = function (request, sender, callback)
     {
-      if(typeof callback !== 'function')
-        return;
+      if(!std.is_fn(callback)) return;
 
       /* Load folder state from extension's local storage. */
       chrome.storage.local.get('folders', function (folders) {
         var index = -1;
         
         if(chrome.runtime.lastError) {
-          console.log("Error occurred whilst loading folders: "
-                      + chrome.runtime.lastError.message);
+          console.error("Error occurred whilst loading folders: "
+                        + chrome.runtime.lastError.message);
         } else {
           /* TODO: we should be using a map for folders instead of an array. */
           folders = folders.hasOwnProperty('folders') ? folders.folders : [ ];
           index = indexOfFolder_(folders, request.id);
 
           if(index) console.log("Loaded folder: id=%s", request.id);
-          else console.log("Folder not found: id=%s", request.id);
+          else console.info("Folder not found: id=%s", request.id);
         }
         
         callback(index >= 0 ? folders[index] : null);
       } );
-    },
+    };
 
-    onSaveFolder_: function (request, sender, callback)
+    var onSaveFolder_ = function (request, sender, callback)
     {
-      if(!(request.folder instanceof Object)
-         || !request.folder.hasOwnProperty('id')) {
+      if(!std.is_obj(request.folder) || !request.folder.hasOwnProperty('id')) {
         throw "No folder specified or invalid folder descriptor";
       }
       
@@ -187,14 +150,13 @@ var Background = function (window, chrome, $, std)
                                   sender.tab.id);
         }
 
-        if(typeof callback === 'function')
-          callback(index >= 0);
+        if(std.is_fn(callback)) callback(index >= 0);
       } );
-    },
+    };
 
-    onSaveFolders_: function (request, sender, callback)
+    var onSaveFolders_ = function (request, sender, callback)
     {
-      if(!(request.folders instanceof Array))
+      if(!std.is_arr(request.folders))
         throw "No folder specified or invalid folder descriptor";
 
       /* De-select active folder if removed. */
@@ -206,11 +168,10 @@ var Background = function (window, chrome, $, std)
         console.log("Folders saved");
       } );
 
-      if(typeof callback === 'function')
-        callback();
-    },
+      if(std.is_fn(callback)) callback();
+    };
 
-    onRemoveFolder_: function (request, sender, callback)
+    var onRemoveFolder_ = function (request, sender, callback)
     {
       if(!request.hasOwnProperty('id'))
         throw "No folder id specified";
@@ -242,41 +203,72 @@ var Background = function (window, chrome, $, std)
             } );
           }
           else
-            console.log("Unable to remove folder: not found: id=%s", request.id);
+            console.error("Unable to remove folder: not found: id=%s",
+                          request.id);
         }
 
-        if(typeof callback === 'function')
-          callback(index >= 0);
+        if(std.is_fn(callback)) callback(index >= 0);
       } );
-    }
-  };
+    };
+
+
+    var self = this,
+        methods = {
+          "read-file": onReadFile_,
+          "set-active": onSetActive_,
+          "get-meta": onGetMeta_,
+          "load-folders": onLoadFolders_,
+          "load-folder": onLoadFolder_,
+          "save-folder": onSaveFolder_,
+          "save-folders": onSaveFolders_,
+          "remove-folder": onRemoveFolder_
+        };
+    
+    /* Handler of messages originating in content scripts. */
+    chrome.runtime.onMessage.addListener(
+      function (request, sender, callback) {
+        if(methods.hasOwnProperty(request.operation)) {
+          console.log("Invoking message handler [type="
+                      + request.operation + "]");
+          
+          methods[request.operation].call(self, request, sender, callback);
+        } else
+          console.error("Invalid request received:", request);
+
+        return true;
+      }
+    );
+
+
+    /* Public interface */
+    return { };
+  })();
 
 
   /**
    * @class
    * */
-  var MessageHandlerTabs = function () {
-  };
-
-  MessageHandlerTabs.prototype = {
-    broadcast: function (data, excludeTabId)
-    {
-      /* Send `data´ to every tab in every window. */
-      chrome.windows.getAll(function (windows) {
-        /* All windows: */
-        windows.forEach(function (window) {
-          /* All tabs: */
-          chrome.tabs.getAllInWindow(window.id, function (tabs) {
-            tabs.forEach(function (tab) {
-              /* This particular tab iteration: */
-              if(!excludeTabId || tab.id !== excludeTabId)
-                chrome.tabs.sendMessage(tab.id, data);
+  var MessageHandlerTabs = (function () {
+    return {
+      broadcast: function (data, excludeTabId)
+      {
+        /* Send `data´ to every tab in every window. */
+        chrome.windows.getAll(function (windows) {
+          /* All windows: */
+          windows.forEach(function (window) {
+            /* All tabs: */
+            chrome.tabs.getAllInWindow(window.id, function (tabs) {
+              tabs.forEach(function (tab) {
+                /* This particular tab iteration: */
+                if(!excludeTabId || tab.id !== excludeTabId)
+                  chrome.tabs.sendMessage(tab.id, data);
+              } );
             } );
           } );
         } );
-      } );
-    }
-  };
+      }
+    };
+  }) ();
 
   
   /* Initialise instance. */
