@@ -22,7 +22,7 @@ var SortingCommon_ = function (window, $) {
   
   var is_obj = function (r) { return r !== null && typeof r === 'object'; };
   var is_fn  = function (r) { return typeof r === 'function'; };
-  var is_und = function (r) { return typeof r === 'undefined'; };
+  var is_und = function (r) { return typeof r === typeof undefined; };
   var is_arr = function (r) { return r instanceof Array; };
   
   var is_str = function (r)
