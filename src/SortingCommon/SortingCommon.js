@@ -90,6 +90,7 @@ var SortingCommon_ = function (window, $) {
     var any = function (r)
     { return is(r) && r.length > 0; };
 
+
     /* Public interface */
     return {
       alloff: alloff,
@@ -130,6 +131,7 @@ var SortingCommon_ = function (window, $) {
    * @class
    * */
   var Url = (function () {
+    /* Public interface */
     return {
       encode: function (s)
       {
