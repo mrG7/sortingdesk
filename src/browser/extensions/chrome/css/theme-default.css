@@ -28,6 +28,9 @@
   background-color: inherit;
 }
 
+.sd-container-inner {
+  background-color: transparent;
+}
 
 /* Positioning of master container (#sd-sorting-desk)
  * Note: null rule-set placeholders. */
