@@ -130,8 +130,8 @@ var Background = function (window, chrome, $, std)
         var index = -1;
         
         if(chrome.runtime.lastError) {
-          console.log("Error occurred whilst loading folders: "
-                      + chrome.runtime.lastError.message);
+          console.error("Error occurred whilst loading folders: "
+                        + chrome.runtime.lastError.message);
         } else {
           folders = folders.hasOwnProperty('folders') ? folders.folders : [ ];
           index = indexOfFolder_(folders, request.folder.id);
@@ -181,8 +181,8 @@ var Background = function (window, chrome, $, std)
         var index = -1;
         
         if(chrome.runtime.lastError) {
-          console.log("Error occurred whilst loading folders: "
-                      + chrome.runtime.lastError.message);
+          console.error("Error occurred whilst loading folders: "
+                        + chrome.runtime.lastError.message);
         } else {
           folders = folders.hasOwnProperty('folders') ? folders.folders : [ ];
           index = indexOfFolder_(folders, request.id);
