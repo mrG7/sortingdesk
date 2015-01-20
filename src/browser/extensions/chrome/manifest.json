@@ -23,7 +23,7 @@
   ],
 
   "background": {
-    "scripts": [ "lib/jquery-2.1.1.min.js", "js/extension/config.js", "js/extension/background.js" ]
+    "scripts": [ "lib/jquery-2.1.1.min.js", "js/extension/config.js", "lib/SortingCommon/SortingCommon.js", "js/extension/background.js" ]
   },
 
   "permissions": [
