@@ -230,15 +230,11 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       /* Allow folder to be an object ready for consumption or a string
        * (containing an id) that can be used to retrieve the folder's
        * descriptor. */
-      if(std.is_obj(folder)) {
+      if(std.is_obj(folder))
         this.initialiseFolder_(folder);
-        this.events_.trigger('open', this.folder_);
-      } else if(folder) {         /* assume id */
+      else if(folder) {         /* assume id */
         this.callbacks_.invoke('load', folder)
-          .done(function (f) {
-            self.initialiseFolder_(f);
-            self.events_.trigger('open', self.folder_);
-          } );
+          .done(function (f) { self.initialiseFolder_(f); } );
       } else
         std.dbg.error('Invalid folder specified', folder);
     },
@@ -275,6 +271,9 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       /* (Re-)instantiate the bins controller. */
       (this.folder_ = this.constructor_.instantiate('ControllerFolder', this))
         .initialise(folder);
+
+      /* Trigger event. */
+      this.events_.trigger('open', this.folder_);
     }
   };
 
