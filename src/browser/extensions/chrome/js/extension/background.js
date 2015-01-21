@@ -214,29 +214,13 @@ var Background = function (window, chrome, $, std)
     var onGetImageBase64_ = function (request, sender, callback)
     {
       if(!request.hasOwnProperty('src'))
-        throw "Image source attribute missing";
+        throw "`src´ attribute missing in request";
       else if(!std.is_fn(callback))
         return;
-
-      var src = request.src.trim(),
-          img = new Image();
-
-      if(/^\/\//.test(src))
-        src = "http:" + src;
       
-      console.log("Getting base64 encode of image: %s", src);
-      img.src = src;
-      img.onload = function () {
-        var canvas = document.createElement("canvas");
-        canvas.width = this.width;
-        canvas.height = this.height;
-
-        var ctx = canvas.getContext("2d");
-        ctx.drawImage(this, 0, 0);
-
-        callback(canvas.toDataURL("image/png")
-                 .replace(/^data:image\/(png|jpg);base64,/, ""));
-      };
+      std.Html.imageToBase64(request.src)
+        .done(function (data) { callback(data); } )
+        .fail(function () { callback(null); } );
     };
 
 
