@@ -116,6 +116,8 @@ var SortingCommon_ = function (window, $) {
 
   var Html = (function () {
 
+    /* Interface
+     * -- */
     /** This method retrieves image data in base64 encoding. It can either be
      * passed a reference to an existing <code>Image</code> instance or a string
      * assumed to contain the URL of an image. When given a string, it attempts
