@@ -132,13 +132,6 @@ var SortingQueue_ = function (window, $, std) {
       (this.dismiss_ = new ControllerButtonDismiss(this))
         .initialise();
 
-      this.dismiss_.register('text-item', function (e, id, scope) {
-        var item = self.items.getById(std.Url.decode(id));
-
-        self.events_.trigger("item-dismissed", item.content);
-        self.items.remove(item);
-      } );
-
       (this.items_ = new ControllerItems(this))
         .initialise();
 
@@ -548,6 +541,16 @@ var SortingQueue_ = function (window, $, std) {
 
   ControllerItems.prototype.initialise = function ()
   {
+    var self = this;
+    
+    /* Register for `text-items´ scope events. */
+    this.owner_.dismiss.register('text-item', function (e, id, scope) {
+      var item = self.getById(std.Url.decode(id));
+
+      self.owner_.events_.trigger("item-dismissed", item.content);
+      self.remove(item);
+    } );
+
     /* Disallow dragging of elements over items container. */
     this.node_.on( {
       dragover: this.fnDisableEvent_
@@ -561,6 +564,9 @@ var SortingQueue_ = function (window, $, std) {
 
   ControllerItems.prototype.reset = function ()
   {
+    /* Unregister ALL `text-item´ scope events. */
+    this.owner_.dismiss.unregister('text-item');
+    
     /* Reallow dragging of elements over items container. */
     this.node_.off( {
       dragover: this.fnDisableEvent_
