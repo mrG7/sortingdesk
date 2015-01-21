@@ -225,7 +225,7 @@ var ChromeExtensionUi = (function ($, std) {
 
     var setActive_ = function (id)
     {
-      chrome.runtime.sendMessage( { operation: 'set-active', id: id } );
+      chrome.runtime.sendMessage( { operation: 'set-active', id: id }, null);
     };
     
     var load_ = function (id)
@@ -255,12 +255,13 @@ var ChromeExtensionUi = (function ($, std) {
 
     var save_ = function (folder)
     {
-      chrome.runtime.sendMessage( { operation: 'save-folder', folder: folder} );
+      chrome.runtime.sendMessage( { operation: 'save-folder', folder: folder},
+                                  null);
     };
 
     var remove_ = function (id)
     {
-      chrome.runtime.sendMessage( { operation: 'remove-folder', id: id } );
+      chrome.runtime.sendMessage( { operation: 'remove-folder', id: id }, null);
     };
 
     var imageToBase64_ = function (src)
