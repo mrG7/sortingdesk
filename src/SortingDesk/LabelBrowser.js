@@ -124,7 +124,8 @@ var LabelBrowser_ = function (window, $, std)
     /* Retrieve feature collection for the bin's `content_id´. */
     this.api_.getFeatureCollection(this.ref_bin_.data.content_id)
       .done(function (fc) { self.set_header_(fc); } )
-      .fail(function () { self.set_header_(null); } );
+      .fail(function ()   { console.warn('Unable to set header');
+                            self.set_header_(null); } );
 
     /* Retrieve all existing labels for the bin's `content_id´. */
     this.api_.getLabelsUniqueById(this.ref_bin_.data.content_id,
