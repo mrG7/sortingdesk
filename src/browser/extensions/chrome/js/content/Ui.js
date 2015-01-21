@@ -203,7 +203,7 @@ var ChromeExtensionUi = (function ($, std) {
     var onRequestStop_ = function (id)
     {
       if(count_ === 0)
-        std.dbg.warn("Internal count clear on request stop: %s", id);
+        console.warn("Internal count clear on request stop: %s", id);
       else if(--count_ === 0)
         ui_.nodes.loading.stop().fadeOut(100);
     };
@@ -300,22 +300,22 @@ var ChromeExtensionUi = (function ($, std) {
     /* Handlers of messages sent by the extension (background.js). */
     var onFolderRemoved_ = function (request, sender, callback)
     {
-      std.dbg.info("Folder removed: id=%s", request.id);
+      console.info("Folder removed: id=%s", request.id);
 
       if(ui_.sorter && ui_.sorter.folder
          && ui_.sorter.folder.id === request.id) {
-        std.dbg.trace("Forcing folder closed");
+        console.log("Forcing folder closed");
         ui_.sorter.close();
       }
     };
 
     var onFolderUpdated_ = function (request, sender, callback)
     {
-      std.dbg.info("Folder updated: id=%s", request.folder.id);
+      console.info("Folder updated: id=%s", request.folder.id);
 
       if(ui_.sorter && ui_.sorter.folder
          && ui_.sorter.folder.id === request.folder.id) {
-        std.dbg.trace("Forcing folder refresh");
+        console.log("Forcing folder refresh");
         ui_.sorter.open(request.folder);
       }
     };
@@ -336,8 +336,8 @@ var ChromeExtensionUi = (function ($, std) {
       chrome.runtime.onMessage.addListener(
         function (request, sender, callback) {
           if(methods_.hasOwnProperty(request.operation)) {
-            std.dbg.trace("Invoking message handler [type="
-                          + request.operation + "]");
+            console.log("Invoking message handler [type="
+                        + request.operation + "]");
 
             /* Invoke handler. */
             methods_[request.operation].call(window, request, sender, callback);
@@ -522,11 +522,11 @@ var ChromeExtensionUi = (function ($, std) {
           break;
           
         default:
-          std.dbg.error("Invalid resource type: %s", res.type);
+          console.error("Invalid resource type: %s", res.type);
           return;
         }
 
-        std.dbg.trace("Injected resource (%s): %s", res.type, res.url);
+        console.log("Injected resource (%s): %s", res.type, res.url);
       } );
     };
     
@@ -561,7 +561,7 @@ var ChromeExtensionUi = (function ($, std) {
        || (/^https:\/\//.test(window.location.href)
            && !result.config.activateHttps))
     {
-      std.dbg.info("Skipping activation: inactive or unsupported");
+      console.info("Skipping activation: inactive or unsupported");
     } else
       ui_ = new Ui(result);
   } );

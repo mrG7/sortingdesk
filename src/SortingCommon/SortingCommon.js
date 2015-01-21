@@ -642,7 +642,7 @@ var SortingCommon_ = function (window, $) {
               e.dataTransfer && e.dataTransfer.getData('DossierId') || null,
               dm.getScope());
           } catch (x) {
-            dbg.error("Exception occurred:", x);
+            console.error("Exception occurred:", x);
           }
         }
 
