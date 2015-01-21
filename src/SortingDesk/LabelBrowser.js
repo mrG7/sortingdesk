@@ -78,7 +78,7 @@ var LabelBrowser_ = function (window, $, std)
     if(this.initialised_)
       throw "Label Browser component already initialised";
 
-    std.dbg.trace("Initializing Label Browser component");
+    console.log("Initializing Label Browser component");
 
     /* Set initial state. */
     els = this.nodes_ = { };
@@ -91,7 +91,7 @@ var LabelBrowser_ = function (window, $, std)
     /* Lambda called when initialisation is over, successfully or not. */
     var onEndInitialise = function () {
       if(self.ref_bin_ !== null) {
-        std.dbg.info("Label Browser component initialized");
+        console.info("Label Browser component initialized");
         self.events_.trigger('ready', self.eqv_fcs_.length);
       }
     };
@@ -130,7 +130,7 @@ var LabelBrowser_ = function (window, $, std)
     this.api_.getLabelsUniqueById(this.ref_bin_.data.content_id,
                                   this.ref_bin_.data.subtopic_id)
       .then(function (subtopics) {
-        std.dbg.trace("Got labels' subtopic unique ids:", subtopics);
+        console.log("Got labels' subtopic unique ids:", subtopics);
 
         var cids = [ ];
         self.subtopics_ = { };
@@ -148,7 +148,7 @@ var LabelBrowser_ = function (window, $, std)
 
         self.api_.getAllFeatureCollections(cids)
           .done(function (fcs) {
-            std.dbg.trace(
+            console.log(
               "Unique labels' content id collection GET successful:", fcs);
 
             /* Ensure that the instance hasn't been reset during the time spent
@@ -163,12 +163,12 @@ var LabelBrowser_ = function (window, $, std)
             }
           } )
           .fail(function () {
-            std.dbg.error('Failed to retrieve all feature collections');
+            console.error('Failed to retrieve all feature collections');
             onEndInitialise();
           } );
       } )
       .fail(function () {
-        std.dbg.error('Failed to load state');
+        console.error('Failed to load state');
         onEndInitialise();
       } );
 
@@ -197,7 +197,7 @@ var LabelBrowser_ = function (window, $, std)
     this.ref_fc_ = this.eqv_fcs_ = this.viewType_ = this.api_ = null;
     this.initialised_ = false;
 
-    std.dbg.info("Label Browser component reset");
+    console.info("Label Browser component reset");
   };
 
   /* overridable */ Browser.prototype.show = function ()
@@ -389,13 +389,13 @@ var LabelBrowser_ = function (window, $, std)
      * is isomorphic to fetching a unique list of all pairs of
      * (content_id, subtopic_id) from a connected component. ---AG */
 
-    std.dbg.trace("Feature collections:", fcs);
-    std.dbg.trace("Subtopics", subtopics);
+    console.log("Feature collections:", fcs);
+    console.log("Subtopics", subtopics);
     
     /* Merge subtopics from all feature collections. */
     fcs.forEach(function (fc) {
       if(!std.is_obj(fc.raw)) {
-        std.dbg.error(
+        console.error(
           "Feature collection `raw´ attribute not found or invalid", fc);
         return;
       }
@@ -410,9 +410,9 @@ var LabelBrowser_ = function (window, $, std)
       }
     } );
 
-    std.dbg.trace("Merged subtopics from %d feature collection(s): count=%d",
-                  fcs.length, count);
-    std.dbg.trace("Subtopic FCs", this.subtopic_fcs_);
+    console.log("Merged subtopics from %d feature collection(s): count=%d",
+                fcs.length, count);
+    console.log("Subtopic FCs", this.subtopic_fcs_);
   };
 
   ViewList.prototype = Object.create(View.prototype);

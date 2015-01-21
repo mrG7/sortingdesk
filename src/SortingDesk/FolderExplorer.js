@@ -70,7 +70,7 @@ var FolderExplorer_ = function (window, $, std)
             || $('[data-sd-scope="folder-explorer-container"]')),
         els;
 
-    std.dbg.trace("Initialising Bin Explorer component");
+    console.log("Initialising Bin Explorer component");
 
     /* Set initial state. */
     this.viewType_ = Explorer.VIEW_DEFAULT;
@@ -144,7 +144,7 @@ var FolderExplorer_ = function (window, $, std)
           self.callbacks_.invoke('remove', id);
           self.refresh();
         } else
-          std.dbg.error("Failed to remove selected item: ", self.selected_);
+          console.error("Failed to remove selected item: ", self.selected_);
       }
 
       return false;
@@ -158,13 +158,13 @@ var FolderExplorer_ = function (window, $, std)
           throw "Folders state array invalid";
 
         self.folders_ = folders;
-        std.dbg.trace("Got folders state successfully", self.folders_);
+        console.log("Got folders state successfully", self.folders_);
         
         self.render_();
       } );
     
     this.initialised_ = true;
-    std.dbg.info("Bin Explorer component initialised");
+    console.info("Bin Explorer component initialised");
     
     this.events_.trigger("initialised", els.container);
     
@@ -187,7 +187,7 @@ var FolderExplorer_ = function (window, $, std)
     this.api_ = this.options_ = this.nodes_ = null;
     this.initialised_ = false;
 
-    std.dbg.info("Bin Explorer component reset");
+    console.info("Bin Explorer component reset");
   };
 
   Explorer.prototype.select = function (item)
@@ -221,7 +221,7 @@ var FolderExplorer_ = function (window, $, std)
   {
     /* Currently resetting to 'folder' mode. */
     this.render_();
-    std.dbg.trace("Refreshed view");
+    console.log("Refreshed view");
     
   };
 
@@ -614,7 +614,7 @@ var FolderExplorer_ = function (window, $, std)
     this.node_ = null;
     this.item_ = item;
 
-    std.dbg.trace("Created iconic item", this.item_);
+    console.log("Created iconic item", this.item_);
 
     /* Getters */
     this.__defineGetter__('node', function () { return this.node_; } );

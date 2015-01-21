@@ -88,7 +88,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
         + " object map";
     }
 
-    std.dbg.trace("Initialising Sorting Desk UI");
+    console.log("Initialising Sorting Desk UI");
 
     /* TODO: must pass in Dossier API URL. */
     this.api_ = Api.initialize(this, opts.dossierUrl);
@@ -190,7 +190,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
         .initialise();
 
       this.initialised_ = true;
-      std.dbg.info("Sorting Desk UI initialised");
+      console.info("Sorting Desk UI initialised");
 
       if(this.options.active)
         this.open(this.options.active);
@@ -219,7 +219,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
           self.folder_ = self.options_ = self.sortingQueue_ = null;
           self.initialised_ = false;
 
-          std.dbg.info("Sorting Desk UI reset");
+          console.info("Sorting Desk UI reset");
         } );
     },
 
@@ -236,14 +236,14 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
         this.callbacks_.invoke('load', folder)
           .done(function (f) { self.initialiseFolder_(f); } );
       } else
-        std.dbg.error('Invalid folder specified', folder);
+        console.error('Invalid folder specified', folder);
     },
 
     close: function ()
     {
       /* Force reset of the bins controller, if an instance currently exists. */
       if(this.folder_ === null) {
-        std.dbg.trace("No folder currently active");
+        console.log("No folder currently active");
         return;
       }
       
@@ -413,7 +413,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.id_ = folder.id;
     this.name_ = folder.name;
 
-    std.dbg.trace("Folder opened: id=%s | name=%s", this.id_, this.name_);
+    console.log("Folder opened: id=%s | name=%s", this.id_, this.name_);
     
     folder.bins.forEach(function (descriptor) {
       self.add(self.construct(descriptor), false, true);
@@ -426,7 +426,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
       /* Attempt to recover if we've been given an invalid id to activate. */
       if(!bin) {
-        std.dbg.info("Failed to set the active bin: setting first (id=%s)",
+        console.info("Failed to set the active bin: setting first (id=%s)",
                      folder.active || null);
 
         bin = this.getAt(0);
@@ -471,7 +471,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     /* De-register for events of 'bin' scope. */
     this.owner_.sortingQueue.dismiss.unregister('bin');
 
-    std.dbg.trace("Folder closed: id=%s, name=%s", this.id_, this.name_);
+    console.log("Folder closed: id=%s, name=%s", this.id_, this.name_);
 
     this.id_ = this.name_ = null;
     this.bins_ = this.hover_ = this.active_ = this.spawner_ = null;
@@ -550,7 +550,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
         return self.doAddLabel_(label);
       },
       function () {
-        std.dbg.error("Unable to add label between '%s' and '%s': "
+        console.error("Unable to add label between '%s' and '%s': "
                       + "feature collection not found",
                       bin.id,
                       descriptor.content_id);
@@ -715,7 +715,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
         content;
 
     if(scope) {
-      std.dbg.trace("Drop event not special case: ignored");
+      console.log("Drop event not special case: ignored");
       return null;
     }
 
@@ -734,7 +734,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
           api.generateSubtopicId(content));
         result.content = content;
       } else
-        std.dbg.error("Unable to retrieve valid `src´ attribute");
+        console.error("Unable to retrieve valid `src´ attribute");
     } else if(std.is_fn(window.getSelection)) {
       content = window.getSelection();
 
@@ -807,8 +807,8 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     /* Attempt to retrieve the feature collection for the bin's content id. */
     return api.getFeatureCollection(descriptor.content_id)
       .then(function (fc) {
-        std.dbg.trace("Feature collection GET successful (id=%s)",
-                      descriptor.content_id, fc);
+        console.log("Feature collection GET successful (id=%s)",
+                    descriptor.content_id, fc);
 
         /* A feature collection was received. No further operations are carried
          * out if `exists´ is true since it means `descriptor´ is actually a bin
@@ -830,17 +830,17 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
          * loaded from local storage and therefore its feature collection
          * shouldn't be created. */
         if(exists) {
-          std.dbg.error("Feature collection GET failed: NOT creating new"
+          console.error("Feature collection GET failed: NOT creating new"
                         + "(id=%s)", descriptor.content_id);
           return null;
         }
 
-        std.dbg.info("Feature collection GET failed: creating new (id=%s)",
+        console.info("Feature collection GET failed: creating new (id=%s)",
                      descriptor.content_id);
         return api.createFeatureCollection(descriptor.content_id,
                                            document.documentElement.outerHTML)
           .done(function(fc) {
-            std.dbg.trace('Feature collection created:', fc);
+            console.log('Feature collection created:', fc);
             api.setFeatureCollectionContent(
               fc, descriptor.subtopic_id, descriptor.content);
             api.setFeatureCollectionContent(
@@ -854,11 +854,11 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   {
     return this.owner_.api.putFeatureCollection(content_id, fc)
       .done(function () {
-        std.dbg.trace("Feature collection PUT successful (id=%s)",
-                      content_id, fc);
+        console.log("Feature collection PUT successful (id=%s)",
+                    content_id, fc);
       } )
       .fail(function () {
-        std.dbg.error("Feature collection PUT failed (id=%s)",
+        console.error("Feature collection PUT failed (id=%s)",
                       content_id, fc);
       } );
   };
@@ -867,11 +867,11 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   {
     return this.owner_.api.addLabel(label)
       .done(function () {
-        std.dbg.trace("Label ADD successful: '%s' == '%s'",
-                      label.cid1, label.cid2);
+        console.log("Label ADD successful: '%s' == '%s'",
+                    label.cid1, label.cid2);
       } )
       .fail(function () {
-        std.dbg.error("Label ADD failed: '%s' ∧ '%s'",
+        console.error("Label ADD failed: '%s' ∧ '%s'",
                       label.cid1, label.cid2);
       } );
   };
@@ -976,7 +976,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
           if(result)
             self.owner_.addLabel(self, result);
           else
-            std.dbg.info("Invalid drop: not text or image");
+            console.info("Invalid drop: not text or image");
 
           break;
 

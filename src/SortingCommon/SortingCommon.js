@@ -861,51 +861,6 @@ var SortingCommon_ = function (window, $) {
   View.prototype.reset = absm_noti;
 
 
-  /**
-   * @class
-   * */
-  var dbg = (function () {
-
-    /* Constants */
-    var LEVEL_TRACE = 4,
-        LEVEL_INFO = 3,
-        LEVEL_WARNING = 2,
-        LEVEL_ERROR = 1,
-        LEVEL_NONE = 0,
-        LEVEL_DEFAULT = LEVEL_TRACE;
-
-    /* Attributes */
-    var level = LEVEL_DEFAULT;
-
-    var lvl = function (lvl)
-    {
-      if(is_und(lvl))
-        return level;
-      else if(lvl > LEVEL_TRACE || lvl < LEVEL_NONE)
-        throw "Invalid debug level specified";
-
-      level = lvl;
-    };
-    
-    var trace = function ()
-    { if(level >= LEVEL_TRACE) console.log.apply(console, arguments); };
-    
-    var info = function ()
-    { if(level >= LEVEL_INFO) console.info.apply(console, arguments); };
-    
-    var warn = function ()
-    { if(level >= LEVEL_WARNING) console.warn.apply(console, arguments); };
-    
-    var error = function ()
-    { if(level >= LEVEL_ERROR) console.error.apply(console, arguments); };
-
-
-    /* Public interface */
-    return { trace: trace, info: info, warn: warn, error: error, lvl: lvl };
-    
-  } )();
-  
-
   /* Return public interface. */
   return {
     /* Functions */
@@ -934,8 +889,7 @@ var SortingCommon_ = function (window, $) {
     Events: Events,
     View: View,
     NodeFinder: NodeFinder,
-    $: jQueryExtensions,
-    dbg: dbg
+    $: jQueryExtensions
   };
 };
 
