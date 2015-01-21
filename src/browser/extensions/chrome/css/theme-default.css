@@ -793,7 +793,7 @@ INPUT.sd-fe-input {
   /* box-shadow */
   -webkit-box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.6);
   -moz-box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.6);
-  box-shadow: 5px 5px 5px 0tespx rgba(0,0,0,0.6);
+  box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.6);
 }
 
 .sd-header {
