@@ -149,6 +149,10 @@ var FolderExplorer_ = function (window, $, std)
 
       return false;
     } );
+
+    els.toolbar.actions.rename.click(function () {
+      return false;
+    } );
     /* End set up up nodes. */
 
     /* Retrieve all folders. */
