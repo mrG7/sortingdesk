@@ -270,7 +270,7 @@ var LabelBrowser_ = function (window, $, std)
   {
     /* Don't set the header if somehow this instance has been reset and is thus
      * not valid anymore. */
-    if(!this.nodes_.ref_bin_)
+    if(!this.ref_bin_)
       return;
     
     this.nodes_.header.title
