@@ -127,28 +127,27 @@ var SortingCommon_ = function (window, $) {
      * returned and is resolved as soon as the image data is available. The
      * promise is only rejected when attempting to load the image fails.
      *
-     * @param {(object|string)} src - Can be either a reference to an
+     * @param {(object|string)} ent - Can be either a reference to an
      * <code>Image</code> instance or a string assumed to contain the URL of an
      * image.
      *
      * @returns {string} Image data in base64 encoding without the prefix
      * <code>data:image/TYPE;base64,</code>. */
-    var imageToBase64 = function (src)
+    var imageToBase64 = function (ent)
     {
       var deferred = $.Deferred();
-      
-      if(src instanceof Image) {
+
+      if(is_image(ent)) {
         window.setTimeout(function () {
-          var data = getImageData_(src);
-          console.log("GOT base64 data: %s", data);
+          var data = getImageData_(ent);
           deferred.resolve(data);
         }, 0);
-      } else if(is_str(src)) {
+      } else if(is_str(ent)) {
         var img;
         
-        src = src.trim();
-        img = new Image();
-        img.src = /^\/\//.test(src) ? "http:" + src : src;
+        ent = ent.trim();
+        img = new window.Image();
+        img.src = /^\/\//.test(ent) ? "http:" + ent : ent;
 
         /* Set up events. */
         img.onload = function () { deferred.resolve(getImageData_(img)); };
