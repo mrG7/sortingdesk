@@ -246,7 +246,8 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
         console.log("No folder currently active");
         return;
       }
-      
+
+      this.api_.getDossierJs().stop();
       this.folder_.reset();
       this.folder_ = null;
       
