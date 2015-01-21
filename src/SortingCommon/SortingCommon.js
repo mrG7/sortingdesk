@@ -114,6 +114,68 @@ var SortingCommon_ = function (window, $) {
   } )();
 
 
+  var Html = (function () {
+
+    /** This method retrieves image data in base64 encoding. It can either be
+     * passed a reference to an existing <code>Image</code> instance or a string
+     * assumed to contain the URL of an image. When given a string, it attempts
+     * to first load the image before retrieving its image data.
+     *
+     * In both instances, a jQuery <code>Deferred</code> promise object is
+     * returned and is resolved as soon as the image data is available. The
+     * promise is only rejected when attempting to load the image fails.
+     *
+     * @param {(object|string)} src - Can be either a reference to an
+     * <code>Image</code> instance or a string assumed to contain the URL of an
+     * image.
+     *
+     * @returns {string} Image data in base64 encoding without the prefix
+     * <code>data:image/TYPE;base64,</code>. */
+    var imageToBase64 = function (src)
+    {
+      var deferred = $.Deferred();
+      
+      if(src instanceof Image) {
+        window.setTimeout(function () {
+          var data = getImageData_(src);
+          console.log("GOT base64 data: %s", data);
+          deferred.resolve(data);
+        }, 0);
+      } else if(is_str(src)) {
+        var img;
+        
+        src = src.trim();
+        img = new Image();
+        img.src = /^\/\//.test(src) ? "http:" + src : src;
+
+        /* Set up events. */
+        img.onload = function () { deferred.resolve(getImageData_(img)); };
+        img.onerror = function () {
+          console.error("Failed to load image: %s", img.src);
+          deferred.reject();
+        };
+      } else
+        throw "Invalid image source specified";
+      
+      return deferred.promise();
+    };
+
+    var getImageData_ = function (img)
+    {
+      var canvas = document.createElement("canvas");
+      canvas.width = img.width;
+      canvas.height = img.height;
+
+      var ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0);
+
+      return canvas.toDataURL("image/png")
+        .replace(/^data:image\/(png|jpg);base64,/, "");
+    };
+    
+  } );
+
+
   var NodeFinder = (function (prefix, root) {
 
     prefix = [ '[data-sd-scope="', prefix, '-' ].join('');
@@ -902,7 +964,8 @@ var SortingCommon_ = function (window, $) {
     Events: Events,
     View: View,
     NodeFinder: NodeFinder,
-    $: jQueryExtensions
+    $: jQueryExtensions,
+    Html: Html
   };
 };
 
