@@ -169,6 +169,7 @@ var SortingCommon_ = function (window, $) {
         || el instanceof window.Image;
     };
 
+    /* Private interface */
     var getImageData_ = function (img)
     {
       var canvas = document.createElement("canvas");
