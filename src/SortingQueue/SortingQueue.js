@@ -480,31 +480,32 @@ var SortingQueue_ = function (window, $, std) {
   ControllerButtonDismiss.prototype.register = function (scope, handler)
   {
     if(this.droppable_ === null)
-      return;
+      return false;
 
     if(!this.handlers_.exists(scope)) {
       this.handlers_.add(scope);
       this.droppable_.add(scope);
     }
 
-    this.handlers_.register(scope, handler);
+    return this.handlers_.register(scope, handler);
   };
 
   ControllerButtonDismiss.prototype.unregister = function (scope, handler)
   {
-    if(this.droppable_ === null)
-      return;
-    
     var count = this.handlers_.count(scope);
 
-    if(count > 0) {
+    if(this.droppable_ !== null && count > 0) {
       if(this.handlers_.unregister(scope, handler)) {
         if(count === 1) {
           this.handlers_.remove(scope);
           this.droppable_.remove(scope);
         }
       }
+
+      return true;
     }
+
+    return false;
   };
 
   ControllerButtonDismiss.prototype.activate = function (callback)
