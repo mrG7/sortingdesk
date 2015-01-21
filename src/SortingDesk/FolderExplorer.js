@@ -201,10 +201,10 @@ var FolderExplorer_ = function (window, $, std)
     } else
       this.selected_ = null;
 
-    var flag = this.selected_ === null,
-        els = this.nodes_.toolbar;
-    els.actions.load.toggleClass('sd-disabled', flag);
-    els.actions.remove.toggleClass('sd-disabled', flag);
+    var flag = this.selected_ === null;
+    $.each(this.nodes_.toolbar.actions, function () {
+      this.toggleClass('sd-disabled', flag);
+    } );
   };
     
   Explorer.prototype.open = function (folder)
