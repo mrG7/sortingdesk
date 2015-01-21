@@ -92,10 +92,14 @@ var SortingCommon_ = function (window, $) {
     { return r instanceof $; };
 
     /** Convenient method meant to be used as a means of ensuring a given
-     * variable contains a valid reference to a jQuery instance and that it
-     * isn't empty.
+     * variable contains a valid reference to a <code>jQuery</code> instance and
+     * that it isn't empty.
      *
-     * @param {object} r - Reference to jQuery instance. */
+     * @param {object} r - Variable to test.
+     *
+     * @returns {boolean} True, if <code>r</code> is a <code>jQuery</code>
+     * instance <strong>and</strong> contains at least one element; False
+     * otherwise. */
     var any = function (r)
     { return is(r) && r.length > 0; };
 
