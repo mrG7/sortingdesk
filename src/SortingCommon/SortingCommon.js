@@ -181,8 +181,15 @@ var SortingCommon_ = function (window, $) {
       return canvas.toDataURL("image/png")
         .replace(/^data:image\/(png|jpg);base64,/, "");
     };
+
+
+    /* Public interface */
+    return {
+      imageToBase64: imageToBase64,
+      is_image: is_image
+    };
     
-  } );
+  } )();
 
 
   var NodeFinder = (function (prefix, root) {
