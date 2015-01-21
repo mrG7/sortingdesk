@@ -109,6 +109,9 @@ var FolderExplorer_ = function (window, $, std)
 
     els.view = finder.find('view');
 
+    /* Deselect currently selected folder when clicked on container. */
+    els.container.click(function () { self.select(null); return false; });
+
     /* Load currently selected item when toolbar button clicked. */
     els.toolbar.actions.load.click(function () {
       if(self.selected_ && self.selected_ instanceof ItemIconicFolder) {
@@ -118,9 +121,6 @@ var FolderExplorer_ = function (window, $, std)
 
       return false;
     } );
-
-    /* Deselect currently selected folder when clicked on container. */
-    els.container.click(function () { self.select(null); return false; });
 
     /* Add item when toolbar button clicked. */
     els.toolbar.actions.add.click(function () {
