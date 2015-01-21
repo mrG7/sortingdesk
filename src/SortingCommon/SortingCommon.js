@@ -171,7 +171,7 @@ var SortingCommon_ = function (window, $) {
     /* Private interface */
     var getImageData_ = function (img)
     {
-      var canvas = document.createElement("canvas");
+      var canvas = window.document.createElement("canvas");
       canvas.width = img.width;
       canvas.height = img.height;
 
