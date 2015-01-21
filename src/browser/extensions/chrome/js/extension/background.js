@@ -213,14 +213,13 @@ var Background = function (window, chrome, $, std)
 
     var onGetImageBase64_ = function (request, sender, callback)
     {
-      if(!request.hasOwnProperty('src'))
-        throw "`src´ attribute missing in request";
-      else if(!std.is_fn(callback))
-        return;
-      
-      std.Html.imageToBase64(request.src)
-        .done(function (data) { callback(data); } )
-        .fail(function () { callback(null); } );
+      if(!request.hasOwnProperty('entity'))
+        throw "`entity´ attribute missing in request";
+      else if(std.is_fn(callback)) {
+        std.Html.imageToBase64(request.entity)
+          .done(function (data) { callback(data); } )
+          .fail(function ()     { callback(false); } );
+      }
     };
 
 

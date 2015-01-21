@@ -264,10 +264,18 @@ var ChromeExtensionUi = (function ($, std) {
       chrome.runtime.sendMessage( { operation: 'remove-folder', id: id }, null);
     };
 
-    var imageToBase64_ = function (src)
+    var imageToBase64_ = function (entity)
     {
-      chrome.runtime.sendMessage( { operation: 'get-image-base64',
-                                    src: src } );
+      var deferred = $.Deferred();
+      
+      chrome.runtime.sendMessage(
+        { operation: 'get-image-base64', entity: entity },
+        function (result) {
+          if(result === false) deferred.reject();
+          else deferred.resolve(result);
+        } );
+
+      return deferred.promise();
     };
     
     /* Interface */

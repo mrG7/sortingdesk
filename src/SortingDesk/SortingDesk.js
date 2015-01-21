@@ -726,13 +726,22 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
      * assume that this event originates in an image if the active
      * `ControllerDraggableImage´ instance has an active node. Otherwise,
      * we attempt to retrieve a text snippet. */
-    if(this.owner_.draggable.activeNode) {
-      content = this.owner_.draggable.activeNode.attr('src');
+    var active = this.owner_.draggable.activeNode;
+    if(active && active.length > 0) {
+      content = active.get(0).src;
 
       if(content) {
         result.subtopic_id = api.makeRawImageId(
           api.generateSubtopicId(content));
         result.content = content;
+
+        /* TODO: attach image data to descriptor. */
+        this.owner_.callbacks.invoke('imageToBase64', content)
+          .done(function (data) {
+            console.log("Got image data: %s", data);
+          } ).fail(function () {
+            console.error("Failed to retrieve image data");
+          } );
       } else
         console.error("Unable to retrieve valid `src´ attribute");
     } else if(std.is_fn(window.getSelection)) {
