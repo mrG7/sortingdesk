@@ -162,6 +162,13 @@ var SortingCommon_ = function (window, $) {
       return deferred.promise();
     };
 
+    /* Is-type functions */
+    var is_image = function (el)
+    {
+      return el instanceof window.HTMLImageElement
+        || el instanceof window.Image;
+    };
+
     var getImageData_ = function (img)
     {
       var canvas = document.createElement("canvas");
