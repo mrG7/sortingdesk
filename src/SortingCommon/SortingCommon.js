@@ -81,6 +81,13 @@ var SortingCommon_ = function (window, $) {
       }
     };
 
+    /** Convenient method that returns true if a given variable contains a valid
+     * reference to a <code>jQuery</code> instance.
+     *
+     * @param {object} r - Variable to test.
+     *
+     * @returns {boolean} True, if <code>r</code> is a <code>jQuery</code>
+     * instance. */
     var is = function (r)
     { return r instanceof $; };
 
