@@ -68,7 +68,9 @@ var SortingCommon_ = function (window, $) {
      * processed recursively. This function can never be a jQuery plugin.
      *
      * @param {object} n - Object containing jQuery instance references and
-     * possibly other objects. */
+     * possibly other objects.
+     *
+     * @returns {undefined} */
     var alloff = function (n)
     {
       for(var k in n) {
