@@ -1,10 +1,11 @@
 * Generic
 * Components
 ** *ALL*
+*** TODO Update external dependencies
+The `update-deps´ script needs to be updated to support external dependencies. Currently one needs to manually copy over updated versions of Dossier.js, for instance.
+
 *** TODO Mechanism for stopping all ongoing AJAX requests
 Behaviour is currently unknown if one switches to a folder while some sort of loading is taking place when the switch occurs (=moreTexts=, getFc=, etc). We need to be able to systematically terminate any and all AJAX requests taking place *before* the switch occurs.
-
-*** TODO Consider using SASS
 
 *** TODO Do *NOT* allow CSS classes to be specified in =options=
 This actually makes no sense and borders on the nonsensical. The assumption should be that the (different) components all use a *fixed* set of CSS classes, which are properly prefixed thus creating a namespace of sorts, which the client can then provide custom styling for. The CSS class names themselves should *not* be allowed to change.
@@ -24,6 +25,13 @@ First iteration would include modules and classes.
 *** TODO Document required options
 =SortingQueue=, =SortingDesk= and possibly other components, could do with documentation about required and optional options, callbacks and so on.
 
+*** CANCELED Consider using SASS
+- State "CANCELED"   from "TODO"       [2015-01-22 Thu 08:07] \\
+  Scepticism that SASS might help on the part of Diffeo's technical team.
+
+** =Dossier.JS=
+*** Improve documentation to support JSDoc
+
 ** =SortingCommon=
 
 ** =SortingQueue=
@@ -41,9 +49,9 @@ See =ProtarchBinSpawner=. Specifically, there are instances where the events att
   Currently waiting to hear from support as to whether ids are guaranteed to always be unique.
     
 ** =DossierJS=
-*** TODO Implement a request manager
+*** TODO Move =SortingQueueItems= class into API
 
-** =SortingDesk=
+* =SortingDesk=
 *** =FolderExplorer=
 **** TODO Disallow creation of folder with duplicate name
 **** WAIT Do not require constructor to =LabelBrowser= component
@@ -59,17 +67,11 @@ Trigger an event instead and let client deal with it.
 This is so the client can update state should loading of state fail. Right now, if the referential FC fails to load, the Label Browser's window shows the strings "Loading" and "Please wait" because the =Ui= instance isn't aware loading actually failed.
 
 **** TODO Show labels ungrouped or grouped by feature collection (=content_id=)
-*** TODO Fire event when no bins exist
-The extension looks too barren and dumb right after a new folder has been created. A mechanism is needed that allows for an event to be fired to communicate this fact.
 
-*** TODO Encode images to base64
-Relevant links to research:
+*** TODO Stop ongoing requests when different bin is made active
 
-+ [[https://developer.mozilla.org/en-US/docs/Web/API/ImageData][ImageData]]
-+ [[http://stackoverflow.com/questions/934012/get-image-data-in-javascript][Get image data in Javascript]]
-+ [[http://stackoverflow.com/questions/10754661/javascript-getting-imagedata-without-canvas][Getting image data without canvas]]
-
-It basically relies on using the =canvas= element to get the image data. Then, it's just a matter of encoding the image data to base64 and stuff it into the subtopic value for that image. Afterwards it's only a matter of showing the image as a [[https://developer.mozilla.org/en-US/docs/Web/HTTP/data_URIs][data URI]].
+*** TODO Attach base64 image data to descriptor
+In =onDropSpecial=.
 
 *** WAIT Implement keyboard auto-repeat with configurable frequency
 - State "WAIT"       from "TODO"       [2014-10-15 Wed 13:56] \\
