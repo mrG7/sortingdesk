@@ -55,7 +55,7 @@ var SortingQueue_ = function (window, $, std) {
     else if(!std.is_fn(cbs.moreTexts))
       throw "Mandatory `moreTexts' callback missing";
 
-    std.dbg.trace("Initialising Sorting Queue UI");
+    console.log("Initialising Sorting Queue UI");
 
     this.options_ = $.extend(true, $.extend(true, {}, defaults_), opts);
 
@@ -132,13 +132,6 @@ var SortingQueue_ = function (window, $, std) {
       (this.dismiss_ = new ControllerButtonDismiss(this))
         .initialise();
 
-      this.dismiss_.register('text-item', function (e, id, scope) {
-        var item = self.items.getById(std.Url.decode(id));
-
-        self.events_.trigger("item-dismissed", item.content);
-        self.items.remove(item);
-      } );
-
       (this.items_ = new ControllerItems(this))
         .initialise();
 
@@ -146,7 +139,7 @@ var SortingQueue_ = function (window, $, std) {
         .initialise();
 
       this.initialised_ = true;
-      std.dbg.info("Sorting Queue UI initialised");
+      console.info("Sorting Queue UI initialised");
     },
 
     /**
@@ -176,7 +169,7 @@ var SortingQueue_ = function (window, $, std) {
 
           self.initialised_ = false;
 
-          std.dbg.info("Sorting Queue UI reset");
+          console.info("Sorting Queue UI reset");
         } )
         .always(function () {
           self.resetter_ = false;
@@ -270,7 +263,7 @@ var SortingQueue_ = function (window, $, std) {
           try {
             result = e.reset();
           } catch(x) {
-            std.dbg.error('Exception thrown whilst resetting:', x);
+            console.error('Exception thrown whilst resetting:', x);
           }
 
           /* Special measure for instances that return a promise. */
@@ -385,7 +378,7 @@ var SortingQueue_ = function (window, $, std) {
 
       --this.count_;
     } else
-      std.dbg.warn("Unknown request ended:", id);
+      console.warn("Unknown request ended:", id);
 
     /* Trigger request end. */
     this.owner_.events.trigger("request-stop", id);
@@ -467,7 +460,7 @@ var SortingQueue_ = function (window, $, std) {
         if(self.handlers_.exists(scope)) {
           self.handlers_.trigger(scope, e, id, scope);
         } else {
-          std.dbg.warn("Unknown scope: " + scope);
+          console.warn("Unknown scope: " + scope);
           return;
         }
 
@@ -487,31 +480,32 @@ var SortingQueue_ = function (window, $, std) {
   ControllerButtonDismiss.prototype.register = function (scope, handler)
   {
     if(this.droppable_ === null)
-      return;
+      return false;
 
     if(!this.handlers_.exists(scope)) {
       this.handlers_.add(scope);
       this.droppable_.add(scope);
     }
 
-    this.handlers_.register(scope, handler);
+    return this.handlers_.register(scope, handler);
   };
 
   ControllerButtonDismiss.prototype.unregister = function (scope, handler)
   {
-    if(this.droppable_ === null)
-      return;
-    
     var count = this.handlers_.count(scope);
 
-    if(count > 0) {
+    if(this.droppable_ !== null && count > 0) {
       if(this.handlers_.unregister(scope, handler)) {
         if(count === 1) {
           this.handlers_.remove(scope);
           this.droppable_.remove(scope);
         }
       }
+
+      return true;
     }
+
+    return false;
   };
 
   ControllerButtonDismiss.prototype.activate = function (callback)
@@ -548,6 +542,16 @@ var SortingQueue_ = function (window, $, std) {
 
   ControllerItems.prototype.initialise = function ()
   {
+    var self = this;
+    
+    /* Register for `text-items´ scope events. */
+    this.owner_.dismiss.register('text-item', function (e, id, scope) {
+      var item = self.getById(std.Url.decode(id));
+
+      self.owner_.events_.trigger("item-dismissed", item.content);
+      self.remove(item);
+    } );
+
     /* Disallow dragging of elements over items container. */
     this.node_.on( {
       dragover: this.fnDisableEvent_
@@ -561,6 +565,9 @@ var SortingQueue_ = function (window, $, std) {
 
   ControllerItems.prototype.reset = function ()
   {
+    /* Unregister ALL `text-item´ scope events. */
+    this.owner_.dismiss.unregister('text-item');
+    
     /* Reallow dragging of elements over items container. */
     this.node_.off( {
       dragover: this.fnDisableEvent_
@@ -715,7 +722,7 @@ var SortingQueue_ = function (window, $, std) {
       else if(this.items_.length)
         this.select(this.items_[index - 1]);
       else
-        std.dbg.trace("No more items available");
+        console.log("No more items available");
     }
 
     item.node
@@ -785,7 +792,7 @@ var SortingQueue_ = function (window, $, std) {
         variant = this.node_.children().eq(0);
       else if(variant.length > 1) {
         /* We should never reach here. */
-        std.dbg.warn("Multiple text items selected:", variant.length);
+        console.warn("Multiple text items selected:", variant.length);
 
         variant = variant.eq(0);
       }

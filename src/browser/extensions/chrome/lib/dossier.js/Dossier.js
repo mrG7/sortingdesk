@@ -9,13 +9,113 @@
 
 
 var _DossierJS = function(window, $) {
+    /* Constants */
     var API_VERSION = {
-        dossier: 1,
+        dossier: 1
     };
+
+    /* + coreference types */
     var COREF_VALUE_POSITIVE = 1,
         COREF_VALUE_UNKNOWN = 0,
         COREF_VALUE_NEGATIVE = -1;
 
+
+    var Xhr = (function () {
+        /* Attributes */
+        var requests_ = { };
+
+        /* Interface */
+        var ajax = function ()
+        {
+            return add_(
+                get_type_(arguments),
+                $.ajax.apply($, Array.prototype.splice.call(arguments, 1)));
+        };
+        
+        var getJSON = function ()
+        {
+            return add_(
+                get_type_(arguments),
+                $.getJSON.apply($, Array.prototype.splice.call(arguments, 1)));
+        };
+
+        var stop = function (type)
+        {
+            if(type === undefined) {
+                for(var k in requests_) {
+                    requests_[k].forEach(function (r) {
+                        r.abort();
+                    } );
+                }
+
+                requests_ = { };
+            } else {
+                var reqs = get(type);
+
+                if(reqs !== null) {
+                    reqs.forEach(function (r) {
+                        r.abort();
+                    } );
+
+                    delete requests_[type];
+                }
+            }
+        };
+
+        var get = function (type)
+        {
+            return requests_[type] || null;
+        };
+
+        /* Private interface */
+        var add_ = function (type, xhr)
+        {
+            var reqs = requests_[type];
+
+            /* Create empty array if no requests exist for this type. */
+            if(!reqs)
+                reqs = requests_[type] = [ ];
+
+            /* Delete request once it completes, ensuring that the request type
+             * is also deleted when requests no longer exist. */
+            reqs.push(xhr.always(function () {
+                if(!reqs.some(function (r, i) {
+                    if(r === xhr) {
+                        reqs.splice(i, 1);
+                        if(reqs.length === 0)
+                            delete requests_[type];
+                        return true;
+                    }
+                } ) ) {
+                    console.error("Failed to remove request: %s: ", type, xhr);
+                } else
+                    console.log("Removed request: ", requests_);
+            } ) );
+
+            console.log("Added xhr: %s: ", type, requests_);
+            return xhr;
+        };
+        
+        var get_type_ = function (args)
+        {
+            if(args.length < 2) {
+                throw "Invalid arguments specified. Expect `type´ and arguments"
+                    + " for `ajax´ call";
+            }
+
+            return args[0];
+        };
+
+
+        /* Public interface */
+        return {
+            ajax: ajax,
+            getJSON: getJSON,
+            stop: stop
+        };
+        
+    } )();
+    
     // Create a new Dossier API, which can be used to issue requests
     // against a running instance of dossier.web.
     //
@@ -82,13 +182,14 @@ var _DossierJS = function(window, $) {
             'search',
             engine_name,
         ].join('/'), params);
-        return $.getJSON(url).promise().then(function(data) {
-            for (var i = 0; i < data.results.length; i++) {
-                data.results[i].fc = new FeatureCollection(
-                    data.results[i].content_id, data.results[i].fc);
-            }
-            return data;
-        });
+        return Xhr.getJSON('API.search', url).promise()
+            .then(function(data) {
+                for (var i = 0; i < data.results.length; i++) {
+                    data.results[i].fc = new FeatureCollection(
+                        data.results[i].content_id, data.results[i].fc);
+                }
+                return data;
+            });
     };
 
     // Retrieves a list of available search engines.
@@ -99,7 +200,8 @@ var _DossierJS = function(window, $) {
     // This returns a jQuery promise that resolves to a list of search engine
     // names.
     API.prototype.searchEngines = function() {
-        return $.getJSON(this.url('search_engines'));
+        return Xhr.getJSON('API.searchEngines',
+                                this.url('search_engines'));
     };
 
     // Retrieves a feature collection from the database with the given
@@ -114,9 +216,10 @@ var _DossierJS = function(window, $) {
     API.prototype.fcGet = function(content_id) {
         var url = this.url('feature-collection/'
                            + encodeURIComponent(serialize(content_id)));
-        return $.getJSON(url).promise().then(function(data) {
-            return new FeatureCollection(content_id, data);
-        });
+        return Xhr.getJSON('API.fcGet', url).promise()
+            .then(function(data) {
+                return new FeatureCollection(content_id, data);
+            });
     };
 
     // Fetch a set of feature collections asynchronously for the given
@@ -178,7 +281,7 @@ var _DossierJS = function(window, $) {
     API.prototype.fcPut = function(content_id, fc) {
         var url = this.url('feature-collection/'
                            + encodeURIComponent(serialize(content_id)));
-        return $.ajax({
+        return Xhr.ajax('API.fcPut', {
             type: 'PUT',
             contentType: 'application/json',
             url: url,
@@ -197,9 +300,10 @@ var _DossierJS = function(window, $) {
     // is a `FeatureCollection`.
     API.prototype.fcRandomGet = function() {
         var url = this.url('random/feature-collection');
-        return $.getJSON(url).promise().then(function(data) {
-            return [data[0], new FeatureCollection(data[0], data[1])];
-        });
+        return Xhr.getJSON('API.fcRandomGet', url).promise()
+            .then(function(data) {
+                return [data[0], new FeatureCollection(data[0], data[1])];
+            });
     };
 
     // Adds a new label to the database, which will be used to support
@@ -222,7 +326,8 @@ var _DossierJS = function(window, $) {
     // This function returns a jQuery promise that resolves when the web
     // service responds.
     API.prototype.addLabel = function(
-        /* <cid1, cid2, annotator, coref_value> | <label> */ ) {
+        /* <cid1, cid2, annotator, coref_value> | <label> */ )
+    {
         var label;
         if (arguments.length == 4) {
             label = new Label(arguments[0], arguments[1],
@@ -237,7 +342,8 @@ var _DossierJS = function(window, $) {
             params = {};
         if (label.subtopic_id1) params.subtopic_id1 = label.subtopic_id1;
         if (label.subtopic_id2) params.subtopic_id2 = label.subtopic_id2;
-        return $.ajax({
+        
+        return Xhr.ajax('API.addLabel', {
             type: 'PUT',
             url: this.url(endpoint, params),
             contentType: 'text/plain',
@@ -269,6 +375,10 @@ var _DossierJS = function(window, $) {
         }
         return def.promise();
     };
+
+    API.prototype.stop = function () {
+        return Xhr.stop.apply(Xhr, arguments);
+    }
 
     // A convenience class for fetching labels.
     //
@@ -326,7 +436,7 @@ var _DossierJS = function(window, $) {
     LabelFetcher.prototype.which = function(which) {
         this._which = which;
         return this;
-    }
+    };
 
     // Move to the next page.
     LabelFetcher.prototype.next = function() {
@@ -380,14 +490,15 @@ var _DossierJS = function(window, $) {
         if (this._page) params.page = this._page;
         if (this._perpage) params.perpage = this._perpage;
         var url = this.api.url(endpoint, params);
-        return $.getJSON(url).promise().then(function(labels) {
-            return labels.map(function(label) {
-                return new Label(label.content_id1, label.content_id2,
-                                 label.annotator_id, label.value,
-                                 label.subtopic_id1 || undefined,
-                                 label.subtopic_id2 || undefined);
+        return Xhr.getJSON('LabelFetcher.get', url).promise()
+            .then(function(labels) {
+                return labels.map(function(label) {
+                    return new Label(label.content_id1, label.content_id2,
+                                     label.annotator_id, label.value,
+                                     label.subtopic_id1 || undefined,
+                                     label.subtopic_id2 || undefined);
+                });
             });
-        });
     };
 
     // Constructs a new label.
@@ -493,7 +604,7 @@ var _DossierJS = function(window, $) {
             }
         }
         return vals;
-    }
+    };
 
     // SortingQueueItems provides SortingQueue integration with DossierJS.
     // Namely, it provides the following callback functions:

@@ -80,7 +80,7 @@ var Api_ = (function (window, $, CryptoJS) {
       mapWordCount: mapWordCount,
       getAnnotator: getAnnotator,
       getClass: getClass,
-      getApi: getApi,
+      getDossierJs: getDossierJs,
       getCallbacks: getCallbacks,
 
       /* Constants */
@@ -320,7 +320,7 @@ var Api_ = (function (window, $, CryptoJS) {
       : null;
   };
 
-  var getApi = function ()
+  var getDossierJs = function ()
   {
     return api_;
   };

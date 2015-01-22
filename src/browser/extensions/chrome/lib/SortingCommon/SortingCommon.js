@@ -22,7 +22,7 @@ var SortingCommon_ = function (window, $) {
   
   var is_obj = function (r) { return r !== null && typeof r === 'object'; };
   var is_fn  = function (r) { return typeof r === 'function'; };
-  var is_und = function (r) { return typeof r === 'undefined'; };
+  var is_und = function (r) { return typeof r === typeof undefined; };
   var is_arr = function (r) { return r instanceof Array; };
   
   var is_str = function (r)
@@ -68,7 +68,9 @@ var SortingCommon_ = function (window, $) {
      * processed recursively. This function can never be a jQuery plugin.
      *
      * @param {object} n - Object containing jQuery instance references and
-     * possibly other objects. */
+     * possibly other objects.
+     *
+     * @returns {undefined} */
     var alloff = function (n)
     {
       for(var k in n) {
@@ -79,22 +81,112 @@ var SortingCommon_ = function (window, $) {
       }
     };
 
+    /** Convenient method that returns true if a given variable contains a valid
+     * reference to a <code>jQuery</code> instance.
+     *
+     * @param {object} r - Variable to test.
+     *
+     * @returns {boolean} True, if <code>r</code> is a <code>jQuery</code>
+     * instance. */
     var is = function (r)
     { return r instanceof $; };
 
     /** Convenient method meant to be used as a means of ensuring a given
-     * variable contains a valid reference to a jQuery instance and that it
-     * isn't empty.
+     * variable contains a valid reference to a <code>jQuery</code> instance and
+     * that it isn't empty.
      *
-     * @param {object} r - Reference to jQuery instance. */
+     * @param {object} r - Variable to test.
+     *
+     * @returns {boolean} True, if <code>r</code> is a <code>jQuery</code>
+     * instance <strong>and</strong> contains at least one element; False
+     * otherwise. */
     var any = function (r)
     { return is(r) && r.length > 0; };
+
 
     /* Public interface */
     return {
       alloff: alloff,
       is: is,
       any: any
+    };
+    
+  } )();
+
+
+  var Html = (function () {
+
+    /* Interface
+     * -- */
+    /** This method retrieves image data in base64 encoding. It can either be
+     * passed a reference to an existing <code>Image</code> instance or a string
+     * assumed to contain the URL of an image. When given a string, it attempts
+     * to first load the image before retrieving its image data.
+     *
+     * In both instances, a jQuery <code>Deferred</code> promise object is
+     * returned and is resolved as soon as the image data is available. The
+     * promise is only rejected when attempting to load the image fails.
+     *
+     * @param {(object|string)} ent - Can be either a reference to an
+     * <code>Image</code> instance or a string assumed to contain the URL of an
+     * image.
+     *
+     * @returns {string} Image data in base64 encoding without the prefix
+     * <code>data:image/TYPE;base64,</code>. */
+    var imageToBase64 = function (ent)
+    {
+      var deferred = $.Deferred();
+
+      if(is_image(ent)) {
+        window.setTimeout(function () {
+          var data = getImageData_(ent);
+          deferred.resolve(data);
+        }, 0);
+      } else if(is_str(ent)) {
+        var img;
+        
+        ent = ent.trim();
+        img = new window.Image();
+        img.src = /^\/\//.test(ent) ? "http:" + ent : ent;
+
+        /* Set up events. */
+        img.onload = function () { deferred.resolve(getImageData_(img)); };
+        img.onerror = function () {
+          console.error("Failed to load image: %s", img.src);
+          deferred.reject();
+        };
+      } else
+        throw "Invalid image source specified";
+      
+      return deferred.promise();
+    };
+
+    /* Is-type functions */
+    var is_image = function (el)
+    {
+      return el instanceof window.HTMLImageElement
+        || el instanceof window.Image;
+    };
+
+    /* Private interface */
+    var getImageData_ = function (img)
+    {
+      var canvas = window.document.createElement("canvas");
+      canvas.width = img.width;
+      canvas.height = img.height;
+
+      var ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0);
+
+      return canvas.toDataURL("image/png")
+        .replace(/^data:image\/(png|jpg);base64,/, "");
+    };
+
+
+    /* Public interface */
+    return {
+      imageToBase64: imageToBase64,
+      is_image: is_image
     };
     
   } )();
@@ -130,6 +222,7 @@ var SortingCommon_ = function (window, $) {
    * @class
    * */
   var Url = (function () {
+    /* Public interface */
     return {
       encode: function (s)
       {
@@ -565,7 +658,7 @@ var SortingCommon_ = function (window, $) {
               e.dataTransfer && e.dataTransfer.getData('DossierId') || null,
               dm.getScope());
           } catch (x) {
-            dbg.error("Exception occurred:", x);
+            console.error("Exception occurred:", x);
           }
         }
 
@@ -782,8 +875,15 @@ var SortingCommon_ = function (window, $) {
     if(arguments.length === 1) {
       /* Expect a map. */
       if(is_obj(ev)) {
-        for(var k in ev)
-          this.register_single_(k, ev[k]);
+        var ct = 0,
+            cg = 0;
+        
+        for(var k in ev) {
+          ++ct;
+          if(this.register_single_(k, ev[k])) ++cg;
+        }
+
+        return cg === ct;
       } else
         throw "Invalid event(s) descriptor map";
     } else /* arguments >= 2; only first two are used */
@@ -859,51 +959,6 @@ var SortingCommon_ = function (window, $) {
   View.prototype.reset = absm_noti;
 
 
-  /**
-   * @class
-   * */
-  var dbg = (function () {
-
-    /* Constants */
-    var LEVEL_TRACE = 4,
-        LEVEL_INFO = 3,
-        LEVEL_WARNING = 2,
-        LEVEL_ERROR = 1,
-        LEVEL_NONE = 0,
-        LEVEL_DEFAULT = LEVEL_TRACE;
-
-    /* Attributes */
-    var level = LEVEL_DEFAULT;
-
-    var lvl = function (lvl)
-    {
-      if(is_und(lvl))
-        return level;
-      else if(lvl > LEVEL_TRACE || lvl < LEVEL_NONE)
-        throw "Invalid debug level specified";
-
-      level = lvl;
-    };
-    
-    var trace = function ()
-    { if(level >= LEVEL_TRACE) console.log.apply(console, arguments); };
-    
-    var info = function ()
-    { if(level >= LEVEL_INFO) console.info.apply(console, arguments); };
-    
-    var warn = function ()
-    { if(level >= LEVEL_WARNING) console.warn.apply(console, arguments); };
-    
-    var error = function ()
-    { if(level >= LEVEL_ERROR) console.error.apply(console, arguments); };
-
-
-    /* Public interface */
-    return { trace: trace, info: info, warn: warn, error: error, lvl: lvl };
-    
-  } )();
-  
-
   /* Return public interface. */
   return {
     /* Functions */
@@ -933,7 +988,7 @@ var SortingCommon_ = function (window, $) {
     View: View,
     NodeFinder: NodeFinder,
     $: jQueryExtensions,
-    dbg: dbg
+    Html: Html
   };
 };
 
