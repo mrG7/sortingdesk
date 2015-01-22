@@ -1,4 +1,12 @@
-2015-01-19  Miguel Guedes  <miguel@miguelguedes.org>
+2015-01-22  Miguel Guedes  <miguel@miguelguedes.org>
+
+	* Sorting Desk:
+
+	Component now stops all ongoing requests whenever a folder is
+	closed.
+
+	Image data of dropped images now processed and its base64 encoding
+	retrieved.
 
 	* Sorting Common:
 
@@ -9,6 +17,9 @@
 	Created a small debugging support class built on top of the
 	browser's standard `console´ object. It has only one purpose and
 	that is to allow for filtering of messages.
+
+	Crafted namespace for HTML-related tasks. At the moment only a
+	function exists that retrieves an image's data in base64 encoding.
 
 	* Label Browser:
 
