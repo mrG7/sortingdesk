@@ -21,9 +21,9 @@ cd "$dir_root/src/browser/extensions/chrome"
 [ -d lib ] && rm lib -rfv
 mkdir -vp lib
 
-mkdir lib/sorting_common -v
-mkdir lib/sorting_queue -v
-mkdir lib/sorting_desk/components -vp
+mkdir lib/sorting-common -v
+mkdir lib/sorting-queue -v
+mkdir lib/sorting-desk/components -vp
 mkdir lib/dossier.js -v
 mkdir lib/CryptoJS -v
 mkdir lib/bootstrap/css -vp
@@ -33,12 +33,12 @@ mkdir lib/bootstrap/js -v
 # Note: Google Chrom(e|ium) browsers do not support symlinks (!). There is no
 # other option but to actually copy, and thus duplicate, the external
 # dependencies we need.
-cp -v "$dir_root/src/sorting_common/sorting_common.js" lib/sorting_common/
-cp -v "$dir_root/src/sorting_queue/sorting_queue.js" lib/sorting_queue/
-cp -v "$dir_root/src/sorting_desk/sorting_desk.js" lib/sorting_desk/
-cp -v "$dir_root/src/sorting_desk/components/label_browser.js" lib/sorting_desk/components
-cp -v "$dir_root/src/sorting_desk/folder_explorer.js" lib/sorting_desk/
-cp -v "$dir_root/src/sorting_desk/api-live.js" lib/sorting_desk/
+cp -v "$dir_root/src/sorting-common/sorting_common.js" lib/sorting-common/
+cp -v "$dir_root/src/sorting-queue/sorting_queue.js" lib/sorting-queue/
+cp -v "$dir_root/src/sorting-desk/sorting_desk.js" lib/sorting-desk/
+cp -v "$dir_root/src/sorting-desk/components/label_browser.js" lib/sorting-desk/components
+cp -v "$dir_root/src/sorting-desk/folder_explorer.js" lib/sorting-desk/
+cp -v "$dir_root/src/sorting-desk/api-live.js" lib/sorting-desk/
 cp -v "$dir_root/src/dossier.js/Dossier.js" lib/dossier.js/
 cp -v "$dir_root/lib/jquery-2.1.1.min.js" lib/
 cp -v "$dir_root/lib/CryptoJS-3.1.2/rollups/md5.js" lib/CryptoJS/

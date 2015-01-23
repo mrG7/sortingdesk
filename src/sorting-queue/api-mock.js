@@ -1,4 +1,4 @@
-/** api-sorting_queue-mock.js --- Sorting Queue's mock API
+/** api-mock.js --- Sorting Queue's mock API
  *
  * Copyright (C) 2015 Diffeo
  *
