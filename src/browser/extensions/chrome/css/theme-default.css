@@ -530,61 +530,61 @@ A.sd-text-item-title:hover {
   top: 140px;
 }
 
-.sd-lb-items TABLE TR {
+.sd-lb-view > TABLE TR {
   color: black;
 }
 
-.sd-lb-items TABLE {
+.sd-lb-view > TABLE {
   width: 100%;
   border-collapse: collapse;
   border-spacing: 2px;
   font-family: arial,sans-serif;
 }
 
-.sd-lb-items TABLE TH {
+.sd-lb-view > TABLE TH {
   font-size: 14px;
 }
 
-.sd-lb-items TABLE TH,
-.sd-lb-items TABLE TD {
+.sd-lb-view > TABLE TH,
+.sd-lb-view > TABLE TD {
   border: 1px solid;
   border-color: white #fcfcfc #f0f0f0 white;
   padding: 5px;
 }
 
-.sd-lb-items TABLE TH {
+.sd-lb-view > TABLE TH {
   background-color: #ececec;
   color: #50505c;
 }
 
-.sd-lb-items TABLE TR:nth-child(odd) {
+.sd-lb-view > TABLE TR:nth-child(odd) {
   background-color: #fafafa;
 }
 
-.sd-lb-items TABLE TR:nth-child(even) {
+.sd-lb-view > TABLE TR:nth-child(even) {
   background-color: #f6f6f6;
 }
 
-.sd-lb-items TABLE TR:hover TD {
+.sd-lb-view > TABLE TR:hover > TD {
   background-color: #f0f8ff;
   cursor: default;
 }
 
-.sd-lb-items-id {
+.sd-lb-view-id {
   font-family: monospace;
   font-size: 10px;
   width: 150px;
   vertical-align: top;
 }
 
-.sd-lb-items-content IMG {
+.sd-lb-view-content IMG {
   font-size: 14px;
   width: auto;
   max-height: 40px;
   transition: all 250ms;
 }
 
-.sd-lb-items-content IMG:hover {
+.sd-lb-view-content IMG:hover {
   max-height: none;
 }
 
