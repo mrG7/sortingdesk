@@ -12,6 +12,12 @@
 /*csslint adjoining-classes: false, important: false */
 
 
+/* Default settings */
+BODY {
+  margin: 0;
+  padding: 0;
+}
+
 /* Common default settings */
 .sd-container {
   position: fixed;
@@ -23,7 +29,6 @@
 
 .sd-container * {
   box-sizing: content-box;
-  -webkit-box-sizing: content-box;
   color: inherit;
   background-color: inherit;
 }
@@ -32,115 +37,18 @@
   background-color: transparent;
 }
 
-/* Positioning of master container (#sd-sorting-desk)
- * Note: null rule-set placeholders. */
-.sd-bottom-right { }
-.sd-bottom-left { }
-.sd-top-left { }
-.sd-top-right { }
-
 /* Master container */
-#sd-sorting-desk.sd-top-left {
-  top: 5px;
-  left: 5px;
-}
-
-#sd-sorting-desk.sd-top-right {
-  top: 5px;
-  right: 5px;
-}
-
-#sd-sorting-desk.sd-bottom-right {
-  bottom: 5px;
-  right: 5px;
-}
-
-#sd-sorting-desk.sd-bottom-left {
-  bottom: 5px;
-  left: 5px;
+#sd-sorting-desk {
+  width: 100%;
 }
 
 /* Container of bins and queue */
 #sd-sorter {
-  display: none;
+  display: block;
   border: 2px solid #ccc;
-  width: 400px;
-  height: 400px;
+  height: auto;
   background-color: white;
   background: linear-gradient(to bottom, rgba(255,255,255,1) 0%, rgba(237,237,237,1) 40%, rgba(235,235,235,1) 100%);
-  /* box-shadow */
-  -webkit-box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.4);
-  -moz-box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.4);
-  box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.4);
-}
-
-#sd-sorting-desk.sd-top-left #sd-sorter {
-  border-radius: 0 10px 10px 10px;
-}
-
-#sd-sorting-desk.sd-top-right #sd-sorter {
-  border-radius: 10px 0 10px 10px;
-}
-
-#sd-sorting-desk.sd-bottom-right #sd-sorter {
-  border-radius: 10px 10px 0 10px;
-}
-
-#sd-sorting-desk.sd-bottom-left #sd-sorter {
-  border-radius: 10px 10px 10px 0;
-}
-
-/* Activator button */
-#sd-activator {
-  display: inline-block;
-  background-color: #3D3C3C;
-  color: white;
-  border: 1px solid #777;
-  padding: 5px;
-  cursor: pointer;
-  border-radius: 20px;
-  line-height: 1.5 !important;
-  height: 20px;
-  opacity: .75;
-  font-size: 13px;
-  overflow: hidden;
-  white-space: nowrap;
-  text-align: center;
-  text-shadow: 1px 1px 2px #aaa;
-  transition: opacity 250ms;
-}
-
-#sd-activator > * {
-  display: inline-block;
-}
-
-#sd-activator > *:not(last-child) {
-  margin-right: 10px;
-}
-
-#sd-sorting-desk.sd-top-left #sd-activator,
-#sd-sorting-desk.sd-bottom-left #sd-activator {
-  float: left;
-}
-
-#sd-sorting-desk.sd-top-right #sd-activator,
-#sd-sorting-desk.sd-bottom-right #sd-activator {
-  float: right;
-}
-
-#sd-sorting-desk.sd-active #sd-activator {
-  border-radius: 0;
-  opacity: 1;
-}
-
-#sd-activator:hover {
-  opacity: 1;
-}
-
-#sd-activator:active {
-  position: relative;
-  top: 1px;
-  left: 1px;
 }
 
 #sd-explorer {
@@ -171,18 +79,6 @@
   transition: all 175ms;
 }
 
-#sd-sorting-desk.sd-top-left #sd-button-add,
-#sd-sorting-desk.sd-bottom-left #sd-button-add {
-  top: 33px;
-  right: -25px;
-}
-
-#sd-sorting-desk.sd-top-right #sd-button-add,
-#sd-sorting-desk.sd-bottom-right #sd-button-add {
-  top: 33px;
-  left: -25px;
-}
-
 #sd-sorting-desk.sd-active #sd-button-add {
   display: block;
 }
@@ -191,36 +87,15 @@
   position: relative;
 }
 
-#sd-sorting-desk.sd-top-left #sd-button-add SPAN,
-#sd-sorting-desk.sd-bottom-left #sd-button-add SPAN {
-  margin-right: -10px;
-}
-
-#sd-sorting-desk.sd-top-right #sd-button-add SPAN,
-#sd-sorting-desk.sd-bottom-right #sd-button-add SPAN {
-  margin-left: -10px;
-}
-
 #sd-button-add.sd-droppable-hover {
   background-color: #DEF3DA;
   border-color: green;
 }
 
-/* NOTE: disabled as we would need to set specific styling for each of the four
- *       corners. */
-/* #sd-button-add:active { */
-/*   top: -14px; */
-/*   left: -24px; */
-/*   box-shadow: none; */
-/*   transition: background-color 175ms, color 100ms; */
-/* } */
-
 /* Various */
-#sd-bins {
+#sd-folder-explorer {
   position: relative;
-  height: 70px;
-  overflow-x: auto;
-  overflow-y: hidden;
+  overflow: auto;
   white-space: nowrap;
   vertical-align: middle;
   margin: 5px;
@@ -270,7 +145,7 @@
   width: 300px;
 }
 
-#sd-bins .sd-empty {
+#sd-folder-explorer .sd-empty {
   top: 0;
   margin-top: 10px;
   padding: 5px;
@@ -282,7 +157,7 @@
   box-shadow: 1px 1px 1px #888;
 }
 
-#sd-bins .sd-empty.sd-wider {
+#sd-folder-explorer .sd-empty.sd-wider {
   margin-top: 10px;
 }
 
@@ -707,76 +582,7 @@ A.sd-text-item-title:hover {
 }
 
 
-/* Folder Explorer */
-.sd-fe-header {
-  height: 45px;
-}
-
-.sd-fe-header-folder {
-  display: none;
-}
-
-.sd-fe-header-folder > DIV {
-  float: left;
-}
-
-.sd-fe-header-folder-title {
-  font-size: 14px;
-  margin: 5px 0 0 10px;
-}
-
-.sd-fe-button-explorer {
-  float: left;
-  margin-right: 15px;
-}
-
-.sd-fe-icon {
-  display: inline-block;
-  min-width: 100px;
-  margin: 10px;
-  padding: 10px;
-  text-align: center;
-  font-size: 14px;
-  line-height: 15px;
-  border: 1px solid transparent;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 250ms;
-  vertical-align: top;
-}
-
-.sd-fe-icon.sd-selected {
-  border-color: #8aa9da;
-  background-color: aliceblue;
-}
-
-.sd-fe-icon .sd-fe-icon-name {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: normal;
-  text-align: center;
-  width: 120px;
-  max-height: 45px;
-} 
-
-.sd-fe-icon:hover:not(.sd-selected):not(.sd-new) {
-  border: 1px solid silver;
-  background-color: #f0f0f0;
-}
-
-.sd-fe-icon.sd-new {
-  cursor: default;
-}
-
-INPUT.sd-fe-input {
-  width: 110px;
-  outline: 2px groove #a9bef3;
-  border: none;
-  padding: 4px;
-}
-
-
-/* Common styling to Label Browser and Folder Explorer components */
+/* Common styling to Label Browser and similar components */
 .sd-container.sd-component {
   top: 100px;
   left: 100px;
