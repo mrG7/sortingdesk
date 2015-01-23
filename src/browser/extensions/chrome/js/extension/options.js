@@ -10,7 +10,7 @@
 /*global chrome, $, Config */
 
 
-var Options = (function (window, $) {
+var Options = (function (window, $, undefined) {
   var initialise_ = function () {
     load_()
       .done(function () {
@@ -27,7 +27,7 @@ var Options = (function (window, $) {
         } );
       } );
     
-    console.log("Initialised options page");
+    console.info("Initialised options page");
   };
 
   var load_ = function () {
