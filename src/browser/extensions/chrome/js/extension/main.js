@@ -244,20 +244,7 @@ var Main = (function (window, chrome, $, std, SortingDesk, LabelBrowser, FolderE
 
   
   $(function () {
-    var height = window.innerHeight / 2;
-    
-    chrome.runtime.sendMessage({ operation: "get-meta" }, function (meta) {
-      /* Cache jQuery references to nodes used. */
-      nodes.loading = $('#sd-sorting-desk .sd-loading');
-
-      /* Instantiate and or initialise class components. */
-      BackgroundListener.initialise();
-
-      /* Set up heights. */
-      $("#sd-folder-explorer").height(height);
-      $("#sd-queue").height(height);
-
-      /* Initialise API and instantiate `SortingDesk´ class. */
+    var instantiate_ = function (meta) {
       (sorter = new SortingDesk.Sorter( {
         container: $('#sd-sorter'),
         constructors: {
@@ -299,6 +286,37 @@ var Main = (function (window, chrome, $, std, SortingDesk, LabelBrowser, FolderE
       ).initialise();
 
       self.sorter_.sortingQueue.on(LoadingStatus.events);
+    };
+
+
+    /* Initialisation sequence */
+    var height = window.innerHeight / 2;
+    
+    chrome.runtime.sendMessage({ operation: "get-meta" }, function (meta) {
+      /* Cache jQuery references to nodes used. */
+      nodes.loading = $('#sd-sorting-desk .sd-loading');
+
+      /* Instantiate and or initialise class components. */
+      BackgroundListener.initialise();
+
+      /* Initialise tooltips. */
+      $('[data-toggle="tooltip"]').tooltip();
+      
+      /* Set up heights. */
+      $("#sd-folder-explorer").height(height);
+      $("#sd-queue").height(height);
+
+      /* Initialise API and instantiate `SortingDesk´ class.
+       * --
+       * Note: for whatever reason, Chrome is not notifying of any exceptions
+       * thrown. */
+      try {
+        instantiate_(meta);
+      } catch(x) {
+        console.error("Exception thrown: " + x);
+        throw x;
+      }
+        
       console.info("Initialised Sorting Desk extension");
       console.info("READY");
     } );
