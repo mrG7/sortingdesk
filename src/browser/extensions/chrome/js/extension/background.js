@@ -11,7 +11,7 @@
 /*jshint laxbreak:true */
 
 
-var Background = function (window, chrome, $, std)
+var Background = function (window, chrome, $, std, undefined)
 {
   /* Constants */
   var TIMEOUT_SAVE = 1000,

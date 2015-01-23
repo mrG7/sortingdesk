@@ -30,7 +30,7 @@ var FolderExplorer_ = function (window, $, std, undefined)
     this.options_ = options;
     this.callbacks_ = new std.Callbacks(callbacks);
     this.events_ = new std.Events(
-      this, [ 'initialised', 'open', 'show', 'hide' ] );
+      this, [ 'initialised', 'open' ] );
     
     this.api_ = options.api;
     if(!std.like_obj(this.api_))
@@ -42,25 +42,21 @@ var FolderExplorer_ = function (window, $, std, undefined)
     this.__defineGetter__('api', function () { return this.api_; } );
     this.__defineGetter__('options', function () { return this.options_; } );
     this.__defineGetter__('nodes', function () { return this.nodes_; } );
-    this.__defineGetter__('mode', function () { return this.mode_; } );
-    this.__defineGetter__('view', function () { return this.view_; } );
     this.__defineGetter__('folders', function () { return this.folders_; } );
+    this.__defineGetter__('view', function () { return this.view_; } );
     this.__defineGetter__('selected', function () { return this.selected_; } );
     this.__defineGetter__('callbacks', function () { return this.callbacks_; });
     this.__defineGetter__('events', function () { return this.events_; } );
   };
 
   /* Constants */
-  Explorer.VIEW_ICONIC  = 0x01;
-  Explorer.VIEW_DEFAULT = Explorer.VIEW_ICONIC;
-  Explorer.MODE_FOLDERS = 0x01;
-  Explorer.MODE_BINS    = 0x02;
+
 
   /* Interface */
   Explorer.prototype.initialise = function ()
   {
     if(this.initialised_)
-      throw "Bin Explorer component already initialised";
+      throw "Folder Explorer component already initialised";
 
     var self = this,
         finder = new std.NodeFinder(
@@ -69,13 +65,12 @@ var FolderExplorer_ = function (window, $, std, undefined)
             || $('[data-sd-scope="folder-explorer-container"]')),
         els;
 
-    console.log("Initialising Bin Explorer component");
+    console.log("Initialising Folder Explorer component");
 
     /* Set initial state. */
-    this.viewType_ = Explorer.VIEW_DEFAULT;
     els = this.nodes_ = { };
     
-    this.view_ = this.mode_ = this.folders_ = null;
+    this.view_ = this.folders_ = null;
     this.selected_ = null;
 
     /* Begin set up nodes. */
@@ -88,22 +83,10 @@ var FolderExplorer_ = function (window, $, std, undefined)
 
     els.toolbar = {
       actions: {
-        load: finder.find('toolbar-load'),
         add: finder.find('toolbar-add'),
         remove: finder.find('toolbar-remove'),
         rename: finder.find('toolbar-rename')
-      },
-      view: {
-        icons: finder.find('toolbar-icons'),
-        list: finder.find('toolbar-list')
       }
-    };
-
-    els.header = {
-      container: finder.find('header'),
-      folder: finder.find('header-folder'),
-      buttonBack: finder.find('button-back'),
-      title: finder.find('folder-title')
     };
 
     els.view = finder.find('view');
@@ -167,7 +150,7 @@ var FolderExplorer_ = function (window, $, std, undefined)
       } );
     
     this.initialised_ = true;
-    console.info("Bin Explorer component initialised");
+    console.info("Folder Explorer component initialised");
     
     this.events_.trigger("initialised", els.container);
     
@@ -190,7 +173,7 @@ var FolderExplorer_ = function (window, $, std, undefined)
     this.api_ = this.options_ = this.nodes_ = null;
     this.initialised_ = false;
 
-    console.info("Bin Explorer component reset");
+    console.info("Folder Explorer component reset");
   };
 
   Explorer.prototype.select = function (item)
@@ -215,45 +198,12 @@ var FolderExplorer_ = function (window, $, std, undefined)
     this.events_.trigger('open', folder);
   };
 
-  Explorer.prototype.viewFolder = function (folder)
-  {
-    this.render_(folder);
-  };
-
   Explorer.prototype.refresh = function ()
   {
     /* Currently resetting to 'folder' mode. */
     this.render_();
     console.log("Refreshed view");
     
-  };
-
-  /* overridable */ Explorer.prototype.show = function ()
-  {
-    var els = this.nodes_;
-    
-    this.check_init_();
-
-    els.container.css( {
-      transform: 'scale(1,1)',
-      opacity: 1
-    } );
-
-    /* Set the items list's height so a scrollbar is shown when it overflows
-     * vertically. */
-    els.view.css('height', els.container.innerHeight()
-                 - els.header.container.outerHeight()
-                 - (els.view.outerHeight(true) - els.view.innerHeight()));
-
-    this.events_.trigger('show');
-    return this;
-  };
-    
-  /* overridable */ Explorer.prototype.hide = function ()
-  {
-    this.do_hide_();
-    this.events_.trigger('hide');
-    return this;
   };
 
   /* Events */
@@ -271,53 +221,13 @@ var FolderExplorer_ = function (window, $, std, undefined)
       throw "Component not yet initialised or already reset";
   };
 
-  Explorer.prototype.do_hide_ = function ()
-  {
-    this.check_init_();
-    this.nodes_.container
-      .css( {
-        transform: 'scale(.2,.2)',
-        opacity: 0
-      } );
-  };
-
   Explorer.prototype.render_ = function (folder)
   {
-    var self = this,
-        hel = this.nodes_.header;
-    
-    if(this.view_) {
+    if(this.view_)
       this.view_.reset();
-      this.view_ = null;
-    }
-
-    if(std.like_obj(folder)) {
-      this.mode_ = Explorer.MODE_BINS;
-      hel.title.html(folder.name);
-      hel.folder.fadeIn(200);
-      hel.buttonBack.click( function () {
-        self.render_();
-        hel.buttonBack.off();
-      } );
-    } else {
-      folder = null;
-      this.mode_ = Explorer.MODE_FOLDERS;
-      hel.folder.fadeOut(200);
-    }
-
-    switch(this.viewType_) {
-    case Explorer.VIEW_ICONIC:
-      this.view_ = folder
-        ? new ViewIconicBins(this, folder.bins)
-        : new ViewIconicFolders(this, this.folders_);
-      
-      break;
-
-    default:
-      throw "Invalid view type or view unsupported: " + this.viewType_;
-    }
 
     /* Render view. */
+    this.view_ = ViewIconicFolders(this, this.folders_);
     this.view_.render();
     this.select(null);
   };
@@ -460,25 +370,6 @@ var FolderExplorer_ = function (window, $, std, undefined)
       } );
   };
 
-
-  /**
-   * @class
-   * */
-  var ViewIconicBins = function (owner, bins)
-  {
-    /* Invoke super constructor. */
-    ViewIconic.call(this, owner, bins);
-
-    /* Attributes */
-    this.maxPerRow_ = Math.floor(
-      Math.max(RowIconicBin.calculateMaxPerRow(owner), 1));
-  };
-
-  ViewIconicBins.prototype = Object.create(ViewIconic.prototype);
-
-  ViewIconicBins.prototype.getClassRow = function ()
-  { return RowIconicBin; };
-
   
   /**
    * @class
@@ -566,40 +457,6 @@ var FolderExplorer_ = function (window, $, std, undefined)
 
   RowIconicFolder.prototype.getClassItem = function ()
   { return ItemIconicFolder; };
-
-
-  /**
-   * @class
-   * */
-  var RowIconicBin = function (owner)
-  {
-    /* Invoke super constructor. */
-    Row.call(this, owner);
-
-    /* Attributes */
-    this.node_ = $('<div></div>')
-      .addClass([ Css.row, Css.rowBin ].join(' '))
-      .appendTo(this.owner.owner.nodes.view);
-  };
-
-  /* Static interface */
-  RowIconicBin.calculateMaxPerRow = function (owner)
-  {
-    var fake = new ItemIconicBin(null, { "fake": { name: "fake" } }),
-        result;
-
-    fake.render($('body'));
-    result = owner.nodes.view.innerWidth() / fake.node.outerWidth(true);
-    fake.node.remove();
-    
-    return result;
-  };
-
-  /* Interface */
-  RowIconicBin.prototype = Object.create(Row.prototype);
-
-  RowIconicBin.prototype.getClassItem = function ()
-  { return ItemIconicBin; };
   
 
   /**
@@ -700,37 +557,6 @@ var FolderExplorer_ = function (window, $, std, undefined)
   { return this.node_.find('INPUT').eq(0); };
   
 
-  /**
-   * @class
-   * */
-  var ItemIconicBin = function (owner, folder)
-  {
-    /* Invoke super constructor. */
-    Item.call(this, owner, folder);
-  };
-
-  /* Interface */
-  ItemIconicBin.prototype = Object.create(Item.prototype);
-
-  ItemIconicBin.prototype.render = function (container)
-  {
-    var self = this;
-    
-    this.node_ = $('<div></div>')
-      .addClass([ Css.icon, Css.iconBin ].join(' '))
-      .html( [ '<div class="',
-               Css.iconImage,
-               '"></div>',
-               '<div class="',
-               Css.iconName,
-               '">',
-               this.item_.name,
-               '</div>' ].join('') );
-
-    this.node_.appendTo(container);
-  };
-  
-
   /* CSS class names used. */
   var Css = {
     icon: "sd-fe-icon",
@@ -756,13 +582,10 @@ var FolderExplorer_ = function (window, $, std, undefined)
     Explorer: Explorer,
     ViewIconic: ViewIconic,
     ViewIconicFolders: ViewIconicFolders,
-    ViewIconicBins: ViewIconicBins,
     Row: Row,
     RowIconicFolder: RowIconicFolder,
-    RowIconicBin: RowIconicBin,
     Item: Item,
-    ItemIconicFolder: ItemIconicFolder,
-    ItemIconicBin: ItemIconicBin
+    ItemIconicFolder: ItemIconicFolder
   };
   
 };

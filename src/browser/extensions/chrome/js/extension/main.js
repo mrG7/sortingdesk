@@ -298,7 +298,6 @@ var Main = (function (window, chrome, $, std, SortingDesk, LabelBrowser, FolderE
       self.sorter_.sortingQueue.on(LoadingStatus.events);
     };
 
-
     /* Initialisation sequence */
     var height = Math.floor(
       (window.innerHeight

@@ -10,7 +10,7 @@
 /*global chrome, $ */
 
 
-var Config = (function (window, $, std, undefined) {
+var Config = (function (window, chrome, $, std, undefined) {
   var defaults_ = {
     dossierUrl: 'http://54.174.195.250:8080',
     active: true,
@@ -54,5 +54,5 @@ var Config = (function (window, $, std, undefined) {
     load: load,
     save: save
   };
-})(window, jQuery, SortingCommon);
+})(window, chrome, jQuery, SortingCommon);
 

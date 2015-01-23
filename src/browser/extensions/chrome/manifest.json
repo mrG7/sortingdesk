@@ -4,26 +4,23 @@
   "version": "0.1.5",
   "options_page": "html/options.html",
   "web_accessible_resources": [
-    "js/content/Ui.js",
     "lib/*.js",
-    "lib/SortingQueue/*.js",
-    "lib/SortingDesk/*.js",
+    "lib/sorting_queue/*.js",
+    "lib/sorting_desk/*.js",
     "lib/dossier.js/*.js",
-    "html/container.html",
-    "media/*",
-    "lib/bootstrap/fonts/*"
+    "media/*"
   ],
 
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": [ "lib/jquery-2.1.1.min.js", "lib/SortingCommon/SortingCommon.js", "js/content/embed.js" ],
+      "js": [ "lib/jquery-2.1.1.min.js", "lib/sorting_common/sorting_common.js", "js/content/embed.js" ],
       "css": [ "css/theme-default.css", "css/theme-default-images.css" ]
     }
   ],
 
   "background": {
-    "scripts": [ "lib/jquery-2.1.1.min.js", "js/extension/config.js", "lib/SortingCommon/SortingCommon.js", "js/extension/background.js" ]
+    "scripts": [ "lib/jquery-2.1.1.min.js", "lib/sorting_common/sorting_common.js", "js/extension/config.js", "js/extension/background.js" ]
   },
 
   "permissions": [
