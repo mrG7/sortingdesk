@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Sorting Desk</title>
+
+  <link href="../css/theme-default.css" type="text/css" rel="stylesheet" />
+  
+  <script src="../lib/jquery-2.1.1.min.js"></script>
+  <script src="../js/extension/config.js"></script>
+  <script src="../js/extension/options.js"></script>
+  <script src="../lib/CryptoJS/md5.js"></script>
+  <script src="../lib/dossier.js/Dossier.js"></script>
+  <script src="../lib/SortingCommon/SortingCommon.js"></script>
+  <script src="../lib/SortingQueue/SortingQueue.js"></script>
+  <script src="../lib/SortingDesk/api-live.js"></script>
+  <script src="../lib/SortingDesk/SortingDesk.js"></script>
+  <script src="../lib/SortingDesk/LabelBrowser.js"></script>
+  <script src="../lib/SortingDesk/FolderExplorer.js"></script>
+  <script src="../js/extension/main.js"></script>
+</head>
+
+<body>
+<!-- Sorting Desk extension -->
+<div id="sd-sorting-desk" class="sd-container">
+  <!-- Buttons: bin add and dismiss -->
+  <div id="sd-sorter">
+    <div id="sd-button-add" data-sd-scope="sorting-desk-button-add">
+      <span>+</span>
+    </div>
+    <div id="sd-button-dismiss" data-sd-scope="sorting-queue-button-dismiss">
+      <span>X</span>
+    </div>
+
+    <div id="sd-folder-explorer" data-sd-scope="folder-explorer-container">
+      <div class="sd-empty" data-sd-scope="folder-explorer-empty">
+        Please <strong>create</strong> a folder to start bookmarking
+      </div>
+    </div>
+    <div id="sd-queue" data-sd-scope="sorting-queue-items">
+      <div class="sd-empty" data-sd-scope="sorting-queue-items-empty">
+        Queue of items empty
+      </div>
+    </div>
+    
+    <!-- Extension state -->
+    <div class="sd-loading"></div>
+  </div>
+
+  <div class="sd-clear"></div>
+</div>
+
+<!-- Label Browser -->
+<div id="sd-label-browser" class="sd-label-browser sd-container sd-component" data-sd-scope="label-browser-container">
+  <div class="sd-container-inner">
+    <!-- Buttons: window close -->
+    <div class="sd-button-close" data-sd-scope="label-browser-close">X</div>
+
+    <!-- Header: id and content, and toolbar -->
+    <div class="sd-header sd-lb-header" data-sd-scope="label-browser-header">
+      <!-- Toolbar -->
+      <div class="sd-toolbar sd-lb-toolbar" data-sd-scope="label-browser-toolbar">
+        <div class="sd-toolbar-button-group">
+          <button class="sd-toolbar-button sd-disabled" data-sd-scope="label-browser-toolbar-list"><span class="sd-glyph sd-glyph-list"></span></button>
+          <button class="sd-toolbar-button sd-disabled" data-sd-scope="label-browser-toolbar-group"><span class="sd-glyph sd-glyph-group"></span></button>
+        </div>
+      </div>
+
+      <!-- Reference bin's id and content -->
+      <div>
+        <h1 class="sd-header-title sd-lb-header-title" data-sd-scope="label-browser-header-title"></h1>
+        <div class="sd-lb-header-content" data-sd-scope="label-browser-header-content"></div>
+      </div>
+
+    </div>
+
+    <!-- Content container -->
+    <div class="sd-lb-container-content sd-container-content">
+      <div class="sd-container-view sd-lb-items" data-sd-scope="label-browser-items">
+        <table>
+          <tr>
+            <th>Source</th>
+            <th>Content</th>
+          </tr>
+        </table>
+      </div>
+      <div class="sd-loading sd-lb-loading"></div>
+      <div class="sd-empty sd-lb-empty">No feature collections retrieved</div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
+
