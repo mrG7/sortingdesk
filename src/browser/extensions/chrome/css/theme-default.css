@@ -34,6 +34,7 @@ BODY {
 /* Master container */
 #sd-sorting-desk {
   width: 100%;
+  box-sizing: border-box;
 }
 
 /* Container of bins and queue */
@@ -81,31 +82,36 @@ BODY {
 }
 
 /* Various */
-#sd-folder-explorer {
-  position: relative;
-  overflow: auto;
+#sd-sorting-desk {
+  overflow: hidden;
   white-space: nowrap;
-  vertical-align: middle;
   border-bottom: 1px solid silver;
 }
 
-#sd-folder-explorer .sd-header {
+#sd-sorting-desk > .sd-header {
   padding: 5px;
   border-radius: 0;
   height: 43px;
 }
 
-#sd-folder-explorer .sd-header-title {
+#sd-sorting-desk > .sd-header > H1 {
   font-size: 13px;
 }
 
-#sd-folder-explorer .sd-header-title {
+#sd-sorting-desk > .sd-header > .sd-header-title {
   margin-top: 7px;
+}
+
+#sd-folder-explorer {
+  overflow: auto;
+  white-space: nowrap;
+  vertical-align: middle;
+  padding: 5px;
+  border-bottom: 1px solid silver;
 }
 
 #sd-queue {
   position: relative;
-  height: 310px;
   overflow-y: auto;
   margin: 5px;
 }
