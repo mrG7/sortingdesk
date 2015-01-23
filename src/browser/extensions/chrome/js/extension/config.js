@@ -10,7 +10,7 @@
 /*global chrome, $ */
 
 
-var Config = (function () {
+var Config = (function (window, $, std, undefined) {
   var defaults_ = {
     dossierUrl: 'http://54.174.195.250:8080',
     active: true,
@@ -20,7 +20,7 @@ var Config = (function () {
 
   var load = function (callback) {
     chrome.storage.local.get('config', function (state) {
-      console.log("Configuration loaded");
+      console.info("Configuration loaded");
 
       /* If a configuration state has not been found, save an initial default
        * one. */
@@ -43,7 +43,7 @@ var Config = (function () {
     chrome.storage.local.set( { "config": options }, function () {
       console.log("Configuration saved");
 
-      if(callback)
+      if(std.if_fn(callback))
         callback();
     } );
   };
@@ -54,5 +54,5 @@ var Config = (function () {
     load: load,
     save: save
   };
-})();
+})(window, jQuery, SortingCommon);
 
