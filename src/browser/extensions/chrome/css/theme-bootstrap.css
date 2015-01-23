@@ -1,0 +1,13 @@
+/** theme-bootstrap.css --- Customisation of bootstrap styling
+ *
+ * Copyright (C) 2015 Diffeo
+ *
+ * Comments:
+ */
+
+/*csslint adjoining-classes: false, important: false */
+
+/* Bootstrap */
+BUTTON.dropdown-toggle > .caret {
+  margin-left: 5px;
+}
