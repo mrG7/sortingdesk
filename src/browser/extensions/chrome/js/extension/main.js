@@ -309,7 +309,8 @@ var Main = (function (window, chrome, $, std, SortingDesk, LabelBrowser, FolderE
       /* Initialise API and instantiate `SortingDesk´ class.
        * --
        * Note: for whatever reason, Chrome is not notifying of any exceptions
-       * thrown. */
+       * thrown, which is why instantiation is wrapped inside a try-catch block.
+       * */
       try {
         instantiate_(meta);
       } catch(x) {
