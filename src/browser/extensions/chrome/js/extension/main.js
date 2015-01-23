@@ -1,3 +1,14 @@
+/**
+ * @file Sorting Desk extension user interface.
+ * @copyright 2015 Diffeo
+ *
+ * Comments:
+ * Uses the `SortingCommon´, `SortingQueue´ and `SortingDesk´ components.
+ *
+ */
+
+
+/*jshint laxbreak:true */
 
 var Main = (function (window, chrome, $, std, SortingDesk, LabelBrowser, FolderExplorer, Api, undefined) {
 
