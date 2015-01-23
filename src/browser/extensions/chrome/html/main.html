@@ -33,10 +33,20 @@
   <!-- Header -->
   <div class="sd-header">
     <!-- Toolbar -->
-    <div class="sd-toolbar" data-sd-scope="sorting-desk-toolbar">
-      <div class="btn-group">
-        <button type="button" class="btn btn-default btn-sm" data-toggle="tooltip" data-placement="left" title="Create a new folder" data-sd-scope="sorting-desk-toolbar-list">
+    <div class="sd-toolbar btn-toolbar" role="toolbar" data-sd-scope="sorting-desk-toolbar">
+      <div class="btn-group btn-group-sm">
+        <button type="button" class="btn btn-default" data-toggle="tooltip" data-placement="left" title="Create a new folder" data-sd-scope="sorting-desk-toolbar-add">
           <span class="glyphicon glyphicon-plus"></span>
+        </button>
+        <button type="button" class="btn btn-default disabled" data-toggle="tooltip" data-placement="left" title="Rename selected folder" data-sd-scope="sorting-desk-toolbar-rename">
+          <span class="glyphicon glyphicon-pencil"></span>
+        </button>
+        <button type="button" class="btn btn-default disabled" data-toggle="tooltip" data-placement="left" title="Remove selected folder" data-sd-scope="sorting-desk-toolbar-remove">
+          <span class="glyphicon glyphicon-remove"></span>
+      </div>
+      <div class="btn-group btn-group-sm">
+        <button type="button" class="btn btn-default" data-toggle="tooltip" data-placement="left" title="Refresh view" data-sd-scope="sorting-desk-toolbar-refresh">
+          <span class="glyphicon glyphicon-refresh"></span>
         </button>
       </div>
     </div>
