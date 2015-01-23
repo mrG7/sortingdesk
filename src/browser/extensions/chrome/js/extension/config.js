@@ -14,7 +14,7 @@ var Config = (function (window, $, std, undefined) {
   var defaults_ = {
     dossierUrl: 'http://54.174.195.250:8080',
     active: true,
-    activateHttps: false
+    startPosition: 0
   };
 
 

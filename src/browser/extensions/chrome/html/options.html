@@ -3,8 +3,11 @@
 <head>
   <title>Sorting Desk &#8212; Options</title>
   <link href="../lib/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen"/>
+  <link href="../css/theme-bootstrap.css" rel="stylesheet" media="screen"/>
   
   <script src="../lib/jquery-2.1.1.min.js"></script>
+  <script src="../lib/bootstrap/js/bootstrap.min.js"></script>
+  <script src="../lib/SortingCommon/SortingCommon.js"></script>
   <script src="../js/extension/config.js"></script>
   <script src="../js/extension/options.js"></script>
 </head>
@@ -13,7 +16,7 @@
   <div class="container">
     <div class="panel panel-default">
       <div class="panel-heading">
-        <h2>Sorting Desk &#8212; Configuration</h2>
+        <h3>Sorting Desk &#8212; Configuration</h3>
       </div>
       <div class="panel-body form-horizontal">
         <div class="form-group">
@@ -22,6 +25,7 @@
             <input type="url" class="form-control" id="dossier-url" placeholder="Enter a valid URL or leave blank to use default" />
           </div>
         </div>
+        
         <div class="form-group">
           <div class="col-sm-offset-2 col-sm-10">
             <div class="checkbox">
@@ -31,15 +35,20 @@
             </div>
           </div>
         </div>
+        
         <div class="form-group">
-          <div class="col-sm-offset-2 col-sm-10">
-            <div class="checkbox">
-              <label>
-                <input id="activate-https" type="checkbox"> Do not activate for <samp>HTTPS</samp> addresses
-              </label>
+          <label for="start-position" class="col-sm-2 control-label">Start position</label>
+          <div class="class-sm-offset-2 col-sm-10">
+            <div class="dropdown">
+              <button id="start-position" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="true">Select start position<span class="caret"></span></button>
+              <ul class="dropdown-menu" aria-labelledby="start-position">
+                <li data-value="0"><a href="#">Right hand-side of main window</a></li>
+                <li data-value="1" class="disabled" title="Not implemented yet"><a href="#">Left hand-side of main window</a></li>
+              </ul>
             </div>
           </div>
         </div>
+        
         <div class="form-group">
           <div class="col-sm-offset-2 col-sm-10">
             <button id="save" type="submit" class="btn btn-default">Save</button>
