@@ -31,7 +31,7 @@ var _DossierJS = function(window, $) {
                 get_type_(arguments),
                 $.ajax.apply($, Array.prototype.splice.call(arguments, 1)));
         };
-        
+
         var getJSON = function ()
         {
             return add_(
@@ -96,7 +96,7 @@ var _DossierJS = function(window, $) {
             /* console.log("Added xhr: %s: ", type, requests_); */
             return xhr;
         };
-        
+
         var get_type_ = function (args)
         {
             if(args.length < 2) {
@@ -114,9 +114,9 @@ var _DossierJS = function(window, $) {
             getJSON: getJSON,
             stop: stop
         };
-        
+
     } )();
-    
+
     // Create a new Dossier API, which can be used to issue requests
     // against a running instance of dossier.web.
     //
@@ -201,8 +201,7 @@ var _DossierJS = function(window, $) {
     // This returns a jQuery promise that resolves to a list of search engine
     // names.
     API.prototype.searchEngines = function() {
-        return Xhr.getJSON('API.searchEngines',
-                                this.url('search_engines'));
+        return Xhr.getJSON('API.searchEngines', this.url('search_engines'));
     };
 
     // Retrieves a feature collection from the database with the given
@@ -248,7 +247,7 @@ var _DossierJS = function(window, $) {
             console.log("No content ids to fetch");
             window.setTimeout(function () { def.resolve(fcs); } );
         }
-        
+
         for (var i = 0; i < content_ids.length; i++) {
             var cid = content_ids[i];
             this.fcGet(cid)
@@ -344,17 +343,22 @@ var _DossierJS = function(window, $) {
 
         if (label.subtopic_id1) params.subtopic_id1 = label.subtopic_id1;
         if (label.subtopic_id2) params.subtopic_id2 = label.subtopic_id2;
-        
+
         return Xhr.ajax('API.addLabel', {
             type: 'PUT',
             url: this.url(endpoint, params),
             contentType: 'text/plain',
             data: label.coref_value.toString()
         }).fail(function() {
-            console.log("Could not add label <" + label.toString() + ">");
+            console.log("Could not add label:", label);
         }).promise();
     };
 
+    // Adds an array of labels asynchronously and returns a promise that is
+    // resolved when all labels have been inserted.
+    //
+    // If a label fails to add, then the promise is rejected with error
+    // information.
     API.prototype.addLabels = function(labels) {
         var promises = [],
             def = $.Deferred(),
@@ -376,6 +380,108 @@ var _DossierJS = function(window, $) {
             );
         }
         return def.promise();
+    };
+
+    // List all folders belonging to a particular user.
+    //
+    // `annotator` is optional and defaults to `unknown`.
+    //
+    // This returns a promise that is resolved to a list of `Folder`s.
+    API.prototype.listFolders = function(annotator /* optional */) {
+        annotator = annotator || 'unknown';
+        var annotator = annotator || 'unknown',
+            params = {annotator_id: annotator},
+            url = this.url('folder', params);
+
+        return Xhr.getJSON('API.listFolders', url).promise()
+            .then(function(ids) {
+                return ids.map(function(id) {
+                    return Folder.from_id(id, annotator);
+                });
+            });
+    };
+
+    // Add a new folder.
+    //
+    // `folder` should be an instance of `Folder`.
+    //
+    // This returns a promise that is resolved if and only if the folder was
+    // added successfully.
+    API.prototype.addFolder = function(folder) {
+        var params = {annotator_id: folder.annotator},
+            url = this.url('folder/' + folder.id, params);
+        return Xhr.ajax('API.addFolder', {
+            type: 'PUT',
+            url: url,
+        }).fail(function() {
+            console.log("Could not add folder:", folder);
+        }).promise();
+    };
+
+    // List all subfolders belonging to a particular folder.
+    //
+    // `folder` should be an instance of `Folder`.
+    //
+    // This returns a promise that is resolved to a list of `Subfolder`s.
+    API.prototype.listSubfolders = function(folder) {
+        var params = {annotator_id: folder.annotator},
+            endpoint = ['folder', folder.id, 'subfolder'].join('/'),
+            url = this.url(endpoint, params);
+        return Xhr.getJSON('API.listSubfolders', url).promise()
+            .then(function(ids) {
+                return ids.map(function(id) {
+                    return Subfolder.from_id(folder, id);
+                });
+            });
+    };
+
+    // Add an item to a subfolder. If the subfolder does not already exist,
+    // it is created.
+    //
+    // `subfolder` should be an instance of `Subfolder`.
+    //
+    // `content_id` and `subtopic_id` should correspond to the item being
+    // put into the subfolder. These ids do not need to conform to any
+    // particular format, although `content_id` should globally identify
+    // a topic and `subtopic_id` should locally identify a subtopic within
+    // a topic.
+    //
+    // This returns a promise that is resolved if and only if the item was
+    // added to the given subfolder.
+    //
+    // Note that there is no way to add a subfolder without an item in it.
+    // Empty subfolders cannot exist!
+    API.prototype.addSubfolderItem = function(subfolder, content_id,
+                                              subtopic_id) {
+        var params = {annotator_id: subfolder.folder.annotator},
+            endpoint = [
+                'folder', subfolder.folder.id, 'subfolder', subfolder.id,
+                serialize(content_id), serialize(subtopic_id),
+            ].join('/'),
+            url = this.url(endpoint, params);
+        return Xhr.ajax('API.addSubfolderItem', {
+            type: 'PUT',
+            url: url,
+        }).fail(function() {
+            console.log("Could not add subfolder with item:",
+                        subfolder, content_id, subtopic_id);
+        }).promise();
+    };
+
+    // Lists all of the items in a particular subfolder.
+    //
+    // `subfolder` should be an instance of `Subfolder`.
+    //
+    // This returns a promise that is resolved to a list of tuples. The first
+    // element in the tuple is a `content_id` and the second element is a
+    // `subtopic_id`.
+    API.prototype.listSubfolderItems = function(subfolder) {
+        var params = {annotator_id: subfolder.folder.annotator},
+            endpoint = [
+                'folder', subfolder.folder.id, 'subfolder', subfolder.id
+            ].join('/'),
+            url = this.url(endpoint, params);
+        return Xhr.getJSON('API.listSubfolderItems', url).promise();
     };
 
     API.prototype.stop = function () {
@@ -608,6 +714,133 @@ var _DossierJS = function(window, $) {
         return vals;
     };
 
+    // A folder is a means to organize user annotations.
+    //
+    // Currently, there are only two levels of folders: folders and subfolders.
+    // Folders can contain zero or more subfolders and subfolders contain
+    // one or more pieces of content. Folders can be owned by a particular
+    // user, although in practice, the same `unknown` annotator is used for
+    // everyone. (Therefore, the namespace of folders is shared by all.)
+    //
+    // Folders use a similar identifier scheme as Wikipedia. Namely, if a
+    // folder's name is "John Smith" then its id is "John_Smith". Identifiers
+    // cannot contain a ' ' (space) character. A name cannot contain a `/`
+    // character (which diverges from Wikipedia). This implies that an
+    // identifier also cannot contain a `/` character.
+    //
+    // A folder has the following instance attributes:
+    //
+    //     name       The name of the folder. Show this to users!
+    //     id         The id of the folder. Hide this from users!
+    //     annotator  The name of the user who owns this folder.
+    //                This defaults to `unknown`.
+    //
+    // Note that this particular constructor should not be used. Use the
+    // static methods `from_name` or `from_id` instead.
+    var Folder = function() { };
+
+    // Create a new folder with the given name.
+    //
+    // If `annotator` is not specified, it defaults to `unknown`.
+    Folder.from_name = function(name, annotator /* optional */) {
+        assert_valid_folder_name(name);
+
+        var f = new Folder();
+        f.name = name;
+        f.id = folder_name_to_id(f.name);
+        f.annotator = annotator || 'unknown';
+        return f;
+    };
+
+    // Create a new folder with the given identifier.
+    //
+    // If `annotator` is not specified, it defaults to `unknown`.
+    Folder.from_id = function(id, annotator /* optional */) {
+        assert_valid_folder_id(id);
+
+        var f = new Folder();
+        f.id = id;
+        f.name = folder_id_to_name(f.id);
+        f.annotator = annotator || 'unknown';
+        return f;
+    };
+
+    // A subfolder is a means to organize user annotations within a topic.
+    //
+    // Please see the documentation for `Folder` for how the folder hierarchy
+    // is structured. Subfolders use the same identifier/name scheme as
+    // folders.
+    //
+    // A subfolder has the following instance attributes:
+    //
+    //     folder   An instance of `Folder` that this subfolder belongs to.
+    //     name     The name of the subfolder. Show this to users!
+    //     id       The id of the subfolder. Hide this from users!
+    //
+    // Note that this particular constructor should not be used. Use the
+    // static methods `from_name` or `from_id` instead.
+    var Subfolder = function(folder) { this.folder = folder; };
+
+    // Create a new subfolder with the given name.
+    //
+    // `folder` must be an instance of `Folder`.
+    Subfolder.from_name = function(folder, name) {
+        assert_valid_folder_name(name);
+
+        var sf = new Subfolder(folder);
+        sf.name = name;
+        sf.id = folder_name_to_id(sf.name);
+        return sf;
+    };
+
+    // Create a new subfolder with the given identifier.
+    //
+    // `folder` must be an instance of `Folder`.
+    Subfolder.from_id = function(folder, id) {
+        assert_valid_folder_id(id);
+
+        var sf = new Subfolder(folder);
+        sf.id = id;
+        sf.name = folder_id_to_name(sf.id);
+        return sf;
+    };
+
+    /* Some helper functions for dealing with folders and their ids/names. */
+
+    function folder_name_to_id(name) {
+        return name.replace(' ', '_');
+    }
+
+    function folder_id_to_name(name) {
+        return name.replace('_', ' ');
+    }
+
+    function assert_valid_folder_name(name) {
+        var illegal = ['/'];
+        if (name.length === 0) {
+            throw "Folder names cannot be empty";
+        }
+        for (var i = 0; i < illegal.length; i++) {
+            if (name.indexOf(illegal[i]) !== -1) {
+                throw "Illegal character '" + illegal[i] + "' found in "
+                      + "folder name '" + name + "'.";
+            }
+        }
+    }
+
+    function assert_valid_folder_id(name) {
+        var illegal = ['/', ' '];
+        if (name.length === 0) {
+            throw "Folder names cannot be empty";
+        }
+        for (var i = 0; i < illegal.length; i++) {
+            if (name.indexOf(illegal[i]) !== -1) {
+                throw "Illegal character '" + illegal[i] + "' found in "
+                      + "folder name '" + name + "'.";
+            }
+        }
+    }
+
     // SortingQueueItems provides SortingQueue integration with DossierJS.
     // Namely, it provides the following callback functions:
     //
@@ -748,7 +981,9 @@ var _DossierJS = function(window, $) {
         FeatureCollection: FeatureCollection,
         Label: Label,
         LabelFetcher: LabelFetcher,
-        SortingQueueItems: SortingQueueItems
+        SortingQueueItems: SortingQueueItems,
+        Folder: Folder,
+        Subfolder: Subfolder,
     };
 };
 
