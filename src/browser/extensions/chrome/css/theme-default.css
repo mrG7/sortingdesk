@@ -1,4 +1,4 @@
-/** theme-default.css --- Default theme used by Sorting Desk
+** theme-default.css --- Default theme used by Sorting Desk
  *
  * Copyright (C) 2014 Diffeo
  *
@@ -27,12 +27,6 @@ BODY {
   z-index: 1000000;
 }
 
-.sd-container * {
-  box-sizing: content-box;
-  color: inherit;
-  background-color: inherit;
-}
-
 .sd-container-inner {
   background-color: transparent;
 }
@@ -46,7 +40,6 @@ BODY {
 #sd-sorter {
   display: block;
   border: 2px solid #ccc;
-  height: auto;
   background-color: white;
   background: linear-gradient(to bottom, rgba(255,255,255,1) 0%, rgba(237,237,237,1) 40%, rgba(235,235,235,1) 100%);
 }
@@ -58,9 +51,8 @@ BODY {
 
 /* Button: add */
 #sd-button-add {
-  display: none;
-  position: absolute;
-  z-index: -1;
+  display: block;
+  float: right;
   border: 2px solid #A2C5A6;
   background-color: #ECF8EA;
   clear: both;
@@ -79,10 +71,6 @@ BODY {
   transition: all 175ms;
 }
 
-#sd-sorting-desk.sd-active #sd-button-add {
-  display: block;
-}
-
 #sd-button-add SPAN {
   position: relative;
 }
@@ -98,8 +86,21 @@ BODY {
   overflow: auto;
   white-space: nowrap;
   vertical-align: middle;
-  margin: 5px;
-  border-bottom: 1px dashed silver;
+  border-bottom: 1px solid silver;
+}
+
+#sd-folder-explorer .sd-header {
+  padding: 5px;
+  border-radius: 0;
+  height: 43px;
+}
+
+#sd-folder-explorer .sd-header-title {
+  font-size: 13px;
+}
+
+#sd-folder-explorer .sd-header-title {
+  margin-top: 7px;
 }
 
 #sd-queue {
@@ -639,11 +640,6 @@ A.sd-text-item-title:hover {
   overflow: hidden;
 }
 
-.sd-lb-toolbar,
-.sd-fe-toolbar {
-  float: right;
-}
-
 .sd-button-close {
   position: absolute;
   top: -12px;
@@ -667,148 +663,16 @@ A.sd-text-item-title:hover {
 
 
 /* Toolbar & buttons */
-.sd-toolbar-button-group {
-  float: left;
-  margin-left: 5px;
+.sd-toolbar {
+  float: right;
 }
 
-.sd-toolbar-button-group:last-child:first-child {
-  margin-left: 0;
+.sd-toolbar BUTTON {
+  background-image: linear-gradient(#fcfcfc, #eee);
 }
 
-.sd-toolbar-button-group > .sd-toolbar-button {
-  position: relative;
-  float: left;
-  margin: 0;
-}
-
-.sd-toolbar-button-group > .sd-toolbar-button:first-child:not(:last-child) {
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-}
-
-.sd-toolbar-button-group > .sd-toolbar-button:last-child:not(:first-child) {
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-}
-
-.sd-toolbar-button-group > .sd-toolbar-button:not(:first-child):not(:last-child) {
-  border-radius: 0;
-}
-
-.sd-button,
-.sd-toolbar-button {
-  display: inline-block;
-  margin-bottom: 0;
-  font-weight: 400;
-  text-align: center;
-  white-space: nowrap;
-  vertical-align: middle;
-  cursor: pointer;
-  background-image: none;
-  user-select: none;
-}
-
-.sd-toolbar-button {
-  padding: 6px 12px;
-  border: 1px solid transparent;
-  border-radius: 6px;
-  outline: 1px auto #ccc;
-  line-height: normal;
-  height: 22px;
-
-  color: #333;
-  background-color: white;
-  transition: all 150ms;
-}
-
-.sd-toolbar-button.sd-disabled {
-  cursor: default;
-}
-
-.sd-toolbar-button.sd-disabled * {
-  color: #ccc;
-}
-  
-
-.sd-toolbar-button:hover:not(.sd-disabled) {
-  background-color: #eee;
-  border-color: #ccc;
-  z-index: 2;
-  outline: none;
-}
-
-.sd-toolbar-button:focus:not(.sd-disabled) {
-  outline: 2px solid #a9bef3;
-  outline-offset: -1px;
-  z-index: 2;
-}
-
-.sd-glyph {
-  position: relative;
-  top: 1px;
-  display: inline-block;
-  font-family: 'Glyphicons Halflings';
-  font-style: normal;
-  font-weight: normal;
-  line-height: 16px;
-  font-size: 16px;
-
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-.sd-button > *,
-.sd-button.sd-normal > *,
-.sd-toolbar-button.sd-normal > * {
-  font-size: 16px;
-}
-
-.sd-button.sd-small > *,
-.sd-toolbar-button.sd-small > * {
-  font-size: 14px;
-}
-
-
-/* Glyphs */
-.sd-glyph-plus:before {
-  content: "\2b"
-}
-
-.sd-glyph-remove:before {
-  content: "\e014";
-}
-
-.sd-glyph-rename:before {
-  content: "\270f";
-}
-
-.sd-glyph-list:before {
-  content: "\e012";
-}
-
-.sd-glyph-group:before {
-  content: "\e032";
-}
-
-.sd-glyph-wrench:before {
-  content: "\e136";
-}
-
-.sd-glyph-icons:before {
-  content:"\e011";
-}
-
-.sd-glyph-chevron-left:before {
-  content:"\e079";
-}
-
-.sd-glyph-floppy-open:before {
-  content:"\e176";
-}
-
-.sd-glyph-folder-open:before {
-  content: "\e118";
+.sd-toolbar BUTTON:hover {
+  background-image: linear-gradient(#eee, #ddd);  
 }
 
 /* Button: round */

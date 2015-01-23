@@ -3,14 +3,17 @@
 <head>
   <title>Sorting Desk</title>
 
+  <link href="../lib/bootstrap/css/bootstrap.min.css" type="text/css" rel="stylesheet" />
+  <link href="../lib/bootstrap/css/bootstrap-theme.min.css" type="text/css" rel="stylesheet" />
   <link href="../css/theme-default.css" type="text/css" rel="stylesheet" />
   
   <script src="../lib/jquery-2.1.1.min.js"></script>
+  <script src="../lib/bootstrap/js/bootstrap.min.js"></script>
+  <script src="../lib/SortingCommon/SortingCommon.js"></script>
   <script src="../js/extension/config.js"></script>
   <script src="../js/extension/options.js"></script>
   <script src="../lib/CryptoJS/md5.js"></script>
   <script src="../lib/dossier.js/Dossier.js"></script>
-  <script src="../lib/SortingCommon/SortingCommon.js"></script>
   <script src="../lib/SortingQueue/SortingQueue.js"></script>
   <script src="../lib/SortingDesk/api-live.js"></script>
   <script src="../lib/SortingDesk/SortingDesk.js"></script>
@@ -23,30 +26,35 @@
 <!-- Sorting Desk extension -->
 <div id="sd-sorting-desk" class="sd-container">
   <!-- Buttons: bin add and dismiss -->
-  <div id="sd-sorter">
-    <div id="sd-button-add" data-sd-scope="sorting-desk-button-add">
-      <span>+</span>
-    </div>
-    <div id="sd-button-dismiss" data-sd-scope="sorting-queue-button-dismiss">
-      <span>X</span>
-    </div>
-
-    <div id="sd-folder-explorer" data-sd-scope="folder-explorer-container">
-      <div class="sd-empty" data-sd-scope="folder-explorer-empty">
-        Please <strong>create</strong> a folder to start bookmarking
-      </div>
-    </div>
-    <div id="sd-queue" data-sd-scope="sorting-queue-items">
-      <div class="sd-empty" data-sd-scope="sorting-queue-items-empty">
-        Queue of items empty
-      </div>
-    </div>
-    
-    <!-- Extension state -->
-    <div class="sd-loading"></div>
+  <div id="sd-button-dismiss" data-sd-scope="sorting-queue-button-dismiss">
+    <span>X</span>
   </div>
 
-  <div class="sd-clear"></div>
+  <div id="sd-folder-explorer" data-sd-scope="folder-explorer-container">
+    <div class="sd-header sd-header-straight">
+      <!-- Toolbar -->
+      <div class="sd-toolbar" data-sd-scope="sorting-desk-toolbar">
+        <div class="btn-group">
+          <button type="button" class="btn btn-default btn-sm" data-toggle="tooltip" data-placement="left" title="Create a new folder" data-sd-scope="sorting-desk-toolbar-list">
+            <span class="glyphicon glyphicon-plus"></span>
+          </button>
+        </div>
+      </div>
+
+      <h1 class="sd-header-title">Folder Explorer</h1>
+    </div>
+    <div class="sd-empty" data-sd-scope="folder-explorer-empty">
+      Please <strong>create</strong> a folder to start bookmarking
+    </div>
+  </div>
+  <div id="sd-queue" data-sd-scope="sorting-queue-items">
+    <div class="sd-empty" data-sd-scope="sorting-queue-items-empty">
+      Queue of items empty
+    </div>
+  </div>
+  
+  <!-- Extension state -->
+  <div class="sd-loading"></div>
 </div>
 
 <!-- Label Browser -->
@@ -58,7 +66,7 @@
     <!-- Header: id and content, and toolbar -->
     <div class="sd-header sd-lb-header" data-sd-scope="label-browser-header">
       <!-- Toolbar -->
-      <div class="sd-toolbar sd-lb-toolbar" data-sd-scope="label-browser-toolbar">
+      <div class="sd-toolbar" data-sd-scope="label-browser-toolbar">
         <div class="sd-toolbar-button-group">
           <button class="sd-toolbar-button sd-disabled" data-sd-scope="label-browser-toolbar-list"><span class="sd-glyph sd-glyph-list"></span></button>
           <button class="sd-toolbar-button sd-disabled" data-sd-scope="label-browser-toolbar-group"><span class="sd-glyph sd-glyph-group"></span></button>
