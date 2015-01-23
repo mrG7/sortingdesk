@@ -88,11 +88,12 @@ var _DossierJS = function(window, $) {
                     }
                 } ) ) {
                     console.error("Failed to remove request: %s: ", type, xhr);
-                } else
-                    console.log("Removed request: ", requests_);
+                } else {
+                    /* console.log("Removed request: ", requests_); */
+                }
             } ) );
 
-            console.log("Added xhr: %s: ", type, requests_);
+            /* console.log("Added xhr: %s: ", type, requests_); */
             return xhr;
         };
         
