@@ -89,6 +89,10 @@ In =onDropSpecial=.
 ** Extension
 *** All
 *** Chrome
+**** TODO Always positioning extension window in the first screen
+Must account for the fact that the main browser window may be in the second window and resize it, if needs be.
+
+**** TODO Subtracting hard-coded margin due to possible Chrome bug
 **** TODO =DossierJS=: must reside in =background.js=
 Moving =Dossier.JS= into =background.js= would effectively mean the limitations on same-origin policy would no longer apply.
 
