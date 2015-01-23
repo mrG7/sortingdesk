@@ -1,6 +1,6 @@
 # makefile --- Master make file
 #
-# Copyright (c) 2014 Diffeo
+# Copyright (c) 2015 Diffeo
 #
 # Comments:
 #

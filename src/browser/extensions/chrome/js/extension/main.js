@@ -248,6 +248,8 @@ var Main = (function (window, chrome, $, std, SortingDesk, LabelBrowser, FolderE
       (sorter = new SortingDesk.Sorter( {
         container: $('#sd-sorter'),
         constructors: {
+          createFolderExplorer: function (options) {
+          },
           createLabelBrowser: function (options) {
             $('[data-sd-scope="label-browser-header-title"]').html("Loading");
             $('[data-sd-scope="label-browser-header-content"]')
@@ -279,11 +281,8 @@ var Main = (function (window, chrome, $, std, SortingDesk, LabelBrowser, FolderE
             itemsDraggable: false
           }
         }
-      }, $.extend(
-        true,
-        Api,
-        HandlerCallbacks.callbacks.sorter ) )
-      ).initialise();
+      }, $.extend(true, Api, HandlerCallbacks.callbacks.sorter ) ) )
+        .initialise();
 
       self.sorter_.sortingQueue.on(LoadingStatus.events);
     };

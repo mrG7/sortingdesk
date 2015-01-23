@@ -1,6 +1,6 @@
 /**
  * @file Module responsible for the extension's configuration state.
- * @copyright 2014 Diffeo
+ * @copyright 2015 Diffeo
  *
  * Comments:
  *

@@ -1,6 +1,6 @@
 /** api-live.js --- Sorting Desk's live API
  *
- * Copyright (C) 2014 Diffeo
+ * Copyright (C) 2015 Diffeo
  *
  * Comments:
  *

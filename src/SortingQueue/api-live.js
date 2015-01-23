@@ -1,6 +1,6 @@
 /** api-sorting_queue-live.js --- Sorting Queue's live API
  *
- * Copyright (C) 2014 Diffeo
+ * Copyright (C) 2015 Diffeo
  *
  * Comments:
  *

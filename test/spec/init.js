@@ -1,6 +1,6 @@
 /**
  * @file Test specification common logic.
- * @copyright 2014 Diffeo
+ * @copyright 2015 Diffeo
  *
  * Comments:
  *

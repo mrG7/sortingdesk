@@ -2,7 +2,7 @@
  * @file Initialisation and handling of the SortingDesk Google Chrome
  * extension user interface.
  * 
- * @copyright 2014 Diffeo
+ * @copyright 2015 Diffeo
  *
  * Comments:
  * Uses the `SortingDesk' component.

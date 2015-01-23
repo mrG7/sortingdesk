@@ -1,6 +1,6 @@
 /**
  * @file Sorting Desk component.
- * @copyright 2014 Diffeo
+ * @copyright 2015 Diffeo
  *
  * Comments:
  * Uses the `SortingCommon´ component.

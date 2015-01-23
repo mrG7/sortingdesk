@@ -1,9 +1,9 @@
 /**
- * @file Bin Explorer component.
- * @copyright 2014 Diffeo
+ * @file Folder Explorer component.
+ * @copyright 2015 Diffeo
  *
  * Comments:
- * Uses the `SortingQueue' component.
+ * Uses the `SortingCommon' component.
  *
  */
 
@@ -13,10 +13,10 @@
 
 
 /**
- * The Bin Explorer module.
+ * The Folder Explorer module.
  *
  * @returns an object containing the module's public interface. */
-var FolderExplorer_ = function (window, $, std)
+var FolderExplorer_ = function (window, $, std, undefined)
 {
 
   /**
