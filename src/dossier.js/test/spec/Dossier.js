@@ -44,10 +44,12 @@ describe('DossierJS.API', function() {
 
     it('can retrieve a random feature collection', function(done) {
         api.fcRandomGet().done(function(r) {
-            expect(r[0]).toEqual(content_id);
-            expect(r[1]).toEqual(fc);
-            done();
-        });
+            if (r.length === 2) {
+                passed(done);
+            } else {
+                failed(done);
+            }
+        }).fail(function() { failed(done); });
     });
 
     it('adds a label', function(done) {
@@ -159,6 +161,61 @@ describe('DossierJS.API', function() {
             expect(r.results[0].content_id).toEqual(content_id);
             expect(r.results[0].fc).toEqual(fc);
             done();
+        }).fail(function() { failed(done); });
+    });
+
+    it('adds folders', function(done) {
+        var f = DossierJS.Folder.from_name('dog');
+        api.addFolder(f).done(function() {
+            api.listFolders().done(function(folders) {
+                console.log(folders[i]);
+                for (var i = 0; i < folders.length; i++) {
+                    if (folders[i].id === f.id) {
+                        passed(done);
+                        return;
+                    }
+                }
+                failed(done);
+            }).fail(function() { failed(done); });
+        }).fail(function() { failed(done); });
+    });
+
+    it('adds subfolders', function(done) {
+        var f = DossierJS.Folder.from_name('dog'),
+            sf = DossierJS.Subfolder.from_name(f, 'bruce');
+        api.addFolder(f).done(function() {
+            api.addSubfolderItem(sf, 'abcd', 'wxyz').done(function() {
+                api.listSubfolders(f).done(function(subfolders) {
+                    for (var i = 0; i < subfolders.length; i++) {
+                        var sf2 = subfolders[i];
+                        if (sf.folder.id == sf2.folder.id && sf.id == sf2.id) {
+                            passed(done);
+                            return;
+                        }
+                    }
+                    failed(done);
+                }).fail(function() { failed(done); });
+            }).fail(function() { failed(done); });
+        }).fail(function() { failed(done); });
+    });
+
+    it('adds subfolder items', function(done) {
+        var f = DossierJS.Folder.from_name('dog'),
+            sf = DossierJS.Subfolder.from_name(f, 'holly');
+        api.addFolder(f).done(function() {
+            api.addSubfolderItem(sf, 'abcd', 'wxyz').done(function() {
+                api.listSubfolderItems(sf).done(function(items) {
+                    for (var i = 0; i < items.length; i++) {
+                        var cid = items[i][0],
+                            subtopic_id = items[i][1];
+                        if (cid === 'abcd' && subtopic_id === 'wxyz') {
+                            passed(done);
+                            return;
+                        }
+                    }
+                    failed(done);
+                }).fail(function() { failed(done); });
+            }).fail(function() { failed(done); });
         }).fail(function() { failed(done); });
     });
 });
