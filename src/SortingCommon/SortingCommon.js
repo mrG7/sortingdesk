@@ -959,6 +959,99 @@ var SortingCommon_ = function (window, $) {
   View.prototype.reset = absm_noti;
 
 
+  /**
+   * @class
+   * */
+  var Position = function (l, t)
+  {
+    if(arguments.length === 2) this.set(l, t);
+    else this.set(0, 0);
+
+    this.__defineGetter__("left", function () { return this.left_; } );
+    this.__defineGetter__("top", function () { return this.top_; } );
+    
+    this.__defineSetter__("left", function (l) { this.left_ = l; } );
+    this.__defineSetter__("top", function (t) { this.top_ = t; } );
+  };
+
+  Position.prototype.set = function (l, t)
+  {
+    this.left_ = l;
+    this.top_ = t;
+  };
+  
+
+  /**
+   * @class
+   * */
+  var Size = function (w, h)
+  {
+    if(arguments.length === 2) this.set(w, h);
+    else this.set(0, 0);
+
+    this.__defineGetter__("width", function () { return this.width_; } );
+    this.__defineGetter__("height", function () { return this.height_; } );
+    
+    this.__defineSetter__("width", function (w) { this.width_ = w; } );
+    this.__defineSetter__("height", function (h) { this.height_ = h; } );
+  };
+
+  Size.prototype.set = function (w, h)
+  {
+    this.width_ = w;
+    this.height_ = h;
+  };
+
+
+  /**
+   * @class
+   * */
+  var PositionSize = function (l, t, w, h)
+  {
+    if(arguments.length === 4) this.set(l, t, w, h);
+    else this.set(0, 0, 0, 0);
+
+    /* Getters */
+    this.__defineGetter__("left", function () { return this.left_; } );
+    this.__defineGetter__("top", function () { return this.top_; } );
+    
+    this.__defineGetter__("right", function () {
+      return this.width_ > 0 ? this.left_ + this.width_ - 1 : this.left_; } );
+    
+    this.__defineGetter__("bottom", function () {
+      return this.height_ > 0 ? this.top_ + this.height_ - 1 : this.top_; } );
+
+    /* Setters */
+    this.__defineGetter__("width", function () { return this.width_; } );
+    this.__defineGetter__("height", function () { return this.height_; } );
+    
+    this.__defineSetter__("left", function (l) { this.left_ = l; } );
+    this.__defineSetter__("top", function (t) { this.top_ = t; } );
+    
+    this.__defineSetter__("width", function (w) { this.width_ = w; } );
+    this.__defineSetter__("height", function (h) { this.height_ = h; } );
+  };
+
+  PositionSize.prototype.set = function (l, t, w, h)
+  {
+    this.left_ = l;
+    this.top_ = t;
+    
+    this.width_ = w;
+    this.height_ = h;
+  };
+
+  PositionSize.prototype.toObject = function ()
+  {
+    return {
+      left: this.left_,
+      top: this.top_,
+      width: this.width_,
+      height: this.height_
+    };
+  };
+  
+
   /* Return public interface. */
   return {
     /* Functions */
@@ -988,7 +1081,10 @@ var SortingCommon_ = function (window, $) {
     View: View,
     NodeFinder: NodeFinder,
     $: jQueryExtensions,
-    Html: Html
+    Html: Html,
+    Size: Size,
+    Position: Position,
+    PositionSize: PositionSize
   };
 };
 
