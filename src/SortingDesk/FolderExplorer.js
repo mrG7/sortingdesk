@@ -8,7 +8,6 @@
  */
 
 
-/*global $, define */
 /*jshint laxbreak:true */
 
 
