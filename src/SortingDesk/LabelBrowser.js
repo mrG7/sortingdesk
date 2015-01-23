@@ -117,8 +117,8 @@ var LabelBrowser_ = function (window, $, std)
       content: finder.find('header-content')
     };
 
-    els.items = finder.find('items');
-    els.table = els.items.find('TABLE');
+    els.view = finder.find('view');
+    els.table = els.view.find('TABLE');
     /* End set up up nodes. */
 
     /* Retrieve feature collection for the bin's `content_id´. */
@@ -212,11 +212,11 @@ var LabelBrowser_ = function (window, $, std)
       opacity: 1
     } );
 
-    /* Set the items list's height so a scrollbar is shown when it overflows
+    /* Set the view's list's height so a scrollbar is shown when it overflows
      * vertically. */
-    els.items.css('height', els.container.innerHeight()
+    els.view.css('height', els.container.innerHeight()
                   - els.header.container.outerHeight()
-                  - (els.items.outerHeight(true) - els.items.innerHeight()));
+                  - (els.view.outerHeight(true) - els.view.innerHeight()));
 
     this.events_.trigger('show');
     return this;
@@ -458,13 +458,13 @@ var LabelBrowser_ = function (window, $, std)
 
     /* Source */
     $('<td></td>')
-      .addClass(Css.items.id)
+      .addClass(Css.view.id)
       .html(source)
       .appendTo(row);
 
     /* Content */
     $('<td></td>')
-      .addClass(Css.items.content)
+      .addClass(Css.view.content)
       .html(this.htmlizeContent())
       .appendTo(row);
 
@@ -474,9 +474,9 @@ var LabelBrowser_ = function (window, $, std)
 
   /* CSS class names used. */
   var Css = {
-    items: {
-      id: 'sd-lb-items-id',
-      content: 'sd-lb-items-content'
+    view: {
+      id: 'sd-lb-view-id',
+      content: 'sd-lb-view-content'
     }
   };
 

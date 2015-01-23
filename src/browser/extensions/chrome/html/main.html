@@ -55,8 +55,13 @@
   
   <!-- Folder Explorer -->
   <div id="sd-folder-explorer" data-sd-scope="folder-explorer-container">
-    <div class="sd-empty" data-sd-scope="folder-explorer-empty">
-      Please <strong>create</strong> a folder to start bookmarking
+    <div class="sd-container-view-outer">
+      <div class="sd-container-view" data-sd-scope="folder-explorer-view">
+      </div>
+    </div>
+    
+    <div class="sd-empty sd-wider" data-sd-scope="folder-explorer-empty">
+      Please click the <em>add</em> button to <strong>create</strong> a folder and start bookmarking
     </div>
   </div>
   
@@ -92,12 +97,11 @@
         <h1 class="sd-header-title sd-lb-header-title" data-sd-scope="label-browser-header-title"></h1>
         <div class="sd-lb-header-content" data-sd-scope="label-browser-header-content"></div>
       </div>
-
     </div>
 
     <!-- Content container -->
-    <div class="sd-lb-container-content sd-container-content">
-      <div class="sd-container-view sd-lb-items" data-sd-scope="label-browser-items">
+    <div class="sd-container-view-outer">
+      <div class="sd-container-view sd-lb-view" data-sd-scope="label-browser-view">
         <table>
           <tr>
             <th>Source</th>

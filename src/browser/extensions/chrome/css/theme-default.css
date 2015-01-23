@@ -636,14 +636,14 @@ A.sd-text-item-title:hover {
   padding: 0;
 }
 
+.sd-container-view-outer {
+  overflow: hidden;
+}
+
 .sd-container-view {
   margin: 5px;
   overflow-y: auto;
   overflow-x: hidden;
-}
-
-.sd-container-content {
-  overflow: hidden;
 }
 
 .sd-button-close {
