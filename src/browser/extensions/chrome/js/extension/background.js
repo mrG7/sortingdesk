@@ -14,7 +14,8 @@
 var Background = function (window, chrome, $, std)
 {
   /* Constants */
-  var TIMEOUT_SAVE = 1000;
+  var TIMEOUT_SAVE = 1000,
+      DEFAULT_EXTENSION_WIDTH = 300;
 
   /* Attributes */
   var handlerTabs_,
@@ -24,6 +25,37 @@ var Background = function (window, chrome, $, std)
   var initialize_ = function ()
   {
     handlerTabs_ = MessageHandlerTabs;
+
+    chrome.windows.getCurrent(function (current) {
+      var screen = new std.Size(window.screen.width, window.screen.height),
+          win = new std.PositionSize(current.left, current.top,
+                                     current.width, current.height),
+          ext = new std.PositionSize(win.right + 1, win.top,
+                                     DEFAULT_EXTENSION_WIDTH, win.height),
+          diff = ext.right - screen.width;
+
+      if(diff > 0) {
+        console.log(diff, win.left);
+        if(diff > win.left) {
+          win.left = 0;
+          win.width = screen.width - DEFAULT_EXTENSION_WIDTH;
+          ext.left = win.right + 1;
+        } else {
+          win.left = win.left - diff - 1;
+          ext.left = ext.left - diff;
+        }
+
+        console.info("Updating window's position/size:", win.toObject());
+        chrome.windows.update(current.id, win.toObject());
+      }
+
+      console.info("Creating Sorting Desk's window:", ext.toObject());
+      chrome.windows.create( $.extend( {
+        url: chrome.runtime.getURL("/html/main.html"),
+        focused: false,
+        type: "popup"
+      }, ext.toObject() ) );
+    } );
   };
 
   var indexOfFolder_ = function (folders, id)
