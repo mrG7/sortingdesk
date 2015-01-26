@@ -10,6 +10,17 @@
 set -e
 
 dir_root="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. && pwd )"
+dir_src="$dir_root/src"
+dir_lib="$dir_root/lib"
+
+
+function message () {
+  echo -e "\033[32m$1\033[0m"
+}
+
+function info () {
+  message "I: $1"
+}
 
 
 # Component: SortingDesk
@@ -18,36 +29,54 @@ cd "$dir_root/src/browser/extensions/chrome"
 
 # The user isn't supposed to add anything into the `lib´ directory. We therefore
 # assume that all its contents can be removed.
-[ -d lib ] && rm lib -rfv
-mkdir -vp lib
+[ -d lib ] && info "cleaning dependencies" && rm lib -rfv
 
-mkdir lib/sorting-common -v
-mkdir lib/sorting-queue -v
-mkdir lib/sorting-desk/components -vp
-mkdir lib/dossier.js -v
-mkdir lib/CryptoJS -v
-mkdir lib/bootstrap/css -vp
-mkdir lib/bootstrap/fonts -v
-mkdir lib/bootstrap/js -v
+info "copying dependencies"
+mkdir -vp lib && cd lib
+
+mkdir sorting-common -v
+mkdir sorting-queue -v
+mkdir sorting-desk/components -vp
+mkdir dossier.js -v
+mkdir CryptoJS -v
+mkdir bootstrap/css -vp
+mkdir bootstrap/fonts -v
+mkdir bootstrap/js -v
+mkdir jstree/themes/default -vp
 
 # Note: Google Chrom(e|ium) browsers do not support symlinks (!). There is no
 # other option but to actually copy, and thus duplicate, the external
 # dependencies we need.
-cp -v "$dir_root/src/sorting-common/sorting_common.js" lib/sorting-common/
-cp -v "$dir_root/src/sorting-queue/sorting_queue.js" lib/sorting-queue/
-cp -v "$dir_root/src/sorting-desk/sorting_desk.js" lib/sorting-desk/
-cp -v "$dir_root/src/sorting-desk/components/label_browser.js" lib/sorting-desk/components
-cp -v "$dir_root/src/sorting-desk/folder_explorer.js" lib/sorting-desk/
-cp -v "$dir_root/src/sorting-desk/api-live.js" lib/sorting-desk/
-cp -v "$dir_root/src/dossier.js/Dossier.js" lib/dossier.js/
-cp -v "$dir_root/lib/jquery-2.1.1.min.js" lib/
-cp -v "$dir_root/lib/CryptoJS-3.1.2/rollups/md5.js" lib/CryptoJS/
-cp -v "$dir_root/lib/bootstrap-3.3.1/css/"*.min.css lib/bootstrap/css/
-cp -v "$dir_root/lib/bootstrap-3.3.1/fonts/"* lib/bootstrap/fonts/
-cp -v "$dir_root/lib/bootstrap-3.3.1/js/"*.min.js lib/bootstrap/js/
+# --
+# Sorting Desk related
+cp -v "$dir_src/sorting-common/sorting_common.js" sorting-common/
+cp -v "$dir_src/sorting-queue/sorting_queue.js" sorting-queue/
+cp -v "$dir_src/sorting-desk/sorting_desk.js" sorting-desk/
+cp -v "$dir_src/sorting-desk/components/label_browser.js" sorting-desk/components
+cp -v "$dir_src/sorting-desk/folder_explorer.js" sorting-desk/
+cp -v "$dir_src/sorting-desk/api-live.js" sorting-desk/
+cp -v "$dir_src/dossier.js/Dossier.js" dossier.js/
+
+# jQuery
+cp -v "$dir_lib/jquery-2.1.1.min.js" ./
+
+# Crypto
+cp -v "$dir_lib/CryptoJS-3.1.2/rollups/md5.js" CryptoJS/
+
+# Bootstrap
+cp -v "$dir_lib/bootstrap-3.3.1/css/"*.min.css bootstrap/css/
+cp -v "$dir_lib/bootstrap-3.3.1/fonts/"* bootstrap/fonts/
+cp -v "$dir_lib/bootstrap-3.3.1/js/"*.min.js bootstrap/js/
+
+# Js Tree
+cp -v "$dir_lib/jstree-3.0.9/dist/jstree.min.js" jstree/
+cp -v "$dir_lib/jstree-3.0.9/dist/themes/default"/*.png jstree/themes/default
+cp -v "$dir_lib/jstree-3.0.9/dist/themes/default"/*.gif jstree/themes/default
+cp -v "$dir_lib/jstree-3.0.9/dist/themes/default/style.min.css" jstree/themes/default
 
 # All files inside `lib' are treated as immutable. We therefore make every file
 # inside `lib' read-only to prevent accidental changes.
-find lib -type f -exec chmod -v =r {} +
+info "enforcing r/o permissions"
+find . -type f -exec chmod -v =r {} +
 
-echo -e "\ndone."
+message "\ndone."
