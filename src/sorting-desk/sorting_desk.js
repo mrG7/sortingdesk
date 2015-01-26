@@ -176,9 +176,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
         buttons: {
           add: finder.find('button-add')
         },
-        empty: {
-          empty: finder.find('explorer-empty')
-        }
+        empty: finder.find('explorer-empty')
       };
 
       els.toolbar = finder.withroot($('body'), function () {
@@ -441,6 +439,9 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.refreshing_ = true;
     this.reset_tree_();
 
+    /* Hide empty notification while loading. */
+    this.update_empty_state_(true);
+          
     this.owner_.api.foldering.list()
       .done(function (coll) {
         coll.forEach(function (f) {
@@ -485,7 +486,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
 /*       this.setActive(bin); */
 /*     } else */
-/*       this.updateEmptyNotification_(); */
+/*       this.update_empty_state_(); */
   };
 
   ControllerExplorer.prototype.construct = function (descriptor)
@@ -564,7 +565,7 @@ return;
         bin.setUnknown();
       } );
 
-    this.updateEmptyNotification_();
+    this.update_empty_state_();
 
     return bin;
   };
@@ -664,7 +665,7 @@ return;
     if(bin === this.active_)
       this.setActive(this.bins_.length > 0 && this.bins_[0] || null);
 
-    this.updateEmptyNotification_();
+    this.update_empty_state_();
   };
 
   ControllerExplorer.prototype.getAt = function (index)
@@ -943,16 +944,18 @@ return;
       } );
   };
 
-  ControllerExplorer.prototype.updateEmptyNotification_ = function ()
+  ControllerExplorer.prototype.update_empty_state_ = function (hide)
   {
-    this.owner_.nodes.empty.bins.stop();
-    if(this.bins_.length === 0) {
-      this.owner_.nodes.empty.bins.fadeIn(
-        this.owner_.options.delays.binsEmptyFadeIn);
-    } else {
-      this.owner_.nodes.empty.bins.fadeOut(
-        this.owner_.options.delays.binsEmptyFadeOut);
-    }      
+    var o = this.owner_;
+    
+    o.nodes.empty.stop();
+
+    if(hide === true)
+      o.nodes.empty.fadeOut(o.options.delays.emptyHide);
+    else if(this.folders_.length === 0)
+      o.nodes.empty.fadeIn(o.options.delays.emptyFadeIn);
+    else
+      o.nodes.empty.fadeOut(o.options.delays.emptyFadeOut);
   };
 
   /* Private interface */
@@ -1361,8 +1364,9 @@ return;
     delays: {                   /* In milliseconds.     */
       binRemoval: 200,          /* Bin is removed from container. */
       addBinShow: 200,          /* Fade in of temporary bin when adding. */
-      binsEmptyFadeIn: 250,
-      binsEmptyFadeOut: 100
+      emptyFadeIn: 250,
+      emptyFadeOut: 100,
+      emptyHide: 50
     },
     constructors: {
       ControllerExplorer: ControllerExplorer,
