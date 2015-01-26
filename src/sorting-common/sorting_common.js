@@ -169,6 +169,22 @@ var SortingCommon_ = function (window, $) {
       return deferred.promise();
     };
 
+    var getXpathSimple = function (node)
+    {
+      var result = [ ];
+
+      if(jQueryExtensions.is(node))
+        node = node.get(0);
+
+      if(node) {
+        do {
+          result.push(node.nodeName);
+        } while( (node = node.parentNode) );
+      }
+
+      return result.reverse().join('/');
+    };
+
     /* Is-type functions */
     var is_image = function (el)
     {
@@ -190,10 +206,11 @@ var SortingCommon_ = function (window, $) {
         .replace(/^data:image\/(png|jpg);base64,/, "");
     };
 
-
+    
     /* Public interface */
     return {
       imageToBase64: imageToBase64,
+      getXpathSimple: getXpathSimple,
       is_image: is_image
     };
     
