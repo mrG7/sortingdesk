@@ -364,6 +364,12 @@ var Api_ = (function (window, $, CryptoJS, DossierJS) {
       
       this.folder_ = folder;
     };
+
+    /* Static interface */
+    Folder.fromName = function (name)
+    {
+      return new Folder(DossierJS.Folder.from_name(name, annotator_));
+    };
     
     /* Interface */
     Folder.prototype = {
