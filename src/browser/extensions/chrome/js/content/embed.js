@@ -10,11 +10,11 @@
  */
 
 
-/*global chrome, $, SortingDesk, LabelBrowser, FolderExplorer, SortingQueue, Api */
+/*global chrome */
 /*jshint laxbreak:true */
 
 
-var ChromeExtensionUi = (function ($, std) {
+var ChromeExtensionUi = (function ($, std, undefined) {
 
   /* Variables */
   var embed_;
