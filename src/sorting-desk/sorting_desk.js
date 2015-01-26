@@ -296,9 +296,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
         data.text = data.text.trim();
         
         if(data.text !== owner.options.folderNewCaption) {
-          var f = new Folder(
-            self, owner.api.foldering.Folder.fromName(data.text));
-
+          var f = new Folder(self, api.foldering.Folder.fromName(data.text));
           f.render();
           self.folders_.push(f);
         }
@@ -306,6 +304,67 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
         self.creating_.reset();
         self.creating_ = null;
         self.update_empty_state_();
+      },
+      "dragover": function (ev)
+      {
+        self.on_dragging_enter_(ev);
+        return false;
+      },
+      "dragenter": function (ev)
+      {
+        self.on_dragging_enter_(ev);
+        return false;
+      },
+      "dragleave": function (ev)
+      {
+        self.on_dragging_exit_(ev);
+        return false;
+      },
+      "drop": function (ev)
+      {
+        var folder = self.on_dragging_exit_(ev);
+        
+        ev = ev.originalEvent;
+        ev.stopPropagation();
+        ev.preventDefault();
+
+        if(folder !== null) {
+          owner.callbacks.invoke("getSelection")
+            .done(function (result) {
+              console.log("GOT selection: ", result);
+
+              if(!std.is_obj(result)) {
+                console.info("No selection content retrieved");
+                return;
+              }
+              
+              switch(result.type) {
+              case 'image':
+                owner.callbacks.invoke('imageToBase64', result.content)
+                  .done(function (data) {
+                    result.data = data;
+                    result.subtopic_id = api.makeRawImageId(
+                      api.generateSubtopicId(result.id));
+
+                  } ).fail(function () {
+                    console.error("Failed to retrieve image data in base64"
+                                  + " encoding");
+                  } );
+
+                break;
+                
+              case 'text':
+                result.subtopic_id = api.makeRawTextId(
+                  api.generateSubtopicId(result.id));
+                break;
+                
+              default:
+                throw "Invalid selection type";
+              }
+            } );
+        }
+        
+        return false;
       }
     } );
 
@@ -739,7 +798,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       .addClass(opts.css.disabled);
   };    
 
-  /* Private methods */
+  /* Private interface */
   ControllerExplorer.prototype.update_ = function (descriptor,
                                                    exists /* = false */)
   {
@@ -832,7 +891,6 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       o.nodes.empty.fadeOut(o.options.delays.emptyFadeOut);
   };
 
-  /* Private interface */
   ControllerExplorer.prototype.reset_tree_ = function ()
   {
     /* Reset every folder contained. */
@@ -841,6 +899,39 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     } );
 
     this.folders_ = [ ];
+  };
+
+  ControllerExplorer.prototype.on_dragging_enter_ = function (ev)
+  {
+    ev = ev.originalEvent;
+    ev.dropEffect = 'move';
+
+    var el = ev.toElement.nodeName.toLowerCase() !== 'li'
+          ? ev.toElement.parentNode : ev.toElement,
+        fl = this.getById(el.id);
+
+    if(fl !== null) {
+      $(el).addClass(this.owner_.options.css.droppableHover);
+      return fl;
+    }
+
+    return null;
+  };
+
+  ControllerExplorer.prototype.on_dragging_exit_ = function (ev)
+  {
+    ev = ev.originalEvent;
+
+    var el = ev.toElement.nodeName.toLowerCase() !== 'li'
+          ? ev.toElement.parentNode : ev.toElement,
+        fl = this.getById(el.id);
+
+    if(fl !== null) {
+      $(el).removeClass(this.owner_.options.css.droppableHover);
+      return fl;
+    }
+
+    return null;
   };
 
 
