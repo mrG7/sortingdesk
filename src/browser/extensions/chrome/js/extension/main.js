@@ -136,33 +136,8 @@ var Main = (function (window, chrome, $, std, SortingDesk, LabelBrowser, FolderE
    * */
   var BackgroundListener = (function () {
 
-    /* Handlers of messages sent by the extension (background.js). */
-    var onFolderRemoved_ = function (request, sender, callback)
-    {
-      console.info("Folder removed: id=%s", request.id);
-
-      if(sorter && sorter.folder
-         && sorter.folder.id === request.id) {
-        console.log("Forcing folder closed");
-        sorter.close();
-      }
-    };
-
-    var onFolderUpdated_ = function (request, sender, callback)
-    {
-      console.info("Folder updated: id=%s", request.folder.id);
-
-      if(sorter && sorter.folder
-         && sorter.folder.id === request.folder.id) {
-        console.log("Forcing folder refresh");
-        sorter.open(request.folder);
-      }
-    };
-
     /* Map message operations to handlers. */
     var methods_ = {
-      "folder-removed": onFolderRemoved_,
-      "folder-updated": onFolderUpdated_
     };
 
     /* Interface */
@@ -192,72 +167,12 @@ var Main = (function (window, chrome, $, std, SortingDesk, LabelBrowser, FolderE
     
   } )();
 
-  
-  /**
-   * @class
-   * */
-  var ResourceInjector = (function () {
-    /* Interface */
-    var inject = function (urls)
-    {
-      if(!std.is_arr(urls))
-        urls = [ urls ];
 
-      urls.forEach(function (res) {
-        if(!std.is_obj(res))
-          throw "Invalid resource descriptor";
-        
-        switch(res.type.toLowerCase()) {
-        case 'font':
-          if(!std.is_str(res.family))
-            throw "Font family not specified";
-          
-          injectFont(res.url, res.family);
-          break;
-          
-        default:
-          console.error("Invalid resource type: %s", res.type);
-          return;
-        }
-
-        console.log("Injected resource (%s): %s", res.type, res.url);
-      } );
-    };
-    
-    var injectFont = function (url, family)
-    {
-      var style = document.createElement('style');
-      style.type = 'text/css';
-      style.textContent = [
-        "@font-face {",
-        "font-family: '",
-        family,
-        "';src: url('",
-        chrome.extension.getURL(url),
-        "'); }" ].join('');
-      
-      document.head.appendChild(style);
-    };
-
-    /* Public interface */
-    return {
-      inject: inject
-    };
-  } )();
-
-
-  /* Load custom font before page finishes loading. */
-  ResourceInjector.inject( [ {
-    url: 'lib/bootstrap/fonts/glyphicons-halflings-regular.woff',
-    family: 'Glyphicons Halflings',
-    type: 'font'
-  } ] );
-
-  
+  /* Startup sequence. */
   $(function () {
     var instantiate_ = function (meta) {
       (sorter = new SortingDesk.Sorter( {
-        container: $('#sd-sorter'),
+        container: $('#sd-folder-explorer'),
         constructors: {
           createFolderExplorer: function (options) {
           },
@@ -265,8 +180,7 @@ var Main = (function (window, chrome, $, std, SortingDesk, LabelBrowser, FolderE
             $('[data-sd-scope="label-browser-header-title"]').html("Loading");
             $('[data-sd-scope="label-browser-header-content"]')
               .html("Please wait...");
-            
-            /* The `options´ map isn't touched *yet*. */
+
             return (new LabelBrowser.Browser(
               $.extend(options, { container: $('#sd-label-browser') } ),
               HandlerCallbacks.callbacks.browser
@@ -287,7 +201,7 @@ var Main = (function (window, chrome, $, std, SortingDesk, LabelBrowser, FolderE
         active: meta.active,
         sortingQueue: {
           options: {
-            container: $('#sd-sorter'),
+            container: $('#sd-queue'),
             visibleItems: 10,
             itemsDraggable: false
           }
@@ -295,7 +209,7 @@ var Main = (function (window, chrome, $, std, SortingDesk, LabelBrowser, FolderE
       }, $.extend(true, Api, HandlerCallbacks.callbacks.sorter ) ) )
         .initialise();
 
-      self.sorter_.sortingQueue.on(LoadingStatus.events);
+      sorter.sortingQueue.on(LoadingStatus.events);
     };
 
     /* Initialisation sequence */
