@@ -97,7 +97,7 @@ var LabelBrowser_ = function (window, $, std)
     };
 
     /* Begin set up nodes. */
-    els.container = finder.root();
+    els.container = finder.root;
     if(els.container.length === 0)
       throw "Unable to find container element";
 

@@ -119,7 +119,7 @@ var SortingQueue_ = function (window, $, std) {
 
       /* Find nodes. */
       this.nodes_ = {
-        container: finder.root(),
+        container: finder.root,
         items: finder.find('items'),
         buttons: {
           dismiss: finder.find('button-dismiss')

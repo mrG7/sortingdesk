@@ -168,9 +168,9 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       var finder = new std.NodeFinder('sorting-desk', this.options_.container);
       
       /* Find nodes. */
-      this.nodes_ = {
-        container: finder.root(),
-        bins: finder.find('bins'),
+      els = this.nodes_ = {
+        container: finder.root,
+        explorer: finder.find('explorer'),
         buttons: {
           add: finder.find('button-add')
         },
