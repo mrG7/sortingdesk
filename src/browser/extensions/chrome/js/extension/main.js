@@ -14,38 +14,43 @@ var Main = (function (window, chrome, $, std, SortingDesk, LabelBrowser, Api, un
 
   /* Module-wide variables */
   var nodes = { },
+      loading,
       sorter;
   
 
   /**
    * @class
    * */
-  var LoadingStatus = (function () {
-    var count_ = 0;
+  var LoadingStatus = function (node)
+  {
+    this.node_ = node;
+    this.count_ = 0;
+  };
 
-    /* Event handlers */
-    var onRequestStart_ = function (id)
+  LoadingStatus.prototype = {
+    get events ()
     {
-      if(count_++ === 0)
-        nodes.loading.stop().fadeIn();
-    };
+      return {
+        'request-begin': this.onRequestBegin_.bind(this),
+        'request-end':  this.onRequestEnd_.bind(this)
+      };
+    },
     
-    var onRequestStop_ = function (id)
+    onRequestBegin_: function (id)
     {
-      if(count_ === 0)
+      console.log("HERE");
+      if(this.count_++ === 0)
+        this.node_.stop().fadeIn();
+    },
+    
+    onRequestEnd_: function (id)
+    {
+      if(this.count_ === 0)
         console.warn("Internal count clear on request stop: %s", id);
-      else if(--count_ === 0)
-        nodes.loading.stop().fadeOut(100);
-    };
-
-    /* Public interface */
-    return {
-      events: {               /* Acts like a getter. */
-        'request-start': onRequestStart_,
-        'request-stop':  onRequestStop_
-      }
-    };
-  } )();
+      else if(--this.count_ === 0)
+        this.node_.stop().fadeOut(100);
+    }
+  };
 
 
   /**
@@ -205,12 +210,18 @@ var Main = (function (window, chrome, $, std, SortingDesk, LabelBrowser, Api, un
           }
         }
       }, $.extend(true, Api, HandlerCallbacks.callbacks.sorter ) ) )
+        .on(loading.sorter.events)
         .initialise();
 
-      sorter.sortingQueue.on(LoadingStatus.events);
+      sorter.sortingQueue.on(loading.queue.events);
     };
 
     /* Initialisation sequence */
+    loading = {
+      sorter: new LoadingStatus($('#sd-folder-explorer .sd-loading')),
+      queue:  new LoadingStatus($('#sd-queue .sd-loading'))
+    };
+    
     var height = Math.floor(window.innerHeight / 2);
     
     chrome.runtime.sendMessage({ operation: "get-meta" }, function (meta) {
