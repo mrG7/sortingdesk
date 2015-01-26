@@ -316,7 +316,8 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
    * */
   var ControllerExplorer = function (owner)
   {
-    var self = this;
+    var self = this,
+        els = owner.nodes;
 
     /* Invoke base class constructor. */
     std.Controller.call(this, owner);
@@ -327,6 +328,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.browser_ = null;
     this.refreshing_ = false;
     this.events_ = new std.Events(this, [ 'refresh-begin', 'refresh-end' ] );
+    this.creating_ = null;
 
     /* Initialise jstree. */
     this.tree_ = this.owner_.nodes.explorer.jstree( {
@@ -336,9 +338,34 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       plugins: [ "dnd" ]
     } ).jstree(true);
 
+    this.owner_.nodes.explorer.on( {
+      "rename_node.jstree": function (node, data) {
+        if(self.creating_ === null)
+          throw "Renaming of nodes not currently implemented";
+
+        data.text = data.text.trim();
+        
+        if(data.text !== owner.options.folderNewCaption) {
+          var f = new Folder(
+            self, owner.api.foldering.Folder.fromName(data.text));
+
+          f.render();
+          self.folders_.push(f);
+        }
+        
+        self.creating_.reset();
+        self.creating_ = null;
+        self.update_empty_state_();
+      }
+    } );
+
     /* Hook up to toolbar events. */
     els.toolbar.actions.refresh.click(function () {
       self.refresh();
+    } );
+
+    els.toolbar.actions.add.click(function () {
+      self.create();
     } );
 
     els.toolbar.actions.remove.click(function () {
@@ -508,6 +535,12 @@ return;
     this.id_ = this.name_ = null;
     this.bins_ = this.hover_ = this.active_ = this.spawner_ = null;
   };
+
+  ControllerExplorer.prototype.create = function ()
+  {
+    this.update_empty_state_(true);
+    (this.creating_ = new FolderNew(this)).render();
+  }
 
   ControllerExplorer.prototype.add = function (bin,
                                              activate /* = true */,
@@ -951,8 +984,12 @@ return;
     /* Invoke base class constructor. */
     std.Drawable.call(this, owner);
 
+    if(!std.is_obj(folder))
+      throw "Invalid or no folder descriptor provided";
+
     /* Attributes */
     this.folder_ = folder;
+    this.id_ = null;
     this.node_ = null;
 
     /* Getters */
@@ -981,6 +1018,36 @@ return;
   /**
    * @class
    * */
+  var FolderNew = function (owner)
+  {
+    /* Invoke base class constructor. */
+    Folder.call(this, owner, { });
+  };
+
+  FolderNew.prototype = Object.create(Folder.prototype);
+
+  FolderNew.prototype.render = function ()
+  {
+    this.id_ = this.owner_.tree.create_node(
+      null, { state: 'open', text: "" }, "last");
+
+    if(this.id_ === false)
+      throw "Failed to create folder";
+    
+    this.node_ = this.owner_.node.find('[id="' + this.id_ + '"]');
+    this.owner_.tree.edit(this.node_,
+                          this.owner_.owner_.options.folderNewCaption);
+  };
+  
+  FolderNew.prototype.reset = function ()
+  {
+    this.owner_.tree.delete_node(this.node_);
+  };
+  
+
+  /**
+   * @class
+   * */
   var Bin = function (owner, descriptor)
   {
     /* Invoke super constructor. */
@@ -1000,7 +1067,7 @@ return;
   Bin.makeId = function (descriptor)
   {
     return descriptor.content_id + '+' + descriptor.subtopic_id;
-  }
+  };
 
   /* Class interface */
   Bin.prototype = Object.create(std.Drawable.prototype);
@@ -1347,7 +1414,8 @@ return;
       BinImage: BinImageDefault,
       ControllerBinSpawner: ControllerBinSpawnerDefault
     },
-    container: null
+    container: null,
+    folderNewCaption: "Enter folder name"
   };
 
 
