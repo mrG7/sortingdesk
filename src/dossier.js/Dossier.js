@@ -389,8 +389,8 @@ var _DossierJS = function(window, $) {
     // This returns a promise that is resolved to a list of `Folder`s.
     API.prototype.listFolders = function(annotator /* optional */) {
         annotator = annotator || 'unknown';
-        var annotator = annotator || 'unknown',
-            params = {annotator_id: annotator},
+
+        var params = {annotator_id: annotator},
             url = this.url('folder', params);
 
         return Xhr.getJSON('API.listFolders', url).promise()
@@ -412,7 +412,7 @@ var _DossierJS = function(window, $) {
             url = this.url('folder/' + folder.id, params);
         return Xhr.ajax('API.addFolder', {
             type: 'PUT',
-            url: url,
+            url: url
         }).fail(function() {
             console.log("Could not add folder:", folder);
         }).promise();
@@ -461,7 +461,7 @@ var _DossierJS = function(window, $) {
             url = this.url(endpoint, params);
         return Xhr.ajax('API.addSubfolderItem', {
             type: 'PUT',
-            url: url,
+            url: url
         }).fail(function() {
             console.log("Could not add subfolder with item:",
                         subfolder, content_id, subtopic_id);
@@ -486,7 +486,7 @@ var _DossierJS = function(window, $) {
 
     API.prototype.stop = function () {
         return Xhr.stop.apply(Xhr, arguments);
-    }
+    };
 
     // A convenience class for fetching labels.
     //
@@ -983,7 +983,7 @@ var _DossierJS = function(window, $) {
         LabelFetcher: LabelFetcher,
         SortingQueueItems: SortingQueueItems,
         Folder: Folder,
-        Subfolder: Subfolder,
+        Subfolder: Subfolder
     };
 };
 
