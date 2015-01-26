@@ -193,10 +193,6 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
         };
       } );
 
-      els.toolbar.actions.refresh.click(function () {
-        self.explorer_.refresh();
-      } );
-      
       /* Begin instantiating and initialising controllers.
        *
        * Start by explicitly initialising SortingQueue's instance and proceed to
@@ -389,6 +385,19 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       plugins: [ "dnd" ]
     } ).jstree(true);
 
+    /* Hook up to toolbar events. */
+    els.toolbar.actions.refresh.click(function () {
+      self.refresh();
+    } );
+
+    els.toolbar.actions.remove.click(function () {
+      console.info("Not implemented yet");
+    } );
+
+    els.toolbar.actions.rename.click(function () {
+      console.info("Not implemented yet");
+    } );
+    
     /* The `LabelBrowser´ component requires a factory method since it needs
      * options passed in. */
     this.haveBrowser_ = !owner.constructor.isConstructor('LabelBrowser');
