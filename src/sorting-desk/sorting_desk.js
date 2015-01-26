@@ -584,13 +584,13 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       } );
   };
 
-  ControllerExplorer.prototype.find = function (callback)
+  ControllerExplorer.prototype.each = function (callback)
   {
     var result = null;
 
-    this.bins_.some(function (bin) {
-      if(callback(bin)) {
-        result = bin;
+    this.folders_.some(function (f) {
+      if(callback(f)) {
+        result = f;
         return true;
       }
     } );
@@ -636,7 +636,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
   ControllerExplorer.prototype.getById = function (id)
   {
-    return this.find(function (bin) {
+    return this.each(function (bin) {
       return bin.id === id;
     } );
   };
