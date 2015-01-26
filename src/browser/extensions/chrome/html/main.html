@@ -30,34 +30,33 @@
     <span>X</span>
   </div>
   
-  <!-- Header -->
-  <div class="sd-header">
-    <!-- Toolbar -->
-    <div class="sd-toolbar btn-toolbar" role="toolbar" data-sd-scope="sorting-desk-toolbar">
-      <div class="btn-group btn-group-sm">
-        <button type="button" class="btn btn-default" data-toggle="tooltip" data-placement="left" title="Create a new folder" data-sd-scope="sorting-desk-toolbar-add">
-          <span class="glyphicon glyphicon-plus"></span>
-        </button>
-        <button type="button" class="btn btn-default disabled" data-toggle="tooltip" data-placement="left" title="Rename selected folder" data-sd-scope="sorting-desk-toolbar-rename">
-          <span class="glyphicon glyphicon-pencil"></span>
-        </button>
-        <button type="button" class="btn btn-default disabled" data-toggle="tooltip" data-placement="left" title="Remove selected folder" data-sd-scope="sorting-desk-toolbar-remove">
-          <span class="glyphicon glyphicon-remove"></span>
-      </div>
-      <div class="btn-group btn-group-sm">
-        <button type="button" class="btn btn-default" data-toggle="tooltip" data-placement="left" title="Refresh view" data-sd-scope="sorting-desk-toolbar-refresh">
-          <span class="glyphicon glyphicon-refresh"></span>
-        </button>
-      </div>
-    </div>
-    <h1 class="sd-header-title">Folder Explorer</h1>
-  </div>
-  
   <!-- Folder Explorer -->
-  <div id="sd-folder-explorer" data-sd-scope="folder-explorer-container">
-    <div class="sd-container-view-outer">
-      <div class="sd-container-view" data-sd-scope="folder-explorer-view">
+  <div id="sd-folder-explorer" class="sd-panel">
+    <!-- Header -->
+    <div class="sd-header">
+      <!-- Toolbar -->
+      <div class="sd-toolbar btn-toolbar" role="toolbar" data-sd-scope="sorting-desk-toolbar">
+        <div class="btn-group btn-group-sm">
+          <button type="button" class="btn btn-default" data-toggle="tooltip" data-placement="left" title="Create a new folder" data-sd-scope="sorting-desk-toolbar-add">
+            <span class="glyphicon glyphicon-plus"></span>
+          </button>
+          <button type="button" class="btn btn-default disabled" data-toggle="tooltip" data-placement="left" title="Rename selected folder" data-sd-scope="sorting-desk-toolbar-rename">
+            <span class="glyphicon glyphicon-pencil"></span>
+          </button>
+          <button type="button" class="btn btn-default disabled" data-toggle="tooltip" data-placement="left" title="Remove selected folder" data-sd-scope="sorting-desk-toolbar-remove">
+            <span class="glyphicon glyphicon-remove"></span>
+        </div>
+        <div class="btn-group btn-group-sm">
+          <button type="button" class="btn btn-default" data-toggle="tooltip" data-placement="left" title="Refresh folder explorer" data-sd-scope="sorting-desk-toolbar-refresh">
+            <span class="glyphicon glyphicon-refresh"></span>
+          </button>
+        </div>
       </div>
+      <h1 class="sd-header-title">Folder Explorer</h1>
+    </div>
+
+    <div class="sd-container-view-outer sd-panel-top">
+      <div class="sd-container-view" data-sd-scope="folder-explorer-view"></div>
     </div>
     
     <div class="sd-empty sd-wider" data-sd-scope="folder-explorer-empty">
@@ -66,9 +65,26 @@
   </div>
   
   <!-- Queue of Items -->
-  <div id="sd-queue" data-sd-scope="sorting-queue-items">
+  <div id="sd-queue" class="sd-panel">
+    <div class="sd-container-view-outer">
+      <div class="sd-container-view" data-sd-scope="sorting-queue-items"></div>
+    </div>
+    
     <div class="sd-empty" data-sd-scope="sorting-queue-items-empty">
-      Queue of items empty
+      Search results empty
+    </div>
+    
+    <!-- Footer -->
+    <div class="sd-footer">
+      <!-- Toolbar -->
+      <div class="sd-toolbar btn-toolbar" role="toolbar" data-sd-scope="sorting-desk-toolbar">
+        <div class="btn-group btn-group-sm">
+          <button type="button" class="btn btn-default disabled" data-toggle="tooltip" data-placement="left" title="Refresh search results" data-sd-scope="sorting-desk-toolbar-refresh">
+            <span class="glyphicon glyphicon-refresh"></span>
+          </button>
+        </div>
+      </div>
+      <h1 class="sd-footer-title">Search Results</h1>
     </div>
   </div>
   

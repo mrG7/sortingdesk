@@ -88,32 +88,37 @@ BODY {
   border-bottom: 1px solid silver;
 }
 
-#sd-sorting-desk > .sd-header {
+#sd-folder-explorer {
+  white-space: nowrap;
+  vertical-align: middle;
+  border-bottom: 1px solid silver;
+}
+
+.sd-panel {
+  position: relative;
+  overflow: hidden;
+}
+
+.sd-panel > .sd-header,
+.sd-panel > .sd-footer {
   padding: 5px;
   border-radius: 0;
   height: 43px;
 }
 
-#sd-sorting-desk > .sd-header > H1 {
+.sd-panel > .sd-header > H1,
+.sd-panel > .sd-footer > H1 {
   font-size: 13px;
 }
 
-#sd-sorting-desk > .sd-header > .sd-header-title {
+.sd-panel > .sd-header > .sd-header-title,
+.sd-panel > .sd-footer > .sd-footer-title {
   margin-top: 7px;
-}
-
-#sd-folder-explorer {
-  overflow: auto;
-  white-space: nowrap;
-  vertical-align: middle;
-  padding: 5px;
-  border-bottom: 1px solid silver;
 }
 
 #sd-queue {
   position: relative;
   overflow-y: auto;
-  margin: 5px;
 }
 
 .sd-clear {
@@ -609,13 +614,13 @@ A.sd-text-item-title:hover {
   box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.4);
 }
 
-.sd-header {
+.sd-header, .sd-footer {
+  position: relative;
+  
   padding: 10px 5px 8px 5px;
   margin: 0;
 
   border: 1px solid #dbdbdb;
-  border-bottom-color: #aaa;
-  border-radius: 8px 8px 0 0;
 
   color: #333;
   background-color: #e5e4ef;
@@ -623,7 +628,22 @@ A.sd-text-item-title:hover {
   text-shadow: 1px 1px 2px #aaa;
 }
 
-.sd-header-title {
+.sd-header {
+  border-bottom-color: #aaa;
+}
+
+.sd-footer {
+  border-top-color: #aaa;
+}
+
+.sd-footer {
+  position: fixed;
+  bottom: 0px;
+  width: 100%;
+}
+
+.sd-header-title,
+.sd-footer-title {
   font-size: 16px;
   font-weight: bold;
   font-family: arial,sans-serif;
@@ -637,13 +657,21 @@ A.sd-text-item-title:hover {
 }
 
 .sd-container-view-outer {
-  overflow: hidden;
+  overflow: auto;
+  margin: 5px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.sd-container-view-outer.sd-panel-top {
+  top: 44px;
 }
 
 .sd-container-view {
-  margin: 5px;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
 .sd-button-close {
