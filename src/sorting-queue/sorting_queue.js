@@ -77,7 +77,7 @@ var SortingQueue_ = function (window, $, std) {
 
     this.events_ = new std.Events(
       this,
-      [ 'request-start', 'request-stop', 'items-updated', 'item-dismissed',
+      [ 'request-begin', 'request-end', 'items-updated', 'item-dismissed',
         'item-deselected', 'item-selected' ]);
   };
 
@@ -361,7 +361,7 @@ var SortingQueue_ = function (window, $, std) {
     ++this.count_;
 
     /* Trigger request start. */
-    this.owner_.events.trigger("request-start", id);
+    this.owner_.events.trigger("request-begin", id);
   };
 
   ControllerRequests.prototype.end = function (id)
@@ -381,7 +381,7 @@ var SortingQueue_ = function (window, $, std) {
       console.warn("Unknown request ended:", id);
 
     /* Trigger request end. */
-    this.owner_.events.trigger("request-stop", id);
+    this.owner_.events.trigger("request-end", id);
   };
 
 
