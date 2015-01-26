@@ -952,6 +952,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.node_ = null;
 
     /* Getters */
+    this.__defineGetter__('id', function () { return this.id_; } );
     this.__defineGetter__('node', function () { return this.node_; } );
   };
 
