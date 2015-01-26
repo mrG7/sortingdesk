@@ -237,8 +237,7 @@ var Main = (function (window, chrome, $, std, SortingDesk, LabelBrowser, FolderE
       try {
         instantiate_(meta);
       } catch(x) {
-        console.error("Exception thrown: " + x);
-        throw x;
+        std.on_exception(x);
       }
         
       console.info("Initialised Sorting Desk extension");
