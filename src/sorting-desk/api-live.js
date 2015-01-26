@@ -368,6 +368,8 @@ var Api_ = (function (window, $, CryptoJS, DossierJS) {
     /* Interface */
     Folder.prototype = {
       folder_: null,
+
+      get data () { return this.folder_; },
       
       list: function ()
       {
@@ -405,7 +407,8 @@ var Api_ = (function (window, $, CryptoJS, DossierJS) {
       folder_: null,
       subfolder_: null,
       
-      get parent() { return this.parent_; },
+      get parent () { return this.parent_; },
+      get data ()   { return this.subfolder_; },
 
       list: function ()
       {
