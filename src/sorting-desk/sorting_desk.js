@@ -960,13 +960,15 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
   Folder.prototype.render = function ()
   {
+    var self = this;
+    
     this.id_ = this.owner_.tree.create_node(
       null, { state: 'open', text: this.folder_.data.name }, "last");
 
     if(this.id_ === false)
       throw "Failed to create folder";
-    
-    this.node_ = this.owner_.node.find('[id="' + this.id_ + '"]');
+
+    this.node_ = $('#' + this.id_);
   };
 
   Folder.prototype.reset = function ()
