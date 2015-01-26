@@ -255,7 +255,8 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   var ControllerExplorer = function (owner)
   {
     var self = this,
-        els = owner.nodes;
+        els = owner.nodes,
+        api = owner.api;
 
     /* Invoke base class constructor. */
     std.Controller.call(this, owner);
@@ -269,14 +270,25 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.creating_ = null;
 
     /* Initialise jstree. */
-    this.tree_ = this.owner_.nodes.explorer.jstree( {
+    this.tree_ = els.explorer.jstree( {
       core: {
-        check_callback: true
+        check_callback: true,
+        multiple: false
       },
-      plugins: [ "dnd" ]
+      dnd: {
+        check_while_dragging: false,
+        is_draggable: function (nodes) {
+          if(nodes instanceof Array) {
+            return nodes.map(function (n) {
+              return self.getByNode(n) !== null;
+            } );
+          }
+        }
+      },
+      plugins: [ /* "dnd" */ ]
     } ).jstree(true);
 
-    this.owner_.nodes.explorer.on( {
+    owner.nodes.explorer.on( {
       "rename_node.jstree": function (node, data) {
         if(self.creating_ === null)
           throw "Renaming of nodes not currently implemented";
