@@ -12,7 +12,7 @@
 /*jshint laxbreak:true */
 
 
-var Api_ = (function (window, $, CryptoJS) {
+var Api_ = (function (window, $, CryptoJS, DossierJS) {
 
   /* Constants */
   var DEFAULT_DOSSIER_STACK_API_URL = 'http://10.3.2.42:9090';
@@ -58,6 +58,7 @@ var Api_ = (function (window, $, CryptoJS) {
 
     /* Return module public API -- post initialization */
     return {
+      /* Functions */
       getFeatureCollection: getFeatureCollection,
       getAllFeatureCollections: getAllFeatureCollections,
       putFeatureCollection: putFeatureCollection,
@@ -406,4 +407,4 @@ if(typeof define === "function" && define.amd) {
     return _(window, $, CryptoJS);
   });
 } else
-  window.Api = Api_(window, $, CryptoJS);
+  window.Api = Api_(window, $, CryptoJS, DossierJS);
