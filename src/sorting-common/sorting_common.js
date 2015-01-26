@@ -200,30 +200,38 @@ var SortingCommon_ = function (window, $) {
   } )();
 
 
-  var NodeFinder = (function (prefix, root) {
+  var NodeFinder = function (prefix, root)
+  {
+    this.prefix_ = [ '[data-sd-scope="', prefix, '-' ].join('');
+    this.root_ = root;
+  };
 
-    prefix = [ '[data-sd-scope="', prefix, '-' ].join('');
+  NodeFinder.prototype = {
+    prefix_: null,
+    root_: null,
     
-    var find = function (scope, parent /* = prefix */ )
+    get root() { return this.root_;  },
+
+    find: function (scope, parent /* = prefix */ )
     {
       var p;
 
       if(parent instanceof $) p = parent;
-      else if(is_str(parent)) p = find(parent);
-      else                    p = root;
+      else if(is_str(parent)) p = this.find(parent);
+      else                    p = this.root_;
 
-      return p.find( [ prefix, scope, '"]' ].join(''));
-    };
+      return p.find( [ this.prefix_, scope, '"]' ].join(''));
+    },
 
-    var root_ = function () { return root; };
-    
-    
-    /* Public interface */
-    return {
-      find: find,
-      root: root_
-    };
-  } );
+    withroot: function (newRoot, callback)
+    {
+      if(!is_fn(callback))
+        throw "Invalid or no callback function specified";
+
+      var nf = new NodeFinder(this.prefix_, newRoot);
+      return callback.call(this);
+    }
+  };
 
 
   /**
