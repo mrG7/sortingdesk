@@ -143,7 +143,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     /* Instances */
     api_: null,
     sortingQueue_: null,
-    folder_: null,
+    explorer_: null,
     draggable_: null,
     
     /* Getters */
@@ -156,7 +156,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     get resetting ()    { return this.sortingQueue_.resetting(); },
     get options ()      { return this.options_; },
     get nodes ()        { return this.nodes_; },
-    get folder ()       { return this.folder_; },
+    get explorer ()     { return this.explorer_; },
     get draggable ()    { return this.draggable_; },
 
     /* Interface */
@@ -181,7 +181,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
         }
       };
 
-      els.toolbar = finder.withroot(els.explorer, function () {
+      els.toolbar = finder.withroot($('body'), function () {
         return {
           actions: {
             add: this.find('toolbar-add'),
@@ -192,6 +192,10 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
         };
       } );
 
+      els.toolbar.actions.refresh.click(function () {
+        self.explorer_.refresh();
+      } );
+      
       /* Begin instantiating and initialising controllers.
        *
        * Start by explicitly initialising SortingQueue's instance and proceed to
@@ -201,13 +205,19 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       (this.draggable_ = new ControllerDraggableImage(this))
         .initialise();
 
+      (this.explorer_ = new ControllerExplorer(this))
+        .on( {
+          "begin-refresh": function () {
+            els.toolbar.actions.refresh.addClass('disabled');
+          },
+          "end-refresh": function () {
+            els.toolbar.actions.refresh.removeClass('disabled');
+          }
+        } )
+        .initialise();
+
       this.initialised_ = true;
       console.info("Sorting Desk UI initialised");
-
-      if(this.options.active)
-        this.open(this.options.active);
-      else
-        this.nodes_.empty.closed.fadeIn();
     },
 
     /**
@@ -224,17 +234,17 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
       var self = this;
 
+      this.explorer_.reset();
+
       return this.sortingQueue_.reset()
         .done(function () {
-          self.folder_.reset();
-
-          self.folder_ = self.options_ = self.sortingQueue_ = null;
+          self.explorer_ = self.options_ = self.sortingQueue_ = null;
           self.initialised_ = false;
 
           console.info("Sorting Desk UI reset");
         } );
     },
-
+    
     open: function (folder)
     {
       var self = this;
@@ -280,10 +290,6 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     {
       this.close();
       this.nodes_.empty.closed.hide();
-      
-      /* (Re-)instantiate the bins controller. */
-      (this.folder_ = this.constructor_.instantiate('ControllerFolder', this))
-        .initialise(folder);
 
       /* Trigger event. */
       this.events_.trigger('open', this.folder_);
@@ -351,7 +357,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   /**
    * @class
    * */
-  var ControllerFolder = function (owner)
+  var ControllerExplorer = function (owner)
   {
     var self = this;
 
@@ -359,12 +365,19 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     std.Controller.call(this, owner);
 
     this.id_ = null;
-    this.name_ = null;
-    this.bins_ = [ ];
-    this.hover_ = null;
+    this.folders_ = [ ];
     this.active_ = null;
-    this.spawner_ = null;
     this.browser_ = null;
+    this.refreshing_ = false;
+    this.events_ = new std.Events(this, [ 'begin-refresh', 'end-refresh' ] );
+
+    /* Initialise jstree. */
+    this.tree_ = this.owner_.nodes.explorer.jstree( {
+      core: {
+        check_callback: true
+      },
+      plugins: [ "dnd" ]
+    } ).jstree(true);
 
     /* The `LabelBrowser´ component requires a factory method since it needs
      * options passed in. */
@@ -373,11 +386,12 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     /* Define getters. */
     this.__defineGetter__("id", function () { return this.id_; } );
     this.__defineGetter__("name", function () { return this.name_; } );
-    this.__defineGetter__("bins", function () { return this.bins_; } );
     this.__defineGetter__("hover", function () { return this.hover_; } );
     this.__defineGetter__("active", function () { return this.active_; } );
+    this.__defineGetter__("tree", function () { return this.tree_; } );
+    
     this.__defineGetter__("node", function () {
-      return this.owner_.nodes.bins;
+      return this.owner_.nodes.explorer;
     } );
 
     this.__defineGetter__("haveBrowser", function () {
@@ -385,72 +399,96 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     } );
 
     /* Instantiate spawner controller. */
-    this.spawner_ = this.owner_.constructor.instantiate(
-      'ControllerBinSpawner',
-      this,
-      function (input) {
-        return self.owner_.constructor.instantiate(
-          'Bin', self, { data: input }, null).render();
-      },
-      function (descriptor) {
-        return self.add(self.construct(descriptor));
-      } );
+/*     this.spawner_ = this.owner_.constructor.instantiate( */
+/*       'ControllerBinSpawner', */
+/*       this, */
+/*       function (input) { */
+/*         return self.owner_.constructor.instantiate( */
+/*           'Bin', self, { data: input }, null).render(); */
+/*       }, */
+/*       function (descriptor) { */
+/*         return self.add(self.construct(descriptor)); */
+/*       } ); */
     
     /* Register for a bin dismissal event and process it accordingly. */
-    owner.sortingQueue.dismiss.register('bin', function (e, id, scope) {
-      var index = self.indexOfId(id);
+/*     owner.sortingQueue.dismiss.register('bin', function (e, id, scope) { */
+/*       var index = self.indexOfId(id); */
 
-      if(index !== -1) {
-        self.removeAt(index);
-        self.owner_.save();
-      }
-    } );
+/*       if(index !== -1) { */
+/*         self.removeAt(index); */
+/*         self.owner_.save(); */
+/*       } */
+/*     } ); */
   };
 
-  ControllerFolder.prototype = Object.create(std.Controller.prototype);
+  ControllerExplorer.prototype = Object.create(std.Controller.prototype);
 
-  ControllerFolder.prototype.initialise = function (folder)
+  ControllerExplorer.prototype.initialise = function ()
   {
-    var self = this,
-        bin;
+    this.refresh();
+  };
+  
+  ControllerExplorer.prototype.refresh = function ()
+  {
+    var self = this;
 
-    this.spawner_.initialise();
-
-    if(!std.is_obj(folder)
-       || !folder.hasOwnProperty('bins')
-       || !std.is_arr(folder.bins))
-    {
-      throw "Invalid or no folder descriptor given";
+    if(this.refreshing_) {
+      console.error("Already refreshing");
+      return;
     }
 
-    this.id_ = folder.id;
-    this.name_ = folder.name;
+    this.events_.trigger('begin-refresh');
+    this.refreshing_ = true;
+    this.reset_tree_();
 
-    console.log("Folder opened: id=%s | name=%s", this.id_, this.name_);
+    this.owner_.api.foldering.list()
+      .done(function (coll) {
+        coll.forEach(function (f) {
+          f = new Folder(self, f);
+          f.render();
+          self.folders_.push(f);
+        } );
+
+        self.refreshing_ = false;
+        self.events_.trigger('end-refresh');
+      } );
+
     
-    folder.bins.forEach(function (descriptor) {
-      self.add(self.construct(descriptor), false, true);
-    } );
+/*     if(!std.is_obj(folder) */
+/*        || !folder.hasOwnProperty('bins') */
+/*        || !std.is_arr(folder.bins)) */
+/*     { */
+/*       throw "Invalid or no folder descriptor given"; */
+/*     } */
 
-    /* Now manually set the active bin. */
-    if(this.bins_.length > 0) {
-      if(folder.active)
-        bin = this.getById(folder.active);
+/*     this.id_ = folder.id; */
+/*     this.name_ = folder.name; */
 
-      /* Attempt to recover if we've been given an invalid id to activate. */
-      if(!bin) {
-        console.info("Failed to set the active bin: setting first (id=%s)",
-                     folder.active || null);
+/*     console.log("Folder opened: id=%s | name=%s", this.id_, this.name_); */
+    
+/*     folder.bins.forEach(function (descriptor) { */
+/*       self.add(self.construct(descriptor), false, true); */
+/*     } ); */
 
-        bin = this.getAt(0);
-      }
+/*     /\* Now manually set the active bin. *\/ */
+/*     if(this.bins_.length > 0) { */
+/*       if(folder.active) */
+/*         bin = this.getById(folder.active); */
 
-      this.setActive(bin);
-    } else
-      this.updateEmptyNotification_();
+/*       /\* Attempt to recover if we've been given an invalid id to activate. *\/ */
+/*       if(!bin) { */
+/*         console.info("Failed to set the active bin: setting first (id=%s)", */
+/*                      folder.active || null); */
+
+/*         bin = this.getAt(0); */
+/*       } */
+
+/*       this.setActive(bin); */
+/*     } else */
+/*       this.updateEmptyNotification_(); */
   };
 
-  ControllerFolder.prototype.construct = function (descriptor)
+  ControllerExplorer.prototype.construct = function (descriptor)
   {
     var map = { 'text': 'Bin',
                 'image': 'BinImage' },
@@ -472,15 +510,22 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       descriptor);
   };
 
-  ControllerFolder.prototype.reset = function ()
+  ControllerExplorer.prototype.reset = function ()
   {
     /* Reset bin spawner controller and remove all children nodes inside the
      * bins HTML container. */
-    this.spawner_.reset();
+    this.reset_tree_();
+    
     this.owner_.api.setQueryContentId(null);
     this.owner_.nodes.empty.bins.hide();
     this.bins_.forEach(function (bin) { bin.node.remove(); } );
 
+
+return;
+
+
+
+    
     /* De-register for events of 'bin' scope. */
     this.owner_.sortingQueue.dismiss.unregister('bin');
 
@@ -490,7 +535,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.bins_ = this.hover_ = this.active_ = this.spawner_ = null;
   };
 
-  ControllerFolder.prototype.add = function (bin,
+  ControllerExplorer.prototype.add = function (bin,
                                              activate /* = true */,
                                              exists   /* = false */)
   {
@@ -524,7 +569,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     return bin;
   };
 
-  ControllerFolder.prototype.merge = function (dropped, dragged)
+  ControllerExplorer.prototype.merge = function (dropped, dragged)
   {
     var api = this.owner_.api,
         label = new (api.getClass('Label'))(
@@ -544,7 +589,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     return this.doAddLabel_(label);
   };
 
-  ControllerFolder.prototype.addLabel = function (bin, descriptor)
+  ControllerExplorer.prototype.addLabel = function (bin, descriptor)
   {
     var self = this,
         api = this.owner_.api;
@@ -570,7 +615,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       } );
   };
 
-  ControllerFolder.prototype.find = function (callback)
+  ControllerExplorer.prototype.find = function (callback)
   {
     var result = null;
 
@@ -584,12 +629,12 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     return result;
   };
 
-  ControllerFolder.prototype.indexOf = function (bin)
+  ControllerExplorer.prototype.indexOf = function (bin)
   {
     return this.bins_.indexOf(bin);
   };
 
-  ControllerFolder.prototype.indexOfId = function (id)
+  ControllerExplorer.prototype.indexOfId = function (id)
   {
     for(var i = 0, l = this.bins_.length; i < l; ++i) {
       if(this.bins_[i].id === id)
@@ -599,12 +644,12 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     return -1;
   };
 
-  ControllerFolder.prototype.remove = function (bin)
+  ControllerExplorer.prototype.remove = function (bin)
   {
     return this.removeAt(this.bins_.indexOf(bin));
   };
 
-  ControllerFolder.prototype.removeAt = function (index)
+  ControllerExplorer.prototype.removeAt = function (index)
   {
     var bin;
 
@@ -622,7 +667,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.updateEmptyNotification_();
   };
 
-  ControllerFolder.prototype.getAt = function (index)
+  ControllerExplorer.prototype.getAt = function (index)
   {
     if(index < 0 || index >= this.bins_.length)
       throw "Invalid bin index";
@@ -630,14 +675,14 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     return this.bins_[index];
   };
 
-  ControllerFolder.prototype.getById = function (id)
+  ControllerExplorer.prototype.getById = function (id)
   {
     return this.find(function (bin) {
       return bin.id === id;
     } );
   };
 
-  ControllerFolder.prototype.setActive = function (bin)
+  ControllerExplorer.prototype.setActive = function (bin)
   {
     /* Don't activate bin if currently active already. */
     if(this.active_ === bin)
@@ -676,7 +721,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.owner_.events.trigger('active', bin);
   };
 
-  ControllerFolder.prototype.browse = function (bin)
+  ControllerExplorer.prototype.browse = function (bin)
   {
     var self = this,
         opts = this.owner_.options;
@@ -703,7 +748,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       .initialise();
   };
 
-  /* overridable */ ControllerFolder.prototype.serialise = function ()
+  /* overridable */ ControllerExplorer.prototype.serialise = function ()
   {
     var bins = [ ];
 
@@ -721,7 +766,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   };
 
   /* Events */
-  ControllerFolder.prototype.onDropSpecial = function (scope)
+  ControllerExplorer.prototype.onDropSpecial = function (scope)
   {
     var api = this.owner_.api,
         result = { },
@@ -786,7 +831,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     return result.subtopic_id && result;
   };
 
-  /* overridable */ ControllerFolder.prototype.enableBrowser = function ()
+  /* overridable */ ControllerExplorer.prototype.enableBrowser = function ()
   {
     var opts = this.owner_.options;
     
@@ -794,7 +839,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       .removeClass(opts.css.disabled);
   };    
 
-  /* overridable */ ControllerFolder.prototype.disableBrowser = function ()
+  /* overridable */ ControllerExplorer.prototype.disableBrowser = function ()
   {
     var opts = this.owner_.options;
     
@@ -803,7 +848,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   };    
 
   /* Protected methods */
-  /* overridable */ ControllerFolder.prototype.append_ = function (node)
+  /* overridable */ ControllerExplorer.prototype.append_ = function (node)
   {
     /* Add bin node to the very top of the container if aren't any yet,
      * otherwise insert it after the last contained bin. */
@@ -813,14 +858,14 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       this.bins_[this.bins_.length - 1].node.after(node);
   };
 
-  ControllerFolder.prototype.onMouseEnter_ = function (bin)
+  ControllerExplorer.prototype.onMouseEnter_ = function (bin)
   { this.hover_ = bin; };
 
-  ControllerFolder.prototype.onMouseLeave_ = function ()
+  ControllerExplorer.prototype.onMouseLeave_ = function ()
   { this.hover_ = null; };
 
   /* Private methods */
-  ControllerFolder.prototype.update_ = function (descriptor,
+  ControllerExplorer.prototype.update_ = function (descriptor,
                                                  exists /* = false */)
   {
     var self = this,
@@ -872,7 +917,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       } );
   };
 
-  ControllerFolder.prototype.doUpdateFc_ = function (content_id, fc)
+  ControllerExplorer.prototype.doUpdateFc_ = function (content_id, fc)
   {
     return this.owner_.api.putFeatureCollection(content_id, fc)
       .done(function () {
@@ -885,7 +930,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       } );
   };
 
-  ControllerFolder.prototype.doAddLabel_ = function (label)
+  ControllerExplorer.prototype.doAddLabel_ = function (label)
   {
     return this.owner_.api.addLabel(label)
       .done(function () {
@@ -898,7 +943,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       } );
   };
 
-  ControllerFolder.prototype.updateEmptyNotification_ = function ()
+  ControllerExplorer.prototype.updateEmptyNotification_ = function ()
   {
     this.owner_.nodes.empty.bins.stop();
     if(this.bins_.length === 0) {
@@ -908,6 +953,52 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       this.owner_.nodes.empty.bins.fadeOut(
         this.owner_.options.delays.binsEmptyFadeOut);
     }      
+  };
+
+  /* Private interface */
+  ControllerExplorer.prototype.reset_tree_ = function ()
+  {
+    /* Reset every folder contained. */
+    this.folders_.forEach(function (f) {
+      f.reset();
+    } );
+
+    this.folders_ = [ ];
+  };
+
+
+  /**
+   * @class
+   * */
+  var Folder = function (owner, folder)
+  {
+    /* Invoke base class constructor. */
+    std.Drawable.call(this, owner);
+
+    /* Attributes */
+    this.folder_ = folder;
+    this.node_ = null;
+
+    /* Getters */
+    this.__defineGetter__('node', function () { return this.node_; } );
+  };
+
+  Folder.prototype = Object.create(std.Drawable.prototype);
+
+  Folder.prototype.render = function ()
+  {
+    this.id_ = this.owner_.tree.create_node(
+      null, { state: 'open', text: this.folder_.data.name }, "last");
+
+    if(this.id_ === false)
+      throw "Failed to create folder";
+    
+    this.node_ = this.owner_.node.find('[id="' + this.id_ + '"]');
+  };
+
+  Folder.prototype.reset = function ()
+  {
+    this.owner_.tree.delete_node(this.node_);
   };
 
 
@@ -1274,7 +1365,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       binsEmptyFadeOut: 100
     },
     constructors: {
-      ControllerFolder: ControllerFolder,
+      ControllerExplorer: ControllerExplorer,
       Bin: BinDefault,
       BinImage: BinImageDefault,
       ControllerBinSpawner: ControllerBinSpawnerDefault
@@ -1286,7 +1377,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   /* Module public API */
   return {
     Sorter: Sorter,
-    ControllerFolder: ControllerFolder,
+    ControllerExplorer: ControllerExplorer,
     Bin: Bin,
     BinDefault: BinDefault,
     BinImageDefault: BinImageDefault,
