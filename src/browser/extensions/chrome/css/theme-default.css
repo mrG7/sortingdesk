@@ -138,10 +138,6 @@ BODY {
   left: -40px;
 }
 
-#sd-folder-explorer .sd-loading {
-  top: 173px;
-}
-
 .sd-empty {
   display: none;
   position: absolute;
@@ -173,8 +169,12 @@ BODY {
   box-shadow: 1px 1px 1px #888;
 }
 
-#sd-folder-explorer .sd-empty.sd-wider {
-  margin-top: 10px;
+#sd-folder-explorer .sd-loading {
+  top: 173px;
+}
+
+#sd-folder-explorer .sd-empty {
+  top: 193px;
 }
 
 
