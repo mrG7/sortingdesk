@@ -299,9 +299,7 @@ var Main = (function (window, chrome, $, std, SortingDesk, LabelBrowser, FolderE
     };
 
     /* Initialisation sequence */
-    var height = Math.floor(
-      (window.innerHeight
-       - $('#sd-sorting-desk > .sd-header').outerHeight() - 12) / 2);
+    var height = Math.floor(window.innerHeight / 2);
     
     chrome.runtime.sendMessage({ operation: "get-meta" }, function (meta) {
       /* Cache jQuery references to nodes used. */
@@ -315,7 +313,7 @@ var Main = (function (window, chrome, $, std, SortingDesk, LabelBrowser, FolderE
       
       /* Set up heights. */
       $("#sd-folder-explorer").height(height);
-      $("#sd-queue").height(height);
+      $("#sd-queue").height(height - $("#sd-queue > .sd-footer").outerHeight());
 
       /* Initialise API and instantiate `SortingDesk´ class.
        * --
