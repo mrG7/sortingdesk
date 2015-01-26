@@ -57,6 +57,14 @@ var SortingCommon_ = function (window, $) {
     };
   };
 
+  var on_exception = function (x)
+  {  
+    console.error("Exception thrown: " + x,
+                  x.stack || "\n<no stack information available>");
+
+    throw x;
+  };
+
   
   /* jQuery-related */
   var jQueryExtensions = (function () {
@@ -1066,6 +1074,7 @@ var SortingCommon_ = function (window, $) {
     like_obj: like_obj,
     is_in: is_in,
     chainize: chainize,
+    on_exception: on_exception,
 
     /* Classes */
     Url: Url,
