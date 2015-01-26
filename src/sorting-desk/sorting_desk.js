@@ -574,8 +574,8 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
   ControllerExplorer.prototype.getById = function (id)
   {
-    return this.each(function (bin) {
-      return bin.id === id;
+    return this.each(function (folder) {
+      return folder.id === id;
     } );
   };
 
