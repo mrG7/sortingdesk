@@ -72,7 +72,7 @@ var LabelBrowser_ = function (window, $, std)
         finder = new std.NodeFinder(
           'label-browser',
           this.options_.container
-            || $('[data-sd-scope="label-browser-container"]')),
+            || $('[data-sd-scope="label-browser-view"]')),
         els;
 
     if(this.initialised_)
