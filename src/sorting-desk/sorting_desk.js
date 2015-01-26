@@ -94,7 +94,10 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.api_ = Api.initialize(this, opts.dossierUrl);
     this.options_ = $.extend(true, $.extend(true, {}, defaults_), opts);
     this.callbacks_ = new std.Callbacks(cbs);
-    this.events_ = new std.Events(this, [ 'open', 'close', 'active' ]);
+    this.events_ = new std.Events(
+      this,
+      [ 'request-begin', 'request-end', 'active' ]);
+    
     this.constructor_ = new std.Constructor(this.options_.constructors);
 
     /* We need to instantiate `SortingQueue´ *now* because it is a dependency;
@@ -205,11 +208,13 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
       (this.explorer_ = new ControllerExplorer(this))
         .on( {
-          "begin-refresh": function () {
-            els.toolbar.actions.refresh.addClass('disabled');
+          "refresh-begin": function () {
+            self.updateToolbar(true);
+            self.events_.trigger("request-begin", "refresh");
           },
-          "end-refresh": function () {
-            els.toolbar.actions.refresh.removeClass('disabled');
+          "refresh-end": function () {
+            self.updateToolbar();
+            self.events_.trigger("request-end", "refresh");
           }
         } )
         .initialise();
@@ -281,6 +286,13 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     {
       if(this.folder_)
         this.callbacks_.invoke('save', this.folder_.serialise() );
+    },
+
+    updateToolbar: function (loading)
+    {
+      var ela = this.nodes_.toolbar.actions;
+      ela.add.toggleClass('disabled', loading);
+      ela.refresh.toggleClass('disabled', loading);
     },
 
     /* Private methods */
@@ -367,7 +379,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.active_ = null;
     this.browser_ = null;
     this.refreshing_ = false;
-    this.events_ = new std.Events(this, [ 'begin-refresh', 'end-refresh' ] );
+    this.events_ = new std.Events(this, [ 'refresh-begin', 'refresh-end' ] );
 
     /* Initialise jstree. */
     this.tree_ = this.owner_.nodes.explorer.jstree( {
@@ -435,9 +447,9 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       return;
     }
 
-    this.events_.trigger('begin-refresh');
     this.refreshing_ = true;
     this.reset_tree_();
+    this.events_.trigger('refresh-begin');
 
     /* Hide empty notification while loading. */
     this.update_empty_state_(true);
@@ -445,13 +457,14 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.owner_.api.foldering.list()
       .done(function (coll) {
         coll.forEach(function (f) {
-          f = new Folder(self, f);
-          f.render();
+          (f = new Folder(self, f)).render();
           self.folders_.push(f);
         } );
-
+      } )
+      .always(function () {
+        self.update_empty_state_();
         self.refreshing_ = false;
-        self.events_.trigger('end-refresh');
+        self.events_.trigger('refresh-end');
       } );
 
     
