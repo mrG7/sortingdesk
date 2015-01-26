@@ -62,42 +62,6 @@ var Main = (function (window, chrome, $, std, SortingDesk, LabelBrowser, Api, un
     {
       chrome.runtime.sendMessage( { operation: 'set-active', id: id }, null);
     };
-    
-    var load_ = function (id)
-    {
-      var deferred = $.Deferred();
-
-      chrome.runtime.sendMessage(
-        { operation: 'load-folder', id: id },
-        function (folder) {
-          if(std.is_obj(folder)) deferred.resolve(folder);
-          else deferred.reject();
-        } );
-
-      return deferred.promise();
-    };
-
-    var loadAll_ = function ()
-    {
-      var deferred = $.Deferred();
-
-      chrome.runtime.sendMessage(
-        { operation: 'load-folders' },
-        function (folders) { deferred.resolve(folders); } );
-
-      return deferred.promise();
-    };
-
-    var save_ = function (folder)
-    {
-      chrome.runtime.sendMessage( { operation: 'save-folder', folder: folder},
-                                  null);
-    };
-
-    var remove_ = function (id)
-    {
-      chrome.runtime.sendMessage( { operation: 'remove-folder', id: id }, null);
-    };
 
     var imageToBase64_ = function (entity)
     {
@@ -112,21 +76,36 @@ var Main = (function (window, chrome, $, std, SortingDesk, LabelBrowser, Api, un
 
       return deferred.promise();
     };
+
+    var getSelection_ = function ()
+    {
+      var deferred = $.Deferred();
+
+      /* If there is an active tab, send it a message requesting detailed
+       * information about current text selection. */
+      if(active !== null) {
+        chrome.tabs.get(active.id, function (tab) {
+          if(!/^chrome[^:]*:/.test(tab.url)) {
+            chrome.tabs.sendMessage(
+              active.id,
+              { operation: 'get-selection' },
+              function (result) {
+                deferred.resolve(result);
+              } );
+          }
+        } );
+      }
+
+      return deferred.promise();
+    };
     
     /* Interface */
     return {
       callbacks: {
         sorter: {
-          load: load_,
-          save: save_,
           setActive: setActive_,
-          imageToBase64: imageToBase64_
-        },
-        explorer: {
-          load: load_,
-          loadAll: loadAll_,
-          save: save_,
-          remove: remove_
+          imageToBase64: imageToBase64_,
+          getSelection: getSelection_
         },
         browser: {
         }
@@ -201,7 +180,6 @@ var Main = (function (window, chrome, $, std, SortingDesk, LabelBrowser, Api, un
           }
         },
         dossierUrl: meta.config.dossierUrl,
-        active: meta.active,
         sortingQueue: {
           options: {
             container: $('#sd-queue'),
@@ -262,7 +240,7 @@ var Main = (function (window, chrome, $, std, SortingDesk, LabelBrowser, Api, un
           } );
         } );
       } );
-      
+
       chrome.tabs.onActivated.addListener(function (info) {
         chrome.tabs.get(info.tabId, function (tab) {
           if(!/^chrome[^:]*:/.test(tab.url)) {
