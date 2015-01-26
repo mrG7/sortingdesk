@@ -1325,28 +1325,6 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   };
 
 
-  /**
-   * @class
-   * */
-  var Html = {
-    getXpathSimple: function (node)
-    {
-      var result = [ ];
-
-      if(std.$.is(node))
-        node = node.get(0);
-
-      if(node) {
-        do {
-          result.push(node.nodeName);
-        } while( (node = node.parentNode) );
-      }
-
-      return result.reverse().join('/');
-    }
-  };
-
-
   /* Default options */
   var defaults_ = {
     css: {
