@@ -10,7 +10,7 @@
 
 /*jshint laxbreak:true */
 
-var Main = (function (window, chrome, $, std, SortingDesk, LabelBrowser, FolderExplorer, Api, undefined) {
+var Main = (function (window, chrome, $, std, SortingDesk, LabelBrowser, Api, undefined) {
 
   /* Module-wide variables */
   var nodes = { },
@@ -174,8 +174,6 @@ var Main = (function (window, chrome, $, std, SortingDesk, LabelBrowser, FolderE
       (sorter = new SortingDesk.Sorter( {
         container: $('#sd-folder-explorer'),
         constructors: {
-          createFolderExplorer: function (options) {
-          },
           createLabelBrowser: function (options) {
             $('[data-sd-scope="label-browser-header-title"]').html("Loading");
             $('[data-sd-scope="label-browser-header-content"]')
@@ -245,4 +243,4 @@ var Main = (function (window, chrome, $, std, SortingDesk, LabelBrowser, FolderE
     } );
   } );
   
-} )(window, chrome, jQuery, SortingCommon, SortingDesk, LabelBrowser, FolderExplorer, Api);
+} )(window, chrome, jQuery, SortingCommon, SortingDesk, LabelBrowser, Api);

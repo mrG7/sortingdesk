@@ -38,6 +38,7 @@ are saved."
 
 (defcustom watch-deps-file-list '("src/sorting-desk/sorting_desk.js"
                                   "src/sorting-desk/api-live.js"
+                                  "src/sorting-desk/components/label_browser.js"
                                   "src/sorting-queue/sorting_queue.js"
                                   "src/sorting-common/sorting_common.js"
                                   "src/dossier.js/Dossier.js")

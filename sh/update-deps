@@ -58,7 +58,6 @@ cp -v "$dir_src/sorting-common/sorting_common.js" sorting-common/
 cp -v "$dir_src/sorting-queue/sorting_queue.js" sorting-queue/
 cp -v "$dir_src/sorting-desk/sorting_desk.js" sorting-desk/
 cp -v "$dir_src/sorting-desk/components/label_browser.js" sorting-desk/components
-cp -v "$dir_src/sorting-desk/folder_explorer.js" sorting-desk/
 cp -v "$dir_src/sorting-desk/api-live.js" sorting-desk/
 cp -v "$dir_src/dossier.js/Dossier.js" dossier.js/
 
