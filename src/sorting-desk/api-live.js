@@ -84,6 +84,9 @@ var Api_ = (function (window, $, CryptoJS, DossierJS) {
       getDossierJs: getDossierJs,
       getCallbacks: getCallbacks,
 
+      /* Namespaces */
+      foldering: foldering,
+
       /* Constants */
       COREF_VALUE_POSITIVE: DossierJS.COREF_VALUE_POSITIVE,
       COREF_VALUE_UNKNOWN: DossierJS.COREF_VALUE_UNKNOWN,
@@ -331,6 +334,105 @@ var Api_ = (function (window, $, CryptoJS, DossierJS) {
     return qitems_.callbacks();
   };
 
+
+  /**
+   * @namespace
+   * */
+  var foldering = (function () {
+    
+    /* Interface: functions */
+    var list = function ()
+    {
+      return api_.listFolders(annotator_)
+        .then(function (collection) {
+          return collection.map(function (f) {
+            return new Folder(f);
+          } );
+        } );
+    };
+
+    
+    /* Interface: classes
+     * -- */
+    /**
+     * @class
+     * */
+    var Folder = function (folder)
+    {
+      if(!(folder instanceof DossierJS.Folder))
+        throw "Invalid or no folder specified";
+      
+      this.folder_ = folder;
+    };
+    
+    /* Interface */
+    Folder.prototype = {
+      folder_: null,
+      
+      list: function ()
+      {
+        var self = this;
+        
+        return api_.listSubfolders(this.folder_)
+          .then(function (collection) {
+            return collection.map(function (sf) {
+              return new Subfolder(new Folder(self.folder_), sf);
+            } );
+          } );
+      },
+
+      add: function (subfolder) {
+        return api_.addSubfolder(subfolder);
+      }
+    };
+
+
+    /**
+     * @class
+     * */
+    var Subfolder = function (folder, subfolder)
+    {
+      if(!(folder instanceof Folder))
+        throw "Invalid or no folder specified";
+      else if(!(subfolder instanceof DossierJS.Subfolder))
+        throw "Invalid or no subfolder specified";
+      
+      this.folder_ = folder;
+      this.subfolder_ = subfolder;
+    };
+
+    Subfolder.prototype = {
+      folder_: null,
+      subfolder_: null,
+      
+      get parent() { return this.parent_; },
+
+      list: function ()
+      {
+        return api_.listSubfolderItems(this.subfolder_);
+      },
+      
+      add: function (content_id, subtopic_id)
+      {
+        return api_.addSubfolderItem(this.subfolder_,
+                                     content_id,
+                                     subtopic_id);
+      }
+    };
+
+
+    /* Public interface */
+    return {
+      /* Functions */
+      list: list,
+
+      /* Classes */
+      Folder: Folder,
+      Subfolder: Subfolder
+    };
+    
+  } )();
+  
 
   /* Private interface */
   var _opt_arg_good = function (a)
