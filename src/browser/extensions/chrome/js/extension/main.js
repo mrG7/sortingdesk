@@ -38,7 +38,6 @@ var Main = (function (window, chrome, $, std, SortingDesk, LabelBrowser, Api, un
     
     onRequestBegin_: function (id)
     {
-      console.log("HERE");
       if(this.count_++ === 0)
         this.node_.stop().fadeIn();
     },
