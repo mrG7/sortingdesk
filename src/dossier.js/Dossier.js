@@ -808,11 +808,11 @@ var _DossierJS = function(window, $) {
     /* Some helper functions for dealing with folders and their ids/names. */
 
     function folder_name_to_id(name) {
-        return name.replace(' ', '_');
+        return name.replace(/\s/g, '_');
     }
 
     function folder_id_to_name(name) {
-        return name.replace('_', ' ');
+        return name.replace(/_/g, ' ');
     }
 
     function assert_valid_folder_name(name) {
