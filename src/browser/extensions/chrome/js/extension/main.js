@@ -14,6 +14,7 @@ var Main = (function (window, chrome, $, std, SortingDesk, LabelBrowser, Api, un
 
   /* Module-wide variables */
   var nodes = { },
+      active = null,
       loading,
       sorter;
   
@@ -101,7 +102,7 @@ var Main = (function (window, chrome, $, std, SortingDesk, LabelBrowser, Api, un
     var imageToBase64_ = function (entity)
     {
       var deferred = $.Deferred();
-      
+
       chrome.runtime.sendMessage(
         { operation: 'get-image-base64', entity: entity },
         function (result) {
@@ -247,6 +248,29 @@ var Main = (function (window, chrome, $, std, SortingDesk, LabelBrowser, Api, un
       } catch(x) {
         std.on_exception(x);
       }
+
+      /* Get currently active tab and listen for changes on which tab becomes
+       * active. */
+      chrome.windows.getLastFocused(function (win) {
+        chrome.tabs.getSelected(win.id, function (info) {
+          chrome.tabs.get(info.id, function (tab) {
+            if(!/^chrome[^:]*:/.test(tab.url)) {
+              active = tab;
+              console.log("Currently active tab: #%d", active.id);
+            } else
+              console.info("No initial active tab");
+          } );
+        } );
+      } );
+      
+      chrome.tabs.onActivated.addListener(function (info) {
+        chrome.tabs.get(info.tabId, function (tab) {
+          if(!/^chrome[^:]*:/.test(tab.url)) {
+            active = tab;
+            console.log("New active tab: ", tab);
+          }
+        } );
+      } );
         
       console.info("Initialised Sorting Desk extension");
       console.info("READY");
