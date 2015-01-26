@@ -164,8 +164,10 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     {
       if(this.initialised_)
         throw "Sorting Desk component already initialised";
-      
-      var finder = new std.NodeFinder('sorting-desk', this.options_.container);
+
+      var self = this,
+          finder = new std.NodeFinder('sorting-desk', this.options_.container),
+          els;
       
       /* Find nodes. */
       els = this.nodes_ = {
@@ -175,10 +177,20 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
           add: finder.find('button-add')
         },
         empty: {
-          closed: finder.find('closed'),
-          bins: finder.find('bins-empty')
+          empty: finder.find('explorer-empty')
         }
       };
+
+      els.toolbar = finder.withroot(els.explorer, function () {
+        return {
+          actions: {
+            add: this.find('toolbar-add'),
+            remove: this.find('toolbar-remove'),
+            rename: this.find('toolbar-rename'),
+            refresh: this.find('toolbar-refresh')
+          }
+        };
+      } );
 
       /* Begin instantiating and initialising controllers.
        *
