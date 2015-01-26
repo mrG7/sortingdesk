@@ -147,7 +147,6 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     api_: null,
     sortingQueue_: null,
     explorer_: null,
-    draggable_: null,
     
     /* Getters */
     get sortingQueue () { return this.sortingQueue_; },
@@ -160,7 +159,6 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     get options ()      { return this.options_; },
     get nodes ()        { return this.nodes_; },
     get explorer ()     { return this.explorer_; },
-    get draggable ()    { return this.draggable_; },
 
     /* Interface */
     initialise: function ()
@@ -198,9 +196,6 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
        * Start by explicitly initialising SortingQueue's instance and proceed to
        * initialising our own instance. */
       this.sortingQueue_.initialise();
-      
-      (this.draggable_ = new ControllerDraggableImage(this))
-        .initialise();
 
       (this.explorer_ = new ControllerExplorer(this))
         .on( {
@@ -252,63 +247,6 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       ela.refresh.toggleClass('disabled', loading);
     }
   };
-
-
-  /**
-   * @class
-   * */
-  var ControllerDraggableImage = function (owner)
-  {
-    /* Invoke super constructor. */
-    std.Controller.call(this, owner);
-    /* Define getters. */
-    this.__defineGetter__("activeNode",
-                          function () { return this.activeNode_; } );
-  };
-
-  ControllerDraggableImage.prototype = Object.create(
-    std.Controller.prototype);
-
-  /* Attributes */
-  ControllerDraggableImage.prototype.saveCursor_ = null;
-  ControllerDraggableImage.prototype.activeNode_ = null;
-
-  /* Methods */
-  ControllerDraggableImage.prototype.initialise = function ()
-  {
-    var self = this;
-
-    /* Attach specialised `drag´ event listeners to every image found on the
-     * page. */
-    $('IMG').each( function () {
-      var el = $(this);
-
-      el.on( {
-        mouseenter: function () {
-          self.saveCursor_ = el.css('cursor');
-          el.css('cursor', 'copy');
-        },
-
-        mouseleave: function () {
-          el.css('cursor', self.saveCursor_);
-        },
-
-        dragstart: function (ev) {
-          self.activeNode_ = $(ev.target);
-        },
-
-        dragend: function () {
-          self.activeNode_ = null;
-        }
-      } );
-    } );
-  };
-
-  ControllerDraggableImage.prototype.reset = function ()
-  { this.clear(); };
-
-  ControllerDraggableImage.prototype.clear = function ()
-  { this.activeNode_ = null; };
 
 
   /**

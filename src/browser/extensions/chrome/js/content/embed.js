@@ -60,11 +60,72 @@ var ChromeExtensionUi = (function ($, std) {
   /**
    * @class
    * */
+  var DraggableImageMonitor = function ()
+  {
+    /* Define getters. */
+    this.__defineGetter__("active",
+                          function () { return this.active_; } );
+
+    /* Initialise component. */
+    var self = this;
+
+    /* Attach specialised `drag´ event listeners to every image found on the
+     * page. */
+    $('IMG').each( function () {
+      var el = $(this);
+
+      el.on( {
+        mouseenter: function () {
+          self.cursor_ = el.css('cursor');
+          el.css('cursor', 'copy');
+        },
+
+        mouseleave: function () {
+          el.css('cursor', self.cursor_);
+        },
+
+        dragstart: function (ev) {
+          self.active_ = $(ev.target);
+          console.log("Image dragging: start");
+        },
+
+        dragend: function () {
+          window.setTimeout(function () {
+            console.log("Image dragging: end");
+            self.active_ = null;
+          }, 250);
+        }
+      } );
+    } );
+    
+  };
+
+  /* Attributes */
+  DraggableImageMonitor.prototype.cursor_ = null;
+  DraggableImageMonitor.prototype.active_ = null;
+
+  /* Interface */
+  DraggableImageMonitor.prototype.clear = function ()
+  { this.active_ = null; };
+
+
+  /**
+   * @class
+   * */
   var Embed = function (meta)
   {
     console.log("Initialising embeddable content");
+    
     BackgroundListener.initialise();
+    this.monitor_ = new DraggableImageMonitor();
+    
     console.info("Initialised embeddable content");
+  };
+
+  Embed.prototype = {
+    monitor_: null,
+
+    get monitor () { return this.monitor_; }
   };
 
   
