@@ -11,3 +11,7 @@
 BUTTON.dropdown-toggle > .caret {
   margin-left: 5px;
 }
+
+.btn-default.disabled {
+  color: #888;
+}
