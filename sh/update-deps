@@ -14,6 +14,7 @@ dir_src="$dir_root/src"
 dir_lib="$dir_root/lib"
 
 
+# Function definition
 function message () {
   echo -e "\033[32m$1\033[0m"
 }
@@ -21,6 +22,7 @@ function message () {
 function info () {
   message "I: $1"
 }
+# End: function definition
 
 
 # Component: SortingDesk
@@ -31,9 +33,10 @@ cd "$dir_root/src/browser/extensions/chrome"
 # assume that all its contents can be removed.
 [ -d lib ] && info "cleaning dependencies" && rm lib -rfv
 
-info "copying dependencies"
-mkdir -vp lib && cd lib
+info "copying dependencies: chrome browser extension"
+mkdir -vp lib && cd lib         # Root dependencies directory
 
+# Create directories
 mkdir sorting-common -v
 mkdir sorting-queue -v
 mkdir sorting-desk/components -vp
@@ -44,6 +47,8 @@ mkdir bootstrap/fonts -v
 mkdir bootstrap/js -v
 mkdir jstree/themes/default -vp
 
+# + Chrome browser extension
+# --
 # Note: Google Chrom(e|ium) browsers do not support symlinks (!). There is no
 # other option but to actually copy, and thus duplicate, the external
 # dependencies we need.
@@ -78,5 +83,6 @@ cp -v "$dir_lib/jstree-3.0.9/dist/themes/default/style.min.css" jstree/themes/de
 # inside `lib' read-only to prevent accidental changes.
 info "enforcing r/o permissions"
 find . -type f -exec chmod -v =r {} +
+# End: Chrome browser extension
 
 message "\ndone."
