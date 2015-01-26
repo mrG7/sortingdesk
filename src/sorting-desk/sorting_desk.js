@@ -243,62 +243,13 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
           console.info("Sorting Desk UI reset");
         } );
     },
-    
-    open: function (folder)
-    {
-      var self = this;
-
-      /* Allow folder to be an object ready for consumption or a string
-       * (containing an id) that can be used to retrieve the folder's
-       * descriptor. */
-      if(std.is_obj(folder))
-        this.initialiseFolder_(folder);
-      else if(folder) {         /* assume id */
-        this.callbacks_.invoke('load', folder)
-          .done(function (f) { self.initialiseFolder_(f); } );
-      } else
-        console.error('Invalid folder specified', folder);
-    },
-
-    close: function ()
-    {
-      /* Force reset of the bins controller, if an instance currently exists. */
-      if(this.folder_ === null) {
-        console.log("No folder currently active");
-        return;
-      }
-
-      this.api_.getDossierJs().stop();
-      this.folder_.reset();
-      this.folder_ = null;
-      
-      /* Clear the items queue list. */
-      this.sortingQueue_.items.removeAll(false);
-      this.events_.trigger('close');
-      this.nodes_.empty.closed.fadeIn();
-    },
-    
-    save: function ()
-    {
-      if(this.folder_)
-        this.callbacks_.invoke('save', this.folder_.serialise() );
-    },
 
     updateToolbar: function (loading)
     {
       var ela = this.nodes_.toolbar.actions;
+
       ela.add.toggleClass('disabled', loading);
       ela.refresh.toggleClass('disabled', loading);
-    },
-
-    /* Private methods */
-    initialiseFolder_: function (folder)
-    {
-      this.close();
-      this.nodes_.empty.closed.hide();
-
-      /* Trigger event. */
-      this.events_.trigger('open', this.folder_);
     }
   };
 
