@@ -383,7 +383,6 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     /* Define getters. */
     this.__defineGetter__("id", function () { return this.id_; } );
     this.__defineGetter__("name", function () { return this.name_; } );
-    this.__defineGetter__("hover", function () { return this.hover_; } );
     this.__defineGetter__("active", function () { return this.active_; } );
     this.__defineGetter__("tree", function () { return this.tree_; } );
     
@@ -394,28 +393,6 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.__defineGetter__("haveBrowser", function () {
       return this.haveBrowser_;
     } );
-
-    /* Instantiate spawner controller. */
-/*     this.spawner_ = this.owner_.constructor.instantiate( */
-/*       'ControllerBinSpawner', */
-/*       this, */
-/*       function (input) { */
-/*         return self.owner_.constructor.instantiate( */
-/*           'Bin', self, { data: input }, null).render(); */
-/*       }, */
-/*       function (descriptor) { */
-/*         return self.add(self.construct(descriptor)); */
-/*       } ); */
-    
-    /* Register for a bin dismissal event and process it accordingly. */
-/*     owner.sortingQueue.dismiss.register('bin', function (e, id, scope) { */
-/*       var index = self.indexOfId(id); */
-
-/*       if(index !== -1) { */
-/*         self.removeAt(index); */
-/*         self.owner_.save(); */
-/*       } */
-/*     } ); */
   };
 
   ControllerExplorer.prototype = Object.create(std.Controller.prototype);
@@ -519,28 +496,13 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     
     this.owner_.api.setQueryContentId(null);
     this.owner_.nodes.empty.bins.hide();
-    this.bins_.forEach(function (bin) { bin.node.remove(); } );
-
-
-return;
-
-
-
-    
-    /* De-register for events of 'bin' scope. */
-    this.owner_.sortingQueue.dismiss.unregister('bin');
-
-    console.log("Folder closed: id=%s, name=%s", this.id_, this.name_);
-
-    this.id_ = this.name_ = null;
-    this.bins_ = this.hover_ = this.active_ = this.spawner_ = null;
   };
 
   ControllerExplorer.prototype.create = function ()
   {
     this.update_empty_state_(true);
     (this.creating_ = new FolderNew(this)).render();
-  }
+  };
 
   ControllerExplorer.prototype.add = function (bin,
                                              activate /* = true */,
@@ -636,19 +598,9 @@ return;
     return result;
   };
 
-  ControllerExplorer.prototype.indexOf = function (bin)
+  ControllerExplorer.prototype.indexOf = function (folder)
   {
-    return this.bins_.indexOf(bin);
-  };
-
-  ControllerExplorer.prototype.indexOfId = function (id)
-  {
-    for(var i = 0, l = this.bins_.length; i < l; ++i) {
-      if(this.bins_[i].id === id)
-        return i;
-    }
-
-    return -1;
+    return this.folders_.indexOf(folder);
   };
 
   ControllerExplorer.prototype.remove = function (bin)
@@ -755,23 +707,6 @@ return;
       .initialise();
   };
 
-  /* overridable */ ControllerExplorer.prototype.serialise = function ()
-  {
-    var bins = [ ];
-
-    /* Push serialised bin data into array. */
-    this.bins.forEach(function (bin) {
-      bins.push(bin.serialise());
-    } );
-
-    return {
-      id: this.id_,
-      name: this.name_,
-      bins: bins,
-      active: this.active_ ? this.active_.id : null
-    };
-  };
-
   /* Events */
   ControllerExplorer.prototype.onDropSpecial = function (scope)
   {
@@ -854,26 +789,9 @@ return;
       .addClass(opts.css.disabled);
   };    
 
-  /* Protected methods */
-  /* overridable */ ControllerExplorer.prototype.append_ = function (node)
-  {
-    /* Add bin node to the very top of the container if aren't any yet,
-     * otherwise insert it after the last contained bin. */
-    if(!this.bins_.length)
-      this.owner_.nodes.bins.prepend(node);
-    else
-      this.bins_[this.bins_.length - 1].node.after(node);
-  };
-
-  ControllerExplorer.prototype.onMouseEnter_ = function (bin)
-  { this.hover_ = bin; };
-
-  ControllerExplorer.prototype.onMouseLeave_ = function ()
-  { this.hover_ = null; };
-
   /* Private methods */
   ControllerExplorer.prototype.update_ = function (descriptor,
-                                                 exists /* = false */)
+                                                   exists /* = false */)
   {
     var self = this,
         api = this.owner_.api;
