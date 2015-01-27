@@ -314,6 +314,16 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
         self.creating_ = null;
         self.update_empty_state_();
       },
+      "select_node.jstree": function (ev, data) {
+        var i = self.getAnyById(data.node.id);
+
+        if(i instanceof Item) {
+          self.tree_.deselect_node(data.node);
+          self.tree_.select_node(data.node.parents[0]);
+        }
+        
+        self.update_toolbar_(i);
+      },
       "dragover":  function (ev){self.on_dragging_enter_(ev);return false;},
       "dragenter": function (ev){self.on_dragging_enter_(ev);return false;},
       "dragleave": function (ev){self.on_dragging_exit_(ev); return false;},
