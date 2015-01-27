@@ -409,6 +409,13 @@ var Api_ = (function (window, $, CryptoJS, DossierJS) {
       this.subfolder_ = subfolder;
     };
 
+    /* Static interface */
+    Subfolder.fromName = function (folder, name)
+    {
+      return new Subfolder(folder,
+                           DossierJS.Subfolder.from_name(folder, name));
+    };
+
     Subfolder.prototype = {
       folder_: null,
       subfolder_: null,
