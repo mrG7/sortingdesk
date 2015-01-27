@@ -314,6 +314,12 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
         self.creating_ = null;
         self.update_empty_state_();
       },
+      "dblclick.jstree": function (ev, data) {
+        var i = self.getAnyById($(ev.target).closest("li").attr('id'));
+        if(i instanceof Item) {
+          self.setActive(i);
+        }
+      },
       "select_node.jstree": function (ev, data) {
         var i = self.getAnyById(data.node.id);
 
