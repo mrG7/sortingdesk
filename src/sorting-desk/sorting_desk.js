@@ -1263,90 +1263,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     return this.renderBrowserIcon(node);
   };
 
-
-  /**
-   * @class
-   * */
-  var ControllerBinSpawner = function (owner, fnRender, fnAdd)
-  {
-    /* Invoke super constructor. */
-    std.Controller.call(this, owner);
-
-    this.fnRender_ = fnRender;
-    this.fnAdd_ = fnAdd;
-  };
-
-  ControllerBinSpawner.prototype =
-    Object.create(std.Controller.prototype);
-
-  ControllerBinSpawner.prototype.reset = function ()
-  {
-    this.fnRender_ = this.fnAdd_ = null;
-  };
-
-  ControllerBinSpawner.prototype.add = function (descriptor)
-  {
-    if(!descriptor || !descriptor.content_id || !descriptor.subtopic_id
-       || !descriptor.content) {
-      throw "Invalid descriptor specified";
-    }
-
-    var bin = this.fnAdd_(descriptor);
-    this.owner_.owner.save();
-
-    return bin;
-  };
-
-
-  /**
-   * @class
-   * */
-  var ControllerBinSpawnerDefault = function (owner, fnRender, fnAdd)
-  {
-    /* Invoke base class constructor. */
-    ControllerBinSpawner.call(this, owner, fnRender, fnAdd);
-
-    /* Attributes */
-    this.node_ = null;
-    this.droppable_ = null;
-  };
-
-  ControllerBinSpawnerDefault.prototype =
-    Object.create(ControllerBinSpawner.prototype);
-
-  ControllerBinSpawnerDefault.prototype.initialise = function ()
-  {
-    var self = this,
-        parentOwner = this.owner_.owner;
-
-    this.node_ = parentOwner.nodes.buttons.add;
-
-    this.droppable_ = new std.Droppable(this.node_, {
-      classHover: parentOwner.options.css.droppableHover,
-      scopes: function (scope) { return !scope; },
-      drop: function (e, id, scope) {
-        var result = self.owner_.onDropSpecial(scope);
-
-        /* If we received a map object, assume a valid drop. */
-        if(result)
-          self.add(result);
-
-        self.node_.removeClass(parentOwner.options.css.droppableHover);
-
-        return false;
-      }
-    } );
-  };
-
-  ControllerBinSpawnerDefault.prototype.reset = function ()
-  {
-    this.droppable_.reset();
-    this.node_ = this.droppable_ = null;
-
-    ControllerBinSpawner.prototype.reset.call(this);
-  };
-
-
+  
   /* Default options */
   var defaults_ = {
     css: {
@@ -1371,10 +1288,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       emptyHide: 50
     },
     constructors: {
-      ControllerExplorer: ControllerExplorer,
-      Bin: BinDefault,
-      BinImage: BinImageDefault,
-      ControllerBinSpawner: ControllerBinSpawnerDefault
+      ControllerExplorer: ControllerExplorer
     },
     container: null,
     folderNewCaption: "Enter folder name"
@@ -1384,12 +1298,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   /* Module public API */
   return {
     Sorter: Sorter,
-    ControllerExplorer: ControllerExplorer,
-    Bin: Bin,
-    BinDefault: BinDefault,
-    BinImageDefault: BinImageDefault,
-    ControllerBinSpawner: ControllerBinSpawner,
-    ControllerBinSpawnerDefault: ControllerBinSpawnerDefault
+    ControllerExplorer: ControllerExplorer
   };
 
 };
