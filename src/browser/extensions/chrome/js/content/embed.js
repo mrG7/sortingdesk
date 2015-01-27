@@ -34,6 +34,10 @@ var ChromeExtensionUi = (function ($, std, undefined) {
           val,
           active = embed_.monitor.active;
 
+      /* We can't yet generate a content_id so we just attached the page's
+       * URL for now. */
+      result.href = window.location.href;
+      
       if(active && active.length > 0) {
         /* Retrieve image's src and clear active drop. */
         val = active.get(0).src;
