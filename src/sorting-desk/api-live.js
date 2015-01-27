@@ -85,7 +85,7 @@ var Api_ = (function (window, $, CryptoJS, DossierJS) {
       getCallbacks: getCallbacks,
 
       /* Namespaces */
-      foldering: foldering,
+      foldering: foldering(),
 
       /* Constants */
       COREF_VALUE_POSITIVE: DossierJS.COREF_VALUE_POSITIVE,
@@ -338,146 +338,89 @@ var Api_ = (function (window, $, CryptoJS, DossierJS) {
   /**
    * @namespace
    * */
-  var foldering = (function () {
+  var foldering = function () {
     
     /* Interface: functions */
-    var list = function ()
+    var listFolders = function ()
     {
       return api_.listFolders(annotator_)
         .then(function (collection) {
           return collection.map(function (f) {
-            return new Folder(f);
+            f.exists = true; return f;
+          } );
+        } );
+
+/*       var def = $.Deferred(), */
+/*           collection = [ 'Folder_on_top', 'Another_folder_below', */
+/*                          'Yet_another_folder', 'One_more_folder' ]; */
+/* /\*       collection = [ ]; *\/ */
+/*       window.setTimeout(function () { */
+/*         def.resolve(collection.map(function (f) { */
+/*           return new Folder(DossierJS.Folder.from_id(f, annotator_)); */
+/*         } ) ); */
+/*       }, 0 ); */
+
+/*       return def.promise(); */
+    };
+
+    var listSubfolders = function (folder)
+    {
+      return api_.listSubfolders(folder)
+        .then(function (collection) {
+          return collection.map(function (sf) {
+            sf.exists = true; return sf;
           } );
         } );
     };
 
-    
-    /* Interface: classes
-     * -- */
-    /**
-     * @class
-     * */
-    var Folder = function (folder)
+    var listItems = function (subfolder)
     {
-      if(!(folder instanceof DossierJS.Folder))
-        throw "Invalid or no folder specified";
-      
-      this.folder_ = folder;
-    };
-
-    /* Static interface */
-    Folder.fromName = function (name)
-    {
-      return new Folder(DossierJS.Folder.from_name(name, annotator_));
-    };
-    
-    /* Interface */
-    Folder.prototype = {
-      folder_: null,
-
-      get data () { return this.folder_; },
-      
-      list: function ()
-      {
-        var self = this;
-        
-        return api_.listSubfolders(this.folder_)
-          .then(function (collection) {
-            return collection.map(function (sf) {
-              return new Subfolder(new Folder(self.folder_), sf);
-            } );
+      return api_.listSubfolderItems(subfolder)
+        .then(function (collection) {
+          return collection.map(function (i) {
+            i = new Item(subfolder, { content_id: i[0], subtopic_id: i[1] });
+            i.exists = true; return i;
           } );
-      },
+        } );
+    };
 
-      add: function (subfolder) {
-        return api_.addSubfolder(subfolder);
-      }
+    var addItem = function (subfolder, item)
+    {
+      console.log("adding item", item);
+      return api_.addSubfolderItem(subfolder, item.content_id,item.subtopic_id);
     };
 
 
     /**
      * @class
      * */
-    var Subfolder = function (folder, subfolder)
+    var Item = function (subfolder, item)
     {
-      if(!(folder instanceof Folder))
-        throw "Invalid or no folder specified";
-      else if(!(subfolder instanceof DossierJS.Subfolder))
-        throw "Invalid or no subfolder specified";
-      
-      this.folder_ = folder;
-      this.subfolder_ = subfolder;
-    };
-
-    /* Static interface */
-    Subfolder.fromName = function (folder, name)
-    {
-      return new Subfolder(folder,
-                           DossierJS.Subfolder.from_name(folder, name));
-    };
-
-    Subfolder.prototype = {
-      folder_: null,
-      subfolder_: null,
-      
-      get parent () { return this.parent_; },
-      get data ()   { return this.subfolder_; },
-
-      list: function ()
-      {
-        return api_.listSubfolderItems(this.subfolder_);
-      },
-      
-      add: function (content_id, subtopic_id)
-      {
-        var self = this;
-        
-        return api_.addSubfolderItem(this.subfolder_,
-                                     content_id,
-                                     subtopic_id)
-          .then(function () {
-            return new Item(self, content_id, subtopic_id);
-          } );
-      }
-    };
-
-
-    /**
-     * @class
-     * */
-    var Item = function (subfolder, content_id, subtopic_id)
-    {
-      if(!(subfolder instanceof Subfolder))
+      if(!(subfolder instanceof DossierJS.Subfolder))
         throw "Invalid or no subfolder specified";
 
+      /* Attributes */
       this.subfolder_ = subfolder;
-      this.content_id_ = content_id;
-      this.subtopic_id_ = subtopic_id;
-    };
-
-    Item.prototype = {
-      subfolder_: null,
-      content_id_: null,
-      subtopic_id_: null,
-
-      get subfolder()   { return this.subfolder_; },
-      get content_id()  { return this.content_id_; },
-      get subtopic_id() { return this.subtopic_id_; }
+      this.content_id = item.content_id; this.subtopic_id = item.subtopic_id;
     };
 
 
     /* Public interface */
     return {
       /* Functions */
-      list: list,
+      listFolders: listFolders,
+      listSubfolders: listSubfolders,
+      listItems: listItems,
+      folderFromName: DossierJS.Folder.from_name,
+      subfolderFromName: DossierJS.Subfolder.from_name,
+      addFolder: api_.addFolder.bind(api_),
+      addItem: addItem,
 
       /* Classes */
-      Folder: Folder,
-      Subfolder: Subfolder,
       Item: Item
     };
     
-  } )();
+  };
   
 
   /* Private interface */
