@@ -496,9 +496,11 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     /* Reset bin spawner controller and remove all children nodes inside the
      * bins HTML container. */
     this.reset_tree_();
-    
     this.owner_.api.setQueryContentId(null);
-    this.owner_.nodes.empty.bins.hide();
+    
+    /* Reset state. */
+    this.id_ = this.folders_ = this.browser_ = null;
+    this.refreshing_ = this.events_ = null
   };
 
   ControllerExplorer.prototype.create = function ()
