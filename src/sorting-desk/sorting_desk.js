@@ -509,7 +509,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     
     /* Reset state. */
     this.id_ = this.folders_ = this.browser_ = null;
-    this.refreshing_ = this.events_ = null
+    this.refreshing_ = this.events_ = null;
   };
 
   ControllerExplorer.prototype.create = function ()
@@ -887,15 +887,18 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     ev = ev.originalEvent;
     ev.dropEffect = 'move';
 
-    var el = ev.toElement.nodeName.toLowerCase() !== 'li'
-          ? ev.toElement.parentNode : ev.toElement,
-        fl = this.getAnyById(el.id);
+    var el = ev.toElement.nodeName.toLowerCase() === 'a'
+          && ev.toElement || false;
 
-    if(fl instanceof Subfolder) {
-      $(el).addClass(this.owner_.options.css.droppableHover);
-      return fl;
+    if(el && el.parentNode && el.parentNode.id) {
+      var fl = this.getAnyById(el.parentNode.id);
+      
+      if(fl instanceof Subfolder) {
+        $(el).addClass(Css.droppable.hover);
+        return fl;
+      }
     }
-
+    
     return null;
   };
 
@@ -903,13 +906,16 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   {
     ev = ev.originalEvent;
 
-    var el = ev.toElement.nodeName.toLowerCase() !== 'li'
-          ? ev.toElement.parentNode : ev.toElement,
-        fl = this.getAnyById(el.id);
+    var el = ev.toElement.nodeName.toLowerCase() === 'a'
+          && ev.toElement || false;
 
-    if(fl instanceof Subfolder) {
-      $(el).removeClass(this.owner_.options.css.droppableHover);
-      return fl;
+    if(el && el.parentNode && el.parentNode.id) {
+      var fl = this.getAnyById(el.parentNode.id);
+      
+      if(fl instanceof Subfolder) {
+        $(el).removeClass(Css.droppable.hover);
+        return fl;
+      }
     }
 
     return null;
