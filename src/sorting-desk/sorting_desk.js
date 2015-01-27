@@ -1088,21 +1088,22 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
         api = this.api,
         obj;
     
-    if(!(item instanceof api.foldering.Item))
-      throw "Invalid or no item specified";
-
-    switch(api.getSubtopicType(item.subtopic_id)) {
-    case 'image': obj = new ItemImage(this, item, content); break;
-    case 'text':  obj = new ItemText (this, item, content); break;
-    default: throw "Invalid item type: "
-        + api.getSubtopicType(item.subtopic_id);
-    }
-
-    if(content) {
-      console.log("TODO: must save FC");
-    }
-
+    obj = Item.construct(api, this, item, content);
     this.items_.push(obj);
+
+    /* Add item to subfolder in persistent storage. */
+    this.api.foldering.addItem(this.subfolder_, item)
+      .done(function () {
+        console.info("Successfully added item to subfolder",
+                     item, this.subfolder_);
+      } )
+      .fail(function () {
+        console.error("Failed to add item to subfolder",
+                      item, this.subfolder_);
+      } );
+
+    /* Create or update feature collection. */
+    this.controller.updateFc(obj.data);
 
     /* Activate item if none is currently active. */
     obj.on({ 'ready': function () {
