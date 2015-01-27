@@ -1022,7 +1022,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       'api', function () { return this.controller.owner.api; } );
     
     this.__defineGetter__('node', function () {
-      return this.controller.tree.get_node(this.id_); } );
+      return this.controller.tree.get_node(this.id_, true); } );
 
     /* Initialisation sequence. */
     if(!std.is_obj(subfolder))
