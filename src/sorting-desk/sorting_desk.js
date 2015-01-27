@@ -1020,18 +1020,15 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     /* Getters */
     this.__defineGetter__('id', function () { return this.id_; } );
     this.__defineGetter__('data', function () { return this.subfolder_; } );
+    this.__defineGetter__('items', function () { return this.items_; } );
+    this.__defineGetter__('controller',function () {return this.owner_.owner;});
+    this.__defineGetter__('tree', function () { return this.controller.tree; });
     
     this.__defineGetter__(
-      'api', function () { return owner.owner.owner.api; } );
-    
-    this.__defineGetter__(
-      'tree', function () { return owner.owner.tree; } );
+      'api', function () { return this.controller.owner.api; } );
     
     this.__defineGetter__('node', function () {
-      return owner.owner.tree.get_node(this.id_); } );
-    
-    this.__defineGetter__('items',
-                          function () { return this.items_; } );
+      return this.controller.tree.get_node(this.id_); } );
 
     /* Initialisation sequence. */
     if(!(subfolder instanceof this.api.foldering.Subfolder))
