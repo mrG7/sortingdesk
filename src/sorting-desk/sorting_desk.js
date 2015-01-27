@@ -324,41 +324,31 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
         self.creating_ = null;
         self.update_empty_state_();
       },
-      },
       "dragover":  function (ev){self.on_dragging_enter_(ev);return false;},
       "dragenter": function (ev){self.on_dragging_enter_(ev);return false;},
       "dragleave": function (ev){self.on_dragging_exit_(ev); return false;},
       "drop": function (ev)
       {
-        var folder = self.on_dragging_exit_(ev);
-        
-        ev = ev.originalEvent;
-        ev.stopPropagation();
-        ev.preventDefault();
+        var subfolder = self.on_dragging_exit_(ev);
 
-        if(folder !== null) {
+        /* Prevent triggering default handler. */
+        ev.originalEvent.preventDefault();
+
+        if(subfolder !== null) {
           owner.callbacks.invoke("getSelection")
             .done(function (result) {
-              console.log("GOT selection: ", result);
-
               if(!std.is_obj(result)) {
                 console.info("No selection content retrieved");
                 return;
               }
               
+              console.log("Got selection content: type=%s",
+                          result.type, result);
+
               switch(result.type) {
               case 'image':
-                owner.callbacks.invoke('imageToBase64', result.content)
-                  .done(function (data) {
-                    result.data = data;
-                    result.subtopic_id = api.makeRawImageId(
-                      api.generateSubtopicId(result.id));
-
-                  } ).fail(function () {
-                    console.error("Failed to retrieve image data in base64"
-                                  + " encoding");
-                  } );
-
+                result.subtopic_id = api.makeRawImageId(
+                  api.generateSubtopicId(result.id));
                 break;
                 
               case 'text':
