@@ -684,8 +684,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       /* There is no active subfolder, which means we need to clear the list of
        * items, but we only do so *after* the query content id has been set
        * since Sorting Queue will attempt to refresh the items list. */
-      this.owner_.api.setQueryContentId(null);
-      this.owner_.sortingQueue.items.removeAll(false);
+      this.reset_query_();
     }
 
     /* Finally, trigger event. */
@@ -789,7 +788,15 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
           });
       } );
   };
-
+  
+  /* Private interface */
+  ControllerExplorer.prototype.reset_query_ = function ()
+  {
+    this.owner_.api.getDossierJs().stop('API.search');
+    this.owner_.api.setQueryContentId(null);
+    this.owner_.sortingQueue.items.removeAll(false);
+  };
+  
   ControllerExplorer.prototype.doUpdateFc_ = function (content_id, fc)
   {
     return this.owner_.api.putFeatureCollection(content_id, fc)
@@ -853,6 +860,8 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     /* Reset relevant state. */
     this.folders_ = [ ];
     this.selected_ = this.creating_ = this.active_ = null;
+
+    this.reset_query_();
   };
 
   ControllerExplorer.prototype.on_dragging_enter_ = function (ev)
