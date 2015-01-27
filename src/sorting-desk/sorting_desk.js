@@ -347,31 +347,41 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
         ev.originalEvent.preventDefault();
 
         if(subfolder !== null) {
-          owner.callbacks.invoke("getSelection")
-            .done(function (result) {
-              if(!std.is_obj(result)) {
-                console.info("No selection content retrieved");
-                return;
-              }
-              
-              console.log("Got selection content: type=%s",
-                          result.type, result);
+          owner.callbacks.invoke("getSelection").done(function (result) {
+            if(!std.is_obj(result)) {
+              console.info("No selection content retrieved");
+              return;
+            }
+            
+            console.log("Got selection content: type=%s",
+                        result.type, result);
 
-              switch(result.type) {
-              case 'image':
-                result.subtopic_id = api.makeRawImageId(
-                  api.generateSubtopicId(result.id));
-                break;
-                
-              case 'text':
-                result.subtopic_id = api.makeRawTextId(
-                  api.generateSubtopicId(result.id));
-                break;
-                
-              default:
-                throw "Invalid selection type";
-              }
-            } );
+            switch(result.type) {
+            case 'image':
+              result.subtopic_id = api.makeRawImageId(
+                api.generateSubtopicId(result.id));
+              break;
+              
+            case 'text':
+              result.subtopic_id = api.makeRawTextId(
+                api.generateSubtopicId(result.id));
+              break;
+              
+            default:
+              throw "Invalid selection type";
+            }
+
+            try {
+              subfolder.add(
+                new api.foldering.Item(
+                  subfolder.data,
+                  api.generateContentId(result.href),
+                  result.subtopic_id),
+                result.content);
+            } catch (x) {
+              std.on_exception(x);
+            }
+          } );
         }
         
         return false;
