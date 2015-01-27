@@ -436,41 +436,12 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
         self.update_empty_state_();
         self.refreshing_ = false;
         self.events_.trigger('refresh-end');
+
+        if(self.folders_.length > 0)
+          self.tree_.select_node(self.folders_[0].id);
+        
+        console.log("Loaded folders:", self.folders_);
       } );
-
-    
-/*     if(!std.is_obj(folder) */
-/*        || !folder.hasOwnProperty('bins') */
-/*        || !std.is_arr(folder.bins)) */
-/*     { */
-/*       throw "Invalid or no folder descriptor given"; */
-/*     } */
-
-/*     this.id_ = folder.id; */
-/*     this.name_ = folder.name; */
-
-/*     console.log("Folder opened: id=%s | name=%s", this.id_, this.name_); */
-    
-/*     folder.bins.forEach(function (descriptor) { */
-/*       self.add(self.construct(descriptor), false, true); */
-/*     } ); */
-
-/*     /\* Now manually set the active bin. *\/ */
-/*     if(this.bins_.length > 0) { */
-/*       if(folder.active) */
-/*         bin = this.getById(folder.active); */
-
-/*       /\* Attempt to recover if we've been given an invalid id to activate. *\/ */
-/*       if(!bin) { */
-/*         console.info("Failed to set the active bin: setting first (id=%s)", */
-/*                      folder.active || null); */
-
-/*         bin = this.getAt(0); */
-/*       } */
-
-/*       this.setActive(bin); */
-/*     } else */
-/*       this.update_empty_state_(); */
   };
 
   ControllerExplorer.prototype.construct = function (descriptor)
