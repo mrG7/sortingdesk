@@ -58,11 +58,6 @@ var Main = (function (window, chrome, $, std, SortingDesk, LabelBrowser, Api, un
    * */
   var HandlerCallbacks = (function () {
 
-    var setActive_ = function (id)
-    {
-      chrome.runtime.sendMessage( { operation: 'set-active', id: id }, null);
-    };
-
     var imageToBase64_ = function (entity)
     {
       var deferred = $.Deferred();
@@ -117,7 +112,6 @@ var Main = (function (window, chrome, $, std, SortingDesk, LabelBrowser, Api, un
     return {
       callbacks: {
         sorter: {
-          setActive: setActive_,
           imageToBase64: imageToBase64_,
           getSelection: getSelection_
         },
