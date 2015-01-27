@@ -739,9 +739,8 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       this.active_.activate();
   };
 
-  /* Private interface */
-  ControllerExplorer.prototype.update_ = function (descriptor,
-                                                   exists /* = false */)
+  ControllerExplorer.prototype.updateFc = function (descriptor,
+                                                    exists /* = false */)
   {
     var self = this,
         api = this.owner_.api;
@@ -753,9 +752,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
                     descriptor.content_id, fc);
 
         /* A feature collection was received. No further operations are carried
-         * out if `exists´ is true since it means `descriptor´ is actually a bin
-         * is being loaded from local storage and therefore its feature
-         * collection shouldn't be updated. */
+         * out if `exists´ is true; otherwise its contents are updated. */
         if(!exists) {
           api.setFeatureCollectionContent(
             fc, descriptor.subtopic_id, descriptor.content);
@@ -767,10 +764,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       },
       function () {
         /* It was not possible to retrieve the feature collection for this
-         * descriptor's content id. No further operations are carried out if
-         * `exists´ is true since it means `descriptor´ is actually a bin being
-         * loaded from local storage and therefore its feature collection
-         * shouldn't be created. */
+         * descriptor's content id. */
         if(exists) {
           console.error("Feature collection GET failed: NOT creating new"
                         + "(id=%s)", descriptor.content_id);
