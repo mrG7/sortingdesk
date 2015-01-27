@@ -737,3 +737,11 @@ A.sd-text-item-title:hover {
 .sd-button-round:hover {
   background-color: #94b6ec;
 }
+
+.sd-folder {
+  background: url('/media/images/folder-root.png') 0px 0px no-repeat !important;
+}
+
+.sd-subfolder {
+  background: url('/media/images/folder-sub.png') 0px 0px no-repeat !important;
+}
