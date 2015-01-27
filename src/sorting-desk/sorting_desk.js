@@ -260,6 +260,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.refreshing_ = false;
     this.events_ = new std.Events(this, [ 'refresh-begin', 'refresh-end' ] );
     this.creating_ = null;
+    this.selected_ = null;
 
     /* Initialise jstree. */
     this.tree_ = els.explorer.jstree( {
@@ -320,9 +321,21 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
         if(i instanceof Item) {
           self.tree_.deselect_node(data.node);
           self.tree_.select_node(data.node.parents[0]);
+        } else if(i === null) {
+          var sel = self.selected_ === null
+                ? self.folders_[0].node
+                : self.selected_.node;
+          
+          self.tree_.deselect_node(data.node);
+          if(sel) self.tree_.select_node(sel);
+
+          console.error("Unknown node type selected:", data);
+        } else {
+          self.selected_ = i;
+          console.log("Current selected node: ", self.selected_);
         }
         
-        self.update_toolbar_(i);
+        self.update_toolbar_();
       },
       "dragover":  function (ev){self.on_dragging_enter_(ev);return false;},
       "dragenter": function (ev){self.on_dragging_enter_(ev);return false;},
@@ -403,6 +416,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.__defineGetter__("name", function () { return this.name_; } );
     this.__defineGetter__("active", function () { return this.active_; } );
     this.__defineGetter__("tree", function () { return this.tree_; } );
+    this.__defineGetter__("selected", function () { return this.selected_; } );
     
     this.__defineGetter__("node", function () {
       return this.owner_.nodes.explorer;
@@ -885,17 +899,17 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
                       label.cid1, label.cid2);
       } );
   };
-
-  ControllerExplorer.prototype.update_toolbar_ = function (item)
+  
+  ControllerExplorer.prototype.update_toolbar_ = function (loading)
   {
-    var ela = this.owner_.nodes.toolbar.actions,
-        loading = item === true;
+    var ela = this.owner_.nodes.toolbar.actions;
+    loading = loading === true;
 
     ela.add.toggleClass('disabled', loading);
-    ela.addSubfolder.toggleClass('disabled', loading
-                                 || !(item instanceof Folder));
-    ela.browse.toggleClass('disabled', loading
-                           || !(item instanceof Subfolder));
+    ela.addSubfolder.toggleClass(
+      'disabled', loading || !(this.selected_ instanceof Folder));
+    ela.browse.toggleClass(
+      'disabled', loading || !(this.selected_ instanceof Subfolder));
     ela.refresh.toggleClass('disabled', loading);
   };
 
