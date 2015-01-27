@@ -57,17 +57,15 @@ var ChromeExtensionUi = (function ($, std, undefined) {
         if(sel && sel.anchorNode) {
           val = sel.toString();
 
-          /* Craft a unique id for this text snippet based on its content,
-           * Xpath representation, offset from selection start, length and,
-           * just to be sure, current system timestamp. This id is
-           * subsequently used to generate a unique and collision free
-           * unique subtopic id. */
+          /* Craft a unique id for this text snippet based on its content, Xpath
+           * representation, offset from selection start and length. This id is
+           * subsequently used to generate a unique and collision free unique
+           * subtopic id. */
           result.xpath = std.Html.getXpathSimple(sel.anchorNode);
           result.id = [ val,
                         result.xpath,
                         sel.anchorOffset,
-                        val.length,
-                        Date.now() ].join('|');
+                        val.length ].join('|');
 
           result.content = val;
           result.type = "text";
