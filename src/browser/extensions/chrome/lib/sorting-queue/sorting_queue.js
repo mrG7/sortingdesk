@@ -77,8 +77,8 @@ var SortingQueue_ = function (window, $, std) {
 
     this.events_ = new std.Events(
       this,
-      [ 'request-start', 'request-stop', 'items-updated', 'item-dismissed',
-        'item-deselected', 'item-selected' ]);
+      [ 'request-begin', 'request-end', 'items-updated', 'item-dismissed',
+        'item-deselected', 'item-selected', 'loading-begin', 'loading-end' ]);
   };
 
   Sorter.prototype = {
@@ -119,7 +119,7 @@ var SortingQueue_ = function (window, $, std) {
 
       /* Find nodes. */
       this.nodes_ = {
-        container: finder.root(),
+        container: finder.root,
         items: finder.find('items'),
         buttons: {
           dismiss: finder.find('button-dismiss')
@@ -361,7 +361,7 @@ var SortingQueue_ = function (window, $, std) {
     ++this.count_;
 
     /* Trigger request start. */
-    this.owner_.events.trigger("request-start", id);
+    this.owner_.events.trigger("request-begin", id);
   };
 
   ControllerRequests.prototype.end = function (id)
@@ -381,7 +381,7 @@ var SortingQueue_ = function (window, $, std) {
       console.warn("Unknown request ended:", id);
 
     /* Trigger request end. */
-    this.owner_.events.trigger("request-stop", id);
+    this.owner_.events.trigger("request-end", id);
   };
 
 
@@ -612,6 +612,7 @@ var SortingQueue_ = function (window, $, std) {
     var self = this;
 
     this.updateEmptyNotification_(true);
+    this.owner_.events_.trigger('loading-begin');
     this.owner_.callbacks.invoke("moreTexts",
                                  this.owner_.options.visibleItems)
       .done(function (items) {
@@ -638,11 +639,13 @@ var SortingQueue_ = function (window, $, std) {
         window.setTimeout( function () {
           self.owner_.requests.end('check-items');
           self.owner_.events.trigger('items-updated', self.items_.length);
+          self.owner_.events_.trigger('loading-end');
           self.updateEmptyNotification_();
         }, Math.pow(items.length - 1, 2) * 1.1 + 10);
       } )
       .fail(function () {
         self.updateEmptyNotification_();
+        self.owner_.events_.trigger('loading-end');
       } );
   };
 

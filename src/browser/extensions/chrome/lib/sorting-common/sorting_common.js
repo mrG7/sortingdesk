@@ -57,6 +57,14 @@ var SortingCommon_ = function (window, $) {
     };
   };
 
+  var on_exception = function (x)
+  {  
+    console.error("Exception thrown: " + x,
+                  x.stack || "\n<no stack information available>");
+
+    throw x;
+  };
+
   
   /* jQuery-related */
   var jQueryExtensions = (function () {
@@ -161,6 +169,22 @@ var SortingCommon_ = function (window, $) {
       return deferred.promise();
     };
 
+    var getXpathSimple = function (node)
+    {
+      var result = [ ];
+
+      if(jQueryExtensions.is(node))
+        node = node.get(0);
+
+      if(node) {
+        do {
+          result.push(node.nodeName);
+        } while( (node = node.parentNode) );
+      }
+
+      return result.reverse().join('/');
+    };
+
     /* Is-type functions */
     var is_image = function (el)
     {
@@ -182,40 +206,49 @@ var SortingCommon_ = function (window, $) {
         .replace(/^data:image\/(png|jpg);base64,/, "");
     };
 
-
+    
     /* Public interface */
     return {
       imageToBase64: imageToBase64,
+      getXpathSimple: getXpathSimple,
       is_image: is_image
     };
     
   } )();
 
 
-  var NodeFinder = (function (prefix, root) {
+  var NodeFinder = function (prefix, root)
+  {
+    this.prefix_ = [ '[data-sd-scope="', prefix, '-' ].join('');
+    this.root_ = root;
+  };
 
-    prefix = [ '[data-sd-scope="', prefix, '-' ].join('');
+  NodeFinder.prototype = {
+    prefix_: null,
+    root_: null,
     
-    var find = function (scope, parent /* = prefix */ )
+    get root() { return this.root_;  },
+
+    find: function (scope, parent /* = prefix */ )
     {
       var p;
 
       if(parent instanceof $) p = parent;
-      else if(is_str(parent)) p = find(parent);
-      else                    p = root;
+      else if(is_str(parent)) p = this.find(parent);
+      else                    p = this.root_;
 
-      return p.find( [ prefix, scope, '"]' ].join(''));
-    };
+      return p.find( [ this.prefix_, scope, '"]' ].join(''));
+    },
 
-    var root_ = function () { return root; };
-    
-    
-    /* Public interface */
-    return {
-      find: find,
-      root: root_
-    };
-  } );
+    withroot: function (newRoot, callback)
+    {
+      if(!is_fn(callback))
+        throw "Invalid or no callback function specified";
+
+      var nf = new NodeFinder(this.prefix_, newRoot);
+      return callback.call(this);
+    }
+  };
 
 
   /**
@@ -1066,6 +1099,7 @@ var SortingCommon_ = function (window, $) {
     like_obj: like_obj,
     is_in: is_in,
     chainize: chainize,
+    on_exception: on_exception,
 
     /* Classes */
     Url: Url,

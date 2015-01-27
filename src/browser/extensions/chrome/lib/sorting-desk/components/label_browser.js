@@ -72,7 +72,7 @@ var LabelBrowser_ = function (window, $, std)
         finder = new std.NodeFinder(
           'label-browser',
           this.options_.container
-            || $('[data-sd-scope="label-browser-container"]')),
+            || $('[data-sd-scope="label-browser-view"]')),
         els;
 
     if(this.initialised_)
@@ -97,7 +97,7 @@ var LabelBrowser_ = function (window, $, std)
     };
 
     /* Begin set up nodes. */
-    els.container = finder.root();
+    els.container = finder.root;
     if(els.container.length === 0)
       throw "Unable to find container element";
 

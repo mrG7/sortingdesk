@@ -12,7 +12,7 @@
 /*jshint laxbreak:true */
 
 
-var Api_ = (function (window, $, CryptoJS) {
+var Api_ = (function (window, $, CryptoJS, DossierJS) {
 
   /* Constants */
   var DEFAULT_DOSSIER_STACK_API_URL = 'http://10.3.2.42:9090';
@@ -58,6 +58,7 @@ var Api_ = (function (window, $, CryptoJS) {
 
     /* Return module public API -- post initialization */
     return {
+      /* Functions */
       getFeatureCollection: getFeatureCollection,
       getAllFeatureCollections: getAllFeatureCollections,
       putFeatureCollection: putFeatureCollection,
@@ -82,6 +83,9 @@ var Api_ = (function (window, $, CryptoJS) {
       getClass: getClass,
       getDossierJs: getDossierJs,
       getCallbacks: getCallbacks,
+
+      /* Namespaces */
+      foldering: foldering(),
 
       /* Constants */
       COREF_VALUE_POSITIVE: DossierJS.COREF_VALUE_POSITIVE,
@@ -129,7 +133,7 @@ var Api_ = (function (window, $, CryptoJS) {
   var setFeatureCollectionContent = function (fc, subtopic_id, content)
   {
     if(typeof content !== 'string' || content.length === 0)
-      throw "Invalid bin content";
+      throw "Invalid item content";
     else if(typeof subtopic_id !== 'string' || subtopic_id === 0) {
       throw "Invalid subtopic id";
     }
@@ -210,7 +214,7 @@ var Api_ = (function (window, $, CryptoJS) {
   var setQueryContentId = function (id)
   {
     if(id !== null && (typeof id !== 'string' || id.length === 0))
-      throw "Invalid engine content id";
+      throw "Invalid query content id";
 
     qitems_.query_content_id = id;
   };
@@ -331,6 +335,94 @@ var Api_ = (function (window, $, CryptoJS) {
   };
 
 
+  /**
+   * @namespace
+   * */
+  var foldering = function () {
+    
+    /* Interface: functions */
+    var listFolders = function ()
+    {
+      return api_.listFolders(annotator_)
+        .then(function (collection) {
+          return collection.map(function (f) {
+            f.exists = true; return f;
+          } );
+        } );
+
+/*       var def = $.Deferred(), */
+/*           collection = [ 'Folder_on_top', 'Another_folder_below', */
+/*                          'Yet_another_folder', 'One_more_folder' ]; */
+/* /\*       collection = [ ]; *\/ */
+/*       window.setTimeout(function () { */
+/*         def.resolve(collection.map(function (f) { */
+/*           return new Folder(DossierJS.Folder.from_id(f, annotator_)); */
+/*         } ) ); */
+/*       }, 0 ); */
+
+/*       return def.promise(); */
+    };
+
+    var listSubfolders = function (folder)
+    {
+      return api_.listSubfolders(folder)
+        .then(function (collection) {
+          return collection.map(function (sf) {
+            sf.exists = true; return sf;
+          } );
+        } );
+    };
+
+    var listItems = function (subfolder)
+    {
+      return api_.listSubfolderItems(subfolder)
+        .then(function (collection) {
+          return collection.map(function (i) {
+            i = new Item(subfolder, { content_id: i[0], subtopic_id: i[1] });
+            i.exists = true; return i;
+          } );
+        } );
+    };
+
+    var addItem = function (subfolder, item)
+    {
+      console.log("adding item", item);
+      return api_.addSubfolderItem(subfolder, item.content_id,item.subtopic_id);
+    };
+
+
+    /**
+     * @class
+     * */
+    var Item = function (subfolder, item)
+    {
+      if(!(subfolder instanceof DossierJS.Subfolder))
+        throw "Invalid or no subfolder specified";
+
+      /* Attributes */
+      this.subfolder_ = subfolder;
+      this.content_id = item.content_id; this.subtopic_id = item.subtopic_id;
+    };
+
+
+    /* Public interface */
+    return {
+      /* Functions */
+      listFolders: listFolders,
+      listSubfolders: listSubfolders,
+      listItems: listItems,
+      folderFromName: DossierJS.Folder.from_name,
+      subfolderFromName: DossierJS.Subfolder.from_name,
+      addFolder: api_.addFolder.bind(api_),
+      addItem: addItem,
+
+      /* Classes */
+      Item: Item
+    };
+    
+  };
+  
+
   /* Private interface */
   var _opt_arg_good = function (a)
   {
@@ -406,4 +498,4 @@ if(typeof define === "function" && define.amd) {
     return _(window, $, CryptoJS);
   });
 } else
-  window.Api = Api_(window, $, CryptoJS);
+  window.Api = Api_(window, $, CryptoJS, DossierJS);
