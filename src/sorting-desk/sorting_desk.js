@@ -877,7 +877,9 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       f.reset();
     } );
 
+    /* Reset relevant state. */
     this.folders_ = [ ];
+    this.selected_ = this.creating_ = this.active_ = null;
   };
 
   ControllerExplorer.prototype.on_dragging_enter_ = function (ev)
