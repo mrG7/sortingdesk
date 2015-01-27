@@ -224,17 +224,8 @@ BODY {
   top: 6px;
 }
 
-.sd-bin.sd-active {
-  background-color: #83c78e;
-  border-color: #349950;
-}
-
 .sd-bin .sd-bin-name {
   color: #5C7CCA;
-}  
-
-.sd-bin.sd-active .sd-bin-name {
-  color: #E6FFD6;
 }  
 
 .sd-bin.sd-unknown {
@@ -344,32 +335,6 @@ BODY {
 .sd-text-item:hover .sd-text-item-title {
   background-color: #F8F8DD;
 }
-
-.sd-text-item:active {
-  background-color: #FFF5F8;
-  color: #7F8368;
-}
-
-.sd-text-item:active .sd-text-item-title {
-  background-color: #FFF5F8;
-}
-
-/* .sd-text-item.sd-selected { */
-  /* border: 2px solid #8EB4DA; */
-  /* background-color: #f0f8ff; */
-/* } */
-
-.sd-text-item:selected .sd-text-item-title {
-  background-color: #FFF5F8;
-}
-
-/* .sd-text-item.sd-selected:hover { */
-  /* background-color: inherit; */
-/* } */
-
-/* .sd-text-item.sd-selected .sd-text-item-content A { */
-  /* color: #465C94 !important; */
-/* } */
 
 .sd-more, .sd-less {
   float: right;
