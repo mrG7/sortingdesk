@@ -430,10 +430,39 @@ var Api_ = (function (window, $, CryptoJS, DossierJS) {
       
       add: function (content_id, subtopic_id)
       {
+        var self = this;
+        
         return api_.addSubfolderItem(this.subfolder_,
                                      content_id,
-                                     subtopic_id);
+                                     subtopic_id)
+          .then(function () {
+            return new Item(self, content_id, subtopic_id);
+          } );
       }
+    };
+
+
+    /**
+     * @class
+     * */
+    var Item = function (subfolder, content_id, subtopic_id)
+    {
+      if(!(subfolder instanceof Subfolder))
+        throw "Invalid or no subfolder specified";
+
+      this.subfolder_ = subfolder;
+      this.content_id_ = content_id;
+      this.subtopic_id_ = subtopic_id;
+    };
+
+    Item.prototype = {
+      subfolder_: null,
+      content_id_: null,
+      subtopic_id_: null,
+
+      get subfolder()   { return this.subfolder_; },
+      get content_id()  { return this.content_id_; },
+      get subtopic_id() { return this.subtopic_id_; }
     };
 
 
@@ -444,7 +473,8 @@ var Api_ = (function (window, $, CryptoJS, DossierJS) {
 
       /* Classes */
       Folder: Folder,
-      Subfolder: Subfolder
+      Subfolder: Subfolder,
+      Item: Item
     };
     
   } )();
