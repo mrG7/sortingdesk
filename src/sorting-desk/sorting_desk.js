@@ -1147,241 +1147,149 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.tree.edit(this.tree.get_node(this.id_),
                    o.owner.owner.options.folderNewCaption);
   };
-  
+
+
+  /**
+   * @class
+   * */
+  var Item = function (owner, item, /* optional */ content)
+  {
     /* Invoke base class constructor. */
-    Subfolder.call(this, owner, subfolder);
-  
-
-  /**
-   * @class
-   * */
-  var Bin = function (owner, descriptor)
-  {
-    /* Invoke super constructor. */
     std.Drawable.call(this, owner);
+    
+    /* Getters */
+    this.__defineGetter__('id', function () { return this.id_; } );
+    this.__defineGetter__('data', function () { return this.item_; } );
+    this.__defineGetter__('fc', function () { return this.fc_; } );
 
-    this.id_ = Bin.makeId(descriptor);
-    this.data_ = descriptor;
-    this.node_ = null;
+    this.__defineGetter__('controller',function () {
+      return this.owner_.controller; });
+    this.__defineGetter__('tree', function () { return this.controller.tree; });
+    
+    this.__defineGetter__(
+      'api', function () { return this.controller.owner.api; } );
+    
+    this.__defineGetter__('node', function () {
+      return this.controller.tree.get_node(this.id_, true); } );
 
-    /* Define getters. */
-    this.__defineGetter__("id",   function () { return this.id_;   } );
-    this.__defineGetter__("data", function () { return this.data_; } );
-    this.__defineGetter__("node", function () { return this.node_; } );
-  };
+    /* Initialisation sequence. */
+    if(!(item instanceof this.api.foldering.Item))
+      throw "Invalid or no item descriptor provided";
 
-  /* Static methods */
-  Bin.makeId = function (descriptor)
-  {
-    return descriptor.content_id + '+' + descriptor.subtopic_id;
-  };
+    /* Attributes */
+    this.item_ = item;
+    this.id_ = null;
+    this.content_ = null;
+    this.events_ = new std.Events(this, [ 'ready' ]);
 
-  /* Class interface */
-  Bin.prototype = Object.create(std.Drawable.prototype);
-
-  Bin.prototype.initialise = function ()
-  {
     var self = this,
-        parentOwner = self.owner_.owner;
+        ready = function () {
+          self.render();
+          self.events_.trigger('ready');
+        };
 
-    (this.node_ = this.render())
-      .attr( {
-        'data-scope': 'bin',
-        'id': this.id
-      } )
-      .on( {
-        mouseenter: function () {
-          self.owner_.onMouseEnter_(self);
-          return false;
-        },
-        mouseleave: function () {
-          self.owner_.onMouseLeave_();
-          return false;
-        },
-        mousedown: function() {
-          $(this).addClass(parentOwner.options.css.mouseDown);
-        },
-        mouseup: function () {
-          $(this).removeClass(parentOwner.options.css.mouseDown);
-        }
-      } );
-
-    new std.Droppable(this.node_, {
-      classHover: parentOwner.options.css.droppableHover,
-      scopes: function (scope) { return scope === 'bin' || scope === null; },
-
-      drop: function (e, id, scope) {
-        switch(scope) {
-        case 'bin':
-          var bin = self.owner_.getById(id);
-
-          /* Ensure dragged bin exists since it is being DRAGGED and disable
-           * dropping bin onto self. */
-          if(!bin)
-            throw "Failed to retrieve bin: " + id;
-          else if(bin === self)
-            break;
-
-          /* Request merge of dropped bin (`bin´) with this Bin instance
-           * (`self´). */
-          self.owner_.merge(self, bin);
-
-          /* Important: DOM node is destroyed above, which means the `dragend'
-           * event won't be triggered, leaving the dismissal button visible. */
-          parentOwner.sortingQueue.dismiss.deactivate();
-
-          break;
-
-        case null:
-          var result = self.owner_.onDropSpecial(scope);
-
-          /* If we received a map object, assume a valid drop. */
-          if(result)
-            self.owner_.addLabel(self, result);
-          else
-            console.info("Invalid drop: not text or image");
-
-          break;
-
-        default:
-          throw "Invalid scope: " + scope;
-        }
-      }
-    } );
-
-    /* We must defer initialisation of D'n'D because owning object's `bin'
-     * attribute will have not yet been set. */
-    window.setTimeout(function () {
-      new std.Draggable(self.node_, {
-        dragstart: function (e) {
-          parentOwner.sortingQueue.dismiss.activate();
-        },
-
-        dragend: function (e) {
-          parentOwner.sortingQueue.dismiss.deactivate();
-          self.node_.removeClass(parentOwner.options.css.mouseDown);
-        }
-      } );
-    }, 0);
-  };
-
-  Bin.prototype.activate = function ()
-  {
-    this.node.addClass(this.owner_.owner.options.css.binActive);
-  };
-
-  Bin.prototype.deactivate = function ()
-  {
-    this.node.removeClass(this.owner_.owner.options.css.binActive);
-  };
-
-  Bin.prototype.setUnknown = function (state /* = true */)
-  {
-    this.node.toggleClass(this.owner_.owner.options.css.binUnknown,
-                          std.is_und(state) || state === true);
-  };
-
-  /* overridable */ Bin.prototype.serialise = function ()
-  {
-    return this.data_;
-  };
-
-  /* overridable */ Bin.prototype.renderBrowserIcon = function (node)
-  {
-    if(this.owner_.haveBrowser) {
-      var self = this,
-          icon = $('<a class="' + this.owner_.owner.options.css.iconLabelBrowser
-                   + '" href="#"></a>')
-            .on( {
-              mousedown: function () { return false; },
-              click: function () {
-                self.owner_.browse(self);
-                return false;
-              }
-            } );
-
-      node.prepend(icon);
+    if(!content) {
+      this.api.getFeatureCollection(item.content_id)
+        .done(function (fc) {
+          self.onGotFeatureCollection(fc);
+          ready();
+        })
+        .fail (function () {
+          console.error("Feature collection could not be retrieved for item:"
+                        + " removing: id=%s", self.item_.subtopic_id);
+          self.owner_.remove(self);
+        } );
+    } else {
+      this.content_ = content;
+      window.setTimeout(function () { ready(); } );
     }
-
-    return node;
   };
 
+  Item.prototype = Object.create(std.Drawable.prototype);
 
+  Item.prototype.reset = function ()
+  {
+    this.tree.delete_node(this.tree.get_node(this.id_));
+  };
+
+  Item.prototype.onGotFeatureCollection = function (fc)
+  {
+    if(fc === null) {
+      console.warn("Item's feature collection could not be retrieved: id=%s",
+                   this.item_.subtopic_id);
+    } else {
+      this.content_ = fc[this.item_.subtopic_id];
+      
+      if(!this.content_) {
+        this.content_ = null;
+        console.warn("Item's content could not be retrieved: id=%s",
+                     this.item_.subtopic_id);
+      }
+    }
+  };
+
+  Item.prototype.activate = function ()
+  {
+    this.node.addClass(Css.active);
+  };
+
+  Item.prototype.deactivate = function ()
+  {
+    this.node.removeClass(Css.active);
+  };
+  
+  
   /**
    * @class
    * */
-  var BinDefault = function (owner, descriptor)
+  var ItemText = function (owner, subfolder, /* optional */ content)
   {
-    /* Invoke super constructor. */
-    Bin.call(this, owner, descriptor);
+    /* Invoke base class constructor. */
+    Item.call(this, owner, subfolder, content);
   };
 
-  BinDefault.prototype = Object.create(Bin.prototype);
+  ItemText.prototype = Object.create(Item.prototype);
 
-  BinDefault.prototype.initialise = function ()
+  ItemText.prototype.render = function ()
   {
-    var self = this;
+    this.id_ = this.tree.create_node(
+      this.owner_.node,
+      { state: 'open', text: this.content_, type: 'item' },
+      "last");
 
-    /* Invoke base class implementation. */
-    Bin.prototype.initialise.call(this);
+    if(this.id_ === false)
+      throw "Failed to create subfolder";
 
-    /* Trap mouse clicks so we can make this bin instance the active one. */
-    this.node_.click(function () {
-      self.owner_.setActive(self);
-      return false;
-    } );
-
+    this.owner_.open();
   };
 
-  BinDefault.prototype.render = function ()
-  {
-    var css = this.owner_.owner.options.css,
-        node = $('<div></div>').addClass(css.bin);
-
-    $('<div></div>')
-      .appendTo(node)
-      .addClass(css.binName)
-      .html(this.data_.content);
-
-    return this.renderBrowserIcon(node);
-  };
-
-
+  
   /**
    * @class
    * */
-  var BinImageDefault = function (owner, bin)
+  var ItemImage = function (owner, subfolder, /* optional */ content)
   {
-    /* Invoke super constructor. */
-    Bin.call(this, owner, bin);
+    /* Invoke base class constructor. */
+    Item.call(this, owner, subfolder, content);
   };
 
-  BinImageDefault.prototype = Object.create(Bin.prototype);
-
-  BinImageDefault.prototype.initialise = function ()
+  ItemImage.prototype = Object.create(Item.prototype);
+  
+  ItemImage.prototype.render = function ()
   {
-    var self = this;
+    this.id_ = this.tree.create_node(
+      this.owner_.node,
+      { state: 'open',
+        type: 'item',
+        text: [ '<img src="', this.content_, '" />' ].join('') },
+      "last");
 
-    /* Invoke base class implementation. */
-    Bin.prototype.initialise.call(this);
+    if(this.id_ === false)
+      throw "Failed to create subfolder";
 
-    /* Trap mouse clicks so we can make this bin instance the active one. */
-    this.node_.click(function () {
-      self.owner_.setActive(self);
-      return false;
-    } );
-
+    this.owner_.open();
   };
 
-  BinImageDefault.prototype.render = function ()
-  {
-    var css = this.owner_.owner.options.css,
-        node = $('<div></div>').addClass([ css.bin, css.binImage ].join(' '));
-
-    $('<div></div>')
-      .addClass(css.binName)
-      .appendTo(node)
-      .html('<img draggable="false" src="' + this.data_.content + '"/>');
 
   /* Css classes */
   var Css = {
