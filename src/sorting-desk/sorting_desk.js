@@ -922,7 +922,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
                           function () { return this.subfolders_; } );
 
     /* Initialisation sequence. */
-    if(!(folder instanceof this.api.foldering.Folder))
+    if(!std.is_obj(folder))
       throw "Invalid or no folder descriptor provided";
 
     /* Attributes */
@@ -1012,7 +1012,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       return this.controller.tree.get_node(this.id_); } );
 
     /* Initialisation sequence. */
-    if(!(subfolder instanceof this.api.foldering.Subfolder))
+    if(!std.is_obj(subfolder))
       throw "Invalid or no subfolder descriptor provided";
 
     /* Attributes */
