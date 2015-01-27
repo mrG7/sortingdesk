@@ -739,18 +739,14 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
   /* overridable */ ControllerExplorer.prototype.enableBrowser = function ()
   {
-    var opts = this.owner_.options;
-    
-    this.owner_.nodes.bins.find('.' + opts.css.iconLabelBrowser)
-      .removeClass(opts.css.disabled);
+    this.owner_.nodes.bins.find('.' + Css.icon.browser)
+      .removeClass(Css.disabled);
   };    
 
   /* overridable */ ControllerExplorer.prototype.disableBrowser = function ()
   {
-    var opts = this.owner_.options;
-    
-    this.owner_.nodes.bins.find('.' + opts.css.iconLabelBrowser)
-      .addClass(opts.css.disabled);
+    this.owner_.nodes.bins.find('.' + Css.icon.browser)
+      .addClass(Css.disabled);
   };    
 
   /* Private interface */
@@ -1322,26 +1318,21 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       .appendTo(node)
       .html('<img draggable="false" src="' + this.data_.content + '"/>');
 
-    return this.renderBrowserIcon(node);
+  /* Css classes */
+  var Css = {
+    active: 'sd-active',
+    disabled: 'sd-disabled',
+    droppable: {
+      hover: 'sd-droppable-hover'
+    },
+    icon: {
+      browser: 'sd-bin-browser-icon'
+    }
   };
-
+  
   
   /* Default options */
   var defaults_ = {
-    css: {
-      bin: 'sd-bin',
-      binImage: 'sd-bin-image',
-      binName: 'sd-bin-name',
-      binAnimateAssign: 'sd-assign',
-      binAdding: 'sd-adding',
-      binActive: 'sd-active',
-      binUnknown: 'sd-unknown',
-      buttonAdd: 'sd-button-add',
-      droppableHover: 'sd-droppable-hover',
-      mouseDown: 'sd-mousedown',
-      iconLabelBrowser: 'sd-bin-browser-icon',
-      disabled: 'sd-disabled'   /* Indicates something is disabled. */
-    },
     delays: {                   /* In milliseconds.     */
       binRemoval: 200,          /* Bin is removed from container. */
       addBinShow: 200,          /* Fade in of temporary bin when adding. */
