@@ -1033,6 +1033,20 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.id_ = null;
     this.items_ = [ ];
 
+    /* Retrieve all items for this folder. */
+    var self = this;
+
+    if(subfolder.exists) {
+      this.api.foldering.listItems(subfolder)
+        .done(function (coll) {
+          coll.forEach(function(i) {
+            try {
+              self.items_.push(Item.construct(self.api, self, i));
+            } catch(x) { std.on_exception(x); }
+          } );
+        } );
+    }
+    
     this.render();
   };
 
