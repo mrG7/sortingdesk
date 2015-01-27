@@ -166,6 +166,30 @@ var Main = (function (window, chrome, $, std, SortingDesk, LabelBrowser, Api, un
   } )();
 
 
+  /* Module interface */
+  var getTabSelectedInWindow = function (windowId, callback)
+  {
+    if(!std.is_fn(callback))
+      throw "Invalid or no callback provided";
+    
+    chrome.tabs.getSelected(windowId, function (info) {
+      chrome.tabs.get(info.id, function (tab) {
+        callback(/^chrome[^:]*:/.test(tab.url) ? null : tab);
+      } );
+    } );
+  };  
+
+  var setActive = function (tab)
+  {
+    active = tab;
+    
+    if(active === null)
+      console.log("No active tab currently");
+    else
+      console.log("Currently active tab: #%d", active.id);      
+  };
+
+  
   /* Startup sequence. */
   $(function () {
     var instantiate_ = function (meta) {
@@ -244,23 +268,25 @@ var Main = (function (window, chrome, $, std, SortingDesk, LabelBrowser, Api, un
       /* Get currently active tab and listen for changes on which tab becomes
        * active. */
       chrome.windows.getLastFocused(function (win) {
-        chrome.tabs.getSelected(win.id, function (info) {
-          chrome.tabs.get(info.id, function (tab) {
-            if(!/^chrome[^:]*:/.test(tab.url)) {
-              active = tab;
-              console.log("Currently active tab: #%d", active.id);
-            } else
-              console.info("No initial active tab");
-          } );
+        getTabSelectedInWindow(win.id, function (tab) {
+          if(tab !== null)
+            setActive(tab);
+          else
+            console.info("No initial active tab");
         } );
       } );
 
+      chrome.windows.onFocusChanged.addListener(function (id) {
+        getTabSelectedInWindow(id, function (tab) { 
+          if(tab !== null)
+            setActive(tab);
+        } );
+      } );
+      
       chrome.tabs.onActivated.addListener(function (info) {
         chrome.tabs.get(info.tabId, function (tab) {
-          if(!/^chrome[^:]*:/.test(tab.url)) {
-            active = tab;
-            console.log("New active tab: ", tab);
-          }
+          if(!/^chrome[^:]*:/.test(tab.url))
+            setActive(tab);
         } );
       } );
         
