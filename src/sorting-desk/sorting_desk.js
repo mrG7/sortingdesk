@@ -970,6 +970,8 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   {
     this.subfolders_.forEach(function (s) { s.reset(); } );
     this.tree.delete_node(this.tree.get_node(this.id_));
+
+    this.subfolders_ = this.folder_ = this.id_ = null;
   };
 
   Folder.prototype.open = function ()
@@ -1048,6 +1050,8 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   {
     this.items_.forEach(function (i) { i.reset(); } );
     this.tree.delete_node(this.tree.get_node(this.id_));
+
+    this.subfolder_ = this.id_ = this.items_ = null;
   };
 
   Subfolder.prototype.render = function ()
@@ -1210,6 +1214,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   Item.prototype.reset = function ()
   {
     this.tree.delete_node(this.tree.get_node(this.id_));
+    this.item_ = this.id_ = this.content_ = null;
   };
 
   Item.prototype.onGotFeatureCollection = function (fc)
