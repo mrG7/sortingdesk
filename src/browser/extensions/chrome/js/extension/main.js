@@ -183,6 +183,23 @@ var Main = (function (window, chrome, $, std, SortingDesk, LabelBrowser, Api, un
       console.log("Currently active tab: #%d", active.id);      
   };
 
+  var setupSortingQueue_ = function (sorter)
+  {
+    var refresh = $('#sd-queue [data-sd-scope="sorting-desk-toolbar-refresh"]'),
+        queue = sorter.sortingQueue;
+
+    queue.on(loading.queue.events)
+      .on( {
+        "loading-begin": function () { refresh.addClass('disabled'); },
+        "loading-end": function () { refresh.removeClass('disabled'); }
+      } );
+
+    refresh.click(function () {
+      sorter.api.getDossierJs().stop('API.search');
+      queue.items.redraw();
+    } );
+  };
+
   
   /* Startup sequence. */
   $(function () {
@@ -223,7 +240,7 @@ var Main = (function (window, chrome, $, std, SortingDesk, LabelBrowser, Api, un
         .on(loading.sorter.events)
         .initialise();
 
-      sorter.sortingQueue.on(loading.queue.events);
+      setupSortingQueue_(sorter);
     };
 
     /* Initialisation sequence */
