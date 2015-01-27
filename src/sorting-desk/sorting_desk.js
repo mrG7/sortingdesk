@@ -324,21 +324,10 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
         self.creating_ = null;
         self.update_empty_state_();
       },
-      "dragover": function (ev)
-      {
-        self.on_dragging_enter_(ev);
-        return false;
       },
-      "dragenter": function (ev)
-      {
-        self.on_dragging_enter_(ev);
-        return false;
-      },
-      "dragleave": function (ev)
-      {
-        self.on_dragging_exit_(ev);
-        return false;
-      },
+      "dragover":  function (ev){self.on_dragging_enter_(ev);return false;},
+      "dragenter": function (ev){self.on_dragging_enter_(ev);return false;},
+      "dragleave": function (ev){self.on_dragging_exit_(ev); return false;},
       "drop": function (ev)
       {
         var folder = self.on_dragging_exit_(ev);
