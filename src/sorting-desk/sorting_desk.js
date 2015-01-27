@@ -202,11 +202,9 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       (this.explorer_ = new ControllerExplorer(this))
         .on( {
           "refresh-begin": function () {
-            self.updateToolbar(true);
             self.events_.trigger("request-begin", "refresh");
           },
           "refresh-end": function () {
-            self.updateToolbar();
             self.events_.trigger("request-end", "refresh");
           }
         } )
@@ -239,14 +237,6 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
           console.info("Sorting Desk UI reset");
         } );
-    },
-
-    updateToolbar: function (loading)
-    {
-      var ela = this.nodes_.toolbar.actions;
-
-      ela.add.toggleClass('disabled', loading);
-      ela.refresh.toggleClass('disabled', loading);
     }
   };
 
@@ -421,6 +411,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.refreshing_ = true;
     this.reset_tree_();
     this.events_.trigger('refresh-begin');
+    this.update_toolbar_(true);
 
     /* Hide empty notification while loading. */
     this.update_empty_state_(true);
@@ -439,6 +430,8 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
         if(self.folders_.length > 0)
           self.tree_.select_node(self.folders_[0].id);
+        else
+          self.update_toolbar_();
         
         console.log("Loaded folders:", self.folders_);
       } );
@@ -857,6 +850,19 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
         console.error("Label ADD failed: '%s' ∧ '%s'",
                       label.cid1, label.cid2);
       } );
+  };
+
+  ControllerExplorer.prototype.update_toolbar_ = function (item)
+  {
+    var ela = this.owner_.nodes.toolbar.actions,
+        loading = item === true;
+
+    ela.add.toggleClass('disabled', loading);
+    ela.addSubfolder.toggleClass('disabled', loading
+                                 || !(item instanceof Folder));
+    ela.browse.toggleClass('disabled', loading
+                           || !(item instanceof Subfolder));
+    ela.refresh.toggleClass('disabled', loading);
   };
 
   ControllerExplorer.prototype.update_empty_state_ = function (hide)
