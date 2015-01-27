@@ -133,7 +133,7 @@ var Api_ = (function (window, $, CryptoJS, DossierJS) {
   var setFeatureCollectionContent = function (fc, subtopic_id, content)
   {
     if(typeof content !== 'string' || content.length === 0)
-      throw "Invalid bin content";
+      throw "Invalid item content";
     else if(typeof subtopic_id !== 'string' || subtopic_id === 0) {
       throw "Invalid subtopic id";
     }
@@ -214,7 +214,7 @@ var Api_ = (function (window, $, CryptoJS, DossierJS) {
   var setQueryContentId = function (id)
   {
     if(id !== null && (typeof id !== 'string' || id.length === 0))
-      throw "Invalid engine content id";
+      throw "Invalid query content id";
 
     qitems_.query_content_id = id;
   };
