@@ -287,7 +287,12 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
           }
         }
       },
-      plugins: [ /* "dnd" */ ]
+      types: {
+        "folder":    { "icon": "sd-folder"    },
+        "subfolder": { "icon": "sd-subfolder" },
+        "item":      { "icon": "jstree-file"  }
+      },
+      plugins: [ "types" /* "dnd" */ ]
     } ).jstree(true);
 
     owner.nodes.explorer.on( {
