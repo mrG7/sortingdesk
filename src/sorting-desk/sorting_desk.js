@@ -930,6 +930,19 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.id_ = null;
     this.subfolders_ = [ ];
 
+    /* Retrieve all subfolders for this folder. */
+    var self = this;
+
+    if(folder.exists) {
+      this.api.foldering.listSubfolders(folder)
+        .done(function (coll) {
+          coll.forEach(function (sf) {
+            self.subfolders_.push(new Subfolder(self, sf));
+          } );
+        } );
+    }
+    
+    /* Now render. */
     this.render();
   };
 
