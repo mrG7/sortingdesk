@@ -26,7 +26,3 @@ BUTTON.dropdown-toggle > .caret {
   height: 99%;
   max-width: 90%;
 }
-
-.jstree > UL > LI UL > LI {
-  border: 2px solid transparent;
-}
