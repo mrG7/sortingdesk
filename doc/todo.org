@@ -68,6 +68,9 @@ This is so the client can update state should loading of state fail. Right now, 
 
 **** TODO Show labels ungrouped or grouped by feature collection (=content_id=)
 
+*** TODO Merging of subfolders isn't implemented
+Can't yet be implemented because server-side folder removal logic is not yet in place.
+
 *** TODO Stop ongoing requests when different bin is made active
 
 *** TODO Attach base64 image data to descriptor
@@ -89,10 +92,12 @@ In =onDropSpecial=.
 ** Extension
 *** All
 *** Chrome
+**** TODO Create browser action that opens extension's window
+User may close the extension window at any time for whatever reason. This means a way of re-opening the extension window at any time must exist.
+
 **** TODO Always positioning extension window in the first screen
 Must account for the fact that the main browser window may be in the second window and resize it, if needs be.
 
-**** TODO Subtracting hard-coded margin due to possible Chrome bug
 **** TODO =DossierJS=: must reside in =background.js=
 Moving =Dossier.JS= into =background.js= would effectively mean the limitations on same-origin policy would no longer apply.
 
