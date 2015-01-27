@@ -666,7 +666,10 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     else if(this.active_ === item)
       return;
 
-    /* Invoke API to activate the bin. If successful, update UI state and force
+    /* Stop all ongoing request at once. */
+    this.owner.api.getDossierJs().stop('API.search');
+
+    /* Invoke API to activate the item. If successful, update UI state and force
      * a redraw of the items container. */
     if(this.active_)
       this.active_.deactivate();
