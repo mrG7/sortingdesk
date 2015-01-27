@@ -556,20 +556,20 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     return this.doAddLabel_(label);
   };
 
-  ControllerExplorer.prototype.addLabel = function (bin, descriptor)
+  ControllerExplorer.prototype.addLabel = function (item, descriptor)
   {
     var self = this,
         api = this.owner_.api;
 
-    return this.update_(descriptor)
+    return this.updateFc(descriptor)
       .then(function (fc) {
-        /* Create label between snippet/image and bin. */
+        /* Create label between snippet/image and item. */
         var label = new (api.getClass('Label'))(
-          bin.data.content_id,
+          item.data.content_id,
           descriptor.content_id,
           api.getAnnotator(),
           api.COREF_VALUE_POSITIVE,
-          bin.data.subtopic_id,
+          item.data.subtopic_id,
           descriptor.subtopic_id);
 
         return self.doAddLabel_(label);
@@ -577,7 +577,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       function () {
         console.error("Unable to add label between '%s' and '%s': "
                       + "feature collection not found",
-                      bin.id,
+                      item.id,
                       descriptor.content_id);
       } );
   };
