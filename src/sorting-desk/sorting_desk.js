@@ -964,38 +964,60 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   {
     /* Invoke base class constructor. */
     std.Drawable.call(this, owner);
+    
+    /* Getters */
+    this.__defineGetter__('id', function () { return this.id_; } );
+    this.__defineGetter__('data', function () { return this.folder_; } );
+    this.__defineGetter__(
+      'api', function () { return owner.owner.api; } );
+    
+    this.__defineGetter__(
+      'tree', function () { return owner.tree; } );
+    
+    this.__defineGetter__(
+      'node', function () { return owner.tree.get_node(this.id_); } );
+    
+    this.__defineGetter__('subfolders',
+                          function () { return this.subfolders_; } );
 
-    if(!std.is_obj(folder))
+    /* Initialisation sequence. */
+    if(!(folder instanceof this.api.foldering.Folder))
       throw "Invalid or no folder descriptor provided";
 
     /* Attributes */
     this.folder_ = folder;
     this.id_ = null;
-    this.node_ = null;
-
-    /* Getters */
-    this.__defineGetter__('id', function () { return this.id_; } );
-    this.__defineGetter__('node', function () { return this.node_; } );
+    this.subfolders_ = [ ];
   };
 
   Folder.prototype = Object.create(std.Drawable.prototype);
 
   Folder.prototype.render = function ()
   {
-    var self = this;
-    
-    this.id_ = this.owner_.tree.create_node(
-      null, { state: 'open', text: this.folder_.data.name }, "last");
+    this.id_ = this.tree.create_node(
+      null, { state: 'open', text: this.folder_.data.name, type: 'folder'},
+      "last");
 
     if(this.id_ === false)
       throw "Failed to create folder";
-
-    this.node_ = $('#' + this.id_);
   };
 
   Folder.prototype.reset = function ()
   {
-    this.owner_.tree.delete_node(this.node_);
+    this.subfolders_.forEach(function (s) { s.reset(); } );
+    this.tree.delete_node(this.tree.get_node(this.id_));
+  };
+
+  Folder.prototype.open = function ()
+  {
+    this.tree.open_node(this.node);
+  };
+  
+  Folder.prototype.add = function (subfolder)
+  {
+    var sf = new Subfolder(this, subfolder);              
+    sf.render();
+    this.subfolders_.push(sf);
   };
 
 
@@ -1005,28 +1027,118 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   var FolderNew = function (owner)
   {
     /* Invoke base class constructor. */
-    Folder.call(this, owner, { });
+    Folder.call(this, owner,
+                owner.owner.api.foldering.Folder.fromName("<fake>"));
   };
 
   FolderNew.prototype = Object.create(Folder.prototype);
 
   FolderNew.prototype.render = function ()
   {
-    this.id_ = this.owner_.tree.create_node(
-      null, { state: 'open', text: "" }, "last");
+    this.id_ = this.tree.create_node(
+      null, { state: 'open', text: "", type: "folder" }, "last");
 
     if(this.id_ === false)
       throw "Failed to create folder";
     
-    this.node_ = this.owner_.node.find('[id="' + this.id_ + '"]');
-    this.owner_.tree.edit(this.node_,
-                          this.owner_.owner_.options.folderNewCaption);
+    this.tree.edit(this.tree.get_node(this.id_),
+                   this.owner_.owner.options.folderNewCaption);
+  };
+
+
+  /**
+   * @class
+   * */
+  var Subfolder = function (owner, subfolder)
+  {
+    /* Invoke base class constructor. */
+    std.Drawable.call(this, owner);
+    
+    /* Getters */
+    this.__defineGetter__('id', function () { return this.id_; } );
+    this.__defineGetter__('data', function () { return this.subfolder_; } );
+    
+    this.__defineGetter__(
+      'api', function () { return owner.owner.owner.api; } );
+    
+    this.__defineGetter__(
+      'tree', function () { return owner.owner.tree; } );
+    
+    this.__defineGetter__('node', function () {
+      return owner.owner.tree.get_node(this.id_); } );
+    
+    this.__defineGetter__('items',
+                          function () { return this.items_; } );
+
+    /* Initialisation sequence. */
+    if(!(subfolder instanceof this.api.foldering.Subfolder))
+      throw "Invalid or no subfolder descriptor provided";
+
+    /* Attributes */
+    this.subfolder_ = subfolder;
+    this.id_ = null;
+    this.items_ = [ ];
+  };
+
+  Subfolder.prototype = Object.create(std.Drawable.prototype);
+
+  Subfolder.prototype.reset = function ()
+  {
+    this.tree.delete_node(this.tree.get_node(this.id_));
+  };
+
+  Subfolder.prototype.render = function ()
+  {
+    this.id_ = this.tree.create_node(
+      this.owner_.node,
+      { state: 'open',
+        text: this.subfolder_.data.name,
+        type: "subfolder"},
+      "last");
+
+    if(this.id_ === false)
+      throw "Failed to create subfolder";
+
+    this.owner_.open();
+  };
+
+
+  /**
+   * @class
+   * */
+  var SubfolderNew = function (owner)
+  {
+    /* Invoke base class constructor. */
+    Subfolder.call(
+      this, owner,
+      owner.owner.owner.api.foldering.Subfolder.fromName(owner.data,
+                                                         "<fake>"));
+  };
+
+  SubfolderNew.prototype = Object.create(Subfolder.prototype);
+
+  SubfolderNew.prototype.render = function ()
+  {
+    this.id_ = this.tree.create_node(
+      this.owner_.node,
+      { state: 'open',
+        text: [ '<img src="',
+                std.Url.decode(this.subfolder_.data.name),
+                '" />' ].join(''),
+        type: "subfolder" },
+      "last");
+
+    if(this.id_ === false)
+      throw "Failed to create subfolder";
+
+    var o = this.owner_;
+    o.open();
+    this.tree.edit(this.tree.get_node(this.id_),
+                   o.owner.owner.options.folderNewCaption);
   };
   
-  FolderNew.prototype.reset = function ()
-  {
-    this.owner_.tree.delete_node(this.node_);
-  };
+    /* Invoke base class constructor. */
+    Subfolder.call(this, owner, subfolder);
   
 
   /**
