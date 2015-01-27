@@ -676,10 +676,12 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     } ) === true ? result : null;
   };
 
-  ControllerExplorer.prototype.setActive = function (subfolder)
+  ControllerExplorer.prototype.setActive = function (item)
   {
-    /* Don't activate subfolder if currently active already. */
-    if(this.active_ === subfolder)
+    /* Don't activate item if currently active already. */
+    if(!(item instanceof Item))
+      throw "Invalid or no item specified";
+    else if(this.active_ === item)
       return;
 
     /* Invoke API to activate the bin. If successful, update UI state and force
@@ -687,17 +689,15 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     if(this.active_)
       this.active_.deactivate();
 
-    this.active_ = subfolder;
+    this.active_ = item;
 
-    if(subfolder) {
-      subfolder.activate();
+    if(item) {
+      item.activate();
 
       if(this.owner_.initialised) {
-        this.owner_.api.setQueryContentId(subfolder.data.content_id);
+        this.owner_.api.setQueryContentId(item.data.content_id);
         this.owner_.sortingQueue.items.redraw();
       }
-
-      this.owner_.callbacks.invoke('setActive', subfolder.data.content_id);
     } else {
       /* There is no active subfolder, which means we need to clear the list of
        * items, but we only do so *after* the query content id has been set
