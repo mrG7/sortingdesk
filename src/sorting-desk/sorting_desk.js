@@ -297,13 +297,21 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
           var f;
           
           if(self.creating_.parent === null) {
-            f = new Folder(self, api.foldering.Folder.fromName(data.text));
+            f = new Folder(self, api.foldering.folderFromName(data.text));
             self.folders_.push(f);
+
+            api.foldering.addFolder(f.data)
+              .done(function () {
+                console.info("Successfully added folder", f.data);
+              } )
+              .fail(function () {
+                console.error("Failed to add folder", f.data);
+              } );
 
             if(self.folders_.length === 1)
               self.tree_.select_node(f.id);
           } else {
-            f = new api.foldering.Subfolder.fromName(
+            f = new api.foldering.subfolderFromName(
               self.creating_.parent.data,
               data.text);
             self.creating_.parent.add(f);
