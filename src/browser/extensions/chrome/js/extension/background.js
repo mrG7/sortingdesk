@@ -15,7 +15,7 @@ var Background = function (window, chrome, $, std, undefined)
 {
   /* Constants */
   var TIMEOUT_SAVE = 1000,
-      DEFAULT_EXTENSION_WIDTH = 300;
+      DEFAULT_EXTENSION_WIDTH = 350;
 
   /* Attributes */
   var handlerTabs_;
