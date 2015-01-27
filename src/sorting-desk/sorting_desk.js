@@ -646,6 +646,24 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     } );
   };
 
+  ControllerExplorer.prototype.getAnyById = function (id)
+  {
+    var result = null;
+    return this.folders_.some(function (folder) {
+      if(folder.id === id) {
+        result = folder;
+        return true;
+      } else {
+        return folder.subfolders.some(function (subfolder) {
+          if(subfolder.id === id) {
+            result = subfolder;
+            return true;
+          }
+        } );
+      }
+    } ) ? result : null;
+  };
+
   ControllerExplorer.prototype.setActive = function (bin)
   {
     /* Don't activate bin if currently active already. */
