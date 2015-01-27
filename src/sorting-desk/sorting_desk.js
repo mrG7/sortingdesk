@@ -951,7 +951,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   Folder.prototype.render = function ()
   {
     this.id_ = this.tree.create_node(
-      null, { state: 'open', text: this.folder_.data.name, type: 'folder'},
+      null, { state: 'open', text: this.folder_.name, type: 'folder'},
       "last");
 
     if(this.id_ === false)
@@ -985,7 +985,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   {
     /* Invoke base class constructor. */
     Folder.call(this, owner,
-                owner.owner.api.foldering.Folder.fromName("<fake>"));
+                owner.owner.api.foldering.folderFromName("<fake>"));
   };
 
   FolderNew.prototype = Object.create(Folder.prototype);
@@ -1051,7 +1051,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.id_ = this.tree.create_node(
       this.owner_.node,
       { state: 'open',
-        text: this.subfolder_.data.name,
+        text: this.subfolder_.name,
         type: "subfolder"},
       "last");
 
@@ -1118,8 +1118,8 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     /* Invoke base class constructor. */
     Subfolder.call(
       this, owner,
-      owner.owner.owner.api.foldering.Subfolder.fromName(owner.data,
-                                                         "<fake>"));
+      owner.owner.owner.api.foldering.subfolderFromName(owner.data,
+                                                        "<fake>"));
   };
 
   SubfolderNew.prototype = Object.create(Subfolder.prototype);
@@ -1130,7 +1130,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       this.owner_.node,
       { state: 'open',
         text: [ '<img src="',
-                std.Url.decode(this.subfolder_.data.name),
+                std.Url.decode(this.subfolder_.name),
                 '" />' ].join(''),
         type: "subfolder" },
       "last");
