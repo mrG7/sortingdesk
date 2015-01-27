@@ -184,8 +184,10 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
         return {
           actions: {
             add: this.find('toolbar-add'),
+            addSubfolder: this.find('toolbar-add-subfolder'),
             remove: this.find('toolbar-remove'),
             rename: this.find('toolbar-rename'),
+            browse: this.find('toolbar-browse'),
             refresh: this.find('toolbar-refresh')
           }
         };
