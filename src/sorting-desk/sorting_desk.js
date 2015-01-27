@@ -375,6 +375,17 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       self.create();
     } );
 
+    els.toolbar.actions.addSubfolder.click(function () {
+      var sel = self.tree_.get_selected(),
+          f;
+      
+      if(std.is_arr(sel) && sel.length > 0) {
+        f = self.getById(sel[0]);
+        if(f !== null)
+          self.createSubfolder(f);
+      }
+    } );
+
     els.toolbar.actions.remove.click(function () {
       console.info("Not implemented yet");
     } );
