@@ -933,11 +933,8 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     /* Getters */
     this.__defineGetter__('id', function () { return this.id_; } );
     this.__defineGetter__('data', function () { return this.folder_; } );
-    this.__defineGetter__(
-      'api', function () { return owner.owner.api; } );
-    
-    this.__defineGetter__(
-      'tree', function () { return owner.tree; } );
+    this.__defineGetter__('api', function () { return owner.owner.api; } );
+    this.__defineGetter__('tree', function () { return owner.tree; } );
     
     this.__defineGetter__(
       'node', function () { return owner.tree.get_node(this.id_); } );
@@ -982,9 +979,8 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   
   Folder.prototype.add = function (subfolder)
   {
-    var sf = new Subfolder(this, subfolder);              
-    sf.render();
-    this.subfolders_.push(sf);
+    this.subfolders_.push(new Subfolder(this, subfolder));
+    this.owner.updateActive();
   };
 
 
