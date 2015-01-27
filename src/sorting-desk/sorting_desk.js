@@ -389,23 +389,12 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     } );
 
     /* Hook up to toolbar events. */
-    els.toolbar.actions.refresh.click(function () {
-      self.refresh();
-    } );
-
-    els.toolbar.actions.add.click(function () {
-      self.create();
-    } );
+    els.toolbar.actions.refresh.click(function () { self.refresh(); } );
+    els.toolbar.actions.add.click(function () { self.create(); } );
 
     els.toolbar.actions.addSubfolder.click(function () {
-      var sel = self.tree_.get_selected(),
-          f;
-      
-      if(std.is_arr(sel) && sel.length > 0) {
-        f = self.getById(sel[0]);
-        if(f !== null)
-          self.createSubfolder(f);
-      }
+      if(self.selected_ instanceof Folder)
+        self.createSubfolder(self.selected_);
     } );
 
     els.toolbar.actions.remove.click(function () {
