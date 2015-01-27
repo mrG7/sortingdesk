@@ -710,3 +710,14 @@ A.sd-text-item-title:hover {
 .sd-subfolder {
   background: url('/media/images/folder-sub.png') 0px 0px no-repeat !important;
 }
+
+.jstree LI.sd-active {
+  border: 1px solid #ACDBB9;
+}
+
+.jstree LI.sd-active,
+.jstree LI.sd-active > A.jstree-hovered {
+  background-color: #E4FAE7;
+  color: #396121;
+  font-weight: bold;
+}
