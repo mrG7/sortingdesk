@@ -758,6 +758,12 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       .addClass(Css.disabled);
   };    
 
+  ControllerExplorer.prototype.updateActive = function ()
+  {
+    if(this.active_)
+      this.active_.activate();
+  };
+
   /* Private interface */
   ControllerExplorer.prototype.update_ = function (descriptor,
                                                    exists /* = false */)
