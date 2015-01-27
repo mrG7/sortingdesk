@@ -664,10 +664,10 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     } ) ? result : null;
   };
 
-  ControllerExplorer.prototype.setActive = function (bin)
+  ControllerExplorer.prototype.setActive = function (subfolder)
   {
-    /* Don't activate bin if currently active already. */
-    if(this.active_ === bin)
+    /* Don't activate subfolder if currently active already. */
+    if(this.active_ === subfolder)
       return;
 
     /* Invoke API to activate the bin. If successful, update UI state and force
@@ -675,32 +675,27 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     if(this.active_)
       this.active_.deactivate();
 
-    this.active_ = bin;
+    this.active_ = subfolder;
 
-    if(bin) {
-      bin.activate();
+    if(subfolder) {
+      subfolder.activate();
 
       if(this.owner_.initialised) {
-        this.owner_.api.setQueryContentId(bin.data.content_id);
+        this.owner_.api.setQueryContentId(subfolder.data.content_id);
         this.owner_.sortingQueue.items.redraw();
       }
 
-      /* Ensure bin is visible. */
-      this.owner_.nodes.bins.animate(
-        { scrollLeft: bin.node.offset().left },
-        250);
-
-      this.owner_.callbacks.invoke('setActive', this.id);
+      this.owner_.callbacks.invoke('setActive', subfolder.data.content_id);
     } else {
-      /* There is no active bin, which means we need to clear the list of items,
-       * but we only do so *after* the query content id has been set since
-       * Sorting Queue will attempt to refresh the items list. */
+      /* There is no active subfolder, which means we need to clear the list of
+       * items, but we only do so *after* the query content id has been set
+       * since Sorting Queue will attempt to refresh the items list. */
       this.owner_.api.setQueryContentId(null);
       this.owner_.sortingQueue.items.removeAll(false);
     }
 
     /* Finally, trigger event. */
-    this.owner_.events.trigger('active', bin);
+    this.owner_.events.trigger('active', this.active_);
   };
 
   ControllerExplorer.prototype.browse = function (bin)
