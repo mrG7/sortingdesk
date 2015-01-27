@@ -296,19 +296,31 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     } ).jstree(true);
 
     owner.nodes.explorer.on( {
-      "rename_node.jstree": function (node, data) {
+      "rename_node.jstree": function (ev, data) {
         if(self.creating_ === null)
           throw "Renaming of nodes not currently implemented";
 
         data.text = data.text.trim();
-        
+
         if(data.text !== owner.options.folderNewCaption) {
-          var f = new Folder(self, api.foldering.Folder.fromName(data.text));
-          f.render();
-          self.folders_.push(f);
+          var f;
+          
+          if(self.creating_.parent === null) {
+            f = new Folder(self, api.foldering.Folder.fromName(data.text));
+            f.render();
+            self.folders_.push(f);
+
+            if(self.folders_.length === 1)
+              self.tree_.select_node(f.id);
+          } else {
+            f = new api.foldering.Subfolder.fromName(
+              self.creating_.parent.data,
+              data.text);
+            self.creating_.parent.add(f);
+          }
         }
         
-        self.creating_.reset();
+        self.creating_.obj.reset();
         self.creating_ = null;
         self.update_empty_state_();
       },
@@ -517,7 +529,20 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   ControllerExplorer.prototype.create = function ()
   {
     this.update_empty_state_(true);
-    (this.creating_ = new FolderNew(this)).render();
+    this.creating_ = {
+      parent: null,
+      obj: new FolderNew(this)
+    };
+    this.creating_.obj.render();
+  };
+  
+  ControllerExplorer.prototype.createSubfolder = function (folder)
+  {
+    this.creating_ = {
+      parent: folder,
+      obj: new SubfolderNew(folder)
+    };
+    this.creating_.obj.render();
   };
 
   ControllerExplorer.prototype.add = function (bin,
