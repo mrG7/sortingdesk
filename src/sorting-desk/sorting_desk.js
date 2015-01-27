@@ -1208,54 +1208,83 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     /* Attributes */
     this.item_ = item;
     this.id_ = null;
-    this.content_ = null;
     this.events_ = new std.Events(this, [ 'ready' ]);
 
     var self = this,
         ready = function () {
           self.render();
+
+          /* Set this as active item if none set yet. */
+          if(self.controller.active === null)
+            self.controller.setActive(self);
+          else
+            self.controller.updateActive();
+          
           self.events_.trigger('ready');
         };
 
     if(!content) {
+      this.owner_.loading(true);
+      
       this.api.getFeatureCollection(item.content_id)
         .done(function (fc) {
-          self.onGotFeatureCollection(fc);
-          ready();
+          if(self.onGotFeatureCollection(fc))
+            ready();
         })
         .fail (function () {
-          console.error("Feature collection could not be retrieved for item:"
-                        + " removing: id=%s", self.item_.subtopic_id);
-          self.owner_.remove(self);
+          self.onGotFeatureCollection(null);
         } );
     } else {
-      this.content_ = content;
+      this.item_.content = content;
       window.setTimeout(function () { ready(); } );
     }
   };
 
+  /* Static methods */
+  Item.construct = function (api, subfolder, item, content)
+  {
+    if(!(subfolder instanceof Subfolder))
+      throw "Invalid or no subfolder specified";
+    else if(!(item instanceof api.foldering.Item))
+      throw "Invalid or no item specified";
+
+    switch(api.getSubtopicType(item.subtopic_id)) {
+    case 'image': return new ItemImage(subfolder, item, content);
+    case 'text':  return new ItemText (subfolder, item, content);
+    }
+    
+    throw "Invalid item type: " + api.getSubtopicType(item.subtopic_id);
+  };
+  
+  /* Interface */
   Item.prototype = Object.create(std.Drawable.prototype);
 
   Item.prototype.reset = function ()
   {
     this.tree.delete_node(this.tree.get_node(this.id_));
-    this.item_ = this.id_ = this.content_ = null;
+    this.item_ = this.id_ = null;
   };
 
-  Item.prototype.onGotFeatureCollection = function (fc)
+  /* overridable */ Item.prototype.onGotFeatureCollection = function (fc)
   {
-    if(fc === null) {
-      console.warn("Item's feature collection could not be retrieved: id=%s",
-                   this.item_.subtopic_id);
-    } else {
-      this.content_ = fc[this.item_.subtopic_id];
-      
-      if(!this.content_) {
-        this.content_ = null;
-        console.warn("Item's content could not be retrieved: id=%s",
-                     this.item_.subtopic_id);
-      }
+    var remove;
+    
+    if(!fc) remove = true;
+    else {
+      this.item_.content = fc.feature(this.item_.subtopic_id);
+      remove = !this.item_.content;
     }
+
+    this.owner_.loading(false);
+    
+    if(remove) {
+      console.warn("Item's feature collection or content could not be retrieved: id=%s",
+                   this.item_.subtopic_id);
+      this.owner_.remove(this);
+      return false;
+    }
+
+    return true;
   };
 
   Item.prototype.activate = function ()
@@ -1284,7 +1313,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   {
     this.id_ = this.tree.create_node(
       this.owner_.node,
-      { state: 'open', text: this.content_, type: 'item' },
+      { state: 'open', text: this.item_.content, type: 'item' },
       "last");
 
     if(this.id_ === false)
@@ -1311,7 +1340,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       this.owner_.node,
       { state: 'open',
         type: 'item',
-        text: [ '<img src="', this.content_, '" />' ].join('') },
+        text: [ '<img src="', this.item_.content, '" />' ].join('') },
       "last");
 
     if(this.id_ === false)
