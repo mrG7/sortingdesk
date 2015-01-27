@@ -659,20 +659,21 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
   ControllerExplorer.prototype.getAnyById = function (id)
   {
-    var result = null;
-    return this.folders_.some(function (folder) {
-      if(folder.id === id) {
-        result = folder;
-        return true;
-      } else {
-        return folder.subfolders.some(function (subfolder) {
-          if(subfolder.id === id) {
-            result = subfolder;
-            return true;
-          }
-        } );
-      }
-    } ) ? result : null;
+    var result = null,
+        search = function (coll, callback) {
+          return coll.some(function (i) {
+            if(i.id === id) {
+              result = i; return true;
+            } else if(callback)
+              return callback(i);
+          } );
+        };
+
+    return search(this.folders_, function (f) {
+      return search(f.subfolders, function (sb) {
+        return search(sb.items);
+      } );
+    } ) === true ? result : null;
   };
 
   ControllerExplorer.prototype.setActive = function (subfolder)
