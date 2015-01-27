@@ -1032,6 +1032,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.subfolder_ = subfolder;
     this.id_ = null;
     this.items_ = [ ];
+    this.loading_ = 0;
 
     /* Retrieve all items for this folder. */
     var self = this;
@@ -1077,6 +1078,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
   Subfolder.prototype.open = function ()
   {
+    this.loading(null);
     this.tree.open_node(this.node);
   };
 
@@ -1121,6 +1123,21 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
     if(this.controller.active === item)
       this.controller.setActive(null);
+  };
+
+  Subfolder.prototype.loading = function (state)
+  {
+    if(state === false) {
+      if(this.loading_ === 0)
+        console.error("Loading count is 0");
+      else if(--this.loading_ === 0)
+        this.node.removeClass("jstree-loading");
+    } else if(state === true)
+      ++this.loading_;
+
+    /* Always force class. */
+    if(this.loading_ > 0)
+      this.node.addClass("jstree-loading");
   };
 
 
