@@ -392,8 +392,8 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
               subfolder.add(
                 new api.foldering.Item(
                   subfolder.data,
-                  api.generateContentId(result.href),
-                  result.subtopic_id),
+                  { content_id: api.generateContentId(result.href),
+                    subtopic_id: result.subtopic_id } ),
                 result.content);
             } catch (x) {
               std.on_exception(x);
