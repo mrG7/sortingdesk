@@ -536,40 +536,6 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     };
   };
 
-  ControllerExplorer.prototype.add = function (bin,
-                                             activate /* = true */,
-                                             exists   /* = false */)
-  {
-    /* Ensure a bin with the same id isn't already contained. */
-    if(this.getById(bin.id))
-      throw "Bin is already contained: " + bin.id;
-    
-    /* Initialise bin. */
-    bin.initialise();
-
-    /* Contain bin and append its HTML node. */
-    this.append_(bin.node);
-    this.bins_.push(bin);
-
-    /* If first bin to be contained, activate it by default, unless told not to
-     * do so. */
-    if(activate !== false && !this.active_)
-      this.setActive(bin);
-
-    /* Request update of the bin's feature collection. Set the bin's state to
-     * unknown if it is supposed to exist in the backend (`exists´ is true,
-     * which means it is being loaded from local storage) but a feature
-     * collection was not retrieved. */
-    this.update_(bin.data, exists === true)
-      .fail(function () {
-        bin.setUnknown();
-      } );
-
-    this.update_empty_state_();
-
-    return bin;
-  };
-
   ControllerExplorer.prototype.merge = function (dropped, dragged)
   {
     var api = this.owner_.api,
