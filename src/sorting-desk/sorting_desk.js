@@ -466,7 +466,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     /* Hide empty notification while loading. */
     this.update_empty_state_(true);
           
-    this.owner_.api.foldering.list()
+    this.owner_.api.foldering.listFolders()
       .done(function (coll) {
         coll.forEach(function (f) {
           self.folders_.push(new Folder(self, f));
