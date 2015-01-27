@@ -298,7 +298,6 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
           
           if(self.creating_.parent === null) {
             f = new Folder(self, api.foldering.Folder.fromName(data.text));
-            f.render();
             self.folders_.push(f);
 
             if(self.folders_.length === 1)
@@ -454,8 +453,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.owner_.api.foldering.list()
       .done(function (coll) {
         coll.forEach(function (f) {
-          (f = new Folder(self, f)).render();
-          self.folders_.push(f);
+          self.folders_.push(new Folder(self, f));
         } );
       } )
       .always(function () {
@@ -511,7 +509,6 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       parent: null,
       obj: new FolderNew(this)
     };
-    this.creating_.obj.render();
   };
   
   ControllerExplorer.prototype.createSubfolder = function (folder)
@@ -520,7 +517,6 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       parent: folder,
       obj: new SubfolderNew(folder)
     };
-    this.creating_.obj.render();
   };
 
   ControllerExplorer.prototype.add = function (bin,
@@ -1002,6 +998,8 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.folder_ = folder;
     this.id_ = null;
     this.subfolders_ = [ ];
+
+    this.render();
   };
 
   Folder.prototype = Object.create(std.Drawable.prototype);
@@ -1092,6 +1090,8 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.subfolder_ = subfolder;
     this.id_ = null;
     this.items_ = [ ];
+
+    this.render();
   };
 
   Subfolder.prototype = Object.create(std.Drawable.prototype);
