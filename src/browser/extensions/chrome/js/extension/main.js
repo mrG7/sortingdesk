@@ -90,7 +90,21 @@ var Main = (function (window, chrome, $, std, SortingDesk, LabelBrowser, Api, un
               active.id,
               { operation: 'get-selection' },
               function (result) {
-                deferred.resolve(result);
+                /* Retrieve base64 encoding of image data if result type is
+                 * image; otherwise resolve promise straight away with result in
+                 * it. */
+                if(std.is_obj(result) && result.type === 'image') {
+                  imageToBase64_(result.content)
+                    .done(function (data) {
+                      result.data = data;
+                      deferred.resolve(result);
+                    } ).fail(function () {
+                      console.error("Failed to retrieve image data in base64"
+                                    + " encoding");
+                      deferred.resolve(null);
+                    } );
+                } else
+                  deferred.resolve(result);
               } );
           }
         } );
