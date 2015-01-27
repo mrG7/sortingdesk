@@ -342,6 +342,9 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
         
         self.update_toolbar_();
       },
+      "after_open.jstree": function (ev) {
+        self.updateActive();
+      },
       "dragover":  function (ev){self.on_dragging_enter_(ev);return false;},
       "dragenter": function (ev){self.on_dragging_enter_(ev);return false;},
       "dragleave": function (ev){self.on_dragging_exit_(ev); return false;},
