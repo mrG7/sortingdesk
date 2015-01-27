@@ -407,7 +407,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
     /* Hook up to toolbar events. */
     els.toolbar.actions.refresh.click(function () { self.refresh(); } );
-    els.toolbar.actions.add.click(function () { self.create(); } );
+    els.toolbar.actions.add.click(function () { self.createFolder(); } );
 
     els.toolbar.actions.addSubfolder.click(function () {
       if(self.selected_ instanceof Folder)
@@ -513,14 +513,13 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     /* Reset bin spawner controller and remove all children nodes inside the
      * bins HTML container. */
     this.reset_tree_();
-    this.owner_.api.setQueryContentId(null);
     
     /* Reset state. */
     this.id_ = this.folders_ = this.browser_ = null;
     this.refreshing_ = this.events_ = null;
   };
 
-  ControllerExplorer.prototype.create = function ()
+  ControllerExplorer.prototype.createFolder = function ()
   {
     this.update_empty_state_(true);
     this.creating_ = {
