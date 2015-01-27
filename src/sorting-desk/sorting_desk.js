@@ -930,9 +930,9 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
     var el = ev.toElement.nodeName.toLowerCase() !== 'li'
           ? ev.toElement.parentNode : ev.toElement,
-        fl = this.getById(el.id);
+        fl = this.getAnyById(el.id);
 
-    if(fl !== null) {
+    if(fl instanceof Subfolder) {
       $(el).addClass(this.owner_.options.css.droppableHover);
       return fl;
     }
@@ -946,9 +946,9 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
     var el = ev.toElement.nodeName.toLowerCase() !== 'li'
           ? ev.toElement.parentNode : ev.toElement,
-        fl = this.getById(el.id);
+        fl = this.getAnyById(el.id);
 
-    if(fl !== null) {
+    if(fl instanceof Subfolder) {
       $(el).removeClass(this.owner_.options.css.droppableHover);
       return fl;
     }
