@@ -447,15 +447,16 @@ A.sd-text-item-title:hover {
 
 /* Droppable elements */
 .sd-droppable {
-  border-style: dashed;
+  border: 2px dashed gray;
 }
 
 .sd-droppable-highlight {
-  border-style: dashed !important;
+  border: 2px dashed gray;
 }
 
 .sd-droppable-hover {
-  border-style: dotted !important;
+  border: 2px dotted gray !important;
+  background-color: #fce4e4 !important;
 }
 
 /* Button: dismiss */
