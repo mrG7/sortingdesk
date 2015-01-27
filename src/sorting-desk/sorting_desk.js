@@ -1046,6 +1046,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
   Subfolder.prototype.reset = function ()
   {
+    this.items_.forEach(function (i) { i.reset(); } );
     this.tree.delete_node(this.tree.get_node(this.id_));
   };
 
