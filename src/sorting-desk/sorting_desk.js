@@ -1120,6 +1120,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     if(index < 0)
       throw "Item not contained: not removing";
 
+    item.reset();
     this.items_.splice(index, 1);
 
     if(this.controller.active === item)
