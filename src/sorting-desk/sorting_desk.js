@@ -1065,6 +1065,54 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.owner_.open();
   };
 
+  Subfolder.prototype.open = function ()
+  {
+    this.tree.open_node(this.node);
+  };
+
+  Subfolder.prototype.add = function (item, content)
+  {
+    var self = this,
+        api = this.api,
+        obj;
+    
+    if(!(item instanceof api.foldering.Item))
+      throw "Invalid or no item specified";
+
+    switch(api.getSubtopicType(item.subtopic_id)) {
+    case 'image': obj = new ItemImage(this, item, content); break;
+    case 'text':  obj = new ItemText (this, item, content); break;
+    default: throw "Invalid item type: "
+        + api.getSubtopicType(item.subtopic_id);
+    }
+
+    if(content) {
+      console.log("TODO: must save FC");
+    }
+
+    this.items_.push(obj);
+
+    /* Activate item if none is currently active. */
+    obj.on({ 'ready': function () {
+      var c = self.controller;
+      if(c.active === null) self.controller.setActive(obj);
+      else c.updateActive();
+    } } );
+  };
+
+  Subfolder.prototype.remove = function (item)
+  {
+    var index = this.items_.indexOf(item);
+
+    if(index < 0)
+      throw "Item not contained: not removing";
+
+    this.items_.splice(index, 1);
+
+    if(this.controller.active === item)
+      this.controller.setActive(null);
+  };
+
 
   /**
    * @class
