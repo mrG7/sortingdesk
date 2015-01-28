@@ -18,45 +18,77 @@ var Background = function (window, chrome, $, std, undefined)
       DEFAULT_EXTENSION_WIDTH = 350;
 
   /* Attributes */
-  var handlerTabs_;
+  var handlerTabs_ = null,
+      window_ = {
+        main: null,
+        extension: null
+      };
 
   
   var initialize_ = function ()
   {
     handlerTabs_ = MessageHandlerTabs;
+    spawn_();
 
-    chrome.windows.getCurrent(function (current) {
-      var screen = new std.Size(window.screen.width, window.screen.height),
-          win = new std.PositionSize(current.left, current.top,
-                                     current.width, current.height),
-          ext = new std.PositionSize(win.right + 1, win.top,
-                                     DEFAULT_EXTENSION_WIDTH, win.height),
-          diff = ext.right - screen.width;
-
-      if(diff > 0) {
-        console.log(diff, win.left);
-        if(diff > win.left) {
-          win.left = 0;
-          win.width = screen.width - DEFAULT_EXTENSION_WIDTH;
-          ext.left = win.right + 1;
-        } else {
-          win.left = win.left - diff - 1;
-          ext.left = ext.left - diff;
-        }
-
-        console.info("Updating window's position/size:", win.toObject());
-        chrome.windows.update(current.id, win.toObject());
+    chrome.windows.onRemoved.addListener(function (id) {
+      if(window_.extension !== null && window_.extension.id === id) {
+        var m = window_.main;
+        
+        console.info("Extension window removed");
+        chrome.windows.update(
+          m.id,
+          { state: m.state,
+            top: m.top, left: m.left, height: m.height,
+            width: m.width } );
+        
+        window_.main = window_.extension = null;
       }
+    } );
 
-      console.info("Creating Sorting Desk's window:", ext.toObject());
-      chrome.windows.create( $.extend( {
-        url: chrome.runtime.getURL("/html/main.html"),
-        focused: false,
-        type: "popup"
-      }, ext.toObject() ) );
+    chrome.browserAction.onClicked.addListener(function () {
+      if(window_.extension === null)
+        spawn_();
     } );
   };
 
+  var spawn_ = function ()
+  {
+    if(window_.extension !== null)
+      throw "Extension window already exists";
+    
+    console.log("Spawning extension window");
+    
+    chrome.windows.getCurrent(function (current) {
+      chrome.windows.getLastFocused(function (win) {
+        var size, ext;
+
+        window_.main = $.extend(true, { }, win);
+        size = new std.PositionSize(win);
+        
+        if(size.width > DEFAULT_EXTENSION_WIDTH * 2) {
+          size.width -= DEFAULT_EXTENSION_WIDTH;
+
+          win.focused = true;
+          chrome.windows.update(win.id, $.extend( {state: "normal" },
+                                                  size.toObject()));
+        }
+
+        ext = new std.PositionSize(size.right, size.top,
+                                   DEFAULT_EXTENSION_WIDTH, size.height - 30);
+        
+        console.info("Creating Sorting Desk's window:", ext.toObject());
+        chrome.windows.create( $.extend( {
+          url: chrome.runtime.getURL("/html/main.html"),
+          focused: false,
+          type: "popup"
+        }, ext.toObject() ), function (nw) {
+          window_.extension = nw;
+          chrome.windows.update(nw.id, ext.toObject());
+        } );
+      } );
+    } );
+  };
+  
   
   /**
    * @class
