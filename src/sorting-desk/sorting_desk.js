@@ -279,10 +279,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       "select_node.jstree": function (ev, data) {
         var i = self.getAnyById(data.node.id);
 
-        if(i instanceof Item) {
-          self.tree_.deselect_node(data.node);
-          self.tree_.select_node(data.node.parents[0]);
-        } else if(i === null) {
+        if(i === null) {
           var sel = self.selected_ === null
                 ? self.folders_[0].node
                 : self.selected_.node;
