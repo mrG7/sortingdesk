@@ -329,12 +329,18 @@ var Main = (function (window, chrome, $, std, sq, sd, Api, undefined) {
       .resize(function () { resize_(); } )
       .click(function (ev) {
         ev = ev.originalEvent;
-        
-        if(ev.target.nodeName.toLowerCase() === 'a') {
+
+        var target = ev.target;
+
+        /* Ensure click event originated in a A tag and it contains a valid href
+         * value. */
+        if(target.nodeName.toLowerCase() === 'a'
+           && target.href !== window.location.href + '#')
+        {
           chrome.windows.getLastFocused(function (win) {
             chrome.tabs.create( {
               windowId: win.id,
-              url: ev.target.href,
+              url: target.href,
               active: true } );
           } );
             
