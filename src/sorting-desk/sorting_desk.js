@@ -270,9 +270,11 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       },
       "dblclick.jstree": function (ev, data) {
         var i = self.getAnyById($(ev.target).closest("li").attr('id'));
-        if(i instanceof Item) {
+        if(i instanceof Subfolder) {
+          if(i.items.length > 0)
+            self.setActive(i.items[0]);
+        } if(i instanceof Item)
           self.setActive(i);
-        }
       },
       "select_node.jstree": function (ev, data) {
         var i = self.getAnyById(data.node.id);
