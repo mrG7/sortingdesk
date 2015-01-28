@@ -750,8 +750,8 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
     if(el && el.parentNode && el.parentNode.id) {
       var fl = this.getAnyById(el.parentNode.id);
-      
-      if(fl instanceof Subfolder) {
+
+      if(std.instanceany(fl, Folder, Subfolder)) {
         $(el).addClass(Css.droppable.hover);
         return fl;
       }
@@ -769,8 +769,8 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
     if(el && el.parentNode && el.parentNode.id) {
       var fl = this.getAnyById(el.parentNode.id);
-      
-      if(fl instanceof Subfolder) {
+
+      if(std.instanceany(fl, Folder, Subfolder)) {
         $(el).removeClass(Css.droppable.hover);
         return fl;
       }
