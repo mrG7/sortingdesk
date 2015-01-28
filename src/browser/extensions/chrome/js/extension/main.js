@@ -201,70 +201,34 @@ var Main = (function (window, chrome, $, std, SortingDesk, LabelBrowser, Api, un
     } );
   };
 
-  
-  /* Startup sequence. */
-  $(function () {
-    var instantiate_ = function (meta) {
-      (sorter = new SortingDesk.Sorter( {
-        container: $('#sd-folder-explorer'),
-        constructors: {
-          createLabelBrowser: function (options) {
-            $('[data-sd-scope="label-browser-header-title"]').html("Loading");
-            $('[data-sd-scope="label-browser-header-content"]')
-              .html("Please wait...");
+  var resize_ = function ()
+  {
+    var height = Math.floor(window.innerHeight / 2);
+    
+    /* Set up heights. */
+    $("#sd-folder-explorer").height(height);
+    $("#sd-queue").height(height - $("#sd-queue > .sd-footer").outerHeight());
+  };
 
-            return (new LabelBrowser.Browser(
-              $.extend(options, { container: $('#sd-label-browser') } ),
-              HandlerCallbacks.callbacks.browser
-            ) ).on( {
-              initialised: function (container) {
-                $('.sd-label-browser .sd-empty').hide();
-                $('.sd-label-browser .sd-loading').show();
-              },
-              
-              ready: function (count) {
-                $('.sd-label-browser .sd-loading').hide();
-                if(count === 0) $('.sd-label-browser .sd-empty').fadeIn();
-              }
-            } );
-          }
-        },
-        dossierUrl: meta.config.dossierUrl,
-        sortingQueue: {
-          options: {
-            container: $('#sd-queue'),
-            visibleItems: 10,
-            itemsDraggable: false
-          }
-        }
-      }, $.extend(true, Api, HandlerCallbacks.callbacks.sorter ) ) )
-        .on(loading.sorter.events)
-        .initialise();
 
-      setupSortingQueue_(sorter);
-    };
-
+  /* Private interface */
+  var initialise_ = function ()
+  {
     /* Initialisation sequence */
     loading = {
       sorter: new LoadingStatus($('#sd-folder-explorer .sd-loading')),
       queue:  new LoadingStatus($('#sd-queue .sd-loading'))
     };
     
-    var height = Math.floor(window.innerHeight / 2);
-    
     chrome.runtime.sendMessage({ operation: "get-meta" }, function (meta) {
       /* Cache jQuery references to nodes used. */
       nodes.loading = $('#sd-sorting-desk .sd-loading');
 
-      /* Instantiate and or initialise class components. */
-      BackgroundListener.initialise();
-
       /* Initialise tooltips. */
       $('[data-toggle="tooltip"]').tooltip();
-      
-      /* Set up heights. */
-      $("#sd-folder-explorer").height(height);
-      $("#sd-queue").height(height - $("#sd-queue > .sd-footer").outerHeight());
+
+      /* Set initial heights */
+      resize_();
 
       /* Initialise API and instantiate `SortingDesk´ class.
        * --
@@ -301,10 +265,56 @@ var Main = (function (window, chrome, $, std, SortingDesk, LabelBrowser, Api, un
             setActive(tab);
         } );
       } );
-        
+
       console.info("Initialised Sorting Desk extension");
       console.info("READY");
     } );
-  } );
+
+    $(window).resize(function () { resize_(); } );
+  };
+  
+  var instantiate_ = function (meta) {
+    (sorter = new SortingDesk.Sorter( {
+      container: $('#sd-folder-explorer'),
+      constructors: {
+        createLabelBrowser: function (options) {
+          $('[data-sd-scope="label-browser-header-title"]').html("Loading");
+          $('[data-sd-scope="label-browser-header-content"]')
+            .html("Please wait...");
+
+          return (new LabelBrowser.Browser(
+            $.extend(options, { container: $('#sd-label-browser') } ),
+            HandlerCallbacks.callbacks.browser
+          ) ).on( {
+            initialised: function (container) {
+              $('.sd-label-browser .sd-empty').hide();
+              $('.sd-label-browser .sd-loading').show();
+            },
+            
+            ready: function (count) {
+              $('.sd-label-browser .sd-loading').hide();
+              if(count === 0) $('.sd-label-browser .sd-empty').fadeIn();
+            }
+          } );
+        }
+      },
+      dossierUrl: meta.config.dossierUrl,
+      sortingQueue: {
+        options: {
+          container: $('#sd-queue'),
+          visibleItems: 10,
+          itemsDraggable: false
+        }
+      }
+    }, $.extend(true, Api, HandlerCallbacks.callbacks.sorter ) ) )
+      .on(loading.sorter.events)
+      .initialise();
+
+    setupSortingQueue_(sorter);
+  };
+
+  
+  /* Startup sequence. */
+  $(function () { initialise_(); } );
   
 } )(window, chrome, jQuery, SortingCommon, SortingDesk, LabelBrowser, Api);
