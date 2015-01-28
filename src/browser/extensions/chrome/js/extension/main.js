@@ -289,32 +289,10 @@ var Main = (function (window, chrome, $, std, SortingDesk, LabelBrowser, Api, un
         return false;
       } );
   };
-  
+
   var instantiate_ = function (meta) {
     (sorter = new SortingDesk.Sorter( {
       container: $('#sd-folder-explorer'),
-      constructors: {
-        createLabelBrowser: function (options) {
-          $('[data-sd-scope="label-browser-header-title"]').html("Loading");
-          $('[data-sd-scope="label-browser-header-content"]')
-            .html("Please wait...");
-
-          return (new LabelBrowser.Browser(
-            $.extend(options, { container: $('#sd-label-browser') } ),
-            HandlerCallbacks.callbacks.browser
-          ) ).on( {
-            initialised: function (container) {
-              $('.sd-label-browser .sd-empty').hide();
-              $('.sd-label-browser .sd-loading').show();
-            },
-            
-            ready: function (count) {
-              $('.sd-label-browser .sd-loading').hide();
-              if(count === 0) $('.sd-label-browser .sd-empty').fadeIn();
-            }
-          } );
-        }
-      },
       dossierUrl: meta.config.dossierUrl,
       sortingQueue: {
         options: {
