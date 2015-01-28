@@ -10,13 +10,68 @@
 
 /*jshint laxbreak:true */
 
-var Main = (function (window, chrome, $, std, SortingDesk, LabelBrowser, Api, undefined) {
+var Main = (function (window, chrome, $, std, sq, sd, Api, undefined) {
 
   /* Module-wide variables */
   var nodes = { },
       active = null,
       loading,
       sorter;
+
+
+  /**
+   * @class
+   * */
+  var Item = function(owner, item)
+  {
+    if(!owner.owner.initialised)
+      return;
+
+    sq.Item.call(this, owner, item);
+  };
+
+  Item.prototype = Object.create(sq.Item.prototype);
+
+  Item.prototype.render = function(text, view, less)
+  {
+    var fc = this.content_.fc;
+    var desc = fc.value('meta_clean_visible').trim();
+    desc = desc.replace(/\s+/g, ' ');
+    desc = desc.slice(0, 200);
+    var title = fc.value('title') || (desc.slice(0, 50) + '...');
+    var url = fc.value('meta_url');
+
+    var ntitle = $(
+      '<p style="font-size: 12pt; margin: 0 0 8px 0;">'
+      + '<strong></strong>'
+      + '</p>'
+    );
+    ntitle.find('strong').text(title);
+
+    var ndesc = $('<p style="font-size: 8pt; display: block; margin: 0;" />');
+    ndesc.text(desc + '...');
+
+    var nurl = $(
+      '<p style="margin: 8px 0 0 0; display: block;">'
+      + '<a style="color: #349950;" href="' + url + '">' + url + '</a>'
+      + '</p>'
+    );
+
+    this.content_.text = $('<div style="margin: 0;" />');
+    this.content_.text.append(ntitle);
+    this.content_.text.append(ndesc);
+    this.content_.text.append(nurl);
+
+    if (!std.is_und(this.content_.raw.probability)) {
+      var score = this.content_.raw.probability.toFixed(4);
+      this.content_.text.append($(
+        '<p style="margin: 8px 0 0 0; display: block;">'
+        + 'Score: ' + score
+        + '</p>'
+      ));
+    }
+    return sq.Item.prototype.render.call(this);
+  };
   
 
   /**
@@ -291,14 +346,18 @@ var Main = (function (window, chrome, $, std, SortingDesk, LabelBrowser, Api, un
   };
 
   var instantiate_ = function (meta) {
-    (sorter = new SortingDesk.Sorter( {
+    
+    (sorter = new sd.Sorter( {
       container: $('#sd-folder-explorer'),
       dossierUrl: meta.config.dossierUrl,
       sortingQueue: {
         options: {
           container: $('#sd-queue'),
           visibleItems: 10,
-          itemsDraggable: false
+          itemsDraggable: false,
+          constructors: {
+            Item: Item
+          }
         }
       }
     }, $.extend(true, Api, HandlerCallbacks.callbacks.sorter ) ) )
@@ -323,4 +382,4 @@ var Main = (function (window, chrome, $, std, SortingDesk, LabelBrowser, Api, un
       } );
   } );
   
-} )(window, chrome, jQuery, SortingCommon, SortingDesk, LabelBrowser, Api);
+} )(window, chrome, jQuery, SortingCommon, SortingQueue, SortingDesk, Api);
