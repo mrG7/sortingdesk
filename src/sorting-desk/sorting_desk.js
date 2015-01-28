@@ -333,6 +333,19 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     els.toolbar.actions.rename.click(function () {
       console.info("Not implemented yet");
     } );
+
+    /* Handle item dismissal. */
+    this.owner_.sortingQueue.on('item-dismissed', function (item) {
+      var query_id = api.getQueryContentId();
+
+      if(query_id) {
+        self.doAddLabel_(new (api.getClass('Label'))(
+          item.content_id,
+          query_id,
+          api.getAnnotator(),
+          api.COREF_VALUE_NEGATIVE));
+      }
+    } );
     
     /* Define getters. */
     this.__defineGetter__("id", function () { return this.id_; } );
