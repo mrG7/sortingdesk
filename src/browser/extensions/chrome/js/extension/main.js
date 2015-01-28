@@ -310,6 +310,17 @@ var Main = (function (window, chrome, $, std, SortingDesk, LabelBrowser, Api, un
 
   
   /* Startup sequence. */
-  $(function () { initialise_(); } );
+  $(function () {
+    chrome.runtime.sendMessage(
+      { operation: 'get-extension-window' },
+      function (win) {
+        chrome.windows.getCurrent(function (f) {
+          if(win === null || f.id === win.id)
+            initialise_();
+          else
+            window.location.href = "about:blank";
+        } );
+      } );
+  } );
   
 } )(window, chrome, jQuery, SortingCommon, SortingDesk, LabelBrowser, Api);
