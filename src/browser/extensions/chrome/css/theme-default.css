@@ -721,3 +721,9 @@ A.sd-text-item-title:hover {
   color: #396121;
   font-weight: bold;
 }
+
+.jstree LI.sd-active[aria-selected="true"],
+.jstree LI.sd-active[aria-selected="true"] > A {
+  background-color: #E4F4FA !important;
+  color: #212C61 !important;
+}
