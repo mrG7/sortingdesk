@@ -69,6 +69,7 @@ var Api_ = (function (window, $, CryptoJS, DossierJS) {
       dedupLabelsBySubtopic: dedupLabelsBySubtopic,
       uniqueContentIdsFromLabels: uniqueContentIdsFromLabels,
       setQueryContentId: setQueryContentId,
+      getQueryContentId: getQueryContentId,
       setSearchEngine: setSearchEngine,
       getSearchEngine: getSearchEngine,
       generateContentId: generateContentId,
@@ -217,6 +218,11 @@ var Api_ = (function (window, $, CryptoJS, DossierJS) {
       throw "Invalid query content id";
 
     qitems_.query_content_id = id;
+  };
+
+  var getQueryContentId = function ()
+  {
+    return qitems_.query_content_id;
   };
 
   var setSearchEngine = function(name)
