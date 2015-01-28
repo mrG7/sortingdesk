@@ -130,12 +130,19 @@ var Background = function (window, chrome, $, std, undefined)
       }
     };
 
+    var onGetExtensionWindow_ = function (request, sender, callback)
+    {
+      if(!std.is_fn(callback)) return;
+      callback(window_.extension);
+    };
+
 
     var self = this,
         methods = {
           "read-file": onReadFile_,
           "get-meta": onGetMeta_,
-          "get-image-base64": onGetImageBase64_
+          "get-image-base64": onGetImageBase64_,
+          "get-extension-window": onGetExtensionWindow_
         };
     
     /* Handler of messages originating in content scripts. */
