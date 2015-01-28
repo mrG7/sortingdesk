@@ -1093,35 +1093,36 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   /**
    * @class
    * */
-  var SubfolderNew = function (owner)
+  var SubfolderNew = function (owner, name)
   {
+    var o = owner.owner.owner;
+
     /* Invoke base class constructor. */
     Subfolder.call(
       this, owner,
-      owner.owner.owner.api.foldering.subfolderFromName(owner.data,
-                                                        "<fake>"));
+      o.api.foldering.subfolderFromName(
+        owner.data,
+        name || o.options.folderNewCaption));
   };
 
   SubfolderNew.prototype = Object.create(Subfolder.prototype);
 
   SubfolderNew.prototype.render = function ()
   {
+    var o = this.owner_;
+
     this.id_ = this.tree.create_node(
       this.owner_.node,
       { state: 'open',
-        text: [ '<img src="',
-                std.Url.decode(this.subfolder_.name),
-                '" />' ].join(''),
+        text: this.subfolder_.name,
         type: "subfolder" },
       "last");
 
     if(this.id_ === false)
       throw "Failed to create subfolder";
 
-    var o = this.owner_;
     o.open();
-    this.tree.edit(this.tree.get_node(this.id_),
-                   o.owner.owner.options.folderNewCaption);
+    this.tree.edit(this.node);
   };
 
 
