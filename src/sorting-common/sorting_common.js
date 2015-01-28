@@ -1041,7 +1041,12 @@ var SortingCommon_ = function (window, $) {
    * */
   var PositionSize = function (l, t, w, h)
   {
-    if(arguments.length === 4) this.set(l, t, w, h);
+    if(arguments.length === 1) {
+      if(!is_obj(l))
+        throw "Invalid or no object specified";
+
+      this.set(l.left, l.top, l.width, l.height);
+    } else if(arguments.length === 4) this.set(l, t, w, h);
     else this.set(0, 0, 0, 0);
 
     /* Getters */
@@ -1065,6 +1070,7 @@ var SortingCommon_ = function (window, $) {
     this.__defineSetter__("height", function (h) { this.height_ = h; } );
   };
 
+  /* Interface */
   PositionSize.prototype.set = function (l, t, w, h)
   {
     this.left_ = l;
