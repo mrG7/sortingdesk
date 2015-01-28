@@ -270,7 +270,24 @@ var Main = (function (window, chrome, $, std, SortingDesk, LabelBrowser, Api, un
       console.info("READY");
     } );
 
-    $(window).resize(function () { resize_(); } );
+    $(window)
+      .resize(function () { resize_(); } )
+      .click(function (ev) {
+        ev = ev.originalEvent;
+        
+        if(ev.target.nodeName.toLowerCase() === 'a') {
+          chrome.windows.getLastFocused(function (win) {
+            chrome.tabs.create( {
+              windowId: win.id,
+              url: ev.target.href,
+              active: true } );
+          } );
+            
+          ev.preventDefault();
+        }
+        
+        return false;
+      } );
   };
   
   var instantiate_ = function (meta) {
