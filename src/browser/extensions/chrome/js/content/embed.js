@@ -40,11 +40,13 @@ var ChromeExtensionUi = (function ($, std, undefined) {
       
       if(active && active.length > 0) {
         /* Retrieve image's src and clear active drop. */
-        val = active.get(0).src;
+        active = active.get(0);
+        val = active.src;
         embed_.monitor.clear();
 
         if(val) {
           result.id = result.content = val;
+          result.caption = active.alt || active.title;
           result.type = "image";
 
           console.log("Image selection:", result);
