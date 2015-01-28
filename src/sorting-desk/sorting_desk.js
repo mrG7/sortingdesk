@@ -721,18 +721,6 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       .initialise();
   };
 
-  /* overridable */ ControllerExplorer.prototype.enableBrowser = function ()
-  {
-    this.owner_.nodes.bins.find('.' + Css.icon.browser)
-      .removeClass(Css.disabled);
-  };    
-
-  /* overridable */ ControllerExplorer.prototype.disableBrowser = function ()
-  {
-    this.owner_.nodes.bins.find('.' + Css.icon.browser)
-      .addClass(Css.disabled);
-  };    
-
   ControllerExplorer.prototype.updateActive = function ()
   {
     if(this.active_)
