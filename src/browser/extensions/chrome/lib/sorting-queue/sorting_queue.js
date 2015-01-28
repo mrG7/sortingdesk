@@ -64,16 +64,7 @@ var SortingQueue_ = function (window, $, std) {
       .initialise();
     
     this.constructor_ = new std.Constructor(this.options_.constructors);
-    
-    this.callbacks_ = new Callbacks(
-      $.extend(true, {
-        itemDismissed: function() {},
-        itemSelected: function() {},
-        itemDeselected: function() {},
-        onRequestStart: function() {},
-        onRequestStop: function() {}
-      }, cbs),
-      this.requests_);
+    this.callbacks_ = new Callbacks(cbs, this.requests_);
 
     this.events_ = new std.Events(
       this,

@@ -57,6 +57,17 @@ var SortingCommon_ = function (window, $) {
     };
   };
 
+  var instanceany = function ()
+  {
+    var a = arguments, o = a[0];
+    for(var i = 1, l = a.length; i < l; ++i) {
+      if(o instanceof a[i])
+        return true;
+    }
+
+    return false;
+  };
+  
   var on_exception = function (x)
   {  
     console.error("Exception thrown: " + x,
@@ -1041,7 +1052,12 @@ var SortingCommon_ = function (window, $) {
    * */
   var PositionSize = function (l, t, w, h)
   {
-    if(arguments.length === 4) this.set(l, t, w, h);
+    if(arguments.length === 1) {
+      if(!is_obj(l))
+        throw "Invalid or no object specified";
+
+      this.set(l.left, l.top, l.width, l.height);
+    } else if(arguments.length === 4) this.set(l, t, w, h);
     else this.set(0, 0, 0, 0);
 
     /* Getters */
@@ -1065,6 +1081,7 @@ var SortingCommon_ = function (window, $) {
     this.__defineSetter__("height", function (h) { this.height_ = h; } );
   };
 
+  /* Interface */
   PositionSize.prototype.set = function (l, t, w, h)
   {
     this.left_ = l;
@@ -1099,6 +1116,7 @@ var SortingCommon_ = function (window, $) {
     like_obj: like_obj,
     is_in: is_in,
     chainize: chainize,
+    instanceany: instanceany,
     on_exception: on_exception,
 
     /* Classes */

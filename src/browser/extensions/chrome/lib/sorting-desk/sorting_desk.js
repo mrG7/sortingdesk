@@ -19,55 +19,6 @@
  * */
 var SortingDesk_ = function (window, $, sq, std, Api) {
 
-  var TextItem = function(owner, item) {
-    if (!owner.owner.initialised) {
-      return;
-    }
-    sq.Item.call(this, owner, item);
-  };
-
-  TextItem.prototype = Object.create(sq.Item.prototype);
-
-  TextItem.prototype.render = function(text, view, less) {
-    var fc = this.content_.fc;
-    var desc = fc.value('meta_clean_visible').trim();
-    desc = desc.replace(/\s+/g, ' ');
-    desc = desc.slice(0, 200);
-    var title = fc.value('title') || (desc.slice(0, 50) + '...');
-    var url = fc.value('meta_url');
-
-    var ntitle = $(
-      '<p style="font-size: 12pt; margin: 0 0 8px 0;">'
-      + '<strong></strong>'
-      + '</p>'
-    );
-    ntitle.find('strong').text(title);
-
-    var ndesc = $('<p style="font-size: 8pt; display: block; margin: 0;" />');
-    ndesc.text(desc + '...');
-
-    var nurl = $(
-      '<p style="margin: 8px 0 0 0; display: block;">'
-      + '<a style="color: #349950;" href="' + url + '">' + url + '</a>'
-      + '</p>'
-    );
-
-    this.content_.text = $('<div style="margin: 0;" />');
-    this.content_.text.append(ntitle);
-    this.content_.text.append(ndesc);
-    this.content_.text.append(nurl);
-
-    if (!std.is_und(this.content_.raw.probability)) {
-      var score = this.content_.raw.probability.toFixed(4);
-      this.content_.text.append($(
-        '<p style="margin: 8px 0 0 0; display: block;">'
-        + 'Score: ' + score
-        + '</p>'
-      ));
-    }
-    return sq.Item.prototype.render.call(this);
-  };
-
 
   /**
    * @class
@@ -123,9 +74,6 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
      * } */
     this.sortingQueue_ = new sq.Sorter(
       $.extend(true, this.options_.sortingQueue.options, {
-        constructors: {
-          Item: TextItem
-        },
         loadItemsAtStartup: false /* IMPORTANT: Explicitly deny loading of items
                                    * at startup as this would potentially break
                                    * request-(start|stop) event handlers set up
@@ -187,7 +135,6 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
             addSubfolder: this.find('toolbar-add-subfolder'),
             remove: this.find('toolbar-remove'),
             rename: this.find('toolbar-rename'),
-            browse: this.find('toolbar-browse'),
             refresh: this.find('toolbar-refresh')
           }
         };
@@ -256,7 +203,6 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.id_ = null;
     this.folders_ = [ ];
     this.active_ = null;
-    this.browser_ = null;
     this.refreshing_ = false;
     this.events_ = new std.Events(this, [ 'refresh-begin', 'refresh-end' ] );
     this.creating_ = null;
@@ -324,17 +270,16 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       },
       "dblclick.jstree": function (ev, data) {
         var i = self.getAnyById($(ev.target).closest("li").attr('id'));
-        if(i instanceof Item) {
+        if(i instanceof Subfolder) {
+          if(i.items.length > 0)
+            self.setActive(i.items[0]);
+        } if(i instanceof Item)
           self.setActive(i);
-        }
       },
       "select_node.jstree": function (ev, data) {
         var i = self.getAnyById(data.node.id);
 
-        if(i instanceof Item) {
-          self.tree_.deselect_node(data.node);
-          self.tree_.select_node(data.node.parents[0]);
-        } else if(i === null) {
+        if(i === null) {
           var sel = self.selected_ === null
                 ? self.folders_[0].node
                 : self.selected_.node;
@@ -358,48 +303,15 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       "dragleave": function (ev){self.on_dragging_exit_(ev); return false;},
       "drop": function (ev)
       {
-        var subfolder = self.on_dragging_exit_(ev);
+        var ent = self.on_dragging_exit_(ev);
 
         /* Prevent triggering default handler. */
         ev.originalEvent.preventDefault();
 
-        if(subfolder !== null) {
-          owner.callbacks.invoke("getSelection").done(function (result) {
-            if(!std.is_obj(result)) {
-              console.info("No selection content retrieved");
-              return;
-            }
-            
-            console.log("Got selection content: type=%s",
-                        result.type, result);
-
-            switch(result.type) {
-            case 'image':
-              result.subtopic_id = api.makeRawImageId(
-                api.generateSubtopicId(result.id));
-              break;
-              
-            case 'text':
-              result.subtopic_id = api.makeRawTextId(
-                api.generateSubtopicId(result.id));
-              break;
-              
-            default:
-              throw "Invalid selection type";
-            }
-
-            try {
-              subfolder.add(
-                new api.foldering.Item(
-                  subfolder.data,
-                  { content_id: api.generateContentId(result.href),
-                    subtopic_id: result.subtopic_id } ),
-                result.content);
-            } catch (x) {
-              std.on_exception(x);
-            }
-          } );
-        }
+        if(ent instanceof Folder)
+          self.on_dropped_in_folder_(ev, ent);
+        else if(ent instanceof Subfolder)
+          self.on_dropped_in_subfolder_(ev, ent);
         
         return false;
       }
@@ -421,24 +333,30 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     els.toolbar.actions.rename.click(function () {
       console.info("Not implemented yet");
     } );
-    
-    /* The `LabelBrowser´ component requires a factory method since it needs
-     * options passed in. */
-    this.haveBrowser_ = !owner.constructor.isConstructor('LabelBrowser');
 
+    /* Handle item dismissal. */
+    this.owner_.sortingQueue.on('item-dismissed', function (item) {
+      var query_id = api.getQueryContentId();
+
+      if(query_id) {
+        self.doAddLabel_(new (api.getClass('Label'))(
+          item.content_id,
+          query_id,
+          api.getAnnotator(),
+          api.COREF_VALUE_NEGATIVE));
+      }
+    } );
+    
     /* Define getters. */
     this.__defineGetter__("id", function () { return this.id_; } );
     this.__defineGetter__("name", function () { return this.name_; } );
     this.__defineGetter__("active", function () { return this.active_; } );
     this.__defineGetter__("tree", function () { return this.tree_; } );
     this.__defineGetter__("selected", function () { return this.selected_; } );
+    this.__defineGetter__("api", function () { return this.owner_.api; } );
     
     this.__defineGetter__("node", function () {
       return this.owner_.nodes.explorer;
-    } );
-
-    this.__defineGetter__("haveBrowser", function () {
-      return this.haveBrowser_;
     } );
   };
 
@@ -466,7 +384,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     /* Hide empty notification while loading. */
     this.update_empty_state_(true);
           
-    this.owner_.api.foldering.listFolders()
+    this.api.foldering.listFolders()
       .done(function (coll) {
         coll.forEach(function (f) {
           self.folders_.push(new Folder(self, f));
@@ -496,7 +414,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       throw "Invalid bin descriptor";
 
     /* Extract bin type. */
-    type = this.owner_.api.getSubtopicType(descriptor.subtopic_id);
+    type = this.api.getSubtopicType(descriptor.subtopic_id);
 
     if(!map.hasOwnProperty(type))
       throw "Invalid bin type: " + type;
@@ -515,7 +433,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.reset_tree_();
     
     /* Reset state. */
-    this.id_ = this.folders_ = this.browser_ = null;
+    this.id_ = this.folders_ = null;
     this.refreshing_ = this.events_ = null;
   };
 
@@ -528,22 +446,21 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     };
   };
   
-  ControllerExplorer.prototype.createSubfolder = function (folder)
+  ControllerExplorer.prototype.createSubfolder = function (folder, name)
   {
     this.creating_ = {
       parent: folder,
-      obj: new SubfolderNew(folder)
+      obj: new SubfolderNew(folder, name)
     };
   };
 
   ControllerExplorer.prototype.merge = function (dropped, dragged)
   {
-    var api = this.owner_.api,
-        label = new (api.getClass('Label'))(
+    var label = new (this.api.getClass('Label'))(
           dropped.id,
           dragged.id,
-          api.getAnnotator(),
-          api.COREF_VALUE_POSITIVE,
+          this.api.getAnnotator(),
+          this.api.COREF_VALUE_POSITIVE,
           dropped.data.subtopic_id,
           dragged.data.subtopic_id);
 
@@ -558,17 +475,16 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
   ControllerExplorer.prototype.addLabel = function (item, descriptor)
   {
-    var self = this,
-        api = this.owner_.api;
+    var self = this;
 
     return this.updateFc(descriptor)
       .then(function (fc) {
         /* Create label between snippet/image and item. */
-        var label = new (api.getClass('Label'))(
+        var label = new (self.api.getClass('Label'))(
           item.data.content_id,
           descriptor.content_id,
-          api.getAnnotator(),
-          api.COREF_VALUE_POSITIVE,
+          self.api.getAnnotator(),
+          self.api.COREF_VALUE_POSITIVE,
           item.data.subtopic_id,
           descriptor.subtopic_id);
 
@@ -667,7 +583,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       return;
 
     /* Stop all ongoing request at once. */
-    this.owner.api.getDossierJs().stop('API.search');
+    this.api.getDossierJs().stop('API.search');
 
     /* Invoke API to activate the item. If successful, update UI state and force
      * a redraw of the items container. */
@@ -680,7 +596,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       item.activate();
 
       if(this.owner_.initialised) {
-        this.owner_.api.setQueryContentId(item.data.content_id);
+        this.api.setQueryContentId(item.data.content_id);
         this.owner_.sortingQueue.items.redraw();
       }
     } else {
@@ -694,45 +610,6 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.owner_.events.trigger('active', this.active_);
   };
 
-  ControllerExplorer.prototype.browse = function (bin)
-  {
-    var self = this,
-        opts = this.owner_.options;
-
-    if(!this.haveBrowser_)
-      throw "Label Browser component unavailable";
-    else if(this.browser_)
-      throw "Label Browser already active";
-
-    /* Disable browser icons. */
-    this.disableBrowser();
-
-    (this.browser_ = this.owner_.constructor.instantiate(
-      'LabelBrowser', { api: this.owner_.api, ref_bin: bin } ) )
-      .on( {
-        hide: function () {
-          self.browser_.reset();
-          self.browser_ = null;
-
-          /* Re-enable browser icons. */
-          self.enableBrowser();
-        }
-      } )
-      .initialise();
-  };
-
-  /* overridable */ ControllerExplorer.prototype.enableBrowser = function ()
-  {
-    this.owner_.nodes.bins.find('.' + Css.icon.browser)
-      .removeClass(Css.disabled);
-  };    
-
-  /* overridable */ ControllerExplorer.prototype.disableBrowser = function ()
-  {
-    this.owner_.nodes.bins.find('.' + Css.icon.browser)
-      .addClass(Css.disabled);
-  };    
-
   ControllerExplorer.prototype.updateActive = function ()
   {
     if(this.active_)
@@ -742,11 +619,10 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   ControllerExplorer.prototype.updateFc = function (descriptor,
                                                     exists /* = false */)
   {
-    var self = this,
-        api = this.owner_.api;
+    var self = this;
 
     /* Attempt to retrieve the feature collection for the bin's content id. */
-    return api.getFeatureCollection(descriptor.content_id)
+    return this.api.getFeatureCollection(descriptor.content_id)
       .then(function (fc) {
         console.log("Feature collection GET successful (id=%s)",
                     descriptor.content_id, fc);
@@ -754,7 +630,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
         /* A feature collection was received. No further operations are carried
          * out if `exists´ is true; otherwise its contents are updated. */
         if(!exists) {
-          api.setFeatureCollectionContent(
+          self.api.setFeatureCollectionContent(
             fc, descriptor.subtopic_id, descriptor.content);
 
           return self.doUpdateFc_(descriptor.content_id, fc);
@@ -773,13 +649,13 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
         console.info("Feature collection GET failed: creating new (id=%s)",
                      descriptor.content_id);
-        return api.createFeatureCollection(descriptor.content_id,
-                                           document.documentElement.outerHTML)
-          .done(function(fc) {
+        return self.api.createFeatureCollection(
+          descriptor.content_id,
+          document.documentElement.outerHTML).done(function(fc) {
             console.log('Feature collection created:', fc);
-            api.setFeatureCollectionContent(
+            self.api.setFeatureCollectionContent(
               fc, descriptor.subtopic_id, descriptor.content);
-            api.setFeatureCollectionContent(
+            self.api.setFeatureCollectionContent(
               fc, 'meta_url', window.location.toString());
             return self.doUpdateFc_(descriptor.content_id, fc);
           });
@@ -789,14 +665,14 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   /* Private interface */
   ControllerExplorer.prototype.reset_query_ = function ()
   {
-    this.owner_.api.getDossierJs().stop('API.search');
-    this.owner_.api.setQueryContentId(null);
+    this.api.getDossierJs().stop('API.search');
+    this.api.setQueryContentId(null);
     this.owner_.sortingQueue.items.removeAll(false);
   };
   
   ControllerExplorer.prototype.doUpdateFc_ = function (content_id, fc)
   {
-    return this.owner_.api.putFeatureCollection(content_id, fc)
+    return this.api.putFeatureCollection(content_id, fc)
       .done(function () {
         console.log("Feature collection PUT successful (id=%s)",
                     content_id, fc);
@@ -809,10 +685,15 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
   ControllerExplorer.prototype.doAddLabel_ = function (label)
   {
-    return this.owner_.api.addLabel(label)
+    var self = this;
+    
+    return this.api.addLabel(label)
       .done(function () {
-        console.log("Label ADD successful: '%s' == '%s'",
-                    label.cid1, label.cid2);
+        console.log("Label ADD successful: '%s' %s '%s'",
+                    label.cid1,
+                    label.coref_value === self.api.COREF_VALUE_POSITIVE
+                    ? '==' : '!=',
+                    label.cid2);
       } )
       .fail(function () {
         console.error("Label ADD failed: '%s' ∧ '%s'",
@@ -828,8 +709,6 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     ela.add.toggleClass('disabled', loading);
     ela.addSubfolder.toggleClass(
       'disabled', loading || !(this.selected_ instanceof Folder));
-    ela.browse.toggleClass(
-      'disabled', loading || !(this.selected_ instanceof Subfolder));
     ela.refresh.toggleClass('disabled', loading);
   };
 
@@ -871,8 +750,8 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
     if(el && el.parentNode && el.parentNode.id) {
       var fl = this.getAnyById(el.parentNode.id);
-      
-      if(fl instanceof Subfolder) {
+
+      if(std.instanceany(fl, Folder, Subfolder)) {
         $(el).addClass(Css.droppable.hover);
         return fl;
       }
@@ -890,8 +769,8 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
     if(el && el.parentNode && el.parentNode.id) {
       var fl = this.getAnyById(el.parentNode.id);
-      
-      if(fl instanceof Subfolder) {
+
+      if(std.instanceany(fl, Folder, Subfolder)) {
         $(el).removeClass(Css.droppable.hover);
         return fl;
       }
@@ -900,6 +779,74 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     return null;
   };
 
+  ControllerExplorer.prototype.on_dropped_in_folder_ = function (
+    ev, folder)
+  {
+    var self = this;
+    
+    this.get_selection_().done(function (result) {
+      self.createSubfolder(
+        folder, result.type === 'image'
+          ? (result.caption || result.content.split('/').splice(-1)[0])
+          : result.content);
+    } );
+  };
+  
+  ControllerExplorer.prototype.on_dropped_in_subfolder_ = function (
+    ev, subfolder)
+  {
+    var self = this;
+    
+    this.get_selection_().done(function (result) {
+      try {
+        subfolder.add(
+          new self.api.foldering.Item(
+            subfolder.data,
+            { content_id: self.api.generateContentId(result.href),
+              subtopic_id: result.subtopic_id } ),
+          result.content);
+      } catch (x) {
+        std.on_exception(x);
+      }
+    } );
+  };
+
+  ControllerExplorer.prototype.get_selection_ = function ()
+  {
+    var self = this,
+        deferred = $.Deferred();
+    
+    this.owner_.callbacks.invoke("getSelection").done(function (result) {
+      if(!std.is_obj(result)) {
+        console.info("No selection content retrieved");
+        deferred.reject();
+      }
+      
+      console.log("Got selection content: type=%s",
+                  result.type, result);
+
+      switch(result.type) {
+      case 'image':
+        result.subtopic_id = self.api.makeRawImageId(
+          self.api.generateSubtopicId(result.id));
+        break;
+        
+      case 'text':
+        result.subtopic_id = self.api.makeRawTextId(
+          self.api.generateSubtopicId(result.id));
+        break;
+        
+      default:
+        console.error("Invalid selection type");
+        deferred.reject();
+      }
+
+      deferred.resolve(result);
+    } );
+
+    return deferred.promise();
+  };
+  
 
   /**
    * @class
@@ -1146,35 +1093,36 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   /**
    * @class
    * */
-  var SubfolderNew = function (owner)
+  var SubfolderNew = function (owner, name)
   {
+    var o = owner.owner.owner;
+
     /* Invoke base class constructor. */
     Subfolder.call(
       this, owner,
-      owner.owner.owner.api.foldering.subfolderFromName(owner.data,
-                                                        "<fake>"));
+      o.api.foldering.subfolderFromName(
+        owner.data,
+        name || o.options.folderNewCaption));
   };
 
   SubfolderNew.prototype = Object.create(Subfolder.prototype);
 
   SubfolderNew.prototype.render = function ()
   {
+    var o = this.owner_;
+
     this.id_ = this.tree.create_node(
       this.owner_.node,
       { state: 'open',
-        text: [ '<img src="',
-                std.Url.decode(this.subfolder_.name),
-                '" />' ].join(''),
+        text: this.subfolder_.name,
         type: "subfolder" },
       "last");
 
     if(this.id_ === false)
       throw "Failed to create subfolder";
 
-    var o = this.owner_;
     o.open();
-    this.tree.edit(this.tree.get_node(this.id_),
-                   o.owner.owner.options.folderNewCaption);
+    this.tree.edit(this.node);
   };
 
 
@@ -1358,7 +1306,6 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       hover: 'sd-droppable-hover'
     },
     icon: {
-      browser: 'sd-bin-browser-icon'
     }
   };
   
