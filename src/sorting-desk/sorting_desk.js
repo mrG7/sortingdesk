@@ -353,6 +353,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.__defineGetter__("active", function () { return this.active_; } );
     this.__defineGetter__("tree", function () { return this.tree_; } );
     this.__defineGetter__("selected", function () { return this.selected_; } );
+    this.__defineGetter__("api", function () { return this.owner_.api; } );
     
     this.__defineGetter__("node", function () {
       return this.owner_.nodes.explorer;
@@ -383,7 +384,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     /* Hide empty notification while loading. */
     this.update_empty_state_(true);
           
-    this.owner_.api.foldering.listFolders()
+    this.api.foldering.listFolders()
       .done(function (coll) {
         coll.forEach(function (f) {
           self.folders_.push(new Folder(self, f));
@@ -413,7 +414,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       throw "Invalid bin descriptor";
 
     /* Extract bin type. */
-    type = this.owner_.api.getSubtopicType(descriptor.subtopic_id);
+    type = this.api.getSubtopicType(descriptor.subtopic_id);
 
     if(!map.hasOwnProperty(type))
       throw "Invalid bin type: " + type;
@@ -445,22 +446,21 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     };
   };
   
-  ControllerExplorer.prototype.createSubfolder = function (folder)
+  ControllerExplorer.prototype.createSubfolder = function (folder, name)
   {
     this.creating_ = {
       parent: folder,
-      obj: new SubfolderNew(folder)
+      obj: new SubfolderNew(folder, name)
     };
   };
 
   ControllerExplorer.prototype.merge = function (dropped, dragged)
   {
-    var api = this.owner_.api,
-        label = new (api.getClass('Label'))(
+    var label = new (this.api.getClass('Label'))(
           dropped.id,
           dragged.id,
-          api.getAnnotator(),
-          api.COREF_VALUE_POSITIVE,
+          this.api.getAnnotator(),
+          this.api.COREF_VALUE_POSITIVE,
           dropped.data.subtopic_id,
           dragged.data.subtopic_id);
 
@@ -475,17 +475,16 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
   ControllerExplorer.prototype.addLabel = function (item, descriptor)
   {
-    var self = this,
-        api = this.owner_.api;
+    var self = this;
 
     return this.updateFc(descriptor)
       .then(function (fc) {
         /* Create label between snippet/image and item. */
-        var label = new (api.getClass('Label'))(
+        var label = new (self.api.getClass('Label'))(
           item.data.content_id,
           descriptor.content_id,
-          api.getAnnotator(),
-          api.COREF_VALUE_POSITIVE,
+          self.api.getAnnotator(),
+          self.api.COREF_VALUE_POSITIVE,
           item.data.subtopic_id,
           descriptor.subtopic_id);
 
@@ -584,7 +583,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       return;
 
     /* Stop all ongoing request at once. */
-    this.owner.api.getDossierJs().stop('API.search');
+    this.api.getDossierJs().stop('API.search');
 
     /* Invoke API to activate the item. If successful, update UI state and force
      * a redraw of the items container. */
@@ -597,7 +596,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       item.activate();
 
       if(this.owner_.initialised) {
-        this.owner_.api.setQueryContentId(item.data.content_id);
+        this.api.setQueryContentId(item.data.content_id);
         this.owner_.sortingQueue.items.redraw();
       }
     } else {
@@ -620,11 +619,10 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   ControllerExplorer.prototype.updateFc = function (descriptor,
                                                     exists /* = false */)
   {
-    var self = this,
-        api = this.owner_.api;
+    var self = this;
 
     /* Attempt to retrieve the feature collection for the bin's content id. */
-    return api.getFeatureCollection(descriptor.content_id)
+    return this.api.getFeatureCollection(descriptor.content_id)
       .then(function (fc) {
         console.log("Feature collection GET successful (id=%s)",
                     descriptor.content_id, fc);
@@ -632,7 +630,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
         /* A feature collection was received. No further operations are carried
          * out if `exists´ is true; otherwise its contents are updated. */
         if(!exists) {
-          api.setFeatureCollectionContent(
+          self.api.setFeatureCollectionContent(
             fc, descriptor.subtopic_id, descriptor.content);
 
           return self.doUpdateFc_(descriptor.content_id, fc);
@@ -651,13 +649,13 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
         console.info("Feature collection GET failed: creating new (id=%s)",
                      descriptor.content_id);
-        return api.createFeatureCollection(descriptor.content_id,
-                                           document.documentElement.outerHTML)
-          .done(function(fc) {
+        return self.api.createFeatureCollection(
+          descriptor.content_id,
+          document.documentElement.outerHTML).done(function(fc) {
             console.log('Feature collection created:', fc);
-            api.setFeatureCollectionContent(
+            self.api.setFeatureCollectionContent(
               fc, descriptor.subtopic_id, descriptor.content);
-            api.setFeatureCollectionContent(
+            self.api.setFeatureCollectionContent(
               fc, 'meta_url', window.location.toString());
             return self.doUpdateFc_(descriptor.content_id, fc);
           });
@@ -667,14 +665,14 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   /* Private interface */
   ControllerExplorer.prototype.reset_query_ = function ()
   {
-    this.owner_.api.getDossierJs().stop('API.search');
-    this.owner_.api.setQueryContentId(null);
+    this.api.getDossierJs().stop('API.search');
+    this.api.setQueryContentId(null);
     this.owner_.sortingQueue.items.removeAll(false);
   };
   
   ControllerExplorer.prototype.doUpdateFc_ = function (content_id, fc)
   {
-    return this.owner_.api.putFeatureCollection(content_id, fc)
+    return this.api.putFeatureCollection(content_id, fc)
       .done(function () {
         console.log("Feature collection PUT successful (id=%s)",
                     content_id, fc);
@@ -687,10 +685,15 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
   ControllerExplorer.prototype.doAddLabel_ = function (label)
   {
-    return this.owner_.api.addLabel(label)
+    var self = this;
+    
+    return this.api.addLabel(label)
       .done(function () {
-        console.log("Label ADD successful: '%s' == '%s'",
-                    label.cid1, label.cid2);
+        console.log("Label ADD successful: '%s' %s '%s'",
+                    label.cid1,
+                    label.coref_value === self.api.COREF_VALUE_POSITIVE
+                    ? '==' : '!=',
+                    label.cid2);
       } )
       .fail(function () {
         console.error("Label ADD failed: '%s' ∧ '%s'",
