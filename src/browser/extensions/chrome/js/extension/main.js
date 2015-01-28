@@ -165,21 +165,31 @@ var Main = (function (window, chrome, $, std, SortingDesk, LabelBrowser, Api, un
   {
     if(!std.is_fn(callback))
       throw "Invalid or no callback provided";
-    
-    chrome.tabs.getSelected(windowId, function (info) {
-      chrome.tabs.get(info.id, function (tab) {
-        callback(/^chrome[^:]*:/.test(tab.url) ? null : tab);
-      } );
+    else if(windowId < 0) {
+      callback(null);
+      return;
+    }
+
+    /* TODO: Invoking `query´ produces strange errors. */
+/*     chrome.tabs.query({ windowId: windowId, active: true }, function (tab) { */
+    chrome.tabs.getSelected(windowId, function (tab) {
+      if(tab) {
+        chrome.tabs.get(tab.id, function (tab) {
+          callback(/^chrome[^:]*:/.test(tab.url) ? null : tab);
+        } );
+      } else
+        callback(null);
     } );
-  };  
+  };
 
   var setActive = function (tab)
   {
     active = tab;
     
-    if(active === null)
+    if(!active) {
+      active = null;
       console.log("No active tab currently");
-    else
+    } else
       console.log("Currently active tab: #%d", active.id);      
   };
 
@@ -280,7 +290,7 @@ var Main = (function (window, chrome, $, std, SortingDesk, LabelBrowser, Api, un
        * active. */
       chrome.windows.getLastFocused(function (win) {
         getTabSelectedInWindow(win.id, function (tab) {
-          if(tab !== null)
+          if(tab)
             setActive(tab);
           else
             console.info("No initial active tab");
