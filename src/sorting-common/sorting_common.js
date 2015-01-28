@@ -57,6 +57,17 @@ var SortingCommon_ = function (window, $) {
     };
   };
 
+  var instanceany = function ()
+  {
+    var a = arguments, o = a[0];
+    for(var i = 1, l = a.length; i < l; ++i) {
+      if(o instanceof a[i])
+        return true;
+    }
+
+    return false;
+  };
+  
   var on_exception = function (x)
   {  
     console.error("Exception thrown: " + x,
@@ -1105,6 +1116,7 @@ var SortingCommon_ = function (window, $) {
     like_obj: like_obj,
     is_in: is_in,
     chainize: chainize,
+    instanceany: instanceany,
     on_exception: on_exception,
 
     /* Classes */
