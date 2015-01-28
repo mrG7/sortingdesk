@@ -128,34 +128,25 @@ var Main = (function (window, chrome, $, std, SortingDesk, LabelBrowser, Api, un
    * */
   var BackgroundListener = (function () {
 
+    /* Event handlers */
+
     /* Map message operations to handlers. */
     var methods_ = {
+      /* null */
     };
 
-    /* Interface */
-    
-    /* Require initialisation because the extension may not be active. If that
-     * is the case, it is of no interest to be listening to messages from
-     * background. */
-    var initialise = function () {
-      /* Handle messages whose `operation´ is defined above in `methods_´. */
-      chrome.runtime.onMessage.addListener(
-        function (request, sender, callback) {
-          if(methods_.hasOwnProperty(request.operation)) {
-            console.log("Invoking message handler [type="
-                        + request.operation + "]");
+    /* Handle messages whose `operation´ is defined above in `methods_´. */
+    chrome.runtime.onMessage.addListener(
+      function (request, sender, callback) {
+        if(methods_.hasOwnProperty(request.operation)) {
+          console.log("Invoking message handler [type="
+                      + request.operation + "]");
 
-            /* Invoke handler. */
-            methods_[request.operation].call(window, request, sender, callback);
-          }
+          /* Invoke handler. */
+          methods_[request.operation].call(window, request, sender, callback);
         }
-      );
-    };
-
-    /* Public interface */
-    return {
-      initialise: initialise
-    };
+      }
+    );
     
   } )();
 
