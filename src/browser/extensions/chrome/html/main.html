@@ -28,7 +28,6 @@
   <script src="../lib/sorting-desk/api-live.js"></script>
   <script src="../lib/sorting-desk/sorting_desk.js"></script>
   <!-- Sorting Desk: components -->
-  <script src="../lib/sorting-desk/components/label_browser.js"></script>
   <script src="../js/extension/main.js"></script>
 </head>
 
@@ -58,11 +57,6 @@
           </button>
           <button type="button" class="btn btn-default disabled" data-toggle="tooltip" data-placement="bottom" title="Remove selected folder" data-sd-scope="sorting-desk-toolbar-remove">
             <span class="glyphicon glyphicon-remove"></span>
-        </div>
-        <div class="btn-group btn-group-sm">
-          <button type="button" class="btn btn-default" data-toggle="tooltip" data-placement="left" title="Launch the label browser" data-sd-scope="sorting-desk-toolbar-browse">
-            <span class="glyphicon glyphicon-tags"></span>
-          </button>
         </div>
         <div class="btn-group btn-group-sm">
           <button type="button" class="btn btn-default" data-toggle="tooltip" data-placement="left" title="Refresh folder explorer" data-sd-scope="sorting-desk-toolbar-refresh">
@@ -111,45 +105,6 @@
     </div>
   
     <div class="sd-loading"></div>
-  </div>
-</div>
-
-<!-- Label Browser -->
-<div id="sd-label-browser" class="sd-label-browser sd-container sd-component" data-sd-scope="label-browser-container">
-  <div class="sd-container-inner">
-    <!-- Buttons: window close -->
-    <div class="sd-button-close" data-sd-scope="label-browser-close">X</div>
-
-    <!-- Header: id and content, and toolbar -->
-    <div class="sd-header sd-lb-header" data-sd-scope="label-browser-header">
-      <!-- Toolbar -->
-      <div class="sd-toolbar" data-sd-scope="label-browser-toolbar">
-        <div class="sd-toolbar-button-group">
-          <button class="sd-toolbar-button sd-disabled" data-sd-scope="label-browser-toolbar-list"><span class="sd-glyph sd-glyph-list"></span></button>
-          <button class="sd-toolbar-button sd-disabled" data-sd-scope="label-browser-toolbar-group"><span class="sd-glyph sd-glyph-group"></span></button>
-        </div>
-      </div>
-
-      <!-- Reference bin's id and content -->
-      <div>
-        <h1 class="sd-header-title sd-lb-header-title" data-sd-scope="label-browser-header-title"></h1>
-        <div class="sd-lb-header-content" data-sd-scope="label-browser-header-content"></div>
-      </div>
-    </div>
-
-    <!-- Content container -->
-    <div class="sd-container-view-outer">
-      <div class="sd-container-view sd-lb-view" data-sd-scope="label-browser-view">
-        <table>
-          <tr>
-            <th>Source</th>
-            <th>Content</th>
-          </tr>
-        </table>
-      </div>
-      <div class="sd-loading sd-lb-loading"></div>
-      <div class="sd-empty sd-lb-empty">No feature collections retrieved</div>
-    </div>
   </div>
 </div>
 </body>

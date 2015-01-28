@@ -169,8 +169,6 @@ var Main = (function (window, chrome, $, std, sq, sd, Api, undefined) {
         sorter: {
           imageToBase64: imageToBase64_,
           getSelection: getSelection_
-        },
-        browser: {
         }
       }
     };

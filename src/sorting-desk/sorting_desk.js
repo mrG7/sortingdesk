@@ -135,7 +135,6 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
             addSubfolder: this.find('toolbar-add-subfolder'),
             remove: this.find('toolbar-remove'),
             rename: this.find('toolbar-rename'),
-            browse: this.find('toolbar-browse'),
             refresh: this.find('toolbar-refresh')
           }
         };
@@ -204,7 +203,6 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.id_ = null;
     this.folders_ = [ ];
     this.active_ = null;
-    this.browser_ = null;
     this.refreshing_ = false;
     this.events_ = new std.Events(this, [ 'refresh-begin', 'refresh-end' ] );
     this.creating_ = null;
@@ -367,10 +365,6 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       console.info("Not implemented yet");
     } );
     
-    /* The `LabelBrowser´ component requires a factory method since it needs
-     * options passed in. */
-    this.haveBrowser_ = !owner.constructor.isConstructor('LabelBrowser');
-
     /* Define getters. */
     this.__defineGetter__("id", function () { return this.id_; } );
     this.__defineGetter__("name", function () { return this.name_; } );
@@ -380,10 +374,6 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     
     this.__defineGetter__("node", function () {
       return this.owner_.nodes.explorer;
-    } );
-
-    this.__defineGetter__("haveBrowser", function () {
-      return this.haveBrowser_;
     } );
   };
 
@@ -460,7 +450,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.reset_tree_();
     
     /* Reset state. */
-    this.id_ = this.folders_ = this.browser_ = null;
+    this.id_ = this.folders_ = null;
     this.refreshing_ = this.events_ = null;
   };
 
@@ -639,33 +629,6 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.owner_.events.trigger('active', this.active_);
   };
 
-  ControllerExplorer.prototype.browse = function (bin)
-  {
-    var self = this,
-        opts = this.owner_.options;
-
-    if(!this.haveBrowser_)
-      throw "Label Browser component unavailable";
-    else if(this.browser_)
-      throw "Label Browser already active";
-
-    /* Disable browser icons. */
-    this.disableBrowser();
-
-    (this.browser_ = this.owner_.constructor.instantiate(
-      'LabelBrowser', { api: this.owner_.api, ref_bin: bin } ) )
-      .on( {
-        hide: function () {
-          self.browser_.reset();
-          self.browser_ = null;
-
-          /* Re-enable browser icons. */
-          self.enableBrowser();
-        }
-      } )
-      .initialise();
-  };
-
   ControllerExplorer.prototype.updateActive = function ()
   {
     if(this.active_)
@@ -761,8 +724,6 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     ela.add.toggleClass('disabled', loading);
     ela.addSubfolder.toggleClass(
       'disabled', loading || !(this.selected_ instanceof Folder));
-    ela.browse.toggleClass(
-      'disabled', loading || !(this.selected_ instanceof Subfolder));
     ela.refresh.toggleClass('disabled', loading);
   };
 
@@ -1291,7 +1252,6 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       hover: 'sd-droppable-hover'
     },
     icon: {
-      browser: 'sd-bin-browser-icon'
     }
   };
   
