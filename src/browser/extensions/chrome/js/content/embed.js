@@ -190,12 +190,9 @@ var ChromeExtensionUi = (function ($, std, undefined) {
     /* Do not proceed with UI initialisation if extension not currently enabled,
      * current tab not active or current page's URL is secure (using HTTPS) and
      * extension is set to not be activated on secure pages. */
-    if(!result.config.active || !result.tab.active || !window.location.href
-       || (/^https:\/\//.test(window.location.href)
-           && !result.config.activateHttps))
-    {
+    if(!result.config.active || !result.tab.active || !window.location.href)
       console.info("Skipping activation: inactive or unsupported");
-    } else
+    else
       embed_ = new Embed(result);
   } );
 
