@@ -301,48 +301,13 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       "dragleave": function (ev){self.on_dragging_exit_(ev); return false;},
       "drop": function (ev)
       {
-        var subfolder = self.on_dragging_exit_(ev);
+        var ent = self.on_dragging_exit_(ev);
 
         /* Prevent triggering default handler. */
         ev.originalEvent.preventDefault();
 
-        if(subfolder !== null) {
-          owner.callbacks.invoke("getSelection").done(function (result) {
-            if(!std.is_obj(result)) {
-              console.info("No selection content retrieved");
-              return;
-            }
-            
-            console.log("Got selection content: type=%s",
-                        result.type, result);
-
-            switch(result.type) {
-            case 'image':
-              result.subtopic_id = api.makeRawImageId(
-                api.generateSubtopicId(result.id));
-              break;
-              
-            case 'text':
-              result.subtopic_id = api.makeRawTextId(
-                api.generateSubtopicId(result.id));
-              break;
-              
-            default:
-              throw "Invalid selection type";
-            }
-
-            try {
-              subfolder.add(
-                new api.foldering.Item(
-                  subfolder.data,
-                  { content_id: api.generateContentId(result.href),
-                    subtopic_id: result.subtopic_id } ),
-                result.content);
-            } catch (x) {
-              std.on_exception(x);
-            }
-          } );
-        }
+        if(ent instanceof Subfolder)
+          self.on_dropped_in_subfolder_(ev, ent);
         
         return false;
       }
@@ -792,6 +757,48 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     }
 
     return null;
+  };
+
+  ControllerExplorer.prototype.on_dropped_in_subfolder_ = function (
+    ev, subfolder)
+  {
+    var api = this.owner_.api;
+
+    this.owner_.callbacks.invoke("getSelection").done(function (result) {
+      if(!std.is_obj(result)) {
+        console.info("No selection content retrieved");
+        return;
+      }
+      
+      console.log("Got selection content: type=%s",
+                  result.type, result);
+
+      switch(result.type) {
+      case 'image':
+        result.subtopic_id = api.makeRawImageId(
+          api.generateSubtopicId(result.id));
+        break;
+        
+      case 'text':
+        result.subtopic_id = api.makeRawTextId(
+          api.generateSubtopicId(result.id));
+        break;
+        
+      default:
+        throw "Invalid selection type";
+      }
+
+      try {
+        subfolder.add(
+          new api.foldering.Item(
+            subfolder.data,
+            { content_id: api.generateContentId(result.href),
+              subtopic_id: result.subtopic_id } ),
+          result.content);
+      } catch (x) {
+        std.on_exception(x);
+      }
+    } );
   };
 
 
