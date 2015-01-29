@@ -339,7 +339,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       var query_id = api.getQueryContentId();
 
       if(query_id) {
-        self.doAddLabel_(new (api.getClass('Label'))(
+        self.do_add_label_(new (api.getClass('Label'))(
           item.content_id,
           query_id,
           api.getAnnotator(),
@@ -470,7 +470,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.removeAt(this.indexOf(dragged));
     this.owner_.save();
 
-    return this.doAddLabel_(label);
+    return this.do_add_label_(label);
   };
 
   ControllerExplorer.prototype.addLabel = function (item, descriptor)
@@ -488,7 +488,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
           item.data.subtopic_id,
           descriptor.subtopic_id);
 
-        return self.doAddLabel_(label);
+        return self.do_add_label_(label);
       },
       function () {
         console.error("Unable to add label between '%s' and '%s': "
@@ -633,7 +633,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
           self.api.setFeatureCollectionContent(
             fc, descriptor.subtopic_id, descriptor.content);
 
-          return self.doUpdateFc_(descriptor.content_id, fc);
+          return self.do_update_fc_(descriptor.content_id, fc);
         }
 
         return fc;
@@ -657,7 +657,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
               fc, descriptor.subtopic_id, descriptor.content);
             self.api.setFeatureCollectionContent(
               fc, 'meta_url', window.location.toString());
-            return self.doUpdateFc_(descriptor.content_id, fc);
+            return self.do_update_fc_(descriptor.content_id, fc);
           });
       } );
   };
@@ -670,7 +670,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.owner_.sortingQueue.items.removeAll(false);
   };
   
-  ControllerExplorer.prototype.doUpdateFc_ = function (content_id, fc)
+  ControllerExplorer.prototype.do_update_fc_ = function (content_id, fc)
   {
     return this.api.putFeatureCollection(content_id, fc)
       .done(function () {
@@ -683,7 +683,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       } );
   };
 
-  ControllerExplorer.prototype.doAddLabel_ = function (label)
+  ControllerExplorer.prototype.do_add_label_ = function (label)
   {
     var self = this;
     
