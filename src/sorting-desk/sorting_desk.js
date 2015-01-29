@@ -1033,7 +1033,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       throw "Invalid or no descriptor specified";
 
     /* First create `Api.Item´ instance after generating a valid content_id, and
-     then create and contain our UI representation of * an item.*/
+     then create and contain our UI representation of an item.*/
     descriptor.content_id = this.api.generateContentId(descriptor.href);
     item = new this.api.foldering.Item(this.data, descriptor);
 
