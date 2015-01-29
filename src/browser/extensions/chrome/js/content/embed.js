@@ -37,7 +37,8 @@ var ChromeExtensionUi = (function ($, std, undefined) {
       /* We can't yet generate a content_id so we just attached the page's
        * URL for now. */
       result.href = window.location.href;
-      
+      result.document = window.document.documentElement.outerHTML;
+
       if(active && active.length > 0) {
         /* Retrieve image's src and clear active drop. */
         active = active.get(0);
