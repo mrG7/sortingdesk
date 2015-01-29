@@ -34,6 +34,7 @@ var Api_ = (function (window, $, CryptoJS, DossierJS) {
 
     qitems_ = new DossierJS.SortingQueueItems(
       api_, 'similar', '', annotator_);
+    qitems_.limit = 50;
     DossierJS.SortingQueueItems.prototype._itemDismissed = function(cobj) {
       console.log('Adding a negative label between ' + cobj.content_id
                   + ' and ...');
@@ -345,7 +346,7 @@ var Api_ = (function (window, $, CryptoJS, DossierJS) {
    * @namespace
    * */
   var foldering = function () {
-    
+
     /* Interface: functions */
     var listFolders = function ()
     {
@@ -424,9 +425,9 @@ var Api_ = (function (window, $, CryptoJS, DossierJS) {
       /* Classes */
       Item: Item
     };
-    
+
   };
-  
+
 
   /* Private interface */
   var _opt_arg_good = function (a)
