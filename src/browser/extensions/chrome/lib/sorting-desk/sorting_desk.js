@@ -339,7 +339,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       var query_id = api.getQueryContentId();
 
       if(query_id) {
-        self.doAddLabel_(new (api.getClass('Label'))(
+        self.do_add_label_(new (api.getClass('Label'))(
           item.content_id,
           query_id,
           api.getAnnotator(),
@@ -470,7 +470,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.removeAt(this.indexOf(dragged));
     this.owner_.save();
 
-    return this.doAddLabel_(label);
+    return this.do_add_label_(label);
   };
 
   ControllerExplorer.prototype.addLabel = function (item, descriptor)
@@ -488,7 +488,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
           item.data.subtopic_id,
           descriptor.subtopic_id);
 
-        return self.doAddLabel_(label);
+        return self.do_add_label_(label);
       },
       function () {
         console.error("Unable to add label between '%s' and '%s': "
@@ -633,7 +633,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
           self.api.setFeatureCollectionContent(
             fc, descriptor.subtopic_id, descriptor.content);
 
-          return self.doUpdateFc_(descriptor.content_id, fc);
+          return self.do_update_fc_(descriptor.content_id, fc);
         }
 
         return fc;
@@ -651,13 +651,13 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
                      descriptor.content_id);
         return self.api.createFeatureCollection(
           descriptor.content_id,
-          document.documentElement.outerHTML).done(function(fc) {
+          descriptor.document).done(function(fc) {
             console.log('Feature collection created:', fc);
             self.api.setFeatureCollectionContent(
               fc, descriptor.subtopic_id, descriptor.content);
             self.api.setFeatureCollectionContent(
               fc, 'meta_url', window.location.toString());
-            return self.doUpdateFc_(descriptor.content_id, fc);
+            return self.do_update_fc_(descriptor.content_id, fc);
           });
       } );
   };
@@ -670,7 +670,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.owner_.sortingQueue.items.removeAll(false);
   };
   
-  ControllerExplorer.prototype.doUpdateFc_ = function (content_id, fc)
+  ControllerExplorer.prototype.do_update_fc_ = function (content_id, fc)
   {
     return this.api.putFeatureCollection(content_id, fc)
       .done(function () {
@@ -683,7 +683,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       } );
   };
 
-  ControllerExplorer.prototype.doAddLabel_ = function (label)
+  ControllerExplorer.prototype.do_add_label_ = function (label)
   {
     var self = this;
     
@@ -799,12 +799,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     
     this.get_selection_().done(function (result) {
       try {
-        subfolder.add(
-          new self.api.foldering.Item(
-            subfolder.data,
-            { content_id: self.api.generateContentId(result.href),
-              subtopic_id: result.subtopic_id } ),
-          result.content);
+        subfolder.add(result);
       } catch (x) {
         std.on_exception(x);
       }
@@ -1029,13 +1024,22 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.tree.open_node(this.node);
   };
 
-  Subfolder.prototype.add = function (item, content)
+  Subfolder.prototype.add = function (descriptor)
   {
     var self = this,
-        api = this.api,
-        obj;
-    
-    obj = Item.construct(api, this, item, content);
+        item, obj;
+
+    if(!std.is_obj(descriptor))
+      throw "Invalid or no descriptor specified";
+
+    /* First create `Api.Item´ instance after generating a valid content_id, and
+     then create and contain our UI representation of an item.*/
+    descriptor.content_id = this.api.generateContentId(descriptor.href);
+    item = new this.api.foldering.Item(this.data, descriptor);
+
+    /* Pass in `descriptor.content´ because we don't want it to retrieve the
+     * item's feature collection; it doesn't exist yet. */
+    obj = Item.construct(this.api, this, item, descriptor.content);
     this.items_.push(obj);
 
     /* Add item to subfolder in persistent storage. */
@@ -1050,7 +1054,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       } );
 
     /* Create or update feature collection. */
-    this.controller.updateFc(obj.data);
+    this.controller.updateFc(descriptor, false);
 
     /* Activate item if none is currently active. */
     obj.on({ 'ready': function () {
@@ -1170,7 +1174,9 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
           
           self.events_.trigger('ready');
         };
-
+    
+    /* Retrieve item's subtopic content from feature collection if `content´ was
+     * not specified. */
     if(!content) {
       this.owner_.loading(true);
       
