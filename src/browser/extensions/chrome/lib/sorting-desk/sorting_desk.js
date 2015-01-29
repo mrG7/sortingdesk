@@ -260,7 +260,9 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
             f = new api.foldering.subfolderFromName(
               self.creating_.parent.data,
               data.text);
-            self.creating_.parent.add(f);
+            f = self.creating_.parent.add(f);
+            if(self.creating_.descriptor)
+              f.add(self.creating_.descriptor);
           }
         }
 
@@ -446,11 +448,13 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     };
   };
 
-  ControllerExplorer.prototype.createSubfolder = function (folder, name)
+  ControllerExplorer.prototype.createSubfolder = function (
+    folder, name, descriptor)
   {
     this.creating_ = {
       parent: folder,
-      obj: new SubfolderNew(folder, name)
+      obj: new SubfolderNew(folder, name),
+      descriptor: descriptor
     };
   };
 
@@ -788,7 +792,8 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       self.createSubfolder(
         folder, result.type === 'image'
           ? (result.caption || result.content.split('/').splice(-1)[0])
-          : result.content);
+          : result.content,
+        result);
     } );
   };
 
@@ -858,7 +863,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.__defineGetter__('tree', function () { return owner.tree; } );
 
     this.__defineGetter__(
-      'node', function () { return owner.tree.get_node(this.id_); } );
+      'node', function () { return owner.tree.get_node(this.id_, true); } );
 
     this.__defineGetter__('subfolders',
                           function () { return this.subfolders_; } );
@@ -915,8 +920,12 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
   Folder.prototype.add = function (subfolder)
   {
-    this.subfolders_.push(new Subfolder(this, subfolder));
+    var sf = new Subfolder(this, subfolder);
+
+    this.subfolders_.push(sf);
     this.owner.updateActive();
+
+    return sf;
   };
 
 
@@ -942,6 +951,8 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
     this.tree.edit(this.tree.get_node(this.id_),
                    this.owner_.owner.options.folderNewCaption);
+    
+    this.node.get(0).scrollIntoView();
   };
 
 
@@ -1127,6 +1138,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
     o.open();
     this.tree.edit(this.node);
+    this.node.get(0).scrollIntoView();
   };
 
 
