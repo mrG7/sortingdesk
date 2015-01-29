@@ -48,7 +48,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.events_ = new std.Events(
       this,
       [ 'request-begin', 'request-end', 'active' ]);
-    
+
     this.constructor_ = new std.Constructor(this.options_.constructors);
 
     /* We need to instantiate `SortingQueue´ *now* because it is a dependency;
@@ -95,7 +95,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     api_: null,
     sortingQueue_: null,
     explorer_: null,
-    
+
     /* Getters */
     get sortingQueue () { return this.sortingQueue_; },
     get initialised ()  { return this.initialised_; },
@@ -117,7 +117,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       var self = this,
           finder = new std.NodeFinder('sorting-desk', this.options_.container),
           els;
-      
+
       /* Find nodes. */
       els = this.nodes_ = {
         container: finder.root,
@@ -241,7 +241,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
         if(data.text !== owner.options.folderNewCaption) {
           var f;
-          
+
           if(self.creating_.parent === null) {
             f = new Folder(self, api.foldering.folderFromName(data.text));
             self.folders_.push(f);
@@ -263,7 +263,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
             self.creating_.parent.add(f);
           }
         }
-        
+
         self.creating_.obj.reset();
         self.creating_ = null;
         self.update_empty_state_();
@@ -283,7 +283,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
           var sel = self.selected_ === null
                 ? self.folders_[0].node
                 : self.selected_.node;
-          
+
           self.tree_.deselect_node(data.node);
           if(sel) self.tree_.select_node(sel);
 
@@ -292,7 +292,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
           self.selected_ = i;
           console.log("Current selected node: ", self.selected_);
         }
-        
+
         self.update_toolbar_();
       },
       "after_open.jstree": function (ev) {
@@ -312,7 +312,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
           self.on_dropped_in_folder_(ev, ent);
         else if(ent instanceof Subfolder)
           self.on_dropped_in_subfolder_(ev, ent);
-        
+
         return false;
       }
     } );
@@ -346,7 +346,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
           api.COREF_VALUE_NEGATIVE));
       }
     } );
-    
+
     /* Define getters. */
     this.__defineGetter__("id", function () { return this.id_; } );
     this.__defineGetter__("name", function () { return this.name_; } );
@@ -354,7 +354,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.__defineGetter__("tree", function () { return this.tree_; } );
     this.__defineGetter__("selected", function () { return this.selected_; } );
     this.__defineGetter__("api", function () { return this.owner_.api; } );
-    
+
     this.__defineGetter__("node", function () {
       return this.owner_.nodes.explorer;
     } );
@@ -366,7 +366,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   {
     this.refresh();
   };
-  
+
   ControllerExplorer.prototype.refresh = function ()
   {
     var self = this;
@@ -383,7 +383,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
     /* Hide empty notification while loading. */
     this.update_empty_state_(true);
-          
+
     this.api.foldering.listFolders()
       .done(function (coll) {
         coll.forEach(function (f) {
@@ -399,7 +399,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
           self.tree_.select_node(self.folders_[0].id);
         else
           self.update_toolbar_();
-        
+
         console.log("Loaded folders:", self.folders_);
       } );
   };
@@ -431,7 +431,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     /* Reset bin spawner controller and remove all children nodes inside the
      * bins HTML container. */
     this.reset_tree_();
-    
+
     /* Reset state. */
     this.id_ = this.folders_ = null;
     this.refreshing_ = this.events_ = null;
@@ -445,7 +445,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       obj: new FolderNew(this)
     };
   };
-  
+
   ControllerExplorer.prototype.createSubfolder = function (folder, name)
   {
     this.creating_ = {
@@ -661,7 +661,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
           });
       } );
   };
-  
+
   /* Private interface */
   ControllerExplorer.prototype.reset_query_ = function ()
   {
@@ -669,7 +669,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.api.setQueryContentId(null);
     this.owner_.sortingQueue.items.removeAll(false);
   };
-  
+
   ControllerExplorer.prototype.do_update_fc_ = function (content_id, fc)
   {
     return this.api.putFeatureCollection(content_id, fc)
@@ -686,7 +686,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   ControllerExplorer.prototype.do_add_label_ = function (label)
   {
     var self = this;
-    
+
     return this.api.addLabel(label)
       .done(function () {
         console.log("Label ADD successful: '%s' %s '%s'",
@@ -700,7 +700,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
                       label.cid1, label.cid2);
       } );
   };
-  
+
   ControllerExplorer.prototype.update_toolbar_ = function (loading)
   {
     var ela = this.owner_.nodes.toolbar.actions;
@@ -715,7 +715,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   ControllerExplorer.prototype.update_empty_state_ = function (hide)
   {
     var o = this.owner_;
-    
+
     o.nodes.empty.stop();
 
     if(hide === true)
@@ -756,7 +756,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
         return fl;
       }
     }
-    
+
     return null;
   };
 
@@ -783,7 +783,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     ev, folder)
   {
     var self = this;
-    
+
     this.get_selection_().done(function (result) {
       self.createSubfolder(
         folder, result.type === 'image'
@@ -791,12 +791,12 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
           : result.content);
     } );
   };
-  
+
   ControllerExplorer.prototype.on_dropped_in_subfolder_ = function (
     ev, subfolder)
   {
     var self = this;
-    
+
     this.get_selection_().done(function (result) {
       try {
         subfolder.add(result);
@@ -810,13 +810,13 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   {
     var self = this,
         deferred = $.Deferred();
-    
+
     this.owner_.callbacks.invoke("getSelection").done(function (result) {
       if(!std.is_obj(result)) {
         console.info("No selection content retrieved");
         deferred.reject();
       }
-      
+
       console.log("Got selection content: type=%s",
                   result.type, result);
 
@@ -825,12 +825,12 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
         result.subtopic_id = self.api.makeRawImageId(
           self.api.generateSubtopicId(result.id));
         break;
-        
+
       case 'text':
         result.subtopic_id = self.api.makeRawTextId(
           self.api.generateSubtopicId(result.id));
         break;
-        
+
       default:
         console.error("Invalid selection type");
         deferred.reject();
@@ -841,7 +841,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
     return deferred.promise();
   };
-  
+
 
   /**
    * @class
@@ -850,16 +850,16 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   {
     /* Invoke base class constructor. */
     std.Drawable.call(this, owner);
-    
+
     /* Getters */
     this.__defineGetter__('id', function () { return this.id_; } );
     this.__defineGetter__('data', function () { return this.folder_; } );
     this.__defineGetter__('api', function () { return owner.owner.api; } );
     this.__defineGetter__('tree', function () { return owner.tree; } );
-    
+
     this.__defineGetter__(
       'node', function () { return owner.tree.get_node(this.id_); } );
-    
+
     this.__defineGetter__('subfolders',
                           function () { return this.subfolders_; } );
 
@@ -883,7 +883,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
           } );
         } );
     }
-    
+
     /* Now render. */
     this.render();
   };
@@ -912,7 +912,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   {
     this.tree.open_node(this.node);
   };
-  
+
   Folder.prototype.add = function (subfolder)
   {
     this.subfolders_.push(new Subfolder(this, subfolder));
@@ -939,7 +939,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
     if(this.id_ === false)
       throw "Failed to create folder";
-    
+
     this.tree.edit(this.tree.get_node(this.id_),
                    this.owner_.owner.options.folderNewCaption);
   };
@@ -952,17 +952,17 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   {
     /* Invoke base class constructor. */
     std.Drawable.call(this, owner);
-    
+
     /* Getters */
     this.__defineGetter__('id', function () { return this.id_; } );
     this.__defineGetter__('data', function () { return this.subfolder_; } );
     this.__defineGetter__('items', function () { return this.items_; } );
     this.__defineGetter__('controller',function () {return this.owner_.owner;});
     this.__defineGetter__('tree', function () { return this.controller.tree; });
-    
+
     this.__defineGetter__(
       'api', function () { return this.controller.owner.api; } );
-    
+
     this.__defineGetter__('node', function () {
       return this.controller.tree.get_node(this.id_, true); } );
 
@@ -989,7 +989,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
           } );
         } );
     }
-    
+
     this.render();
   };
 
@@ -1137,7 +1137,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   {
     /* Invoke base class constructor. */
     std.Drawable.call(this, owner);
-    
+
     /* Getters */
     this.__defineGetter__('id', function () { return this.id_; } );
     this.__defineGetter__('data', function () { return this.item_; } );
@@ -1146,10 +1146,10 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.__defineGetter__('controller',function () {
       return this.owner_.controller; });
     this.__defineGetter__('tree', function () { return this.controller.tree; });
-    
+
     this.__defineGetter__(
       'api', function () { return this.controller.owner.api; } );
-    
+
     this.__defineGetter__('node', function () {
       return this.controller.tree.get_node(this.id_, true); } );
 
@@ -1171,15 +1171,15 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
             self.controller.setActive(self);
           else
             self.controller.updateActive();
-          
+
           self.events_.trigger('ready');
         };
-    
+
     /* Retrieve item's subtopic content from feature collection if `content´ was
      * not specified. */
     if(!content) {
       this.owner_.loading(true);
-      
+
       this.api.getFeatureCollection(item.content_id)
         .done(function (fc) {
           if(self.onGotFeatureCollection(fc))
@@ -1206,10 +1206,10 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     case 'image': return new ItemImage(subfolder, item, content);
     case 'text':  return new ItemText (subfolder, item, content);
     }
-    
+
     throw "Invalid item type: " + api.getSubtopicType(item.subtopic_id);
   };
-  
+
   /* Interface */
   Item.prototype = Object.create(std.Drawable.prototype);
 
@@ -1222,7 +1222,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   /* overridable */ Item.prototype.onGotFeatureCollection = function (fc)
   {
     var remove;
-    
+
     if(!fc) remove = true;
     else {
       this.item_.content = fc.feature(this.item_.subtopic_id);
@@ -1230,7 +1230,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     }
 
     this.owner_.loading(false);
-    
+
     if(remove) {
       console.warn("Item's feature collection or content could not be retrieved: id=%s",
                    this.item_.subtopic_id);
@@ -1250,8 +1250,8 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   {
     this.node.removeClass(Css.active);
   };
-  
-  
+
+
   /**
    * @class
    * */
@@ -1276,7 +1276,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.owner_.open();
   };
 
-  
+
   /**
    * @class
    * */
@@ -1287,7 +1287,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   };
 
   ItemImage.prototype = Object.create(Item.prototype);
-  
+
   ItemImage.prototype.render = function ()
   {
     this.id_ = this.tree.create_node(
@@ -1314,8 +1314,8 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     icon: {
     }
   };
-  
-  
+
+
   /* Default options */
   var defaults_ = {
     delays: {                   /* In milliseconds.     */
