@@ -392,7 +392,6 @@ var Api_ = (function (window, $, CryptoJS, DossierJS) {
 
     var addItem = function (subfolder, item)
     {
-      console.log("adding item", item);
       return api_.addSubfolderItem(subfolder, item.content_id,item.subtopic_id);
     };
 
