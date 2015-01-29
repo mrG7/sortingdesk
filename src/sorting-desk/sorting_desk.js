@@ -651,7 +651,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
                      descriptor.content_id);
         return self.api.createFeatureCollection(
           descriptor.content_id,
-          document.documentElement.outerHTML).done(function(fc) {
+          descriptor.document).done(function(fc) {
             console.log('Feature collection created:', fc);
             self.api.setFeatureCollectionContent(
               fc, descriptor.subtopic_id, descriptor.content);
@@ -799,12 +799,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     
     this.get_selection_().done(function (result) {
       try {
-        subfolder.add(
-          new self.api.foldering.Item(
-            subfolder.data,
-            { content_id: self.api.generateContentId(result.href),
-              subtopic_id: result.subtopic_id } ),
-          result.content);
+        subfolder.add(result);
       } catch (x) {
         std.on_exception(x);
       }
@@ -1029,13 +1024,22 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.tree.open_node(this.node);
   };
 
-  Subfolder.prototype.add = function (item, content)
+  Subfolder.prototype.add = function (descriptor)
   {
     var self = this,
-        api = this.api,
-        obj;
-    
-    obj = Item.construct(api, this, item, content);
+        item, obj;
+
+    if(!std.is_obj(descriptor))
+      throw "Invalid or no descriptor specified";
+
+    /* First create `Api.Item´ instance after generating a valid content_id, and
+     then create and contain our UI representation of * an item.*/
+    descriptor.content_id = this.api.generateContentId(descriptor.href);
+    item = new this.api.foldering.Item(this.data, descriptor);
+
+    /* Pass in `descriptor.content´ because we don't want it to retrieve the
+     * item's feature collection; it doesn't exist yet. */
+    obj = Item.construct(this.api, this, item, descriptor.content);
     this.items_.push(obj);
 
     /* Add item to subfolder in persistent storage. */
@@ -1050,7 +1054,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       } );
 
     /* Create or update feature collection. */
-    this.controller.updateFc(obj.data);
+    this.controller.updateFc(descriptor, false);
 
     /* Activate item if none is currently active. */
     obj.on({ 'ready': function () {
@@ -1170,7 +1174,9 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
           
           self.events_.trigger('ready');
         };
-
+    
+    /* Retrieve item's subtopic content from feature collection if `content´ was
+     * not specified. */
     if(!content) {
       this.owner_.loading(true);
       
