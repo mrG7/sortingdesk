@@ -656,7 +656,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
             self.api.setFeatureCollectionContent(
               fc, descriptor.subtopic_id, descriptor.content);
             self.api.setFeatureCollectionContent(
-              fc, 'meta_url', window.location.toString());
+              fc, 'meta_url', descriptor.href.toString());
             return self.do_update_fc_(descriptor.content_id, fc);
           });
       } );
