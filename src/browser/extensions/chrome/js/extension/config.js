@@ -12,7 +12,8 @@
 
 var Config = (function (window, chrome, $, std, undefined) {
   var defaults_ = {
-    dossierUrl: 'http://54.174.195.250:8080',
+    /* dossierUrl: 'http://54.174.195.250:8080', */
+    dossierUrl: 'http://10.3.2.42:9090',
     active: true,
     startPosition: 0
   };
