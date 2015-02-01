@@ -85,6 +85,8 @@ In =onDropSpecial=.
 **** TODO Allow container to be moved to either side of the page
 Attempt mechanism that doesn't show container over the page but alongside it instead.
 
+**** TODO Destroy extension window when last browser window destroyed
+
 ** API
 *** All
 **** TODO Add timeout to AJAX calls
