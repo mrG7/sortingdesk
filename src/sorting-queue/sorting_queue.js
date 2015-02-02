@@ -444,7 +444,7 @@ var SortingQueue_ = function (window, $, std) {
 
     this.handlers_ = new std.Events([ ]);
     this.droppable_ = new std.Droppable(this.owner_.nodes.buttons.dismiss, {
-      classHover: this.owner_.options.css.droppableHover,
+      classHover: Css.dnd.droppable.hover,
       scopes: [ ],
 
       drop: function (e, id, scope) {
@@ -645,7 +645,7 @@ var SortingQueue_ = function (window, $, std) {
 
   ControllerItems.prototype.selectOffset = function (offset)
   {
-    var csel = this.owner_.options.css.itemSelected,
+    var csel = Css.item.selected,
         index;
 
     if(!this.node_.length)
@@ -761,7 +761,7 @@ var SortingQueue_ = function (window, $, std) {
 
   /* overridable */ ControllerItems.prototype.getNodeSelected = function ()
   {
-    return this.node_.find('.' + this.owner_.options.css.itemSelected);
+    return this.node_.find('.' + Css.item.selected);
   };
 
   /* Private methods */
@@ -774,7 +774,7 @@ var SortingQueue_ = function (window, $, std) {
     if(!this.owner_.initialised)
       return;
 
-    var csel = this.owner_.options.css.itemSelected;
+    var csel = Css.item.selected;
 
     if(!this.node_.children().length)
       return;
@@ -910,7 +910,7 @@ var SortingQueue_ = function (window, $, std) {
       return;
 
     new std.Draggable(this.node_, {
-      classDragging: parentOwner.options.css.itemDragging,
+      classDragging: Css.item.dragging,
 
       dragstart: function (e) {
         /* Firstly select item being dragged to ensure correct item position
@@ -937,14 +937,13 @@ var SortingQueue_ = function (window, $, std) {
   };
 
   Item.prototype.deselect = function() {
-    this.node.removeClass(this.owner_.owner.options.css.itemSelected);
+    this.node.removeClass(Css.item.selected);
     this.owner_.owner.events.trigger("item-deselected", this.content);
   };
 
   Item.prototype.render = function() {
-    var css = this.owner_.owner.options.css,
-        node = $('<div class="' + css.item + '"/>'),
-        content = $('<div class="' + css.itemContent + '"/>'),
+    var node = $('<div class="' + Css.item.container + '"/>'),
+        content = $('<div class="' + Css.item.content + '"/>'),
         anchor = this.content_.name;
 
     /* Append title if existent. */
@@ -952,12 +951,12 @@ var SortingQueue_ = function (window, $, std) {
       anchor += '&ndash; ' + this.content_.title;
 
     if(this.content_.url && anchor) {
-      node.append('<a class="' + css.itemTitle + '" target="_blank" '
+      node.append('<a class="' + Css.item.title + '" target="_blank" '
                   + 'href="' + this.content_.url + '">'
                   + anchor + '</a>');
     }
 
-    node.append('<a class="' + css.itemClose + '" href="#">x</a>');
+    node.append('<a class="' + Css.item.close + '" href="#">x</a>');
 
     /* Append content and remove all CSS classes from children. */
     content.append(this.content_.text);
@@ -969,32 +968,40 @@ var SortingQueue_ = function (window, $, std) {
   /* Not mandatory. */
   /* overridable */
   Item.prototype.getNodeClose = function() {
-    return this.node_.find('.' + this.owner_.owner.options.css.itemClose);
+    return this.node_.find('.' + Css.item.close);
   };
 
   /* overridable */ Item.prototype.isSelected = function ()
-  { return this.node_.hasClass(this.owner_.owner.options.css.itemSelected); };
+  { return this.node_.hasClass(Css.item.selected); };
 
   /* Private methods */
   Item.prototype.select_ = function (ev) {
-    this.node.addClass(this.owner_.owner.options.css.itemSelected);
+    this.node.addClass(Css.item.selected);
     this.owner_.owner.events.trigger("item-selected", this.content, ev);
   };
 
 
+  var Css = {
+    item: {
+      container: 'sd-text-item',
+      content: 'sd-text-item-content',
+      title: 'sd-text-item-title',
+      close: 'sd-text-item-close',
+      selected: 'sd-selected',
+      dragging: 'sd-dragging'
+    },
+    dnd: {
+      droppable: {
+        hover: 'sd-droppable-hover'
+      }
+    }
+  };
+  
   /* ----------------------------------------------------------------------
    *  Default options
    *  Private attribute.
    * ---------------------------------------------------------------------- */
   var defaults_ = {
-    css: {
-      item: 'sd-text-item',
-      itemContent: 'sd-text-item-content',
-      itemTitle: 'sd-text-item-title',
-      itemClose: 'sd-text-item-close',
-      itemSelected: 'sd-selected',
-      itemDragging: 'sd-dragging'
-    },
     keyboard: {                 /* Contains scan codes. */
       listUp: 38,               /* up                   */
       listDown: 40,             /* down                 */
