@@ -1,131 +1,48 @@
 * Generic
-* Components
-** *ALL*
-*** TODO Update external dependencies
-The `update-deps´ script needs to be updated to support external dependencies. Currently one needs to manually copy over updated versions of Dossier.js, for instance.
+** TODO Replace methods with (prefix) string =initialis= for =initializ=
 
-*** TODO Mechanism for stopping all ongoing AJAX requests
-Behaviour is currently unknown if one switches to a folder while some sort of loading is taking place when the switch occurs (=moreTexts=, getFc=, etc). We need to be able to systematically terminate any and all AJAX requests taking place *before* the switch occurs.
-
-*** TODO Do *NOT* allow CSS classes to be specified in =options=
-This actually makes no sense and borders on the nonsensical. The assumption should be that the (different) components all use a *fixed* set of CSS classes, which are properly prefixed thus creating a namespace of sorts, which the client can then provide custom styling for. The CSS class names themselves should *not* be allowed to change.
-
-Example:
-
-The HTML element representation of an item, as created by =SortingQueue=, will *always* be given the CSS class =sd-text-item= and this class name can *not* be changed or configured, ever.
-
-*** TODO Replace methods with (prefix) string =initialis= for =initializ=
-
-**** TODO Request feedback from Diffeo about other British-isms and use American English variations
+*** TODO Request feedback from Diffeo about other British-isms and use American English variations
 This may be of particular concern given the sensitive nature of the project.
 
-*** TODO Document code
+** TODO Document code
 First iteration would include modules and classes.
 
-*** TODO Document required options
+** TODO Document required options
 =SortingQueue=, =SortingDesk= and possibly other components, could do with documentation about required and optional options, callbacks and so on.
 
-*** CANCELED Consider using SASS
-- State "CANCELED"   from "TODO"       [2015-01-22 Thu 08:07] \\
-  Scepticism that SASS might help on the part of Diffeo's technical team.
-
-** =Dossier.JS=
-*** Improve documentation to support JSDoc
-
-** =SortingCommon=
-
-** =SortingQueue=
-*** TODO Rename CSS class names alluding to the old concept of text item
-Some CSS class names are still in use which employ the old concept of text item. These should be renamed such that the "text" word is removed.
-
-*** TODO =Droppable=: requires reset method
-See =ProtarchBinSpawner=. Specifically, there are instances where the events attached by =Droppable= need to be unbound at destruction time; i.e. when a =Droppable= instance is created on the DOM's own body.
-
-*** TODO =ControllerItems=: disable all other dragging-related events
-
-*** TODO Prefix text-items' node ids
-- State "TODO"       from "WAIT"       [2014-09-07 Sun 08:16]
-- State "WAIT"       from "TODO"       [2014-09-05 Fri 10:41] \\
-  Currently waiting to hear from support as to whether ids are guaranteed to always be unique.
-    
-** =DossierJS=
-*** TODO Move =SortingQueueItems= class into API
-
 * =SortingDesk=
-*** =ControllerExplorer=
-**** TODO Disallow creation of folder with duplicate name
-**** TODO Implement folder renaming
-**** TODO Implement folder removing
-**** TODO Implement subfolder renaming
-**** TODO Implement subfolder removing
-**** TODO Merging of subfolders isn't implemented
-Can't yet be implemented because server-side folder removal logic is not yet in place.
-
-**** TODO [#A] Why can't an attribute be added in the =SubfolderNew= constructor and accessed in =render=?
-
-*** TODO Attach base64 image data to descriptor
-In =onDropSpecial=.
+** =ControllerExplorer=
+*** TODO [#A] Why can't an attribute be added in the =SubfolderNew= constructor and accessed in =render=?
 
 *** WAIT Implement keyboard auto-repeat with configurable frequency
 - State "WAIT"       from "TODO"       [2014-10-15 Wed 13:56] \\
   Probable unwanted feature.
   
-*** WAIT Do not allow duplicate bins
-- State "WAIT"       from "CANCELED"   [2014-11-26 Wed 09:09] \\
-  Reissuing TODO item as there is validity in the concept.
-- State "CANCELED"   from "WAIT"       [2014-09-04 Thu 13:02] \\
-  Most likely can't be done reliably.
-- State "WAIT"       from "TODO"       [2014-08-22 Fri 12:44] \\
-  Specifications aren't clear as to how bins that are based on existing text items
-  are created.
-  
-** Extension
-*** All
-*** Chrome
-**** TODO Allow container to be moved to either side of the page
-Attempt mechanism that doesn't show container over the page but alongside it instead.
+* Examples
+** TODO Fix broken examples
 
-**** TODO Destroy extension window when last browser window destroyed
-
-** API
-*** All
-**** TODO Add timeout to AJAX calls
-
-*** Live
-**** TODO Place methods in relevant namespaces
-For instance all methods pertaining to feature collection should be in a `fc´ or `featureCollection´ namespace of their own.
-
-**** TODO Force clients of the =Api= module to instantiate it
-As it stands, the =Api= module can only be used by one client at a time.
-
-**** TODO Remove bypass of =DossierJS.SortingQueueItems.prototype._moreTexts=
-The bypass was created do deliver items in the format expected by =SortingQueue= but this should instead be integrated in DossierJS. Better still, IMHO, would be to integrate what is now the =SortingQueueItems= class in =Api=.
-
-** Examples
-*** TODO Fix broken examples
-
-*** WAIT Create examples [0%]
+** WAIT Create examples [0%]
 - State "WAIT"       from "TODO"       [2014-11-25 Tue 06:39] \\
   Not a priority at the moment.
   
-**** TODO No content ids
+*** TODO No content ids
 
-** Tests
-*** TODO instance: ensure reset doesn't run twice
+* Tests
+** TODO instance: ensure reset doesn't run twice
 
-*** TODO instance: require =visibleItems= to be greater than 0
+** TODO instance: require =visibleItems= to be greater than 0
 
-*** TODO interface: ensure 'bin add' button is created prior to using it
+** TODO interface: ensure 'bin add' button is created prior to using it
 
-*** TODO interface: ensure correct number of sub-bins are created
+** TODO interface: ensure correct number of sub-bins are created
 
-*** TODO interface: removed test for adding of sub-bin
+** TODO interface: removed test for adding of sub-bin
 
-** Unclassified
-*** TODO Revamp errors returned via promises to include error *codes*
+* Unclassified
+** TODO Revamp errors returned via promises to include error *codes*
 It is easier for programs to process errors if they are given as a code. Errors in human natural language are only useful to humans, not programs.
 
-*** TODO Review data structures
+** TODO Review data structures
 This includes =Sorting Desk='s bin data structure and =Sorting Queue='s item
 data structure. Changes to any of the components will require updating the
 different API and example source files, as well as dossier.js .
@@ -150,14 +67,11 @@ The above could instead be:
 
 A similar discussion could be had regarding bins' data structure.
 
-*** TODO Employ use of classes to identify hover state and possibly others
-This is meant to resolve the problem that parent elements can't be styled depending on mouse state, such as =:hover=, when nested elements are used. The only way to reliably solve this problem is to rely on CSS classes to signal mouse states.
-
-*** WAIT Resolve all annotated TODO items
+** WAIT Resolve all annotated TODO items
 - State "WAIT"       from "TODO"       [2014-10-15 Wed 13:57] \\
   To be done when Sorting Desk has reached a significant milestone.
   
-*** WAIT Implement user notifications
+** WAIT Implement user notifications
 - State "WAIT"       from "CANCELED"   [2014-11-26 Wed 09:08] \\
   Requires explicit approval.
 - State "CANCELED"   from "WAIT"       [2014-10-09 Thu 10:43] \\
@@ -168,14 +82,3 @@ A mechanism for displaying notifications to the user is needed for the purpose
 of providing feedback, in particular in the cases when a user action is invalid
 and results in an error.
 
-* Bugs
-** TODO When items' DIV is selected, scrolling with keyboard both selects next item as well as scroll the DIV contents
-Scrolling on the items' DIV container must be suppressed.
-
-Note that this might not be possible if the browser does not allow control over the HTML element's focus.
-
-** TODO Wrong items are selected when a list of items contains duplicate items
-A possible solution for this is to append a timestamp to each item's id. Even though each HTML node's id would be unique, they would each refer to the same item datum.
-
-** TODO =Droppable=: =reset= clearing *all* events
-This could be undesirable since all the events attached to the element are cleared, including any events the client may have set up.
