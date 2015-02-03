@@ -443,32 +443,12 @@ A.sd-text-item-title:hover {
   transition: all 175ms;
   cursor: pointer;
   line-height: 25px;
-}
-
-#sd-sorting-desk.sd-top-left #sd-button-dismiss,
-#sd-sorting-desk.sd-bottom-left #sd-button-dismiss {
   top: 33px;
   right: -25px;
 }
 
-#sd-sorting-desk.sd-top-right #sd-button-dismiss,
-#sd-sorting-desk.sd-bottom-right #sd-button-dismiss {
-  top: 33px;
-  left: -25px;
-}
-
 #sd-button-dismiss SPAN {
   position: relative;
-}
-
-#sd-sorting-desk.sd-top-left #sd-button-dismiss SPAN,
-#sd-sorting-desk.sd-bottom-left #sd-button-dismiss SPAN {
-  margin-right: -10px;
-}
-
-#sd-sorting-desk.sd-top-right #sd-button-dismiss SPAN,
-#sd-sorting-desk.sd-bottom-right #sd-button-dismiss SPAN {
-  margin-left: -10px;
 }
 
 #sd-button-dismiss.sd-droppable-hover {
