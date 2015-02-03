@@ -46,6 +46,21 @@ var SortingCommon_ = function (window, $) {
     return true;
   };
 
+  var any_in  = function (/* (r, k) | (r, k0..n) */)
+  {
+    var r = arguments[0];
+
+    if(!like_obj(r))
+      throw "Reference not provided or not an object";
+
+    for(var i = 1; i < arguments.length; ++i) {
+      if(r.hasOwnProperty(arguments[i]))
+        return true;
+    }
+
+    return false;
+  };
+
   var like = function (l, r) { return r instanceof Object && l instanceof r; };
   var like_obj = function (r) { return r instanceof Object; };
 
@@ -1115,6 +1130,7 @@ var SortingCommon_ = function (window, $) {
     like: like,
     like_obj: like_obj,
     is_in: is_in,
+    any_in: any_in,
     chainize: chainize,
     instanceany: instanceany,
     on_exception: on_exception,
