@@ -72,7 +72,7 @@ var Main = (function (window, chrome, $, std, sq, sd, Api, undefined) {
     }
     return sq.Item.prototype.render.call(this);
   };
-  
+
 
   /**
    * @class
@@ -91,13 +91,13 @@ var Main = (function (window, chrome, $, std, sq, sd, Api, undefined) {
         'request-end':  this.onRequestEnd_.bind(this)
       };
     },
-    
+
     onRequestBegin_: function (id)
     {
       if(this.count_++ === 0)
         this.node_.stop().fadeIn();
     },
-    
+
     onRequestEnd_: function (id)
     {
       if(this.count_ === 0)
@@ -162,7 +162,7 @@ var Main = (function (window, chrome, $, std, sq, sd, Api, undefined) {
 
       return deferred.promise();
     };
-    
+
     /* Interface */
     return {
       callbacks: {
@@ -200,7 +200,7 @@ var Main = (function (window, chrome, $, std, sq, sd, Api, undefined) {
         }
       }
     );
-    
+
   } )();
 
 
@@ -229,12 +229,12 @@ var Main = (function (window, chrome, $, std, sq, sd, Api, undefined) {
   var setActive = function (tab)
   {
     active = tab;
-    
+
     if(!active) {
       active = null;
       console.log("No active tab currently");
     } else
-      console.log("Currently active tab: #%d", active.id);      
+      console.log("Currently active tab: #%d", active.id);
   };
 
   var setupSortingQueue_ = function (sorter)
@@ -257,7 +257,7 @@ var Main = (function (window, chrome, $, std, sq, sd, Api, undefined) {
   var resize_ = function ()
   {
     var height = Math.floor(window.innerHeight / 2);
-    
+
     /* Set up heights. */
     $("#sd-folder-explorer").height(height);
     $("#sd-queue").height(height - $("#sd-queue > .sd-footer").outerHeight());
@@ -272,7 +272,7 @@ var Main = (function (window, chrome, $, std, sq, sd, Api, undefined) {
       sorter: new LoadingStatus($('#sd-folder-explorer .sd-loading')),
       queue:  new LoadingStatus($('#sd-queue .sd-loading'))
     };
-    
+
     chrome.runtime.sendMessage({ operation: "get-meta" }, function (meta) {
       /* Cache jQuery references to nodes used. */
       nodes.loading = $('#sd-sorting-desk .sd-loading');
@@ -306,12 +306,12 @@ var Main = (function (window, chrome, $, std, sq, sd, Api, undefined) {
       } );
 
       chrome.windows.onFocusChanged.addListener(function (id) {
-        getTabSelectedInWindow(id, function (tab) { 
+        getTabSelectedInWindow(id, function (tab) {
           if(tab !== null)
             setActive(tab);
         } );
       } );
-      
+
       chrome.tabs.onActivated.addListener(function (info) {
         chrome.tabs.get(info.tabId, function (tab) {
           if(!/^chrome[^:]*:/.test(tab.url))
@@ -341,16 +341,16 @@ var Main = (function (window, chrome, $, std, sq, sd, Api, undefined) {
               url: target.href,
               active: true } );
           } );
-            
+
           ev.preventDefault();
         }
-        
+
         return false;
       } );
   };
 
   var instantiate_ = function (meta) {
-    
+
     (sorter = new sd.Sorter( {
       container: $('#sd-folder-explorer'),
       dossierUrl: meta.config.dossierUrl,
@@ -371,7 +371,7 @@ var Main = (function (window, chrome, $, std, sq, sd, Api, undefined) {
     setupSortingQueue_(sorter);
   };
 
-  
+
   /* Startup sequence. */
   $(function () {
     chrome.runtime.sendMessage(
@@ -385,5 +385,5 @@ var Main = (function (window, chrome, $, std, sq, sd, Api, undefined) {
         } );
       } );
   } );
-  
+
 } )(window, chrome, jQuery, SortingCommon, SortingQueue, SortingDesk, Api);

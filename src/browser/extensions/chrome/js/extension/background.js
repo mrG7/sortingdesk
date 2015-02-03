@@ -24,7 +24,7 @@ var Background = function (window, chrome, $, std, undefined)
         extension: null
       };
 
-  
+
   var initialize_ = function ()
   {
     handlerTabs_ = MessageHandlerTabs;
@@ -33,14 +33,14 @@ var Background = function (window, chrome, $, std, undefined)
     chrome.windows.onRemoved.addListener(function (id) {
       if(window_.extension !== null && window_.extension.id === id) {
         var m = window_.main;
-        
+
         console.info("Extension window removed");
         chrome.windows.update(
           m.id,
           { state: m.state,
             top: m.top, left: m.left, height: m.height,
             width: m.width } );
-        
+
         window_.main = window_.extension = null;
       }
     } );
@@ -55,16 +55,16 @@ var Background = function (window, chrome, $, std, undefined)
   {
     if(window_.extension !== null)
       throw "Extension window already exists";
-    
+
     console.log("Spawning extension window");
-    
+
     chrome.windows.getCurrent(function (current) {
       chrome.windows.getLastFocused(function (win) {
         var size, ext;
 
         window_.main = $.extend(true, { }, win);
         size = new std.PositionSize(win);
-        
+
         if(size.width > DEFAULT_EXTENSION_WIDTH * 2) {
           size.width -= DEFAULT_EXTENSION_WIDTH;
 
@@ -75,7 +75,7 @@ var Background = function (window, chrome, $, std, undefined)
 
         ext = new std.PositionSize(size.right, size.top,
                                    DEFAULT_EXTENSION_WIDTH, size.height - 30);
-        
+
         console.info("Creating Sorting Desk's window:", ext.toObject());
         chrome.windows.create( $.extend( {
           url: chrome.runtime.getURL("/html/main.html"),
@@ -88,8 +88,8 @@ var Background = function (window, chrome, $, std, undefined)
       } );
     } );
   };
-  
-  
+
+
   /**
    * @class
    * */
@@ -110,7 +110,7 @@ var Background = function (window, chrome, $, std, undefined)
     var onGetMeta_ = function (request, sender, callback)
     {
       if(!std.is_fn(callback)) return;
-      
+
       Config.load(function (options) {
         callback( {
           config: options,
@@ -144,14 +144,14 @@ var Background = function (window, chrome, $, std, undefined)
           "get-image-base64": onGetImageBase64_,
           "get-extension-window": onGetExtensionWindow_
         };
-    
+
     /* Handler of messages originating in content scripts. */
     chrome.runtime.onMessage.addListener(
       function (request, sender, callback) {
         if(methods.hasOwnProperty(request.operation)) {
           console.log("Invoking message handler [type="
                       + request.operation + "]");
-          
+
           methods[request.operation].call(self, request, sender, callback);
         } else
           console.error("Invalid request received:", request);
@@ -191,8 +191,8 @@ var Background = function (window, chrome, $, std, undefined)
     };
   }) ();
 
-  
+
   /* Initialise instance. */
   initialize_();
-  
+
 }(window, chrome, $, SortingCommon);

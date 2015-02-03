@@ -951,7 +951,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
     this.tree.edit(this.tree.get_node(this.id_),
                    this.owner_.owner.options.folderNewCaption);
-    
+
     this.node.get(0).scrollIntoView();
   };
 

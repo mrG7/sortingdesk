@@ -19,25 +19,25 @@ var SortingCommon_ = function (window, $) {
 
   /* Module-wide function */
   var absm_noti = function ( ) { throw "Abstract method not implemented"; };
-  
+
   var is_obj = function (r) { return r !== null && typeof r === 'object'; };
   var is_fn  = function (r) { return typeof r === 'function'; };
   var is_und = function (r) { return typeof r === typeof undefined; };
   var is_arr = function (r) { return r instanceof Array; };
-  
+
   var is_str = function (r)
   { return typeof r === 'string' || r instanceof String; };
 
   var is_num = function (r)
   { return typeof r === 'number' || r instanceof Number; };
-  
+
   var is_in  = function (/* (r, k) | (r, k0..n) */)
   {
     var r = arguments[0];
 
     if(!like_obj(r))
       throw "Reference not provided or not an object";
-    
+
     for(var i = 1; i < arguments.length; ++i) {
       if(!r.hasOwnProperty(arguments[i]))
         return false;
@@ -48,7 +48,7 @@ var SortingCommon_ = function (window, $) {
 
   var like = function (l, r) { return r instanceof Object && l instanceof r; };
   var like_obj = function (r) { return r instanceof Object; };
-  
+
   var chainize = function (context, fn)
   {
     return function () {
@@ -67,16 +67,16 @@ var SortingCommon_ = function (window, $) {
 
     return false;
   };
-  
+
   var on_exception = function (x)
-  {  
+  {
     console.error("Exception thrown: " + x,
                   x.stack || "\n<no stack information available>");
 
     throw x;
   };
 
-  
+
   /* jQuery-related */
   var jQueryExtensions = (function () {
 
@@ -129,7 +129,7 @@ var SortingCommon_ = function (window, $) {
       is: is,
       any: any
     };
-    
+
   } )();
 
 
@@ -163,7 +163,7 @@ var SortingCommon_ = function (window, $) {
         }, 0);
       } else if(is_str(ent)) {
         var img;
-        
+
         ent = ent.trim();
         img = new window.Image();
         img.src = /^\/\//.test(ent) ? "http:" + ent : ent;
@@ -176,7 +176,7 @@ var SortingCommon_ = function (window, $) {
         };
       } else
         throw "Invalid image source specified";
-      
+
       return deferred.promise();
     };
 
@@ -217,14 +217,14 @@ var SortingCommon_ = function (window, $) {
         .replace(/^data:image\/(png|jpg);base64,/, "");
     };
 
-    
+
     /* Public interface */
     return {
       imageToBase64: imageToBase64,
       getXpathSimple: getXpathSimple,
       is_image: is_image
     };
-    
+
   } )();
 
 
@@ -237,7 +237,7 @@ var SortingCommon_ = function (window, $) {
   NodeFinder.prototype = {
     prefix_: null,
     root_: null,
-    
+
     get root() { return this.root_;  },
 
     find: function (scope, parent /* = prefix */ )
@@ -292,7 +292,7 @@ var SortingCommon_ = function (window, $) {
   {
     if(!like_obj(owner))
       throw "Invalid owner instance reference specified";
-    
+
     this.owner_ = owner;
   };
 
@@ -340,7 +340,7 @@ var SortingCommon_ = function (window, $) {
     if(!is_und(map)) {
       if(!is_obj(map))
         throw "Invalid callbacks map specified";
-      
+
       /* Ensure all attributes in the map are functions. */
       for(var k in map) {
         if(!is_fn(map[k]))
@@ -359,7 +359,7 @@ var SortingCommon_ = function (window, $) {
    *
    * The callback is always required to exist. If it doesn't exist, an exception
    * is thrown.
-   * 
+   *
    * @param {string} name       - Name of callback to invoke.
    * @param {*}      parameters - One or more parameters to pass to callback. */
   Callbacks.prototype.invoke = function ( /* (name, arg0..n) */ )
@@ -376,12 +376,12 @@ var SortingCommon_ = function (window, $) {
    * The callback may optionally <strong>not</strong> be required to exist if
    * the <code>mandatory</code> argument is <code>true</code>; otherwise,
    * <code>null</code> is returned instead.
-   * 
+   *
    * @param {string}  name      - Name of callback to invoke.
-   * 
+   *
    * @param {boolean} mandatory - If true, the callback must exist and an
    * exception is thrown if it doesn't.
-   * 
+   *
    * @param {*}       parameters - One or more parameters to pass to callback.
    * */
   Callbacks.prototype.call = function (/* (name, mandatory = true, arg0..n) */ )
@@ -468,7 +468,7 @@ var SortingCommon_ = function (window, $) {
     /* Factory method doesn't exist. Ensure class constructor has been passed
      * and instantiate it. */
     descriptor = this.map_[arguments[0]];
-    
+
     if(!descriptor)
       throw "Class or factory non existent: " + arguments[0];
 
@@ -525,7 +525,7 @@ var SortingCommon_ = function (window, $) {
     this.fnEventKeyUp = null;
   };
 
-  
+
   /**
    * @class
    *
@@ -566,7 +566,7 @@ var SortingCommon_ = function (window, $) {
           return s === target;
         } );
     };
-    
+
     /* Event handlers */
     var onDragStart = function (event) {
       activeNode = (event.originalEvent || event).target;
@@ -580,7 +580,7 @@ var SortingCommon_ = function (window, $) {
 
     var reset = function () { activeNode = null; };
 
-    
+
     /* Public interface */
     return {
       isScope: isScope,
@@ -640,7 +640,7 @@ var SortingCommon_ = function (window, $) {
   var Droppable = function (node, options)
   {
     var dm = DragDropManager;
-    
+
     if(!(node instanceof $))
       throw "Invalid or no jQuery reference specified";
 
@@ -760,7 +760,7 @@ var SortingCommon_ = function (window, $) {
       throw "Observer already registered";
     else if(!(observer instanceof Observer))
       throw "Invalid observer instance reference specified";
-    
+
     this.observers_.push(observer);
   };
 
@@ -802,8 +802,8 @@ var SortingCommon_ = function (window, $) {
   {
     this.callback_.apply(null, arguments);
   };
-  
-  
+
+
   /**
    * @class
    * */
@@ -876,7 +876,7 @@ var SortingCommon_ = function (window, $) {
 
     return false;
   };
-    
+
 
   Events.prototype.exists = function (ev)
   {
@@ -893,7 +893,7 @@ var SortingCommon_ = function (window, $) {
   Events.prototype.trigger = function ( /* (ev, arg0..n) */ )
   {
     var ev = arguments[0];
-    
+
     if(!is_str(ev) || ev.length === 0)
       throw "Invalid or no event name specified";
 
@@ -921,7 +921,7 @@ var SortingCommon_ = function (window, $) {
       if(is_obj(ev)) {
         var ct = 0,
             cg = 0;
-        
+
         for(var k in ev) {
           ++ct;
           if(this.register_single_(k, ev[k])) ++cg;
@@ -947,7 +947,7 @@ var SortingCommon_ = function (window, $) {
     else
       throw "Invalid event(s) descriptor";
   };
-  
+
   /* Protected methods */
   Events.prototype.register_single_ = function (ev, fn)
   {
@@ -981,10 +981,10 @@ var SortingCommon_ = function (window, $) {
       var index = this.map_[ev].indexOf(fn);
       if(index === -1)
         return false;
-      
+
       this.map_splice(index, 1);
     }
-    
+
     return true;
   };
 
@@ -1013,7 +1013,7 @@ var SortingCommon_ = function (window, $) {
 
     this.__defineGetter__("left", function () { return this.left_; } );
     this.__defineGetter__("top", function () { return this.top_; } );
-    
+
     this.__defineSetter__("left", function (l) { this.left_ = l; } );
     this.__defineSetter__("top", function (t) { this.top_ = t; } );
   };
@@ -1023,7 +1023,7 @@ var SortingCommon_ = function (window, $) {
     this.left_ = l;
     this.top_ = t;
   };
-  
+
 
   /**
    * @class
@@ -1035,7 +1035,7 @@ var SortingCommon_ = function (window, $) {
 
     this.__defineGetter__("width", function () { return this.width_; } );
     this.__defineGetter__("height", function () { return this.height_; } );
-    
+
     this.__defineSetter__("width", function (w) { this.width_ = w; } );
     this.__defineSetter__("height", function (h) { this.height_ = h; } );
   };
@@ -1063,20 +1063,20 @@ var SortingCommon_ = function (window, $) {
     /* Getters */
     this.__defineGetter__("left", function () { return this.left_; } );
     this.__defineGetter__("top", function () { return this.top_; } );
-    
+
     this.__defineGetter__("right", function () {
       return this.width_ > 0 ? this.left_ + this.width_ - 1 : this.left_; } );
-    
+
     this.__defineGetter__("bottom", function () {
       return this.height_ > 0 ? this.top_ + this.height_ - 1 : this.top_; } );
 
     /* Setters */
     this.__defineGetter__("width", function () { return this.width_; } );
     this.__defineGetter__("height", function () { return this.height_; } );
-    
+
     this.__defineSetter__("left", function (l) { this.left_ = l; } );
     this.__defineSetter__("top", function (t) { this.top_ = t; } );
-    
+
     this.__defineSetter__("width", function (w) { this.width_ = w; } );
     this.__defineSetter__("height", function (h) { this.height_ = h; } );
   };
@@ -1086,7 +1086,7 @@ var SortingCommon_ = function (window, $) {
   {
     this.left_ = l;
     this.top_ = t;
-    
+
     this.width_ = w;
     this.height_ = h;
   };
@@ -1100,7 +1100,7 @@ var SortingCommon_ = function (window, $) {
       height: this.height_
     };
   };
-  
+
 
   /* Return public interface. */
   return {

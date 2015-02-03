@@ -25,7 +25,7 @@ var Options = (function (window, $, std, undefined) {
         load_();
       } );
     } );
-    
+
     $(".dropdown-menu").on('click', 'li a', function() {
       var $this = $(this),
           $parent = $this.parent();
@@ -33,7 +33,7 @@ var Options = (function (window, $, std, undefined) {
       if(!$parent.hasClass('disabled'))
         setDropdownValue_($this.parents('ul').prev(), $parent);
     } );
-    
+
     console.info("Initialised options page");
   };
 
@@ -49,7 +49,7 @@ var Options = (function (window, $, std, undefined) {
 
       elv = el.next().find('li[data-value=' + val + ']');
     }
-    
+
     if(elv.length === 0) {
       if(def !== undefined)
         setDropdownValue_(el, def);
@@ -65,7 +65,7 @@ var Options = (function (window, $, std, undefined) {
       $('#dossier-url').val(state.dossierUrl);
       $('#active').prop('checked', state.active);
       setDropdownValue_($('#start-position'), state.startPosition, 0);
-      
+
       if(std.is_fn(callback))
         callback();
     } );
