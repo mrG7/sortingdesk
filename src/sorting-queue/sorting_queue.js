@@ -740,7 +740,7 @@ var SortingQueue_ = function (window, $, std) {
                 this.owner_.options.delays.textItemFade,
                 function () {
                   $(this).slideUp(
-                    self.owner_.options.delays.slideItemUp,
+                    self.owner_.options.delays.slideItem,
                     function () {
                       $(this).remove();
                       self.select();
@@ -1032,7 +1032,7 @@ var SortingQueue_ = function (window, $, std) {
     delays: {                   /* In milliseconds.     */
       animateAssign: 75,        /* Duration of assignment of text item via
                                  * shortcut. */
-      slideItemUp: 150,         /* Slide up length of deleted text item. */
+      slideItem: 150,           /* Item slide up/down. */
       textItemFade: 100,        /* Fade out duration of text item after
                                  * assignment. */
       queueEmptyFadeIn: 250,
