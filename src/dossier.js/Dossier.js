@@ -19,104 +19,6 @@ var _DossierJS = function(window, $) {
         COREF_VALUE_UNKNOWN = 0,
         COREF_VALUE_NEGATIVE = -1;
 
-
-    var Xhr = (function () {
-        /* Attributes */
-        var requests_ = { };
-
-        /* Interface */
-        var ajax = function ()
-        {
-            return add_(
-                get_type_(arguments),
-                $.ajax.apply($, Array.prototype.splice.call(arguments, 1)));
-        };
-
-        var getJSON = function ()
-        {
-            return add_(
-                get_type_(arguments),
-                $.getJSON.apply($, Array.prototype.splice.call(arguments, 1)));
-        };
-
-        var stop = function (type)
-        {
-            if(type === undefined) {
-                for(var k in requests_) {
-                    requests_[k].forEach(function (r) {
-                        r.abort();
-                    } );
-                }
-
-                requests_ = { };
-            } else {
-                var reqs = get(type);
-
-                if(reqs !== null) {
-                    reqs.forEach(function (r) {
-                        r.abort();
-                    } );
-
-                    delete requests_[type];
-                }
-            }
-        };
-
-        var get = function (type)
-        {
-            return requests_[type] || null;
-        };
-
-        /* Private interface */
-        var add_ = function (type, xhr)
-        {
-            var reqs = requests_[type];
-
-            /* Create empty array if no requests exist for this type. */
-            if(!reqs)
-                reqs = requests_[type] = [ ];
-
-            /* Delete request once it completes, ensuring that the request type
-             * is also deleted when requests no longer exist. */
-            reqs.push(xhr.always(function () {
-                if(!reqs.some(function (r, i) {
-                    if(r === xhr) {
-                        reqs.splice(i, 1);
-                        if(reqs.length === 0)
-                            delete requests_[type];
-                        return true;
-                    }
-                } ) ) {
-                    console.error("Failed to remove request: %s: ", type, xhr);
-                } else {
-                    /* console.log("Removed request: ", requests_); */
-                }
-            } ) );
-
-            /* console.log("Added xhr: %s: ", type, requests_); */
-            return xhr;
-        };
-
-        var get_type_ = function (args)
-        {
-            if(args.length < 2) {
-                throw "Invalid arguments specified. Expect `type´ and arguments"
-                    + " for `ajax´ call";
-            }
-
-            return args[0];
-        };
-
-
-        /* Public interface */
-        return {
-            ajax: ajax,
-            getJSON: getJSON,
-            stop: stop
-        };
-
-    } )();
-
     // Create a new Dossier API, which can be used to issue requests
     // against a running instance of dossier.web.
     //
@@ -957,6 +859,104 @@ var _DossierJS = function(window, $) {
                 console.log("moreTexts: request failed");
             });
     };
+
+    // Internal XHR handling. Useful for canceling existing requests.
+    var Xhr = (function () {
+        /* Attributes */
+        var requests_ = { };
+
+        /* Interface */
+        var ajax = function ()
+        {
+            return add_(
+                get_type_(arguments),
+                $.ajax.apply($, Array.prototype.splice.call(arguments, 1)));
+        };
+
+        var getJSON = function ()
+        {
+            return add_(
+                get_type_(arguments),
+                $.getJSON.apply($, Array.prototype.splice.call(arguments, 1)));
+        };
+
+        var stop = function (type)
+        {
+            if(type === undefined) {
+                for(var k in requests_) {
+                    requests_[k].forEach(function (r) {
+                        r.abort();
+                    } );
+                }
+
+                requests_ = { };
+            } else {
+                var reqs = get(type);
+
+                if(reqs !== null) {
+                    reqs.forEach(function (r) {
+                        r.abort();
+                    } );
+
+                    delete requests_[type];
+                }
+            }
+        };
+
+        var get = function (type)
+        {
+            return requests_[type] || null;
+        };
+
+        /* Private interface */
+        var add_ = function (type, xhr)
+        {
+            var reqs = requests_[type];
+
+            /* Create empty array if no requests exist for this type. */
+            if(!reqs)
+                reqs = requests_[type] = [ ];
+
+            /* Delete request once it completes, ensuring that the request type
+             * is also deleted when requests no longer exist. */
+            reqs.push(xhr.always(function () {
+                if(!reqs.some(function (r, i) {
+                    if(r === xhr) {
+                        reqs.splice(i, 1);
+                        if(reqs.length === 0)
+                            delete requests_[type];
+                        return true;
+                    }
+                } ) ) {
+                    console.error("Failed to remove request: %s: ", type, xhr);
+                } else {
+                    /* console.log("Removed request: ", requests_); */
+                }
+            } ) );
+
+            /* console.log("Added xhr: %s: ", type, requests_); */
+            return xhr;
+        };
+
+        var get_type_ = function (args)
+        {
+            if(args.length < 2) {
+                throw "Invalid arguments specified. Expect `type´ and arguments"
+                    + " for `ajax´ call";
+            }
+
+            return args[0];
+        };
+
+
+        /* Public interface */
+        return {
+            ajax: ajax,
+            getJSON: getJSON,
+            stop: stop
+        };
+
+    } )();
 
     function serialize(obj) {
         return typeof obj.serialize === 'function' ? obj.serialize() : obj;
