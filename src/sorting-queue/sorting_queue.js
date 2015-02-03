@@ -1002,6 +1002,155 @@ var SortingQueue_ = function (window, $, std) {
   };
 
 
+  /**
+   * @class
+   * */
+  var ItemDismissal = function (item, options)
+  {
+    /* Input validation */
+    if(!(item instanceof Item))
+      throw "Invalid or no item reference specified";
+    else if(!std.is_arr(options) || options.length === 0)
+      throw "Invalid or empty options array specified";
+
+    /* Invoke super constructor. */
+    std.Drawable.call(this, item);
+
+    /* Attributes */
+    this.options_ = options;
+    this.node_ = null;
+    this.events_ = new std.Events(this, [ 'done' ] );
+
+    /* Getters */
+    this.__defineGetter__("node", function () { return this.node_; } );
+
+    /* Initialisation */
+    this.initialise();
+  };
+
+  ItemDismissal.prototype = Object.create(std.Drawable.prototype);
+
+  ItemDismissal.prototype.initialise = function ()
+  {
+    var self = this;
+
+    if(this.events_ === null)
+      throw "Instance already reset";
+
+    this.render();
+
+    if(!std.$.is(this.node_))
+      throw "Item dismissal node not created";
+
+    this.owner_.node.addClass(Css_.dismissal.dismissing);
+
+    this.node_.click(function (ev) {
+      ev.preventDefault();
+      ev = ev.originalEvent;
+
+      var target = $(ev.target);
+      if(!target.hasClass(Css_.dismissal.option))
+        return false;
+
+      try {
+        self.events_.trigger( 'done', target.data('id'), self.owner_.content);
+      } catch(x) { std.on_exception(x); }
+
+/*       self.reset(); */
+
+      return false;
+    } );
+  };
+
+  ItemDismissal.prototype.reset = function ()
+  {
+    this.node_.remove();
+    this.node_ = this.options_ = this.events_ = this.dismissing_ = null;
+  };
+
+  ItemDismissal.prototype.render = std.absm_noti;
+
+  /* Private interface */
+  ItemDismissal.prototype.title = function ()
+  {
+    var text = this.owner_.node.find(
+      ':not(IFRAME):not(.' + Css_.item.close + ')')
+          .addBack().contents()
+          .filter(function() {
+            return this.nodeType == 3;
+          });
+
+    return text.length > 0 ? $(text[0]).text() : null;
+  };
+
+
+  /**
+   * @class
+   * */
+  var ItemDismissalTop = function (item, options)
+  {
+    ItemDismissal.call(this, item, options);
+  };
+
+  ItemDismissalTop.prototype = Object.create(ItemDismissal.prototype);
+
+  ItemDismissalTop.prototype.render = function ()
+  {
+    var self = this;
+
+    this.node_ = $([ '<div class="', Css_.dismissal.container, '"></div>' ]
+                   .join(''));
+
+    this.options_.forEach(function (o) {
+      self.node_.append([ '<a class="', Css_.dismissal.option,
+                          '" href="#" data-id="', o.id, '">', o.title, '</a>' ]
+                        .join(''));
+    } );
+
+    this.owner_.getNodeClose().remove();
+    this.owner_.node.prepend(this.node_.hide());
+    window.setTimeout(function () {
+      self.node_.slideDown(self.owner_.owner.owner.options_.delays.slideItem);
+    } );
+  };
+
+
+  /**
+   * @class
+   * */
+  var ItemDismissalReplace = function (item, options)
+  {
+    ItemDismissal.call(this, item, options);
+  };
+
+  ItemDismissalReplace.prototype = Object.create(ItemDismissal.prototype);
+
+  ItemDismissalReplace.prototype.render = function ()
+  {
+    var self = this,
+        title = this.title(),
+        el = this.owner_.node;
+
+    this.node_ = $([ '<div class="', Css_.dismissal.container, '"></div>' ]
+                   .join(''));
+
+    this.options_.forEach(function (o) {
+      self.node_.append([ '<a class="', Css_.dismissal.option,
+                          '" href="#" data-id="', o.id, '">', o.title, '</a>' ]
+                        .join(''));
+    } );
+
+    el.children().remove();
+    el.append(this.node_.hide());
+    if(title) el.append($(['<p>', title, '</p>'].join(''))
+                        .addClass(Css_.dismissal.title));
+
+    window.setTimeout(function () {
+      self.node_.slideDown(self.owner_.owner.owner.options_.delays.slideItem);
+    } );
+  };
+
+
   /* ---------------------------------------------------------------------- */
   /**
    * Namespace containing all the CSS classes used by Sorting Queue.
@@ -1016,6 +1165,12 @@ var SortingQueue_ = function (window, $, std) {
       close: 'sd-text-item-close',
       selected: 'sd-selected',
       dragging: 'sd-dragging'
+    },
+    dismissal: {
+      container: 'sd-dismissal',
+      dismissing: 'sd-dismissal-dismissing',
+      option: 'sd-dismissal-option',
+      title: 'sd-dismissal-title'
     },
     dnd: {
       droppable: {
@@ -1061,7 +1216,10 @@ var SortingQueue_ = function (window, $, std) {
   return {
     /* SortingQueue proper */
     Sorter: Sorter,
-    Item: Item
+    Item: Item,
+    ItemDismissal: ItemDismissal,
+    ItemDismissalTop: ItemDismissalTop,
+    ItemDismissalReplace: ItemDismissalReplace
   };
 
 };
