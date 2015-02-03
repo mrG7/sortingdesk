@@ -62,7 +62,7 @@ var SortingQueue_ = function (window, $, std) {
     /* Begin instantiating and initialising classes needed. */
     (this.requests_ = new ControllerRequests(this))
       .initialise();
-    
+
     this.constructor_ = new std.Constructor(this.options_.constructors);
     this.callbacks_ = new Callbacks(cbs, this.requests_);
 
@@ -235,7 +235,7 @@ var SortingQueue_ = function (window, $, std) {
 
     resetEntities_: function (entities)
     {
-      var self = this, 
+      var self = this,
           waiting = 0;
 
       entities.forEach(function (e) {
@@ -410,7 +410,7 @@ var SortingQueue_ = function (window, $, std) {
         this.owner_.events.trigger("item-dismissed", sel.content);
         this.owner_.items.remove();
       }
-      
+
       break;
 
     default:
@@ -444,7 +444,7 @@ var SortingQueue_ = function (window, $, std) {
 
     this.handlers_ = new std.Events([ ]);
     this.droppable_ = new std.Droppable(this.owner_.nodes.buttons.dismiss, {
-      classHover: Css.dnd.droppable.hover,
+      classHover: Css_.dnd.droppable.hover,
       scopes: [ ],
 
       drop: function (e, id, scope) {
@@ -534,7 +534,7 @@ var SortingQueue_ = function (window, $, std) {
   ControllerItems.prototype.initialise = function ()
   {
     var self = this;
-    
+
     /* Register for `text-items´ scope events. */
     this.owner_.dismiss.register('text-item', function (e, id, scope) {
       var item = self.getById(std.Url.decode(id));
@@ -558,7 +558,7 @@ var SortingQueue_ = function (window, $, std) {
   {
     /* Unregister ALL `text-item´ scope events. */
     this.owner_.dismiss.unregister('text-item');
-    
+
     /* Reallow dragging of elements over items container. */
     this.node_.off( {
       dragover: this.fnDisableEvent_
@@ -625,7 +625,7 @@ var SortingQueue_ = function (window, $, std) {
         window.setTimeout( function () {
           self.select();
         }, 10);
-        
+
         /* Ensure event is fired after the last item is added. */
         window.setTimeout( function () {
           self.owner_.requests.end('check-items');
@@ -645,7 +645,7 @@ var SortingQueue_ = function (window, $, std) {
 
   ControllerItems.prototype.selectOffset = function (offset)
   {
-    var csel = Css.item.selected,
+    var csel = Css_.item.selected,
         index;
 
     if(!this.node_.length)
@@ -761,7 +761,7 @@ var SortingQueue_ = function (window, $, std) {
 
   /* overridable */ ControllerItems.prototype.getNodeSelected = function ()
   {
-    return this.node_.find('.' + Css.item.selected);
+    return this.node_.find('.' + Css_.item.selected);
   };
 
   /* Private methods */
@@ -774,7 +774,7 @@ var SortingQueue_ = function (window, $, std) {
     if(!this.owner_.initialised)
       return;
 
-    var csel = Css.item.selected;
+    var csel = Css_.item.selected;
 
     if(!this.node_.children().length)
       return;
@@ -846,13 +846,13 @@ var SortingQueue_ = function (window, $, std) {
     } else {
       this.owner_.nodes.empty.items.fadeOut(
         this.owner_.options.delays.queueEmptyFadeOut);
-    }      
+    }
   };
 
   ControllerItems.prototype.removeNodes_ = function ()
   {
     this.items_.forEach(function (item) { item.node.remove(); } );
-  };    
+  };
 
 
   /**
@@ -910,7 +910,7 @@ var SortingQueue_ = function (window, $, std) {
       return;
 
     new std.Draggable(this.node_, {
-      classDragging: Css.item.dragging,
+      classDragging: Css_.item.dragging,
 
       dragstart: function (e) {
         /* Firstly select item being dragged to ensure correct item position
@@ -937,13 +937,13 @@ var SortingQueue_ = function (window, $, std) {
   };
 
   Item.prototype.deselect = function() {
-    this.node.removeClass(Css.item.selected);
+    this.node.removeClass(Css_.item.selected);
     this.owner_.owner.events.trigger("item-deselected", this.content);
   };
 
   Item.prototype.render = function() {
-    var node = $('<div class="' + Css.item.container + '"/>'),
-        content = $('<div class="' + Css.item.content + '"/>'),
+    var node = $('<div class="' + Css_.item.container + '"/>'),
+        content = $('<div class="' + Css_.item.content + '"/>'),
         anchor = this.content_.name;
 
     /* Append title if existent. */
@@ -951,12 +951,12 @@ var SortingQueue_ = function (window, $, std) {
       anchor += '&ndash; ' + this.content_.title;
 
     if(this.content_.url && anchor) {
-      node.append('<a class="' + Css.item.title + '" target="_blank" '
+      node.append('<a class="' + Css_.item.title + '" target="_blank" '
                   + 'href="' + this.content_.url + '">'
                   + anchor + '</a>');
     }
 
-    node.append('<a class="' + Css.item.close + '" href="#">x</a>');
+    node.append('<a class="' + Css_.item.close + '" href="#">x</a>');
 
     /* Append content and remove all CSS classes from children. */
     content.append(this.content_.text);
@@ -968,20 +968,26 @@ var SortingQueue_ = function (window, $, std) {
   /* Not mandatory. */
   /* overridable */
   Item.prototype.getNodeClose = function() {
-    return this.node_.find('.' + Css.item.close);
+    return this.node_.find('.' + Css_.item.close);
   };
 
   /* overridable */ Item.prototype.isSelected = function ()
-  { return this.node_.hasClass(Css.item.selected); };
+  { return this.node_.hasClass(Css_.item.selected); };
 
   /* Private methods */
   Item.prototype.select_ = function (ev) {
-    this.node.addClass(Css.item.selected);
+    this.node.addClass(Css_.item.selected);
     this.owner_.owner.events.trigger("item-selected", this.content, ev);
   };
 
 
-  var Css = {
+  /* ---------------------------------------------------------------------- */
+  /**
+   * Namespace containing all the CSS classes used by Sorting Queue.
+   * @namespace
+   * @private
+   **/
+  var Css_ = {
     item: {
       container: 'sd-text-item',
       content: 'sd-text-item-content',
@@ -996,11 +1002,13 @@ var SortingQueue_ = function (window, $, std) {
       }
     }
   };
-  
-  /* ----------------------------------------------------------------------
-   *  Default options
-   *  Private attribute.
-   * ---------------------------------------------------------------------- */
+
+  /* ---------------------------------------------------------------------- */
+  /**
+   * Default options.
+   * @namespace
+   * @private
+   **/
   var defaults_ = {
     keyboard: {                 /* Contains scan codes. */
       listUp: 38,               /* up                   */
@@ -1023,7 +1031,7 @@ var SortingQueue_ = function (window, $, std) {
     binCharsLeft: 25,
     binCharsRight: 25,
     itemsDraggable: true,
-    loadItemsAtStartup: true    
+    loadItemsAtStartup: true
   };
 
 
