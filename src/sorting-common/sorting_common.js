@@ -449,6 +449,16 @@ var SortingCommon_ = function (window, $) {
     this.map_ = map;
   };
 
+  /* Static interface */
+  Constructor.exists = function (obj, name)
+  {
+    if(!like_obj(obj))
+      throw "Invalid or no object specified";
+
+    return any_in(obj, name, 'create' + name);
+  };
+
+  /* Instance interface */
   Constructor.prototype.exists = function (name)
   {
     return is_in(this.map_, name, 'create' + name);
