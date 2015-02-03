@@ -310,9 +310,9 @@ BODY {
   text-overflow: ellipsis;
 }
 
-.sd-text-item-content * {
-  display: inline-block;
-}
+/* .sd-text-item-content * { */
+/*   display: inline-block; */
+/* } */
 
 /* TODO: remove when `Item´ in main.js is reworked. */
 .sd-text-item-content > DIV > P {
