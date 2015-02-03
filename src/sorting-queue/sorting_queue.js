@@ -887,10 +887,17 @@ var SortingQueue_ = function (window, $, std) {
 
     this.content_ = item;
     this.node_ = null;
+    this.dismissing_ = false;
 
-    /* Define getters. */
+    /* Getters */
     this.__defineGetter__("content", function () { return this.content_; } );
     this.__defineGetter__("node", function () { return this.node_; } );
+    this.__defineGetter__("dismissing", function ()
+                          { return this.dismissing_; } );
+
+    /* Setters */
+    this.__defineSetter__("dismissing", function (state)
+                          { this.dismissing_ = state; } );
 
     this.node_ = this.render();
     this.initialise();
