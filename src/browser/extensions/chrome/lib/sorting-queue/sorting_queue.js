@@ -62,7 +62,7 @@ var SortingQueue_ = function (window, $, std) {
     /* Begin instantiating and initialising classes needed. */
     (this.requests_ = new ControllerRequests(this))
       .initialise();
-    
+
     this.constructor_ = new std.Constructor(this.options_.constructors);
     this.callbacks_ = new Callbacks(cbs, this.requests_);
 
@@ -235,7 +235,7 @@ var SortingQueue_ = function (window, $, std) {
 
     resetEntities_: function (entities)
     {
-      var self = this, 
+      var self = this,
           waiting = 0;
 
       entities.forEach(function (e) {
@@ -406,11 +406,9 @@ var SortingQueue_ = function (window, $, std) {
       } );
 
       var sel = this.owner_.items.selected();
-      if(sel) {
-        this.owner_.events.trigger("item-dismissed", sel.content);
-        this.owner_.items.remove();
-      }
-      
+      if(sel)
+        this.owner_.items.dismiss(sel);
+
       break;
 
     default:
@@ -444,7 +442,7 @@ var SortingQueue_ = function (window, $, std) {
 
     this.handlers_ = new std.Events([ ]);
     this.droppable_ = new std.Droppable(this.owner_.nodes.buttons.dismiss, {
-      classHover: this.owner_.options.css.droppableHover,
+      classHover: Css_.dnd.droppable.hover,
       scopes: [ ],
 
       drop: function (e, id, scope) {
@@ -534,13 +532,10 @@ var SortingQueue_ = function (window, $, std) {
   ControllerItems.prototype.initialise = function ()
   {
     var self = this;
-    
+
     /* Register for `text-items´ scope events. */
     this.owner_.dismiss.register('text-item', function (e, id, scope) {
-      var item = self.getById(std.Url.decode(id));
-
-      self.owner_.events_.trigger("item-dismissed", item.content);
-      self.remove(item);
+      self.dismiss(self.getById(std.Url.decode(id)));
     } );
 
     /* Disallow dragging of elements over items container. */
@@ -558,7 +553,7 @@ var SortingQueue_ = function (window, $, std) {
   {
     /* Unregister ALL `text-item´ scope events. */
     this.owner_.dismiss.unregister('text-item');
-    
+
     /* Reallow dragging of elements over items container. */
     this.node_.off( {
       dragover: this.fnDisableEvent_
@@ -625,7 +620,7 @@ var SortingQueue_ = function (window, $, std) {
         window.setTimeout( function () {
           self.select();
         }, 10);
-        
+
         /* Ensure event is fired after the last item is added. */
         window.setTimeout( function () {
           self.owner_.requests.end('check-items');
@@ -645,7 +640,7 @@ var SortingQueue_ = function (window, $, std) {
 
   ControllerItems.prototype.selectOffset = function (offset)
   {
-    var csel = this.owner_.options.css.itemSelected,
+    var csel = Css_.item.selected,
         index;
 
     if(!this.node_.length)
@@ -673,6 +668,26 @@ var SortingQueue_ = function (window, $, std) {
       return null;
 
     return this.getById(std.Url.decode(node.attr('id')));
+  };
+
+  ControllerItems.prototype.dismiss = function (item)
+  {
+    var self = this,
+        p = this.owner_;
+
+    if(!(item instanceof Item))
+      throw "Invalid or no Item reference specified";
+    else if(item.dismissing)
+      throw "Already dismissing item: #" + item.content.node_id;
+
+    if(p.constructor.exists('ItemDismissal')) {
+      item.dismissing = true;
+      p.constructor.instantiate('ItemDismissal', item)
+        .on('done', function () { self.remove(item); } );
+    } else {
+      this.owner_.events.trigger("item-dismissed", item.content);
+      this.remove(item);
+    }
   };
 
   ControllerItems.prototype.removeAll = function(check /* = true */) {
@@ -725,7 +740,7 @@ var SortingQueue_ = function (window, $, std) {
                 this.owner_.options.delays.textItemFade,
                 function () {
                   $(this).slideUp(
-                    self.owner_.options.delays.slideItemUp,
+                    self.owner_.options.delays.slideItem,
                     function () {
                       $(this).remove();
                       self.select();
@@ -761,7 +776,7 @@ var SortingQueue_ = function (window, $, std) {
 
   /* overridable */ ControllerItems.prototype.getNodeSelected = function ()
   {
-    return this.node_.find('.' + this.owner_.options.css.itemSelected);
+    return this.node_.find('.' + Css_.item.selected);
   };
 
   /* Private methods */
@@ -774,7 +789,7 @@ var SortingQueue_ = function (window, $, std) {
     if(!this.owner_.initialised)
       return;
 
-    var csel = this.owner_.options.css.itemSelected;
+    var csel = Css_.item.selected;
 
     if(!this.node_.children().length)
       return;
@@ -846,13 +861,13 @@ var SortingQueue_ = function (window, $, std) {
     } else {
       this.owner_.nodes.empty.items.fadeOut(
         this.owner_.options.delays.queueEmptyFadeOut);
-    }      
+    }
   };
 
   ControllerItems.prototype.removeNodes_ = function ()
   {
     this.items_.forEach(function (item) { item.node.remove(); } );
-  };    
+  };
 
 
   /**
@@ -872,10 +887,17 @@ var SortingQueue_ = function (window, $, std) {
 
     this.content_ = item;
     this.node_ = null;
+    this.dismissing_ = false;
 
-    /* Define getters. */
+    /* Getters */
     this.__defineGetter__("content", function () { return this.content_; } );
     this.__defineGetter__("node", function () { return this.node_; } );
+    this.__defineGetter__("dismissing", function ()
+                          { return this.dismissing_; } );
+
+    /* Setters */
+    this.__defineSetter__("dismissing", function (state)
+                          { this.dismissing_ = state; } );
 
     this.node_ = this.render();
     this.initialise();
@@ -900,8 +922,7 @@ var SortingQueue_ = function (window, $, std) {
 
     this.getNodeClose()
       .click(function () {
-        parentOwner.events.trigger("item-dismissed", self.content_);
-        self.owner_.remove(self);
+        self.owner_.dismiss(self);
         return false;
       } );
 
@@ -910,7 +931,7 @@ var SortingQueue_ = function (window, $, std) {
       return;
 
     new std.Draggable(this.node_, {
-      classDragging: parentOwner.options.css.itemDragging,
+      classDragging: Css_.item.dragging,
 
       dragstart: function (e) {
         /* Firstly select item being dragged to ensure correct item position
@@ -937,14 +958,13 @@ var SortingQueue_ = function (window, $, std) {
   };
 
   Item.prototype.deselect = function() {
-    this.node.removeClass(this.owner_.owner.options.css.itemSelected);
+    this.node.removeClass(Css_.item.selected);
     this.owner_.owner.events.trigger("item-deselected", this.content);
   };
 
   Item.prototype.render = function() {
-    var css = this.owner_.owner.options.css,
-        node = $('<div class="' + css.item + '"/>'),
-        content = $('<div class="' + css.itemContent + '"/>'),
+    var node = $('<div class="' + Css_.item.container + '"/>'),
+        content = $('<div class="' + Css_.item.content + '"/>'),
         anchor = this.content_.name;
 
     /* Append title if existent. */
@@ -952,12 +972,12 @@ var SortingQueue_ = function (window, $, std) {
       anchor += '&ndash; ' + this.content_.title;
 
     if(this.content_.url && anchor) {
-      node.append('<a class="' + css.itemTitle + '" target="_blank" '
+      node.append('<a class="' + Css_.item.title + '" target="_blank" '
                   + 'href="' + this.content_.url + '">'
                   + anchor + '</a>');
     }
 
-    node.append('<a class="' + css.itemClose + '" href="#">x</a>');
+    node.append('<a class="' + Css_.item.close + '" href="#">x</a>');
 
     /* Append content and remove all CSS classes from children. */
     content.append(this.content_.text);
@@ -969,32 +989,203 @@ var SortingQueue_ = function (window, $, std) {
   /* Not mandatory. */
   /* overridable */
   Item.prototype.getNodeClose = function() {
-    return this.node_.find('.' + this.owner_.owner.options.css.itemClose);
+    return this.node_.find('.' + Css_.item.close);
   };
 
   /* overridable */ Item.prototype.isSelected = function ()
-  { return this.node_.hasClass(this.owner_.owner.options.css.itemSelected); };
+  { return this.node_.hasClass(Css_.item.selected); };
 
   /* Private methods */
   Item.prototype.select_ = function (ev) {
-    this.node.addClass(this.owner_.owner.options.css.itemSelected);
+    this.node.addClass(Css_.item.selected);
     this.owner_.owner.events.trigger("item-selected", this.content, ev);
   };
 
 
-  /* ----------------------------------------------------------------------
-   *  Default options
-   *  Private attribute.
-   * ---------------------------------------------------------------------- */
-  var defaults_ = {
-    css: {
-      item: 'sd-text-item',
-      itemContent: 'sd-text-item-content',
-      itemTitle: 'sd-text-item-title',
-      itemClose: 'sd-text-item-close',
-      itemSelected: 'sd-selected',
-      itemDragging: 'sd-dragging'
+  /**
+   * @class
+   * */
+  var ItemDismissal = function (item, options)
+  {
+    /* Input validation */
+    if(!(item instanceof Item))
+      throw "Invalid or no item reference specified";
+    else if(!std.is_arr(options) || options.length === 0)
+      throw "Invalid or empty options array specified";
+
+    /* Invoke super constructor. */
+    std.Drawable.call(this, item);
+
+    /* Attributes */
+    this.options_ = options;
+    this.node_ = null;
+    this.events_ = new std.Events(this, [ 'done' ] );
+
+    /* Getters */
+    this.__defineGetter__("node", function () { return this.node_; } );
+
+    /* Initialisation */
+    this.initialise();
+  };
+
+  ItemDismissal.prototype = Object.create(std.Drawable.prototype);
+
+  ItemDismissal.prototype.initialise = function ()
+  {
+    var self = this;
+
+    if(this.events_ === null)
+      throw "Instance already reset";
+
+    this.render();
+
+    if(!std.$.is(this.node_))
+      throw "Item dismissal node not created";
+
+    this.owner_.node.addClass(Css_.dismissal.dismissing);
+
+    this.node_.click(function (ev) {
+      ev.preventDefault();
+      ev = ev.originalEvent;
+
+      var target = $(ev.target);
+      if(!target.hasClass(Css_.dismissal.option))
+        return false;
+
+      try {
+        self.events_.trigger( 'done', target.data('id'), self.owner_.content);
+      } catch(x) { std.on_exception(x); }
+
+/*       self.reset(); */
+
+      return false;
+    } );
+  };
+
+  ItemDismissal.prototype.reset = function ()
+  {
+    this.node_.remove();
+    this.node_ = this.options_ = this.events_ = this.dismissing_ = null;
+  };
+
+  ItemDismissal.prototype.render = std.absm_noti;
+
+  /* Private interface */
+  ItemDismissal.prototype.title = function ()
+  {
+    var text = this.owner_.node.find(
+      ':not(IFRAME):not(.' + Css_.item.close + ')')
+          .addBack().contents()
+          .filter(function() {
+            return this.nodeType == 3;
+          });
+
+    return text.length > 0 ? $(text[0]).text() : null;
+  };
+
+
+  /**
+   * @class
+   * */
+  var ItemDismissalTop = function (item, options)
+  {
+    ItemDismissal.call(this, item, options);
+  };
+
+  ItemDismissalTop.prototype = Object.create(ItemDismissal.prototype);
+
+  ItemDismissalTop.prototype.render = function ()
+  {
+    var self = this;
+
+    this.node_ = $([ '<div class="', Css_.dismissal.container, '"></div>' ]
+                   .join(''));
+
+    this.options_.forEach(function (o) {
+      self.node_.append([ '<a class="', Css_.dismissal.option,
+                          '" href="#" data-id="', o.id, '">', o.title, '</a>' ]
+                        .join(''));
+    } );
+
+    this.owner_.getNodeClose().remove();
+    this.owner_.node.prepend(this.node_.hide());
+    window.setTimeout(function () {
+      self.node_.slideDown(self.owner_.owner.owner.options_.delays.slideItem);
+    } );
+  };
+
+
+  /**
+   * @class
+   * */
+  var ItemDismissalReplace = function (item, options)
+  {
+    ItemDismissal.call(this, item, options);
+  };
+
+  ItemDismissalReplace.prototype = Object.create(ItemDismissal.prototype);
+
+  ItemDismissalReplace.prototype.render = function ()
+  {
+    var self = this,
+        title = this.title(),
+        el = this.owner_.node;
+
+    this.node_ = $([ '<div class="', Css_.dismissal.container, '"></div>' ]
+                   .join(''));
+
+    this.options_.forEach(function (o) {
+      self.node_.append([ '<a class="', Css_.dismissal.option,
+                          '" href="#" data-id="', o.id, '">', o.title, '</a>' ]
+                        .join(''));
+    } );
+
+    el.children().remove();
+    el.append(this.node_.hide());
+    if(title) el.append($(['<p>', title, '</p>'].join(''))
+                        .addClass(Css_.dismissal.title));
+
+    window.setTimeout(function () {
+      self.node_.slideDown(self.owner_.owner.owner.options_.delays.slideItem);
+    } );
+  };
+
+
+  /* ---------------------------------------------------------------------- */
+  /**
+   * Namespace containing all the CSS classes used by Sorting Queue.
+   * @namespace
+   * @private
+   **/
+  var Css_ = {
+    item: {
+      container: 'sd-text-item',
+      content: 'sd-text-item-content',
+      title: 'sd-text-item-title',
+      close: 'sd-text-item-close',
+      selected: 'sd-selected',
+      dragging: 'sd-dragging'
     },
+    dismissal: {
+      container: 'sd-dismissal',
+      dismissing: 'sd-dismissal-dismissing',
+      option: 'sd-dismissal-option',
+      title: 'sd-dismissal-title'
+    },
+    dnd: {
+      droppable: {
+        hover: 'sd-droppable-hover'
+      }
+    }
+  };
+
+  /* ---------------------------------------------------------------------- */
+  /**
+   * Default options.
+   * @namespace
+   * @private
+   **/
+  var defaults_ = {
     keyboard: {                 /* Contains scan codes. */
       listUp: 38,               /* up                   */
       listDown: 40,             /* down                 */
@@ -1003,7 +1194,7 @@ var SortingQueue_ = function (window, $, std) {
     delays: {                   /* In milliseconds.     */
       animateAssign: 75,        /* Duration of assignment of text item via
                                  * shortcut. */
-      slideItemUp: 150,         /* Slide up length of deleted text item. */
+      slideItem: 150,           /* Item slide up/down. */
       textItemFade: 100,        /* Fade out duration of text item after
                                  * assignment. */
       queueEmptyFadeIn: 250,
@@ -1016,7 +1207,7 @@ var SortingQueue_ = function (window, $, std) {
     binCharsLeft: 25,
     binCharsRight: 25,
     itemsDraggable: true,
-    loadItemsAtStartup: true    
+    loadItemsAtStartup: true
   };
 
 
@@ -1025,7 +1216,10 @@ var SortingQueue_ = function (window, $, std) {
   return {
     /* SortingQueue proper */
     Sorter: Sorter,
-    Item: Item
+    Item: Item,
+    ItemDismissal: ItemDismissal,
+    ItemDismissalTop: ItemDismissalTop,
+    ItemDismissalReplace: ItemDismissalReplace
   };
 
 };
