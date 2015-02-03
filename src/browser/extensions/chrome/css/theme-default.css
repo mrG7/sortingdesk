@@ -226,7 +226,7 @@ BODY {
 
 .sd-bin .sd-bin-name {
   color: #5C7CCA;
-}  
+}
 
 .sd-bin.sd-unknown {
   background-color: #d24949 !important;
@@ -478,91 +478,6 @@ A.sd-text-item-title:hover {
 }
 
 
-/* Label Browser */
-.sd-lb-header {
-  height: 57px;
-}
-
-.sd-lb-header-content {
-  font-size: 14px;
-  line-height: 14px;
-  font-style: italic;
-  color: #5d6c9b;
-  color: #444;
-}
-
-.sd-lb-header-content IMG {
-  width: auto;
-  max-height: 40px;
-}
-
-.sd-lb-loading {
-  display: block;
-}
-
-.sd-lb-empty {
-  top: 140px;
-}
-
-.sd-lb-view > TABLE TR {
-  color: black;
-}
-
-.sd-lb-view > TABLE {
-  width: 100%;
-  border-collapse: collapse;
-  border-spacing: 2px;
-  font-family: arial,sans-serif;
-}
-
-.sd-lb-view > TABLE TH {
-  font-size: 14px;
-}
-
-.sd-lb-view > TABLE TH,
-.sd-lb-view > TABLE TD {
-  border: 1px solid;
-  border-color: white #fcfcfc #f0f0f0 white;
-  padding: 5px;
-}
-
-.sd-lb-view > TABLE TH {
-  background-color: #ececec;
-  color: #50505c;
-}
-
-.sd-lb-view > TABLE TR:nth-child(odd) {
-  background-color: #fafafa;
-}
-
-.sd-lb-view > TABLE TR:nth-child(even) {
-  background-color: #f6f6f6;
-}
-
-.sd-lb-view > TABLE TR:hover > TD {
-  background-color: #f0f8ff;
-  cursor: default;
-}
-
-.sd-lb-view-id {
-  font-family: monospace;
-  font-size: 10px;
-  width: 150px;
-  vertical-align: top;
-}
-
-.sd-lb-view-content IMG {
-  font-size: 14px;
-  width: auto;
-  max-height: 40px;
-  transition: all 250ms;
-}
-
-.sd-lb-view-content IMG:hover {
-  max-height: none;
-}
-
-
 /* Common styling to Label Browser and similar components */
 .sd-container.sd-component {
   top: 100px;
@@ -585,7 +500,7 @@ A.sd-text-item-title:hover {
 
 .sd-header, .sd-footer {
   position: relative;
-  
+
   padding: 10px 5px 8px 5px;
   margin: 0;
 
@@ -675,7 +590,7 @@ A.sd-text-item-title:hover {
 }
 
 .sd-toolbar BUTTON:hover {
-  background-image: linear-gradient(#eee, #ddd);  
+  background-image: linear-gradient(#eee, #ddd);
 }
 
 /* Button: round */
