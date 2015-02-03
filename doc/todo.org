@@ -17,14 +17,18 @@ First iteration would include modules and classes.
 *** WAIT Implement keyboard auto-repeat with configurable frequency
 - State "WAIT"       from "TODO"       [2014-10-15 Wed 13:56] \\
   Probable unwanted feature.
-  
+
+* Chrome extension
+** theme-default: special rule =.sd-text-item-content > DIV > P=
+Remove special rule when =Item= in =main.js= is reworked.
+
 * Examples
 ** TODO Fix broken examples
 
 ** WAIT Create examples [0%]
 - State "WAIT"       from "TODO"       [2014-11-25 Tue 06:39] \\
   Not a priority at the moment.
-  
+
 *** TODO No content ids
 
 * Tests
@@ -70,7 +74,7 @@ A similar discussion could be had regarding bins' data structure.
 ** WAIT Resolve all annotated TODO items
 - State "WAIT"       from "TODO"       [2014-10-15 Wed 13:57] \\
   To be done when Sorting Desk has reached a significant milestone.
-  
+
 ** WAIT Implement user notifications
 - State "WAIT"       from "CANCELED"   [2014-11-26 Wed 09:08] \\
   Requires explicit approval.
@@ -81,4 +85,3 @@ A similar discussion could be had regarding bins' data structure.
 A mechanism for displaying notifications to the user is needed for the purpose
 of providing feedback, in particular in the cases when a user action is invalid
 and results in an error.
-
