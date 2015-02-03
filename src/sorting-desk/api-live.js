@@ -432,8 +432,11 @@ var Api_ = (function (window, $, CryptoJS, DossierJS) {
    * DossierJS.SortingQueueItems.prototype._moreTexts . It is here so as to
    * ensure that we receive items in the format expected by
    * SortingQueue. */
-  DossierJS.SortingQueueItems.prototype._moreTexts = function() {
+  DossierJS.SortingQueueItems.prototype._moreTexts = function(num) {
     var self = this;
+
+    if(typeof num !== 'number' || num <= 0)
+      throw "Invalid number of items specified";
 
     if (self._processing || !qitems_.query_content_id) {
       var deferred = $.Deferred();
@@ -452,7 +455,7 @@ var Api_ = (function (window, $, CryptoJS, DossierJS) {
     }
 
     self._processing = true;
-    var p = $.extend({limit: self.limit.toString()}, self.params);
+    var p = $.extend({limit: num.toString()}, self.params);
     return self.api.search(self.engine_name, self.query_content_id, p)
       .then(function(data) {
         var items = [];
