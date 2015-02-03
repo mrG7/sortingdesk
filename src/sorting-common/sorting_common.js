@@ -461,7 +461,7 @@ var SortingCommon_ = function (window, $) {
   /* Instance interface */
   Constructor.prototype.exists = function (name)
   {
-    return is_in(this.map_, name, 'create' + name);
+    return any_in(this.map_, name, 'create' + name);
   };
 
   Constructor.prototype.hasFactoryMethod = function (name)
