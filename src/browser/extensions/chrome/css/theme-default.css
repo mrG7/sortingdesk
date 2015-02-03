@@ -410,6 +410,51 @@ A.sd-text-item-title:hover {
   background-color: inherit !important;
 }
 
+/* Dismissal */
+.sd-dismissal {
+  display: block;
+  margin: 0 0 12px 0;
+  text-align: center;
+  white-space: normal;
+}
+
+.sd-dismissal-option {
+  margin: 0px 6px 4px 0;
+  padding: 4px;
+  border: 1px solid #DDD;
+  border-radius: 4px;
+  box-shadow: 1px 1px 0 0 rgba(50, 50, 50, 0.3);
+  background: linear-gradient(to bottom, #FFF 0%, #F6F6F6 47%, #F2F2F2 100%);
+  text-decoration: none;
+  color: #4C779B;
+  display: inline-block;
+}
+
+.sd-dismissal-option:hover,
+.sd-dismissal-option:focus {
+  background: linear-gradient(to bottom, #FAFAFA 0%, #F1F1F1 47%, #DDD 100%);
+  text-decoration: none;
+}
+
+.sd-dismissal-option:active {
+  background: linear-gradient(to bottom, #F2F2F2 0%, #F6F6F6 47%, #FFFFFF 100%);
+  box-shadow: none;
+}
+
+.sd-dismissal-dismissing,
+.sd-dismissal-dismissing:hover {
+  background-color: #f9f1f1;
+  border-color: #e2b6b6;
+}
+
+.sd-dismissal-title {
+  overflow: hidden;
+  margin: 0;
+  font-size: 14px;
+  font-weight: bold;
+  text-overflow: ellipsis;
+}
+
 /* Droppable elements */
 .sd-droppable {
   border: 2px dashed gray;
