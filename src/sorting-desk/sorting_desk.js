@@ -73,15 +73,34 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
      *   }
      * } */
     delete this.options_.sortingQueue;
+    cbs = opts.sortingQueue.callbacks || { };
+    opts = opts.sortingQueue.options;
+
+    if(!std.is_obj(opts.constructors))
+      opts.constructors = { };
+
+    /* Specify text dismissal handler if client hasn't supplying its own. */
+    if(!std.Constructor.exists(opts.constructors, 'ItemDismissal')) {
+      opts.constructors.createItemDismissal = function (item) {
+        return (new sq.ItemDismissalReplace(
+          item, [ { id: 0, title: 'First option' },
+                  { id: 1, title: 'Second option' },
+                  { id: 2, title: 'Third option' },
+                  { id: 3, title: 'Fourth option' } ]))
+          .on('done', function (id) {
+            console.log('User chose: %s', id);
+          } );
+      };
+    }
+
     this.sortingQueue_ = new sq.Sorter(
-      $.extend(true, opts.sortingQueue.options, {
+      $.extend(true, opts, {
         loadItemsAtStartup: false /* IMPORTANT: Explicitly deny loading of items
                                    * at startup as this would potentially break
                                    * request-(start|stop) event handlers set up
                                    * only *AFTER* this constructor exits. */
       }),
-      $.extend(this.api_.getCallbacks(),
-               opts.sortingQueue.callbacks || { } ));
+      $.extend(this.api_.getCallbacks(), cbs));
   };
 
   Sorter.prototype = {
