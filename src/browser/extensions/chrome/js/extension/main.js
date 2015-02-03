@@ -357,7 +357,7 @@ var Main = (function (window, chrome, $, std, sq, sd, Api, undefined) {
       sortingQueue: {
         options: {
           container: $('#sd-queue'),
-          visibleItems: 10,
+          visibleItems: 20,
           itemsDraggable: false,
           constructors: {
             Item: Item
