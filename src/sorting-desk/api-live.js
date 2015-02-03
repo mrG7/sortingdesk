@@ -356,18 +356,6 @@ var Api_ = (function (window, $, CryptoJS, DossierJS) {
             f.exists = true; return f;
           } );
         } );
-
-/*       var def = $.Deferred(), */
-/*           collection = [ 'Folder_on_top', 'Another_folder_below', */
-/*                          'Yet_another_folder', 'One_more_folder' ]; */
-/* /\*       collection = [ ]; *\/ */
-/*       window.setTimeout(function () { */
-/*         def.resolve(collection.map(function (f) { */
-/*           return new Folder(DossierJS.Folder.from_id(f, annotator_)); */
-/*         } ) ); */
-/*       }, 0 ); */
-
-/*       return def.promise(); */
     };
 
     var listSubfolders = function (folder)
