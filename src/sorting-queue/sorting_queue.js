@@ -406,10 +406,8 @@ var SortingQueue_ = function (window, $, std) {
       } );
 
       var sel = this.owner_.items.selected();
-      if(sel) {
-        this.owner_.events.trigger("item-dismissed", sel.content);
-        this.owner_.items.remove();
-      }
+      if(sel)
+        this.owner_.items.dismiss(sel);
 
       break;
 
@@ -537,10 +535,7 @@ var SortingQueue_ = function (window, $, std) {
 
     /* Register for `text-items´ scope events. */
     this.owner_.dismiss.register('text-item', function (e, id, scope) {
-      var item = self.getById(std.Url.decode(id));
-
-      self.owner_.events_.trigger("item-dismissed", item.content);
-      self.remove(item);
+      self.dismiss(self.getById(std.Url.decode(id)));
     } );
 
     /* Disallow dragging of elements over items container. */
@@ -673,6 +668,26 @@ var SortingQueue_ = function (window, $, std) {
       return null;
 
     return this.getById(std.Url.decode(node.attr('id')));
+  };
+
+  ControllerItems.prototype.dismiss = function (item)
+  {
+    var self = this,
+        p = this.owner_;
+
+    if(!(item instanceof Item))
+      throw "Invalid or no Item reference specified";
+    else if(item.dismissing)
+      throw "Already dismissing item: #" + item.content.node_id;
+
+    if(p.constructor.exists('ItemDismissal')) {
+      item.dismissing = true;
+      p.constructor.instantiate('ItemDismissal', item)
+        .on('done', function () { self.remove(item); } );
+    } else {
+      this.owner_.events.trigger("item-dismissed", item.content);
+      this.remove(item);
+    }
   };
 
   ControllerItems.prototype.removeAll = function(check /* = true */) {
@@ -900,8 +915,7 @@ var SortingQueue_ = function (window, $, std) {
 
     this.getNodeClose()
       .click(function () {
-        parentOwner.events.trigger("item-dismissed", self.content_);
-        self.owner_.remove(self);
+        self.owner_.dismiss(self);
         return false;
       } );
 
