@@ -314,6 +314,11 @@ BODY {
   display: inline-block;
 }
 
+/* TODO: remove when `Item´ in main.js is reworked. */
+.sd-text-item-content > DIV > P {
+  white-space: normal;
+}
+
 .sd-text-item-content A {
   color: #85B7E4;
 }
