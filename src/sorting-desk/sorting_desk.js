@@ -72,15 +72,16 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
      *     }
      *   }
      * } */
+    delete this.options_.sortingQueue;
     this.sortingQueue_ = new sq.Sorter(
-      $.extend(true, this.options_.sortingQueue.options, {
+      $.extend(true, opts.sortingQueue.options, {
         loadItemsAtStartup: false /* IMPORTANT: Explicitly deny loading of items
                                    * at startup as this would potentially break
                                    * request-(start|stop) event handlers set up
                                    * only *AFTER* this constructor exits. */
       }),
       $.extend(this.api_.getCallbacks(),
-               this.options_.sortingQueue.callbacks || { } ));
+               opts.sortingQueue.callbacks || { } ));
   };
 
   Sorter.prototype = {
