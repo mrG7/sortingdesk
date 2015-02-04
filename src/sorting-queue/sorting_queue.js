@@ -683,7 +683,7 @@ var SortingQueue_ = function (window, $, std) {
     if(p.constructor.exists('ItemDismissal')) {
       item.dismissing = true;
       p.constructor.instantiate('ItemDismissal', item)
-        .on('done', function () { self.remove(item); } );
+        .on('dismissed', function () { self.remove(item); } );
     } else {
       this.owner_.events.trigger("item-dismissed", item.content);
       this.remove(item);
@@ -1010,22 +1010,27 @@ var SortingQueue_ = function (window, $, std) {
     /* Input validation */
     if(!(item instanceof Item))
       throw "Invalid or no item reference specified";
-    else if(!std.is_arr(options) || options.length === 0)
-      throw "Invalid or empty options array specified";
+    else if(!std.is_obj(options))
+      throw "Invalid or empty options object specified";
 
     /* Invoke super constructor. */
     std.Drawable.call(this, item);
 
     /* Attributes */
-    this.options_ = options;
+    this.options_ = $.extend({ }, ItemDismissal.defaults, options);
     this.node_ = null;
-    this.events_ = new std.Events(this, [ 'done' ] );
+    this.events_ = new std.Events(this, [ 'dismissed' ] );
+    this.timer_ = null;
 
     /* Getters */
     this.__defineGetter__("node", function () { return this.node_; } );
 
     /* Initialisation */
     this.initialise();
+  };
+
+  ItemDismissal.defaults = {
+    delayTimedDismissal: 5
   };
 
   ItemDismissal.prototype = Object.create(std.Drawable.prototype);
@@ -1042,8 +1047,6 @@ var SortingQueue_ = function (window, $, std) {
     if(!std.$.is(this.node_))
       throw "Item dismissal node not created";
 
-    this.owner_.node.addClass(Css_.dismissal.dismissing);
-
     this.node_.click(function (ev) {
       ev.preventDefault();
       ev = ev.originalEvent;
@@ -1053,25 +1056,51 @@ var SortingQueue_ = function (window, $, std) {
         return false;
 
       try {
-        self.events_.trigger( 'done', target.data('id'), self.owner_.content);
+        self.events_.trigger('dismissed',
+                             target.data('id'),
+                             self.owner_.content);
       } catch(x) { std.on_exception(x); }
 
 /*       self.reset(); */
 
       return false;
     } );
+
+    var delay = this.options_.delayTimedDismissal;
+    console.log(delay);
+    if(!std.is_num(delay) || delay <= 0)
+      return;
+
+    this.owner_.node_.on( {
+      mouseenter: function (ev) {
+        if(self.timer_ !== null)
+          window.clearTimeout(self.timer_);
+      },
+      mouseleave: function (ev) {
+        self.timer_ = window.setTimeout(function () {
+          self.timer_ = null;
+          self.events_.trigger('dismissed',
+                               null,
+                               self.owner_.content);
+        }, self.options_.delayTimedDismissal * 1000);
+      }
+    } );
   };
 
   ItemDismissal.prototype.reset = function ()
   {
+    if(this.timer_)
+      window.clearTimeout(self.timer_);
+
     this.node_.remove();
     this.node_ = this.options_ = this.events_ = this.dismissing_ = null;
+    this.timer_ = null;
   };
 
   ItemDismissal.prototype.render = std.absm_noti;
 
   /* Private interface */
-  ItemDismissal.prototype.title = function ()
+  ItemDismissal.prototype.brief = function ()
   {
     var text = this.owner_.node.find(
       ':not(IFRAME):not(.' + Css_.item.close + ')')
@@ -1097,26 +1126,65 @@ var SortingQueue_ = function (window, $, std) {
   ItemDismissalReplace.prototype.render = function ()
   {
     var self = this,
-        title = this.title(),
-        el = this.owner_.node;
+        el = this.owner_.node,
+        choices = this.options_.choices;
 
-    this.node_ = $([ '<div class="', Css_.dismissal.container, '"></div>' ]
+    var co, ci;
+    if(std.is_arr(choices) && choices.length > 0) {
+      co = $('<table/>').addClass(Css_.dismissal.containers.options);
+
+      for(var i = 0, l = choices.length; i < l; ++i) {
+        var o = choices[i];
+
+        if(i % 2 === 0)
+          ci = $('<tr/>').appendTo(co);
+
+        $([ '<button',
+            '" data-id="', o.id, '">', o.title, '</button>' ]
+          .join(''))
+          .addClass(Css_.dismissal.option)
+          .appendTo($('<td/>').appendTo(ci));
+      }
+    } else
+      co = $();
+
+    this.node_ = $([ '<div class="', Css_.dismissal.containers.main,
+                     '"></div>' ]
                    .join(''));
 
-    this.options_.forEach(function (o) {
-      self.node_.append([ '<a class="', Css_.dismissal.option,
-                          '" href="#" data-id="', o.id, '">', o.title, '</a>' ]
-                        .join(''));
-    } );
+    this.append_not_empty_('question');
+    this.append_not_empty_('description');
+    this.node_.append(co);
 
-    el.children().remove();
-    el.append(this.node_.hide());
-    if(title) el.append($(['<p>', title, '</p>'].join(''))
-                        .addClass(Css_.dismissal.title));
+    el.fadeOut(200, function () {
+      var brief = self.brief();
 
-    window.setTimeout(function () {
-      self.node_.slideDown(self.owner_.owner.owner.options_.delays.slideItem);
+      el.children().remove();
+      el.append(self.node_);
+      el.addClass(Css_.dismissal.dismissing);
+
+      if(brief) {
+        el.append($(['<p>', brief, '</p>'].join(''))
+                  .addClass(Css_.dismissal.brief));
+      }
+
+      el.fadeIn(200);
     } );
+  };
+
+  /* Private interface */
+  ItemDismissalReplace.prototype.append_not_empty_ = function (
+    attr,
+    cssClass /* == null ? attr : cssClass */)
+  {
+    var s = this.options_[attr];
+    if(!std.is_str(s)) return;
+
+    s = s.trim();
+    if(s.length === 0) return;
+
+    this.node_.append($(['<p>', s, '</p>'].join(''))
+                      .addClass(Css_.dismissal[cssClass || attr]));
   };
 
 
@@ -1136,10 +1204,16 @@ var SortingQueue_ = function (window, $, std) {
       dragging: 'sd-dragging'
     },
     dismissal: {
-      container: 'sd-dismissal',
+      containers: {
+        main: 'sd-dismissal',
+        options: 'sd-dismissal-options',
+        row: 'sd-dismissal-options-row'
+      },
+      question: 'sd-dismissal-question',
+      description: 'sd-dismissal-description',
       dismissing: 'sd-dismissal-dismissing',
       option: 'sd-dismissal-option',
-      title: 'sd-dismissal-title'
+      brief: 'sd-dismissal-brief'
     },
     dnd: {
       droppable: {
