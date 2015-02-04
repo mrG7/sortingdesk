@@ -329,28 +329,7 @@ BODY {
 }
 
 .sd-text-item-content A:visited {
-  color: #778BBE !important;
-}
-
-.sd-text-item:hover {
-  background-color: #F8F8DD;
-  color: #44573C;
-}
-
-.sd-text-item:hover .sd-text-item-title {
-  background-color: #F8F8DD;
-}
-
-.sd-more, .sd-less {
-  float: right;
-  font-size: 85%;
-  padding-top: 3px;
-  color: #999;
-}
-
-.sd-more:hover, .sd-less:hover {
-  color: #123;
-  cursor: pointer;
+  color: #85B7E4 !important;
 }
 
 A.sd-text-item-title {
@@ -364,20 +343,10 @@ A.sd-text-item-title {
   border-radius: 6px;
 }
 
-A.sd-text-item-title:hover {
-  color: #4A8BCC;
-}
-
 .sd-text-item:hover .sd-text-item-close,
 .sd-text-item.sd-selected .sd-text-item-close {
   display: block;
   opacity: 1;
-}
-
-.sd-text-item.sd-dragging:hover .sd-text-item-close,
-.sd-text-item.sd-selected.sd-dragging .sd-text-item-close {
-  display: none;
-  opacity: 0;
 }
 
 .sd-text-item-close {
