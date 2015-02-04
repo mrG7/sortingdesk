@@ -42,7 +42,7 @@ var Main = (function (window, chrome, $, std, sq, sd, Api, undefined) {
     var url = fc.value('meta_url');
 
     var ntitle = $(
-      '<p style="font-size: 12pt; margin: 0 0 8px 0;">'
+      '<p style="color: #565656; font-size: 12pt; margin: 0 0 8px 0;">'
       + '<strong></strong>'
       + '</p>'
     );
@@ -53,7 +53,7 @@ var Main = (function (window, chrome, $, std, sq, sd, Api, undefined) {
 
     var nurl = $(
       '<p style="margin: 8px 0 0 0; display: block;">'
-      + '<a style="color: #349950;" href="' + url + '">' + url + '</a>'
+      + '<a href="' + url + '">' + url + '</a>'
       + '</p>'
     );
 
