@@ -1055,11 +1055,9 @@ var SortingQueue_ = function (window, $, std) {
       if(!target.hasClass(Css_.dismissal.option))
         return false;
 
-      try {
-        self.events_.trigger('dismissed',
-                             target.data('id'),
-                             self.owner_.content);
-      } catch(x) { std.on_exception(x); }
+      self.events_.trigger('dismissed',
+                           target.data('id'),
+                           self.owner_.content);
 
 /*       self.reset(); */
 
