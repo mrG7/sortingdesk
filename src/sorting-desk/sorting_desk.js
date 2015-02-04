@@ -82,14 +82,16 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     /* Specify text dismissal handler if client hasn't supplying its own. */
     if(!std.Constructor.exists(opts.constructors, 'ItemDismissal')) {
       opts.constructors.createItemDismissal = function (item) {
-        return (new sq.ItemDismissalReplace(
+        return (new sq.ItemDismissalReplaceTight(
           item, {
             question: "Ex pertinax evertitur usu, mei delicata?",
-            description: "Lorem ipsum dolor sit amet, id per sonet atomorum, in eum detracto.",
-            choices: [ { id: 0, title: 'First option' },
-                       { id: 1, title: 'Second option' },
-                       { id: 2, title: 'Third option' },
-                       { id: 3, title: 'Fourth option' } ]
+            description: "Lorem ipsum dolor sit amet, id per sonet atomorum, in"
+              + " eum detracto.",
+            tooltipClose: "Ignore",
+            choices: [ { id: 0, title: 'Duplicate?' },
+                       { id: 1, title: 'Wrong?' },
+/*                        { id: 2, title: 'Third option' }, */
+/*                        { id: 3, title: 'Fourth option' } */ ]
           } ))
           .on('dismissed', function (id) {
             console.log('User chose: %s', id);

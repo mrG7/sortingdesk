@@ -392,10 +392,19 @@ A.sd-text-item-title {
   text-align: left;
 }
 
+.sd-dismissal-replace-tight.sd-dismissal {
+  margin: 0;
+}
+
 .sd-dismissal-question {
   font-size: 16px;
   font-weight: bold;
   text-shadow: 2px 2px 2px #6e7073;
+}
+
+.sd-dismissal-replace-tight .sd-dismissal-question {
+  font-size: 14px;
+  text-shadow: 1px 1px 1px #6e7073;
 }
 
 .sd-dismissal-description {
@@ -412,6 +421,7 @@ A.sd-text-item-title {
 
 .sd-dismissal-options TD {
   width: 50%;
+  vertical-align: middle;
 }
 
 .sd-dismissal-option {
@@ -426,6 +436,10 @@ A.sd-text-item-title {
   color: white;
   text-align: center;
   text-shadow: 1px 1px 1px #6e7073;
+}
+
+.sd-dismissal-replace-tight .sd-dismissal-option {
+  padding: 3px 8px 3px 8px;
 }
 
 .sd-dismissal-option:hover,

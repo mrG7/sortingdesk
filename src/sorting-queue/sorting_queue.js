@@ -681,8 +681,7 @@ var SortingQueue_ = function (window, $, std) {
       throw "Already dismissing item: #" + item.content.node_id;
 
     if(p.constructor.exists('ItemDismissal')) {
-      item.dismissing = true;
-      p.constructor.instantiate('ItemDismissal', item)
+      item.dismissing = p.constructor.instantiate('ItemDismissal', item)
         .on('dismissed', function () { self.remove(item); } );
     } else {
       this.owner_.events.trigger("item-dismissed", item.content);
@@ -791,7 +790,7 @@ var SortingQueue_ = function (window, $, std) {
 
     var csel = Css_.item.selected;
 
-    if(!this.node_.children().length)
+    if(this.node_.children().length === 0)
       return;
 
     if(std.is_und(variant)) {
@@ -837,14 +836,14 @@ var SortingQueue_ = function (window, $, std) {
     /* Ensure text item is _always_ visible at the bottom and top ends of
      * the containing node. */
     var st = this.node_.scrollTop(),           /* scrolling top */
-        ch = this.node_.innerHeight(),         /* container height */
+        /* container height */
+        ch = this.owner_.options.container.innerHeight(),
         ipt = variant.position().top,          /* item position top */
         ih = st + ipt + variant.outerHeight(); /* item height */
 
-    if(st + ipt < st            /* top */
-       || variant.outerHeight() > ch) {
+    if(st + ipt < st || variant.outerHeight() > ch)
       this.node_.scrollTop(st + ipt);
-    } else if(ih > st + ch) {   /* bottom */
+    else if(ih > st + ch) {   /* bottom */
       this.node_.scrollTop(st + ipt - ch
                            + variant.outerHeight()
                            + parseInt(variant.css('marginBottom'))
@@ -1030,7 +1029,9 @@ var SortingQueue_ = function (window, $, std) {
   };
 
   ItemDismissal.defaults = {
-    delayTimedDismissal: 5
+    delayTimedDismissal: 5,
+    delayFade: 100,
+    closeIsChoice: true
   };
 
   ItemDismissal.prototype = Object.create(std.Drawable.prototype);
@@ -1043,6 +1044,25 @@ var SortingQueue_ = function (window, $, std) {
       throw "Instance already reset";
 
     this.render();
+
+    /* Remove close button if requested to do so */
+    if(this.options_.closeIsChoice === true) {
+      /* Set tooltip on button close, if requested. */
+      if(std.is_str(this.options_.tooltipClose)) {
+        this.owner_.getNodeClose().attr('title',
+                                        this.options_.tooltipClose);
+      }
+
+      /* Attach handler to click event. */
+      this.owner_.getNodeClose()
+        .off()
+        .click(function () {
+          self.events_.trigger('dismissed', null, self.owner_.content);
+        } );
+    } else
+      this.owner_.getNodeClose().remove();
+
+    this.owner_.owner.select(this.owner_);
 
     if(!std.$.is(this.node_))
       throw "Item dismissal node not created";
@@ -1065,7 +1085,6 @@ var SortingQueue_ = function (window, $, std) {
     } );
 
     var delay = this.options_.delayTimedDismissal;
-    console.log(delay);
     if(!std.is_num(delay) || delay <= 0)
       return;
 
@@ -1125,7 +1144,8 @@ var SortingQueue_ = function (window, $, std) {
   {
     var self = this,
         el = this.owner_.node,
-        choices = this.options_.choices;
+        choices = this.options_.choices,
+        brief = self.brief();
 
     var co, ci;
     if(std.is_arr(choices) && choices.length > 0) {
@@ -1148,25 +1168,24 @@ var SortingQueue_ = function (window, $, std) {
 
     this.node_ = $([ '<div class="', Css_.dismissal.containers.main,
                      '"></div>' ]
-                   .join(''));
+                   .join('')).addClass(Css_.dismissal.context.replace);
 
     this.append_not_empty_('question');
     this.append_not_empty_('description');
     this.node_.append(co);
 
-    el.fadeOut(200, function () {
-      var brief = self.brief();
+    if(brief) {
+      this.node_.append($(['<p>', brief, '</p>'].join(''))
+                        .addClass(Css_.dismissal.brief));
+    }
 
-      el.children().remove();
+    el.fadeOut(this.options_.delayFade, function () {
+
+      el.children().not(self.owner.getNodeClose()).remove();
       el.append(self.node_);
       el.addClass(Css_.dismissal.dismissing);
 
-      if(brief) {
-        el.append($(['<p>', brief, '</p>'].join(''))
-                  .addClass(Css_.dismissal.brief));
-      }
-
-      el.fadeIn(200);
+      el.fadeIn(self.options_.delayFade);
     } );
   };
 
@@ -1186,6 +1205,64 @@ var SortingQueue_ = function (window, $, std) {
   };
 
 
+  /**
+   * @class
+   * */
+  var ItemDismissalReplaceTight = function (item, options)
+  {
+    ItemDismissalReplace.call(this, item, options);
+  };
+
+  ItemDismissalReplaceTight.prototype = Object.create(
+    ItemDismissalReplace.prototype);
+
+  ItemDismissalReplaceTight.prototype.render = function ()
+  {
+    var self = this,
+        el = this.owner_.node,
+        choices = this.options_.choices,
+        brief = self.brief();
+
+    var co, ci;
+    if(std.is_arr(choices) && choices.length > 0) {
+      co = $('<table/>').addClass(Css_.dismissal.containers.options);
+
+      for(var i = 0, l = choices.length; i < l; ++i) {
+        var o = choices[i];
+
+        if(i % 2 === 0)
+          ci = $('<tr/>').appendTo(co);
+
+        $([ '<button',
+            '" data-id="', o.id, '">', o.title, '</button>' ]
+          .join(''))
+          .addClass(Css_.dismissal.option)
+          .appendTo($('<td/>').appendTo(ci));
+      }
+    } else
+      co = $();
+
+    this.node_ = $([ '<div class="', Css_.dismissal.containers.main,
+                     '"></div>' ]
+                   .join('')).addClass(Css_.dismissal.context.tight);
+
+    if(brief) {
+      this.node_.append($(['<p>', brief, '</p>'].join(''))
+                        .addClass(Css_.dismissal.brief));
+    }
+
+    this.node_.append(co);
+
+    el.fadeOut(this.options_.delayFade, function () {
+      el.children().not(self.owner.getNodeClose()).remove();
+      el.append(self.node_);
+      el.addClass(Css_.dismissal.dismissing);
+
+      el.fadeIn(self.options_.delayFade);
+    } );
+  };
+
+
   /* ---------------------------------------------------------------------- */
   /**
    * Namespace containing all the CSS classes used by Sorting Queue.
@@ -1202,6 +1279,10 @@ var SortingQueue_ = function (window, $, std) {
       dragging: 'sd-dragging'
     },
     dismissal: {
+      context: {
+        replace: 'sd-dismissal-replace',
+        tight: 'sd-dismissal-replace-tight'
+      },
       containers: {
         main: 'sd-dismissal',
         options: 'sd-dismissal-options',
@@ -1259,7 +1340,8 @@ var SortingQueue_ = function (window, $, std) {
     Sorter: Sorter,
     Item: Item,
     ItemDismissal: ItemDismissal,
-    ItemDismissalReplace: ItemDismissalReplace
+    ItemDismissalReplace: ItemDismissalReplace,
+    ItemDismissalReplaceTight: ItemDismissalReplaceTight
   };
 
 };
