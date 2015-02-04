@@ -927,7 +927,11 @@ var SortingCommon_ = function (window, $) {
       var args = Array.prototype.splice.call(arguments, 1);
 
       d.forEach(function (fn) {
-        fn.apply(null, args);
+        try {
+          fn.apply(null, args);
+        } catch(x) {
+          on_exception(x);
+        }
       } );
     }
   };
