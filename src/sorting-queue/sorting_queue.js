@@ -1087,37 +1087,6 @@ var SortingQueue_ = function (window, $, std) {
   /**
    * @class
    * */
-  var ItemDismissalTop = function (item, options)
-  {
-    ItemDismissal.call(this, item, options);
-  };
-
-  ItemDismissalTop.prototype = Object.create(ItemDismissal.prototype);
-
-  ItemDismissalTop.prototype.render = function ()
-  {
-    var self = this;
-
-    this.node_ = $([ '<div class="', Css_.dismissal.container, '"></div>' ]
-                   .join(''));
-
-    this.options_.forEach(function (o) {
-      self.node_.append([ '<a class="', Css_.dismissal.option,
-                          '" href="#" data-id="', o.id, '">', o.title, '</a>' ]
-                        .join(''));
-    } );
-
-    this.owner_.getNodeClose().remove();
-    this.owner_.node.prepend(this.node_.hide());
-    window.setTimeout(function () {
-      self.node_.slideDown(self.owner_.owner.owner.options_.delays.slideItem);
-    } );
-  };
-
-
-  /**
-   * @class
-   * */
   var ItemDismissalReplace = function (item, options)
   {
     ItemDismissal.call(this, item, options);
@@ -1218,7 +1187,6 @@ var SortingQueue_ = function (window, $, std) {
     Sorter: Sorter,
     Item: Item,
     ItemDismissal: ItemDismissal,
-    ItemDismissalTop: ItemDismissalTop,
     ItemDismissalReplace: ItemDismissalReplace
   };
 
