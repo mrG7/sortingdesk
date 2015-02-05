@@ -6,7 +6,7 @@
 # Comments:
 #
 
-! command -v wmctrl &>/dev/null \
+! command -v wmctrl &>/dev/null 2>&1 \
   && >&2 echo "E: \`wmctrl´ program not found" \
   && exit 1
 

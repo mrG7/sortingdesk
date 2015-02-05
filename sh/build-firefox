@@ -7,7 +7,7 @@
 #
 
 ! command -v cfx &>/dev/null 2>&1 \
-  && >&2 echo "E: `cfx´ program not found" \
+  && >&2 echo "E: \`cfx´ program not found" \
   && exit 1
 
 set -e
