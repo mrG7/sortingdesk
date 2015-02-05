@@ -836,8 +836,7 @@ var SortingQueue_ = function (window, $, std) {
     /* Ensure text item is _always_ visible at the bottom and top ends of
      * the containing node. */
     var st = this.node_.scrollTop(),           /* scrolling top */
-        /* container height */
-        ch = this.node_.innerHeight(),
+        ch = this.node_.innerHeight(),         /* container height */
         ipt = variant.position().top,          /* item position top */
         ih = st + ipt + variant.outerHeight(); /* item height */
 
