@@ -9,10 +9,10 @@
 
 set -e
 
-dir_root="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. && pwd )"
-dir_src="$dir_root/src"
-dir_lib="$dir_root/lib"
-
+readonly dir_root="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. && pwd )"
+readonly dir_src="$dir_root/src"
+readonly dir_lib="$dir_root/lib"
+readonly dir_ext="$dir_src/browser/extensions"
 
 # Function definition
 function message () {
@@ -22,66 +22,130 @@ function message () {
 function info () {
   message "I: $1"
 }
+
+function error () {
+  echo -e "\033[31mE: $1\033[0m"
+  exit 1
+}
+
+# mkdirx <dir[/child0..n]>
+# Create directory, or directories, specified by `dir´ inside extension's `lib´
+# directory.
+#
+# `dir´: relative path of directory structure required
+function mkdirx () {
+  mkdir -vp "chrome/$1"
+  mkdir -vp "firefox/data/$1"
+}
+
+# cpx <file> <dest>
+# Copy `file´ to extension's `lib´ directory.
+#
+# `file´: full path to file
+# `dest´: relative path to subdirectory inside extension's `lib´ directory
+function cpx () {
+  cp -v "$1" "chrome/$2"
+  cp -v "$1" "firefox/data/$2"
+}
+
+# cpx <dir> <dest>
+# Copy `dir´ to extension's `lib´ directory recursively.
+#
+# `dir´: full path to directory
+# `dest´: relative path to subdirectory inside extension's `lib´ directory
+function cpxr () {
+  [ ! -d "$1" ] && error "not a directory: $1"
+  cp -vr "$1" "chrome/$2"
+  cp -vr "$1" "firefox/data/$2"
+}
+
+# cpxa <file0..n-1> <dest>
+# Copy variable number of files to extension's `lib´ directory, each of which
+# given as a single parameter.
+#
+# `filen´: full path to a file
+# `dest´ : relative path to subdirectory inside extension's `lib´ directory
+function cpxa () {
+  local files=( "$@" )
+  local dest=${files[${#files[@]}-1]}
+
+  # Remove last element from array since it contains the destination
+  unset files[${#files[@]}-1]
+
+  # Copy all files
+  for f in "${files[@]}"; do
+    cpx "$f" "$dest"
+  done
+}
 # End: function definition
 
 
-# Component: SortingDesk
-# ---
-cd "$dir_root/src/browser/extensions/chrome"
+# Start: main
+cd "$dir_root/src/browser/extensions/"
 
-# The user isn't supposed to add anything into the `lib´ directory. We therefore
-# assume that all its contents can be removed.
-[ -d lib ] && info "cleaning dependencies" && rm lib -rfv
+# The user isn't supposed to add or change anything in the `lib´ and `shared´
+# directories. We therefore assume content can be removed.
+info "cleaning dependencies"
+[ -d chrome/lib ] && rm chrome/lib -rfv
+[ -d firefox/data/lib ] && rm firefox/data/lib -rfv
+[ -d chrome/shared ] && rm chrome/shared -rfv
+[ -d firefox/data/shared ] && rm firefox/data/shared -rfv
 
 info "copying dependencies: chrome browser extension"
-mkdir -vp lib && cd lib         # Root dependencies directory
 
-# Create directories
-mkdir sorting-common -v
-mkdir sorting-queue -v
-mkdir sorting-desk/components -vp
-mkdir dossier.js -v
-mkdir CryptoJS -v
-mkdir bootstrap/css -vp
-mkdir bootstrap/fonts -v
-mkdir bootstrap/js -v
-mkdir jstree/themes/default -vp
+# + Create directories
+mkdirx lib/sorting-common
+mkdirx lib/sorting-queue
+mkdirx lib/sorting-desk/components
+mkdirx lib/dossier.js
+mkdirx lib/CryptoJS
+mkdirx lib/bootstrap/css
+mkdirx lib/bootstrap/fonts
+mkdirx lib/bootstrap/js
+mkdirx lib/jstree/themes/default
+mkdirx shared
 
 # + Chrome browser extension
 # --
-# Note: Google Chrom(e|ium) browsers do not support symlinks (!). There is no
-# other option but to actually copy, and thus duplicate, the external
-# dependencies we need.
+# Note: Google Chrom(e|ium) and the Mozilla Firefox browsers do not support
+# symlinks (!). There is no other option but to actually copy, and thus
+# duplicate, the external dependencies we need.
 # --
 # Sorting Desk related
-cp -v "$dir_src/sorting-common/sorting_common.js" sorting-common/
-cp -v "$dir_src/sorting-queue/sorting_queue.js" sorting-queue/
-cp -v "$dir_src/sorting-desk/sorting_desk.js" sorting-desk/
-cp -v "$dir_src/sorting-desk/components/label_browser.js" sorting-desk/components
-cp -v "$dir_src/sorting-desk/api-live.js" sorting-desk/
-cp -v "$dir_src/dossier.js/Dossier.js" dossier.js/
+cpx "$dir_src/sorting-common/sorting_common.js" lib/sorting-common/
+cpx "$dir_src/sorting-queue/sorting_queue.js" lib/sorting-queue/
+cpx "$dir_src/sorting-desk/sorting_desk.js" lib/sorting-desk/
+cpx "$dir_src/sorting-desk/components/label_browser.js" lib/sorting-desk/components
+cpx "$dir_src/sorting-desk/api-live.js" lib/sorting-desk/
+cpx "$dir_src/dossier.js/Dossier.js" lib/dossier.js/
 
 # jQuery
-cp -v "$dir_lib/jquery-2.1.1.min.js" ./
+cpx "$dir_lib/jquery-2.1.1.min.js" lib/
 
 # Crypto
-cp -v "$dir_lib/CryptoJS-3.1.2/rollups/md5.js" CryptoJS/
+cpx "$dir_lib/CryptoJS-3.1.2/rollups/md5.js" lib/CryptoJS/
 
 # Bootstrap
-cp -v "$dir_lib/bootstrap-3.3.1/css/"*.min.css bootstrap/css/
-cp -v "$dir_lib/bootstrap-3.3.1/fonts/"* bootstrap/fonts/
-cp -v "$dir_lib/bootstrap-3.3.1/js/"*.min.js bootstrap/js/
+cpxa "$dir_lib/bootstrap-3.3.1/css/"*.min.css lib/bootstrap/css/
+cpxa "$dir_lib/bootstrap-3.3.1/fonts/"* lib/bootstrap/fonts/
+cpxa "$dir_lib/bootstrap-3.3.1/js/"*.min.js lib/bootstrap/js/
 
 # Js Tree
-cp -v "$dir_lib/jstree-3.0.9/dist/jstree.min.js" jstree/
-cp -v "$dir_lib/jstree-3.0.9/dist/themes/default"/*.png jstree/themes/default
-cp -v "$dir_lib/jstree-3.0.9/dist/themes/default"/*.gif jstree/themes/default
-cp -v "$dir_lib/jstree-3.0.9/dist/themes/default/style.min.css" jstree/themes/default
+cpx "$dir_lib/jstree-3.0.9/dist/jstree.min.js" lib/jstree/
+cpxa "$dir_lib/jstree-3.0.9/dist/themes/default"/*.png lib/jstree/themes/default
+cpxa "$dir_lib/jstree-3.0.9/dist/themes/default"/*.gif lib/jstree/themes/default
+cpx "$dir_lib/jstree-3.0.9/dist/themes/default/style.min.css" lib/jstree/themes/default
 
-# All files inside `lib' are treated as immutable. We therefore make every file
-# inside `lib' read-only to prevent accidental changes.
+# Shared assets
+cpxr "$dir_ext/shared" ./
+
+# All files inside `lib' and `shared´ are treated as immutable. We therefore
+# make every file read-only to prevent accidental changes.
 info "enforcing r/o permissions"
-find . -type f -exec chmod -v =r {} +
-# End: Chrome browser extension
+find ./chrome/lib/ -type f -exec chmod -v =r {} +
+find ./chrome/shared/ -type f -exec chmod -v =r {} +
+find ./firefox/data/lib/ -type f -exec chmod -v =r {} +
+find ./firefox/data/shared/ -type f -exec chmod -v =r {} +
 
 message "\ndone."
+# End: main
