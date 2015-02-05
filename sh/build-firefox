@@ -6,11 +6,11 @@
 # Comments:
 #
 
-set -e
-
-[ ! command -v cfx &>/dev/null 2>&1 ] \
-  && >&2 echo "E: cfx program not installed" \
+! command -v cfx &>/dev/null 2>&1 \
+  && >&2 echo "E: `cfx´ program not found" \
   && exit 1
+
+set -e
 
 dir_root="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. && pwd )"
 cd "$dir_root/src/browser/extensions/firefox"
