@@ -1,0 +1,28 @@
+/** theme-dependencies.css --- Customisation of the styling of several
+ * dependencies used by Sorting Desk.
+ *
+ * Copyright (C) 2015 Diffeo
+ *
+ * Comments:
+ */
+
+/*csslint adjoining-classes: false, important: false */
+
+/* Bootstrap */
+BUTTON.dropdown-toggle > .caret {
+  margin-left: 5px;
+}
+
+.btn {
+  transition: 150ms all;
+}
+
+.btn-default.disabled {
+  color: #888;
+}
+
+/* Jstree */
+.jstree UL > LI > A > IMG {
+  height: 99%;
+  max-width: 90%;
+}
