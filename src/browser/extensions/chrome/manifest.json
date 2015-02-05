@@ -31,7 +31,7 @@
   ],
 
   "icons": {
-    "128": "icon_128.png"
+    "128": "shared/media/icons/icon_128.png"
   },
 
   "browser_action": {
