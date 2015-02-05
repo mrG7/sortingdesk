@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "Sorting Desk",
   "version": "0.2.1",
-  "options_page": "html/options.html",
+  "options_page": "src/html/options.html",
   "web_accessible_resources": [
     "lib/*.js",
     "lib/sorting-queue/*.js",
@@ -14,13 +14,13 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": [ "lib/jquery-2.1.1.min.js", "lib/sorting-common/sorting_common.js", "js/content/embed.js" ],
-      "css": [ "css/theme-default.css", "css/theme-default-images.css" ]
+      "js": [ "lib/jquery-2.1.1.min.js", "lib/sorting-common/sorting_common.js", "src/js/content/embed.js" ],
+      "css": [ "src/css/theme-default.css", "src/css/theme-default-images.css" ]
     }
   ],
 
   "background": {
-    "scripts": [ "lib/jquery-2.1.1.min.js", "lib/sorting-common/sorting_common.js", "js/extension/config.js", "js/extension/background.js" ]
+    "scripts": [ "lib/jquery-2.1.1.min.js", "lib/sorting-common/sorting_common.js", "src/js/extension/config.js", "src/js/extension/background.js" ]
   },
 
   "permissions": [
