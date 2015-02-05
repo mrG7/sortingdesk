@@ -17,7 +17,6 @@ var Config = (function (window, chrome, $, std, undefined) {
     active: true,
     startPosition: 0
   };
-  console.log(chrome);
 
   var load = function (callback) {
     chrome.storage.local.get('config', function (state) {
