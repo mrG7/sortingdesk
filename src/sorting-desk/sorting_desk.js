@@ -969,6 +969,8 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
   FolderNew.prototype.render = function ()
   {
+    var self = this;
+
     this.id_ = this.tree.create_node(
       null, { state: 'open', text: "", type: "folder" }, "last");
 
@@ -978,7 +980,10 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.tree.edit(this.tree.get_node(this.id_),
                    this.owner_.owner.options.folderNewCaption);
 
-    this.node.get(0).scrollIntoView();
+    /* TODO: remove hardcoded timeout.
+     * Scrolling into view has to be on a timeout because JsTree performs a
+     * slide down animation. */
+    window.setTimeout(function () { self.node.get(0).scrollIntoView(); }, 200);
   };
 
 
@@ -1150,7 +1155,8 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
   SubfolderNew.prototype.render = function ()
   {
-    var o = this.owner_;
+    var self = this,
+        o = this.owner_;
 
     this.id_ = this.tree.create_node(
       this.owner_.node,
@@ -1164,7 +1170,11 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
     o.open();
     this.tree.edit(this.node);
-    this.node.get(0).scrollIntoView();
+
+    /* TODO: remove hardcoded timeout.
+     * Scrolling into view has to be on a timeout because JsTree performs a
+     * slide down animation. */
+    window.setTimeout(function () { self.node.get(0).scrollIntoView(); }, 200);
   };
 
 
