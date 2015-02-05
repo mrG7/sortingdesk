@@ -612,8 +612,14 @@ var SortingQueue_ = function (window, $, std) {
 
         items.forEach(function (item, index) {
           window.setTimeout( function () {
-            self.items_.push(
-              self.owner_.constructor.instantiate('Item', self, item));
+            /* Only continue adding items if the owning Sorting Queue is still
+             * in an `initialised´ state. Given the asynchronous nature of this
+             * method, it might be the case that the owning instance might have
+             * been issued a reset, in which case no more items are loaded. */
+            if(self.owner_.initialised) {
+              self.items_.push(
+                self.owner_.constructor.instantiate('Item', self, item));
+            }
           }, Math.pow(index, 2) * 1.1);
         } );
 
@@ -625,7 +631,7 @@ var SortingQueue_ = function (window, $, std) {
         window.setTimeout( function () {
           self.owner_.requests.end('check-items');
           self.owner_.events.trigger('items-updated', self.items_.length);
-          self.owner_.events_.trigger('loading-end');
+          self.owner_.events.trigger('loading-end');
           self.updateEmptyNotification_();
         }, Math.pow(items.length - 1, 2) * 1.1 + 10);
       } )
@@ -782,12 +788,6 @@ var SortingQueue_ = function (window, $, std) {
   ControllerItems.prototype.select_ = function (variant,
                                                 /* optional */ ev)
   {
-    /* Fail silently if not initialised anymore. This might happen if, for
-     * example, the `reset' method was invoked but the component is still
-     * loading text items. */
-    if(!this.owner_.initialised)
-      return;
-
     var csel = Css_.item.selected;
 
     if(this.node_.children().length === 0)
@@ -836,8 +836,7 @@ var SortingQueue_ = function (window, $, std) {
     /* Ensure text item is _always_ visible at the bottom and top ends of
      * the containing node. */
     var st = this.node_.scrollTop(),           /* scrolling top */
-        /* container height */
-        ch = this.owner_.options.container.innerHeight(),
+        ch = this.node_.innerHeight(),         /* container height */
         ipt = variant.position().top,          /* item position top */
         ih = st + ipt + variant.outerHeight(); /* item height */
 
@@ -874,13 +873,6 @@ var SortingQueue_ = function (window, $, std) {
    * */
   var Item = function (owner, item)
   {
-    /* Fail silently if not initialised anymore. This might happen if, for
-     * example, the `reset' method was invoked but the component is still
-     * loading text items. */
-    if (!owner.owner.initialised) {
-        return;
-    }
-
     /* Invoke super constructor. */
     std.Drawable.call(this, owner);
 

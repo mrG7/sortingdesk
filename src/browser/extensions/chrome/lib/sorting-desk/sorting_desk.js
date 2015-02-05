@@ -84,14 +84,9 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       opts.constructors.createItemDismissal = function (item) {
         return (new sq.ItemDismissalReplaceTight(
           item, {
-            question: "Ex pertinax evertitur usu, mei delicata?",
-            description: "Lorem ipsum dolor sit amet, id per sonet atomorum, in"
-              + " eum detracto.",
             tooltipClose: "Ignore",
             choices: [ { id: 0, title: 'Duplicate?' },
-                       { id: 1, title: 'Wrong?' },
-/*                        { id: 2, title: 'Third option' }, */
-/*                        { id: 3, title: 'Fourth option' } */ ]
+                       { id: 1, title: 'Wrong?' }  ]
           } ))
           .on('dismissed', function (id) {
             console.log('User chose: %s', id);
@@ -969,6 +964,8 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
   FolderNew.prototype.render = function ()
   {
+    var self = this;
+
     this.id_ = this.tree.create_node(
       null, { state: 'open', text: "", type: "folder" }, "last");
 
@@ -978,7 +975,10 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.tree.edit(this.tree.get_node(this.id_),
                    this.owner_.owner.options.folderNewCaption);
 
-    this.node.get(0).scrollIntoView();
+    /* TODO: remove hardcoded timeout.
+     * Scrolling into view has to be on a timeout because JsTree performs a
+     * slide down animation. */
+    window.setTimeout(function () { self.node.get(0).scrollIntoView(); }, 200);
   };
 
 
@@ -1150,7 +1150,8 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
   SubfolderNew.prototype.render = function ()
   {
-    var o = this.owner_;
+    var self = this,
+        o = this.owner_;
 
     this.id_ = this.tree.create_node(
       this.owner_.node,
@@ -1164,7 +1165,11 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
     o.open();
     this.tree.edit(this.node);
-    this.node.get(0).scrollIntoView();
+
+    /* TODO: remove hardcoded timeout.
+     * Scrolling into view has to be on a timeout because JsTree performs a
+     * slide down animation. */
+    window.setTimeout(function () { self.node.get(0).scrollIntoView(); }, 200);
   };
 
 
