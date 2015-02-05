@@ -1,0 +1,26 @@
+#!/bin/bash
+# reload-firefox --- Builds the extension and posts the package to a service
+# running on localhost that then refreshes it on a Firebox-based browser.
+#
+# Copyright (c) 2015 Diffeo
+#
+# Comments:
+#
+
+set -e
+
+function fail() {
+  [ ! -z "$2" ] && >&2 echo "E: failed to reload extension: $2"
+  exit $1
+}
+
+dir_root="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. && pwd )"
+source "$dir_root/sh/settings.sh"
+cd "$dir_root/src/browser/extensions/firefox"
+
+echo "I: reloading extension"
+"$dir_root/sh/build-firefox" >/dev/null
+
+set +e
+wget --post-file=sortingdesk.xpi $URL_FIREFOX_RELOAD &>/dev/null
+[ $? -eq 8 ] && echo "done." || fail 1 "service failure"

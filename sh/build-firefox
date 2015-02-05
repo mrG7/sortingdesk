@@ -1,0 +1,20 @@
+#!/bin/bash
+# build-firefox --- Builds and packages the extension.
+#
+# Copyright (c) 2015 Diffeo
+#
+# Comments:
+#
+
+set -e
+
+[ ! command -v cfx &>/dev/null 2>&1 ] \
+  && >&2 echo "E: cfx program not installed" \
+  && exit 1
+
+dir_root="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. && pwd )"
+cd "$dir_root/src/browser/extensions/firefox"
+
+echo "I: building Firefox extension"
+cfx xpi >/dev/null
+echo "done."
