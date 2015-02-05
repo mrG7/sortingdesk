@@ -10,6 +10,10 @@ First iteration would include modules and classes.
 ** TODO Document required options
 =SortingQueue=, =SortingDesk= and possibly other components, could do with documentation about required and optional options, callbacks and so on.
 
+* =SortingQueue=
+** DONE Investigate what can be done about ensuring selected item is always visible
+- State "DONE"       from "TODO"       [2015-02-05 Thu 08:21]
+
 * =SortingDesk=
 ** =ControllerExplorer=
 *** TODO [#A] Why can't an attribute be added in the =SubfolderNew= constructor and accessed in =render=?
