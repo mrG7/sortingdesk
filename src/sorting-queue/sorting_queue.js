@@ -837,7 +837,7 @@ var SortingQueue_ = function (window, $, std) {
      * the containing node. */
     var st = this.node_.scrollTop(),           /* scrolling top */
         /* container height */
-        ch = this.owner_.options.container.innerHeight(),
+        ch = this.node_.innerHeight(),
         ipt = variant.position().top,          /* item position top */
         ih = st + ipt + variant.outerHeight(); /* item height */
 

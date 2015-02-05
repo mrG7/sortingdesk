@@ -593,6 +593,11 @@ A.sd-text-item-title {
 }
 
 .sd-container-view {
+  overflow: auto;
+}
+
+/* Hack for JsTree. */
+#sd-folder-explorer .sd-container-view {
   overflow: hidden;
 }
 

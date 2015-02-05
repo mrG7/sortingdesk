@@ -256,11 +256,18 @@ var Main = (function (window, chrome, $, std, sq, sd, Api, undefined) {
 
   var resize_ = function ()
   {
-    var height = Math.floor(window.innerHeight / 2);
+    var height = Math.floor(window.innerHeight / 2),
+        q = $("#sd-queue");
 
-    /* Set up heights. */
+    /* Set up heights of master containers. */
     $("#sd-folder-explorer").height(height);
-    $("#sd-queue").height(height - $("#sd-queue > .sd-footer").outerHeight());
+    q.height(height -= $("#sd-queue > .sd-footer").outerHeight());
+
+    /* Sorting Queue requires special care. In particular, the element that
+     * will contain items *must* be set the maximum allowed height. */
+    q = q.find('.sd-container-view-outer');
+    $("#sd-queue .sd-container-view").height(
+      height - (q.outerHeight(true) - q.innerHeight()));
   };
 
 
