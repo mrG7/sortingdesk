@@ -1,0 +1,15 @@
+#!/bin/bash
+# focus-firefox --- Focus on either the Mozilla Firefox or Tor Browser programs.
+#
+# Copyright (c) 2015 Diffeo
+#
+# Comments:
+#
+
+! command -v wmctrl &>/dev/null \
+  && >&2 echo "E: \`wmctrl´ program not found" \
+  && exit 1
+
+set -e
+
+wmctrl -a "Mozilla Firefox" || wmctrl -a "Tor Browser"
