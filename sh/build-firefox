@@ -12,7 +12,7 @@
 
 set -e
 
-dir_root="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. && pwd )"
+readonly dir_root="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. && pwd )"
 cd "$dir_root/src/browser/extensions/firefox"
 
 echo "I: building Firefox extension"

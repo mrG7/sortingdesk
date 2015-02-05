@@ -14,7 +14,7 @@ function fail() {
   exit $1
 }
 
-dir_root="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. && pwd )"
+readonly dir_root="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. && pwd )"
 source "$dir_root/sh/settings.sh"
 cd "$dir_root/src/browser/extensions/firefox"
 
