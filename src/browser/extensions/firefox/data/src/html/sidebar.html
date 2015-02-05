@@ -1,10 +1,111 @@
-<!DOCTYPE HTML>
+<!DOCTYPE html>
 <html>
-  <head>
-    <link href="stuff.css" type="text/css" rel="stylesheet">
-  </head>
-  <body>
-    <script type="text/javascript" src="../js/sidebar.js"></script>
-    <p>We have a sidebar!</p>
-  </body>
+<head>
+  <title>Sorting Desk</title>
+
+  <link href="../../lib/bootstrap/css/bootstrap.min.css" type="text/css" rel="stylesheet" />
+  <link href="../../lib/bootstrap/css/bootstrap-theme.min.css" type="text/css" rel="stylesheet" />
+  <link href="../../lib/jstree/themes/default/style.min.css" type="text/css" rel="stylesheet" />
+  <link href="../css/theme-default.css" type="text/css" rel="stylesheet" />
+  <link href="../css/theme-default-images.css" type="text/css" rel="stylesheet" />
+  <link href="../css/theme-dependencies.css" type="text/css" rel="stylesheet" />
+
+  <!-- External dependencies -->
+  <script src="../../lib/jquery-2.1.1.min.js"></script>
+  <script src="../../lib/jstree/jstree.min.js"></script>
+  <script src="../../lib/bootstrap/js/bootstrap.min.js"></script>
+  <script src="../../lib/CryptoJS/md5.js"></script>
+  <!-- Sorting Common -->
+  <script src="../../lib/sorting-common/sorting_common.js"></script>
+  <!-- Chrome extension -->
+  <script src="../js/extension/config.js"></script>
+  <script src="../js/extension/options.js"></script>
+  <!-- Dossier.js -->
+  <script src="../../lib/dossier.js/Dossier.js"></script>
+  <!-- Sorting Queue -->
+  <script src="../../lib/sorting-queue/sorting_queue.js"></script>
+  <!-- Sorting Desk -->
+  <script src="../../lib/sorting-desk/api-live.js"></script>
+  <script src="../../lib/sorting-desk/sorting_desk.js"></script>
+  <!-- Sorting Desk: components -->
+  <script src="../js/sidebar.js"></script>
+</head>
+
+<body>
+<!-- Sorting Desk extension -->
+<div id="sd-sorting-desk" class="sd-container">
+  <!-- Buttons: folder dismiss -->
+  <div id="sd-button-dismiss" data-sd-scope="sorting-queue-button-dismiss">
+    <span>X</span>
+  </div>
+
+  <!-- Folder Explorer -->
+  <div id="sd-folder-explorer" class="sd-panel">
+    <!-- Header -->
+    <div class="sd-header">
+      <!-- Toolbar -->
+      <div class="sd-toolbar btn-toolbar" role="toolbar" data-sd-scope="sorting-desk-toolbar">
+        <div class="btn-group btn-group-sm">
+          <button type="button" class="btn btn-default" data-toggle="tooltip" data-placement="bottom" title="Create a new top level folder" data-sd-scope="sorting-desk-toolbar-add">
+            <span class="glyphicon glyphicon-plus"></span>
+          </button>
+          <button type="button" class="btn btn-default" data-toggle="tooltip" data-placement="bottom" title="Create a new subfolder" data-sd-scope="sorting-desk-toolbar-add-subfolder">
+            <span class="glyphicon glyphicon-plus-sign"></span>
+          </button>
+          <button type="button" class="btn btn-default disabled" data-toggle="tooltip" data-placement="bottom" title="Rename selected folder" data-sd-scope="sorting-desk-toolbar-rename">
+            <span class="glyphicon glyphicon-pencil"></span>
+          </button>
+          <button type="button" class="btn btn-default disabled" data-toggle="tooltip" data-placement="bottom" title="Remove selected folder" data-sd-scope="sorting-desk-toolbar-remove">
+            <span class="glyphicon glyphicon-remove"></span>
+        </div>
+        <div class="btn-group btn-group-sm">
+          <button type="button" class="btn btn-default" data-toggle="tooltip" data-placement="left" title="Refresh folder explorer" data-sd-scope="sorting-desk-toolbar-refresh">
+            <span class="glyphicon glyphicon-refresh"></span>
+          </button>
+        </div>
+      </div>
+      <h1 class="sd-header-title">Folder Explorer</h1>
+    </div>
+
+    <div class="sd-container-view-outer sd-panel-top">
+      <div class="sd-container-view" data-sd-scope="sorting-desk-explorer"></div>
+    </div>
+
+    <div class="sd-empty sd-wider" data-sd-scope="sorting-desk-explorer-empty">
+      <p>Folder explorer does not contain any folders</p>
+      <div class="sd-hint">
+        <strong>Hint:</strong> click the <em>add folder</em> button above to <strong>create a folder</strong>. Next, <strong>create a subfolder</strong> using the <em>add subfolder</em> button so you can start bookmarking. To bookmark interesting snippets of text or images, simply <strong>drag and drop</strong> them straight into subfolders.
+      </div>
+    </div>
+
+    <div class="sd-loading"></div>
+  </div>
+
+  <!-- Queue of Items -->
+  <div id="sd-queue" class="sd-panel">
+    <div class="sd-container-view-outer">
+      <div class="sd-container-view" data-sd-scope="sorting-queue-items"></div>
+    </div>
+
+    <div class="sd-empty" data-sd-scope="sorting-queue-items-empty">
+      Search results empty
+    </div>
+
+    <!-- Footer -->
+    <div class="sd-footer">
+      <!-- Toolbar -->
+      <div class="sd-toolbar btn-toolbar" role="toolbar" data-sd-scope="sorting-desk-toolbar">
+        <div class="btn-group btn-group-sm">
+          <button type="button" class="btn btn-default" data-toggle="tooltip" data-placement="left" title="Refresh search results" data-sd-scope="sorting-desk-toolbar-refresh">
+            <span class="glyphicon glyphicon-refresh"></span>
+          </button>
+        </div>
+      </div>
+      <h1 class="sd-footer-title">Search Results</h1>
+    </div>
+
+    <div class="sd-loading"></div>
+  </div>
+</div>
+</body>
 </html>
