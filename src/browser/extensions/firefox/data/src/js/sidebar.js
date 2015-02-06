@@ -8,13 +8,14 @@
  */
 
 
+/*global addon */
 /*jshint laxbreak:true */
 
 var Main = (function (window, $, std, sq, sd, Api, undefined) {
 
   /* Module-wide variables */
-  var nodes = { },
-      active = null,
+  var preferences,
+      nodes = { },
       loading,
       sorter;
 
@@ -113,8 +114,8 @@ var Main = (function (window, $, std, sq, sd, Api, undefined) {
    * */
   var HandlerCallbacks = (function () {
 
-/*     var imageToBase64_ = function (entity) */
-/*     { */
+    var imageToBase64_ = function (entity)
+    {
 /*       var deferred = $.Deferred(); */
 
 /*       chrome.runtime.sendMessage( */
@@ -125,117 +126,52 @@ var Main = (function (window, $, std, sq, sd, Api, undefined) {
 /*         } ); */
 
 /*       return deferred.promise(); */
-/*     }; */
+    };
 
-/*     var getSelection_ = function () */
-/*     { */
-/*       var deferred = $.Deferred(); */
+    var getSelection_ = function ()
+    {
+      var deferred = $.Deferred();
 
-/*       /\* If there is an active tab, send it a message requesting detailed */
-/*        * information about current text selection. *\/ */
-/*       if(active !== null) { */
-/*         chrome.tabs.get(active.id, function (tab) { */
-/*           if(!/^chrome[^:]*:/.test(tab.url)) { */
-/*             chrome.tabs.sendMessage( */
-/*               active.id, */
-/*               { operation: 'get-selection' }, */
-/*               function (result) { */
-/*                 /\* Retrieve base64 encoding of image data if result type is */
-/*                  * image; otherwise resolve promise straight away with result in */
-/*                  * it. *\/ */
-/*                 if(std.is_obj(result) && result.type === 'image') { */
-/*                   imageToBase64_(result.content) */
-/*                     .done(function (data) { */
-/*                       result.data = data; */
-/*                       deferred.resolve(result); */
-/*                     } ).fail(function () { */
-/*                       console.error("Failed to retrieve image data in base64" */
-/*                                     + " encoding"); */
-/*                       deferred.resolve(null); */
-/*                     } ); */
-/*                 } else */
-/*                   deferred.resolve(result); */
-/*               } ); */
-/*           } */
-/*         } ); */
-/*       } */
+      addon.port.on('get-selection', function (result) {
+        if(result !== null) {
+          /* Retrieve base64 encoding of image data if result type is
+           * image; otherwise resolve promise straight away with result in
+           * it. */
+          if(!std.is_obj(result)) {
+            console.error("Invalid result type received: not object");
+            deferred.reject();
+          } else if(result.type === 'image') {
+            result.data = '';
+            deferred.resolve(result);
+            /*             imageToBase64_(result.content) */
+            /*               .done(function (data) { */
+            /*                 result.data = data; */
+            /*                 deferred.resolve(result); */
+            /*               } ).fail(function () { */
+            /*                 console.error("Failed to retrieve image data in base64" */
+            /*                               + " encoding"); */
+            /*                 deferred.resolve(null); */
+            /*               } ); */
+          } else
+            deferred.resolve(result);
+        }
+      } );
+      addon.port.emit('get-selection');
 
-/*       return deferred.promise(); */
-/*     }; */
+      return deferred.promise();
+    };
 
-    /* Interface */
+    /* interface */
     return {
       callbacks: {
         sorter: {
 /*           imageToBase64: imageToBase64_, */
-/*           getSelection: getSelection_ */
+          getSelection: getSelection_
         }
       }
     };
 
   } )();
-
-
-/*   /\** */
-/*    * @class */
-/*    * *\/ */
-/*   var BackgroundListener = (function () { */
-
-/*     /\* Event handlers *\/ */
-
-/*     /\* Map message operations to handlers. *\/ */
-/*     var methods_ = { */
-/*       /\* null *\/ */
-/*     }; */
-
-/*     /\* Handle messages whose `operation´ is defined above in `methods_´. *\/ */
-/*     chrome.runtime.onMessage.addListener( */
-/*       function (request, sender, callback) { */
-/*         if(methods_.hasOwnProperty(request.operation)) { */
-/*           console.log("Invoking message handler [type=" */
-/*                       + request.operation + "]"); */
-
-/*           /\* Invoke handler. *\/ */
-/*           methods_[request.operation].call(window, request, sender, callback); */
-/*         } */
-/*       } */
-/*     ); */
-
-/*   } )(); */
-
-
-/*   /\* Module interface *\/ */
-/*   var getTabSelectedInWindow = function (windowId, callback) */
-/*   { */
-/*     if(!std.is_fn(callback)) */
-/*       throw "Invalid or no callback provided"; */
-/*     else if(windowId < 0) { */
-/*       callback(null); */
-/*       return; */
-/*     } */
-
-/*     /\* TODO: Invoking `query´ produces strange errors. *\/ */
-/* /\*     chrome.tabs.query({ windowId: windowId, active: true }, function (tab) { *\/ */
-/*     chrome.tabs.getSelected(windowId, function (tab) { */
-/*       if(tab) { */
-/*         chrome.tabs.get(tab.id, function (tab) { */
-/*           callback(/^chrome[^:]*:/.test(tab.url) ? null : tab); */
-/*         } ); */
-/*       } else */
-/*         callback(null); */
-/*     } ); */
-/*   }; */
-
-/*   var setActive = function (tab) */
-/*   { */
-/*     active = tab; */
-
-/*     if(!active) { */
-/*       active = null; */
-/*       console.log("No active tab currently"); */
-/*     } else */
-/*       console.log("Currently active tab: #%d", active.id); */
-/*   }; */
 
   var setupSortingQueue_ = function (sorter)
   {
@@ -280,55 +216,24 @@ var Main = (function (window, $, std, sq, sd, Api, undefined) {
       queue:  new LoadingStatus($('#sd-queue .sd-loading'))
     };
 
-/*     chrome.runtime.sendMessage({ operation: "get-meta" }, function (meta) { */
-/*       /\* Cache jQuery references to nodes used. *\/ */
-/*       nodes.loading = $('#sd-sorting-desk .sd-loading'); */
+    /* Cache jQuery references to nodes used. */
+    nodes.loading = $('#sd-sorting-desk .sd-loading');
 
-      /* Initialise tooltips. */
-      $('[data-toggle="tooltip"]').tooltip();
+    /* Initialise tooltips. */
+    $('[data-toggle="tooltip"]').tooltip();
 
-/*       /\* Set initial heights *\/ */
-/*       resize_(); */
+    /* Set initial heights */
+    resize_();
 
-/*       /\* Initialise API and instantiate `SortingDesk´ class. */
-/*        * -- */
-/*        * Note: for whatever reason, Chrome is not notifying of any exceptions */
-/*        * thrown, which is why instantiation is wrapped inside a try-catch block. */
-/*        * *\/ */
-/*       try { */
-/*         instantiate_(meta); */
-/*       } catch(x) { */
-/*         std.on_exception(x); */
-/*       } */
+    /* Initialise API and instantiate `SortingDesk´ class. */
+    try {
+      instantiate_();
+    } catch(x) {
+      std.on_exception(x);
+    }
 
-/*       /\* Get currently active tab and listen for changes on which tab becomes */
-/*        * active. *\/ */
-/*       chrome.windows.getLastFocused(function (win) { */
-/*         getTabSelectedInWindow(win.id, function (tab) { */
-/*           if(tab) */
-/*             setActive(tab); */
-/*           else */
-/*             console.info("No initial active tab"); */
-/*         } ); */
-/*       } ); */
-
-/*       chrome.windows.onFocusChanged.addListener(function (id) { */
-/*         getTabSelectedInWindow(id, function (tab) { */
-/*           if(tab !== null) */
-/*             setActive(tab); */
-/*         } ); */
-/*       } ); */
-
-/*       chrome.tabs.onActivated.addListener(function (info) { */
-/*         chrome.tabs.get(info.tabId, function (tab) { */
-/*           if(!/^chrome[^:]*:/.test(tab.url)) */
-/*             setActive(tab); */
-/*         } ); */
-/*       } ); */
-
-      console.info("Initialised Sorting Desk extension");
-      console.info("READY");
-/*     } ); */
+    console.info("Initialised Sorting Desk extension");
+    console.info("READY");
 
     $(window)
       .resize(function () { resize_(); } )
@@ -342,13 +247,7 @@ var Main = (function (window, $, std, sq, sd, Api, undefined) {
         if(target.nodeName.toLowerCase() === 'a'
            && target.href !== window.location.href + '#')
         {
-/*           chrome.windows.getLastFocused(function (win) { */
-/*             chrome.tabs.create( { */
-/*               windowId: win.id, */
-/*               url: target.href, */
-/*               active: true } ); */
-/*           } ); */
-
+          console.log("click event!", target);
           ev.preventDefault();
         }
 
@@ -356,11 +255,10 @@ var Main = (function (window, $, std, sq, sd, Api, undefined) {
       } );
   };
 
-  var instantiate_ = function (meta) {
-
+  var instantiate_ = function () {
     (sorter = new sd.Sorter( {
       container: $('#sd-folder-explorer'),
-      dossierUrl: meta.config.dossierUrl,
+      dossierUrl: preferences.dossierUrl,
       sortingQueue: {
         options: {
           container: $('#sd-queue'),
@@ -381,7 +279,11 @@ var Main = (function (window, $, std, sq, sd, Api, undefined) {
 
   /* Startup sequence. */
   $(function () {
-    initialise_();
+    addon.port.once('get-preferences', function (prefs) {
+      preferences = prefs;
+      initialise_();
+    } )
+    addon.port.emit('get-preferences');
   } );
 
 } )(window, jQuery, SortingCommon, SortingQueue, SortingDesk, Api);
