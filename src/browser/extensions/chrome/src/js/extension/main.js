@@ -143,7 +143,10 @@ var Main = (function (window, chrome, $, std, sq, sd, Api, undefined) {
                 /* Retrieve base64 encoding of image data if result type is
                  * image; otherwise resolve promise straight away with result in
                  * it. */
-                if(std.is_obj(result) && result.type === 'image') {
+                if(!std.is_obj(result)) {
+                  console.error("Invalid result type received: not object");
+                  deferred.reject();
+                } else if(result.type === 'image') {
                   imageToBase64_(result.content)
                     .done(function (data) {
                       result.data = data;
