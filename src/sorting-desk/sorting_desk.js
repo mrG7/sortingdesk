@@ -770,8 +770,8 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     ev = ev.originalEvent;
     ev.dropEffect = 'move';
 
-    var el = ev.toElement.nodeName.toLowerCase() === 'a'
-          && ev.toElement || false;
+    var to = ev.toElement || ev.target,
+        el = to && to.nodeName.toLowerCase() === 'a' && to || false;
 
     if(el && el.parentNode && el.parentNode.id) {
       var fl = this.getAnyById(el.parentNode.id);
@@ -789,8 +789,8 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   {
     ev = ev.originalEvent;
 
-    var el = ev.toElement.nodeName.toLowerCase() === 'a'
-          && ev.toElement || false;
+    var to = ev.toElement || ev.target,
+        el = to && to.nodeName.toLowerCase() === 'a' && to || false;
 
     if(el && el.parentNode && el.parentNode.id) {
       var fl = this.getAnyById(el.parentNode.id);
