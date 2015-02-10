@@ -48,6 +48,10 @@ var Background = function (window, chrome, $, std, undefined)
     chrome.browserAction.onClicked.addListener(function () {
       if(window_.extension === null)
         spawn_();
+      else {
+        chrome.windows.remove(window_.extension.id);
+        window_.extension = null;
+      }
     } );
   };
 
