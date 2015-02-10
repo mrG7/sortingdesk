@@ -656,9 +656,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
         /* A feature collection was received. No further operations are carried
          * out if `exists´ is true; otherwise its contents are updated. */
         if(!exists) {
-          self.api.setFeatureCollectionContent(
-            fc, descriptor.subtopic_id, descriptor.content);
-
+          self.set_fc_content_(fc, descriptor);
           return self.do_update_fc_(descriptor.content_id, fc);
         }
 
@@ -668,8 +666,9 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
         /* It was not possible to retrieve the feature collection for this
          * descriptor's content id. */
         if(exists) {
-          console.error("Feature collection GET failed: NOT creating new"
-                        + "(id=%s)", descriptor.content_id);
+          console.error("Feature collection GET failed: exists: "
+                        + "NOT creating new (id=%s)",
+                        descriptor.content_id);
           return null;
         }
 
@@ -679,8 +678,8 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
           descriptor.content_id,
           descriptor.document).done(function(fc) {
             console.log('Feature collection created:', fc);
-            self.api.setFeatureCollectionContent(
-              fc, descriptor.subtopic_id, descriptor.content);
+            self.set_fc_content_(fc, fc, descriptor.subtopic_id, descriptor);
+
             self.api.setFeatureCollectionContent(
               fc, 'meta_url', descriptor.href.toString());
             return self.do_update_fc_(descriptor.content_id, fc);
@@ -689,6 +688,20 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   };
 
   /* Private interface */
+  ControllerExplorer.prototype.set_fc_content_ = function (fc, descriptor)
+  {
+    var set = this.api.setFeatureCollectionContent;
+    set(fc, descriptor.subtopic_id, descriptor.content);
+
+    if(descriptor.type === 'image'
+       && std.is_str(descriptor.data)
+       && descriptor.data.length > 0)
+    {
+      set(fc, this.api.makeRawImageDataId(descriptor.subtopic_id),
+          descriptor.data);
+    }
+  };
+
   ControllerExplorer.prototype.reset_query_ = function ()
   {
     this.api.getDossierJs().stop('API.search');
@@ -852,8 +865,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
         deferred.reject();
       }
 
-      console.log("Got selection content: type=%s",
-                  result.type, result);
+      console.log("Got selection content: type=%s", result.type /*, result */);
 
       switch(result.type) {
       case 'image':
