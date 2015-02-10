@@ -77,6 +77,7 @@ var Api_ = (function (window, $, CryptoJS, DossierJS) {
       generateSubtopicId: generateSubtopicId,
       makeRawTextId: makeRawTextId,
       makeRawImageId: makeRawImageId,
+      makeRawImageDataId: makeRawImageDataId,
       isSubtopic: isSubtopic,
       getSubtopicType: getSubtopicType,
       extractSubtopicId: extractSubtopicId,
@@ -257,6 +258,11 @@ var Api_ = (function (window, $, CryptoJS, DossierJS) {
   var makeRawImageId = function (subtopic_id)
   {
     return [ 'subtopic', 'image', subtopic_id ].join('|');
+  };
+
+  var makeRawImageDataId = function (subtopic_id)
+  {
+    return [ subtopic_id, 'data' ].join('|');
   };
 
   var isSubtopic = function (subtopic_id)
