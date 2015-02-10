@@ -62,10 +62,8 @@ var Embeddable = (function ($, std, undefined) {
          * subsequently used to generate a unique and collision free unique
          * subtopic id. */
         result.xpath = std.Html.getXpathSimple(sel.anchorNode);
-        result.id = [ val,
-                      result.xpath,
-                      sel.anchorOffset,
-                      val.length ].join('|');
+        result.id = [ val, result.xpath, sel.anchorOffset, val.length ]
+          .join('|');
 
         result.content = val;
         result.type = "text";
