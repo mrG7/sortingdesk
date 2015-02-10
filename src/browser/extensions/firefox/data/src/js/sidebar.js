@@ -114,20 +114,6 @@ var Main = (function (window, $, std, sq, sd, Api, undefined) {
    * */
   var HandlerCallbacks = (function () {
 
-    var imageToBase64_ = function (entity)
-    {
-/*       var deferred = $.Deferred(); */
-
-/*       chrome.runtime.sendMessage( */
-/*         { operation: 'get-image-base64', entity: entity }, */
-/*         function (result) { */
-/*           if(result === false) deferred.reject(); */
-/*           else deferred.resolve(result); */
-/*         } ); */
-
-/*       return deferred.promise(); */
-    };
-
     var getSelection_ = function ()
     {
       var deferred = $.Deferred();
@@ -144,18 +130,21 @@ var Main = (function (window, $, std, sq, sd, Api, undefined) {
         }
 
         if(result.type === 'image') {
-          result.data = '';
-          /*             imageToBase64_(result.content) */
-          /*               .done(function (data) { */
-          /*                 result.data = data; */
-          /*                 deferred.resolve(result); */
-          /*               } ).fail(function () { */
-          /*                 console.error("Failed to retrieve image data in base64" */
-          /*                               + " encoding"); */
-          /*                 deferred.resolve(null); */
-          /*               } ); */
+          std.Html.imageToBase64(result.content)
+            .done(function (data) {
+              result.data = data;
+/*               console.log("Got base64 encoding of image: %s", data); */
+              deferred.resolve(result); } )
+            .fail(function () {
+              console.error("Failed to retrieve image data in base64"
+                            + " encoding");
+              deferred.resolve(null);
+            } );
+
+          return;
         }
 
+        /* Resolve if not an image. */
         deferred.resolve(result);
       } );
 
@@ -166,7 +155,6 @@ var Main = (function (window, $, std, sq, sd, Api, undefined) {
     return {
       callbacks: {
         sorter: {
-/*           imageToBase64: imageToBase64_, */
           getSelection: getSelection_
         }
       }
