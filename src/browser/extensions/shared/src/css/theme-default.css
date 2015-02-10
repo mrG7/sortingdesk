@@ -33,6 +33,7 @@ BODY {
 
 /* Master container */
 #sd-sorting-desk {
+  min-width: 320px;
   width: 100%;
   box-sizing: border-box;
 }
