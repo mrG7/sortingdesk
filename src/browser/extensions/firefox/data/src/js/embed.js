@@ -70,7 +70,7 @@ var Embeddable = (function ($, std, undefined) {
         result.content = val;
         result.type = "text";
 
-        console.log("Text selection:", result);
+/*         console.log("Text selection:", result); */
         self.port.emit("get-selection", result);
       } else
         console.error("No text currently selected");
@@ -97,29 +97,26 @@ var Embeddable = (function ($, std, undefined) {
      * page. */
     $('IMG').each( function () {
       var el = $(this);
+      el
+        .attr('draggable', 'true')
+        .on( {
+          mouseenter: function () {
+            self.cursor_ = el.css('cursor');
+            el.css('cursor', 'copy');
+          },
 
-      el.on( {
-        mouseenter: function () {
-          self.cursor_ = el.css('cursor');
-          el.css('cursor', 'copy');
-        },
+          mouseleave: function () {
+            el.css('cursor', self.cursor_);
+          },
 
-        mouseleave: function () {
-          el.css('cursor', self.cursor_);
-        },
+          mousedown: function (ev) {
+            self.active_ = $(ev.target);
+          },
 
-        dragstart: function (ev) {
-          self.active_ = $(ev.target);
-          console.log("Image dragging: start");
-        },
-
-        dragend: function () {
-          window.setTimeout(function () {
-            console.log("Image dragging: end");
+          mouseup: function () {
             self.active_ = null;
-          }, 250);
-        }
-      } );
+          }
+        } );
     } );
 
   };
