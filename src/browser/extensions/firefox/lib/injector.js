@@ -24,7 +24,6 @@ var Injector = (function () {
     return map[id];
   };
 
-
   /* Initialisation sequence */
   var initialise = function () {
     if(initialised)
@@ -34,16 +33,15 @@ var Injector = (function () {
       return data.url(s);
     } );
 
-    mtabs.on('open', function (tab) {
-      if(tab.id in map)
-        console.error("Content script already attached: %d", tab.id);
-      else
-        map[tab.id] = tab.attach( { contentScriptFile: scripts } );
+    mtabs.on('ready', function (tab) {
+      console.log("tab ready: ", tab.id);
+      map[tab.id] = tab.attach( { contentScriptFile: scripts } );
     } );
 
     mtabs.on('close', function (tab) {
+      console.log("closing tab: ", tab.id);
       if(!(tab.id in map))
-        console.error("Content script NOT attached: %d", tab.id);
+        console.error("Content script NOT attached: ", tab.id);
       else
         delete map[tab.id];
     } );
