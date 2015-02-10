@@ -152,8 +152,10 @@ var Main = (function (window, $, std, sq, sd, Api, undefined) {
             /*                               + " encoding"); */
             /*                 deferred.resolve(null); */
             /*               } ); */
-          } else
+          } else {
+            console.info("No selection content available");
             deferred.resolve(result);
+          }
         }
       } );
       addon.port.emit('get-selection');

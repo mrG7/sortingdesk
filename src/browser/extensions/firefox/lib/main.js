@@ -73,23 +73,24 @@ var Main = (function (undefined) {
       } );
 
       w.port.on('get-selection', function () {
+        console.log("get-selection: returning active tab's selection");
         var active = mtabs.activeTab;
 
-        console.log("get-selection: returning active tab's selection");
-
         if(active && mblacklist.valid(active.url)) {
-          var worker = minjector.get(active.url);
+          var cs = minjector.get(active.id);
 
-          if(worker) {
-            worker.port.once('get-selection', function (result) {
+          if(cs) {
+            cs.port.once('get-selection', function (result) {
+              console.log("received selection result: ", result);
               w.port.emit('get-selection', result);
             } );
-            worker.port.emit('get-selection');
-          }
-        } else {
+
+            console.log("sending message");
+            cs.port.emit('get-selection');
+          } else
+            console.error("No content script attached to tab");
+        } else
           console.info("No active tab or invalid URL");
-          w.port.emit('get-active-tab', null);
-        }
       } );
 
       console.log("Attached sidebar");
