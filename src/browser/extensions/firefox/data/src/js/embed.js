@@ -47,7 +47,7 @@ var Embeddable = (function ($, std, undefined) {
         result.caption = active.alt || active.title;
         result.type = "image";
 
-        console.log("Image selection:", result);
+/*         console.log("Image selection:", result); */
         self.port.emit("get-selection", result);
       } else
         console.error("Unable to retrieve valid `src´ attribute");
