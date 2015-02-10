@@ -152,7 +152,7 @@ var Main = (function (window, chrome, $, std, sq, sd, Api, undefined) {
                   else  {
                     imageToBase64_(result.content)
                       .done(function (data) {
-                        result.data = "data:image/jpeg;base64," + data;
+                        result.data = "data:image/png;base64," + data;
                       } )
                       .fail(function () {
                         console.error("Failed to retrieve image data in base64"
