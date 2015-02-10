@@ -662,11 +662,11 @@ A.sd-text-item-title {
 }
 
 .sd-folder {
-  background: url('/media/images/folder-root.png') 0px 0px no-repeat !important;
+  background: url('../../media/images/folder-root.png') 0 0 no-repeat !important;
 }
 
 .sd-subfolder {
-  background: url('/media/images/folder-sub.png') 0px 0px no-repeat !important;
+  background: url('../../media/images/folder-sub.png') 0 0 no-repeat !important;
 }
 
 .jstree LI.sd-active {
