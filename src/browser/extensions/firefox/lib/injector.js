@@ -35,7 +35,8 @@ var Injector = (function () {
 
     mtabs.on('ready', function (tab) {
       console.log("tab ready: ", tab.id);
-      map[tab.id] = tab.attach( { contentScriptFile: scripts } );
+      var w = map[tab.id] = tab.attach( { contentScriptFile: scripts } );
+      w.port.emit('initialise');
     } );
 
     mtabs.on('close', function (tab) {

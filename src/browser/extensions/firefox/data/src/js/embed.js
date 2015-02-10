@@ -19,8 +19,9 @@ var Embeddable = (function ($, std, undefined) {
   var monitor_;
 
 
-  self.port.on("ping", function () {
-    console.log("PING");
+  /* Message handling */
+  self.port.on("initialise", function () {
+    initialise();
   } );
 
   self.port.on("get-selection", function () {
@@ -132,9 +133,10 @@ var Embeddable = (function ($, std, undefined) {
   { this.active_ = null; };
 
 
-  /* Initialisation sequence. */
-  monitor_ = new DraggableImageMonitor();
-
-  console.info("Initialised embeddable content");
+  /* Module-wide functions */
+  var initialise = function () {
+    monitor_ = new DraggableImageMonitor();
+    console.info("Initialised embeddable content");
+  };
 
 })($, SortingCommon);
