@@ -80,13 +80,11 @@ var Main = (function (undefined) {
           var cs = minjector.get(active.id);
 
           if(cs) {
+            cs.port.emit('get-selection');
             cs.port.once('get-selection', function (result) {
-              console.log("received selection result: ", result);
+/*               console.log("received selection result: ", result); */
               w.port.emit('get-selection', result);
             } );
-
-            console.log("sending message");
-            cs.port.emit('get-selection');
           } else
             console.error("No content script attached to tab");
         } else
