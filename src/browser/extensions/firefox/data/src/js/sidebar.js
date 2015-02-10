@@ -132,33 +132,32 @@ var Main = (function (window, $, std, sq, sd, Api, undefined) {
     {
       var deferred = $.Deferred();
 
-      addon.port.on('get-selection', function (result) {
-        if(result !== null) {
-          /* Retrieve base64 encoding of image data if result type is
-           * image; otherwise resolve promise straight away with result in
-           * it. */
-          if(!std.is_obj(result)) {
-            console.error("Invalid result type received: not object");
-            deferred.reject();
-          } else if(result.type === 'image') {
-            result.data = '';
-            deferred.resolve(result);
-            /*             imageToBase64_(result.content) */
-            /*               .done(function (data) { */
-            /*                 result.data = data; */
-            /*                 deferred.resolve(result); */
-            /*               } ).fail(function () { */
-            /*                 console.error("Failed to retrieve image data in base64" */
-            /*                               + " encoding"); */
-            /*                 deferred.resolve(null); */
-            /*               } ); */
-          } else {
-            console.info("No selection content available");
-            deferred.resolve(result);
-          }
-        }
-      } );
       addon.port.emit('get-selection');
+      addon.port.once('get-selection', function (result) {
+        /* Retrieve base64 encoding of image data if result type is
+         * image; otherwise resolve promise straight away with result in
+         * it. */
+        if(!std.is_obj(result)) {
+          console.error("Invalid result type received: not object");
+          deferred.reject();
+          return;
+        }
+
+        if(result.type === 'image') {
+          result.data = '';
+          /*             imageToBase64_(result.content) */
+          /*               .done(function (data) { */
+          /*                 result.data = data; */
+          /*                 deferred.resolve(result); */
+          /*               } ).fail(function () { */
+          /*                 console.error("Failed to retrieve image data in base64" */
+          /*                               + " encoding"); */
+          /*                 deferred.resolve(null); */
+          /*               } ); */
+        }
+
+        deferred.resolve(result);
+      } );
 
       return deferred.promise();
     };
@@ -284,7 +283,7 @@ var Main = (function (window, $, std, sq, sd, Api, undefined) {
     addon.port.once('get-preferences', function (prefs) {
       preferences = prefs;
       initialise_();
-    } )
+    } );
     addon.port.emit('get-preferences');
   } );
 
