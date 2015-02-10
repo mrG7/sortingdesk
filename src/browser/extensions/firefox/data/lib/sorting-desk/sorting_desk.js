@@ -228,6 +228,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.events_ = new std.Events(this, [ 'refresh-begin', 'refresh-end' ] );
     this.creating_ = null;
     this.selected_ = null;
+    this.dropTarget_ = null;
 
     /* Initialise jstree. */
     this.tree_ = els.explorer.jstree( {
@@ -457,7 +458,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
     /* Reset state. */
     this.id_ = this.folders_ = null;
-    this.refreshing_ = this.events_ = null;
+    this.refreshing_ = this.events_ = this.dropTarget_ = null;
   };
 
   ControllerExplorer.prototype.createFolder = function ()
@@ -767,6 +768,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
   ControllerExplorer.prototype.on_dragging_enter_ = function (ev)
   {
+    this.clear_drop_target_();
     ev = ev.originalEvent;
     ev.dropEffect = 'move';
 
@@ -777,7 +779,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       var fl = this.getAnyById(el.parentNode.id);
 
       if(std.instanceany(fl, Folder, Subfolder)) {
-        $(el).addClass(Css.droppable.hover);
+        this.dropTarget_ = $(el).addClass(Css.droppable.hover);
         return fl;
       }
     }
@@ -787,6 +789,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
   ControllerExplorer.prototype.on_dragging_exit_ = function (ev)
   {
+    this.clear_drop_target_();
     ev = ev.originalEvent;
 
     var to = ev.toElement || ev.target,
@@ -795,13 +798,19 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     if(el && el.parentNode && el.parentNode.id) {
       var fl = this.getAnyById(el.parentNode.id);
 
-      if(std.instanceany(fl, Folder, Subfolder)) {
-        $(el).removeClass(Css.droppable.hover);
+      if(std.instanceany(fl, Folder, Subfolder))
         return fl;
-      }
     }
 
     return null;
+  };
+
+  ControllerExplorer.prototype.clear_drop_target_ = function ()
+  {
+    if(this.dropTarget_ !== null) {
+      this.dropTarget_.removeClass(Css.droppable.hover);
+      this.dropTarget_ = null;
+    }
   };
 
   ControllerExplorer.prototype.on_dropped_in_folder_ = function (
