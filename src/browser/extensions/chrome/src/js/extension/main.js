@@ -141,23 +141,35 @@ var Main = (function (window, chrome, $, std, sq, sd, Api, undefined) {
               { operation: 'get-selection' },
               function (result) {
                 /* Retrieve base64 encoding of image data if result type is
-                 * image; otherwise resolve promise straight away with result in
-                 * it. */
+                 * image AND its content is not *already* encoded in base64;
+                 * otherwise resolve promise straight away with result in it. */
                 if(!std.is_obj(result)) {
                   console.error("Invalid result type received: not object");
                   deferred.reject();
                 } else if(result.type === 'image') {
-                  imageToBase64_(result.content)
-                    .done(function (data) {
-                      result.data = data;
-                      deferred.resolve(result);
-                    } ).fail(function () {
-                      console.error("Failed to retrieve image data in base64"
-                                    + " encoding");
-                      deferred.resolve(null);
-                    } );
-                } else
-                  deferred.resolve(result);
+                  if(/^data:/.test(result.content))
+                    result.data = result.content;
+                  else  {
+                    imageToBase64_(result.content)
+                      .done(function (data) {
+                        result.data = "data:image/jpeg;base64," + data;
+                      } )
+                      .fail(function () {
+                        console.error("Failed to retrieve image data in base64"
+                                      + " encoding");
+                        result.data = null; /* force null */
+                      } )
+                      .always(function () {
+                        /* Always resolve, even when we don't retrieve image
+                         * data in base64 encoding.  */
+                        deferred.resolve(result);
+                      } );
+
+                    return;
+                  }
+                }
+
+                deferred.resolve(result);
               } );
           }
         } );
