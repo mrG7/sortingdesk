@@ -228,8 +228,7 @@ var SortingCommon_ = function (window, $) {
       var ctx = canvas.getContext("2d");
       ctx.drawImage(img, 0, 0);
 
-      return canvas.toDataURL("image/png")
-        .replace(/^data:image\/(png|jpg);base64,/, "");
+      return canvas.toDataURL("image/png");
     };
 
 
