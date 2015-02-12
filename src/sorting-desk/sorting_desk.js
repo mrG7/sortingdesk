@@ -295,6 +295,8 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       "dblclick.jstree": function (ev, data) {
         var i = self.getAnyById($(ev.target).closest("li").attr('id'));
         if(i instanceof Subfolder) {
+          i.open();
+
           if(i.items.length > 0)
             self.setActive(i.items[0]);
         } if(i instanceof Item)
@@ -1054,6 +1056,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     var def = Object.defineProperty;
     def(this, 'data', {get:function () { return this.subfolder_; }});
     def(this, 'items', {get:function () { return this.items_; }});
+    def(this, 'loaded', {get:function () { return this.loaded_; }});
 
     /* Initialisation sequence. */
     if(!std.is_obj(subfolder))
@@ -1062,20 +1065,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     /* Attributes */
     this.subfolder_ = subfolder;
     this.items_ = [ ];
-
-    /* Retrieve all items for this folder. */
-    var self = this;
-
-    if(subfolder.exists) {
-      this.api.foldering.listItems(subfolder)
-        .done(function (coll) {
-          coll.forEach(function(i) {
-            try {
-              self.items_.push(Item.construct(self.api, self, i));
-            } catch(x) { std.on_exception(x); }
-          } );
-        } );
-    }
+    this.loaded_ = !subfolder.exists;
 
     this.render();
   };
@@ -1107,8 +1097,27 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
   Subfolder.prototype.open = function ()
   {
-    this.loading(null);
-    this.tree.open_node(this.node);
+    /* Retrieve all items for this subfolder, if not yet loaded. */
+    if(!this.loaded_) {
+      var self = this;
+
+      /* Set the `loaded_´ flag to true now to prevent entering here again. */
+      this.loaded_ = true;
+      this.loading(true);
+
+      this.api.foldering.listItems(this.subfolder_)
+        .done(function (coll) {
+          coll.forEach(function(i) {
+            try {
+              self.items_.push(Item.construct(self.api, self, i));
+            } catch(x) { std.on_exception(x); }
+          } );
+
+          self.tree.open_node(self.node);
+          self.loading(false);
+        } );
+    } else
+      this.tree.open_node(this.node);
   };
 
   Subfolder.prototype.add = function (descriptor)
