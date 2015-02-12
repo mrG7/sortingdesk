@@ -622,7 +622,8 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       item.activate();
 
       if(this.owner_.initialised) {
-        this.api.setQueryContentId(item.data.content_id);
+        this.api.setQueryContentId(item.data.content_id,
+                                   item.data.subtopic_id);
         this.owner_.sortingQueue.items.redraw();
       }
     } else {

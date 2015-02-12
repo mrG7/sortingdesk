@@ -71,6 +71,7 @@ var Api_ = (function (window, $, CryptoJS, DossierJS) {
       uniqueContentIdsFromLabels: uniqueContentIdsFromLabels,
       setQueryContentId: setQueryContentId,
       getQueryContentId: getQueryContentId,
+      getQuerySubtopicId: getQuerySubtopicId,
       setSearchEngine: setSearchEngine,
       getSearchEngine: getSearchEngine,
       generateContentId: generateContentId,
@@ -214,17 +215,25 @@ var Api_ = (function (window, $, CryptoJS, DossierJS) {
     return cids;
   };
 
-  var setQueryContentId = function (id)
+  var setQueryContentId = function (id, subid)
   {
     if(id !== null && (typeof id !== 'string' || id.length === 0))
       throw "Invalid query content id";
 
     qitems_.query_content_id = id;
+    if (typeof subid !== 'undefined') {
+        qitems_.query_subtopic_id = subid;
+    }
   };
 
   var getQueryContentId = function ()
   {
     return qitems_.query_content_id;
+  };
+
+  var getQuerySubtopicId = function ()
+  {
+    return qitems_.query_subtopic_id;
   };
 
   var setSearchEngine = function(name)
@@ -457,6 +466,9 @@ var Api_ = (function (window, $, CryptoJS, DossierJS) {
 
     self._processing = true;
     var p = $.extend({limit: num.toString()}, self.params);
+    if (self.query_subtopic_id !== null) {
+        p['subtopic_id'] = self.query_subtopic_id;
+    }
     return self.api.search(self.engine_name, self.query_content_id, p)
       .then(function(data) {
         var items = [];
