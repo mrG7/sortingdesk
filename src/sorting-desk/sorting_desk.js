@@ -1296,7 +1296,8 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.owner_.loading(false);
 
     if(remove) {
-      console.warn("Item's feature collection or content could not be retrieved: id=%s",
+      console.warn("Item's feature collection or content could not be "
+                   + "retrieved: id=%s",
                    this.item_.subtopic_id);
       this.owner_.remove(this);
       return false;
