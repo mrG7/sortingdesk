@@ -372,16 +372,14 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     } );
 
     /* Define getters. */
-    this.__defineGetter__("id", function () { return this.id_; } );
-    this.__defineGetter__("name", function () { return this.name_; } );
-    this.__defineGetter__("active", function () { return this.active_; } );
-    this.__defineGetter__("tree", function () { return this.tree_; } );
-    this.__defineGetter__("selected", function () { return this.selected_; } );
-    this.__defineGetter__("api", function () { return this.owner_.api; } );
-
-    this.__defineGetter__("node", function () {
-      return this.owner_.nodes.explorer;
-    } );
+    var def = Object.defineProperty;
+    def(this, "id", { get: function () { return this.id_; } } );
+    def(this, "name", { get: function () { return this.name_; } } );
+    def(this, "active", { get: function () { return this.active_; } } );
+    def(this, "tree", { get: function () { return this.tree_; } } );
+    def(this, "selected", { get: function () { return this.selected_; } } );
+    def(this, "api", { get: function () { return this.owner_.api; } } );
+    def(this, "node", { get: function () {return this.owner_.nodes.explorer;}});
   };
 
   ControllerExplorer.prototype = Object.create(std.Controller.prototype);
