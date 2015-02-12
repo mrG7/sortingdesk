@@ -58,6 +58,55 @@ var Main = (function (undefined) {
     else                hide();
   };
 
+  var getImageData_ = function (url)
+  {
+    const {Cc, Ci, Cu} = require("chrome"),
+          WM = Cc['@mozilla.org/appshell/window-mediator;1'].
+            getService(Ci.nsIWindowMediator),
+          BROWSER = 'navigator:browser',
+          window = WM.getMostRecentWindow(BROWSER);
+
+    var gBrowser, tab, document;
+
+    if(!window) {
+      console.error("No active window");
+      return null;
+    }
+
+    gBrowser = window.gBrowser;
+    tab = gBrowser.selectedTab;
+
+    if(!tab) {
+      console.error("No active tab");
+      return null;
+    }
+
+    document = gBrowser.getBrowserForTab(tab).contentDocument;
+
+    for each(let img in document.getElementsByTagName('IMG')) {
+      if(img.src === url) {
+/*         console.log("Found image: ", img); */
+
+        var canvas = document.createElement("canvas");
+        canvas.width = img.width;
+        canvas.height = img.height;
+
+        var ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0);
+
+        try {
+          return canvas.toDataURL("image/png");
+        } catch(x) {
+          console.error("Failed to get image data from canvas: " + x);
+          return null;
+        }
+      }
+    }
+
+    console.error("Failed to find image element from url: ", url);
+    return null;
+  };
+
 
   /* Initialisation sequence */
   minjector.initialise();
@@ -83,6 +132,15 @@ var Main = (function (undefined) {
             cs.port.emit('get-selection');
             cs.port.once('get-selection', function (result) {
 /*               console.log("received selection result: ", result); */
+
+              if(result.type === 'image') {
+                if(/^data:/.test(result.content)) {
+                  console.info("Image already in base64");
+                  result.data = result.content;
+                } else
+                  result.data = getImageData_(result.content);
+              }
+
               w.port.emit('get-selection', result);
             } );
           } else
@@ -110,9 +168,6 @@ var Main = (function (undefined) {
       toggle();
     }
   });
-
-  console.log("Initialised Sorting Desk addon");
-
 
   /* Public interface */
   exports.toggle = toggle;

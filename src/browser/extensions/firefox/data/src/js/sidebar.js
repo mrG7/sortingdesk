@@ -126,26 +126,8 @@ var Main = (function (window, $, std, sq, sd, Api, undefined) {
         if(!std.is_obj(result)) {
           console.error("Invalid result type received: not object");
           deferred.reject();
-          return;
-        }
-
-        if(result.type === 'image') {
-          std.Html.imageToBase64(result.content)
-            .done(function (data) {
-              result.data = data;
-/*               console.log("Got base64 encoding of image: %s", data); */
-              deferred.resolve(result); } )
-            .fail(function () {
-              console.error("Failed to retrieve image data in base64"
-                            + " encoding");
-              deferred.resolve(null);
-            } );
-
-          return;
-        }
-
-        /* Resolve if not an image. */
-        deferred.resolve(result);
+        } else
+          deferred.resolve(result);
       } );
 
       return deferred.promise();
