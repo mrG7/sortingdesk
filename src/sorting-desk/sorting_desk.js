@@ -1358,6 +1358,17 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
   ItemImage.prototype = Object.create(Item.prototype);
 
+  ItemImage.prototype.onGotFeatureCollection = function (fc)
+  {
+    if(Item.prototype.onGotFeatureCollection.call(this, fc)) {
+      this.item_.data = fc.feature(
+        this.api.makeRawImageDataId(this.item_.subtopic_id));
+      return true;
+    }
+
+    return false;
+  };
+
   ItemImage.prototype.render = function ()
   {
     this.id_ = this.tree.create_node(
