@@ -678,7 +678,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
           descriptor.content_id,
           descriptor.document).done(function(fc) {
             console.log('Feature collection created:', fc);
-            self.set_fc_content_(fc, fc, descriptor.subtopic_id, descriptor);
+            self.set_fc_content_(fc, descriptor);
 
             self.api.setFeatureCollectionContent(
               fc, 'meta_url', descriptor.href.toString());
