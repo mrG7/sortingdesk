@@ -43,9 +43,8 @@ var Api_ = (function (window, $, CryptoJS, DossierJS) {
         (new DossierJS.LabelFetcher(api_))
           .cid(bin.data_.content_id)
           .which('connected')
-          .get()
-          .done(function(labels) {
-            cids = uniqueContentIdsFromLabels(labels);
+          .get().done(function(labels) {
+            var cids = uniqueContentIdsFromLabels(labels);
             console.log('... these content ids:', cids);
 
             api_.addLabels(cids.map(function(cid) {
