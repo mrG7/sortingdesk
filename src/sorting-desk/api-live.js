@@ -34,7 +34,7 @@ var Api_ = (function (window, $, CryptoJS, DossierJS) {
 
     qitems_ = new DossierJS.SortingQueueItems(
       api_, 'similar', '', annotator_);
-    qitems_.limit = 50;
+    qitems_.limit = 30;
     DossierJS.SortingQueueItems.prototype._itemDismissed = function(cobj) {
       console.log('Adding a negative label between ' + cobj.content_id
                   + ' and ...');
