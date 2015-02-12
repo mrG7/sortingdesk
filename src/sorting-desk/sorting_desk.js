@@ -1139,13 +1139,13 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       .fail(function () {
         console.error("Failed to add item to subfolder",
                       item, this.subfolder_);
-      } )
-      .always(function () {
-        obj.loading(false);
       } );
 
     /* Create or update feature collection. */
-    this.controller.updateFc(descriptor, false);
+    this.controller.updateFc(descriptor, false)
+      .always(function () {
+        obj.loading(false);
+      } );
 
     /* Activate item if none is currently active. */
     obj.on({ 'ready': function () {
