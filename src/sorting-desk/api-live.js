@@ -85,6 +85,7 @@ var Api_ = (function (window, $, CryptoJS, DossierJS) {
       getClass: getClass,
       getDossierJs: getDossierJs,
       getCallbacks: getCallbacks,
+      DossierJS: DossierJS,
 
       /* Namespaces */
       foldering: foldering(),
