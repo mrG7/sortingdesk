@@ -687,8 +687,7 @@ var SortingQueue_ = function (window, $, std) {
       throw "Already dismissing item: #" + item.content.node_id;
 
     if(p.constructor.exists('ItemDismissal')) {
-      item.dismissing = p.constructor.instantiate('ItemDismissal', item)
-        .on('dismissed', function () { self.remove(item); } );
+      item.dismissing = p.constructor.instantiate('ItemDismissal', item);
     } else {
       this.owner_.events.trigger("item-dismissed", item.content);
       this.remove(item);

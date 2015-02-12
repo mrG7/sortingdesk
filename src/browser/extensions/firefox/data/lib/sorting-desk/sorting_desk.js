@@ -40,6 +40,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     }
 
     console.log("Initialising Sorting Desk UI");
+    var self = this;
 
     /* TODO: must pass in Dossier API URL. */
     this.api_ = Api.initialize(this, opts.dossierUrl);
@@ -85,17 +86,38 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
         return (new sq.ItemDismissalReplaceTight(
           item, {
             tooltipClose: "Ignore",
-            choices: [ { id: 0, title: 'Duplicate?' },
-                       { id: 1, title: 'Wrong?' }  ]
+            choices: [ { id: 'duplicate', title: 'Duplicate?' },
+                       { id: 'negative', title: 'Wrong?' }  ]
           } ))
           .on('dismissed', function (id) {
             console.log('User chose: %s', id);
+
+            var cid = item.content.content_id,
+                djs = self.api.DossierJS,
+                label = new djs.Label(
+                    self.api.getQueryContentId(),
+                    cid,
+                    'unknown',
+                    0, // coref value is filled in below
+                    self.api.getQuerySubtopicId());
+            if (id === null) {
+                label.coref_value = djs.COREF_VALUE_UNKNOWN;
+            } else if (id === 'duplicate') {
+                label.coref_value = djs.COREF_VALUE_POSITIVE;
+            } else if (id === 'negative') {
+                label.coref_value = djs.COREF_VALUE_NEGATIVE;
+            } else {
+                throw "Unrecognized dismissal identifier: " + id;
+            }
+            self.api.addLabel(label)
+                .done(function() { item.owner.remove(item); });
           } );
       };
     }
 
     this.sortingQueue_ = new sq.Sorter(
       $.extend(true, opts, {
+        visibleItems: 30,
         loadItemsAtStartup: false /* IMPORTANT: Explicitly deny loading of items
                                    * at startup as this would potentially break
                                    * request-(start|stop) event handlers set up
@@ -621,7 +643,8 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       item.activate();
 
       if(this.owner_.initialised) {
-        this.api.setQueryContentId(item.data.content_id);
+        this.api.setQueryContentId(item.data.content_id,
+                                   item.data.subtopic_id);
         this.owner_.sortingQueue.items.redraw();
       }
     } else {
