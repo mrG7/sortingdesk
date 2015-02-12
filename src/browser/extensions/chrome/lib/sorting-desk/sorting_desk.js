@@ -295,6 +295,8 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       "dblclick.jstree": function (ev, data) {
         var i = self.getAnyById($(ev.target).closest("li").attr('id'));
         if(i instanceof Subfolder) {
+          i.open();
+
           if(i.items.length > 0)
             self.setActive(i.items[0]);
         } if(i instanceof Item)
@@ -372,16 +374,14 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     } );
 
     /* Define getters. */
-    this.__defineGetter__("id", function () { return this.id_; } );
-    this.__defineGetter__("name", function () { return this.name_; } );
-    this.__defineGetter__("active", function () { return this.active_; } );
-    this.__defineGetter__("tree", function () { return this.tree_; } );
-    this.__defineGetter__("selected", function () { return this.selected_; } );
-    this.__defineGetter__("api", function () { return this.owner_.api; } );
-
-    this.__defineGetter__("node", function () {
-      return this.owner_.nodes.explorer;
-    } );
+    var def = Object.defineProperty;
+    def(this, "id", { get: function () { return this.id_; } } );
+    def(this, "name", { get: function () { return this.name_; } } );
+    def(this, "active", { get: function () { return this.active_; } } );
+    def(this, "tree", { get: function () { return this.tree_; } } );
+    def(this, "selected", { get: function () { return this.selected_; } } );
+    def(this, "api", { get: function () { return this.owner_.api; } } );
+    def(this, "node", { get: function () {return this.owner_.nodes.explorer;}});
   };
 
   ControllerExplorer.prototype = Object.create(std.Controller.prototype);
@@ -651,7 +651,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     return this.api.getFeatureCollection(descriptor.content_id)
       .then(function (fc) {
         console.log("Feature collection GET successful (id=%s)",
-                    descriptor.content_id, fc);
+                    descriptor.content_id);
 
         /* A feature collection was received. No further operations are carried
          * out if `exists´ is true; otherwise its contents are updated. */
@@ -677,8 +677,10 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
         return self.api.createFeatureCollection(
           descriptor.content_id,
           descriptor.document).done(function(fc) {
-            console.log('Feature collection created:', fc);
-            self.set_fc_content_(fc, fc, descriptor.subtopic_id, descriptor);
+            console.log('Feature collection created: (id=%s)',
+                       descriptor.content_id);
+
+            self.set_fc_content_(fc, descriptor);
 
             self.api.setFeatureCollectionContent(
               fc, 'meta_url', descriptor.href.toString());
@@ -714,11 +716,11 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     return this.api.putFeatureCollection(content_id, fc)
       .done(function () {
         console.log("Feature collection PUT successful (id=%s)",
-                    content_id, fc);
+                    content_id);
       } )
       .fail(function () {
         console.error("Feature collection PUT failed (id=%s)",
-                      content_id, fc);
+                      content_id);
       } );
   };
 
@@ -893,22 +895,62 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   /**
    * @class
    * */
-  var Folder = function (owner, folder)
+  var ItemBase = function (owner)
   {
     /* Invoke base class constructor. */
     std.Drawable.call(this, owner);
 
     /* Getters */
-    this.__defineGetter__('id', function () { return this.id_; } );
-    this.__defineGetter__('data', function () { return this.folder_; } );
-    this.__defineGetter__('api', function () { return owner.owner.api; } );
-    this.__defineGetter__('tree', function () { return owner.tree; } );
+    var def = Object.defineProperty;
+    def(this, 'id', { get: function () { return this.id_; } } );
+    def(this, 'controller', { get: function () {return this.controller_;}});
+    def(this, 'api', { get: function () { return this.controller_.api; } } );
+    def(this, 'tree', { get: function () { return this.controller_.tree; } } );
 
-    this.__defineGetter__(
-      'node', function () { return owner.tree.get_node(this.id_, true); } );
+    def(this, 'node', { get: function () {
+      return this.controller.tree.get_node(this.id_, true); } } );
 
-    this.__defineGetter__('subfolders',
-                          function () { return this.subfolders_; } );
+    /* Attributes */
+    var ctrl = owner;
+    while(ctrl !== null && !(ctrl instanceof ControllerExplorer))
+      ctrl = ctrl.owner;
+
+    if(ctrl === null)
+      throw "Controller not found";
+
+    this.controller_ = ctrl;
+    this.loading_ = 0;
+    this.id_ = null;
+  };
+
+  ItemBase.prototype.loading = function (state /* = true */)
+  {
+    if(state === false) {
+      if(this.loading_ <= 0)
+        console.error("Loading count is 0");
+      else if(--this.loading_ === 0)
+        this.node.removeClass("jstree-loading");
+    } else if(state === true)
+      ++this.loading_;
+
+    /* Always force class. */
+    if(this.loading_ > 0)
+      this.node.addClass("jstree-loading");
+  };
+
+
+  /**
+   * @class
+   * */
+  var Folder = function (owner, folder)
+  {
+    /* Invoke base class constructor. */
+    ItemBase.call(this, owner);
+
+    /* Getters */
+    var def = Object.defineProperty;
+    def(this, 'data', { get: function () { return this.folder_; } } );
+    def(this, 'subfolders', { get: function () { return this.subfolders_; } } );
 
     /* Initialisation sequence. */
     if(!std.is_obj(folder))
@@ -916,7 +958,6 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
     /* Attributes */
     this.folder_ = folder;
-    this.id_ = null;
     this.subfolders_ = [ ];
 
     /* Retrieve all subfolders for this folder. */
@@ -935,7 +976,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.render();
   };
 
-  Folder.prototype = Object.create(std.Drawable.prototype);
+  Folder.prototype = Object.create(ItemBase.prototype);
 
   Folder.prototype.render = function ()
   {
@@ -1009,20 +1050,13 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   var Subfolder = function (owner, subfolder)
   {
     /* Invoke base class constructor. */
-    std.Drawable.call(this, owner);
+    ItemBase.call(this, owner);
 
     /* Getters */
-    this.__defineGetter__('id', function () { return this.id_; } );
-    this.__defineGetter__('data', function () { return this.subfolder_; } );
-    this.__defineGetter__('items', function () { return this.items_; } );
-    this.__defineGetter__('controller',function () {return this.owner_.owner;});
-    this.__defineGetter__('tree', function () { return this.controller.tree; });
-
-    this.__defineGetter__(
-      'api', function () { return this.controller.owner.api; } );
-
-    this.__defineGetter__('node', function () {
-      return this.controller.tree.get_node(this.id_, true); } );
+    var def = Object.defineProperty;
+    def(this, 'data', {get:function () { return this.subfolder_; }});
+    def(this, 'items', {get:function () { return this.items_; }});
+    def(this, 'loaded', {get:function () { return this.loaded_; }});
 
     /* Initialisation sequence. */
     if(!std.is_obj(subfolder))
@@ -1030,28 +1064,13 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
     /* Attributes */
     this.subfolder_ = subfolder;
-    this.id_ = null;
     this.items_ = [ ];
-    this.loading_ = 0;
-
-    /* Retrieve all items for this folder. */
-    var self = this;
-
-    if(subfolder.exists) {
-      this.api.foldering.listItems(subfolder)
-        .done(function (coll) {
-          coll.forEach(function(i) {
-            try {
-              self.items_.push(Item.construct(self.api, self, i));
-            } catch(x) { std.on_exception(x); }
-          } );
-        } );
-    }
+    this.loaded_ = !subfolder.exists;
 
     this.render();
   };
 
-  Subfolder.prototype = Object.create(std.Drawable.prototype);
+  Subfolder.prototype = Object.create(ItemBase.prototype);
 
   Subfolder.prototype.reset = function ()
   {
@@ -1078,8 +1097,27 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
   Subfolder.prototype.open = function ()
   {
-    this.loading(null);
-    this.tree.open_node(this.node);
+    /* Retrieve all items for this subfolder, if not yet loaded. */
+    if(!this.loaded_) {
+      var self = this;
+
+      /* Set the `loaded_´ flag to true now to prevent entering here again. */
+      this.loaded_ = true;
+      this.loading(true);
+
+      this.api.foldering.listItems(this.subfolder_)
+        .done(function (coll) {
+          coll.forEach(function(i) {
+            try {
+              self.items_.push(Item.construct(self.api, self, i));
+            } catch(x) { std.on_exception(x); }
+          } );
+
+          self.tree.open_node(self.node);
+          self.loading(false);
+        } );
+    } else
+      this.tree.open_node(this.node);
   };
 
   Subfolder.prototype.add = function (descriptor)
@@ -1099,6 +1137,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
      * item's feature collection; it doesn't exist yet. */
     obj = Item.construct(this.api, this, item, descriptor.content);
     this.items_.push(obj);
+    window.setTimeout(function () { obj.loading(true); }, 50);
 
     /* Add item to subfolder in persistent storage. */
     this.api.foldering.addItem(this.subfolder_, item)
@@ -1112,7 +1151,10 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       } );
 
     /* Create or update feature collection. */
-    this.controller.updateFc(descriptor, false);
+    this.controller.updateFc(descriptor, false)
+      .always(function () {
+        obj.loading(false);
+      } );
 
     /* Activate item if none is currently active. */
     obj.on({ 'ready': function () {
@@ -1134,21 +1176,6 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
     if(this.controller.active === item)
       this.controller.setActive(null);
-  };
-
-  Subfolder.prototype.loading = function (state)
-  {
-    if(state === false) {
-      if(this.loading_ === 0)
-        console.error("Loading count is 0");
-      else if(--this.loading_ === 0)
-        this.node.removeClass("jstree-loading");
-    } else if(state === true)
-      ++this.loading_;
-
-    /* Always force class. */
-    if(this.loading_ > 0)
-      this.node.addClass("jstree-loading");
   };
 
 
@@ -1200,22 +1227,12 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   var Item = function (owner, item, /* optional */ content)
   {
     /* Invoke base class constructor. */
-    std.Drawable.call(this, owner);
+    ItemBase.call(this, owner);
 
     /* Getters */
-    this.__defineGetter__('id', function () { return this.id_; } );
-    this.__defineGetter__('data', function () { return this.item_; } );
-    this.__defineGetter__('fc', function () { return this.fc_; } );
-
-    this.__defineGetter__('controller',function () {
-      return this.owner_.controller; });
-    this.__defineGetter__('tree', function () { return this.controller.tree; });
-
-    this.__defineGetter__(
-      'api', function () { return this.controller.owner.api; } );
-
-    this.__defineGetter__('node', function () {
-      return this.controller.tree.get_node(this.id_, true); } );
+    var def = Object.defineProperty;
+    def(this, 'data', {get:function () { return this.item_; }});
+    def(this, 'fc', {get:function () { return this.fc_; }});
 
     /* Initialisation sequence. */
     if(!(item instanceof this.api.foldering.Item))
@@ -1223,7 +1240,6 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
     /* Attributes */
     this.item_ = item;
-    this.id_ = null;
     this.events_ = new std.Events(this, [ 'ready' ]);
 
     var self = this,
@@ -1275,7 +1291,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   };
 
   /* Interface */
-  Item.prototype = Object.create(std.Drawable.prototype);
+  Item.prototype = Object.create(ItemBase.prototype);
 
   Item.prototype.reset = function ()
   {
@@ -1296,7 +1312,8 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.owner_.loading(false);
 
     if(remove) {
-      console.warn("Item's feature collection or content could not be retrieved: id=%s",
+      console.warn("Item's feature collection or content could not be "
+                   + "retrieved: id=%s",
                    this.item_.subtopic_id);
       this.owner_.remove(this);
       return false;
@@ -1352,13 +1369,25 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
   ItemImage.prototype = Object.create(Item.prototype);
 
+  ItemImage.prototype.onGotFeatureCollection = function (fc)
+  {
+    if(Item.prototype.onGotFeatureCollection.call(this, fc)) {
+      this.item_.data = fc.feature(
+        this.api.makeRawImageDataId(this.item_.subtopic_id));
+      return true;
+    }
+
+    return false;
+  };
+
   ItemImage.prototype.render = function ()
   {
     this.id_ = this.tree.create_node(
       this.owner_.node,
       { state: 'open',
         type: 'item',
-        text: [ '<img src="', this.item_.content, '" />' ].join('') },
+        text: [ '<img src="', this.item_.data || this.item_.content,
+                '" />' ].join('') },
       "last");
 
     if(this.id_ === false)
