@@ -1126,6 +1126,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
      * item's feature collection; it doesn't exist yet. */
     obj = Item.construct(this.api, this, item, descriptor.content);
     this.items_.push(obj);
+    window.setTimeout(function () { obj.loading(true); }, 50);
 
     /* Add item to subfolder in persistent storage. */
     this.api.foldering.addItem(this.subfolder_, item)
@@ -1136,6 +1137,9 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       .fail(function () {
         console.error("Failed to add item to subfolder",
                       item, this.subfolder_);
+      } )
+      .always(function () {
+        obj.loading(false);
       } );
 
     /* Create or update feature collection. */
