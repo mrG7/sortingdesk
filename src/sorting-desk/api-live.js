@@ -136,9 +136,8 @@ var Api_ = (function (window, $, CryptoJS, DossierJS) {
   {
     if(typeof content !== 'string' || content.length === 0)
       throw "Invalid item content";
-    else if(typeof subtopic_id !== 'string' || subtopic_id === 0) {
+    else if(typeof subtopic_id !== 'string' || subtopic_id === 0)
       throw "Invalid subtopic id";
-    }
 
     fc.raw[subtopic_id] = content;
   };
@@ -497,7 +496,7 @@ var Api_ = (function (window, $, CryptoJS, DossierJS) {
 /* Compatibility with RequireJs. */
 if(typeof define === "function" && define.amd) {
   define("API", [ "jquery", "CryptoJS" ], function ($, CryptoJS) {
-    return _(window, $, CryptoJS);
+    return Api_(window, $, CryptoJS);
   });
 } else
   window.Api = Api_(window, $, CryptoJS, DossierJS);
