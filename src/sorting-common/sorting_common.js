@@ -307,11 +307,12 @@ var SortingCommon_ = function (window, $) {
     if(!like_obj(owner))
       throw "Invalid owner instance reference specified";
 
-    this.owner_ = owner;
-  };
+    /* Getters */
+    Object.defineProperty(this, 'owner', {
+      get: function () { return this.owner_; } } );
 
-  Owned.prototype = {
-    get owner () { return this.owner_; }
+    /* Attributes */
+    this.owner_ = owner;
   };
 
 
@@ -323,8 +324,6 @@ var SortingCommon_ = function (window, $) {
     /* Invoke super constructor. */
     Owned.call(this, owner);
   };
-
-  Controller.prototype = Object.create(Owned.prototype);
 
   /* Following method to allow for deferred initialisation. */
   /* abstract */ Controller.prototype.initialise = absm_noti;
@@ -340,8 +339,6 @@ var SortingCommon_ = function (window, $) {
     /* Invoke super constructor. */
     Owned.call(this, owner);
   };
-
-  Drawable.prototype = Object.create(Owned.prototype);
 
   /* abstract */ Drawable.prototype.render = absm_noti;
 
