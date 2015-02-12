@@ -649,7 +649,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     return this.api.getFeatureCollection(descriptor.content_id)
       .then(function (fc) {
         console.log("Feature collection GET successful (id=%s)",
-                    descriptor.content_id, fc);
+                    descriptor.content_id);
 
         /* A feature collection was received. No further operations are carried
          * out if `exists´ is true; otherwise its contents are updated. */
@@ -675,7 +675,9 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
         return self.api.createFeatureCollection(
           descriptor.content_id,
           descriptor.document).done(function(fc) {
-            console.log('Feature collection created:', fc);
+            console.log('Feature collection created: (id=%s)',
+                       descriptor.content_id);
+
             self.set_fc_content_(fc, descriptor);
 
             self.api.setFeatureCollectionContent(
@@ -712,11 +714,11 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     return this.api.putFeatureCollection(content_id, fc)
       .done(function () {
         console.log("Feature collection PUT successful (id=%s)",
-                    content_id, fc);
+                    content_id);
       } )
       .fail(function () {
         console.error("Feature collection PUT failed (id=%s)",
-                      content_id, fc);
+                      content_id);
       } );
   };
 
