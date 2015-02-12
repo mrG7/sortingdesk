@@ -1359,7 +1359,8 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       this.owner_.node,
       { state: 'open',
         type: 'item',
-        text: [ '<img src="', this.item_.content, '" />' ].join('') },
+        text: [ '<img src="', this.item_.data || this.item_.content,
+                '" />' ].join('') },
       "last");
 
     if(this.id_ === false)
