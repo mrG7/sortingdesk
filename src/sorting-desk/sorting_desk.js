@@ -946,7 +946,10 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   ItemBase.prototype.addClass = function (cl)
   {
     var n = this.nodeData.li_attr,
-        coll = this.get_classes_(n);
+        coll;
+
+    if(n === undefined) return;
+    coll = this.get_classes_(n);
 
     if(coll.indexOf(cl) === -1) {
       coll.push(cl);
@@ -957,9 +960,14 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
   ItemBase.prototype.removeClass = function (cl)
   {
+    if(this.nodeData === undefined) return;
+
     var n = this.nodeData.li_attr,
-        coll = n.class.split(' '),
-        ndx = coll.indexOf(cl);
+        coll, ndx;
+
+    if(n === undefined) return;
+    coll = n.class.split(' ');
+    ndx = coll.indexOf(cl);
 
     if(ndx >= 0) {
       coll.splice(ndx, 1);
