@@ -942,7 +942,6 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   {
     var n = this.nodeData.li_attr,
         coll = this.get_classes_(n);
-    console.log('adding class: %s', cl, coll, coll.indexOf(cl));
 
     if(coll.indexOf(cl) === -1) {
       coll.push(cl);
