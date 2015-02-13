@@ -267,6 +267,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
           if(self.creating_.parent === null) {
             f = new Folder(self, api.foldering.folderFromName(data.text));
             self.folders_.push(f);
+            f.loading(true);
 
             api.foldering.addFolder(f.data)
               .done(function () {
@@ -274,6 +275,9 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
               } )
               .fail(function () {
                 console.error("Failed to add folder", f.data);
+              } )
+              .always(function () {
+                f.loading(false);
               } );
 
             if(self.folders_.length === 1)
