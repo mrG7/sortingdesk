@@ -242,13 +242,19 @@ var Background = function (window, chrome, $, std, undefined)
       callback(window_.extension);
     };
 
+    var onEmbeddableActive_ = function (request, sender)
+    {
+      chrome.pageAction.show(sender.tab.id);
+    };
+
 
     var self = this,
         methods = {
           "read-file": onReadFile_,
           "get-meta": onGetMeta_,
           "get-image-base64": onGetImageBase64_,
-          "get-extension-window": onGetExtensionWindow_
+          "get-extension-window": onGetExtensionWindow_,
+          "embeddable-active": onEmbeddableActive_
         };
 
     /* Handler of messages originating in content scripts. */
