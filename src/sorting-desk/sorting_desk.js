@@ -321,9 +321,6 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
         self.update_toolbar_();
       },
-      "after_open.jstree": function (ev) {
-        self.updateActive();
-      },
       "dragover":  function (ev){self.on_dragging_enter_(ev);return false;},
       "dragenter": function (ev){self.on_dragging_enter_(ev);return false;},
       "dragleave": function (ev){self.on_dragging_exit_(ev); return false;},
@@ -910,6 +907,9 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     def(this, 'node', { get: function () {
       return this.controller.tree.get_node(this.id_, true); } } );
 
+    def(this, 'nodeData', { get: function () {
+      return this.controller.tree.get_node(this.id_); } } );
+
     /* Attributes */
     var ctrl = owner;
     while(ctrl !== null && !(ctrl instanceof ControllerExplorer))
@@ -929,13 +929,50 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       if(this.loading_ <= 0)
         console.error("Loading count is 0");
       else if(--this.loading_ === 0)
-        this.node.removeClass("jstree-loading");
+        this.removeClass("jstree-loading");
     } else if(state === true)
       ++this.loading_;
 
     /* Always force class. */
     if(this.loading_ > 0)
-      this.node.addClass("jstree-loading");
+      this.addClass("jstree-loading");
+  };
+
+  ItemBase.prototype.addClass = function (cl)
+  {
+    var n = this.nodeData.li_attr,
+        coll = this.get_classes_(n);
+    console.log('adding class: %s', cl, coll, coll.indexOf(cl));
+
+    if(coll.indexOf(cl) === -1) {
+      coll.push(cl);
+      n.class = coll.join(' ');
+      this.node.addClass(cl);
+    }
+  };
+
+  ItemBase.prototype.removeClass = function (cl)
+  {
+    var n = this.nodeData.li_attr,
+        coll = n.class.split(' '),
+        ndx = coll.indexOf(cl);
+
+    if(ndx >= 0) {
+      coll.splice(ndx, 1);
+      n.class = coll.join(' ');
+      this.node.removeClass(cl);
+    } else
+      console.warn("CSS class not found: %s", cl);
+  };
+
+  ItemBase.prototype.get_classes_ = function (attr)
+  {
+    if(!std.is_str(attr.class)) {
+      attr.class = '';
+      return [ ];
+    }
+
+    return attr.class.split(' ');
   };
 
 
@@ -1004,10 +1041,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   Folder.prototype.add = function (subfolder)
   {
     var sf = new Subfolder(this, subfolder);
-
     this.subfolders_.push(sf);
-    this.owner.updateActive();
-
     return sf;
   };
 
@@ -1160,7 +1194,6 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     obj.on({ 'ready': function () {
       var c = self.controller;
       if(c.active === null) self.controller.setActive(obj);
-      else c.updateActive();
     } } );
   };
 
@@ -1249,8 +1282,6 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
           /* Set this as active item if none set yet. */
           if(self.controller.active === null)
             self.controller.setActive(self);
-          else
-            self.controller.updateActive();
 
           self.events_.trigger('ready');
         };
@@ -1324,12 +1355,12 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
   Item.prototype.activate = function ()
   {
-    this.node.addClass(Css.active);
+    this.addClass(Css.active);
   };
 
   Item.prototype.deactivate = function ()
   {
-    this.node.removeClass(Css.active);
+    this.removeClass(Css.active);
   };
 
 
