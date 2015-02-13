@@ -1034,7 +1034,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
   Folder.prototype.open = function ()
   {
-    this.tree.open_node(this.node);
+    this.tree.open_node(this.id);
   };
 
   Folder.prototype.add = function (subfolder)
@@ -1116,7 +1116,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   Subfolder.prototype.render = function ()
   {
     this.id_ = this.tree.create_node(
-      this.owner_.node,
+      this.owner_.id,
       { state: 'open',
         text: this.subfolder_.name,
         type: "subfolder"},
@@ -1146,11 +1146,11 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
             } catch(x) { std.on_exception(x); }
           } );
 
-          self.tree.open_node(self.node);
+          self.tree.open_node(self.id);
           self.loading(false);
         } );
     } else
-      this.tree.open_node(this.node);
+      this.tree.open_node(this.id);
   };
 
   Subfolder.prototype.add = function (descriptor)
@@ -1234,7 +1234,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
         o = this.owner_;
 
     this.id_ = this.tree.create_node(
-      this.owner_.node,
+      this.owner_.id,
       { state: 'open',
         text: this.subfolder_.name,
         type: "subfolder" },
@@ -1244,7 +1244,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       throw "Failed to create subfolder";
 
     o.open();
-    this.tree.edit(this.node);
+    this.tree.edit(this.id);
 
     /* TODO: remove hardcoded timeout.
      * Scrolling into view has to be on a timeout because JsTree performs a
@@ -1377,7 +1377,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   ItemText.prototype.render = function ()
   {
     this.id_ = this.tree.create_node(
-      this.owner_.node,
+      this.owner_.id,
       { state: 'open', text: this.item_.content, type: 'item' },
       "last");
 
@@ -1413,7 +1413,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   ItemImage.prototype.render = function ()
   {
     this.id_ = this.tree.create_node(
-      this.owner_.node,
+      this.owner_.id,
       { state: 'open',
         type: 'item',
         text: [ '<img src="', this.item_.data || this.item_.content,
