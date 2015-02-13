@@ -34,7 +34,7 @@ var Api_ = (function (window, $, CryptoJS, DossierJS) {
 
     qitems_ = new DossierJS.SortingQueueItems(
       api_, 'similar', '', annotator_);
-    qitems_.limit = 50;
+    qitems_.limit = 30;
     DossierJS.SortingQueueItems.prototype._itemDismissed = function(cobj) {
       console.log('Adding a negative label between ' + cobj.content_id
                   + ' and ...');
@@ -70,6 +70,7 @@ var Api_ = (function (window, $, CryptoJS, DossierJS) {
       uniqueContentIdsFromLabels: uniqueContentIdsFromLabels,
       setQueryContentId: setQueryContentId,
       getQueryContentId: getQueryContentId,
+      getQuerySubtopicId: getQuerySubtopicId,
       setSearchEngine: setSearchEngine,
       getSearchEngine: getSearchEngine,
       generateContentId: generateContentId,
@@ -85,6 +86,7 @@ var Api_ = (function (window, $, CryptoJS, DossierJS) {
       getClass: getClass,
       getDossierJs: getDossierJs,
       getCallbacks: getCallbacks,
+      DossierJS: DossierJS,
 
       /* Namespaces */
       foldering: foldering(),
@@ -212,17 +214,25 @@ var Api_ = (function (window, $, CryptoJS, DossierJS) {
     return cids;
   };
 
-  var setQueryContentId = function (id)
+  var setQueryContentId = function (id, subid)
   {
     if(id !== null && (typeof id !== 'string' || id.length === 0))
       throw "Invalid query content id";
 
     qitems_.query_content_id = id;
+    if (typeof subid !== 'undefined') {
+        qitems_.query_subtopic_id = subid;
+    }
   };
 
   var getQueryContentId = function ()
   {
     return qitems_.query_content_id;
+  };
+
+  var getQuerySubtopicId = function ()
+  {
+    return qitems_.query_subtopic_id;
   };
 
   var setSearchEngine = function(name)
@@ -460,6 +470,9 @@ var Api_ = (function (window, $, CryptoJS, DossierJS) {
 
     self._processing = true;
     var p = $.extend({limit: num.toString()}, self.params);
+    if (self.query_subtopic_id !== null) {
+        p['subtopic_id'] = self.query_subtopic_id;
+    }
     return self.api.search(self.engine_name, self.query_content_id, p)
       .then(function(data) {
         var items = [];

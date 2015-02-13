@@ -243,9 +243,12 @@ var _DossierJS = function(window, $) {
             endpoint = ['label', url_cid1, url_cid2, url_ann].join('/'),
             params = {};
 
-        if (label.subtopic_id1) params.subtopic_id1 = label.subtopic_id1;
-        if (label.subtopic_id2) params.subtopic_id2 = label.subtopic_id2;
-
+        if (label.subtopic_id1) {
+            params.subtopic_id1 = serialize(label.subtopic_id1);
+        }
+        if (label.subtopic_id2) {
+            params.subtopic_id2 = serialize(label.subtopic_id2);
+        }
         return Xhr.ajax('API.addLabel', {
             type: 'PUT',
             url: this.url(endpoint, params),
@@ -769,12 +772,15 @@ var _DossierJS = function(window, $) {
     //   qitems.query_content_id = '<content id>';
     //   sorting_desk_instance.items.removeAll();
     //
-    // Similarly, each instance has an `annotator` attribute, which is set
-    // to the value given in the constructor, but may be changed at any time.
-    // The value is used whenever a label is created.
+    // There are a number of attributes that can be set on an instance of
+    // `SortingQueueItems` that affect search engine behavior:
     //
-    // There are also `limit` and `params` instance attributes. `limit` is set
-    // to `5` by default. `params` is empty by default.
+    //   annotator   - Used whenever a label is created.
+    //   limit       - Limits the number of results returned to the user.
+    //                 Defaults to `5`.
+    //   query_subtopic_id - Causes a search engine to use subtopic querying.
+    //                       This only works if the search engine supports it!
+    //   params      - Pass arbitrary query parameters to the search engine.
     //
     // The `api` parameter should be an instance of `DossierJS.API`.
     //
@@ -785,6 +791,7 @@ var _DossierJS = function(window, $) {
         this.api = api;
         this.engine_name = engine_name;
         this.query_content_id = query_content_id;
+        this.query_subtopic_id = null;
         this.annotator = annotator;
         this.limit = 5;
         this.params = {};
@@ -838,6 +845,9 @@ var _DossierJS = function(window, $) {
         self._processing = true;
 
         var p = $.extend({limit: self.limit.toString()}, self.params);
+        if (self.query_subtopic_id !== null) {
+            p['subtopic_id'] = self.query_subtopic_id;
+        }
         return self.api.search(self.engine_name, self.query_content_id, p)
             .then(function(data) {
                 var items = [];
