@@ -279,7 +279,7 @@ var Api_ = (function (window, $, CryptoJS, DossierJS) {
     type = subtopic_id.match(/^subtopic\|(\w+)\|.+/);
 
     if(!type || type.length !== 2)
-      throw "Invalid format for subtopic id";
+      throw "Invalid format for subtopic id: " + subtopic_id;
 
     return type[1];
   };
