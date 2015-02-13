@@ -304,7 +304,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       },
       "dblclick.jstree": function (ev, data) {
         var i = self.getAnyById($(ev.target).closest("li").attr('id'));
-        if(!i.opening()) {
+        if(!i.opening) {
           if(i instanceof Subfolder) {
             i.open();
 
