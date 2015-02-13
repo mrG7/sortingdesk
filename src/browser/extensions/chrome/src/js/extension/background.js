@@ -22,13 +22,20 @@ var Background = function (window, chrome, $, std, undefined)
       window_ = {
         main: null,
         extension: null
+      },
+      content = {
+        scripts: [ "lib/jquery-2.1.1.min.js",
+                   "lib/sorting-common/sorting_common.js",
+                   "src/js/content/embed.js" ],
+        styles: [ "shared/src/css/theme-default.css",
+                  "shared/src/css/theme-default-images.css" ]
       };
 
 
-  var initialize_ = function ()
+  var initialize = function ()
   {
     handlerTabs_ = MessageHandlerTabs;
-    spawn_();
+    spawn();
 
     chrome.windows.onRemoved.addListener(function (id) {
       if(window_.extension !== null && window_.extension.id === id) {
@@ -45,52 +52,147 @@ var Background = function (window, chrome, $, std, undefined)
       }
     } );
 
-    chrome.browserAction.onClicked.addListener(function () {
-      if(window_.extension === null)
-        spawn_();
-      else {
-        chrome.windows.remove(window_.extension.id);
-        window_.extension = null;
-      }
+    forAllTabs(function (tab) {
+      injectEmbeddableContentMaybe(tab);
+    } );
+
+    chrome.tabs.onUpdated.addListener(function (id, details, tab) {
+      if(details.status === 'loading')
+        injectEmbeddableContentMaybe(tab);
     } );
   };
 
-  var spawn_ = function ()
+  var injectEmbeddableContentMaybe = function (tab)
+  {
+    if(/^https?:/.test(tab.url)) {
+      console.log("Injecting content: %s", tab.url);
+      injectEmbeddableContent(tab.id);
+    } else
+      console.log("Ignoring: %s", tab.url);
+  };
+
+  var injectEmbeddableContent = function (id)
+  {
+    content.styles.forEach(function (style) {
+      chrome.tabs.insertCSS(id, { file: style } );
+    } );
+
+    var load_script = function (i) {
+      if(i >= content.scripts.length)
+        return;
+
+      chrome.tabs.executeScript(
+        id,
+        { file: content.scripts[i] },
+        function () {
+          load_script(++i);
+        } );
+    };
+
+    load_script(0);
+  };
+
+  var spawn = function ()
   {
     if(window_.extension !== null)
       throw "Extension window already exists";
 
-    console.log("Spawning extension window");
+    closeExtensionWindows();
+    findSuitableWindow(function (win) {
+      var size, ext;
 
-    chrome.windows.getCurrent(function (current) {
-      chrome.windows.getLastFocused(function (win) {
-        var size, ext;
+      console.log("Spawning extension window");
 
-        window_.main = $.extend(true, { }, win);
-        size = new std.PositionSize(win);
+      window_.main = $.extend(true, { }, win);
+      size = new std.PositionSize(win);
 
-        if(size.width > DEFAULT_EXTENSION_WIDTH * 2) {
-          size.width -= DEFAULT_EXTENSION_WIDTH;
+      if(size.width > DEFAULT_EXTENSION_WIDTH * 2) {
+        size.width -= DEFAULT_EXTENSION_WIDTH;
 
-          win.focused = true;
-          chrome.windows.update(win.id, $.extend( {state: "normal" },
-                                                  size.toObject()));
+        win.focused = true;
+        chrome.windows.update(win.id, $.extend( {state: "normal" },
+                                                size.toObject()));
+      }
+
+      ext = new std.PositionSize(size.right, size.top,
+                                 DEFAULT_EXTENSION_WIDTH, size.height - 30);
+
+      console.info("Creating Sorting Desk's window:", ext.toObject());
+      chrome.windows.create( $.extend( {
+        url: chrome.runtime.getURL("/src/html/main.html"),
+        focused: false,
+        type: "popup"
+      }, ext.toObject() ), function (nw) {
+        window_.extension = nw;
+        chrome.windows.update(nw.id, ext.toObject());
+      } );
+    } );
+  };
+
+  var forAllWindows = function (filter, callback)
+  {
+    var result = null;
+
+    chrome.windows.getAll(function (windows) {
+      /* All windows: */
+      windows.some(function (window) {
+        if(filter(window) === true) {
+          console.log(window);
+          callback(window);
+          return true;
         }
 
-        ext = new std.PositionSize(size.right, size.top,
-                                   DEFAULT_EXTENSION_WIDTH, size.height - 30);
+        return false;
+      } );
+    } );
+  };
 
-        console.info("Creating Sorting Desk's window:", ext.toObject());
-        chrome.windows.create( $.extend( {
-          url: chrome.runtime.getURL("/src/html/main.html"),
-          focused: false,
-          type: "popup"
-        }, ext.toObject() ), function (nw) {
-          window_.extension = nw;
-          chrome.windows.update(nw.id, ext.toObject());
+  var forAllTabs = function (filter, callback)
+  {
+    if(!std.is_fn(filter))
+      throw "Invalid or no filter function specified";
+
+    var result = chrome.windows.getAll(function (windows) {
+      /* All windows: */
+      return windows.some(function (window) {
+        /* All tabs: */
+        chrome.tabs.getAllInWindow(window.id, function (tabs) {
+          /* Call callback on every tab. */
+          return tabs.some(function (tab) {
+            if(filter(tab) === true) {
+              if(std.is_fn(callback))
+                callback(tab);
+
+              return true;
+            }
+
+            return false;
+          } ) === true;
         } );
       } );
     } );
+
+    if(result !== true && std.is_fn(callback))
+      callback(null);
+  };
+
+  var closeExtensionWindows = function ()
+  {
+    forAllWindows(function (window) {
+      if(window.type === 'popup') {
+        chrome.tabs.getAllInWindow(window.id, function (tabs) {
+          if(tabs.length === 1 && tabs[0].title === 'Sorting Desk')
+            chrome.windows.remove(window.id);
+        } );
+      }
+    } );
+  };
+
+  var findSuitableWindow = function (callback)
+  {
+    forAllWindows(function (window) {
+      return window.type === 'normal';
+    }, callback);
   };
 
 
@@ -197,6 +299,6 @@ var Background = function (window, chrome, $, std, undefined)
 
 
   /* Initialise instance. */
-  initialize_();
+  initialize();
 
 }(window, chrome, $, SortingCommon);

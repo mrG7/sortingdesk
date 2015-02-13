@@ -8,19 +8,15 @@
     "lib/sorting-queue/*.js",
     "lib/sorting-desk/*.js",
     "lib/dossier.js/*.js",
+    "shared/src/css/*.css",
     "media/*"
   ],
 
-  "content_scripts": [
-    {
-      "matches": ["<all_urls>"],
-      "js": [ "lib/jquery-2.1.1.min.js", "lib/sorting-common/sorting_common.js", "src/js/content/embed.js" ],
-      "css": [ "shared/src/css/theme-default.css", "shared/src/css/theme-default-images.css" ]
-    }
-  ],
-
   "background": {
-    "scripts": [ "lib/jquery-2.1.1.min.js", "lib/sorting-common/sorting_common.js", "src/js/extension/config.js", "src/js/extension/background.js" ]
+    "scripts": [ "lib/jquery-2.1.1.min.js",
+                 "lib/sorting-common/sorting_common.js",
+                 "src/js/extension/config.js",
+                 "src/js/extension/background.js" ]
   },
 
   "permissions": [
@@ -34,10 +30,12 @@
     "128": "shared/media/icons/icon_128.png"
   },
 
-  "browser_action": {
+  "page_action": {
     "default_icon": {
+      "19": "shared/media/icons/icon_active_19.png",
+      "38": "shared/media/icons/icon_active_38.png"
     },
-    "default_title": "Sorting Desk"
+    "default_title": "Sorting Desk active on this page"
   },
 
   "chrome_url_overrides": {
