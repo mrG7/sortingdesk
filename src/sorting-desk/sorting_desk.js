@@ -294,17 +294,24 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
       },
       "before_open.jstree": function (ev, data) {
         var i = self.getAnyById(data.node.id);
-        if(i instanceof Subfolder)
+        if(i !== null)
           i.open();
+      },
+      "after_open.jstree": function (ev, data) {
+        var i = self.getAnyById(data.node.id);
+        if(i !== null)
+          i.onAfterOpen();
       },
       "dblclick.jstree": function (ev, data) {
         var i = self.getAnyById($(ev.target).closest("li").attr('id'));
-        if(i instanceof Subfolder) {
-          i.open();
+        if(!i.opening()) {
+          if(i instanceof Subfolder) {
+            i.open();
 
-          if(i.items.length > 0)
-            self.setActive(i.items[0]);
-        } if(i instanceof Item)
+            if(i.items.length > 0)
+              self.setActive(i.items[0]);
+          }
+        } else if(i instanceof Item)
           self.setActive(i);
       },
       "select_node.jstree": function (ev, data) {
@@ -908,6 +915,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     def(this, 'controller', { get: function () {return this.controller_;}});
     def(this, 'api', { get: function () { return this.controller_.api; } } );
     def(this, 'tree', { get: function () { return this.controller_.tree; } } );
+    def(this, 'opening', { get: function () { return this.opening_; } } );
 
     def(this, 'node', { get: function () {
       return this.controller.tree.get_node(this.id_, true); } } );
@@ -926,7 +934,21 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.controller_ = ctrl;
     this.loading_ = 0;
     this.id_ = null;
+    this.opening_ = false;
   };
+
+  ItemBase.prototype.open = function ()
+  {
+    /* Don't attempt to open if already opening as it will result in a stack
+     * overflow error and catastrophic failure. */
+    if(!this.opening_) {
+      this.opening_ = true;
+      this.tree.open_node(this.id_);
+    }
+  };
+
+  ItemBase.prototype.onAfterOpen = function ()
+  { this.opening_ = false; };
 
   ItemBase.prototype.loading = function (state /* = true */)
   {
@@ -1045,11 +1067,6 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.subfolders_ = this.folder_ = this.id_ = null;
   };
 
-  Folder.prototype.open = function ()
-  {
-    this.tree.open_node(this.id);
-  };
-
   Folder.prototype.add = function (subfolder)
   {
     var sf = new Subfolder(this, subfolder);
@@ -1149,6 +1166,11 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
 
   Subfolder.prototype.open = function ()
   {
+    if(this.opening_)
+      return;
+
+    this.opening_ = true;
+
     /* Remove fake node, if one exists. */
     if(this.fake_ !== null) {
       this.tree.delete_node(this.fake_);
