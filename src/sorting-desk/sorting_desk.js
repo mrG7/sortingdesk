@@ -292,6 +292,11 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
         self.creating_ = null;
         self.update_empty_state_();
       },
+      "before_open.jstree": function (ev, data) {
+        var i = self.getAnyById(data.node.id);
+        if(i instanceof Subfolder)
+          i.open();
+      },
       "dblclick.jstree": function (ev, data) {
         var i = self.getAnyById($(ev.target).closest("li").attr('id'));
         if(i instanceof Subfolder) {
@@ -1099,6 +1104,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     this.subfolder_ = subfolder;
     this.items_ = [ ];
     this.loaded_ = !subfolder.exists;
+    this.fake_ = null;
 
     this.render();
   };
@@ -1125,11 +1131,22 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     if(this.id_ === false)
       throw "Failed to create subfolder";
 
+    if(!this.loaded_) {
+      this.fake_ = this.tree.create_node(
+        this.id_, { text: '<placeholder>' }, "last");
+    }
+
     this.owner_.open();
   };
 
   Subfolder.prototype.open = function ()
   {
+    /* Remove fake node, if one exists. */
+    if(this.fake_ !== null) {
+      this.tree.delete_node(this.fake_);
+      this.fake_ = null;
+    }
+
     /* Retrieve all items for this subfolder, if not yet loaded. */
     if(!this.loaded_) {
       var self = this;
