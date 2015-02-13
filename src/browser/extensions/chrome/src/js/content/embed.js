@@ -1,7 +1,7 @@
 /**
  * @file Initialisation and handling of the SortingDesk Google Chrome
  * extension user interface.
- * 
+ *
  * @copyright 2015 Diffeo
  *
  * Comments:
@@ -14,7 +14,7 @@
 /*jshint laxbreak:true */
 
 
-var ChromeExtensionUi = (function ($, std, undefined) {
+var Embeddable = (function ($, std, undefined) {
 
   /* Variables */
   var embed_;
@@ -29,7 +29,7 @@ var ChromeExtensionUi = (function ($, std, undefined) {
     var onGetSelection_ = function (request, sender, callback)
     {
       if(!std.is_fn(callback)) return;
-      
+
       var result = { },
           val,
           active = embed_.monitor.active;
@@ -56,7 +56,7 @@ var ChromeExtensionUi = (function ($, std, undefined) {
           console.error("Unable to retrieve valid `src´ attribute");
       } else {
         var sel = window.getSelection();
-        
+
         if(sel && sel.anchorNode) {
           val = sel.toString();
 
@@ -72,7 +72,7 @@ var ChromeExtensionUi = (function ($, std, undefined) {
 
           result.content = val;
           result.type = "text";
-          
+
           console.log("Text selection:", result);
           callback(result);
         } else
@@ -89,7 +89,7 @@ var ChromeExtensionUi = (function ($, std, undefined) {
     };
 
     /* Interface */
-    
+
     /* Require initialisation because the extension may not be active. If that
      * is the case, it is of no interest to be listening to messages from
      * background. */
@@ -112,7 +112,7 @@ var ChromeExtensionUi = (function ($, std, undefined) {
     return {
       initialise: initialise
     };
-    
+
   } )();
 
 
@@ -156,7 +156,7 @@ var ChromeExtensionUi = (function ($, std, undefined) {
         }
       } );
     } );
-    
+
   };
 
   /* Attributes */
@@ -174,10 +174,12 @@ var ChromeExtensionUi = (function ($, std, undefined) {
   var Embed = function (meta)
   {
     console.log("Initialising embeddable content");
-    
+
     BackgroundListener.initialise();
     this.monitor_ = new DraggableImageMonitor();
-    
+
+    chrome.runtime.sendMessage({ operation: "embeddable-active" });
+
     console.info("Initialised embeddable content");
   };
 
@@ -187,17 +189,15 @@ var ChromeExtensionUi = (function ($, std, undefined) {
     get monitor () { return this.monitor_; }
   };
 
-  
   /* Attempt to initialize extension class responsible for the UI. */
   chrome.runtime.sendMessage({ operation: "get-meta" }, function (result) {
     /* Do not proceed with UI initialisation if extension not currently enabled,
      * current tab not active or current page's URL is secure (using HTTPS) and
      * extension is set to not be activated on secure pages. */
-    if(!result.config.active || !result.tab.active || !window.location.href)
+    if(!result.config.active || !window.location.href)
       console.info("Skipping activation: inactive or unsupported");
     else
       embed_ = new Embed(result);
   } );
 
-  
 })($, SortingCommon);
