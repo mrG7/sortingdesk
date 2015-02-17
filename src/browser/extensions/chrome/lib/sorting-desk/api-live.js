@@ -12,7 +12,7 @@
 /*jshint laxbreak:true */
 
 
-var Api_ = (function (window, $, CryptoJS, DossierJS) {
+var Api_ = (function (window, $, CryptoJS, DossierJS, undefined) {
 
   /* Constants */
   var DEFAULT_DOSSIER_STACK_API_URL = 'http://10.3.2.42:9090';
@@ -43,9 +43,8 @@ var Api_ = (function (window, $, CryptoJS, DossierJS) {
         (new DossierJS.LabelFetcher(api_))
           .cid(bin.data_.content_id)
           .which('connected')
-          .get()
-          .done(function(labels) {
-            cids = uniqueContentIdsFromLabels(labels);
+          .get().done(function(labels) {
+            var cids = uniqueContentIdsFromLabels(labels);
             console.log('... these content ids:', cids);
 
             api_.addLabels(cids.map(function(cid) {
@@ -78,6 +77,7 @@ var Api_ = (function (window, $, CryptoJS, DossierJS) {
       generateSubtopicId: generateSubtopicId,
       makeRawTextId: makeRawTextId,
       makeRawImageId: makeRawImageId,
+      makeRawImageDataId: makeRawImageDataId,
       isSubtopic: isSubtopic,
       getSubtopicType: getSubtopicType,
       extractSubtopicId: extractSubtopicId,
@@ -138,9 +138,8 @@ var Api_ = (function (window, $, CryptoJS, DossierJS) {
   {
     if(typeof content !== 'string' || content.length === 0)
       throw "Invalid item content";
-    else if(typeof subtopic_id !== 'string' || subtopic_id === 0) {
+    else if(typeof subtopic_id !== 'string' || subtopic_id === 0)
       throw "Invalid subtopic id";
-    }
 
     fc.raw[subtopic_id] = content;
   };
@@ -269,6 +268,11 @@ var Api_ = (function (window, $, CryptoJS, DossierJS) {
     return [ 'subtopic', 'image', subtopic_id ].join('|');
   };
 
+  var makeRawImageDataId = function (subtopic_id)
+  {
+    return [ subtopic_id, 'data' ].join('|');
+  };
+
   var isSubtopic = function (subtopic_id)
   {
     return typeof subtopic_id === 'string'
@@ -285,7 +289,7 @@ var Api_ = (function (window, $, CryptoJS, DossierJS) {
     type = subtopic_id.match(/^subtopic\|(\w+)\|.+/);
 
     if(!type || type.length !== 2)
-      throw "Invalid format for subtopic id";
+      throw "Invalid format for subtopic id: " + subtopic_id;
 
     return type[1];
   };
@@ -405,7 +409,8 @@ var Api_ = (function (window, $, CryptoJS, DossierJS) {
 
       /* Attributes */
       this.subfolder_ = subfolder;
-      this.content_id = item.content_id; this.subtopic_id = item.subtopic_id;
+      this.content_id = item.content_id;
+      this.subtopic_id = item.subtopic_id;
     };
 
 
@@ -504,8 +509,8 @@ var Api_ = (function (window, $, CryptoJS, DossierJS) {
 
 /* Compatibility with RequireJs. */
 if(typeof define === "function" && define.amd) {
-  define("API", [ "jquery", "CryptoJS" ], function ($, CryptoJS) {
-    return _(window, $, CryptoJS);
+  define("API", [ "jquery", "CryptoJS", "DossierJS" ], function ($, CryptoJS, DossierJS) {
+    return Api_(window, $, CryptoJS, DossierJs);
   });
 } else
   window.Api = Api_(window, $, CryptoJS, DossierJS);

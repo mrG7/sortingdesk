@@ -24,6 +24,11 @@ var Injector = (function () {
     return map[id];
   };
 
+  var attach_ = function (tab) {
+    var w = map[tab.id] = tab.attach( { contentScriptFile: scripts } );
+    w.port.emit('initialise');
+    console.log("embedded content script to tab: ", tab.id);
+  };
 
   /* Initialisation sequence */
   var initialise = function () {
@@ -34,19 +39,21 @@ var Injector = (function () {
       return data.url(s);
     } );
 
-    mtabs.on('open', function (tab) {
-      if(tab.id in map)
-        console.error("Content script already attached: %d", tab.id);
-      else
-        map[tab.id] = tab.attach( { contentScriptFile: scripts } );
+    mtabs.on('ready', function (tab) {
+      attach_(tab);
     } );
 
     mtabs.on('close', function (tab) {
+      console.log("closing tab: ", tab.id);
       if(!(tab.id in map))
-        console.error("Content script NOT attached: %d", tab.id);
+        console.error("Content script NOT attached: ", tab.id);
       else
         delete map[tab.id];
     } );
+
+    /* Attach content scripts to all tabs at startup. */
+    for(let tab of mtabs)
+      attach_(tab);
 
     console.log("Injector module initialised");
   };

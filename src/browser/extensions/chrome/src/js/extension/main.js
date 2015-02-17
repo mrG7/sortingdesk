@@ -34,6 +34,7 @@ var Main = (function (window, chrome, $, std, sq, sd, Api, undefined) {
 
   Item.prototype.render = function(text, view, less)
   {
+    var raw = this.content_.raw;
     var fc = this.content_.fc;
     var desc = fc.value('meta_clean_visible').trim();
     desc = desc.replace(/\s+/g, ' ');
@@ -62,15 +63,72 @@ var Main = (function (window, chrome, $, std, sq, sd, Api, undefined) {
     this.content_.text.append(ndesc);
     this.content_.text.append(nurl);
 
-    if (!std.is_und(this.content_.raw.probability)) {
-      var score = this.content_.raw.probability.toFixed(4);
+    if(std.is_num(raw.probability)) {
+      var score = raw.probability.toFixed(4);
       this.content_.text.append($(
         '<p style="margin: 8px 0 0 0; display: block;">'
         + 'Score: ' + score
         + '</p>'
-      ));
+      ) );
+
+      var info = raw.feature_cmp_info;;
+      if(std.is_obj(info)) {
+        for(var i in info) {
+          var j = info[i],
+              values = j.common_values;
+
+          if(std.is_arr(values) && values.length > 0) {
+            var container = $('<div/>').addClass('sd-dict-container'),
+                hasPhi = std.is_num(j.phi) && j.phi > 0,
+                el;
+
+            el = $('<div/>').addClass("sd-dict-weight");
+            if(hasPhi)
+              el.append(this.create_weight_('Score:', 1 - j.phi));
+
+           if(std.is_num(j.weight) && j.weight > 0) {
+              if(hasPhi)
+                el.append('<br/>');
+
+              el.append(this.create_weight_('Weight:', j.weight));
+           }
+
+            container.append(el);
+            container.append($('<h1/>').text(i));
+
+            el = $('<div/>').addClass('sd-dict-values');
+
+            if(i === 'image_url') {
+              values.forEach(function (v) {
+                el.append($('<img/>').attr('src', v));
+              } );
+            } else {
+              values.forEach(function (v) {
+                el.append($('<span/>').text(v));
+              } );
+            }
+
+            container.append(el);
+            this.content_.text.append(container);
+            this.content_.text.append($('<div class="sd-clear"/>'));
+          }
+        }
+      }
     }
+
+    console.log(this.content_);
+
     return sq.Item.prototype.render.call(this);
+  };
+
+  Item.prototype.create_weight_ = function (caption, weight)
+  {
+    var el = $('<span/>').addClass('sd-dict-weight');
+
+    el.append($('<span/>').text(caption));
+    el.append($('<span/>').text(weight.toFixed(4)));
+
+    return el;
   };
 
 
@@ -113,21 +171,7 @@ var Main = (function (window, chrome, $, std, sq, sd, Api, undefined) {
    * */
   var HandlerCallbacks = (function () {
 
-    var imageToBase64_ = function (entity)
-    {
-      var deferred = $.Deferred();
-
-      chrome.runtime.sendMessage(
-        { operation: 'get-image-base64', entity: entity },
-        function (result) {
-          if(result === false) deferred.reject();
-          else deferred.resolve(result);
-        } );
-
-      return deferred.promise();
-    };
-
-    var getSelection_ = function ()
+    var onGetSelection_ = function ()
     {
       var deferred = $.Deferred();
 
@@ -140,24 +184,36 @@ var Main = (function (window, chrome, $, std, sq, sd, Api, undefined) {
               active.id,
               { operation: 'get-selection' },
               function (result) {
-                /* Retrieve base64 encoding of image data if result type is
-                 * image; otherwise resolve promise straight away with result in
-                 * it. */
                 if(!std.is_obj(result)) {
                   console.error("Invalid result type received: not object");
                   deferred.reject();
                 } else if(result.type === 'image') {
-                  imageToBase64_(result.content)
-                    .done(function (data) {
-                      result.data = data;
-                      deferred.resolve(result);
-                    } ).fail(function () {
-                      console.error("Failed to retrieve image data in base64"
-                                    + " encoding");
-                      deferred.resolve(null);
-                    } );
-                } else
-                  deferred.resolve(result);
+                  /* There is a pretty good chance that image data will have
+                   * already been retrieved in the content script (embed.js),
+                   * in which case `result.data´ will contain the image data.
+                   * Otherwise, an attempt is made in addon space to retrieve
+                   * the base64 encoding of the image data. */
+                  if(!std.is_str(result.data)) {
+                    console.info("Attempting to retrieve image data from"
+                                 + " background script");
+                    std.Html.imageToBase64(result.content)
+                      .done(function (data) { result.data = data; } )
+                      .fail(function () {
+                        console.error("Failed to retrieve image data in"
+                                      + " base64 encoding");
+                        result.data = null; /* force null */
+                      } )
+                      .always(function () {
+                        /* Always resolve, even when we don't retrieve image
+                         * data in base64 encoding.  */
+                        deferred.resolve(result);
+                      } );
+
+                    return;
+                  }
+                }
+
+                deferred.resolve(result);
               } );
           }
         } );
@@ -170,8 +226,7 @@ var Main = (function (window, chrome, $, std, sq, sd, Api, undefined) {
     return {
       callbacks: {
         sorter: {
-          imageToBase64: imageToBase64_,
-          getSelection: getSelection_
+          getSelection: onGetSelection_
         }
       }
     };
@@ -193,13 +248,13 @@ var Main = (function (window, chrome, $, std, sq, sd, Api, undefined) {
 
     /* Handle messages whose `operation´ is defined above in `methods_´. */
     chrome.runtime.onMessage.addListener(
-      function (request, sender, callback) {
-        if(methods_.hasOwnProperty(request.operation)) {
-          console.log("Invoking message handler [type="
-                      + request.operation + "]");
+      function (req, sen, cb) {
+        if(methods_.hasOwnProperty(req.operation)) {
+          console.log("Invoking message handler [type=" + req.operation + "]");
 
           /* Invoke handler. */
-          methods_[request.operation].call(window, request, sender, callback);
+          if(methods_[req.operation].call(window, req, sen, cb) === true)
+            return true;
         }
       }
     );
@@ -277,6 +332,8 @@ var Main = (function (window, chrome, $, std, sq, sd, Api, undefined) {
   /* Private interface */
   var initialise_ = function ()
   {
+    console.log("Initialising main");
+
     /* Initialisation sequence */
     loading = {
       sorter: new LoadingStatus($('#sd-folder-explorer .sd-loading')),
@@ -324,7 +381,7 @@ var Main = (function (window, chrome, $, std, sq, sd, Api, undefined) {
 
       chrome.tabs.onActivated.addListener(function (info) {
         chrome.tabs.get(info.tabId, function (tab) {
-          if(!/^chrome[^:]*:/.test(tab.url))
+          if(tab && tab.url && !/^chrome[^:]*:/.test(tab.url))
             setActive(tab);
         } );
       } );
@@ -357,10 +414,11 @@ var Main = (function (window, chrome, $, std, sq, sd, Api, undefined) {
 
         return false;
       } );
+
+    console.log("Initialised main");
   };
 
   var instantiate_ = function (meta) {
-
     (sorter = new sd.Sorter( {
       container: $('#sd-folder-explorer'),
       dossierUrl: meta.config.dossierUrl,

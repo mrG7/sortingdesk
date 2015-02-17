@@ -19,7 +19,7 @@ var Blacklist = (function () {
       throw "Invalid or no URL specified";
 
     return blacklist.some(function (i) {
-      return !(new RegExp(i)).test(url);
+      return (new RegExp(i)).test(url) !== false;
     } );
   };
 

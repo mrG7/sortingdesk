@@ -1,7 +1,7 @@
 /**
  * @file Initialisation and handling of the SortingDesk Google Chrome
  * extension user interface.
- * 
+ *
  * @copyright 2015 Diffeo
  *
  * Comments:
@@ -14,10 +14,40 @@
 /*jshint laxbreak:true */
 
 
-var ChromeExtensionUi = (function ($, std, undefined) {
+var Embeddable = (function ($, std, undefined) {
 
   /* Variables */
   var embed_;
+
+  var fetchImage = function (url, callback)
+  {
+    /* Code borrowed from the following Stack Overflow page:
+     * http://stackoverflow.com/a/17682424 */
+    var xhr = new XMLHttpRequest();
+
+    xhr.onreadystatechange = function() {
+      if (this.readyState === 4) {
+        if (this.status === 200)
+          callback(this.response);
+        else {
+          console.error('Failed to fetch image: status='
+                        + this.status
+                        + ': text=' + this.statusText);
+          callback();
+        }
+      }
+    };
+
+    xhr.onerror = function () {
+      console.error('Failed to fetch image: ', url);
+      callback();
+    };
+
+    xhr.open('GET', url);
+    xhr.responseType = 'blob';
+
+    xhr.send(null);
+  };
 
 
   /**
@@ -29,7 +59,7 @@ var ChromeExtensionUi = (function ($, std, undefined) {
     var onGetSelection_ = function (request, sender, callback)
     {
       if(!std.is_fn(callback)) return;
-      
+
       var result = { },
           val,
           active = embed_.monitor.active;
@@ -44,26 +74,57 @@ var ChromeExtensionUi = (function ($, std, undefined) {
         active = active.get(0);
         val = active.src;
         embed_.monitor.clear();
+        console.log("Image selection:", result);
 
         if(val) {
           result.id = result.content = val;
           result.caption = active.alt || active.title;
           result.type = "image";
 
-          console.log("Image selection:", result);
-          callback(result);
+          /* Don't get image data if the image was loaded via a data URI. */
+          if(/^data:/.test(val)) {
+            result.data = val;
+            callback(result);
+            return;
+          }
+
+          /* Image was loaded via a URI.  Fetch it and convert its data blob to
+           * base64. */
+          fetchImage(val, function (blob) {
+            var reader = new window.FileReader();
+
+            /* If a blob is available, convert it to base64. */
+            if(!blob)
+              callback(result);
+            else {
+              reader.onload = function () {
+                result.data = reader.result;
+                callback(result);
+              };
+
+              reader.onerror = function () {
+                console.error('Conversion of image data from blob to data'
+                              + ' failed.');
+                callback(result);
+              };
+
+              reader.readAsDataURL(blob);
+            }
+          } );
+
+          return true;
         } else
           console.error("Unable to retrieve valid `src´ attribute");
       } else {
         var sel = window.getSelection();
-        
+
         if(sel && sel.anchorNode) {
           val = sel.toString();
 
-          /* Craft a unique id for this text snippet based on its content, Xpath
-           * representation, offset from selection start and length. This id is
-           * subsequently used to generate a unique and collision free unique
-           * subtopic id. */
+          /* Craft a unique id for this text snippet based on its content,
+           * Xpath representation, offset from selection start and length. This
+           * id is subsequently used to generate a unique and collision free
+           * unique subtopic id. */
           result.xpath = std.Html.getXpathSimple(sel.anchorNode);
           result.id = [ val,
                         result.xpath,
@@ -72,7 +133,7 @@ var ChromeExtensionUi = (function ($, std, undefined) {
 
           result.content = val;
           result.type = "text";
-          
+
           console.log("Text selection:", result);
           callback(result);
         } else
@@ -89,20 +150,21 @@ var ChromeExtensionUi = (function ($, std, undefined) {
     };
 
     /* Interface */
-    
+
     /* Require initialisation because the extension may not be active. If that
      * is the case, it is of no interest to be listening to messages from
      * background. */
     var initialise = function () {
       /* Handle messages whose `operation´ is defined above in `methods_´. */
       chrome.runtime.onMessage.addListener(
-        function (request, sender, callback) {
-          if(methods_.hasOwnProperty(request.operation)) {
+        function (req, sen, cb) {
+          if(methods_.hasOwnProperty(req.operation)) {
             console.log("Invoking message handler [type="
-                        + request.operation + "]");
+                        + req.operation + "]");
 
             /* Invoke handler. */
-            methods_[request.operation].call(window, request, sender, callback);
+            if(methods_[req.operation].call(window, req, sen, cb) === true)
+              return true;
           }
         }
       );
@@ -112,7 +174,7 @@ var ChromeExtensionUi = (function ($, std, undefined) {
     return {
       initialise: initialise
     };
-    
+
   } )();
 
 
@@ -156,7 +218,7 @@ var ChromeExtensionUi = (function ($, std, undefined) {
         }
       } );
     } );
-    
+
   };
 
   /* Attributes */
@@ -174,10 +236,12 @@ var ChromeExtensionUi = (function ($, std, undefined) {
   var Embed = function (meta)
   {
     console.log("Initialising embeddable content");
-    
+
     BackgroundListener.initialise();
     this.monitor_ = new DraggableImageMonitor();
-    
+
+    chrome.runtime.sendMessage({ operation: "embeddable-active" });
+
     console.info("Initialised embeddable content");
   };
 
@@ -187,17 +251,15 @@ var ChromeExtensionUi = (function ($, std, undefined) {
     get monitor () { return this.monitor_; }
   };
 
-  
   /* Attempt to initialize extension class responsible for the UI. */
   chrome.runtime.sendMessage({ operation: "get-meta" }, function (result) {
     /* Do not proceed with UI initialisation if extension not currently enabled,
      * current tab not active or current page's URL is secure (using HTTPS) and
      * extension is set to not be activated on secure pages. */
-    if(!result.config.active || !result.tab.active || !window.location.href)
+    if(!result.config.active || !window.location.href)
       console.info("Skipping activation: inactive or unsupported");
     else
       embed_ = new Embed(result);
   } );
 
-  
 })($, SortingCommon);

@@ -8,20 +8,9 @@
     "lib/sorting-queue/*.js",
     "lib/sorting-desk/*.js",
     "lib/dossier.js/*.js",
+    "shared/src/css/*.css",
     "media/*"
   ],
-
-  "content_scripts": [
-    {
-      "matches": ["<all_urls>"],
-      "js": [ "lib/jquery-2.1.1.min.js", "lib/sorting-common/sorting_common.js", "src/js/content/embed.js" ],
-      "css": [ "shared/src/css/theme-default.css", "shared/src/css/theme-default-images.css" ]
-    }
-  ],
-
-  "background": {
-    "scripts": [ "lib/jquery-2.1.1.min.js", "lib/sorting-common/sorting_common.js", "src/js/extension/config.js", "src/js/extension/background.js" ]
-  },
 
   "permissions": [
     "tabs",
@@ -30,12 +19,35 @@
     "<all_urls>"
   ],
 
+  "background": {
+    "scripts": [ "lib/jquery-2.1.1.min.js",
+                 "lib/sorting-common/sorting_common.js",
+                 "src/js/extension/config.js",
+                 "src/js/extension/background.js" ]
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": [ "lib/jquery-2.1.1.min.js",
+              "lib/sorting-common/sorting_common.js",
+              "src/js/content/embed.js" ],
+      "css": [ "shared/src/css/theme-default.css",
+               "shared/src/css/theme-default-images.css" ]
+    }
+  ],
+
   "icons": {
-    "128": "shared/media/icons/icon_128.png"
+    "128": "shared/media/icons/icon_128.png",
+    "64":  "shared/media/icons/icon_64.png",
+    "32":  "shared/media/icons/icon_32.png",
+    "16":  "shared/media/icons/icon_16.png"
   },
 
   "browser_action": {
     "default_icon": {
+      "38": "shared/media/icons/icon_38.png",
+      "19": "shared/media/icons/icon_19.png"
     },
     "default_title": "Sorting Desk"
   },

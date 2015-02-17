@@ -36,12 +36,16 @@ are saved."
   :type 'directory
   :group 'watch-deps)
 
-(defcustom watch-deps-file-list '("src/sorting-desk/sorting_desk.js"
-                                  "src/sorting-desk/api-live.js"
-                                  "src/sorting-desk/components/label_browser.js"
-                                  "src/sorting-queue/sorting_queue.js"
-                                  "src/sorting-common/sorting_common.js"
-                                  "src/dossier.js/Dossier.js")
+(defcustom watch-deps-file-list
+  '("src/sorting-desk/sorting_desk.js"
+    "src/sorting-desk/api-live.js"
+    "src/sorting-desk/components/label_browser.js"
+    "src/sorting-queue/sorting_queue.js"
+    "src/sorting-common/sorting_common.js"
+    "src/dossier.js/Dossier.js"
+    "src/browser/extensions/shared/src/css/theme-default.css"
+    "src/browser/extensions/shared/src/css/theme-default-images.css"
+    "src/browser/extensions/shared/src/css/theme-dependencies.css")
   "Relative path of each file to watch out for changes. Saving any of the files
 in the list will result in the shell command defined in `watch-deps-command'
 being executed."

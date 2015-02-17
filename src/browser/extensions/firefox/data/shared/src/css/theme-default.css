@@ -33,6 +33,7 @@ BODY {
 
 /* Master container */
 #sd-sorting-desk {
+  min-width: 320px;
   width: 100%;
   box-sizing: border-box;
 }
@@ -85,12 +86,6 @@ BODY {
 #sd-sorting-desk {
   overflow: hidden;
   white-space: nowrap;
-  border-bottom: 1px solid silver;
-}
-
-#sd-folder-explorer {
-  white-space: nowrap;
-  vertical-align: middle;
   border-bottom: 1px solid silver;
 }
 
@@ -168,122 +163,10 @@ BODY {
   box-shadow: 1px 1px 1px #888;
 }
 
-#sd-folder-explorer .sd-loading {
-  top: 173px;
-}
-
-#sd-folder-explorer .sd-empty {
-  top: 193px;
-}
-
 
 /* ----------------------------------------------------------------------
  *  Sorting Desk
  * ---------------------------------------------------------------------- */
-.sd-bin {
-  display: inline-block;
-  position: relative;
-  border: 2px solid #7582C9;
-  background-color: #D0DDFF;
-  border-radius: 8px;
-  padding: 5px;
-  margin: 5px 5px 5px 0;
-  text-align: center;
-  font-size: 13px;
-  box-shadow: 1px 1px 1px 0 rgba(50, 50, 50, 0.75);
-  text-shadow: 1px 1px 1px rgba(150, 150, 150, 1);
-  transition: background-color 175ms, color 100ms;
-  min-width: 50px;
-  max-width: 200px;
-  line-height: 16px;
-}
-
-.sd-bin.sd-bin-image {
-  padding: 1px;
-  top: 4px;
-}
-
-.sd-bin:hover:not(.sd-adding) {
-  background-color: #A9BEF3;
-  color: #F2F6FF;
-  cursor: pointer;
-  transition: background-color 175ms, color 100ms;
-}
-
-.sd-bin.sd-mousedown:not(.sd-adding),
-.sd-bin.sd-assign {
-  position: relative;
-  top: 2px;
-  left: 2px;
-  box-shadow: none;
-  transition: background-color 175ms, color 100ms;
-}
-
-.sd-bin.sd-bin-image.sd-mousedown:not(.sd-adding),
-.sd-bin.sd-bin-image.sd-assign {
-  top: 6px;
-}
-
-.sd-bin .sd-bin-name {
-  color: #5C7CCA;
-}
-
-.sd-bin.sd-unknown {
-  background-color: #d24949 !important;
-  border-color: #ab4949 !important;
-}
-
-.sd-bin.sd-active:hover {
-  color: #E6FFD6;
-  background-color: #92E29F;
-  border-color: #349950;
-}
-
-.sd-bin-browser-icon {
-  position: absolute;
-  width: 12px;
-  height: 11px;
-  top: -5px;
-  right: -10px;
-  display: none;
-  padding: 3px;
-  border: 1px solid grey;
-  border-radius: 9px;
-  opacity: 0;
-  box-shadow: 1px 1px 1px 0 rgba(50, 50, 50, 0.75);
-  transition: all 200ms;
-  z-index: 1000001;
-}
-
-.sd-bin:hover .sd-bin-browser-icon:not(.sd-disabled) {
-  display: block;
-  background-color: white;
-  opacity: 1;
-}
-
-.sd-bin-browser-icon:not(.sd-disabled):hover {
-  background-color: #ececec;
-}
-
-/* Bin: name */
-.sd-bin-name {
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.sd-bin-name IMG {
-  border: 0 none;
-  width: auto;
-  height: 24px;
-  display: block;
-  margin: 0;
-  margin-left: auto;
-  margin-right: auto;
-  padding: 0;
-  line-height: 0;
-  border-radius: 6px;
-}
-
 /* Text item */
 .sd-text-item {
   position: relative;
@@ -306,7 +189,7 @@ BODY {
 
 .sd-text-item-content {
   overflow: hidden;
-  max-height: 1000px;
+/*   max-height: 1000px; */
   text-overflow: ellipsis;
 }
 
@@ -382,6 +265,60 @@ A.sd-text-item-title {
   border-color: #eee !important;
   color: silver !important;
   background-color: inherit !important;
+}
+
+.sd-dict-container {
+  max-height: 200px;
+  margin: 8px 0 8px 8px;
+  padding: 5px;
+  border: 1px solid #ccc;
+  background-color: #fcfcfc;
+  clear: both;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.sd-dict-container H1 {
+  font-size: 12px;
+  font-weight: bold;
+  margin: 0 0 10px 0;
+  color: #37434F;
+}
+
+.sd-dict-weight {
+  float: right;
+}
+
+DIV.sd-dict-weight > SPAN > SPAN:last-child {
+  padding-left: 5px;
+  color: #666;
+}
+
+.sd-dict-values {
+  clear: both;
+}
+
+.sd-dict-values > IMG {
+  display: block;
+  float: left;
+  margin-top: 5px;
+  margin-left: 10px;
+  height: 24px;
+  overflow-y: auto;
+}
+
+.sd-dict-values > SPAN {
+  display: block;
+  float: left;
+  margin-left: 10px;
+  border-radius: 4px;
+  border: 1px solid #b1bcd5;
+  background-color: #e3eaf4;
+  padding: 3px 5px 3px 5px;
+  margin-top: 5px;
+  text-overflow: ellipsis;
+  max-width: 150px;
+  overflow: hidden;
 }
 
 /* Dismissal */
@@ -468,6 +405,7 @@ A.sd-text-item-title {
   text-shadow: 1px 1px 1px #276688;
 }
 
+
 /* Droppable elements */
 .sd-droppable {
   border: 2px dashed gray;
@@ -482,41 +420,8 @@ A.sd-text-item-title {
   background-color: #fce4e4 !important;
 }
 
-/* Button: dismiss */
-#sd-button-dismiss {
-  display: none;
-  position: absolute;
-  z-index: -1;
-  border: 2px solid #C5A2A2;
-  background-color: #F8EAEA;
-  clear: both;
-  font-size: 20px;
-  color: #900;
-  padding: 5px;
-  width: 28px;
-  text-align: center;
-  border-radius: 19px;
-  box-shadow: 1px 1px 2px 0 rgba(50, 50, 50, 0.75);
-  text-shadow: 1px 1px 2px rgba(150, 150, 150, 1);
-  transition: all 175ms;
-  cursor: pointer;
-  line-height: 25px;
-  top: 33px;
-  right: -25px;
-}
 
-#sd-button-dismiss SPAN {
-  position: relative;
-}
-
-#sd-button-dismiss.sd-droppable-hover {
-  background-color: #C04343;
-  border-color: #7A4747;
-  color: #FFF5F5;
-}
-
-
-/* Common styling to Label Browser and similar components */
+/* Styling common to components */
 .sd-container.sd-component {
   top: 100px;
   left: 100px;
@@ -596,11 +501,6 @@ A.sd-text-item-title {
   overflow: auto;
 }
 
-/* Hack for JsTree. */
-#sd-folder-explorer .sd-container-view {
-  overflow: hidden;
-}
-
 .sd-button-close {
   position: absolute;
   top: -12px;
@@ -636,37 +536,33 @@ A.sd-text-item-title {
   background-image: linear-gradient(#eee, #ddd);
 }
 
-/* Button: round */
-.sd-button-round,
-.sd-button-round.sd-normal {
-  background-color: #6490d5;
-  padding: 4px 5px 4px 5px;
-  border-radius: 16px;
-  border: 1px solid #a5bacd;
-  transition: all 200ms;
-  line-height: normal;
+
+/* Folder Explorer */
+#sd-folder-explorer {
+  white-space: nowrap;
+  vertical-align: middle;
+  border-bottom: 1px solid silver;
 }
 
-.sd-button-round SPAN {
-  color: white;
-  text-shadow: none;
+/* Hack for JsTree. */
+#sd-folder-explorer .sd-container-view {
+  overflow: hidden;
 }
 
-.sd-button-round.sd-small {
-  padding: 2px 4px 2px 4px;
-  border-radius: 12px;
+#sd-folder-explorer .sd-loading {
+  top: 173px;
 }
 
-.sd-button-round:hover {
-  background-color: #94b6ec;
+#sd-folder-explorer .sd-empty {
+  top: 193px;
 }
 
 .sd-folder {
-  background: url('/media/images/folder-root.png') 0px 0px no-repeat !important;
+  background: url('../../media/images/folder-root.png') 0 0 no-repeat !important;
 }
 
 .sd-subfolder {
-  background: url('/media/images/folder-sub.png') 0px 0px no-repeat !important;
+  background: url('../../media/images/folder-sub.png') 0 0 no-repeat !important;
 }
 
 .jstree LI.sd-active {
