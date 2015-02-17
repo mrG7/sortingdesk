@@ -1330,7 +1330,7 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
   /**
    * @class
    * */
-  var Item = function (owner, item, /* optional */ content)
+  var Item = function (owner, item, /* optional */ descriptor)
   {
     /* Invoke base class constructor. */
     ItemBase.call(this, owner);
@@ -1359,9 +1359,9 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
           self.events_.trigger('ready');
         };
 
-    /* Retrieve item's subtopic content from feature collection if `content´ was
-     * not specified. */
-    if(!content) {
+    /* Retrieve item's subtopic content from feature collection if `descriptor´
+     * was not specified. */
+    if(!descriptor) {
       this.owner_.loading(true);
 
       this.api.getFeatureCollection(item.content_id)
@@ -1373,7 +1373,8 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
           self.onGotFeatureCollection(null);
         } );
     } else {
-      this.item_.content = content;
+      this.item_.content = descriptor.content;
+      this.item_.data = descriptor.data;
       window.setTimeout(function () { ready(); } );
     }
   };
@@ -1389,8 +1390,8 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
       throw "Invalid or no item specified";
 
     switch(api.getSubtopicType(item.subtopic_id)) {
-    case 'image': return new ItemImage(subfolder, item, content);
-    case 'text':  return new ItemText (subfolder, item, content);
+    case 'image': return new ItemImage(subfolder, item, descriptor);
+    case 'text':  return new ItemText (subfolder, item, descriptor);
     }
 
     throw "Invalid item type: " + api.getSubtopicType(item.subtopic_id);
