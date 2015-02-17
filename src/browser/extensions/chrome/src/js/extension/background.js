@@ -264,7 +264,10 @@ var Background = function (window, chrome, $, std, undefined)
           console.log("Invoking message handler [type="
                       + request.operation + "]");
 
-          methods[request.operation].call(self, request, sender, callback);
+          if(methods[request.operation].call(
+            self, request, sender, callback) === true) {
+            return true;
+          }
         } else
           console.error("Invalid request received:", request);
 

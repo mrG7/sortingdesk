@@ -96,13 +96,14 @@ var Embeddable = (function ($, std, undefined) {
     var initialise = function () {
       /* Handle messages whose `operation´ is defined above in `methods_´. */
       chrome.runtime.onMessage.addListener(
-        function (request, sender, callback) {
-          if(methods_.hasOwnProperty(request.operation)) {
+        function (req, sen, cb) {
+          if(methods_.hasOwnProperty(req.operation)) {
             console.log("Invoking message handler [type="
-                        + request.operation + "]");
+                        + req.operation + "]");
 
             /* Invoke handler. */
-            methods_[request.operation].call(window, request, sender, callback);
+            if(methods_[req.operation].call(window, req, sen, cb) === true)
+              return true;
           }
         }
       );
