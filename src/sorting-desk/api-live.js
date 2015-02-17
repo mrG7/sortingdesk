@@ -409,7 +409,8 @@ var Api_ = (function (window, $, CryptoJS, DossierJS, undefined) {
 
       /* Attributes */
       this.subfolder_ = subfolder;
-      this.content_id = item.content_id; this.subtopic_id = item.subtopic_id;
+      this.content_id = item.content_id;
+      this.subtopic_id = item.subtopic_id;
     };
 
 
