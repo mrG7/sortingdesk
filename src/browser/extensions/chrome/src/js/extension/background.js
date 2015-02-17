@@ -144,7 +144,6 @@ var Background = function (window, chrome, $, std, undefined)
       /* All windows: */
       windows.some(function (window) {
         if(filter(window) === true) {
-          console.log(window);
           callback(window);
           return true;
         }
@@ -232,17 +231,6 @@ var Background = function (window, chrome, $, std, undefined)
       } );
     };
 
-    var onGetImageBase64_ = function (request, sender, callback)
-    {
-      if(!request.hasOwnProperty('entity'))
-        throw "`entity´ attribute missing in request";
-      else if(std.is_fn(callback)) {
-        std.Html.imageToBase64(request.entity)
-          .done(function (data) { callback(data); } )
-          .fail(function ()     { callback(false); } );
-      }
-    };
-
     var onGetExtensionWindow_ = function (request, sender, callback)
     {
       if(!std.is_fn(callback)) return;
@@ -265,7 +253,6 @@ var Background = function (window, chrome, $, std, undefined)
         methods = {
           "read-file": onReadFile_,
           "get-meta": onGetMeta_,
-          "get-image-base64": onGetImageBase64_,
           "get-extension-window": onGetExtensionWindow_,
           "embeddable-active": onEmbeddableActive_
         };
