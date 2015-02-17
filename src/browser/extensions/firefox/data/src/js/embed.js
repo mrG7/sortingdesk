@@ -47,7 +47,7 @@ var Embeddable = (function ($, std, undefined) {
         result.caption = active.alt || active.title;
         result.type = "image";
 
-/*         console.log("Image selection:", result); */
+        console.log("Image selection: ", val);
         self.port.emit("get-selection", result);
       } else
         console.error("Unable to retrieve valid `src´ attribute");
@@ -68,7 +68,7 @@ var Embeddable = (function ($, std, undefined) {
         result.content = val;
         result.type = "text";
 
-/*         console.log("Text selection:", result); */
+        console.log("Text selection: ", val);
         self.port.emit("get-selection", result);
       } else
         console.error("No text currently selected");
