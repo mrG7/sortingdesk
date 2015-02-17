@@ -38,7 +38,10 @@
   ],
 
   "icons": {
-    "128": "shared/media/icons/icon_128.png"
+    "128": "shared/media/icons/icon_128.png",
+    "64":  "shared/media/icons/icon_64.png",
+    "32":  "shared/media/icons/icon_32.png",
+    "16":  "shared/media/icons/icon_16.png"
   },
 
   "browser_action": {
