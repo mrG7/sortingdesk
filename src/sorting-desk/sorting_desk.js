@@ -100,17 +100,22 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
                     'unknown',
                     0, // coref value is filled in below
                     self.api.getQuerySubtopicId());
-            if (id === null) {
-                label.coref_value = djs.COREF_VALUE_UNKNOWN;
-            } else if (id === 'duplicate') {
-                label.coref_value = djs.COREF_VALUE_POSITIVE;
-            } else if (id === 'negative') {
-                label.coref_value = djs.COREF_VALUE_NEGATIVE;
-            } else {
-                throw "Unrecognized dismissal identifier: " + id;
+            if (id === null)
+              label.coref_value = djs.COREF_VALUE_UNKNOWN;
+            else if (id === 'duplicate')
+              label.coref_value = djs.COREF_VALUE_POSITIVE;
+            else if (id === 'negative')
+              label.coref_value = djs.COREF_VALUE_NEGATIVE;
+            else {
+              item.owner.remove(item);
+              console.error("Unrecognized dismissal identifier: " + id);
+              return;
             }
+
+            this.setResetHtml("Processing...");
+
             self.api.addLabel(label)
-                .done(function() { item.owner.remove(item); });
+              .done(function() { item.owner.remove(item); });
           } );
       };
     }
