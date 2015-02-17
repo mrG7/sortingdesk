@@ -1055,8 +1055,8 @@ var SortingQueue_ = function (window, $, std) {
       /* Attach handler to click event. */
       this.owner_.getNodeClose()
         .off()
-        .click(function () {
-          self.events_.trigger('dismissed', null, self.owner_.content);
+        .click(function (ev) {
+          self.dismiss_(null);
         } );
     } else
       this.owner_.getNodeClose().remove();
@@ -1074,12 +1074,7 @@ var SortingQueue_ = function (window, $, std) {
       if(!target.hasClass(Css_.dismissal.option))
         return false;
 
-      self.events_.trigger('dismissed',
-                           target.data('id'),
-                           self.owner_.content);
-
-/*       self.reset(); */
-
+      self.dismiss_(target.data('id'));
       return false;
     } );
 
@@ -1095,9 +1090,7 @@ var SortingQueue_ = function (window, $, std) {
       mouseleave: function (ev) {
         self.timer_ = window.setTimeout(function () {
           self.timer_ = null;
-          self.events_.trigger('dismissed',
-                               null,
-                               self.owner_.content);
+          self.dismiss_(null);
         }, self.options_.delayTimedDismissal * 1000);
       }
     } );
@@ -1115,7 +1108,6 @@ var SortingQueue_ = function (window, $, std) {
 
   ItemDismissal.prototype.render = std.absm_noti;
 
-  /* Private interface */
   ItemDismissal.prototype.brief = function ()
   {
     var text = this.owner_.node.find(
@@ -1126,6 +1118,13 @@ var SortingQueue_ = function (window, $, std) {
           });
 
     return text.length > 0 ? $(text[0]).text() : null;
+  };
+
+  /* Private interface */
+  ItemDismissal.prototype.dismiss_ = function (id)
+  {
+    this.events_.trigger('dismissed', id, this.owner_.content);
+    this.reset();
   };
 
 
