@@ -17,7 +17,7 @@
  *
  * @returns an object containing the module's public interface.
  * */
-var SortingDesk_ = function (window, $, sq, std, Api) {
+var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
 
 
   /**
