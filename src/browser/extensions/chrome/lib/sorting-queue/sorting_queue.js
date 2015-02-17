@@ -574,7 +574,8 @@ var SortingQueue_ = function (window, $, std) {
 
   // Returns a de-duped `items`.
   // This includes de-duping with respect to items currently in the queue.
-  ControllerItems.prototype.dedupItems = function(items) {
+  ControllerItems.prototype.dedupItems = function(items)
+  {
     var seen = {},
         deduped = [];
     for (var i = 0; i < this.items.length; i++) {
@@ -694,7 +695,8 @@ var SortingQueue_ = function (window, $, std) {
     }
   };
 
-  ControllerItems.prototype.removeAll = function(check /* = true */) {
+  ControllerItems.prototype.removeAll = function(check /* = true */)
+  {
     this.removeNodes_();
     this.items_ = [];
 
@@ -758,7 +760,8 @@ var SortingQueue_ = function (window, $, std) {
     return true;
   };
 
-  ControllerItems.prototype.getByNode = function($node) {
+  ControllerItems.prototype.getByNode = function($node)
+  {
     return this.getById(std.Url.decode($node.attr('id')));
   };
 
@@ -947,12 +950,14 @@ var SortingQueue_ = function (window, $, std) {
       this.owner_.select(this);
   };
 
-  Item.prototype.deselect = function() {
+  Item.prototype.deselect = function()
+  {
     this.node.removeClass(Css_.item.selected);
     this.owner_.owner.events.trigger("item-deselected", this.content);
   };
 
-  Item.prototype.render = function() {
+  Item.prototype.render = function()
+  {
     var node = $('<div class="' + Css_.item.container + '"/>'),
         content = $('<div class="' + Css_.item.content + '"/>'),
         anchor = this.content_.name;
@@ -978,7 +983,8 @@ var SortingQueue_ = function (window, $, std) {
 
   /* Not mandatory. */
   /* overridable */
-  Item.prototype.getNodeClose = function() {
+  Item.prototype.getNodeClose = function()
+  {
     return this.node_.find('.' + Css_.item.close);
   };
 
@@ -986,7 +992,8 @@ var SortingQueue_ = function (window, $, std) {
   { return this.node_.hasClass(Css_.item.selected); };
 
   /* Private methods */
-  Item.prototype.select_ = function (ev) {
+  Item.prototype.select_ = function (ev)
+  {
     this.node.addClass(Css_.item.selected);
     this.owner_.owner.events.trigger("item-selected", this.content, ev);
   };
