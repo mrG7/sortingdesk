@@ -113,21 +113,7 @@ var Main = (function (window, chrome, $, std, sq, sd, Api, undefined) {
    * */
   var HandlerCallbacks = (function () {
 
-    var imageToBase64_ = function (entity)
-    {
-      var deferred = $.Deferred();
-
-      chrome.runtime.sendMessage(
-        { operation: 'get-image-base64', entity: entity },
-        function (result) {
-          if(result === false) deferred.reject();
-          else deferred.resolve(result);
-        } );
-
-      return deferred.promise();
-    };
-
-    var getSelection_ = function ()
+    var onGetSelection_ = function ()
     {
       var deferred = $.Deferred();
 
@@ -182,8 +168,7 @@ var Main = (function (window, chrome, $, std, sq, sd, Api, undefined) {
     return {
       callbacks: {
         sorter: {
-          imageToBase64: imageToBase64_,
-          getSelection: getSelection_
+          getSelection: onGetSelection_
         }
       }
     };
