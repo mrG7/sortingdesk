@@ -12,7 +12,7 @@
 /*jshint laxbreak:true */
 
 
-var Api_ = (function (window, $, CryptoJS, DossierJS) {
+var Api_ = (function (window, $, CryptoJS, DossierJS, undefined) {
 
   /* Constants */
   var DEFAULT_DOSSIER_STACK_API_URL = 'http://10.3.2.42:9090';
@@ -409,7 +409,8 @@ var Api_ = (function (window, $, CryptoJS, DossierJS) {
 
       /* Attributes */
       this.subfolder_ = subfolder;
-      this.content_id = item.content_id; this.subtopic_id = item.subtopic_id;
+      this.content_id = item.content_id;
+      this.subtopic_id = item.subtopic_id;
     };
 
 
@@ -508,8 +509,8 @@ var Api_ = (function (window, $, CryptoJS, DossierJS) {
 
 /* Compatibility with RequireJs. */
 if(typeof define === "function" && define.amd) {
-  define("API", [ "jquery", "CryptoJS" ], function ($, CryptoJS) {
-    return Api_(window, $, CryptoJS);
+  define("API", [ "jquery", "CryptoJS", "DossierJS" ], function ($, CryptoJS, DossierJS) {
+    return Api_(window, $, CryptoJS, DossierJs);
   });
 } else
   window.Api = Api_(window, $, CryptoJS, DossierJS);

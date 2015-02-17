@@ -17,7 +17,7 @@
  *
  * @returns an object containing the module's public interface.
  * */
-var SortingDesk_ = function (window, $, sq, std, Api) {
+var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
 
 
   /**
@@ -1216,7 +1216,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
         .done(function (coll) {
           coll.forEach(function(i) {
             try {
-              self.items_.push(Item.construct(self.api, self, i));
+              self.items_.push(Item.construct(self, i));
             } catch(x) { std.on_exception(x); }
           } );
 
@@ -1240,9 +1240,9 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
     descriptor.content_id = this.api.generateContentId(descriptor.href);
     item = new this.api.foldering.Item(this.data, descriptor);
 
-    /* Pass in `descriptor.content´ because we don't want it to retrieve the
-     * item's feature collection; it doesn't exist yet. */
-    obj = Item.construct(this.api, this, item, descriptor.content);
+    /* Pass in `descriptor´ because we don't want it to retrieve the item's
+     * feature collection; it doesn't exist yet. */
+    obj = Item.construct(this, item, descriptor);
     this.items_.push(obj);
     window.setTimeout(function () { obj.loading(true); }, 50);
 
@@ -1330,7 +1330,7 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
   /**
    * @class
    * */
-  var Item = function (owner, item, /* optional */ content)
+  var Item = function (owner, item, /* optional */ descriptor)
   {
     /* Invoke base class constructor. */
     ItemBase.call(this, owner);
@@ -1359,9 +1359,9 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
           self.events_.trigger('ready');
         };
 
-    /* Retrieve item's subtopic content from feature collection if `content´ was
-     * not specified. */
-    if(!content) {
+    /* Retrieve item's subtopic content from feature collection if `descriptor´
+     * was not specified. */
+    if(!descriptor) {
       this.owner_.loading(true);
 
       this.api.getFeatureCollection(item.content_id)
@@ -1373,22 +1373,25 @@ var SortingDesk_ = function (window, $, sq, std, Api) {
           self.onGotFeatureCollection(null);
         } );
     } else {
-      this.item_.content = content;
+      this.item_.content = descriptor.content;
+      this.item_.data = descriptor.data;
       window.setTimeout(function () { ready(); } );
     }
   };
 
   /* Static methods */
-  Item.construct = function (api, subfolder, item, content)
+  Item.construct = function (subfolder, item, descriptor)
   {
     if(!(subfolder instanceof Subfolder))
       throw "Invalid or no subfolder specified";
-    else if(!(item instanceof api.foldering.Item))
+
+    var api = subfolder.api;
+    if(!(item instanceof api.foldering.Item))
       throw "Invalid or no item specified";
 
     switch(api.getSubtopicType(item.subtopic_id)) {
-    case 'image': return new ItemImage(subfolder, item, content);
-    case 'text':  return new ItemText (subfolder, item, content);
+    case 'image': return new ItemImage(subfolder, item, descriptor);
+    case 'text':  return new ItemText (subfolder, item, descriptor);
     }
 
     throw "Invalid item type: " + api.getSubtopicType(item.subtopic_id);
