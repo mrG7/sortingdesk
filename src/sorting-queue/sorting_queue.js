@@ -1089,6 +1089,10 @@ var SortingQueue_ = function (window, $, std) {
           window.clearTimeout(self.timer_);
       },
       mouseleave: function (ev) {
+        /* Ensure reset hasn't been invoked meanwhile. */
+        if(self.node_ === null)
+          return;
+
         self.timer_ = window.setTimeout(function () {
           self.timer_ = null;
           self.dismiss_(null);
@@ -1115,6 +1119,7 @@ var SortingQueue_ = function (window, $, std) {
     if(this.timer_)
       window.clearTimeout(self.timer_);
 
+    this.node_.off();
     this.node_.remove();
     this.node_ = this.options_ = this.events_ = this.dismissing_ = null;
     this.timer_ = null;
