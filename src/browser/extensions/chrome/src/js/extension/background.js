@@ -58,9 +58,12 @@ var Background = function (window, chrome, $, std, undefined)
       injectEmbeddableContentMaybe(tab);
     } );
 
-    chrome.tabs.onUpdated.addListener(function (id, details, tab) {
-      if(details.status === 'loading')
-        injectEmbeddableContentMaybe(tab);
+    chrome.browserAction.onClicked.addListener(function (tab) {
+      if(window_.extension !== null) {
+        chrome.windows.remove(window_.extension.id);
+        window_.extension = null;
+      } else
+        spawn();
     } );
 
     console.log("Initialised background script");
@@ -248,7 +251,13 @@ var Background = function (window, chrome, $, std, undefined)
 
     var onEmbeddableActive_ = function (request, sender)
     {
-      chrome.pageAction.show(sender.tab.id);
+      chrome.browserAction.setIcon( {
+        path: chrome.extension.getURL("shared/media/icons/icon_active_38.png"),
+        tabId: sender.tab.id } );
+
+      chrome.browserAction.setTitle( {
+        title: "Sorting Desk is active on this page",
+        tabId: sender.tab.id } );
     };
 
 

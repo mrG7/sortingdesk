@@ -12,13 +12,6 @@
     "media/*"
   ],
 
-  "background": {
-    "scripts": [ "lib/jquery-2.1.1.min.js",
-                 "lib/sorting-common/sorting_common.js",
-                 "src/js/extension/config.js",
-                 "src/js/extension/background.js" ]
-  },
-
   "permissions": [
     "tabs",
     "storage",
@@ -26,16 +19,34 @@
     "<all_urls>"
   ],
 
+  "background": {
+    "scripts": [ "lib/jquery-2.1.1.min.js",
+                 "lib/sorting-common/sorting_common.js",
+                 "src/js/extension/config.js",
+                 "src/js/extension/background.js" ]
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": [ "lib/jquery-2.1.1.min.js",
+              "lib/sorting-common/sorting_common.js",
+              "src/js/content/embed.js" ],
+      "css": [ "shared/src/css/theme-default.css",
+               "shared/src/css/theme-default-images.css" ]
+    }
+  ],
+
   "icons": {
     "128": "shared/media/icons/icon_128.png"
   },
 
-  "page_action": {
+  "browser_action": {
     "default_icon": {
-      "19": "shared/media/icons/icon_active_19.png",
-      "38": "shared/media/icons/icon_active_38.png"
+      "38": "shared/media/icons/icon_38.png",
+      "19": "shared/media/icons/icon_19.png"
     },
-    "default_title": "Sorting Desk active on this page"
+    "default_title": "Sorting Desk"
   },
 
   "chrome_url_overrides": {
