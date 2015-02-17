@@ -34,6 +34,8 @@ var Background = function (window, chrome, $, std, undefined)
 
   var initialize = function ()
   {
+    console.log("Initialising background script");
+
     handlerTabs_ = MessageHandlerTabs;
     spawn();
 
@@ -60,6 +62,8 @@ var Background = function (window, chrome, $, std, undefined)
       if(details.status === 'loading')
         injectEmbeddableContentMaybe(tab);
     } );
+
+    console.log("Initialised background script");
   };
 
   var injectEmbeddableContentMaybe = function (tab)
