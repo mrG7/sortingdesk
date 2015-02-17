@@ -159,14 +159,17 @@ var Main = (function (undefined) {
                 if(/^data:/.test(result.content)) {
                   console.info("Image already in base64");
                   result.data = result.content;
-                  w.port.emit('get-selection', result);
                 } else {
                   getImageData(result.content, function (data) {
                     result.data = data;
                     w.port.emit('get-selection', result);
                   } );
+
+                  return;
                 }
               }
+
+              w.port.emit('get-selection', result);
             } );
           } else
             console.error("No content script attached to tab");
