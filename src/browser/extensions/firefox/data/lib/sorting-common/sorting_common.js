@@ -842,7 +842,7 @@ var SortingCommon_ = function (window, $) {
      * doesn't already exist. Note that we are not making any checks to ensure
      * the owning instance is a valid instantiated prototypal object. */
     if(arguments.length === 2) {
-      ent = arguments[0];
+      ent = this.owner_ = arguments[0];
 
       if(!like_obj(ent))
         throw "Invalid owner instance reference specified";
@@ -857,8 +857,10 @@ var SortingCommon_ = function (window, $) {
         ent.off = chainize(ent, this.unregister.bind(this));
 
       ent = arguments[1];
-    } else
+    } else {
+      this.owner_ = null;
       ent = arguments[0];
+    }
 
     /* It is assumed that the events a class advertises do not change since they
      * are directly related to the class' responsibilities and purpose, -- thus
@@ -913,7 +915,8 @@ var SortingCommon_ = function (window, $) {
 
   Events.prototype.trigger = function ( /* (ev, arg0..n) */ )
   {
-    var ev = arguments[0];
+    var self = this,
+        ev = arguments[0];
 
     if(!is_str(ev) || ev.length === 0)
       throw "Invalid or no event name specified";
@@ -924,7 +927,7 @@ var SortingCommon_ = function (window, $) {
 
       d.forEach(function (fn) {
         try {
-          fn.apply(null, args);
+          fn.apply(self.owner_, args);
         } catch(x) {
           on_exception(x);
         }
