@@ -126,23 +126,23 @@ var Main = (function (window, chrome, $, std, sq, sd, Api, undefined) {
               active.id,
               { operation: 'get-selection' },
               function (result) {
-                /* Retrieve base64 encoding of image data if result type is
-                 * image AND its content is not *already* encoded in base64;
-                 * otherwise resolve promise straight away with result in it. */
                 if(!std.is_obj(result)) {
                   console.error("Invalid result type received: not object");
                   deferred.reject();
                 } else if(result.type === 'image') {
-                  if(/^data:/.test(result.content))
-                    result.data = result.content;
-                  else  {
-                    imageToBase64_(result.content)
-                      .done(function (data) {
-                        result.data = data;
-                      } )
+                  /* There is a pretty good chance that image data will have
+                   * already been retrieved in the content script (embed.js),
+                   * in which case `result.data´ will contain the image data.
+                   * Otherwise, an attempt is made in addon space to retrieve
+                   * the base64 encoding of the image data. */
+                  if(!std.is_str(result.data)) {
+                    console.info("Attempting to retrieve image data from"
+                                 + " background script");
+                    std.Html.imageToBase64(result.content)
+                      .done(function (data) { result.data = data; } )
                       .fail(function () {
-                        console.error("Failed to retrieve image data in base64"
-                                      + " encoding");
+                        console.error("Failed to retrieve image data in"
+                                      + " base64 encoding");
                         result.data = null; /* force null */
                       } )
                       .always(function () {
