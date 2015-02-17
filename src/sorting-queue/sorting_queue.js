@@ -910,7 +910,8 @@ var SortingQueue_ = function (window, $, std) {
         "data-scope": "text-item"
       } )
       .click(function (ev) {
-        self.owner_.select_(self, ev);
+        if(ev.originalEvent.target.nodeName.toLowerCase() !== 'a')
+          self.owner_.select_(self, ev);
       } );
 
     this.getNodeClose()
