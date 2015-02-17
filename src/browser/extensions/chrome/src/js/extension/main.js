@@ -289,6 +289,8 @@ var Main = (function (window, chrome, $, std, sq, sd, Api, undefined) {
   /* Private interface */
   var initialise_ = function ()
   {
+    console.log("Initialising main");
+
     /* Initialisation sequence */
     loading = {
       sorter: new LoadingStatus($('#sd-folder-explorer .sd-loading')),
@@ -369,10 +371,11 @@ var Main = (function (window, chrome, $, std, sq, sd, Api, undefined) {
 
         return false;
       } );
+
+    console.log("Initialised main");
   };
 
   var instantiate_ = function (meta) {
-
     (sorter = new sd.Sorter( {
       container: $('#sd-folder-explorer'),
       dossierUrl: meta.config.dossierUrl,
