@@ -338,7 +338,7 @@ var Main = (function (window, chrome, $, std, sq, sd, Api, undefined) {
 
       chrome.tabs.onActivated.addListener(function (info) {
         chrome.tabs.get(info.tabId, function (tab) {
-          if(!/^chrome[^:]*:/.test(tab.url))
+          if(tab && tab.url && !/^chrome[^:]*:/.test(tab.url))
             setActive(tab);
         } );
       } );
