@@ -336,9 +336,9 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
 
             if(i.items.length > 0)
               self.setActive(i.items[0]);
-          }
-        } else if(i instanceof Item)
+          } else if(i instanceof Item)
           self.setActive(i);
+        }
       },
       "select_node.jstree": function (ev, data) {
         var i = self.getAnyById(data.node.id);
