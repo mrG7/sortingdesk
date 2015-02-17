@@ -1062,11 +1062,15 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
     var self = this;
 
     if(folder.exists) {
+      window.setTimeout(function () { self.loading(true); } );
+
       this.api.foldering.listSubfolders(folder)
         .done(function (coll) {
           coll.forEach(function (sf) {
             self.subfolders_.push(new Subfolder(self, sf));
           } );
+
+          self.loading(false);
         } );
     }
 
