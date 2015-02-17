@@ -19,6 +19,36 @@ var Embeddable = (function ($, std, undefined) {
   /* Variables */
   var embed_;
 
+  var fetchImage = function (url, callback)
+  {
+    /* Code borrowed from the following Stack Overflow page:
+     * http://stackoverflow.com/a/17682424 */
+    var xhr = new XMLHttpRequest();
+
+    xhr.onreadystatechange = function() {
+      if (this.readyState === 4) {
+        if (this.status === 200)
+          callback(this.response);
+        else {
+          console.error('Failed to fetch image: status='
+                        + this.status
+                        + ': text=' + this.statusText);
+          callback();
+        }
+      }
+    };
+
+    xhr.onerror = function () {
+      console.error('Failed to fetch image: ', url);
+      callback();
+    };
+
+    xhr.open('GET', url);
+    xhr.responseType = 'blob';
+
+    xhr.send(null);
+  };
+
 
   /**
    * @class
@@ -44,14 +74,45 @@ var Embeddable = (function ($, std, undefined) {
         active = active.get(0);
         val = active.src;
         embed_.monitor.clear();
+        console.log("Image selection:", result);
 
         if(val) {
           result.id = result.content = val;
           result.caption = active.alt || active.title;
           result.type = "image";
 
-          console.log("Image selection:", result);
-          callback(result);
+          /* Don't get image data if the image was loaded via a data URI. */
+          if(/^data:/.test(val)) {
+            result.data = val;
+            callback(result);
+            return;
+          }
+
+          /* Image was loaded via a URI.  Fetch it and convert its data blob to
+           * base64. */
+          fetchImage(val, function (blob) {
+            var reader = new window.FileReader();
+
+            /* If a blob is available, convert it to base64. */
+            if(!blob)
+              callback(result);
+            else {
+              reader.onload = function () {
+                result.data = reader.result;
+                callback(result);
+              };
+
+              reader.onerror = function () {
+                console.error('Conversion of image data from blob to data'
+                              + ' failed.');
+                callback(result);
+              };
+
+              reader.readAsDataURL(blob);
+            }
+          } );
+
+          return true;
         } else
           console.error("Unable to retrieve valid `src´ attribute");
       } else {
@@ -60,10 +121,10 @@ var Embeddable = (function ($, std, undefined) {
         if(sel && sel.anchorNode) {
           val = sel.toString();
 
-          /* Craft a unique id for this text snippet based on its content, Xpath
-           * representation, offset from selection start and length. This id is
-           * subsequently used to generate a unique and collision free unique
-           * subtopic id. */
+          /* Craft a unique id for this text snippet based on its content,
+           * Xpath representation, offset from selection start and length. This
+           * id is subsequently used to generate a unique and collision free
+           * unique subtopic id. */
           result.xpath = std.Html.getXpathSimple(sel.anchorNode);
           result.id = [ val,
                         result.xpath,
