@@ -5,7 +5,7 @@
  * @copyright 2015 Diffeo
  *
  * Comments:
- * Uses the `SortingDesk' component.
+ * Uses the `SortingDesk' and shared `DraggableImageMonitor´ components.
  *
  */
 
@@ -14,7 +14,7 @@
 /*jshint laxbreak:true */
 
 
-var Embeddable = (function ($, std, undefined) {
+var Embeddable = (function ($, std, DraggableImageMonitor, undefined) {
 
   /* Variables */
   var embed_;
@@ -210,4 +210,4 @@ var Embeddable = (function ($, std, undefined) {
       embed_ = new Embed(result);
   } );
 
-})($, SortingCommon);
+})($, SortingCommon, DraggableImageMonitor);

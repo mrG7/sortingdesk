@@ -13,7 +13,7 @@
 /*jshint lax break:true */
 
 
-var Embeddable = (function ($, std, undefined) {
+var Embeddable = (function ($, std, DraggableImageMonitor, undefined) {
 
   /* Module variables */
   var monitor_;
@@ -49,6 +49,8 @@ var Embeddable = (function ($, std, undefined) {
 
         console.log("Image selection: ", val);
         self.port.emit("get-selection", result);
+
+        return;
       } else
         console.error("Unable to retrieve valid `src´ attribute");
     } else {
@@ -70,6 +72,8 @@ var Embeddable = (function ($, std, undefined) {
 
         console.log("Text selection: ", val);
         self.port.emit("get-selection", result);
+
+        return;
       } else
         console.error("No text currently selected");
     }
@@ -85,4 +89,4 @@ var Embeddable = (function ($, std, undefined) {
   var initialise = function () {
   };
 
-})($, SortingCommon);
+})($, SortingCommon, DraggableImageMonitor);
