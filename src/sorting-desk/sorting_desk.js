@@ -1440,6 +1440,7 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
 
     if(!fc) remove = true;
     else {
+      this.fc_ = fc;
       this.item_.content = fc.feature(this.item_.subtopic_id);
       remove = !this.item_.content;
     }
@@ -1517,7 +1518,7 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
   {
     if(Item.prototype.onGotFeatureCollection.call(this, fc)) {
       this.item_.data = fc.feature(
-        this.api.makeRawImageDataId(this.item_.subtopic_id));
+        this.api.makeRawSubId(this.item_.subtopic_id));
       return true;
     }
 
