@@ -116,8 +116,6 @@ var Main = (function (window, chrome, $, std, sq, sd, Api, undefined) {
       }
     }
 
-    console.log(this.content_);
-
     return sq.Item.prototype.render.call(this);
   };
 
@@ -171,62 +169,103 @@ var Main = (function (window, chrome, $, std, sq, sd, Api, undefined) {
    * */
   var HandlerCallbacks = (function () {
 
-    var onGetSelection_ = function ()
-    {
+    var reject_ = function (deferred) {
+      window.setTimeout(function () {
+        deferred.reject();
+      } );
+    };
+
+    var do_active_tab_ = function (callback) {
       var deferred = $.Deferred();
 
       /* If there is an active tab, send it a message requesting detailed
        * information about current text selection. */
       if(active !== null) {
         chrome.tabs.get(active.id, function (tab) {
-          if(!/^chrome[^:]*:/.test(tab.url)) {
-            chrome.tabs.sendMessage(
-              active.id,
-              { operation: 'get-selection' },
-              function (result) {
-                if(!std.is_obj(result)) {
-                  console.error("Invalid result type received: not object");
-                  deferred.reject();
-                } else if(result.type === 'image') {
-                  /* There is a pretty good chance that image data will have
-                   * already been retrieved in the content script (embed.js),
-                   * in which case `result.data´ will contain the image data.
-                   * Otherwise, an attempt is made in addon space to retrieve
-                   * the base64 encoding of the image data. */
-                  if(!std.is_str(result.data)) {
-                    console.info("Attempting to retrieve image data from"
-                                 + " background script");
-                    std.Html.imageToBase64(result.content)
-                      .done(function (data) { result.data = data; } )
-                      .fail(function () {
-                        console.error("Failed to retrieve image data in"
-                                      + " base64 encoding");
-                        result.data = null; /* force null */
-                      } )
-                      .always(function () {
-                        /* Always resolve, even when we don't retrieve image
-                         * data in base64 encoding.  */
-                        deferred.resolve(result);
-                      } );
-
-                    return;
-                  }
-                }
-
-                deferred.resolve(result);
-              } );
+          if(/^https?:/.test(tab.url)) {
+            callback(deferred);
+          } else {
+            console.error("Active tab's URL not valid");
+            reject_(deferred);
           }
         } );
+      } else {
+        console.error("There is no active tab presently");
+        reject_(deferred);
       }
 
       return deferred.promise();
+    };
+
+    var onGetSelection_ = function ()
+    {
+      return do_active_tab_(function (deferred) {
+        chrome.tabs.sendMessage(
+          active.id,
+          { operation: 'get-selection' },
+          function (result) {
+            if(!std.is_obj(result)) {
+              console.error("Invalid result type received: not object");
+              deferred.reject_();
+              return;
+            } else if(result.type === 'image') {
+              /* There is a pretty good chance that image data will have
+               * already been retrieved in the content script (embed.js),
+               * in which case `result.data´ will contain the image data.
+               * Otherwise, an attempt is made in addon space to retrieve
+               * the base64 encoding of the image data. */
+              if(!std.is_str(result.data)) {
+                console.info("Attempting to retrieve image data from"
+                             + " background script");
+                std.Html.imageToBase64(result.content)
+                  .done(function (data) { result.data = data; } )
+                  .fail(function () {
+                    console.error("Failed to retrieve image data in"
+                                  + " base64 encoding");
+                    result.data = null; /* force null */
+                  } )
+                  .always(function () {
+                    /* Always resolve, even when we don't retrieve image
+                     * data in base64 encoding.  */
+                    deferred.resolve(result);
+                  } );
+
+                return;
+              }
+            }
+
+            deferred.resolve(result);
+          } );
+      } );
+    };
+
+    var onCreateManualItem_ = function (text)
+    {
+      return do_active_tab_(function (deferred) {
+        chrome.tabs.sendMessage(
+          active.id,
+          { operation: 'get-page-meta' },
+          function (result) {
+            if(!std.is_obj(result)) {
+              console.error("Invalid result type received: not object");
+              deferred.reject();
+            } else {
+              result.id = [ text, Date.now() ].join('|');
+              result.content = text;
+              result.type = "manual";
+
+              deferred.resolve(result);
+            }
+          } );
+      } );
     };
 
     /* Interface */
     return {
       callbacks: {
         sorter: {
-          getSelection: onGetSelection_
+          getSelection: onGetSelection_,
+          createManualItem: onCreateManualItem_
         }
       }
     };
@@ -435,6 +474,19 @@ var Main = (function (window, chrome, $, std, sq, sd, Api, undefined) {
     }, $.extend(true, Api, HandlerCallbacks.callbacks.sorter ) ) )
       .on(loading.sorter.events)
       .initialise();
+
+    sorter.explorer.on( {
+      "selected-folder": function () {
+        var str = 'Create a subfolder';
+        $('[data-sd-scope="sorting-desk-toolbar-add-contextual"]')
+          .attr( { 'title': str, 'data-original-title': str } );
+      },
+      "selected-subfolder": function () {
+        var str = 'Create a manual item';
+        $('[data-sd-scope="sorting-desk-toolbar-add-contextual"]')
+          .attr( { 'title': str, 'data-original-title': str } );
+      }
+    } );
 
     setupSortingQueue_(sorter);
   };

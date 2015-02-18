@@ -144,9 +144,21 @@ var Embeddable = (function ($, std, DraggableImageMonitor, undefined) {
       callback(null);
     };
 
+    var onGetPageMeta_ = function (request, sender, callback)
+    {
+      if(!std.is_fn(callback)) return;
+
+      callback( {
+        href: window.location.href,
+        document: window.document.documentElement.outerHTML
+      } );
+    };
+
+
     /* Map message operations to handlers. */
     var methods_ = {
-      "get-selection": onGetSelection_
+      "get-selection": onGetSelection_,
+      "get-page-meta": onGetPageMeta_
     };
 
     /* Interface */
