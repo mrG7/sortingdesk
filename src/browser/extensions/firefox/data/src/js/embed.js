@@ -82,11 +82,22 @@ var Embeddable = (function ($, std, DraggableImageMonitor, undefined) {
     self.port.emit("get-selection", null);
   } );
 
+  self.port.on("get-page-meta", function () {
+    self.port.emit("get-page-meta", {
+      href: window.location.href,
+      document: window.document.documentElement.outerHTML
     } );
+  } );
 
 
   /* Module-wide functions */
   var initialise = function () {
+    console.log("Initialising embeddable content");
+
+    $(function () {
+      monitor_ = new DraggableImageMonitor();
+      console.info("Initialised embeddable content");
+    } );
   };
 
 })($, SortingCommon, DraggableImageMonitor);
