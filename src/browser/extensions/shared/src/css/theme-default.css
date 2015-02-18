@@ -24,7 +24,6 @@ BODY {
   font-family: arial,sans-serif;
   font-size: 12px;
   color: black;
-  z-index: 1000000;
 }
 
 .sd-container-inner {
@@ -33,7 +32,7 @@ BODY {
 
 /* Master container */
 #sd-sorting-desk {
-  min-width: 320px;
+  min-width: 330px;
   width: 100%;
   box-sizing: border-box;
 }
@@ -498,11 +497,11 @@ DIV.sd-dict-weight > SPAN > SPAN:last-child {
 }
 
 .sd-toolbar BUTTON {
-  background-image: linear-gradient(#fcfcfc, #eee);
+/*   background-image: linear-gradient(#fcfcfc, #eee); */
 }
 
 .sd-toolbar BUTTON:hover {
-  background-image: linear-gradient(#eee, #ddd);
+/*   background-image: linear-gradient(#eee, #ddd); */
 }
 
 
@@ -549,4 +548,8 @@ DIV.sd-dict-weight > SPAN > SPAN:last-child {
 .jstree LI.sd-active[aria-selected="true"] > A {
   background-color: #E4F4FA !important;
   color: #212C61 !important;
+}
+
+.vakata-context {
+  font-size: 12px;
 }
