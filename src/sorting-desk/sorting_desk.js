@@ -740,7 +740,7 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
        && std.is_str(descriptor.data)
        && descriptor.data.length > 0)
     {
-      set(fc, this.api.makeRawImageDataId(descriptor.subtopic_id),
+      set(fc, this.api.makeRawSubId(descriptor.subtopic_id, "data"),
           descriptor.data);
     }
   };

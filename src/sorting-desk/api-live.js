@@ -77,7 +77,8 @@ var Api_ = (function (window, $, CryptoJS, DossierJS, undefined) {
       generateSubtopicId: generateSubtopicId,
       makeRawTextId: makeRawTextId,
       makeRawImageId: makeRawImageId,
-      makeRawImageDataId: makeRawImageDataId,
+      makeRawCustomId: makeRawCustomId,
+      makeRawSubId: makeRawSubId,
       isSubtopic: isSubtopic,
       getSubtopicType: getSubtopicType,
       extractSubtopicId: extractSubtopicId,
@@ -268,9 +269,14 @@ var Api_ = (function (window, $, CryptoJS, DossierJS, undefined) {
     return [ 'subtopic', 'image', subtopic_id ].join('|');
   };
 
-  var makeRawImageDataId = function (subtopic_id)
+  var makeRawCustomId = function (subtopic_id, prefix)
   {
-    return [ subtopic_id, 'data' ].join('|');
+    return [ 'subtopic', prefix, subtopic_id ].join('|');
+  };
+
+  var makeRawSubId = function (subtopic_id, suffix)
+  {
+    return [ subtopic_id, suffix ].join('|');
   };
 
   var isSubtopic = function (subtopic_id)
