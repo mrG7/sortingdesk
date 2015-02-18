@@ -183,6 +183,7 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
             addSubfolder: this.find('toolbar-add-subfolder'),
             remove: this.find('toolbar-remove'),
             rename: this.find('toolbar-rename'),
+            jump: this.find('toolbar-jump'),
             refresh: this.find('toolbar-refresh')
           }
         };
@@ -398,6 +399,10 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
 
     els.toolbar.actions.rename.click(function () {
       console.info("Not implemented yet");
+    } );
+
+    els.toolbar.actions.jump.click(function () {
+      self.on_jump_bookmarked_page_();
     } );
 
     /* Handle item dismissal. */
@@ -791,6 +796,9 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
     ela.add.toggleClass('disabled', loading);
     ela.addSubfolder.toggleClass(
       'disabled', loading || !(this.selected_ instanceof Folder));
+    ela.jump.toggleClass(
+      'disabled', loading || !(this.selected_ instanceof Item));
+
     ela.refresh.toggleClass('disabled', loading);
   };
 
@@ -895,6 +903,17 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
         std.on_exception(x);
       }
     } );
+  };
+
+  ControllerExplorer.prototype.on_jump_bookmarked_page_ = function ()
+  {
+    if(this.selected_ !== null) {
+      if(this.selected_ instanceof Item)
+        this.selected_.jump();
+      else
+        console.error("Selected node not an item");
+    } else
+      console.error("No selected nodes found");
   };
 
   ControllerExplorer.prototype.get_selection_ = function ()
@@ -1446,6 +1465,15 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
   Item.prototype.deactivate = function ()
   {
     this.removeClass(Css.active);
+  };
+
+  Item.prototype.jump = function ()
+  {
+    if(std.is_obj(this.fc_.raw) && std.is_str(this.fc_.raw.meta_url)) {
+      var win = window.open(this.fc_.raw.meta_url, "_blank");
+      win.focus();
+    } else
+      console.warn("No meta URL in feature collection");
   };
 
 
