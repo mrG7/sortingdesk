@@ -966,6 +966,7 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
     def(this, 'api', { get: function () { return this.controller_.api; } } );
     def(this, 'tree', { get: function () { return this.controller_.tree; } } );
     def(this, 'opening', { get: function () { return this.opening_; } } );
+    def(this, 'events', { get: function () { return this.events_; } } );
 
     def(this, 'node', { get: function () {
       return this.controller.tree.get_node(this.id_, true); } } );
@@ -985,6 +986,7 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
     this.loading_ = 0;
     this.id_ = null;
     this.opening_ = false;
+    this.events_ = new std.Events(this, [ 'loading', 'loaded' ] );
   };
 
   ItemBase.prototype.open = function ()
@@ -1002,13 +1004,20 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
 
   ItemBase.prototype.loading = function (state /* = true */)
   {
+    if(arguments.length === 0)
+      return this.loading_ > 0;
+
     if(state === false) {
       if(this.loading_ <= 0)
         console.error("Loading count is 0");
-      else if(--this.loading_ === 0)
+      else if(--this.loading_ === 0) {
         this.removeClass("jstree-loading");
-    } else if(state === true)
-      ++this.loading_;
+        this.events_.trigger('loaded');
+      }
+    } else if(state === true) {
+      if(++this.loading_ === 1)
+        this.events_.trigger('loading');
+    }
 
     /* Always force class. */
     if(this.loading_ > 0)
@@ -1238,6 +1247,9 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
       /* Set the `loaded_´ flag to true now to prevent entering here again. */
       this.loaded_ = true;
       this.loading(true);
+      this.on("loaded", function () {
+        self.controller.update_toolbar_();
+      } );
 
       this.api.foldering.listItems(this.subfolder_)
         .done(function (coll) {
