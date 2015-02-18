@@ -360,7 +360,6 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
           console.error("Unknown node type selected:", data);
         } else {
           self.selected_ = i;
-          console.log("Current selected node: ", self.selected_);
         }
 
         self.update_toolbar_();
@@ -1277,12 +1276,12 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
     /* Add item to subfolder in persistent storage. */
     this.api.foldering.addItem(this.subfolder_, item)
       .done(function () {
-        console.info("Successfully added item to subfolder",
-                     item, this.subfolder_);
+        console.info("Successfully added item to subfolder: id=%s",
+                     item.subtopic_id);
       } )
       .fail(function () {
         console.error("Failed to add item to subfolder",
-                      item, this.subfolder_);
+                      item.subtopic_id);
       } );
 
     /* Create or update feature collection. */
