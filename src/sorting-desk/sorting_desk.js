@@ -180,7 +180,7 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
         return {
           actions: {
             add: this.find('toolbar-add'),
-            addSubfolder: this.find('toolbar-add-subfolder'),
+            addContextual: this.find('toolbar-add-contextual'),
             remove: this.find('toolbar-remove'),
             rename: this.find('toolbar-rename'),
             jump: this.find('toolbar-jump'),
@@ -253,7 +253,13 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
     this.folders_ = [ ];
     this.active_ = null;
     this.refreshing_ = false;
-    this.events_ = new std.Events(this, [ 'refresh-begin', 'refresh-end' ] );
+    this.events_ = new std.Events(
+      this,
+      [ 'refresh-begin',
+        'refresh-end',
+        'selected-folder',
+        'selected-subfolder' ] );
+
     this.creating_ = null;
     this.selected_ = null;
     this.dropTarget_ = null;
@@ -310,13 +316,24 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
 
             if(self.folders_.length === 1)
               self.tree_.select_node(f.id);
-          } else {
+          } else if(self.creating_.obj instanceof Subfolder) {
             f = new api.foldering.subfolderFromName(
               self.creating_.parent.data,
               data.text);
             f = self.creating_.parent.add(f);
             if(self.creating_.descriptor)
               f.add(self.creating_.descriptor);
+          } else if(self.creating_.obj instanceof ItemBase) {
+            var p = self.creating_.parent;
+
+            self.owner_.callbacks.invoke('createManualItem', data.text)
+              .done(function (descriptor) {
+                descriptor.subtopic_id =
+                  self.generate_subtopic_id_(descriptor);
+
+                if(descriptor.subtopic_id !== null)
+                  p.add(descriptor);
+              } );
           }
         }
 
@@ -360,6 +377,11 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
           console.error("Unknown node type selected:", data);
         } else {
           self.selected_ = i;
+
+          if(i instanceof Folder)
+            self.events_.trigger('selected-folder');
+          else if(i instanceof Subfolder)
+            self.events_.trigger('selected-subfolder');
         }
 
         self.update_toolbar_();
@@ -387,9 +409,11 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
     els.toolbar.actions.refresh.click(function () { self.refresh(); } );
     els.toolbar.actions.add.click(function () { self.createFolder(); } );
 
-    els.toolbar.actions.addSubfolder.click(function () {
+    els.toolbar.actions.addContextual.click(function () {
       if(self.selected_ instanceof Folder)
         self.createSubfolder(self.selected_);
+      else if(self.selected_ instanceof Subfolder)
+        self.createItem(self.selected_);
     } );
 
     els.toolbar.actions.remove.click(function () {
@@ -521,6 +545,21 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
       parent: folder,
       obj: new SubfolderNew(folder, name),
       descriptor: descriptor
+    };
+  };
+
+  ControllerExplorer.prototype.createItem = function (subfolder, name)
+  {
+    if(subfolder === undefined)
+      subfolder = this.selected_;
+    if(!(subfolder instanceof Subfolder)) {
+      console.error("Invalid or no subfolder");
+      return;
+    }
+
+    this.creating_ = {
+      parent: subfolder,
+      obj: new ItemNew(subfolder, name)
     };
   };
 
@@ -793,8 +832,14 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
     loading = loading === true;
 
     ela.add.toggleClass('disabled', loading);
-    ela.addSubfolder.toggleClass(
-      'disabled', loading || !(this.selected_ instanceof Folder));
+
+    ela.addContextual.toggleClass(
+      'disabled',
+      loading || (this.selected_ instanceof Item)
+        || (this.selected_ instanceof Subfolder
+            && (!this.selected_.loaded
+                || this.selected_.loading())));
+
     ela.jump.toggleClass(
       'disabled', loading || !(this.selected_ instanceof Item));
 
@@ -928,26 +973,32 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
 
       console.log("Got selection content: type=%s", result.type /*, result */);
 
-      switch(result.type) {
-      case 'image':
-        result.subtopic_id = self.api.makeRawImageId(
-          self.api.generateSubtopicId(result.id));
-        break;
-
-      case 'text':
-        result.subtopic_id = self.api.makeRawTextId(
-          self.api.generateSubtopicId(result.id));
-        break;
-
-      default:
-        console.error("Invalid selection type");
+      result.subtopic_id = self.generate_subtopic_id_(result);
+      if(result.subtopic_id === null)
         deferred.reject();
-      }
-
-      deferred.resolve(result);
+      else
+        deferred.resolve(result);
     } );
 
     return deferred.promise();
+  };
+
+  ControllerExplorer.prototype.generate_subtopic_id_ = function (descriptor)
+  {
+    switch(descriptor.type) {
+    case 'image':
+      return this.api.makeRawImageId(
+        this.api.generateSubtopicId(descriptor.id));
+    case 'text':
+      return this.api.makeRawTextId(
+        this.api.generateSubtopicId(descriptor.id));
+    case 'manual':
+      return this.api.makeRawCustomId(
+        this.api.generateSubtopicId(descriptor.id), "manual");
+    default:
+      console.error("Invalid selection type");
+      return null;
+    }
   };
 
 
@@ -1274,8 +1325,8 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
     if(!std.is_obj(descriptor))
       throw "Invalid or no descriptor specified";
 
-    /* First create `Api.Item´ instance after generating a valid content_id, and
-     then create and contain our UI representation of an item.*/
+    /* First create `Api.Item´ instance after generating a valid content_id,
+     * and then create and contain our UI representation of an item.*/
     descriptor.content_id = this.api.generateContentId(descriptor.href);
     item = new this.api.foldering.Item(this.data, descriptor);
 
@@ -1433,6 +1484,7 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
 
     switch(api.getSubtopicType(item.subtopic_id)) {
     case 'image': return new ItemImage(subfolder, item, descriptor);
+    case 'manual':
     case 'text':  return new ItemText (subfolder, item, descriptor);
     }
 
@@ -1555,6 +1607,49 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
     this.owner_.open();
   };
 
+
+  /**
+   * @class
+   * */
+  var ItemNew = function (owner, name)
+  {
+    /* Invoke base class constructor. */
+    ItemBase.call(this, owner);
+
+    this.name_ = name;
+    this.render();
+  };
+
+  ItemNew.prototype = Object.create(ItemBase.prototype);
+
+  ItemNew.prototype.render = function ()
+  {
+    var self = this,
+        o = this.owner_;
+
+    this.id_ = this.tree.create_node(
+      this.owner_.id,
+      { state: 'open',
+        text: this.name_,
+        type: "item" },
+      "last");
+
+    if(this.id_ === false)
+      throw "Failed to create manual item";
+
+    o.open();
+    this.tree.edit(this.id_);
+
+    /* TODO: remove hardcoded timeout.
+     * Scrolling into view has to be on a timeout because JsTree performs a
+     * slide down animation. */
+    window.setTimeout(function () { self.node.get(0).scrollIntoView(); }, 200);
+  };
+
+  ItemNew.prototype.reset = function ()
+  {
+    this.tree.delete_node(this.tree.get_node(this.id_));
+  };
 
   /* Css classes */
   var Css = {
