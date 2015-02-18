@@ -270,6 +270,7 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
         check_callback: true,
         multiple: false
       },
+      plugins: [ "types", "contextmenu" /* "dnd" */ ],
       dnd: {
         check_while_dragging: false,
         is_draggable: function (nodes) {
@@ -285,7 +286,41 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
         "subfolder": { "icon": "sd-subfolder" },
         "item":      { "icon": "jstree-file"  }
       },
-      plugins: [ "types" /* "dnd" */ ]
+      contextmenu: {
+        items: function (node) {
+          var obj = self.getAnyById(node.id),
+              items = {
+              "rename": {
+                label: "Rename",
+                icon: "glyphicon glyphicon-pencil",
+                _disabled: true
+              },
+              "remove": {
+                label: "Remove",
+                icon: "glyphicon glyphicon-remove",
+                _disabled: true
+              }
+            };
+
+          if(obj instanceof Subfolder) {
+            items["create"] = {
+              label: "Create manual item",
+              icon: "glyphicon glyphicon-plus",
+              separator_before: true,
+              action: function () { self.createItem(); }
+            };
+          } else if(obj instanceof Item) {
+            items["jump"] = {
+              label: "Jump to bookmarked page",
+              icon: "glyphicon glyphicon-eye-open",
+              separator_before: true,
+              action: self.on_jump_bookmarked_page_.bind(self)
+            };
+          }
+
+          return items;
+        }
+      }
     } ).jstree(true);
 
     owner.nodes.explorer.on( {
