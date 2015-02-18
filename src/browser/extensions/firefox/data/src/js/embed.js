@@ -78,60 +78,11 @@ var Embeddable = (function ($, std, undefined) {
     self.port.emit("get-selection", null);
   } );
 
-
-  /**
-   * @class
-   * */
-  var DraggableImageMonitor = function ()
-  {
-    /* Define getters. */
-    this.__defineGetter__("active",
-                          function () { return this.active_; } );
-
-    /* Initialise component. */
-    var self = this;
-
-    /* Attach specialised `drag´ event listeners to every image found on the
-     * page. */
-    $('IMG').each( function () {
-      var el = $(this);
-      el
-        .attr('draggable', 'true')
-        .on( {
-          mouseenter: function () {
-            self.cursor_ = el.css('cursor');
-            el.css('cursor', 'copy');
-          },
-
-          mouseleave: function () {
-            el.css('cursor', self.cursor_);
-          },
-
-          mousedown: function (ev) {
-            self.active_ = $(ev.target);
-          },
-
-          mouseup: function () {
-            self.active_ = null;
-          }
-        } );
     } );
-
-  };
-
-  /* Attributes */
-  DraggableImageMonitor.prototype.cursor_ = null;
-  DraggableImageMonitor.prototype.active_ = null;
-
-  /* Interface */
-  DraggableImageMonitor.prototype.clear = function ()
-  { this.active_ = null; };
 
 
   /* Module-wide functions */
   var initialise = function () {
-    monitor_ = new DraggableImageMonitor();
-    console.info("Initialised embeddable content");
   };
 
 })($, SortingCommon);
