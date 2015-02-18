@@ -24,7 +24,6 @@ BODY {
   font-family: arial,sans-serif;
   font-size: 12px;
   color: black;
-  z-index: 1000000;
 }
 
 .sd-container-inner {
@@ -33,7 +32,7 @@ BODY {
 
 /* Master container */
 #sd-sorting-desk {
-  min-width: 320px;
+  min-width: 330px;
   width: 100%;
   box-sizing: border-box;
 }
@@ -49,37 +48,6 @@ BODY {
 #sd-explorer {
   position: relative;
   top: -2px;
-}
-
-/* Button: add */
-#sd-button-add {
-  display: block;
-  float: right;
-  border: 2px solid #A2C5A6;
-  background-color: #ECF8EA;
-  clear: both;
-  padding: 5px;
-  font-size: 25px;
-  color: green;
-  font-weight: bold;
-  width: 28px;
-  text-align: center;
-  border-radius: 19px;
-  box-shadow: 1px 1px 2px 0 rgba(50, 50, 50, 0.75);
-  text-shadow: 1px 1px 2px rgba(150, 150, 150, 1);
-  transition: background-color 175ms, color 100ms;
-  cursor: default;
-  line-height: 25px;
-  transition: all 175ms;
-}
-
-#sd-button-add SPAN {
-  position: relative;
-}
-
-#sd-button-add.sd-droppable-hover {
-  background-color: #DEF3DA;
-  border-color: green;
 }
 
 /* Various */
@@ -529,11 +497,11 @@ DIV.sd-dict-weight > SPAN > SPAN:last-child {
 }
 
 .sd-toolbar BUTTON {
-  background-image: linear-gradient(#fcfcfc, #eee);
+/*   background-image: linear-gradient(#fcfcfc, #eee); */
 }
 
 .sd-toolbar BUTTON:hover {
-  background-image: linear-gradient(#eee, #ddd);
+/*   background-image: linear-gradient(#eee, #ddd); */
 }
 
 
@@ -580,4 +548,8 @@ DIV.sd-dict-weight > SPAN > SPAN:last-child {
 .jstree LI.sd-active[aria-selected="true"] > A {
   background-color: #E4F4FA !important;
   color: #212C61 !important;
+}
+
+.vakata-context {
+  font-size: 12px;
 }

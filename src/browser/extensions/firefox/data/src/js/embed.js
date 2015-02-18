@@ -13,7 +13,7 @@
 /*jshint lax break:true */
 
 
-var Embeddable = (function ($, std, undefined) {
+var Embeddable = (function ($, std, DraggableImageMonitor, undefined) {
 
   /* Module variables */
   var monitor_;
@@ -49,6 +49,8 @@ var Embeddable = (function ($, std, undefined) {
 
         console.log("Image selection: ", val);
         self.port.emit("get-selection", result);
+
+        return;
       } else
         console.error("Unable to retrieve valid `src´ attribute");
     } else {
@@ -70,6 +72,8 @@ var Embeddable = (function ($, std, undefined) {
 
         console.log("Text selection: ", val);
         self.port.emit("get-selection", result);
+
+        return;
       } else
         console.error("No text currently selected");
     }
@@ -78,60 +82,22 @@ var Embeddable = (function ($, std, undefined) {
     self.port.emit("get-selection", null);
   } );
 
-
-  /**
-   * @class
-   * */
-  var DraggableImageMonitor = function ()
-  {
-    /* Define getters. */
-    this.__defineGetter__("active",
-                          function () { return this.active_; } );
-
-    /* Initialise component. */
-    var self = this;
-
-    /* Attach specialised `drag´ event listeners to every image found on the
-     * page. */
-    $('IMG').each( function () {
-      var el = $(this);
-      el
-        .attr('draggable', 'true')
-        .on( {
-          mouseenter: function () {
-            self.cursor_ = el.css('cursor');
-            el.css('cursor', 'copy');
-          },
-
-          mouseleave: function () {
-            el.css('cursor', self.cursor_);
-          },
-
-          mousedown: function (ev) {
-            self.active_ = $(ev.target);
-          },
-
-          mouseup: function () {
-            self.active_ = null;
-          }
-        } );
+  self.port.on("get-page-meta", function () {
+    self.port.emit("get-page-meta", {
+      href: window.location.href,
+      document: window.document.documentElement.outerHTML
     } );
-
-  };
-
-  /* Attributes */
-  DraggableImageMonitor.prototype.cursor_ = null;
-  DraggableImageMonitor.prototype.active_ = null;
-
-  /* Interface */
-  DraggableImageMonitor.prototype.clear = function ()
-  { this.active_ = null; };
+  } );
 
 
   /* Module-wide functions */
   var initialise = function () {
-    monitor_ = new DraggableImageMonitor();
-    console.info("Initialised embeddable content");
+    console.log("Initialising embeddable content");
+
+    $(function () {
+      monitor_ = new DraggableImageMonitor();
+      console.info("Initialised embeddable content");
+    } );
   };
 
-})($, SortingCommon);
+})($, SortingCommon, DraggableImageMonitor);

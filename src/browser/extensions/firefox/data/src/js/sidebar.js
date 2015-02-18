@@ -115,8 +115,6 @@ var Main = (function (window, $, std, sq, sd, Api, undefined) {
       }
     }
 
-    console.log(this.content_);
-
     return sq.Item.prototype.render.call(this);
   };
 
@@ -170,7 +168,7 @@ var Main = (function (window, $, std, sq, sd, Api, undefined) {
    * */
   var HandlerCallbacks = (function () {
 
-    var getSelection_ = function ()
+    var onGetSelection_ = function ()
     {
       var deferred = $.Deferred();
 
@@ -189,11 +187,33 @@ var Main = (function (window, $, std, sq, sd, Api, undefined) {
       return deferred.promise();
     };
 
+    var onCreateManualItem_ = function (text)
+    {
+      var deferred = $.Deferred();
+
+      addon.port.emit('get-page-meta');
+      addon.port.once('get-page-meta', function (result) {
+        if(!std.is_obj(result)) {
+          console.error("Invalid result type received: not object");
+          deferred.reject();
+        } else {
+          result.id = [ text, Date.now() ].join('|');
+          result.content = text;
+          result.type = "manual";
+
+          deferred.resolve(result);
+        }
+      } );
+
+      return deferred.promise();
+    };
+
     /* interface */
     return {
       callbacks: {
         sorter: {
-          getSelection: getSelection_
+          getSelection: onGetSelection_,
+          createManualItem: onCreateManualItem_
         }
       }
     };

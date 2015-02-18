@@ -5,7 +5,7 @@
  * @copyright 2015 Diffeo
  *
  * Comments:
- * Uses the `SortingDesk' component.
+ * Uses the `SortingDesk' and shared `DraggableImageMonitor´ components.
  *
  */
 
@@ -14,7 +14,7 @@
 /*jshint laxbreak:true */
 
 
-var Embeddable = (function ($, std, undefined) {
+var Embeddable = (function ($, std, DraggableImageMonitor, undefined) {
 
   /* Variables */
   var embed_;
@@ -144,9 +144,21 @@ var Embeddable = (function ($, std, undefined) {
       callback(null);
     };
 
+    var onGetPageMeta_ = function (request, sender, callback)
+    {
+      if(!std.is_fn(callback)) return;
+
+      callback( {
+        href: window.location.href,
+        document: window.document.documentElement.outerHTML
+      } );
+    };
+
+
     /* Map message operations to handlers. */
     var methods_ = {
-      "get-selection": onGetSelection_
+      "get-selection": onGetSelection_,
+      "get-page-meta": onGetPageMeta_
     };
 
     /* Interface */
@@ -181,58 +193,6 @@ var Embeddable = (function ($, std, undefined) {
   /**
    * @class
    * */
-  var DraggableImageMonitor = function ()
-  {
-    /* Define getters. */
-    this.__defineGetter__("active",
-                          function () { return this.active_; } );
-
-    /* Initialise component. */
-    var self = this;
-
-    /* Attach specialised `drag´ event listeners to every image found on the
-     * page. */
-    $('IMG').each( function () {
-      var el = $(this);
-
-      el.on( {
-        mouseenter: function () {
-          self.cursor_ = el.css('cursor');
-          el.css('cursor', 'copy');
-        },
-
-        mouseleave: function () {
-          el.css('cursor', self.cursor_);
-        },
-
-        dragstart: function (ev) {
-          self.active_ = $(ev.target);
-          console.log("Image dragging: start");
-        },
-
-        dragend: function () {
-          window.setTimeout(function () {
-            console.log("Image dragging: end");
-            self.active_ = null;
-          }, 250);
-        }
-      } );
-    } );
-
-  };
-
-  /* Attributes */
-  DraggableImageMonitor.prototype.cursor_ = null;
-  DraggableImageMonitor.prototype.active_ = null;
-
-  /* Interface */
-  DraggableImageMonitor.prototype.clear = function ()
-  { this.active_ = null; };
-
-
-  /**
-   * @class
-   * */
   var Embed = function (meta)
   {
     console.log("Initialising embeddable content");
@@ -262,4 +222,4 @@ var Embeddable = (function ($, std, undefined) {
       embed_ = new Embed(result);
   } );
 
-})($, SortingCommon);
+})($, SortingCommon, DraggableImageMonitor);

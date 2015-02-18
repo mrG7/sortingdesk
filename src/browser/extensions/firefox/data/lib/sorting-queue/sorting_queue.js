@@ -910,7 +910,8 @@ var SortingQueue_ = function (window, $, std) {
         "data-scope": "text-item"
       } )
       .click(function (ev) {
-        self.owner_.select_(self, ev);
+        if(ev.originalEvent.target.nodeName.toLowerCase() !== 'a')
+          self.owner_.select_(self, ev);
       } );
 
     this.getNodeClose()
@@ -1018,6 +1019,7 @@ var SortingQueue_ = function (window, $, std) {
     this.node_ = null;
     this.events_ = new std.Events(this, [ 'dismissed' ] );
     this.timer_ = null;
+    this.resetHtml_ = null;
 
     /* Getters */
     this.__defineGetter__("node", function () { return this.node_; } );
@@ -1054,8 +1056,8 @@ var SortingQueue_ = function (window, $, std) {
       /* Attach handler to click event. */
       this.owner_.getNodeClose()
         .off()
-        .click(function () {
-          self.events_.trigger('dismissed', null, self.owner_.content);
+        .click(function (ev) {
+          self.dismiss_(null);
         } );
     } else
       this.owner_.getNodeClose().remove();
@@ -1073,12 +1075,7 @@ var SortingQueue_ = function (window, $, std) {
       if(!target.hasClass(Css_.dismissal.option))
         return false;
 
-      self.events_.trigger('dismissed',
-                           target.data('id'),
-                           self.owner_.content);
-
-/*       self.reset(); */
-
+      self.dismiss_(target.data('id'));
       return false;
     } );
 
@@ -1092,14 +1089,29 @@ var SortingQueue_ = function (window, $, std) {
           window.clearTimeout(self.timer_);
       },
       mouseleave: function (ev) {
+        /* Ensure reset hasn't been invoked meanwhile. */
+        if(self.node_ === null)
+          return;
+
         self.timer_ = window.setTimeout(function () {
           self.timer_ = null;
-          self.events_.trigger('dismissed',
-                               null,
-                               self.owner_.content);
+          self.dismiss_(null);
         }, self.options_.delayTimedDismissal * 1000);
       }
     } );
+  };
+
+  /** Set the reset HTML.  Currently, dismissal events are not reversible.
+   * Whenever the user initiates a dismissal event, it will always result in the
+   * user having to make a choice and consequently the handling `ItemDismissal´
+   * instance being reset.  This method allows for custom HTML to be assigned to
+   * the owning item instance on instance reset.  Useful to show a "loading" or
+   * "processing" message, for instance.
+   *
+   * @param {string} html The HTML to assign at reset time. */
+  ItemDismissal.prototype.setResetHtml = function (html)
+  {
+    this.resetHtml_ = html;
   };
 
   ItemDismissal.prototype.reset = function ()
@@ -1107,14 +1119,18 @@ var SortingQueue_ = function (window, $, std) {
     if(this.timer_)
       window.clearTimeout(self.timer_);
 
+    this.node_.off();
     this.node_.remove();
     this.node_ = this.options_ = this.events_ = this.dismissing_ = null;
     this.timer_ = null;
+
+    /* Change the owning item's HTML to the set in `resetHtml_´, if any. */
+    if(this.resetHtml_ !== null)
+      this.owner_.node.html(this.resetHtml_);
   };
 
   ItemDismissal.prototype.render = std.absm_noti;
 
-  /* Private interface */
   ItemDismissal.prototype.brief = function ()
   {
     var text = this.owner_.node.find(
@@ -1125,6 +1141,13 @@ var SortingQueue_ = function (window, $, std) {
           });
 
     return text.length > 0 ? $(text[0]).text() : null;
+  };
+
+  /* Private interface */
+  ItemDismissal.prototype.dismiss_ = function (id)
+  {
+    this.events_.trigger('dismissed', id, this.owner_.content);
+    this.reset();
   };
 
 

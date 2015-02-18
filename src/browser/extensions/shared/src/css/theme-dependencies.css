@@ -14,7 +14,7 @@ BUTTON.dropdown-toggle > .caret {
 }
 
 .btn {
-  transition: 150ms all;
+  transition: 90ms all;
 }
 
 .btn-default.disabled {

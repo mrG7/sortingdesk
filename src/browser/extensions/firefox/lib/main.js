@@ -124,6 +124,22 @@ var Main = (function (undefined) {
     } );
   };
 
+  var getActiveTabWorker_ = function (worker)
+  {
+    var active = mtabs.activeTab,
+        cs;
+
+    if(active && mblacklist.valid(active.url)) {
+      cs = minjector.get(active.id);
+
+      if(cs) return cs;
+      else   console.error("No content script attached to tab");
+    } else
+      console.info("No active tab or invalid URL");
+
+    worker.port.emit('get-selection', null);
+  };
+
 
   /* Initialisation sequence
    * -- */
@@ -145,33 +161,38 @@ var Main = (function (undefined) {
 
       w.port.on('get-selection', function () {
         console.log("get-selection: returning active tab's selection");
-        var active = mtabs.activeTab;
+        var cs = getActiveTabWorker_(w);
+        if(!cs) return;
 
-        if(active && mblacklist.valid(active.url)) {
-          var cs = minjector.get(active.id);
+        cs.port.emit('get-selection');
+        cs.port.once('get-selection', function (result) {
+          if(result && result.type === 'image') {
+            if(/^data:/.test(result.content)) {
+              console.info("Image already in base64");
+              result.data = result.content;
+            } else {
+              getImageData(result.content, function (data) {
+                result.data = data;
+                w.port.emit('get-selection', result);
+              } );
 
-          if(cs) {
-            cs.port.emit('get-selection');
-            cs.port.once('get-selection', function (result) {
-              console.log("received selection result: ", result);
+              return;
+            }
+          }
 
-              if(result.type === 'image') {
-                if(/^data:/.test(result.content)) {
-                  console.info("Image already in base64");
-                  result.data = result.content;
-                  w.port.emit('get-selection', result);
-                } else {
-                  getImageData(result.content, function (data) {
-                    result.data = data;
-                    w.port.emit('get-selection', result);
-                  } );
-                }
-              }
-            } );
-          } else
-            console.error("No content script attached to tab");
-        } else
-          console.info("No active tab or invalid URL");
+          w.port.emit('get-selection', result);
+        } );
+      } );
+
+      w.port.on('get-page-meta', function () {
+        console.log("get-page-meta: returning page meta");
+        var cs = getActiveTabWorker_(w);
+        if(!cs) return;
+
+        cs.port.emit('get-page-meta');
+        cs.port.once('get-page-meta', function (result) {
+          w.port.emit('get-page-meta', result);
+        } );
       } );
 
       console.log("Attached sidebar");

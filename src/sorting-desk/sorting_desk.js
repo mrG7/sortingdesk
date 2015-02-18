@@ -100,17 +100,22 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
                     'unknown',
                     0, // coref value is filled in below
                     self.api.getQuerySubtopicId());
-            if (id === null) {
-                label.coref_value = djs.COREF_VALUE_UNKNOWN;
-            } else if (id === 'duplicate') {
-                label.coref_value = djs.COREF_VALUE_POSITIVE;
-            } else if (id === 'negative') {
-                label.coref_value = djs.COREF_VALUE_NEGATIVE;
-            } else {
-                throw "Unrecognized dismissal identifier: " + id;
+            if (id === null)
+              label.coref_value = djs.COREF_VALUE_UNKNOWN;
+            else if (id === 'duplicate')
+              label.coref_value = djs.COREF_VALUE_POSITIVE;
+            else if (id === 'negative')
+              label.coref_value = djs.COREF_VALUE_NEGATIVE;
+            else {
+              item.owner.remove(item);
+              console.error("Unrecognized dismissal identifier: " + id);
+              return;
             }
+
+            this.setResetHtml("Processing...");
+
             self.api.addLabel(label)
-                .done(function() { item.owner.remove(item); });
+              .done(function() { item.owner.remove(item); });
           } );
       };
     }
@@ -175,9 +180,10 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
         return {
           actions: {
             add: this.find('toolbar-add'),
-            addSubfolder: this.find('toolbar-add-subfolder'),
+            addContextual: this.find('toolbar-add-contextual'),
             remove: this.find('toolbar-remove'),
             rename: this.find('toolbar-rename'),
+            jump: this.find('toolbar-jump'),
             refresh: this.find('toolbar-refresh')
           }
         };
@@ -247,7 +253,13 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
     this.folders_ = [ ];
     this.active_ = null;
     this.refreshing_ = false;
-    this.events_ = new std.Events(this, [ 'refresh-begin', 'refresh-end' ] );
+    this.events_ = new std.Events(
+      this,
+      [ 'refresh-begin',
+        'refresh-end',
+        'selected-folder',
+        'selected-subfolder' ] );
+
     this.creating_ = null;
     this.selected_ = null;
     this.dropTarget_ = null;
@@ -258,6 +270,7 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
         check_callback: true,
         multiple: false
       },
+      plugins: [ "types", "contextmenu" /* "dnd" */ ],
       dnd: {
         check_while_dragging: false,
         is_draggable: function (nodes) {
@@ -273,7 +286,41 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
         "subfolder": { "icon": "sd-subfolder" },
         "item":      { "icon": "jstree-file"  }
       },
-      plugins: [ "types" /* "dnd" */ ]
+      contextmenu: {
+        items: function (node) {
+          var obj = self.getAnyById(node.id),
+              items = {
+              "rename": {
+                label: "Rename",
+                icon: "glyphicon glyphicon-pencil",
+                _disabled: true
+              },
+              "remove": {
+                label: "Remove",
+                icon: "glyphicon glyphicon-remove",
+                _disabled: true
+              }
+            };
+
+          if(obj instanceof Subfolder) {
+            items["create"] = {
+              label: "Create manual item",
+              icon: "glyphicon glyphicon-plus",
+              separator_before: true,
+              action: function () { self.createItem(); }
+            };
+          } else if(obj instanceof Item) {
+            items["jump"] = {
+              label: "Jump to bookmarked page",
+              icon: "glyphicon glyphicon-eye-open",
+              separator_before: true,
+              action: self.on_jump_bookmarked_page_.bind(self)
+            };
+          }
+
+          return items;
+        }
+      }
     } ).jstree(true);
 
     owner.nodes.explorer.on( {
@@ -304,13 +351,24 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
 
             if(self.folders_.length === 1)
               self.tree_.select_node(f.id);
-          } else {
+          } else if(self.creating_.obj instanceof Subfolder) {
             f = new api.foldering.subfolderFromName(
               self.creating_.parent.data,
               data.text);
             f = self.creating_.parent.add(f);
             if(self.creating_.descriptor)
               f.add(self.creating_.descriptor);
+          } else if(self.creating_.obj instanceof ItemBase) {
+            var p = self.creating_.parent;
+
+            self.owner_.callbacks.invoke('createManualItem', data.text)
+              .done(function (descriptor) {
+                descriptor.subtopic_id =
+                  self.generate_subtopic_id_(descriptor);
+
+                if(descriptor.subtopic_id !== null)
+                  p.add(descriptor);
+              } );
           }
         }
 
@@ -354,7 +412,11 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
           console.error("Unknown node type selected:", data);
         } else {
           self.selected_ = i;
-          console.log("Current selected node: ", self.selected_);
+
+          if(i instanceof Folder)
+            self.events_.trigger('selected-folder');
+          else if(i instanceof Subfolder)
+            self.events_.trigger('selected-subfolder');
         }
 
         self.update_toolbar_();
@@ -382,9 +444,11 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
     els.toolbar.actions.refresh.click(function () { self.refresh(); } );
     els.toolbar.actions.add.click(function () { self.createFolder(); } );
 
-    els.toolbar.actions.addSubfolder.click(function () {
+    els.toolbar.actions.addContextual.click(function () {
       if(self.selected_ instanceof Folder)
         self.createSubfolder(self.selected_);
+      else if(self.selected_ instanceof Subfolder)
+        self.createItem(self.selected_);
     } );
 
     els.toolbar.actions.remove.click(function () {
@@ -393,6 +457,10 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
 
     els.toolbar.actions.rename.click(function () {
       console.info("Not implemented yet");
+    } );
+
+    els.toolbar.actions.jump.click(function () {
+      self.on_jump_bookmarked_page_();
     } );
 
     /* Handle item dismissal. */
@@ -512,6 +580,21 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
       parent: folder,
       obj: new SubfolderNew(folder, name),
       descriptor: descriptor
+    };
+  };
+
+  ControllerExplorer.prototype.createItem = function (subfolder, name)
+  {
+    if(subfolder === undefined)
+      subfolder = this.selected_;
+    if(!(subfolder instanceof Subfolder)) {
+      console.error("Invalid or no subfolder");
+      return;
+    }
+
+    this.creating_ = {
+      parent: subfolder,
+      obj: new ItemNew(subfolder, name)
     };
   };
 
@@ -735,7 +818,7 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
        && std.is_str(descriptor.data)
        && descriptor.data.length > 0)
     {
-      set(fc, this.api.makeRawImageDataId(descriptor.subtopic_id),
+      set(fc, this.api.makeRawSubId(descriptor.subtopic_id, "data"),
           descriptor.data);
     }
   };
@@ -784,8 +867,17 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
     loading = loading === true;
 
     ela.add.toggleClass('disabled', loading);
-    ela.addSubfolder.toggleClass(
-      'disabled', loading || !(this.selected_ instanceof Folder));
+
+    ela.addContextual.toggleClass(
+      'disabled',
+      loading || (this.selected_ instanceof Item)
+        || (this.selected_ instanceof Subfolder
+            && (!this.selected_.loaded
+                || this.selected_.loading())));
+
+    ela.jump.toggleClass(
+      'disabled', loading || !(this.selected_ instanceof Item));
+
     ela.refresh.toggleClass('disabled', loading);
   };
 
@@ -892,6 +984,17 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
     } );
   };
 
+  ControllerExplorer.prototype.on_jump_bookmarked_page_ = function ()
+  {
+    if(this.selected_ !== null) {
+      if(this.selected_ instanceof Item)
+        this.selected_.jump();
+      else
+        console.error("Selected node not an item");
+    } else
+      console.error("No selected nodes found");
+  };
+
   ControllerExplorer.prototype.get_selection_ = function ()
   {
     var self = this,
@@ -905,26 +1008,32 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
 
       console.log("Got selection content: type=%s", result.type /*, result */);
 
-      switch(result.type) {
-      case 'image':
-        result.subtopic_id = self.api.makeRawImageId(
-          self.api.generateSubtopicId(result.id));
-        break;
-
-      case 'text':
-        result.subtopic_id = self.api.makeRawTextId(
-          self.api.generateSubtopicId(result.id));
-        break;
-
-      default:
-        console.error("Invalid selection type");
+      result.subtopic_id = self.generate_subtopic_id_(result);
+      if(result.subtopic_id === null)
         deferred.reject();
-      }
-
-      deferred.resolve(result);
+      else
+        deferred.resolve(result);
     } );
 
     return deferred.promise();
+  };
+
+  ControllerExplorer.prototype.generate_subtopic_id_ = function (descriptor)
+  {
+    switch(descriptor.type) {
+    case 'image':
+      return this.api.makeRawImageId(
+        this.api.generateSubtopicId(descriptor.id));
+    case 'text':
+      return this.api.makeRawTextId(
+        this.api.generateSubtopicId(descriptor.id));
+    case 'manual':
+      return this.api.makeRawCustomId(
+        this.api.generateSubtopicId(descriptor.id), "manual");
+    default:
+      console.error("Invalid selection type");
+      return null;
+    }
   };
 
 
@@ -943,6 +1052,7 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
     def(this, 'api', { get: function () { return this.controller_.api; } } );
     def(this, 'tree', { get: function () { return this.controller_.tree; } } );
     def(this, 'opening', { get: function () { return this.opening_; } } );
+    def(this, 'events', { get: function () { return this.events_; } } );
 
     def(this, 'node', { get: function () {
       return this.controller.tree.get_node(this.id_, true); } } );
@@ -962,6 +1072,7 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
     this.loading_ = 0;
     this.id_ = null;
     this.opening_ = false;
+    this.events_ = new std.Events(this, [ 'loading', 'loaded' ] );
   };
 
   ItemBase.prototype.open = function ()
@@ -979,13 +1090,20 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
 
   ItemBase.prototype.loading = function (state /* = true */)
   {
+    if(arguments.length === 0)
+      return this.loading_ > 0;
+
     if(state === false) {
       if(this.loading_ <= 0)
         console.error("Loading count is 0");
-      else if(--this.loading_ === 0)
+      else if(--this.loading_ === 0) {
         this.removeClass("jstree-loading");
-    } else if(state === true)
-      ++this.loading_;
+        this.events_.trigger('loaded');
+      }
+    } else if(state === true) {
+      if(++this.loading_ === 1)
+        this.events_.trigger('loading');
+    }
 
     /* Always force class. */
     if(this.loading_ > 0)
@@ -1062,11 +1180,15 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
     var self = this;
 
     if(folder.exists) {
+      window.setTimeout(function () { self.loading(true); } );
+
       this.api.foldering.listSubfolders(folder)
         .done(function (coll) {
           coll.forEach(function (sf) {
             self.subfolders_.push(new Subfolder(self, sf));
           } );
+
+          self.loading(false);
         } );
     }
 
@@ -1211,6 +1333,9 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
       /* Set the `loaded_´ flag to true now to prevent entering here again. */
       this.loaded_ = true;
       this.loading(true);
+      this.on("loaded", function () {
+        self.controller.update_toolbar_();
+      } );
 
       this.api.foldering.listItems(this.subfolder_)
         .done(function (coll) {
@@ -1235,8 +1360,8 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
     if(!std.is_obj(descriptor))
       throw "Invalid or no descriptor specified";
 
-    /* First create `Api.Item´ instance after generating a valid content_id, and
-     then create and contain our UI representation of an item.*/
+    /* First create `Api.Item´ instance after generating a valid content_id,
+     * and then create and contain our UI representation of an item.*/
     descriptor.content_id = this.api.generateContentId(descriptor.href);
     item = new this.api.foldering.Item(this.data, descriptor);
 
@@ -1249,12 +1374,12 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
     /* Add item to subfolder in persistent storage. */
     this.api.foldering.addItem(this.subfolder_, item)
       .done(function () {
-        console.info("Successfully added item to subfolder",
-                     item, this.subfolder_);
+        console.info("Successfully added item to subfolder: id=%s",
+                     item.subtopic_id);
       } )
       .fail(function () {
         console.error("Failed to add item to subfolder",
-                      item, this.subfolder_);
+                      item.subtopic_id);
       } );
 
     /* Create or update feature collection. */
@@ -1332,6 +1457,9 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
    * */
   var Item = function (owner, item, /* optional */ descriptor)
   {
+    if(!(owner instanceof Subfolder))
+      throw "Invalid or no owner specified: not `Subfolder´ instance";
+
     /* Invoke base class constructor. */
     ItemBase.call(this, owner);
 
@@ -1391,6 +1519,7 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
 
     switch(api.getSubtopicType(item.subtopic_id)) {
     case 'image': return new ItemImage(subfolder, item, descriptor);
+    case 'manual':
     case 'text':  return new ItemText (subfolder, item, descriptor);
     }
 
@@ -1412,6 +1541,7 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
 
     if(!fc) remove = true;
     else {
+      this.fc_ = fc;
       this.item_.content = fc.feature(this.item_.subtopic_id);
       remove = !this.item_.content;
     }
@@ -1437,6 +1567,15 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
   Item.prototype.deactivate = function ()
   {
     this.removeClass(Css.active);
+  };
+
+  Item.prototype.jump = function ()
+  {
+    if(std.is_obj(this.fc_.raw) && std.is_str(this.fc_.raw.meta_url)) {
+      var win = window.open(this.fc_.raw.meta_url, "_blank");
+      win.focus();
+    } else
+      console.warn("No meta URL in feature collection");
   };
 
 
@@ -1480,7 +1619,7 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
   {
     if(Item.prototype.onGotFeatureCollection.call(this, fc)) {
       this.item_.data = fc.feature(
-        this.api.makeRawImageDataId(this.item_.subtopic_id));
+        this.api.makeRawSubId(this.item_.subtopic_id));
       return true;
     }
 
@@ -1503,6 +1642,49 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
     this.owner_.open();
   };
 
+
+  /**
+   * @class
+   * */
+  var ItemNew = function (owner, name)
+  {
+    /* Invoke base class constructor. */
+    ItemBase.call(this, owner);
+
+    this.name_ = name;
+    this.render();
+  };
+
+  ItemNew.prototype = Object.create(ItemBase.prototype);
+
+  ItemNew.prototype.render = function ()
+  {
+    var self = this,
+        o = this.owner_;
+
+    this.id_ = this.tree.create_node(
+      this.owner_.id,
+      { state: 'open',
+        text: this.name_,
+        type: "item" },
+      "last");
+
+    if(this.id_ === false)
+      throw "Failed to create manual item";
+
+    o.open();
+    this.tree.edit(this.id_);
+
+    /* TODO: remove hardcoded timeout.
+     * Scrolling into view has to be on a timeout because JsTree performs a
+     * slide down animation. */
+    window.setTimeout(function () { self.node.get(0).scrollIntoView(); }, 200);
+  };
+
+  ItemNew.prototype.reset = function ()
+  {
+    this.tree.delete_node(this.tree.get_node(this.id_));
+  };
 
   /* Css classes */
   var Css = {
