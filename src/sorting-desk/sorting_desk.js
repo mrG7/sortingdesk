@@ -1360,6 +1360,9 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
    * */
   var Item = function (owner, item, /* optional */ descriptor)
   {
+    if(!(owner instanceof Subfolder))
+      throw "Invalid or no owner specified: not `Subfolder´ instance";
+
     /* Invoke base class constructor. */
     ItemBase.call(this, owner);
 
