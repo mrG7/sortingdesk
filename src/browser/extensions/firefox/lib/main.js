@@ -17,7 +17,10 @@ var Main = (function (undefined) {
       mbuttons = require('sdk/ui/button/action'),
       mtabs = require("sdk/tabs"),
       msidebar = require("sdk/ui/sidebar"),
+      mtimers = require("sdk/timers"),
       data = require("sdk/self").data;
+
+  Cu.import('resource://gre/modules/Services.jsm');
 
   /* Own modules */
   var minjector = require('./injector.js'),
@@ -30,18 +33,18 @@ var Main = (function (undefined) {
 
 
   /* Interface */
-  var show = function ()
+  var show_ = function (force)
   {
     if(sidebar === null)
       throw "Sidebar not yet instantiated";
 
-    if(!active) {
+    if(!active || force === true) {
       sidebar.show();
       mpreferences.set('active', active = true);
     }
   };
 
-  var hide = function ()
+  var hide_ = function ()
   {
     if(sidebar === null)
       throw "Sidebar not yet instantiated";
@@ -52,14 +55,32 @@ var Main = (function (undefined) {
     }
   };
 
+  var alertInvalidUrl_ = function ()
+  {
+    Services.prompt.alert(null, 'Dossier stack URL',
+                          'Please select a valid dossier stack URL in Sorting '
+                          + 'Desk\'s preferences page.');
+  };
+
+  var onUrlUpdated = function (url)
+  {
+    if(!url) {
+      alertInvalidUrl_();
+      if(sidebar) sidebar.hide();
+    } else {
+      if(mpreferences.get().active)
+        constructSidebar_();
+    }
+  };
+
   var toggle = function (state)
   {
     if(state === undefined) state = !active;
-    if(state === true)      show();
-    else                    hide();
+    if(state === true)      show_();
+    else                    hide_();
   };
 
-  var getBlob = function(url, callback)
+  var getBlob_ = function(url, callback)
   {
     let xhr = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"]
           .createInstance(Ci.nsIXMLHttpRequest);
@@ -97,9 +118,9 @@ var Main = (function (undefined) {
     xhr.send(null);
   };
 
-  var getImageData = function (url, callback)
+  var getImageData_ = function (url, callback)
   {
-    getBlob(url, data => {
+    getBlob_(url, data => {
       /* Don't attempt to convert blob to base64 if one wasn't retrieved. */
       if(!data) {
         callback(null);
@@ -140,67 +161,79 @@ var Main = (function (undefined) {
     worker.port.emit('get-selection', null);
   };
 
+  var constructSidebar_ = function (force)
+  {
+    if(sidebar)
+      sidebar.dispose();
+
+    sidebar = msidebar.Sidebar( {
+      id: "sidebar-sorting-desk",
+      title: "Sorting Desk",
+      url: data.url("src/html/sidebar.html"),
+      onAttach: onAttachSidebar_
+    } );
+
+    if(active || force === true)
+      show_(true);
+  };
+
+  var onAttachSidebar_ = function (worker)
+  {
+    worker.port.on('get-preferences', function () {
+      console.log("get-preferences: returning preferences");
+      worker.port.emit('get-preferences', mpreferences.get());
+    } );
+
+    worker.port.on('get-selection', function () {
+      console.log("get-selection: returning active tab's selection");
+      var cs = getActiveTabWorker_(worker);
+      if(!cs) return;
+
+      cs.port.emit('get-selection');
+      cs.port.once('get-selection', function (result) {
+        if(result && result.type === 'image') {
+          if(/^data:/.test(result.content)) {
+            console.info("Image already in base64");
+            result.data = result.content;
+          } else {
+            getImageData_(result.content, function (data) {
+              result.data = data;
+              worker.port.emit('get-selection', result);
+            } );
+
+            return;
+          }
+        }
+
+        worker.port.emit('get-selection', result);
+      } );
+    } );
+
+    worker.port.on('get-page-meta', function () {
+      console.log("get-page-meta: returning page meta");
+      var cs = getActiveTabWorker_(worker);
+      if(!cs) return;
+
+      cs.port.emit('get-page-meta');
+      cs.port.once('get-page-meta', function (result) {
+        worker.port.emit('get-page-meta', result);
+      } );
+    } );
+
+    console.log("Attached sidebar");
+  };
 
   /* Initialisation sequence
-   * -- */
-  /* Firefox */
-  Cu.import('resource://gre/modules/Services.jsm');
-
-  /* Sorting desk related */
+   * --
+   * Sorting desk related */
   minjector.initialise();
 
-  sidebar = msidebar.Sidebar( {
-    id: "sidebar-sorting-desk",
-    title: "Sorting Desk",
-    url: data.url("src/html/sidebar.html"),
-    onAttach: function (w) {
-      w.port.on('get-preferences', function () {
-        console.log("get-preferences: returning preferences");
-        w.port.emit('get-preferences', mpreferences.get());
-      } );
-
-      w.port.on('get-selection', function () {
-        console.log("get-selection: returning active tab's selection");
-        var cs = getActiveTabWorker_(w);
-        if(!cs) return;
-
-        cs.port.emit('get-selection');
-        cs.port.once('get-selection', function (result) {
-          if(result && result.type === 'image') {
-            if(/^data:/.test(result.content)) {
-              console.info("Image already in base64");
-              result.data = result.content;
-            } else {
-              getImageData(result.content, function (data) {
-                result.data = data;
-                w.port.emit('get-selection', result);
-              } );
-
-              return;
-            }
-          }
-
-          w.port.emit('get-selection', result);
-        } );
-      } );
-
-      w.port.on('get-page-meta', function () {
-        console.log("get-page-meta: returning page meta");
-        var cs = getActiveTabWorker_(w);
-        if(!cs) return;
-
-        cs.port.emit('get-page-meta');
-        cs.port.once('get-page-meta', function (result) {
-          w.port.emit('get-page-meta', result);
-        } );
-      } );
-
-      console.log("Attached sidebar");
-    }
-  } );
-
-  if(mpreferences.get().active)
-    show();
+  if(mpreferences.get().active) {
+    if(!mpreferences.getDossierUrl())
+      alertInvalidUrl_();
+    else
+      constructSidebar_(mpreferences.get().active);
+  }
 
   mbuttons.ActionButton({
     id: "button-diffeo",
@@ -217,5 +250,6 @@ var Main = (function (undefined) {
 
   /* Public interface */
   exports.toggle = toggle;
+  exports.onUrlUpdated = onUrlUpdated;
 
 } )();

@@ -11,12 +11,20 @@
 
 
 var Options = (function (window, $, std, undefined) {
-  var initialise_ = function () {
+
+  var urls_,
+      defaultActiveUrl_;
+
+  var initialise_ = function ()
+  {
+    defaultActiveUrl_ = $('#active-url').text();
+
     load_(function () {
       /* Save state when the `save´ button is clicked on. */
       $('#save').click(function () {
         Config.save( {
-          dossierUrl: $('#dossier-url').val(),
+          dossierUrls: $('#dossier-urls').val(),
+          activeUrl: $('#active-url').val(),
           active: $('#active').is(':checked'),
           startPosition: $('#start-position').val()
         } );
@@ -26,29 +34,32 @@ var Options = (function (window, $, std, undefined) {
       } );
     } );
 
+    $('#dossier-urls').on('blur', function () {
+      urls_ = Config.stringToUrls(this.value);
+      this.value = Config.urlsToString(urls_);
+      updateActiveUrl_();
+    } );
+
     $(".dropdown-menu").on('click', 'li a', function() {
       var $this = $(this),
           $parent = $this.parent();
 
       if(!$parent.hasClass('disabled'))
-        setDropdownValue_($this.parents('ul').prev(), $parent);
+        setDropdownValue_($this.parents('ul').prev().prev(), $parent);
     } );
 
     console.info("Initialised options page");
   };
 
-  var setDropdownValue_ = function (el, val, def) {
+  var setDropdownValue_ = function (el, val, def)
+  {
     var elv;
 
     if(std.$.is(val)) {
       elv = val;
       val = elv.data('value');
-    } else {
-      if(!std.is_num(val)) val = def;
-      if(!std.is_num(val)) return;
-
-      elv = el.next().find('li[data-value=' + val + ']');
-    }
+    } else
+      elv = getDropdownCollection_(el).find('li[data-value="' + val + '"]');
 
     if(elv.length === 0) {
       if(def !== undefined)
@@ -60,11 +71,52 @@ var Options = (function (window, $, std, undefined) {
     }
   };
 
-  var load_ = function (callback) {
+  var clearDropdown_ = function (el, text)
+  {
+    el.text(text);
+  };
+
+  var addDropdownItem_ = function (el, val, html)
+  {
+    getDropdownCollection_(el)
+      .append($('<li />').attr('data-value', val)
+              .append($('<a/>').attr('href', '#').html(html)));
+  };
+
+  var getDropdownCollection_ = function (el)
+  {
+    el = el.next();
+
+    if(el.get(0).nodeName.toLowerCase() === 'ul')
+      return el;
+    return el.next();
+  };
+
+  var updateActiveUrl_ = function ()
+  {
+    var ela = $('#active-url');
+
+    urls_ = Config.stringToUrls($("#dossier-urls").val());
+    getDropdownCollection_(ela).children().remove();
+
+    for(var k in urls_)
+      addDropdownItem_(ela, k, k.bold() + ': ' + urls_[k]);
+
+    if(!(ela.val() in urls_))
+      clearDropdown_(ela, defaultActiveUrl_);
+  };
+
+  var load_ = function (callback)
+  {
     Config.load(function (state) {
-      $('#dossier-url').val(state.dossierUrl);
+      var elc = $("#dossier-urls");
+
+      elc.val(state.dossierUrls);
+      updateActiveUrl_();
+
       $('#active').prop('checked', state.active);
       setDropdownValue_($('#start-position'), state.startPosition, 0);
+      setDropdownValue_($('#active-url'), state.activeUrl);
 
       if(std.is_fn(callback))
         callback();

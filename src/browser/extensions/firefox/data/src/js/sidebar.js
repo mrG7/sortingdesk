@@ -18,115 +18,6 @@ var Main = (function (window, $, std, sq, sd, Api, undefined) {
       nodes = { },
       loading,
       sorter;
-  /**
-   * @class
-   * */
-  var Item = function(owner, item)
-  {
-    if(!owner.owner.initialised)
-      return;
-
-    sq.Item.call(this, owner, item);
-  };
-
-  Item.prototype = Object.create(sq.Item.prototype);
-
-  Item.prototype.render = function(text, view, less)
-  {
-    var raw = this.content_.raw;
-    var fc = this.content_.fc;
-    var desc = fc.value('meta_clean_visible').trim();
-    desc = desc.replace(/\s+/g, ' ');
-    desc = desc.slice(0, 200);
-    var title = fc.value('title') || (desc.slice(0, 50) + '...');
-    var url = fc.value('meta_url');
-
-    var ntitle = $(
-      '<p style="color: #565656; font-size: 12pt; margin: 0 0 8px 0;">'
-      + '<strong></strong>'
-      + '</p>'
-    );
-    ntitle.find('strong').text(title);
-
-    var ndesc = $('<p style="font-size: 8pt; display: block; margin: 0;" />');
-    ndesc.text(desc + '...');
-
-    var nurl = $(
-      '<p style="margin: 8px 0 0 0; display: block;">'
-      + '<a href="' + url + '">' + url + '</a>'
-      + '</p>'
-    );
-
-    this.content_.text = $('<div style="margin: 0;" />');
-    this.content_.text.append(ntitle);
-    this.content_.text.append(ndesc);
-    this.content_.text.append(nurl);
-
-    if(std.is_num(raw.probability)) {
-      var score = raw.probability.toFixed(4);
-      this.content_.text.append($(
-        '<p style="margin: 8px 0 0 0; display: block;">'
-        + 'Score: ' + score
-        + '</p>'
-      ) );
-
-      var info = raw.feature_cmp_info;;
-      if(std.is_obj(info)) {
-        for(var i in info) {
-          var j = info[i],
-              values = j.common_values;
-
-          if(std.is_arr(values) && values.length > 0) {
-            var container = $('<div/>').addClass('sd-dict-container'),
-                hasPhi = std.is_num(j.phi) && j.phi > 0,
-                el;
-
-            el = $('<div/>').addClass("sd-dict-weight");
-            if(hasPhi)
-              el.append(this.create_weight_('Score:', 1 - j.phi));
-
-           if(std.is_num(j.weight) && j.weight > 0) {
-              if(hasPhi)
-                el.append('<br/>');
-
-              el.append(this.create_weight_('Weight:', j.weight));
-           }
-
-            container.append(el);
-            container.append($('<h1/>').text(i));
-
-            el = $('<div/>').addClass('sd-dict-values');
-
-            if(i === 'image_url') {
-              values.forEach(function (v) {
-                el.append($('<img/>').attr('src', v));
-              } );
-            } else {
-              values.forEach(function (v) {
-                el.append($('<span/>').text(v));
-              } );
-            }
-
-            container.append(el);
-            this.content_.text.append(container);
-            this.content_.text.append($('<div class="sd-clear"/>'));
-          }
-        }
-      }
-    }
-
-    return sq.Item.prototype.render.call(this);
-  };
-
-  Item.prototype.create_weight_ = function (caption, weight)
-  {
-    var el = $('<span/>').addClass('sd-dict-weight');
-
-    el.append($('<span/>').text(caption));
-    el.append($('<span/>').text(weight.toFixed(4)));
-
-    return el;
-  };
 
 
   /**
@@ -303,6 +194,13 @@ var Main = (function (window, $, std, sq, sd, Api, undefined) {
   };
 
   var instantiate_ = function () {
+    console.log(preferences);
+    if(!preferences.dossierUrl) {
+      console.error("No dossier stack URL currently defined");
+      return;
+    } else
+      console.log("Using ", preferences.dossierUrl);
+
     (sorter = new sd.Sorter( {
       container: $('#sd-folder-explorer'),
       dossierUrl: preferences.dossierUrl,
@@ -310,10 +208,7 @@ var Main = (function (window, $, std, sq, sd, Api, undefined) {
         options: {
           container: $('#sd-queue'),
           visibleItems: 20,
-          itemsDraggable: false,
-          constructors: {
-            Item: Item
-          }
+          itemsDraggable: false
         }
       }
     }, $.extend(true, Api, HandlerCallbacks.callbacks.sorter ) ) )

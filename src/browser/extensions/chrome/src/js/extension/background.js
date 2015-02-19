@@ -36,36 +36,49 @@ var Background = function (window, chrome, $, std, undefined)
     console.log("Initialising background script");
 
     handlerTabs_ = MessageHandlerTabs;
-    spawn();
 
-    chrome.windows.onRemoved.addListener(function (id) {
-      if(window_.extension !== null && window_.extension.id === id) {
-        var m = window_.main;
+    Config.load(function (options) {
+      /* Spawn the extension window if active in config. */
+      if(!options.active)
+        console.log("Sorting Desk not active");
+      else
+        spawn(options);
 
-        console.info("Extension window removed");
-        chrome.windows.update(
-          m.id,
-          { state: m.state,
-            top: m.top, left: m.left, height: m.height,
-            width: m.width } );
+      /* Process removal of extension window. */
+      chrome.windows.onRemoved.addListener(function (id) {
+        if(window_.extension !== null && window_.extension.id === id) {
+          var m = window_.main;
 
-        window_.main = window_.extension = null;
-      }
+          console.info("Extension window removed");
+          chrome.windows.update(
+            m.id,
+            { state: m.state,
+              top: m.top, left: m.left, height: m.height,
+              width: m.width } );
+
+          window_.main = window_.extension = null;
+        }
+      } );
+
+      console.log("Initialised background script");
     } );
 
-    forAllTabs(function (tab) {
-      injectEmbeddableContentMaybe(tab);
-    } );
-
+    /* Toggle extension window between open/close state on browser action
+     * click. */
     chrome.browserAction.onClicked.addListener(function (tab) {
-      if(window_.extension !== null) {
-        chrome.windows.remove(window_.extension.id);
-        window_.extension = null;
-      } else
-        spawn();
+      Config.load(function (options) {
+        options.active = !options.active;
+        Config.save(options);
+      } );
     } );
+  };
 
-    console.log("Initialised background script");
+  var close = function ()
+  {
+    if(window_.extension !== null) {
+      chrome.windows.remove(window_.extension.id);
+      window_.extension = null;
+    }
   };
 
   var injectEmbeddableContentMaybe = function (tab)
@@ -83,9 +96,7 @@ var Background = function (window, chrome, $, std, undefined)
       if(i >= content.scripts.length)
         return;
 
-      chrome.tabs.executeScript(
-        id,
-        { file: content.scripts[i] },
+      chrome.tabs.executeScript( id, { file: content.scripts[i] },
         function () {
           load_script(++i);
         } );
@@ -94,10 +105,28 @@ var Background = function (window, chrome, $, std, undefined)
     load_script(0);
   };
 
-  var spawn = function ()
+  var spawn = function (options)
   {
     if(window_.extension !== null)
       throw "Extension window already exists";
+
+    if(options === undefined) {
+      Config.load(function (options) {
+        /* Prevent potentially entering an endless loop. */
+        if(options === undefined)
+          throw "Failed to load config";
+
+        spawn(options);
+      } );
+
+      return;
+    } else if(!std.is_obj(options))
+      throw "Options container not an object";
+
+    if(!Config.isValidUrl(options)) {
+      console.error("Active URL not selected or invalid");
+      return;
+    }
 
     closeExtensionWindows();
     findSuitableWindow(function (win) {
@@ -112,8 +141,8 @@ var Background = function (window, chrome, $, std, undefined)
         size.width -= DEFAULT_EXTENSION_WIDTH;
 
         win.focused = true;
-        chrome.windows.update(win.id, $.extend( {state: "normal" },
-                                                size.toObject()));
+        /*  chrome.windows.update(win.id, $.extend( {state: "normal" }, */
+        /*                                           size.toObject())); */
       }
 
       ext = new std.PositionSize(size.right, size.top,
@@ -128,6 +157,11 @@ var Background = function (window, chrome, $, std, undefined)
         window_.extension = nw;
         chrome.windows.update(nw.id, ext.toObject());
       } );
+    } );
+
+    /* Inject embeddable content in all existing tabs. */
+    forAllTabs(function (tab) {
+      injectEmbeddableContentMaybe(tab);
     } );
   };
 
@@ -219,6 +253,9 @@ var Background = function (window, chrome, $, std, undefined)
       if(!std.is_fn(callback)) return;
 
       Config.load(function (options) {
+        options.activeUrl = Config.getUrlByIdFromString(options.activeUrl,
+                                                        options.dossierUrls);
+
         callback( {
           config: options,
           tab: sender.tab
@@ -234,6 +271,9 @@ var Background = function (window, chrome, $, std, undefined)
 
     var onEmbeddableActive_ = function (request, sender)
     {
+      if(!sender.tab || !sender.tab.hasOwnProperty('id'))
+        return;
+
       chrome.browserAction.setIcon( {
         path: chrome.extension.getURL("shared/media/icons/icon_active_38.png"),
         tabId: sender.tab.id } );
@@ -243,13 +283,24 @@ var Background = function (window, chrome, $, std, undefined)
         tabId: sender.tab.id } );
     };
 
+    var onConfigSaved_ = function ()
+    {
+      Config.load(function (options) {
+        if(!options.active)
+          close();
+        else if(window_.extension === null)
+          spawn();
+      } );
+    };
+
 
     var self = this,
         methods = {
           "read-file": onReadFile_,
           "get-meta": onGetMeta_,
           "get-extension-window": onGetExtensionWindow_,
-          "embeddable-active": onEmbeddableActive_
+          "embeddable-active": onEmbeddableActive_,
+          "config-saved": onConfigSaved_
         };
 
     /* Handler of messages originating in content scripts. */
@@ -264,7 +315,7 @@ var Background = function (window, chrome, $, std, undefined)
             return true;
           }
         } else
-          console.error("Invalid request received:", request);
+          console.warn("Unhandled request received:", request);
 
         return true;
       }
