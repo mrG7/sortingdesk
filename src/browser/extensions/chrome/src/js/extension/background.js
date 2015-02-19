@@ -67,11 +67,6 @@ var Background = function (window, chrome, $, std, undefined)
       console.log("Initialised background script");
     } );
 
-    /* Inject embeddable content in all existing tabs. */
-    forAllTabs(function (tab) {
-      injectEmbeddableContentMaybe(tab);
-    } );
-
     /* Toggle extension window between open/close state on browser action
      * click. */
     chrome.browserAction.onClicked.addListener(function (tab) {
@@ -168,6 +163,11 @@ var Background = function (window, chrome, $, std, undefined)
         window_.extension = nw;
         chrome.windows.update(nw.id, ext.toObject());
       } );
+    } );
+
+    /* Inject embeddable content in all existing tabs. */
+    forAllTabs(function (tab) {
+      injectEmbeddableContentMaybe(tab);
     } );
   };
 

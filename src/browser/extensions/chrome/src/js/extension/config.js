@@ -68,7 +68,8 @@ var Config = (function (window, chrome, $, std, undefined) {
       throw "Invalid or no options map specified";
 
     return std.is_str(options.activeUrl)
-      && getUrlByIdFromString(options.activeUrl, options.dossierUrls);
+      && getUrlByIdFromString(options.activeUrl, options.dossierUrls)
+      || false;
   };
 
   var load = function (callback)
