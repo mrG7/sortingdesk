@@ -66,10 +66,10 @@ var Background = function (window, chrome, $, std, undefined)
     /* Toggle extension window between open/close state on browser action
      * click. */
     chrome.browserAction.onClicked.addListener(function (tab) {
-      if(window_.extension !== null)
-        close();
-      else
-        spawn();
+      Config.load(function (options) {
+        options.active = !options.active;
+        Config.save(options);
+      } );
     } );
   };
 
@@ -96,9 +96,7 @@ var Background = function (window, chrome, $, std, undefined)
       if(i >= content.scripts.length)
         return;
 
-      chrome.tabs.executeScript(
-        id,
-        { file: content.scripts[i] },
+      chrome.tabs.executeScript( id, { file: content.scripts[i] },
         function () {
           load_script(++i);
         } );
