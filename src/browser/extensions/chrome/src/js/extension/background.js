@@ -277,6 +277,9 @@ var Background = function (window, chrome, $, std, undefined)
 
     var onEmbeddableActive_ = function (request, sender)
     {
+      if(!sender.tab || !sender.tab.hasOwnProperty('id'))
+        return;
+
       chrome.browserAction.setIcon( {
         path: chrome.extension.getURL("shared/media/icons/icon_active_38.png"),
         tabId: sender.tab.id } );
