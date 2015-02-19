@@ -1373,7 +1373,6 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
      * feature collection; it doesn't exist yet. */
     obj = Item.construct(this, item, descriptor);
     this.items_.push(obj);
-    window.setTimeout(function () { obj.loading(true); }, 50);
 
     /* Add item to subfolder in persistent storage. */
     this.api.foldering.addItem(this.subfolder_, item)
@@ -1385,18 +1384,6 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
         console.error("Failed to add item to subfolder",
                       item.subtopic_id);
       } );
-
-    /* Create or update feature collection. */
-    this.controller.updateFc(descriptor, false)
-      .always(function () {
-        obj.loading(false);
-      } );
-
-    /* Activate item if none is currently active. */
-    obj.on({ 'ready': function () {
-      var c = self.controller;
-      if(c.active === null) self.controller.setActive(obj);
-    } } );
   };
 
   Subfolder.prototype.remove = function (item)
@@ -1482,7 +1469,8 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
 
     var self = this,
         ready = function () {
-          self.render();
+          if(self.id_ === null)
+            self.render();
 
           /* Set this as active item if none set yet. */
           if(self.controller.active === null)
@@ -1493,21 +1481,23 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
 
     /* Retrieve item's subtopic content from feature collection if `descriptor´
      * was not specified. */
-    if(!descriptor) {
-      this.owner_.loading(true);
+    this.owner_.loading(true);
 
+    if(!descriptor) {
       this.api.getFeatureCollection(item.content_id)
-        .done(function (fc) {
-          if(self.onGotFeatureCollection(fc))
-            ready();
-        })
-        .fail (function () {
-          self.onGotFeatureCollection(null);
-        } );
+        .done(function (fc) { if(self.onGotFeatureCollection(fc)) ready(); } )
+        .fail(function ()   { self.onGotFeatureCollection(null); } );
     } else {
       this.item_.content = descriptor.content;
       this.item_.data = descriptor.data;
-      window.setTimeout(function () { ready(); } );
+      this.render();
+      this.loading(true);
+
+      /* Create or update feature collection. */
+      this.controller.updateFc(descriptor, false)
+        .done(function (fc) { self.onGotFeatureCollection(fc); } )
+        .fail(function ()   { self.onGotFeatureCollection(null); } )
+        .always(function () { self.loading(false); } );
     }
   };
 
