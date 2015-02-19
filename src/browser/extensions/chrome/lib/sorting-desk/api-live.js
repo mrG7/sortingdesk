@@ -114,7 +114,10 @@ var Api_ = (function (window, $, CryptoJS, DossierJS, undefined) {
 
   var putFeatureCollection = function (content_id, fc)
   {
-    return api_.fcPut(content_id, fc);
+    return api_.fcPut(content_id, fc)
+      .then(function () {
+        return fc;
+      } );
   };
 
   var createFeatureCollection = function (content_id, html)
