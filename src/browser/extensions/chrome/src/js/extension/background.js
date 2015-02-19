@@ -24,7 +24,7 @@ var Background = function (window, chrome, $, std, undefined)
         extension: null
       },
       content = {
-        scripts: [ "lib/jquery-2.1.1.min.js",
+        scripts: [ "lib/query-2.1.1.min.js",
                    "shared/src/js/draggable_image_monitor.js",
                    "lib/sorting-common/sorting_common.js",
                    "src/js/content/embed.js" ]
@@ -36,27 +36,40 @@ var Background = function (window, chrome, $, std, undefined)
     console.log("Initialising background script");
 
     handlerTabs_ = MessageHandlerTabs;
-    spawn();
 
-    chrome.windows.onRemoved.addListener(function (id) {
-      if(window_.extension !== null && window_.extension.id === id) {
-        var m = window_.main;
+    Config.load(function (options) {
+      /* Spawn the extension window if active in config. */
+      if(!options.active)
+        console.log("Sorting Desk not active");
+      else
+        spawn(options);
 
-        console.info("Extension window removed");
-        chrome.windows.update(
-          m.id,
-          { state: m.state,
-            top: m.top, left: m.left, height: m.height,
-            width: m.width } );
+      /* Process removal of extension window. */
+      chrome.windows.onRemoved.addListener(function (id) {
+        if(window_.extension !== null && window_.extension.id === id) {
+          var m = window_.main;
 
-        window_.main = window_.extension = null;
-      }
+          console.info("Extension window removed");
+          chrome.windows.update(
+            m.id,
+            { state: m.state,
+              top: m.top, left: m.left, height: m.height,
+              width: m.width } );
+
+          window_.main = window_.extension = null;
+        }
+      } );
+
+      console.log("Initialised background script");
     } );
 
+    /* Inject embeddable content in all existing tabs. */
     forAllTabs(function (tab) {
       injectEmbeddableContentMaybe(tab);
     } );
 
+    /* Toggle extension window between open/close state on browser action
+     * click. */
     chrome.browserAction.onClicked.addListener(function (tab) {
       if(window_.extension !== null) {
         chrome.windows.remove(window_.extension.id);
@@ -64,8 +77,6 @@ var Background = function (window, chrome, $, std, undefined)
       } else
         spawn();
     } );
-
-    console.log("Initialised background script");
   };
 
   var injectEmbeddableContentMaybe = function (tab)
@@ -94,10 +105,28 @@ var Background = function (window, chrome, $, std, undefined)
     load_script(0);
   };
 
-  var spawn = function ()
+  var spawn = function (options)
   {
     if(window_.extension !== null)
       throw "Extension window already exists";
+
+    if(options === undefined) {
+      Config.load(function (options) {
+        /* Prevent potentially entering an endless loop. */
+        if(options === undefined)
+          throw "Failed to load config";
+
+        spawn(options);
+      } );
+
+      return;
+    } else if(!std.is_obj(options))
+      throw "Options container not an object";
+
+    if(!Config.isValidUrl(options)) {
+      console.error("Active URL not selected or invalid");
+      return;
+    }
 
     closeExtensionWindows();
     findSuitableWindow(function (win) {
@@ -112,8 +141,8 @@ var Background = function (window, chrome, $, std, undefined)
         size.width -= DEFAULT_EXTENSION_WIDTH;
 
         win.focused = true;
-        chrome.windows.update(win.id, $.extend( {state: "normal" },
-                                                size.toObject()));
+        /*  chrome.windows.update(win.id, $.extend( {state: "normal" }, */
+        /*                                           size.toObject())); */
       }
 
       ext = new std.PositionSize(size.right, size.top,
@@ -219,6 +248,9 @@ var Background = function (window, chrome, $, std, undefined)
       if(!std.is_fn(callback)) return;
 
       Config.load(function (options) {
+        options.activeUrl = Config.getUrlByIdFromString(options.activeUrl,
+                                                        options.dossierUrls);
+
         callback( {
           config: options,
           tab: sender.tab

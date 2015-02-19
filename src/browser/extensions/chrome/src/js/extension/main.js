@@ -279,10 +279,17 @@ var Main = (function (window, chrome, $, std, sq, sd, Api, undefined) {
   var BackgroundListener = (function () {
 
     /* Event handlers */
+    var onConfigSaved_ = function (request, sender)
+    {
+      console.log("RELOAD");
+      console.info("Reloading extension window");
+      window.location = window.location;
+    };
+
 
     /* Map message operations to handlers. */
     var methods_ = {
-      /* null */
+      "config-saved": onConfigSaved_
     };
 
     /* Handle messages whose `operation´ is defined above in `methods_´. */
@@ -457,10 +464,13 @@ var Main = (function (window, chrome, $, std, sq, sd, Api, undefined) {
     console.log("Initialised main");
   };
 
-  var instantiate_ = function (meta) {
+  var instantiate_ = function (meta)
+  {
+    console.log("Active Dossier stack URL: %s", meta.config.activeUrl);
+
     (sorter = new sd.Sorter( {
       container: $('#sd-folder-explorer'),
-      dossierUrl: meta.config.dossierUrl,
+      dossierUrl: meta.config.activeUrl,
       sortingQueue: {
         options: {
           container: $('#sd-queue'),
