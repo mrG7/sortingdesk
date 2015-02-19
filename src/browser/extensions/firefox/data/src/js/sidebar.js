@@ -303,6 +303,13 @@ var Main = (function (window, $, std, sq, sd, Api, undefined) {
   };
 
   var instantiate_ = function () {
+    console.log(preferences);
+    if(!preferences.dossierUrl) {
+      console.error("No dossier stack URL currently defined");
+      return;
+    } else
+      console.log("Using ", preferences.dossierUrl);
+
     (sorter = new sd.Sorter( {
       container: $('#sd-folder-explorer'),
       dossierUrl: preferences.dossierUrl,
