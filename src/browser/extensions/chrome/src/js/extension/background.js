@@ -37,6 +37,10 @@ var Background = function (window, chrome, $, std, undefined)
 
     handlerTabs_ = MessageHandlerTabs;
 
+    content.scripts = content.scripts.map(function (s) {
+      return chrome.runtime.getURL(s);
+    } );
+
     Config.load(function (options) {
       /* Spawn the extension window if active in config. */
       if(!options.active)
