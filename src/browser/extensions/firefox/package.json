@@ -16,14 +16,14 @@
     {
       "name": "dossierUrls",
       "title": "Available Dossier stack URL(s)",
-      "description": "The URL to the Dossier stack URL. Mandatory setting.",
+      "description": "The URL to the Dossier stack URL.",
       "type": "string",
       "value": "memex@http://10.3.2.42:9090,dev@http://54.174.195.250:8080"
     },
     {
       "name": "urlName",
       "title": "Active Dossier stack URL",
-      "description": "Enter the name identifier of the URL. Mandatory setting.",
+      "description": "Enter the name identifier of the URL.",
       "type": "string",
       "value": ""
     },
