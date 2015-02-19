@@ -9,6 +9,7 @@
     "lib/sorting-desk/*.js",
     "lib/dossier.js/*.js",
     "shared/src/css/*.css",
+    "shared/src/js/*.js",
     "media/*"
   ],
 
