@@ -24,7 +24,7 @@ var Background = function (window, chrome, $, std, undefined)
         extension: null
       },
       content = {
-        scripts: [ "lib/query-2.1.1.min.js",
+        scripts: [ "lib/jquery-2.1.1.min.js",
                    "shared/src/js/draggable_image_monitor.js",
                    "lib/sorting-common/sorting_common.js",
                    "src/js/content/embed.js" ]
@@ -36,10 +36,6 @@ var Background = function (window, chrome, $, std, undefined)
     console.log("Initialising background script");
 
     handlerTabs_ = MessageHandlerTabs;
-
-    content.scripts = content.scripts.map(function (s) {
-      return chrome.runtime.getURL(s);
-    } );
 
     Config.load(function (options) {
       /* Spawn the extension window if active in config. */
