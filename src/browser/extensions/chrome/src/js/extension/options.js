@@ -12,10 +12,13 @@
 
 var Options = (function (window, $, std, undefined) {
 
-  var urls_;
+  var urls_,
+      defaultActiveUrl_;
 
   var initialise_ = function ()
   {
+    defaultActiveUrl_ = $('#active-url').text();
+
     load_(function () {
       /* Save state when the `save´ button is clicked on. */
       $('#save').click(function () {
@@ -33,10 +36,8 @@ var Options = (function (window, $, std, undefined) {
 
     $('#dossier-urls').on('blur', function () {
       urls_ = Config.stringToUrls(this.value);
-
-      var str = Config.urlsToString(urls_);
-      if(str !== this.value)
-        this.value = str;
+      this.value = Config.urlsToString(urls_);
+      updateActiveUrl_();
     } );
 
     $(".dropdown-menu").on('click', 'li a', function() {
@@ -58,7 +59,7 @@ var Options = (function (window, $, std, undefined) {
       elv = val;
       val = elv.data('value');
     } else
-      elv = getDropdownCollection(el).find('li[data-value="' + val + '"]');
+      elv = getDropdownCollection_(el).find('li[data-value="' + val + '"]');
 
     if(elv.length === 0) {
       if(def !== undefined)
@@ -70,37 +71,52 @@ var Options = (function (window, $, std, undefined) {
     }
   };
 
+  var clearDropdown_ = function (el, text)
+  {
+    el.text(text);
+  };
+
   var addDropdownItem_ = function (el, val, html)
   {
-    getDropdownCollection(el)
+    getDropdownCollection_(el)
       .append($('<li />').attr('data-value', val)
               .append($('<a/>').attr('href', '#').html(html)));
   };
 
-  var getDropdownCollection = function (el)
+  var getDropdownCollection_ = function (el)
   {
     el = el.next();
+
     if(el.get(0).nodeName.toLowerCase() === 'ul')
       return el;
     return el.next();
   };
 
+  var updateActiveUrl_ = function ()
+  {
+    var ela = $('#active-url');
+
+    urls_ = Config.stringToUrls($("#dossier-urls").val());
+    getDropdownCollection_(ela).children().remove();
+
+    for(var k in urls_)
+      addDropdownItem_(ela, k, k.bold() + ': ' + urls_[k]);
+
+    if(!(ela.val() in urls_))
+      clearDropdown_(ela, defaultActiveUrl_);
+  };
+
   var load_ = function (callback)
   {
     Config.load(function (state) {
-      var elc = $("#dossier-urls"),
-          ela = $('#active-url');
-
-      urls_ = Config.stringToUrls(state.dossierUrls);
-      getDropdownCollection(ela).children().remove();
-
-      for(var k in urls_)
-        addDropdownItem_(ela, k, k.bold() + ': ' + urls_[k]);
+      var elc = $("#dossier-urls");
 
       elc.val(state.dossierUrls);
+      updateActiveUrl_();
+
       $('#active').prop('checked', state.active);
       setDropdownValue_($('#start-position'), state.startPosition, 0);
-      setDropdownValue_(ela, state.activeUrl);
+      setDropdownValue_($('#active-url'), state.activeUrl);
 
       if(std.is_fn(callback))
         callback();
