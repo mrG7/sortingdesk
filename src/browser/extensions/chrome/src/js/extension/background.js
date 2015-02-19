@@ -318,7 +318,7 @@ var Background = function (window, chrome, $, std, undefined)
             return true;
           }
         } else
-          console.error("Invalid request received:", request);
+          console.warn("Unhandled request received:", request);
 
         return true;
       }
