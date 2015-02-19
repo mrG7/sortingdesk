@@ -766,7 +766,7 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
   };
 
   ControllerExplorer.prototype.updateFc = function (descriptor,
-                                                    exists /* = false */)
+                                                    readonly /* = false */)
   {
     var self = this;
 
@@ -777,8 +777,8 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
                     descriptor.content_id);
 
         /* A feature collection was received. No further operations are carried
-         * out if `exists´ is true; otherwise its contents are updated. */
-        if(!exists) {
+         * out if `readonly´ is true; otherwise its contents are updated. */
+        if(!readonly) {
           self.set_fc_content_(fc, descriptor);
           return self.do_update_fc_(descriptor.content_id, fc);
         }
@@ -788,8 +788,8 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
       function () {
         /* It was not possible to retrieve the feature collection for this
          * descriptor's content id. */
-        if(exists) {
-          console.error("Feature collection GET failed: exists: "
+        if(readonly) {
+          console.error("Feature collection GET failed: "
                         + "NOT creating new (id=%s)",
                         descriptor.content_id);
           return null;
