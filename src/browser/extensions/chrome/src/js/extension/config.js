@@ -16,7 +16,7 @@ var Config = (function (window, chrome, $, std, undefined) {
     dossierUrls: [ 'memex@http://10.3.2.42:9090',
                    'dev@http://54.174.195.250:8080',
                    'local@localhost:8080' ].join(', '),
-    activeUrl: null,
+    activeUrl: 'memex',
     active: true,
     startPosition: 0
   };
@@ -96,7 +96,7 @@ var Config = (function (window, chrome, $, std, undefined) {
     /* Ensure options have default values when none provided by user. */
     if(!options.dossierUrl)
       options.dossierUrls = defaults_.dossierUrls;
-console.log("Saving: ", options);
+
     chrome.storage.local.set( { "config": options }, function () {
       console.log("Configuration saved");
 

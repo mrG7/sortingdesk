@@ -25,7 +25,7 @@
       "title": "Active Dossier stack URL",
       "description": "Enter the name identifier of the URL.",
       "type": "string",
-      "value": ""
+      "value": "memex"
     },
     {
       "name": "active",
