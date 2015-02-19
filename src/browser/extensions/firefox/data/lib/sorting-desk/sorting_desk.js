@@ -45,6 +45,7 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
     /* TODO: must pass in Dossier API URL. */
     this.api_ = Api.initialize(this, opts.dossierUrl);
     this.options_ = $.extend(true, $.extend(true, {}, defaults_), opts);
+    delete this.options_.sortingQueue; /* don't keep SQ options */
     this.callbacks_ = new std.Callbacks(cbs);
     this.events_ = new std.Events(
       this,
@@ -73,9 +74,12 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
      *     }
      *   }
      * } */
-    delete this.options_.sortingQueue;
     cbs = opts.sortingQueue.callbacks || { };
     opts = opts.sortingQueue.options;
+
+    /* Specify our custom `Item´ class if client hasn't provided one. */
+    if(!opts.constructors) opts.constructors = { };
+    if(!opts.constructors.Item) opts.constructors.Item = SqItem;
 
     if(!std.is_obj(opts.constructors))
       opts.constructors = { };
@@ -1685,6 +1689,117 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
   {
     this.tree.delete_node(this.tree.get_node(this.id_));
   };
+
+  /**
+   * @class
+   * */
+  var SqItem = function(owner, item)
+  {
+    if(!owner.owner.initialised)
+      return;
+
+    sq.Item.call(this, owner, item);
+  };
+
+  SqItem.prototype = Object.create(sq.Item.prototype);
+
+  SqItem.prototype.render = function(text, view, less)
+  {
+    var raw = this.content_.raw;
+    var fc = this.content_.fc;
+    var desc = fc.value('meta_clean_visible').trim();
+    desc = desc.replace(/\s+/g, ' ');
+    desc = desc.slice(0, 200);
+    var title = fc.value('title') || (desc.slice(0, 50) + '...');
+    var url = fc.value('meta_url');
+
+    var ntitle = $(
+      '<p style="color: #565656; font-size: 12pt; margin: 0 0 8px 0;">'
+      + '<strong></strong>'
+      + '</p>'
+    );
+    ntitle.find('strong').text(title);
+
+    var ndesc = $('<p style="font-size: 8pt; display: block; margin: 0;" />');
+    ndesc.text(desc + '...');
+
+    var nurl = $(
+      '<p style="margin: 8px 0 0 0; display: block;">'
+      + '<a href="' + url + '">' + url + '</a>'
+      + '</p>'
+    );
+
+    this.content_.text = $('<div style="margin: 0;" />');
+    this.content_.text.append(ntitle);
+    this.content_.text.append(ndesc);
+    this.content_.text.append(nurl);
+
+    if(std.is_num(raw.probability)) {
+      var score = raw.probability.toFixed(4);
+      this.content_.text.append($(
+        '<p style="margin: 8px 0 0 0; display: block;">'
+        + 'Score: ' + score
+        + '</p>'
+      ) );
+
+      var info = raw.feature_cmp_info;;
+      if(std.is_obj(info)) {
+        for(var i in info) {
+          var j = info[i],
+              values = j.common_values;
+
+          if(std.is_arr(values) && values.length > 0) {
+            var container = $('<div/>').addClass('sd-dict-container'),
+                hasPhi = std.is_num(j.phi) && j.phi > 0,
+                el;
+
+            el = $('<div/>').addClass("sd-dict-weight");
+            if(hasPhi)
+              el.append(this.create_weight_('Score:', 1 - j.phi));
+
+           if(std.is_num(j.weight) && j.weight > 0) {
+              if(hasPhi)
+                el.append('<br/>');
+
+              el.append(this.create_weight_('Weight:', j.weight));
+           }
+
+            container.append(el);
+            container.append($('<h1/>').text(i));
+
+            el = $('<div/>').addClass('sd-dict-values');
+
+            if(i === 'image_url') {
+              values.forEach(function (v) {
+                el.append($('<img/>').attr('src', v));
+              } );
+            } else {
+              values.forEach(function (v) {
+                el.append($('<span/>').text(v));
+              } );
+            }
+
+            container.append(el);
+            this.content_.text.append(container);
+            this.content_.text.append($('<div class="sd-clear"/>'));
+          }
+        }
+      }
+    }
+
+    return sq.Item.prototype.render.call(this);
+  };
+
+  SqItem.prototype.create_weight_ = function (caption, weight)
+  {
+    var el = $('<span/>').addClass('sd-dict-weight');
+
+    el.append($('<span/>').text(caption));
+    el.append($('<span/>').text(weight.toFixed(4)));
+
+    return el;
+  };
+
 
   /* Css classes */
   var Css = {
