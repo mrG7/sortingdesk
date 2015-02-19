@@ -1531,13 +1531,19 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
 
   /* overridable */ Item.prototype.onGotFeatureCollection = function (fc)
   {
-    var remove;
+    var remove = false;
 
     if(!fc) remove = true;
     else {
       this.fc_ = fc;
-      this.item_.content = fc.feature(this.item_.subtopic_id);
-      remove = !this.item_.content;
+
+      /* If this item does not yet have content, it exists and thus its feature,
+       * given by its subtopic id, must exist in the feature collection.
+       * Otherwise, the item is being created. */
+      if(!this.item_.content) {
+        this.item_.content = fc.feature(this.item_.subtopic_id);
+        remove = !this.item_.content;
+      }
     }
 
     this.owner_.loading(false);
