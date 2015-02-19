@@ -75,12 +75,19 @@ var Background = function (window, chrome, $, std, undefined)
     /* Toggle extension window between open/close state on browser action
      * click. */
     chrome.browserAction.onClicked.addListener(function (tab) {
-      if(window_.extension !== null) {
-        chrome.windows.remove(window_.extension.id);
-        window_.extension = null;
-      } else
+      if(window_.extension !== null)
+        close();
+      else
         spawn();
     } );
+  };
+
+  var close = function ()
+  {
+    if(window_.extension !== null) {
+      chrome.windows.remove(window_.extension.id);
+      window_.extension = null;
+    }
   };
 
   var injectEmbeddableContentMaybe = function (tab)
@@ -279,13 +286,24 @@ var Background = function (window, chrome, $, std, undefined)
         tabId: sender.tab.id } );
     };
 
+    var onConfigSaved_ = function ()
+    {
+      Config.load(function (options) {
+        if(!options.active)
+          close();
+        else if(window_.extension === null)
+          spawn();
+      } );
+    };
+
 
     var self = this,
         methods = {
           "read-file": onReadFile_,
           "get-meta": onGetMeta_,
           "get-extension-window": onGetExtensionWindow_,
-          "embeddable-active": onEmbeddableActive_
+          "embeddable-active": onEmbeddableActive_,
+          "config-saved": onConfigSaved_
         };
 
     /* Handler of messages originating in content scripts. */
