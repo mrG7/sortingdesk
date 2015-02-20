@@ -1686,6 +1686,7 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
     this.tree.delete_node(this.tree.get_node(this.id_));
   };
 
+
   /**
    * @class
    * */
@@ -1701,55 +1702,51 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
 
   SqItem.prototype.render = function(text, view, less)
   {
-    var raw = this.content_.raw;
-    var fc = this.content_.fc;
-    var desc = fc.value('meta_clean_visible').trim();
-    desc = desc.replace(/\s+/g, ' ');
-    desc = desc.slice(0, 200);
-    var title = fc.value('title') || (desc.slice(0, 50) + '...');
-    var url = fc.value('meta_url');
+    /* Nodes */
+    var node = $('<div class="' + sq.Css.item.container + '"/>'),
+        content = $('<div class="' + sq.Css.item.content + '"/>'),
+        css = Css.item;
 
-    var ntitle = $(
-      '<p style="color: #565656; font-size: 12pt; margin: 0 0 8px 0;">'
-      + '<strong></strong>'
-      + '</p>'
-    );
-    ntitle.find('strong').text(title);
+    /* Data */
+    var raw = this.content_.raw,
+        fc = this.content_.fc,
+        desc = fc.value('meta_clean_visible').trim(),
+        url = fc.value('meta_url');
 
-    var ndesc = $('<p style="font-size: 8pt; display: block; margin: 0;" />');
-    ndesc.text(desc + '...');
+    desc = desc.replace(/\s+/g, ' ').slice(0, 200);
 
-    var nurl = $(
-      '<p style="margin: 8px 0 0 0; display: block;">'
-      + '<a href="' + url + '">' + url + '</a>'
-      + '</p>'
-    );
+    /* Begin appending data */
+    node.append('<a class="' + sq.Css.item.close + '" href="#">x</a>');
 
-    this.content_.text = $('<div style="margin: 0;" />');
-    this.content_.text.append(ntitle);
-    this.content_.text.append(ndesc);
-    this.content_.text.append(nurl);
+    content.append($('<p/>').addClass(css.title)
+                   .text(fc.value('title')
+                         || (desc.slice(0, 50) + '...')));
+
+    content.append($('<p/>').text(desc + '...')
+                   .addClass(css.description));
+
+    content.append($('<p/>').addClass(css.url)
+                   .append($('<a/>').attr('href', url).text(url)));
 
     if(std.is_num(raw.probability)) {
-      var score = raw.probability.toFixed(4);
-      this.content_.text.append($(
-        '<p style="margin: 8px 0 0 0; display: block;">'
-        + 'Score: ' + score
-        + '</p>'
-      ) );
+      content.append($('<p/>')
+                     .append(this.create_weight_('Score:', raw.probability))
+                     .addClass(css.score));
 
-      var info = raw.feature_cmp_info;;
+      var info = raw.feature_cmp_info;
       if(std.is_obj(info)) {
+        css = css.dict;
+
         for(var i in info) {
           var j = info[i],
               values = j.common_values;
 
           if(std.is_arr(values) && values.length > 0) {
-            var container = $('<div/>').addClass('sd-dict-container'),
+            var container = $('<div/>').addClass(css.container),
                 hasPhi = std.is_num(j.phi) && j.phi > 0,
                 el;
 
-            el = $('<div/>').addClass("sd-dict-weight");
+            el = $('<div/>').addClass(css.weight);
             if(hasPhi)
               el.append(this.create_weight_('Score:', 1 - j.phi));
 
@@ -1763,7 +1760,7 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
             container.append(el);
             container.append($('<h1/>').text(i));
 
-            el = $('<div/>').addClass('sd-dict-values');
+            el = $('<div/>').addClass(css.values);
 
             if(i === 'image_url') {
               values.forEach(function (v) {
@@ -1776,19 +1773,20 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
             }
 
             container.append(el);
-            this.content_.text.append(container);
-            this.content_.text.append($('<div class="sd-clear"/>'));
+            content.append(container);
+            content.append($('<div/>').addClass(Css.clear));
           }
         }
       }
     }
 
-    return sq.Item.prototype.render.call(this);
+    node.append(content);
+    return node;
   };
 
-  SqItem.prototype.create_weight_ = function (caption, weight)
+  SqItem.prototype.create_weight_ = function (caption, weight, css)
   {
-    var el = $('<span/>').addClass('sd-dict-weight');
+    var el = $('<span/>').addClass(css || Css.item.dict.weight);
 
     el.append($('<span/>').text(caption));
     el.append($('<span/>').text(weight.toFixed(4)));
@@ -1799,12 +1797,24 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
 
   /* Css classes */
   var Css = {
+    clear: 'sd-clear',
     active: 'sd-active',
     disabled: 'sd-disabled',
     droppable: {
       hover: 'sd-droppable-hover'
     },
     icon: {
+    },
+    item: {
+      title: 'sd-text-item-title',
+      description: 'sd-text-item-description',
+      url: 'sd-text-item-url',
+      score: 'sd-text-item-score',
+      dict: {
+        container: 'sd-dict-container',
+        weight: 'sd-dict-weight',
+        values: 'sd-dict-values'
+      }
     }
   };
 
