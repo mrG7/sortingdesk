@@ -442,7 +442,7 @@ var SortingQueue_ = function (window, $, std) {
 
     this.handlers_ = new std.Events([ ]);
     this.droppable_ = new std.Droppable(this.owner_.nodes.buttons.dismiss, {
-      classHover: Css_.dnd.droppable.hover,
+      classHover: Css.dnd.droppable.hover,
       scopes: [ ],
 
       drop: function (e, id, scope) {
@@ -647,7 +647,7 @@ var SortingQueue_ = function (window, $, std) {
 
   ControllerItems.prototype.selectOffset = function (offset)
   {
-    var csel = Css_.item.selected,
+    var csel = Css.item.selected,
         index;
 
     if(!this.node_.length)
@@ -783,14 +783,14 @@ var SortingQueue_ = function (window, $, std) {
 
   /* overridable */ ControllerItems.prototype.getNodeSelected = function ()
   {
-    return this.node_.find('.' + Css_.item.selected);
+    return this.node_.find('.' + Css.item.selected);
   };
 
   /* Private methods */
   ControllerItems.prototype.select_ = function (variant,
                                                 /* optional */ ev)
   {
-    var csel = Css_.item.selected;
+    var csel = Css.item.selected;
 
     if(this.node_.children().length === 0)
       return;
@@ -925,7 +925,7 @@ var SortingQueue_ = function (window, $, std) {
       return;
 
     new std.Draggable(this.node_, {
-      classDragging: Css_.item.dragging,
+      classDragging: Css.item.dragging,
 
       dragstart: function (e) {
         /* Firstly select item being dragged to ensure correct item position
@@ -953,14 +953,14 @@ var SortingQueue_ = function (window, $, std) {
 
   Item.prototype.deselect = function()
   {
-    this.node.removeClass(Css_.item.selected);
+    this.node.removeClass(Css.item.selected);
     this.owner_.owner.events.trigger("item-deselected", this.content);
   };
 
   Item.prototype.render = function()
   {
-    var node = $('<div class="' + Css_.item.container + '"/>'),
-        content = $('<div class="' + Css_.item.content + '"/>'),
+    var node = $('<div class="' + Css.item.container + '"/>'),
+        content = $('<div class="' + Css.item.content + '"/>'),
         anchor = this.content_.name;
 
     /* Append title if existent. */
@@ -968,12 +968,12 @@ var SortingQueue_ = function (window, $, std) {
       anchor += '&ndash; ' + this.content_.title;
 
     if(this.content_.url && anchor) {
-      node.append('<a class="' + Css_.item.title + '" target="_blank" '
+      node.append('<a class="' + Css.item.title + '" target="_blank" '
                   + 'href="' + this.content_.url + '">'
                   + anchor + '</a>');
     }
 
-    node.append('<a class="' + Css_.item.close + '" href="#">x</a>');
+    node.append('<a class="' + Css.item.close + '" href="#">x</a>');
 
     /* Append content and remove all CSS classes from children. */
     content.append(this.content_.text);
@@ -986,16 +986,16 @@ var SortingQueue_ = function (window, $, std) {
   /* overridable */
   Item.prototype.getNodeClose = function()
   {
-    return this.node_.find('.' + Css_.item.close);
+    return this.node_.find('.' + Css.item.close);
   };
 
   /* overridable */ Item.prototype.isSelected = function ()
-  { return this.node_.hasClass(Css_.item.selected); };
+  { return this.node_.hasClass(Css.item.selected); };
 
   /* Private methods */
   Item.prototype.select_ = function (ev)
   {
-    this.node.addClass(Css_.item.selected);
+    this.node.addClass(Css.item.selected);
     this.owner_.owner.events.trigger("item-selected", this.content, ev);
   };
 
@@ -1072,7 +1072,7 @@ var SortingQueue_ = function (window, $, std) {
       ev = ev.originalEvent;
 
       var target = $(ev.target);
-      if(!target.hasClass(Css_.dismissal.option))
+      if(!target.hasClass(Css.dismissal.option))
         return false;
 
       self.dismiss_(target.data('id'));
@@ -1134,7 +1134,7 @@ var SortingQueue_ = function (window, $, std) {
   ItemDismissal.prototype.brief = function ()
   {
     var text = this.owner_.node.find(
-      ':not(IFRAME):not(.' + Css_.item.close + ')')
+      ':not(IFRAME):not(.' + Css.item.close + ')')
           .addBack().contents()
           .filter(function() {
             return this.nodeType == 3;
@@ -1170,7 +1170,7 @@ var SortingQueue_ = function (window, $, std) {
 
     var co, ci;
     if(std.is_arr(choices) && choices.length > 0) {
-      co = $('<table/>').addClass(Css_.dismissal.containers.options);
+      co = $('<table/>').addClass(Css.dismissal.containers.options);
 
       for(var i = 0, l = choices.length; i < l; ++i) {
         var o = choices[i];
@@ -1181,15 +1181,15 @@ var SortingQueue_ = function (window, $, std) {
         $([ '<button',
             '" data-id="', o.id, '">', o.title, '</button>' ]
           .join(''))
-          .addClass(Css_.dismissal.option)
+          .addClass(Css.dismissal.option)
           .appendTo($('<td/>').appendTo(ci));
       }
     } else
       co = $();
 
-    this.node_ = $([ '<div class="', Css_.dismissal.containers.main,
+    this.node_ = $([ '<div class="', Css.dismissal.containers.main,
                      '"></div>' ]
-                   .join('')).addClass(Css_.dismissal.context.replace);
+                   .join('')).addClass(Css.dismissal.context.replace);
 
     this.append_not_empty_('question');
     this.append_not_empty_('description');
@@ -1197,14 +1197,14 @@ var SortingQueue_ = function (window, $, std) {
 
     if(brief) {
       this.node_.append($(['<p>', brief, '</p>'].join(''))
-                        .addClass(Css_.dismissal.brief));
+                        .addClass(Css.dismissal.brief));
     }
 
     el.fadeOut(this.options_.delayFade, function () {
 
       el.children().not(self.owner.getNodeClose()).remove();
       el.append(self.node_);
-      el.addClass(Css_.dismissal.dismissing);
+      el.addClass(Css.dismissal.dismissing);
 
       el.fadeIn(self.options_.delayFade);
     } );
@@ -1222,7 +1222,7 @@ var SortingQueue_ = function (window, $, std) {
     if(s.length === 0) return;
 
     this.node_.append($(['<p>', s, '</p>'].join(''))
-                      .addClass(Css_.dismissal[cssClass || attr]));
+                      .addClass(Css.dismissal[cssClass || attr]));
   };
 
 
@@ -1246,7 +1246,7 @@ var SortingQueue_ = function (window, $, std) {
 
     var co, ci;
     if(std.is_arr(choices) && choices.length > 0) {
-      co = $('<table/>').addClass(Css_.dismissal.containers.options);
+      co = $('<table/>').addClass(Css.dismissal.containers.options);
 
       for(var i = 0, l = choices.length; i < l; ++i) {
         var o = choices[i];
@@ -1257,19 +1257,19 @@ var SortingQueue_ = function (window, $, std) {
         $([ '<button',
             '" data-id="', o.id, '">', o.title, '</button>' ]
           .join(''))
-          .addClass(Css_.dismissal.option)
+          .addClass(Css.dismissal.option)
           .appendTo($('<td/>').appendTo(ci));
       }
     } else
       co = $();
 
-    this.node_ = $([ '<div class="', Css_.dismissal.containers.main,
+    this.node_ = $([ '<div class="', Css.dismissal.containers.main,
                      '"></div>' ]
-                   .join('')).addClass(Css_.dismissal.context.tight);
+                   .join('')).addClass(Css.dismissal.context.tight);
 
     if(brief) {
       this.node_.append($(['<p>', brief, '</p>'].join(''))
-                        .addClass(Css_.dismissal.brief));
+                        .addClass(Css.dismissal.brief));
     }
 
     this.node_.append(co);
@@ -1277,7 +1277,7 @@ var SortingQueue_ = function (window, $, std) {
     el.fadeOut(this.options_.delayFade, function () {
       el.children().not(self.owner.getNodeClose()).remove();
       el.append(self.node_);
-      el.addClass(Css_.dismissal.dismissing);
+      el.addClass(Css.dismissal.dismissing);
 
       el.fadeIn(self.options_.delayFade);
     } );
@@ -1290,7 +1290,7 @@ var SortingQueue_ = function (window, $, std) {
    * @namespace
    * @private
    **/
-  var Css_ = {
+  var Css = {
     item: {
       container: 'sd-text-item',
       content: 'sd-text-item-content',
@@ -1357,7 +1357,7 @@ var SortingQueue_ = function (window, $, std) {
   /**
    * Module public interface. */
   return {
-    /* SortingQueue proper */
+    Css: Css,
     Sorter: Sorter,
     Item: Item,
     ItemDismissal: ItemDismissal,
