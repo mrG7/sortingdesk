@@ -1339,10 +1339,8 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
     if(this.id_ === false)
       throw "Failed to create subfolder";
 
-    if(!this.loaded_) {
-      this.fake_ = this.tree.create_node(
-        this.id_, { text: '<placeholder>' }, "last");
-    }
+    if(!this.loaded_)
+      this.create_fake_();
 
     this.owner_.open();
   };
@@ -1381,6 +1379,16 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
 
           self.tree.open_node(self.id);
           self.loading(false);
+        } )
+        .fail(function () {
+          self.loading(false);
+          self.loaded_ = false;
+          self.tree.close_node(self.id);
+          self.create_fake_();
+          self.controller.owner.networkFailure.incident(
+            NetworkFailure.types.subfolder.load, self.subfolder_
+          );
+
         } );
     } else
       this.tree.open_node(this.id);
@@ -1411,8 +1419,9 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
                      item.subtopic_id);
       } )
       .fail(function () {
-        console.error("Failed to add item to subfolder",
-                      item.subtopic_id);
+        self.controller.owner.networkFailure.incident(
+          NetworkFailure.types.subfolder.add, descriptor
+        );
       } );
   };
 
@@ -1428,6 +1437,18 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
 
     if(this.controller.active === item)
       this.controller.setActive(null);
+  };
+
+  /* Private interface */
+  Subfolder.prototype.create_fake_ = function ()
+  {
+    if(this.fake_ !== null)
+      throw "Fake node already exists";
+    else if(this.id_ === null)
+      throw "Subfolder not yet rendered";
+
+    this.fake_ = this.tree.create_node(
+      this.id_, { text: '<placeholder>' }, "last");
   };
 
 
