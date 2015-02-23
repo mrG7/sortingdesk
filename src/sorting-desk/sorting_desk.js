@@ -327,7 +327,8 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
               label: "Jump to bookmarked page",
               icon: "glyphicon glyphicon-eye-open",
               separator_before: true,
-              action: self.on_jump_bookmarked_page_.bind(self)
+              action: self.on_jump_bookmarked_page_.bind(self),
+              _disabled: !obj.loaded
             };
           }
 
@@ -900,13 +901,14 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
 
     ela.addContextual.toggleClass(
       'disabled',
-      loading || (this.selected_ instanceof Item)
+      loading || this.selected_ instanceof Item
         || (this.selected_ instanceof Subfolder
             && (!this.selected_.loaded
                 || this.selected_.loading())));
 
     ela.jump.toggleClass(
-      'disabled', loading || !(this.selected_ instanceof Item));
+      'disabled', loading || !(this.selected_ instanceof Item
+                               && this.selected_.loaded));
 
     ela.refresh.toggleClass('disabled', loading);
   };
@@ -1083,6 +1085,7 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
     def(this, 'tree', { get: function () { return this.controller_.tree; } } );
     def(this, 'opening', { get: function () { return this.opening_; } } );
     def(this, 'events', { get: function () { return this.events_; } } );
+    def(this, 'loaded', { get: function () { return this.loaded_; } } );
 
     def(this, 'node', { get: function () {
       return this.controller.tree.get_node(this.id_, true); } } );
@@ -1102,6 +1105,7 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
     this.loading_ = 0;
     this.id_ = null;
     this.opening_ = false;
+    this.loaded_ = false;
     this.events_ = new std.Events(this, [ 'loading', 'loaded' ] );
   };
 
@@ -1302,7 +1306,6 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
     var def = Object.defineProperty;
     def(this, 'data', {get:function () { return this.subfolder_; }});
     def(this, 'items', {get:function () { return this.items_; }});
-    def(this, 'loaded', {get:function () { return this.loaded_; }});
 
     /* Initialisation sequence. */
     if(!std.is_obj(subfolder))
@@ -1603,7 +1606,9 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
       }
     }
 
+    this.loaded_ = !remove;
     this.owner_.loading(false);
+    this.controller.update_toolbar_();
 
     if(remove) {
       console.warn("Item's feature collection or content could not be "
