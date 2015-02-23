@@ -157,16 +157,35 @@ BODY {
 
 .sd-text-item-content {
   overflow: hidden;
-/*   max-height: 1000px; */
-  text-overflow: ellipsis;
 }
 
-/* .sd-text-item-content * { */
-/*   display: inline-block; */
-/* } */
+.sd-text-item-title {
+  color: #565656;
+  font-size: 14px;
+  margin: 0 0 8px 0;
+  font-weight: bold;
+  text-overflow: ellipsis;
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.25);
+}
 
-/* TODO: remove when `Item´ in main.js is reworked. */
-.sd-text-item-content > DIV > P {
+.sd-text-item-description {
+  font-size: 12px;
+  margin: 0;
+}
+
+.sd-text-item-url {
+  margin: 8px 0 0 0;
+}
+
+.sd-text-item-score {
+  margin: 8px 0 0 0;
+}
+
+.sd-text-item-score > .sd-dict-weight {
+  float: none;
+}
+
+.sd-text-item-content > P {
   white-space: normal;
 }
 
@@ -253,11 +272,11 @@ A.sd-text-item-title {
   color: #37434F;
 }
 
-.sd-dict-weight {
+DIV.sd-dict-weight {
   float: right;
 }
 
-DIV.sd-dict-weight > SPAN > SPAN:last-child {
+SPAN.sd-dict-weight > SPAN:last-child {
   padding-left: 5px;
   color: #666;
 }

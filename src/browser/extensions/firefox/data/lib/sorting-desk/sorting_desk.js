@@ -119,7 +119,12 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
             this.setResetHtml("Processing...");
 
             self.api.addLabel(label)
-              .done(function() { item.owner.remove(item); });
+              .done(function () { item.owner.remove(item); })
+              .fail(function () {
+                self.networkFailure.incident(
+                  NetworkFailure.types.dismissal, item
+                );
+              } );
           } );
       };
     }
@@ -140,6 +145,7 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
     callbacks_: null,
     events_: null,
     constructor_: null,
+    networkFailure_: null,
     options_: null,
     nodes_: null,
 
@@ -149,16 +155,17 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
     explorer_: null,
 
     /* Getters */
-    get sortingQueue () { return this.sortingQueue_; },
-    get initialised ()  { return this.initialised_; },
-    get constructor ()  { return this.constructor_; },
-    get callbacks ()    { return this.callbacks_; },
-    get events ()       { return this.events_; },
-    get api ()          { return this.api_; },
-    get resetting ()    { return this.sortingQueue_.resetting(); },
-    get options ()      { return this.options_; },
-    get nodes ()        { return this.nodes_; },
-    get explorer ()     { return this.explorer_; },
+    get sortingQueue ()  { return this.sortingQueue_; },
+    get initialised ()   { return this.initialised_; },
+    get constructor ()   { return this.constructor_; },
+    get callbacks ()     { return this.callbacks_; },
+    get networkFailure() { return this.networkFailure_; },
+    get events ()        { return this.events_; },
+    get api ()           { return this.api_; },
+    get resetting ()     { return this.sortingQueue_.resetting(); },
+    get options ()       { return this.options_; },
+    get nodes ()         { return this.nodes_; },
+    get explorer ()      { return this.explorer_; },
 
     /* Interface */
     initialise: function ()
@@ -209,6 +216,8 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
           }
         } )
         .initialise();
+
+      this.networkFailure_ = new NetworkFailure(this);
 
       this.initialised_ = true;
       console.info("Sorting Desk UI initialised");
@@ -318,7 +327,8 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
               label: "Jump to bookmarked page",
               icon: "glyphicon glyphicon-eye-open",
               separator_before: true,
-              action: self.on_jump_bookmarked_page_.bind(self)
+              action: self.on_jump_bookmarked_page_.bind(self),
+              _disabled: !obj.loaded
             };
           }
 
@@ -347,11 +357,11 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
                 console.info("Successfully added folder", f.data);
               } )
               .fail(function () {
-                console.error("Failed to add folder", f.data);
+                owner.NetworkFailure.incident(
+                  NetworkFailure.types.folder.add, f.data
+                );
               } )
-              .always(function () {
-                f.loading(false);
-              } );
+              .always(function () { f.loading(false); } );
 
             if(self.folders_.length === 1)
               self.tree_.select_node(f.id);
@@ -423,7 +433,7 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
             self.events_.trigger('selected-subfolder');
         }
 
-        self.update_toolbar_();
+        self.updateToolbar();
       },
       "dragover":  function (ev){self.on_dragging_enter_(ev);return false;},
       "dragenter": function (ev){self.on_dragging_enter_(ev);return false;},
@@ -510,7 +520,7 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
     this.refreshing_ = true;
     this.reset_tree_();
     this.events_.trigger('refresh-begin');
-    this.update_toolbar_(true);
+    this.updateToolbar(true);
 
     /* Hide empty notification while loading. */
     this.update_empty_state_(true);
@@ -521,6 +531,11 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
           self.folders_.push(new Folder(self, f));
         } );
       } )
+      .fail(function () {
+        self.owner_.networkFailure.incident(
+          NetworkFailure.types.folder.list, null
+        );
+      } )
       .always(function () {
         self.update_empty_state_();
         self.refreshing_ = false;
@@ -529,7 +544,7 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
         if(self.folders_.length > 0)
           self.tree_.select_node(self.folders_[0].id);
         else
-          self.update_toolbar_();
+          self.updateToolbar();
 
         console.log("Loaded folders:", self.folders_);
       } );
@@ -804,12 +819,41 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
                        descriptor.content_id);
 
             self.set_fc_content_(fc, descriptor);
-
             self.api.setFeatureCollectionContent(
               fc, 'meta_url', descriptor.href.toString());
+
             return self.do_update_fc_(descriptor.content_id, fc);
-          });
+          } )
+          .fail(function () {
+            self.owner_.networkFailure.incident(
+              NetworkFailure.types.fc.create, {
+                content_id: descriptor.content_id,
+                fc: fc
+              } );
+          } );
       } );
+  };
+
+  ControllerExplorer.prototype.updateToolbar = function (loading)
+  {
+    var ela = this.owner_.nodes.toolbar.actions;
+    loading = loading === true;
+
+    ela.add.toggleClass('disabled', loading);
+
+    ela.addContextual.toggleClass(
+      'disabled',
+      loading || !this.selected_
+        || this.selected_ instanceof Item
+        || (this.selected_ instanceof Subfolder
+            && (!this.selected_.loaded
+                || this.selected_.loading())));
+
+    ela.jump.toggleClass(
+      'disabled', loading || !(this.selected_ instanceof Item
+             && this.selected_.loaded));
+
+    ela.refresh.toggleClass('disabled', loading);
   };
 
   /* Private interface */
@@ -836,14 +880,18 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
 
   ControllerExplorer.prototype.do_update_fc_ = function (content_id, fc)
   {
+    var self = this;
+
     return this.api.putFeatureCollection(content_id, fc)
       .done(function () {
         console.log("Feature collection PUT successful (id=%s)",
                     content_id);
       } )
       .fail(function () {
-        console.error("Feature collection PUT failed (id=%s)",
-                      content_id);
+        self.owner_.networkFailure.incident(
+          NetworkFailure.types.fc.save, {
+            content_id: content_id, fc: fc
+          } );
       } );
   };
 
@@ -860,29 +908,10 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
                     label.cid2);
       } )
       .fail(function () {
-        console.error("Label ADD failed: '%s' ∧ '%s'",
-                      label.cid1, label.cid2);
+        self.owner_.networkFailure.incident(
+          NetworkFailure.types.label, label
+        );
       } );
-  };
-
-  ControllerExplorer.prototype.update_toolbar_ = function (loading)
-  {
-    var ela = this.owner_.nodes.toolbar.actions;
-    loading = loading === true;
-
-    ela.add.toggleClass('disabled', loading);
-
-    ela.addContextual.toggleClass(
-      'disabled',
-      loading || (this.selected_ instanceof Item)
-        || (this.selected_ instanceof Subfolder
-            && (!this.selected_.loaded
-                || this.selected_.loading())));
-
-    ela.jump.toggleClass(
-      'disabled', loading || !(this.selected_ instanceof Item));
-
-    ela.refresh.toggleClass('disabled', loading);
   };
 
   ControllerExplorer.prototype.update_empty_state_ = function (hide)
@@ -919,14 +948,20 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
     ev = ev.originalEvent;
     ev.dropEffect = 'move';
 
-    var to = ev.toElement || ev.target,
+    var self = this,
+        to = ev.toElement || ev.target,
         el = to && to.nodeName.toLowerCase() === 'a' && to || false;
 
     if(el && el.parentNode && el.parentNode.id) {
       var fl = this.getAnyById(el.parentNode.id);
 
       if(std.instanceany(fl, Folder, Subfolder)) {
-        this.dropTarget_ = $(el).addClass(Css.droppable.hover);
+        this.owner_.callbacks.invoke("checkSelection")
+          .done(function (result) {
+            if(result === true && self.dropTarget_ === null)
+              self.dropTarget_ = $(el).addClass(Css.droppable.hover);
+          } );
+
         return fl;
       }
     }
@@ -1057,6 +1092,7 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
     def(this, 'tree', { get: function () { return this.controller_.tree; } } );
     def(this, 'opening', { get: function () { return this.opening_; } } );
     def(this, 'events', { get: function () { return this.events_; } } );
+    def(this, 'loaded', { get: function () { return this.loaded_; } } );
 
     def(this, 'node', { get: function () {
       return this.controller.tree.get_node(this.id_, true); } } );
@@ -1076,7 +1112,17 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
     this.loading_ = 0;
     this.id_ = null;
     this.opening_ = false;
-    this.events_ = new std.Events(this, [ 'loading', 'loaded' ] );
+    this.loaded_ = false;
+    this.events_ = new std.Events(this, [ 'loading-start', 'loading-end' ] );
+
+    this.on( {
+      "loading-end": function () {
+        ctrl.updateToolbar();
+      },
+      "loaded": function () {
+        ctrl.updateToolbar();
+      }
+    } );
   };
 
   ItemBase.prototype.open = function ()
@@ -1092,6 +1138,14 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
   ItemBase.prototype.onAfterOpen = function ()
   { this.opening_ = false; };
 
+  ItemBase.prototype.setLoaded = function (state)
+  {
+    this.loaded_ = state;
+
+    if(state)
+      this.events_.trigger('loaded');
+  };
+
   ItemBase.prototype.loading = function (state /* = true */)
   {
     if(arguments.length === 0)
@@ -1102,11 +1156,11 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
         console.error("Loading count is 0");
       else if(--this.loading_ === 0) {
         this.removeClass("jstree-loading");
-        this.events_.trigger('loaded');
+        this.events_.trigger('loading-end');
       }
     } else if(state === true) {
       if(++this.loading_ === 1)
-        this.events_.trigger('loading');
+        this.events_.trigger('loading-begin');
     }
 
     /* Always force class. */
@@ -1193,6 +1247,10 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
           } );
 
           self.loading(false);
+        } )
+        .fail(function () {
+          self.controller.owner.networkFailure.incident(
+            NetworkFailure.types.folder.load, folder);
         } );
     }
 
@@ -1272,7 +1330,6 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
     var def = Object.defineProperty;
     def(this, 'data', {get:function () { return this.subfolder_; }});
     def(this, 'items', {get:function () { return this.items_; }});
-    def(this, 'loaded', {get:function () { return this.loaded_; }});
 
     /* Initialisation sequence. */
     if(!std.is_obj(subfolder))
@@ -1281,7 +1338,7 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
     /* Attributes */
     this.subfolder_ = subfolder;
     this.items_ = [ ];
-    this.loaded_ = !subfolder.exists;
+    this.setLoaded(!subfolder.exists);
     this.fake_ = null;
 
     this.render();
@@ -1309,10 +1366,8 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
     if(this.id_ === false)
       throw "Failed to create subfolder";
 
-    if(!this.loaded_) {
-      this.fake_ = this.tree.create_node(
-        this.id_, { text: '<placeholder>' }, "last");
-    }
+    if(!this.loaded_)
+      this.create_fake_();
 
     this.owner_.open();
   };
@@ -1337,9 +1392,6 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
       /* Set the `loaded_´ flag to true now to prevent entering here again. */
       this.loaded_ = true;
       this.loading(true);
-      this.on("loaded", function () {
-        self.controller.update_toolbar_();
-      } );
 
       this.api.foldering.listItems(this.subfolder_)
         .done(function (coll) {
@@ -1351,6 +1403,17 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
 
           self.tree.open_node(self.id);
           self.loading(false);
+          self.setLoaded(true);
+        } )
+        .fail(function () {
+          self.loading(false);
+          self.setLoaded(false);
+          self.tree.close_node(self.id);
+          self.create_fake_();
+          self.controller.owner.networkFailure.incident(
+            NetworkFailure.types.subfolder.load, self.subfolder_
+          );
+
         } );
     } else
       this.tree.open_node(this.id);
@@ -1381,8 +1444,9 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
                      item.subtopic_id);
       } )
       .fail(function () {
-        console.error("Failed to add item to subfolder",
-                      item.subtopic_id);
+        self.controller.owner.networkFailure.incident(
+          NetworkFailure.types.subfolder.add, descriptor
+        );
       } );
   };
 
@@ -1398,6 +1462,18 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
 
     if(this.controller.active === item)
       this.controller.setActive(null);
+  };
+
+  /* Private interface */
+  Subfolder.prototype.create_fake_ = function ()
+  {
+    if(this.fake_ !== null)
+      throw "Fake node already exists";
+    else if(this.id_ === null)
+      throw "Subfolder not yet rendered";
+
+    this.fake_ = this.tree.create_node(
+      this.id_, { text: '<placeholder>' }, "last");
   };
 
 
@@ -1496,7 +1572,13 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
       /* Create or update feature collection. */
       this.controller.updateFc(descriptor, false)
         .done(function (fc) { self.onGotFeatureCollection(fc); } )
-        .fail(function ()   { self.onGotFeatureCollection(null); } )
+        .fail(function ()   {
+          self.controller.owner.networkFailure.incident(
+            NetworkFailure.types.fc.save, descriptor
+          );
+
+          self.onGotFeatureCollection(null);
+        } )
         .always(function () { self.loading(false); } );
     }
   };
@@ -1546,6 +1628,7 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
       }
     }
 
+    this.setLoaded(!remove);
     this.owner_.loading(false);
 
     if(remove) {
@@ -1686,6 +1769,42 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
     this.tree.delete_node(this.tree.get_node(this.id_));
   };
 
+
+  /**
+   * @class
+   * */
+  var NetworkFailure = function (owner)
+  {
+    std.Owned.call(this, owner);
+  };
+
+  /* Constants */
+  NetworkFailure.types = {
+    folder: {
+      list: 'folder-list',
+      add: 'folder-add',
+      load: 'folder-load'
+    },
+    subfolder: {
+      load: 'subfolder-load',
+      add: 'subfolder-add'
+    },
+    dismissal: 'item-dismissal',
+    fc: {
+      create: 'fc-create',
+      save: 'fc-save'
+    },
+    label: 'label-add'
+  };
+
+  NetworkFailure.prototype = Object.create(std.Owned.prototype);
+
+  NetworkFailure.prototype.incident = function (type, data)
+  {
+    this.owner_.callbacks.invokeMaybe('networkFailure', type, data);
+  };
+
+
   /**
    * @class
    * */
@@ -1701,55 +1820,51 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
 
   SqItem.prototype.render = function(text, view, less)
   {
-    var raw = this.content_.raw;
-    var fc = this.content_.fc;
-    var desc = fc.value('meta_clean_visible').trim();
-    desc = desc.replace(/\s+/g, ' ');
-    desc = desc.slice(0, 200);
-    var title = fc.value('title') || (desc.slice(0, 50) + '...');
-    var url = fc.value('meta_url');
+    /* Nodes */
+    var node = $('<div class="' + sq.Css.item.container + '"/>'),
+        content = $('<div class="' + sq.Css.item.content + '"/>'),
+        css = Css.item;
 
-    var ntitle = $(
-      '<p style="color: #565656; font-size: 12pt; margin: 0 0 8px 0;">'
-      + '<strong></strong>'
-      + '</p>'
-    );
-    ntitle.find('strong').text(title);
+    /* Data */
+    var raw = this.content_.raw,
+        fc = this.content_.fc,
+        desc = fc.value('meta_clean_visible').trim(),
+        url = fc.value('meta_url');
 
-    var ndesc = $('<p style="font-size: 8pt; display: block; margin: 0;" />');
-    ndesc.text(desc + '...');
+    desc = desc.replace(/\s+/g, ' ').slice(0, 200);
 
-    var nurl = $(
-      '<p style="margin: 8px 0 0 0; display: block;">'
-      + '<a href="' + url + '">' + url + '</a>'
-      + '</p>'
-    );
+    /* Begin appending data */
+    node.append('<a class="' + sq.Css.item.close + '" href="#">x</a>');
 
-    this.content_.text = $('<div style="margin: 0;" />');
-    this.content_.text.append(ntitle);
-    this.content_.text.append(ndesc);
-    this.content_.text.append(nurl);
+    content.append($('<p/>').addClass(css.title)
+                   .text(fc.value('title')
+                         || (desc.slice(0, 50) + '...')));
+
+    content.append($('<p/>').text(desc + '...')
+                   .addClass(css.description));
+
+    content.append($('<p/>').addClass(css.url)
+                   .append($('<a/>').attr('href', url).text(url)));
 
     if(std.is_num(raw.probability)) {
-      var score = raw.probability.toFixed(4);
-      this.content_.text.append($(
-        '<p style="margin: 8px 0 0 0; display: block;">'
-        + 'Score: ' + score
-        + '</p>'
-      ) );
+      content.append($('<p/>')
+                     .append(this.create_weight_('Score:', raw.probability))
+                     .addClass(css.score));
 
-      var info = raw.feature_cmp_info;;
+      var info = raw.feature_cmp_info;
       if(std.is_obj(info)) {
+        css = css.dict;
+
         for(var i in info) {
           var j = info[i],
               values = j.common_values;
 
           if(std.is_arr(values) && values.length > 0) {
-            var container = $('<div/>').addClass('sd-dict-container'),
+            var container = $('<div/>').addClass(css.container),
                 hasPhi = std.is_num(j.phi) && j.phi > 0,
                 el;
 
-            el = $('<div/>').addClass("sd-dict-weight");
+            el = $('<div/>').addClass(css.weight);
             if(hasPhi)
               el.append(this.create_weight_('Score:', 1 - j.phi));
 
@@ -1763,7 +1878,7 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
             container.append(el);
             container.append($('<h1/>').text(i));
 
-            el = $('<div/>').addClass('sd-dict-values');
+            el = $('<div/>').addClass(css.values);
 
             if(i === 'image_url') {
               values.forEach(function (v) {
@@ -1776,19 +1891,20 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
             }
 
             container.append(el);
-            this.content_.text.append(container);
-            this.content_.text.append($('<div class="sd-clear"/>'));
+            content.append(container);
+            content.append($('<div/>').addClass(Css.clear));
           }
         }
       }
     }
 
-    return sq.Item.prototype.render.call(this);
+    node.append(content);
+    return node;
   };
 
-  SqItem.prototype.create_weight_ = function (caption, weight)
+  SqItem.prototype.create_weight_ = function (caption, weight, css)
   {
-    var el = $('<span/>').addClass('sd-dict-weight');
+    var el = $('<span/>').addClass(css || Css.item.dict.weight);
 
     el.append($('<span/>').text(caption));
     el.append($('<span/>').text(weight.toFixed(4)));
@@ -1799,12 +1915,24 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
 
   /* Css classes */
   var Css = {
+    clear: 'sd-clear',
     active: 'sd-active',
     disabled: 'sd-disabled',
     droppable: {
       hover: 'sd-droppable-hover'
     },
     icon: {
+    },
+    item: {
+      title: 'sd-text-item-title',
+      description: 'sd-text-item-description',
+      url: 'sd-text-item-url',
+      score: 'sd-text-item-score',
+      dict: {
+        container: 'sd-dict-container',
+        weight: 'sd-dict-weight',
+        values: 'sd-dict-values'
+      }
     }
   };
 
@@ -1829,7 +1957,8 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
   /* Module public API */
   return {
     Sorter: Sorter,
-    ControllerExplorer: ControllerExplorer
+    ControllerExplorer: ControllerExplorer,
+    NetworkFailure: NetworkFailure
   };
 
 };

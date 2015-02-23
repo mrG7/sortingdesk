@@ -368,11 +368,12 @@ var SortingCommon_ = function (window, $) {
 
   /** Invoke a callback with optional parameters.
    *
-   * The callback is always required to exist. If it doesn't exist, an exception
-   * is thrown.
+   * The callback is always required to exist. If it doesn't exist, an
+   * exception is thrown.
    *
    * @param {string} name       - Name of callback to invoke.
-   * @param {*}      parameters - One or more parameters to pass to callback. */
+   * @param {*}      parameters - One or more parameters to pass to callback.
+   * */
   Callbacks.prototype.invoke = function ( /* (name, arg0..n) */ )
   {
     if(arguments.length < 1)
@@ -382,11 +383,29 @@ var SortingCommon_ = function (window, $) {
                       Array.prototype.splice.call(arguments, 1));
   };
 
+  /** Invoke a callback with optional parameters <strong>if</strong> it
+   * exists.
+   *
+   * The callback is not required to exist and, in thie event,
+   * <code>null</code> is returned.
+   *
+   * @param {string} name       - Name of callback to invoke.
+   * @param {*}      parameters - One or more parameters to pass to callback.
+   * */
+  Callbacks.prototype.invokeMaybe = function ( /* (name, arg0..n) */ )
+  {
+    if(arguments.length < 1)
+      throw "Callback name not specified";
+
+    return this.call_(arguments[0], false,
+                      Array.prototype.splice.call(arguments, 1));
+  };
+
   /** Invoke a callback with optional parameters.
    *
    * The callback may optionally <strong>not</strong> be required to exist if
-   * the <code>mandatory</code> argument is <code>true</code>; otherwise,
-   * <code>null</code> is returned instead.
+   * the <code>mandatory</code> argument is <code>false</code>, in which case
+   * no further action is taken and <code>null</code> is returned.
    *
    * @param {string}  name      - Name of callback to invoke.
    *
@@ -395,7 +414,7 @@ var SortingCommon_ = function (window, $) {
    *
    * @param {*}       parameters - One or more parameters to pass to callback.
    * */
-  Callbacks.prototype.call = function (/* (name, mandatory = true, arg0..n) */ )
+  Callbacks.prototype.call = function (/* (name, mandatory = true, arg0..n) */)
   {
     if(arguments.length < 2)
       throw "One or more parameters missing (name, mandatory)";

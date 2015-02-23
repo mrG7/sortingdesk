@@ -123,16 +123,16 @@ var Api_ = (function (window, $, CryptoJS, DossierJS, undefined) {
   var createFeatureCollection = function (content_id, html)
   {
     var self = this;
-    var url = api_.url('feature-collection/'
-                       + encodeURIComponent(content_id));
+    var url = api_.url('feature-collection/' + encodeURIComponent(content_id));
+
     return $.ajax({
       type: 'PUT',
       contentType: 'text/html',
       url: url,
       data: html
     }).fail(function() {
-      console.log("Could not save feature collection " +
-                  "(content id: '" + content_id + "')");
+      console.error("Could not save feature collection " +
+                    "(content id: '" + content_id + "')");
     }).then(function(fc) {
       return new (self.getClass('FeatureCollection'))(content_id, fc);
     });
@@ -467,10 +467,10 @@ var Api_ = (function (window, $, CryptoJS, DossierJS, undefined) {
 
       window.setTimeout(function () {
         if(self._processing) {
-          console.log('moreTexts in progress, ignoring new request');
+          console.warn('moreTexts in progress, ignoring new request');
           deferred.reject( { error: "Request in progress" } );
         } else {
-          console.log('Query content id not yet set');
+          console.error('Query content id not yet set');
           deferred.reject( { error: "No query content id" } );
         }
       } );
@@ -504,7 +504,7 @@ var Api_ = (function (window, $, CryptoJS, DossierJS, undefined) {
         self._processing = false;
       })
       .fail(function() {
-        console.log("moreTexts: request failed");
+        console.error("moreTexts: request failed");
       });
   };
 
