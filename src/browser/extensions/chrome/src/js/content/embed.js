@@ -55,10 +55,21 @@ var Embeddable = (function ($, std, DraggableImageMonitor, undefined) {
    * */
   var BackgroundListener = (function () {
 
+    var check_callback_ = function (callback)
+    {
+      if(!std.is_fn(callback)) {
+        console.warn("Invalid or no callback function specified");
+        return false;
+      }
+
+      return true;
+    };
+
+
     /* Events */
     var onGetSelection_ = function (request, sender, callback)
     {
-      if(!std.is_fn(callback)) return;
+      if(!check_callback_(callback)) return;
 
       var result = { },
           val,
@@ -146,7 +157,7 @@ var Embeddable = (function ($, std, DraggableImageMonitor, undefined) {
 
     var onGetPageMeta_ = function (request, sender, callback)
     {
-      if(!std.is_fn(callback)) return;
+      if(!check_callback_(callback)) return;
 
       callback( {
         href: window.location.href,
