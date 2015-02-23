@@ -433,7 +433,7 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
             self.events_.trigger('selected-subfolder');
         }
 
-        self.update_toolbar_();
+        self.updateToolbar();
       },
       "dragover":  function (ev){self.on_dragging_enter_(ev);return false;},
       "dragenter": function (ev){self.on_dragging_enter_(ev);return false;},
@@ -520,7 +520,7 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
     this.refreshing_ = true;
     this.reset_tree_();
     this.events_.trigger('refresh-begin');
-    this.update_toolbar_(true);
+    this.updateToolbar(true);
 
     /* Hide empty notification while loading. */
     this.update_empty_state_(true);
@@ -544,7 +544,7 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
         if(self.folders_.length > 0)
           self.tree_.select_node(self.folders_[0].id);
         else
-          self.update_toolbar_();
+          self.updateToolbar();
 
         console.log("Loaded folders:", self.folders_);
       } );
@@ -834,6 +834,27 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
       } );
   };
 
+  ControllerExplorer.prototype.updateToolbar = function (loading)
+  {
+    var ela = this.owner_.nodes.toolbar.actions;
+    loading = loading === true;
+
+    ela.add.toggleClass('disabled', loading);
+
+    ela.addContextual.toggleClass(
+      'disabled',
+      loading || this.selected_ instanceof Item
+        || (this.selected_ instanceof Subfolder
+            && (!this.selected_.loaded
+                || this.selected_.loading())));
+
+    ela.jump.toggleClass(
+      'disabled', loading || !(this.selected_ instanceof Item
+                               && this.selected_.loaded));
+
+    ela.refresh.toggleClass('disabled', loading);
+  };
+
   /* Private interface */
   ControllerExplorer.prototype.set_fc_content_ = function (fc, descriptor)
   {
@@ -890,27 +911,6 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
           NetworkFailure.types.label, label
         );
       } );
-  };
-
-  ControllerExplorer.prototype.update_toolbar_ = function (loading)
-  {
-    var ela = this.owner_.nodes.toolbar.actions;
-    loading = loading === true;
-
-    ela.add.toggleClass('disabled', loading);
-
-    ela.addContextual.toggleClass(
-      'disabled',
-      loading || this.selected_ instanceof Item
-        || (this.selected_ instanceof Subfolder
-            && (!this.selected_.loaded
-                || this.selected_.loading())));
-
-    ela.jump.toggleClass(
-      'disabled', loading || !(this.selected_ instanceof Item
-                               && this.selected_.loaded));
-
-    ela.refresh.toggleClass('disabled', loading);
   };
 
   ControllerExplorer.prototype.update_empty_state_ = function (hide)
@@ -1369,7 +1369,7 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
       this.loaded_ = true;
       this.loading(true);
       this.on("loaded", function () {
-        self.controller.update_toolbar_();
+        self.controller.updateToolbar();
       } );
 
       this.api.foldering.listItems(this.subfolder_)
@@ -1608,7 +1608,7 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
 
     this.loaded_ = !remove;
     this.owner_.loading(false);
-    this.controller.update_toolbar_();
+    this.controller.updateToolbar();
 
     if(remove) {
       console.warn("Item's feature collection or content could not be "
