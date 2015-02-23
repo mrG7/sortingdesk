@@ -843,14 +843,15 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
 
     ela.addContextual.toggleClass(
       'disabled',
-      loading || this.selected_ instanceof Item
+      loading || !this.selected_
+        || this.selected_ instanceof Item
         || (this.selected_ instanceof Subfolder
             && (!this.selected_.loaded
                 || this.selected_.loading())));
 
     ela.jump.toggleClass(
       'disabled', loading || !(this.selected_ instanceof Item
-                               && this.selected_.loaded));
+             && this.selected_.loaded));
 
     ela.refresh.toggleClass('disabled', loading);
   };
