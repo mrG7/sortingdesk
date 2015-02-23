@@ -149,12 +149,37 @@ var Main = (function (window, chrome, $, std, sq, sd, Api, undefined) {
       } );
     };
 
+    var netfails_ = {
+      'folder-list': "retrieving the list of folders",
+      'folder-add': "adding a new folder",
+      'folder-load': "loading the folder's subfolders",
+      'subfolder-load': "loading the subfolder's items",
+      'subfolder-add': "adding an item to the subfolder",
+      'item-dismissal': "processing the item's dismissal",
+      'fc-create': "saving the item's data",
+      'fc-save': "saving the item's data",
+      'label': "saving state data"
+    };
+
+    var onNetworkFailure_ = function (type, data)
+    {
+      var action = netfails_[type] || "contacting the server";
+
+      alert([ "Unfortunately we have encountered a problem whilst ",
+              action, ".\n\n",
+              "Please try again. If the problem persists, contact the support",
+              " team.",
+            ].join(''));
+    };
+
     /* Interface */
     return {
       callbacks: {
         sorter: {
           getSelection: onGetSelection_,
-          createManualItem: onCreateManualItem_
+          checkSelection: onCheckSelection_,
+          createManualItem: onCreateManualItem_,
+          networkFailure: onNetworkFailure_
         }
       }
     };
