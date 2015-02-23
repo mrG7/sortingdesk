@@ -1106,7 +1106,16 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
     this.id_ = null;
     this.opening_ = false;
     this.loaded_ = false;
-    this.events_ = new std.Events(this, [ 'loading', 'loaded' ] );
+    this.events_ = new std.Events(this, [ 'loading-start', 'loading-end' ] );
+
+    this.on( {
+      "loading-end": function () {
+        ctrl.updateToolbar();
+      },
+      "loaded": function () {
+        ctrl.updateToolbar();
+      }
+    } );
   };
 
   ItemBase.prototype.open = function ()
@@ -1122,6 +1131,14 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
   ItemBase.prototype.onAfterOpen = function ()
   { this.opening_ = false; };
 
+  ItemBase.prototype.setLoaded = function (state)
+  {
+    this.loaded_ = state;
+
+    if(state)
+      this.events_.trigger('loaded');
+  };
+
   ItemBase.prototype.loading = function (state /* = true */)
   {
     if(arguments.length === 0)
@@ -1132,11 +1149,11 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
         console.error("Loading count is 0");
       else if(--this.loading_ === 0) {
         this.removeClass("jstree-loading");
-        this.events_.trigger('loaded');
+        this.events_.trigger('loading-end');
       }
     } else if(state === true) {
       if(++this.loading_ === 1)
-        this.events_.trigger('loading');
+        this.events_.trigger('loading-begin');
     }
 
     /* Always force class. */
@@ -1314,7 +1331,7 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
     /* Attributes */
     this.subfolder_ = subfolder;
     this.items_ = [ ];
-    this.loaded_ = !subfolder.exists;
+    this.setLoaded(!subfolder.exists);
     this.fake_ = null;
 
     this.render();
@@ -1368,9 +1385,6 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
       /* Set the `loaded_´ flag to true now to prevent entering here again. */
       this.loaded_ = true;
       this.loading(true);
-      this.on("loaded", function () {
-        self.controller.updateToolbar();
-      } );
 
       this.api.foldering.listItems(this.subfolder_)
         .done(function (coll) {
@@ -1382,10 +1396,11 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
 
           self.tree.open_node(self.id);
           self.loading(false);
+          self.setLoaded(true);
         } )
         .fail(function () {
           self.loading(false);
-          self.loaded_ = false;
+          self.setLoaded(false);
           self.tree.close_node(self.id);
           self.create_fake_();
           self.controller.owner.networkFailure.incident(
@@ -1606,9 +1621,8 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
       }
     }
 
-    this.loaded_ = !remove;
+    this.setLoaded(!remove);
     this.owner_.loading(false);
-    this.controller.updateToolbar();
 
     if(remove) {
       console.warn("Item's feature collection or content could not be "
