@@ -383,6 +383,24 @@ var SortingCommon_ = function (window, $) {
                       Array.prototype.splice.call(arguments, 1));
   };
 
+  /** Invoke a callback with optional parameters <strong>if</strong> it
+   * exists.
+   *
+   * The callback is not required to exist and, in thie event,
+   * <code>null</code> is returned.
+   *
+   * @param {string} name       - Name of callback to invoke.
+   * @param {*}      parameters - One or more parameters to pass to callback.
+   * */
+  Callbacks.prototype.invokeMaybe = function ( /* (name, arg0..n) */ )
+  {
+    if(arguments.length < 1)
+      throw "Callback name not specified";
+
+    return this.call_(arguments[0], false,
+                      Array.prototype.splice.call(arguments, 1));
+  };
+
   /** Invoke a callback with optional parameters.
    *
    * The callback may optionally <strong>not</strong> be required to exist if
