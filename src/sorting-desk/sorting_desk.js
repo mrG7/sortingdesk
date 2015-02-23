@@ -119,7 +119,12 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
             this.setResetHtml("Processing...");
 
             self.api.addLabel(label)
-              .done(function() { item.owner.remove(item); });
+              .done(function () { item.owner.remove(item); })
+              .fail(function () {
+                self.networkFailure.incident(
+                  NetworkFailure.types.dismissal, item
+                );
+              } );
           } );
       };
     }
@@ -140,6 +145,7 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
     callbacks_: null,
     events_: null,
     constructor_: null,
+    networkFailure_: null,
     options_: null,
     nodes_: null,
 
@@ -149,16 +155,17 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
     explorer_: null,
 
     /* Getters */
-    get sortingQueue () { return this.sortingQueue_; },
-    get initialised ()  { return this.initialised_; },
-    get constructor ()  { return this.constructor_; },
-    get callbacks ()    { return this.callbacks_; },
-    get events ()       { return this.events_; },
-    get api ()          { return this.api_; },
-    get resetting ()    { return this.sortingQueue_.resetting(); },
-    get options ()      { return this.options_; },
-    get nodes ()        { return this.nodes_; },
-    get explorer ()     { return this.explorer_; },
+    get sortingQueue ()  { return this.sortingQueue_; },
+    get initialised ()   { return this.initialised_; },
+    get constructor ()   { return this.constructor_; },
+    get callbacks ()     { return this.callbacks_; },
+    get networkFailure() { return this.networkFailure_; },
+    get events ()        { return this.events_; },
+    get api ()           { return this.api_; },
+    get resetting ()     { return this.sortingQueue_.resetting(); },
+    get options ()       { return this.options_; },
+    get nodes ()         { return this.nodes_; },
+    get explorer ()      { return this.explorer_; },
 
     /* Interface */
     initialise: function ()
@@ -209,6 +216,8 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
           }
         } )
         .initialise();
+
+      this.networkFailure_ = new NetworkFailure(this);
 
       this.initialised_ = true;
       console.info("Sorting Desk UI initialised");
@@ -347,11 +356,11 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
                 console.info("Successfully added folder", f.data);
               } )
               .fail(function () {
-                console.error("Failed to add folder", f.data);
+                owner.NetworkFailure.incident(
+                  NetworkFailure.types.folder.add, f.data
+                );
               } )
-              .always(function () {
-                f.loading(false);
-              } );
+              .always(function () { f.loading(false); } );
 
             if(self.folders_.length === 1)
               self.tree_.select_node(f.id);
@@ -520,6 +529,11 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
         coll.forEach(function (f) {
           self.folders_.push(new Folder(self, f));
         } );
+      } )
+      .fail(function () {
+        self.owner_.networkFailure.incident(
+          NetworkFailure.types.folder.list, null
+        );
       } )
       .always(function () {
         self.update_empty_state_();
@@ -804,11 +818,18 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
                        descriptor.content_id);
 
             self.set_fc_content_(fc, descriptor);
-
             self.api.setFeatureCollectionContent(
               fc, 'meta_url', descriptor.href.toString());
+
             return self.do_update_fc_(descriptor.content_id, fc);
-          });
+          } )
+          .fail(function () {
+            self.owner_.networkFailure.incident(
+              NetworkFailure.types.fc.create, {
+                content_id: descriptor.content_id,
+                fc: fc
+              } );
+          } );
       } );
   };
 
@@ -836,14 +857,18 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
 
   ControllerExplorer.prototype.do_update_fc_ = function (content_id, fc)
   {
+    var self = this;
+
     return this.api.putFeatureCollection(content_id, fc)
       .done(function () {
         console.log("Feature collection PUT successful (id=%s)",
                     content_id);
       } )
       .fail(function () {
-        console.error("Feature collection PUT failed (id=%s)",
-                      content_id);
+        self.owner_.networkFailure.incident(
+          NetworkFailure.types.fc.save, {
+            content_id: content_id, fc: fc
+          } );
       } );
   };
 
@@ -860,8 +885,9 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
                     label.cid2);
       } )
       .fail(function () {
-        console.error("Label ADD failed: '%s' ∧ '%s'",
-                      label.cid1, label.cid2);
+        self.owner_.networkFailure.incident(
+          NetworkFailure.types.label, label
+        );
       } );
   };
 
@@ -1193,6 +1219,10 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
           } );
 
           self.loading(false);
+        } )
+        .fail(function () {
+          self.controller.owner.networkFailure.incident(
+            NetworkFailure.types.folder.load, folder);
         } );
     }
 
@@ -1496,7 +1526,13 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
       /* Create or update feature collection. */
       this.controller.updateFc(descriptor, false)
         .done(function (fc) { self.onGotFeatureCollection(fc); } )
-        .fail(function ()   { self.onGotFeatureCollection(null); } )
+        .fail(function ()   {
+          self.controller.owner.networkFailure.incident(
+            NetworkFailure.types.fc.save, descriptor
+          );
+
+          self.onGotFeatureCollection(null);
+        } )
         .always(function () { self.loading(false); } );
     }
   };
@@ -1690,6 +1726,41 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
   /**
    * @class
    * */
+  var NetworkFailure = function (owner)
+  {
+    std.Owned.call(this, owner);
+  };
+
+  /* Constants */
+  NetworkFailure.types = {
+    folder: {
+      list: 'folder-list',
+      add: 'folder-add',
+      load: 'folder-load'
+    },
+    subfolder: {
+      load: 'subfolder-load',
+      add: 'subfolder-add'
+    },
+    dismissal: 'item-dismissal',
+    fc: {
+      create: 'fc-create',
+      save: 'fc-save'
+    },
+    label: 'label-add'
+  };
+
+  NetworkFailure.prototype = Object.create(std.Owned.prototype);
+
+  NetworkFailure.prototype.incident = function (type, data)
+  {
+    this.owner_.callbacks.invokeMaybe('networkFailure', type, data);
+  };
+
+
+  /**
+   * @class
+   * */
   var SqItem = function(owner, item)
   {
     if(!owner.owner.initialised)
@@ -1839,7 +1910,8 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
   /* Module public API */
   return {
     Sorter: Sorter,
-    ControllerExplorer: ControllerExplorer
+    ControllerExplorer: ControllerExplorer,
+    NetworkFailure: NetworkFailure
   };
 
 };
