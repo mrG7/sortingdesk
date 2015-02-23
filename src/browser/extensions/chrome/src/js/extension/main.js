@@ -300,6 +300,13 @@ var Main = (function (window, chrome, $, std, sq, sd, Api, undefined) {
       queue:  new LoadingStatus($('#sd-queue .sd-loading'))
     };
 
+    /* Prevent drag and drop events on extension window's document. */
+    $(document).on( {
+      dragover: function ()   { return false; },
+      dragleave: function ()  { return false; },
+      drop: function ()       { return false; }
+    } );
+
     chrome.runtime.sendMessage({ operation: "get-meta" }, function (meta) {
       /* Cache jQuery references to nodes used. */
       nodes.loading = $('#sd-sorting-desk .sd-loading');
