@@ -187,7 +187,7 @@ var Main = (function (undefined) {
     worker.port.on('get-selection', function () {
       console.log("get-selection: returning active tab's selection");
       var cs = getActiveTabWorker_(worker);
-      if(!cs) return;
+      if(!cs) worker.port.emit('get-selection', null);
 
       cs.port.emit('get-selection');
       cs.port.once('get-selection', function (result) {
@@ -223,7 +223,7 @@ var Main = (function (undefined) {
     worker.port.on('get-page-meta', function () {
       console.log("get-page-meta: returning page meta");
       var cs = getActiveTabWorker_(worker);
-      if(!cs) return;
+      if(!cs) worker.port.emit('get-page-meta', null);
 
       cs.port.emit('get-page-meta');
       cs.port.once('get-page-meta', function (result) {
