@@ -13,10 +13,10 @@
 /*jshint lax break:true */
 
 
-var Embeddable = (function ($, std, DraggableImageMonitor, undefined) {
+var Embeddable = (function ($, std, DragDropMonitor, undefined) {
 
   /* Module variables */
-  var monitor_;
+  var monitor;
 
 
   /* Message handling */
@@ -27,7 +27,7 @@ var Embeddable = (function ($, std, DraggableImageMonitor, undefined) {
   self.port.on("get-selection", function () {
     var result = { },
         val,
-        active = monitor_.active;
+        active = monitor.active;
 
     console.log("getting active selection");
 
@@ -40,7 +40,6 @@ var Embeddable = (function ($, std, DraggableImageMonitor, undefined) {
       /* Retrieve image's src and clear active drop. */
       active = active.get(0);
       val = active.src;
-      monitor_.clear();
 
       if(val) {
         result.id = result.content = val;
@@ -93,11 +92,8 @@ var Embeddable = (function ($, std, DraggableImageMonitor, undefined) {
   /* Module-wide functions */
   var initialise = function () {
     console.log("Initialising embeddable content");
-
-    $(function () {
-      monitor_ = new DraggableImageMonitor();
-      console.info("Initialised embeddable content");
-    } );
+    monitor = new DragDropMonitor();
+    console.info("Initialised embeddable content");
   };
 
-})($, SortingCommon, DraggableImageMonitor);
+})($, SortingCommon, DragDropMonitor);
