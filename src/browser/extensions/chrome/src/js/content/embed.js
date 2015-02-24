@@ -81,8 +81,6 @@ var Embeddable = (function ($, std, DragDropMonitor, undefined) {
         /* Retrieve image's src and clear active drop. */
         active = active.get(0);
         val = active.src;
-        monitor.clear();
-        console.log("Image selection:", result);
 
         if(val) {
           result.id = result.content = val;
@@ -90,37 +88,38 @@ var Embeddable = (function ($, std, DragDropMonitor, undefined) {
           result.type = "image";
 
           /* Don't get image data if the image was loaded via a data URI. */
-          if(/^data:/.test(val)) {
+          if(/^data:/.test(val))
             result.data = val;
-            callback(result);
-            return;
+          else {
+            /* Image was loaded via a URI.  Fetch it and convert its data blob to
+             * base64. */
+            fetchImage(val, function (blob) {
+              var reader = new window.FileReader();
+
+              /* If a blob is available, convert it to base64. */
+              if(!blob)
+                callback(result); /* no image data returned. */
+              else {
+                reader.onload = function () {
+                  result.data = reader.result;
+                  callback(result);
+                };
+
+                reader.onerror = function () {
+                  console.error(
+                    'Conversion of image data from blob to data failed.');
+                  callback(result);
+                };
+
+                reader.readAsDataURL(blob);
+              }
+            } );
+
+            /* This message will be processed asynchronously since we need to
+             * retrieve the image data in base64 encoding (above).  For this
+             * reason, return true. */
+            return true;
           }
-
-          /* Image was loaded via a URI.  Fetch it and convert its data blob to
-           * base64. */
-          fetchImage(val, function (blob) {
-            var reader = new window.FileReader();
-
-            /* If a blob is available, convert it to base64. */
-            if(!blob)
-              callback(result);
-            else {
-              reader.onload = function () {
-                result.data = reader.result;
-                callback(result);
-              };
-
-              reader.onerror = function () {
-                console.error('Conversion of image data from blob to data'
-                              + ' failed.');
-                callback(result);
-              };
-
-              reader.readAsDataURL(blob);
-            }
-          } );
-
-          return true;
         } else
           console.error("Unable to retrieve valid `src´ attribute");
       } else {
@@ -144,15 +143,11 @@ var Embeddable = (function ($, std, DragDropMonitor, undefined) {
 
           result.content = val;
           result.type = "text";
-
-          console.log("Text selection:", result);
-          callback(result);
-          return;
         }
       }
 
-      /* Retrieval of selection failed or none retrievable. */
-      callback(null);
+      /* Return selection data if `type´ attribute present; null, otherwise. */
+      callback(std.is_str(result.type) ? result : null);
     };
 
     var onCheckSelection_ = function (request, sender, callback)
