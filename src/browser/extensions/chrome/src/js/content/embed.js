@@ -5,7 +5,7 @@
  * @copyright 2015 Diffeo
  *
  * Comments:
- * Uses the `SortingDesk' and shared `DraggableImageMonitor´ components.
+ * Uses the `SortingDesk' and shared `DragDropMonitor´ components.
  *
  */
 
@@ -14,7 +14,7 @@
 /*jshint laxbreak:true */
 
 
-var Embeddable = (function ($, std, DraggableImageMonitor, undefined) {
+var Embeddable = (function ($, std, DragDropMonitor, undefined) {
 
   /* Variables */
   var embed_;
@@ -155,6 +155,26 @@ var Embeddable = (function ($, std, DraggableImageMonitor, undefined) {
       callback(null);
     };
 
+    var onCheckSelection_ = function (request, sender, callback)
+    {
+      if(!check_callback_(callback)) return;
+      if(!embed_.monitor.down) {
+        callback(false);
+        return;
+      }
+
+      var active = embed_.monitor.active;
+
+      if(active && active.length > 0)
+        callback(!!active.get(0).src);
+      else {
+        active = window.getSelection();
+        callback(active
+                 && active.anchorNode
+                 && active.toString().length > 0);
+      }
+    };
+
     var onGetPageMeta_ = function (request, sender, callback)
     {
       if(!check_callback_(callback)) return;
@@ -209,7 +229,7 @@ var Embeddable = (function ($, std, DraggableImageMonitor, undefined) {
     console.log("Initialising embeddable content");
 
     BackgroundListener.initialise();
-    this.monitor_ = new DraggableImageMonitor();
+    this.monitor_ = new DragDropMonitor();
 
     chrome.runtime.sendMessage({ operation: "embeddable-active" });
 
@@ -233,4 +253,4 @@ var Embeddable = (function ($, std, DraggableImageMonitor, undefined) {
       embed_ = new Embed(result);
   } );
 
-})($, SortingCommon, DraggableImageMonitor);
+})($, SortingCommon, DragDropMonitor);
