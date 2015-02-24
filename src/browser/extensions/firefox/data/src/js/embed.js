@@ -70,7 +70,7 @@ var Embeddable = (function ($, std, DragDropMonitor, undefined) {
     }
 
     /* Return selection data if `type´ attribute present; null, otherwise. */
-    self.port.emit("get-selection", std.is_str(result) ? result : null);
+    self.port.emit("get-selection", std.is_str(result.type) ? result : null);
   } );
 
   self.port.on("check-selection", function () {
