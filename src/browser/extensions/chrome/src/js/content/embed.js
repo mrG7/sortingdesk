@@ -129,13 +129,16 @@ var Embeddable = (function ($, std, DragDropMonitor, undefined) {
       } else {
         var sel = window.getSelection();
 
-        if(sel && sel.anchorNode) {
+        if(sel && sel.anchorNode)
           val = sel.toString();
+        else
+          console.error("No text currently selected");
 
+        if(val && val.length > 0) {
           /* Craft a unique id for this text snippet based on its content,
-           * Xpath representation, offset from selection start and length. This
-           * id is subsequently used to generate a unique and collision free
-           * unique subtopic id. */
+           * Xpath representation, offset from selection start and length.
+           * This id is subsequently used to generate a unique and collision
+           * free unique subtopic id. */
           result.xpath = std.Html.getXpathSimple(sel.anchorNode);
           result.id = [ val,
                         result.xpath,
@@ -147,11 +150,11 @@ var Embeddable = (function ($, std, DragDropMonitor, undefined) {
 
           console.log("Text selection:", result);
           callback(result);
-        } else
-          console.error("No text currently selected");
+          return;
+        }
       }
 
-      /* Retrieval of selection failed. */
+      /* Retrieval of selection failed or none retrievable. */
       callback(null);
     };
 
@@ -189,6 +192,7 @@ var Embeddable = (function ($, std, DragDropMonitor, undefined) {
     /* Map message operations to handlers. */
     var methods_ = {
       "get-selection": onGetSelection_,
+      "check-selection": onCheckSelection_,
       "get-page-meta": onGetPageMeta_
     };
 
