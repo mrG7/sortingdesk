@@ -139,7 +139,7 @@ var Main = (function (window, $, std, sq, sd, Api, undefined) {
       callbacks: {
         sorter: {
           getSelection: onGetSelection_,
-          checkSelection: onCheckSelection_,
+/*           checkSelection: onCheckSelection_, */
           createManualItem: onCreateManualItem_,
           networkFailure: onNetworkFailure_
         }
