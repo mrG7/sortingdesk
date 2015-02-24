@@ -1810,17 +1810,14 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
           this.clear_target_(true);
         }
 
-        this.sd_.callbacks.invoke("checkSelection")
-          .done(function (result) {
-            /* Return straight away if there is a target already active, the
-             * drag event terminated meanwhile or the selection check failed.
-             * */
-            if(self.target_ !== null || self.exit_ || result !== true)
-              return;
-
-            el.addClass(Css.droppable.hover);
-            self.set_target_(el);
+        var d = this.sd_.callbacks.invokeMaybe("checkSelection");
+        if(d === null)
+          this.on_selection_queried_(el, true);
+        else {
+          d.done(function (result) {
+            self.on_selection_queried_(el, result);
           } );
+        }
 
         return fl;
       }
@@ -1828,6 +1825,18 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
 
     this.clear_target_();
     return null;
+  };
+
+  DragDropHandler.prototype.on_selection_queried_ = function (el, result)
+  {
+    /* Return straight away if there is a target already active, the
+     * drag event terminated meanwhile or the selection check failed.
+     * */
+    if(this.target_ !== null || this.exit_ || result !== true)
+      return;
+
+    el.addClass(Css.droppable.hover);
+    this.set_target_(el);
   };
 
   DragDropHandler.prototype.on_dragging_exit_ = function (ev)
