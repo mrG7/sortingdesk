@@ -16,9 +16,6 @@
 
 var Embeddable = (function ($, std, DragDropMonitor, undefined) {
 
-  /* Variables */
-  var embed_;
-
   var fetchImage = function (url, callback)
   {
     /* Code borrowed from the following Stack Overflow page:
@@ -73,7 +70,7 @@ var Embeddable = (function ($, std, DragDropMonitor, undefined) {
 
       var result = { },
           val,
-          active = embed_.monitor.active;
+          active = monitor.active;
 
       /* We can't yet generate a content_id so we just attached the page's
        * URL for now. */
@@ -84,7 +81,7 @@ var Embeddable = (function ($, std, DragDropMonitor, undefined) {
         /* Retrieve image's src and clear active drop. */
         active = active.get(0);
         val = active.src;
-        embed_.monitor.clear();
+        monitor.clear();
         console.log("Image selection:", result);
 
         if(val) {
@@ -161,12 +158,12 @@ var Embeddable = (function ($, std, DragDropMonitor, undefined) {
     var onCheckSelection_ = function (request, sender, callback)
     {
       if(!check_callback_(callback)) return;
-      if(!embed_.monitor.down) {
+      if(!monitor.down) {
         callback(false);
         return;
       }
 
-      var active = embed_.monitor.active;
+      var active = monitor.active;
 
       if(active && active.length > 0)
         callback(!!active.get(0).src);
@@ -225,26 +222,27 @@ var Embeddable = (function ($, std, DragDropMonitor, undefined) {
   } )();
 
 
-  /**
-   * @class
-   * */
-  var Embed = function (meta)
+  /* Module-wide attributes and interface
+   * --
+   * Attributes
+   */
+  var monitor = null;
+
+
+  /* Interface */
+  var initialise = function (meta)
   {
     console.log("Initialising embeddable content");
 
+    monitor = new DragDropMonitor();
     BackgroundListener.initialise();
-    this.monitor_ = new DragDropMonitor();
 
+    /* Let extension know embedded content is ready. */
     chrome.runtime.sendMessage({ operation: "embeddable-active" });
 
     console.info("Initialised embeddable content");
   };
 
-  Embed.prototype = {
-    monitor_: null,
-
-    get monitor () { return this.monitor_; }
-  };
 
   /* Attempt to initialize extension class responsible for the UI. */
   chrome.runtime.sendMessage({ operation: "get-meta" }, function (result) {
@@ -254,7 +252,7 @@ var Embeddable = (function ($, std, DragDropMonitor, undefined) {
     if(!result.config.active || !window.location.href)
       console.info("Skipping activation: inactive or unsupported");
     else
-      embed_ = new Embed(result);
+      initialise(result);
   } );
 
 })($, SortingCommon, DragDropMonitor);
