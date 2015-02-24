@@ -1800,19 +1800,26 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
       if(std.instanceany(fl, Folder, Subfolder)) {
         el = $(el);
 
-        if(this.target_ !== null && !std.$.same(this.target_, el))
+        /* Clear target immediately if current target not the same as active
+         * element.  If it is the same, return straight away since we already
+         * know the selection is valid (see below). */
+        if(this.target_ !== null) {
+          if(std.$.same(this.target_, el))
+            return fl;
+
           this.clear_target_(true);
+        }
 
         this.sd_.callbacks.invoke("checkSelection")
           .done(function (result) {
-            if(self.exit_
-               || (self.target_ !== null && !std.$.same(self.target_, el)))
-            {
+            /* Return straight away if there is a target already active, the
+             * drag event terminated meanwhile or the selection check failed.
+             * */
+            if(self.target_ !== null || self.exit_ || result !== true)
               return;
-            } else if(result === true) {
-              el.addClass(Css.droppable.hover);
-              self.set_target_(el);
-            }
+
+            el.addClass(Css.droppable.hover);
+            self.set_target_(el);
           } );
 
         return fl;
