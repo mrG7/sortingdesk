@@ -46,17 +46,31 @@ var Background = function (window, chrome, $, std, undefined)
 
       /* Process removal of extension window. */
       chrome.windows.onRemoved.addListener(function (id) {
-        if(window_.extension !== null && window_.extension.id === id) {
-          var m = window_.main;
+        if(window_.extension !== null) {
+          if(window_.extension.id === id) {
+            var m = window_.main;
 
-          console.info("Extension window removed");
-          chrome.windows.update(
-            m.id,
-            { state: m.state,
-              top: m.top, left: m.left, height: m.height,
-              width: m.width } );
+            console.info("Extension window removed");
+            chrome.windows.update(
+              m.id,
+              { state: m.state,
+                top: m.top, left: m.left, height: m.height,
+                width: m.width } );
 
-          window_.main = window_.extension = null;
+            window_.main = window_.extension = null;
+          } else {
+            chrome.windows.getAll(function (wins) {
+              var count = 0;
+
+              wins.forEach(function (w) {
+                if(w.type === 'normal')
+                  ++ count;
+              } );
+
+              if(count === 0)
+                close();
+            } );
+          }
         }
       } );
 
@@ -67,7 +81,7 @@ var Background = function (window, chrome, $, std, undefined)
      * click. */
     chrome.browserAction.onClicked.addListener(function (tab) {
       Config.load(function (options) {
-        options.active = !options.active;
+        options.active = window_.extension === null;
         Config.save(options);
       } );
     } );
