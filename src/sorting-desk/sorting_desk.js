@@ -275,7 +275,13 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
 
     this.creating_ = null;
     this.selected_ = null;
-    this.dropTarget_ = null;
+
+    /* Drag and drop handler */
+    this.dnd_ = new DragDropHandler(this);
+    this.dnd_.on( {
+      'drop-folder': this.on_dropped_in_folder_.bind(this),
+      'drop-subfolder': this.on_dropped_in_subfolder_.bind(this)
+    } );
 
     /* Initialise jstree. */
     this.tree_ = els.explorer.jstree( {
@@ -434,23 +440,6 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
         }
 
         self.updateToolbar();
-      },
-      "dragover":  function (ev){self.on_dragging_enter_(ev);return false;},
-      "dragenter": function (ev){self.on_dragging_enter_(ev);return false;},
-      "dragleave": function (ev){self.on_dragging_exit_(ev); return false;},
-      "drop": function (ev)
-      {
-        var ent = self.on_dragging_exit_(ev);
-
-        /* Prevent triggering default handler. */
-        ev.originalEvent.preventDefault();
-
-        if(ent instanceof Folder)
-          self.on_dropped_in_folder_(ev, ent);
-        else if(ent instanceof Subfolder)
-          self.on_dropped_in_subfolder_(ev, ent);
-
-        return false;
       }
     } );
 
@@ -574,13 +563,13 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
 
   ControllerExplorer.prototype.reset = function ()
   {
-    /* Reset bin spawner controller and remove all children nodes inside the
-     * bins HTML container. */
     this.reset_tree_();
+    this.dnd_.reset();
 
     /* Reset state. */
     this.id_ = this.folders_ = null;
     this.refreshing_ = this.events_ = this.dropTarget_ = null;
+    this.dnd_ = null;
   };
 
   ControllerExplorer.prototype.createFolder = function ()
@@ -942,55 +931,7 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
     this.reset_query_();
   };
 
-  ControllerExplorer.prototype.on_dragging_enter_ = function (ev)
-  {
-    this.clear_drop_target_();
-    ev = ev.originalEvent;
-    ev.dropEffect = 'move';
-
-    var to = ev.toElement || ev.target,
-        el = to && to.nodeName.toLowerCase() === 'a' && to || false;
-
-    if(el && el.parentNode && el.parentNode.id) {
-      var fl = this.getAnyById(el.parentNode.id);
-
-      if(std.instanceany(fl, Folder, Subfolder)) {
-        this.dropTarget_ = $(el).addClass(Css.droppable.hover);
-        return fl;
-      }
-    }
-
-    return null;
-  };
-
-  ControllerExplorer.prototype.on_dragging_exit_ = function (ev)
-  {
-    this.clear_drop_target_();
-    ev = ev.originalEvent;
-
-    var to = ev.toElement || ev.target,
-        el = to && to.nodeName.toLowerCase() === 'a' && to || false;
-
-    if(el && el.parentNode && el.parentNode.id) {
-      var fl = this.getAnyById(el.parentNode.id);
-
-      if(std.instanceany(fl, Folder, Subfolder))
-        return fl;
-    }
-
-    return null;
-  };
-
-  ControllerExplorer.prototype.clear_drop_target_ = function ()
-  {
-    if(this.dropTarget_ !== null) {
-      this.dropTarget_.removeClass(Css.droppable.hover);
-      this.dropTarget_ = null;
-    }
-  };
-
-  ControllerExplorer.prototype.on_dropped_in_folder_ = function (
-    ev, folder)
+  ControllerExplorer.prototype.on_dropped_in_folder_ = function (ev, folder)
   {
     var self = this;
 
@@ -1761,6 +1702,144 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
   ItemNew.prototype.reset = function ()
   {
     this.tree.delete_node(this.tree.get_node(this.id_));
+  };
+
+
+  /**
+   * class
+   * */
+  var DragDropHandler = function (owner)
+  {
+    std.Owned.call(this, owner);
+
+    /* Attributes */
+    this.sd_ = owner.owner;
+    this.target_ = null;
+    this.timer_ = null;
+    this.exit_ = true;
+    this.events_ = new std.Events(this, [ 'drop-folder', 'drop-subfolder' ]);
+
+    /* Initialisation sequence */
+    var self = this;
+    this.sd_.nodes.explorer.on( {
+      "dragover":  function (ev){self.on_dragging_enter_(ev);return false;},
+      "dragenter": function (ev){self.on_dragging_enter_(ev);return false;},
+      "dragleave": function (ev){self.on_dragging_exit_(ev); return false;},
+      "drop": function (ev)
+      {
+        var ent = self.on_dragging_exit_(ev);
+
+        /* Prevent triggering default handler. */
+        ev.originalEvent.preventDefault();
+
+        if(ent instanceof Folder)
+          self.events_.trigger('drop-folder', ev, ent);
+        else if(ent instanceof Subfolder)
+          self.events_.trigger('drop-subfolder', ev, ent);
+
+        return false;
+      }
+    } );
+  };
+
+  DragDropHandler.TIMEOUT_CLEAR_TARGET = 250;
+
+  DragDropHandler.prototype = Object.create(std.Owned.prototype);
+
+  DragDropHandler.prototype.reset = function ()
+  {
+    this.sd_.nodes.explorer.off();
+    this.target_ = this.sd_ = null;
+  };
+
+  DragDropHandler.prototype.clear_target_ = function (now)
+  {
+    var self = this;
+
+    if(this.timer_ !== null) {
+      this.do_clear_target_();
+      window.clearTimeout(this.timer_);
+    }
+
+    this.timer_ = window.setTimeout(function () {
+      if(self.target_ !== null)
+        self.do_clear_target_();
+
+        self.timer_ = null;
+    }, now === true ? 0 : DragDropHandler.TIMEOUT_CLEAR_TARGET);
+  };
+
+  DragDropHandler.prototype.do_clear_target_ = function ()
+  {
+    if(this.target_ !== null) {
+      this.target_.removeClass(Css.droppable.hover);
+      this.target_ = null;
+    }
+  };
+
+  DragDropHandler.prototype.set_target_ = function (el)
+  {
+    if(this.target_ !== null && !std.$.same(this.target_, el))
+      this.target_.removeClass(Css.droppable.hover);
+
+    this.target_ = el;
+  };
+
+  DragDropHandler.prototype.on_dragging_enter_ = function (ev)
+  {
+    this.exit_ = false;
+    ev = ev.originalEvent;
+
+    var self = this,
+        to = ev.toElement || ev.target,
+        el = to && to.nodeName.toLowerCase() === 'a' && to || false;
+
+    if(el && el.parentNode && el.parentNode.id) {
+      var fl = this.owner_.getAnyById(el.parentNode.id);
+
+      if(std.instanceany(fl, Folder, Subfolder)) {
+        el = $(el);
+
+        if(this.target_ !== null && !std.$.same(this.target_, el))
+          this.clear_target_(true);
+
+        this.sd_.callbacks.invoke("checkSelection")
+          .done(function (result) {
+            if(self.exit_
+               || (self.target_ !== null && !std.$.same(self.target_, el)))
+            {
+              return;
+            } else if(result === true) {
+              el.addClass(Css.droppable.hover);
+              self.set_target_(el);
+            }
+          } );
+
+        return fl;
+      }
+    }
+
+    this.clear_target_();
+    return null;
+  };
+
+  DragDropHandler.prototype.on_dragging_exit_ = function (ev)
+  {
+    this.exit_ = true;
+    this.clear_target_(true);
+    ev = ev.originalEvent;
+
+    var to = ev.toElement || ev.target,
+        el = to && to.nodeName.toLowerCase() === 'a' && to || false;
+
+    if(el && el.parentNode && el.parentNode.id) {
+      var fl = this.owner_.getAnyById(el.parentNode.id);
+
+      if(std.instanceany(fl, Folder, Subfolder))
+        return fl;
+    }
+
+    return null;
   };
 
 
