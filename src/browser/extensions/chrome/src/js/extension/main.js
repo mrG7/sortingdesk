@@ -128,6 +128,16 @@ var Main = (function (window, chrome, $, std, sq, sd, Api, undefined) {
       } );
     };
 
+    var onCheckSelection_ = function ()
+    {
+      return do_active_tab_(function (deferred) {
+        chrome.tabs.sendMessage(active.id, { operation: 'check-selection' },
+          function (result) {
+            deferred.resolve(result);
+          } );
+      } );
+    };
+
     var onCreateManualItem_ = function (text)
     {
       return do_active_tab_(function (deferred) {
