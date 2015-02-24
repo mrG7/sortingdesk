@@ -73,8 +73,25 @@ var Embeddable = (function ($, std, DragDropMonitor, undefined) {
     self.port.emit("get-selection", std.is_str(result) ? result : null);
   } );
 
+  self.port.on("check-selection", function () {
+    var result;
+
+    if(!monitor.down)
+      result = false;
+    else {
+      var active = monitor.active;
+
+      if(active && active.length > 0)
+        result = !!active.get(0).src;
+      else {
+        active = window.getSelection();
+        result = active
+                 && active.anchorNode
+                 && active.toString().length > 0;
+      }
     }
 
+    self.port.emit("check-selection", result);
   } );
 
   self.port.on("get-page-meta", function () {

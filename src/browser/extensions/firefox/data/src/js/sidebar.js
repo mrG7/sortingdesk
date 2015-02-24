@@ -99,6 +99,18 @@ var Main = (function (window, $, std, sq, sd, Api, undefined) {
       return deferred.promise();
     };
 
+    var onCheckSelection_ = function ()
+    {
+      var deferred = $.Deferred();
+
+      addon.port.emit('check-selection');
+      addon.port.once('check-selection', function (result) {
+        deferred.resolve(result);
+      } );
+
+      return deferred.promise();
+    };
+
     var netfails_ = {
       'folder-list': "retrieving the list of folders",
       'folder-add': "adding a new folder",
@@ -127,6 +139,7 @@ var Main = (function (window, $, std, sq, sd, Api, undefined) {
       callbacks: {
         sorter: {
           getSelection: onGetSelection_,
+          checkSelection: onCheckSelection_,
           createManualItem: onCreateManualItem_,
           networkFailure: onNetworkFailure_
         }

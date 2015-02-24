@@ -209,6 +209,17 @@ var Main = (function (undefined) {
       } );
     } );
 
+    worker.port.on('check-selection', function () {
+      console.log("check-selection: testing selected content");
+      var cs = getActiveTabWorker_(worker);
+      if(!cs) worker.port.emit('check-selection', null);
+
+      cs.port.emit('check-selection');
+      cs.port.once('check-selection', function (result) {
+        worker.port.emit('check-selection', result);
+      } );
+    } );
+
     worker.port.on('get-page-meta', function () {
       console.log("get-page-meta: returning page meta");
       var cs = getActiveTabWorker_(worker);

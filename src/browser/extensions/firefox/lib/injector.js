@@ -15,7 +15,7 @@ var Injector = (function () {
   var initialised = false,
       map = { },
       scripts = [ "lib/jquery-2.1.1.min.js",
-                  "shared/src/js/draggable_image_monitor.js",
+                  "shared/src/js/drag_drop_monitor.js",
                   "lib/sorting-common/sorting_common.js",
                   "src/js/embed.js" ];
 
