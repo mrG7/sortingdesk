@@ -244,7 +244,8 @@ var Embeddable = (function ($, std, DragDropMonitor, undefined) {
   };
 
 
-  /* Attempt to initialize extension class responsible for the UI. */
+  /* Initialise only if the extension is running and thus its configuration is
+   * available, and it is active. */
   chrome.runtime.sendMessage({ operation: "get-meta" }, function (result) {
     /* Do not proceed with UI initialisation if extension not currently enabled,
      * current tab not active or current page's URL is secure (using HTTPS) and
