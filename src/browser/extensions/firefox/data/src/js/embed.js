@@ -45,19 +45,17 @@ var Embeddable = (function ($, std, DragDropMonitor, undefined) {
         result.id = result.content = val;
         result.caption = active.alt || active.title;
         result.type = "image";
-
-        console.log("Image selection: ", val);
-        self.port.emit("get-selection", result);
-
-        return;
       } else
         console.error("Unable to retrieve valid `src´ attribute");
     } else {
       var sel = window.getSelection();
 
-      if(sel && sel.anchorNode) {
+      if(sel && sel.anchorNode)
         val = sel.toString();
+      else
+        console.error("No text currently selected");
 
+      if(val && val.length > 0) {
         /* Craft a unique id for this text snippet based on its content, Xpath
          * representation, offset from selection start and length. This id is
          * subsequently used to generate a unique and collision free unique
@@ -68,17 +66,15 @@ var Embeddable = (function ($, std, DragDropMonitor, undefined) {
 
         result.content = val;
         result.type = "text";
-
-        console.log("Text selection: ", val);
-        self.port.emit("get-selection", result);
-
-        return;
-      } else
-        console.error("No text currently selected");
+      }
     }
 
-    /* Retrieval of selection failed. */
-    self.port.emit("get-selection", null);
+    /* Return selection data if `type´ attribute present; null, otherwise. */
+    self.port.emit("get-selection", std.is_str(result) ? result : null);
+  } );
+
+    }
+
   } );
 
   self.port.on("get-page-meta", function () {
