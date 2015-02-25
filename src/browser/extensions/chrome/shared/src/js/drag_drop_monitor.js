@@ -68,7 +68,3 @@ DragDropMonitor.TIMEOUT_DRAGEND = 250;
 DragDropMonitor.prototype.cursor_ = null;
 DragDropMonitor.prototype.active_ = null;
 DragDropMonitor.prototype.down_   = false;
-
-/* Interface */
-DragDropMonitor.prototype.clear = function ()
-{ this.active_ = null; };

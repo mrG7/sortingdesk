@@ -137,12 +137,38 @@ var SortingCommon_ = function (window, $) {
     var any = function (r)
     { return is(r) && r.length > 0; };
 
+    /** Returns true if two jQuery collections contain the exact same DOM
+     * elements.
+     *
+     * @param {object} l - Left collection to test.
+     * @param {object} r - Right collection to test.
+     *
+     * @returns {boolean} True, if <code>r</code> contains the same DOM
+     * elements as <code>l</code>.  This implies that the collections of both
+     * <code>l</code> and <code>r</code> contain the same number of elements
+     * too. */
+    var same = function (l, r)
+    {
+      if(!is(l) || !is(r))
+        throw "Invalid jQuery reference(s) specified";
+      else if(l.length !== r.length)
+        return false;
+
+      for(var i = 0, c = l.length; i < c; ++i) {
+        if(l.get(i) !== r.get(i))
+          return false;
+      }
+
+      return true;
+    };
+
 
     /* Public interface */
     return {
       alloff: alloff,
       is: is,
-      any: any
+      any: any,
+      same: same
     };
 
   } )();
