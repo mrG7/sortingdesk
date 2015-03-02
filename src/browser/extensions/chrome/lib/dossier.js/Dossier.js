@@ -85,14 +85,16 @@ var _DossierJS = function(window, $) {
             'search',
             engine_name,
         ].join('/'), params);
-        return Xhr.getJSON('API.search', url).promise()
+        return Xhr.getJSON('API.search', url)
             .then(function(data) {
                 for (var i = 0; i < data.results.length; i++) {
                     data.results[i].fc = new FeatureCollection(
                         data.results[i].content_id, data.results[i].fc);
                 }
                 return data;
-            });
+            }, function () {
+                console.error("Search failed: ", url);
+            } );
     };
 
     // Retrieves a list of available search engines.
@@ -103,7 +105,10 @@ var _DossierJS = function(window, $) {
     // This returns a jQuery promise that resolves to a list of search engine
     // names.
     API.prototype.searchEngines = function() {
-        return Xhr.getJSON('API.searchEngines', this.url('search_engines'));
+        return Xhr.getJSON('API.searchEngines', this.url('search_engines'))
+            .fail(function () {
+                console.error("Failed to retrieve search engines.");
+            } );
     };
 
     // Retrieves a feature collection from the database with the given
@@ -118,10 +123,13 @@ var _DossierJS = function(window, $) {
     API.prototype.fcGet = function(content_id) {
         var url = this.url('feature-collection/'
                            + encodeURIComponent(serialize(content_id)));
-        return Xhr.getJSON('API.fcGet', url).promise()
+        return Xhr.getJSON('API.fcGet', url)
             .then(function(data) {
                 return new FeatureCollection(content_id, data);
-            });
+            }, function () {
+                console.error("Failed to retrieve feature collection: ",
+                              content_id);
+            } );
     };
 
     // Fetch a set of feature collections asynchronously for the given
@@ -146,7 +154,7 @@ var _DossierJS = function(window, $) {
             fcs = [];
 
         if(content_ids.length === 0) {
-            console.log("No content ids to fetch");
+            console.warn("No content ids to fetch");
             window.setTimeout(function () { def.resolve(fcs); } );
         }
 
@@ -157,7 +165,7 @@ var _DossierJS = function(window, $) {
                     fcs.push(fc);
                 })
                 .fail(function() {
-                    console.log('Could not fetch FC for ' + cid);
+                    console.error('Could not fetch FC for ' + cid);
                 })
                 .always(function() {
                     to_resolve -= 1;
@@ -189,9 +197,9 @@ var _DossierJS = function(window, $) {
             url: url,
             data: JSON.stringify(fc.raw)
         }).fail(function() {
+            console.error("Could not save feature collection " +
+                          "(content id: '" + content_id + "')");
             console.log(fc);
-            console.log("Could not save feature collection " +
-                        "(content id: '" + content_id + "')");
         });
     };
 
@@ -202,10 +210,12 @@ var _DossierJS = function(window, $) {
     // is a `FeatureCollection`.
     API.prototype.fcRandomGet = function() {
         var url = this.url('random/feature-collection');
-        return Xhr.getJSON('API.fcRandomGet', url).promise()
+        return Xhr.getJSON('API.fcRandomGet', url)
             .then(function(data) {
                 return [data[0], new FeatureCollection(data[0], data[1])];
-            });
+            }, function () {
+                console.error("Failed to retrieve random feature collection");
+            } );
     };
 
     // Adds a new label to the database, which will be used to support
@@ -243,20 +253,17 @@ var _DossierJS = function(window, $) {
             endpoint = ['label', url_cid1, url_cid2, url_ann].join('/'),
             params = {};
 
-        if (label.subtopic_id1) {
-            params.subtopic_id1 = serialize(label.subtopic_id1);
-        }
-        if (label.subtopic_id2) {
-            params.subtopic_id2 = serialize(label.subtopic_id2);
-        }
+        if (label.subtopic_id1) params.subtopic_id1 = label.subtopic_id1;
+        if (label.subtopic_id2) params.subtopic_id2 = label.subtopic_id2;
+
         return Xhr.ajax('API.addLabel', {
             type: 'PUT',
             url: this.url(endpoint, params),
             contentType: 'text/plain',
             data: label.coref_value.toString()
-        }).fail(function() {
-            console.log("Could not add label:", label);
-        }).promise();
+        } ).fail(function() {
+            console.error("Could not add label:", label);
+        } );
     };
 
     // Adds an array of labels asynchronously and returns a promise that is
@@ -279,7 +286,7 @@ var _DossierJS = function(window, $) {
                     }
                 })
                 .fail(function(jqXHR, textStatus, errorThrown) {
-                    console.log("Failed to add label: " + label);
+                    console.error("Failed to add label: " + label);
                     def.reject(jqXHR, textStatus, errorThrown, label);
                 })
             );
@@ -298,12 +305,14 @@ var _DossierJS = function(window, $) {
         var params = {annotator_id: annotator},
             url = this.url('folder', params);
 
-        return Xhr.getJSON('API.listFolders', url).promise()
+        return Xhr.getJSON('API.listFolders', url)
             .then(function(ids) {
                 return ids.map(function(id) {
                     return Folder.from_id(id, annotator);
                 });
-            });
+            }, function () {
+                console.error("Failed to list folders");
+            } );
     };
 
     // Add a new folder.
@@ -319,8 +328,8 @@ var _DossierJS = function(window, $) {
             type: 'PUT',
             url: url
         }).fail(function() {
-            console.log("Could not add folder:", folder);
-        }).promise();
+            console.error("Could not add folder:", folder);
+        });
     };
 
     // List all subfolders belonging to a particular folder.
@@ -332,12 +341,14 @@ var _DossierJS = function(window, $) {
         var params = {annotator_id: folder.annotator},
             endpoint = ['folder', folder.id, 'subfolder'].join('/'),
             url = this.url(endpoint, params);
-        return Xhr.getJSON('API.listSubfolders', url).promise()
+        return Xhr.getJSON('API.listSubfolders', url)
             .then(function(ids) {
                 return ids.map(function(id) {
                     return Subfolder.from_id(folder, id);
                 });
-            });
+            }, function () {
+                console.error("Failed to list subfolders of folder:", folder);
+            } );
     };
 
     // Add an item to a subfolder. If the subfolder does not already exist,
@@ -368,9 +379,9 @@ var _DossierJS = function(window, $) {
             type: 'PUT',
             url: url
         }).fail(function() {
-            console.log("Could not add subfolder with item:",
-                        subfolder, content_id, subtopic_id);
-        }).promise();
+            console.error("Could not add subfolder with item:",
+                          subfolder, content_id, subtopic_id);
+        });
     };
 
     // Lists all of the items in a particular subfolder.
@@ -386,7 +397,10 @@ var _DossierJS = function(window, $) {
                 'folder', subfolder.folder.id, 'subfolder', subfolder.id
             ].join('/'),
             url = this.url(endpoint, params);
-        return Xhr.getJSON('API.listSubfolderItems', url).promise();
+        return Xhr.getJSON('API.listSubfolderItems', url)
+            .fail(function () {
+                console.error("Failed to list items in subfolder:", subfolder);
+            } );
     };
 
     API.prototype.stop = function () {
@@ -502,8 +516,11 @@ var _DossierJS = function(window, $) {
         }
         if (this._page) params.page = this._page;
         if (this._perpage) params.perpage = this._perpage;
-        var url = this.api.url(endpoint, params);
-        return Xhr.getJSON('LabelFetcher.get', url).promise()
+
+        var self = this,
+            url = this.api.url(endpoint, params);
+
+        return Xhr.getJSON('LabelFetcher.get', url)
             .then(function(labels) {
                 return labels.map(function(label) {
                     return new Label(label.content_id1, label.content_id2,
@@ -511,7 +528,10 @@ var _DossierJS = function(window, $) {
                                      label.subtopic_id1 || undefined,
                                      label.subtopic_id2 || undefined);
                 });
-            });
+            }, function () {
+                console.error("Failed to retrieve labels for id:",
+                              self._cid);
+            } );
     };
 
     // Constructs a new label.
@@ -772,15 +792,12 @@ var _DossierJS = function(window, $) {
     //   qitems.query_content_id = '<content id>';
     //   sorting_desk_instance.items.removeAll();
     //
-    // There are a number of attributes that can be set on an instance of
-    // `SortingQueueItems` that affect search engine behavior:
+    // Similarly, each instance has an `annotator` attribute, which is set
+    // to the value given in the constructor, but may be changed at any time.
+    // The value is used whenever a label is created.
     //
-    //   annotator   - Used whenever a label is created.
-    //   limit       - Limits the number of results returned to the user.
-    //                 Defaults to `5`.
-    //   query_subtopic_id - Causes a search engine to use subtopic querying.
-    //                       This only works if the search engine supports it!
-    //   params      - Pass arbitrary query parameters to the search engine.
+    // There are also `limit` and `params` instance attributes. `limit` is set
+    // to `5` by default. `params` is empty by default.
     //
     // The `api` parameter should be an instance of `DossierJS.API`.
     //
@@ -791,7 +808,6 @@ var _DossierJS = function(window, $) {
         this.api = api;
         this.engine_name = engine_name;
         this.query_content_id = query_content_id;
-        this.query_subtopic_id = null;
         this.annotator = annotator;
         this.limit = 5;
         this.params = {};
@@ -831,10 +847,10 @@ var _DossierJS = function(window, $) {
 
             window.setTimeout(function () {
                 if(self._processing) {
-                    console.log('moreTexts in progress, ignoring new request');
+                    console.warn('moreTexts in progress; ignoring');
                     deferred.reject( { error: "Request in progress" } );
                 } else {
-                    console.log('Query content id not yet set');
+                    console.error('Query content id not yet set');
                     deferred.reject( { error: "No query content id" } );
                 }
             } );
@@ -845,9 +861,6 @@ var _DossierJS = function(window, $) {
         self._processing = true;
 
         var p = $.extend({limit: self.limit.toString()}, self.params);
-        if (self.query_subtopic_id !== null) {
-            p['subtopic_id'] = self.query_subtopic_id;
-        }
         return self.api.search(self.engine_name, self.query_content_id, p)
             .then(function(data) {
                 var items = [];
@@ -866,7 +879,7 @@ var _DossierJS = function(window, $) {
                 self._processing = false;
             })
             .fail(function() {
-                console.log("moreTexts: request failed");
+                console.error("moreTexts: request failed");
             });
     };
 

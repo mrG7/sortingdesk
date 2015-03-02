@@ -13,10 +13,10 @@
 /*jshint lax break:true */
 
 
-var Embeddable = (function ($, std, DraggableImageMonitor, undefined) {
+var Embeddable = (function ($, std, DragDropMonitor, undefined) {
 
   /* Module variables */
-  var monitor_;
+  var monitor;
 
 
   /* Message handling */
@@ -27,7 +27,7 @@ var Embeddable = (function ($, std, DraggableImageMonitor, undefined) {
   self.port.on("get-selection", function () {
     var result = { },
         val,
-        active = monitor_.active;
+        active = monitor.active;
 
     console.log("getting active selection");
 
@@ -40,25 +40,22 @@ var Embeddable = (function ($, std, DraggableImageMonitor, undefined) {
       /* Retrieve image's src and clear active drop. */
       active = active.get(0);
       val = active.src;
-      monitor_.clear();
 
       if(val) {
         result.id = result.content = val;
         result.caption = active.alt || active.title;
         result.type = "image";
-
-        console.log("Image selection: ", val);
-        self.port.emit("get-selection", result);
-
-        return;
       } else
         console.error("Unable to retrieve valid `src´ attribute");
     } else {
       var sel = window.getSelection();
 
-      if(sel && sel.anchorNode) {
+      if(sel && sel.anchorNode)
         val = sel.toString();
+      else
+        console.error("No text currently selected");
 
+      if(val && val.length > 0) {
         /* Craft a unique id for this text snippet based on its content, Xpath
          * representation, offset from selection start and length. This id is
          * subsequently used to generate a unique and collision free unique
@@ -69,17 +66,32 @@ var Embeddable = (function ($, std, DraggableImageMonitor, undefined) {
 
         result.content = val;
         result.type = "text";
-
-        console.log("Text selection: ", val);
-        self.port.emit("get-selection", result);
-
-        return;
-      } else
-        console.error("No text currently selected");
+      }
     }
 
-    /* Retrieval of selection failed. */
-    self.port.emit("get-selection", null);
+    /* Return selection data if `type´ attribute present; null, otherwise. */
+    self.port.emit("get-selection", std.is_str(result.type) ? result : null);
+  } );
+
+  self.port.on("check-selection", function () {
+    var result;
+
+    if(!monitor.down)
+      result = false;
+    else {
+      var active = monitor.active;
+
+      if(active && active.length > 0)
+        result = !!active.get(0).src;
+      else {
+        active = window.getSelection();
+        result = active
+                 && active.anchorNode
+                 && active.toString().length > 0;
+      }
+    }
+
+    self.port.emit("check-selection", result);
   } );
 
   self.port.on("get-page-meta", function () {
@@ -93,11 +105,8 @@ var Embeddable = (function ($, std, DraggableImageMonitor, undefined) {
   /* Module-wide functions */
   var initialise = function () {
     console.log("Initialising embeddable content");
-
-    $(function () {
-      monitor_ = new DraggableImageMonitor();
-      console.info("Initialised embeddable content");
-    } );
+    monitor = new DragDropMonitor();
+    console.info("Initialised embeddable content");
   };
 
-})($, SortingCommon, DraggableImageMonitor);
+})($, SortingCommon, DragDropMonitor);

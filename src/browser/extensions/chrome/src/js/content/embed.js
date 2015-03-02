@@ -5,7 +5,7 @@
  * @copyright 2015 Diffeo
  *
  * Comments:
- * Uses the `SortingDesk' and shared `DraggableImageMonitor´ components.
+ * Uses the `SortingDesk' and shared `DragDropMonitor´ components.
  *
  */
 
@@ -14,10 +14,7 @@
 /*jshint laxbreak:true */
 
 
-var Embeddable = (function ($, std, DraggableImageMonitor, undefined) {
-
-  /* Variables */
-  var embed_;
+var Embeddable = (function ($, std, DragDropMonitor, undefined) {
 
   var fetchImage = function (url, callback)
   {
@@ -55,14 +52,25 @@ var Embeddable = (function ($, std, DraggableImageMonitor, undefined) {
    * */
   var BackgroundListener = (function () {
 
+    var check_callback_ = function (callback)
+    {
+      if(!std.is_fn(callback)) {
+        console.warn("Invalid or no callback function specified");
+        return false;
+      }
+
+      return true;
+    };
+
+
     /* Events */
     var onGetSelection_ = function (request, sender, callback)
     {
-      if(!std.is_fn(callback)) return;
+      if(!check_callback_(callback)) return;
 
       var result = { },
           val,
-          active = embed_.monitor.active;
+          active = monitor.active;
 
       /* We can't yet generate a content_id so we just attached the page's
        * URL for now. */
@@ -73,8 +81,6 @@ var Embeddable = (function ($, std, DraggableImageMonitor, undefined) {
         /* Retrieve image's src and clear active drop. */
         active = active.get(0);
         val = active.src;
-        embed_.monitor.clear();
-        console.log("Image selection:", result);
 
         if(val) {
           result.id = result.content = val;
@@ -82,49 +88,53 @@ var Embeddable = (function ($, std, DraggableImageMonitor, undefined) {
           result.type = "image";
 
           /* Don't get image data if the image was loaded via a data URI. */
-          if(/^data:/.test(val)) {
+          if(/^data:/.test(val))
             result.data = val;
-            callback(result);
-            return;
+          else {
+            /* Image was loaded via a URI.  Fetch it and convert its data blob to
+             * base64. */
+            fetchImage(val, function (blob) {
+              var reader = new window.FileReader();
+
+              /* If a blob is available, convert it to base64. */
+              if(!blob)
+                callback(result); /* no image data returned. */
+              else {
+                reader.onload = function () {
+                  result.data = reader.result;
+                  callback(result);
+                };
+
+                reader.onerror = function () {
+                  console.error(
+                    'Conversion of image data from blob to data failed.');
+                  callback(result);
+                };
+
+                reader.readAsDataURL(blob);
+              }
+            } );
+
+            /* This message will be processed asynchronously since we need to
+             * retrieve the image data in base64 encoding (above).  For this
+             * reason, return true. */
+            return true;
           }
-
-          /* Image was loaded via a URI.  Fetch it and convert its data blob to
-           * base64. */
-          fetchImage(val, function (blob) {
-            var reader = new window.FileReader();
-
-            /* If a blob is available, convert it to base64. */
-            if(!blob)
-              callback(result);
-            else {
-              reader.onload = function () {
-                result.data = reader.result;
-                callback(result);
-              };
-
-              reader.onerror = function () {
-                console.error('Conversion of image data from blob to data'
-                              + ' failed.');
-                callback(result);
-              };
-
-              reader.readAsDataURL(blob);
-            }
-          } );
-
-          return true;
         } else
           console.error("Unable to retrieve valid `src´ attribute");
       } else {
         var sel = window.getSelection();
 
-        if(sel && sel.anchorNode) {
+        if(sel && sel.anchorNode)
           val = sel.toString();
+        else
+          console.error("No text currently selected");
 
+        if(val && val.length > 0) {
           /* Craft a unique id for this text snippet based on its content,
-           * Xpath representation, offset from selection start and length. This
-           * id is subsequently used to generate a unique and collision free
-           * unique subtopic id. */
+           * Xpath representation, offset from selection start and length.
+           * This id is subsequently used to generate a unique and collision
+           * free unique subtopic id. */
           result.xpath = std.Html.getXpathSimple(sel.anchorNode);
           result.id = [ val,
                         result.xpath,
@@ -133,20 +143,36 @@ var Embeddable = (function ($, std, DraggableImageMonitor, undefined) {
 
           result.content = val;
           result.type = "text";
-
-          console.log("Text selection:", result);
-          callback(result);
-        } else
-          console.error("No text currently selected");
+        }
       }
 
-      /* Retrieval of selection failed. */
-      callback(null);
+      /* Return selection data if `type´ attribute present; null, otherwise. */
+      callback(std.is_str(result.type) ? result : null);
+    };
+
+    var onCheckSelection_ = function (request, sender, callback)
+    {
+      if(!check_callback_(callback)) return;
+      if(!monitor.down) {
+        callback(false);
+        return;
+      }
+
+      var active = monitor.active;
+
+      if(active && active.length > 0)
+        callback(!!active.get(0).src);
+      else {
+        active = window.getSelection();
+        callback(active
+                 && active.anchorNode
+                 && active.toString().length > 0);
+      }
     };
 
     var onGetPageMeta_ = function (request, sender, callback)
     {
-      if(!std.is_fn(callback)) return;
+      if(!check_callback_(callback)) return;
 
       callback( {
         href: window.location.href,
@@ -158,6 +184,7 @@ var Embeddable = (function ($, std, DraggableImageMonitor, undefined) {
     /* Map message operations to handlers. */
     var methods_ = {
       "get-selection": onGetSelection_,
+      "check-selection": onCheckSelection_,
       "get-page-meta": onGetPageMeta_
     };
 
@@ -190,28 +217,30 @@ var Embeddable = (function ($, std, DraggableImageMonitor, undefined) {
   } )();
 
 
-  /**
-   * @class
-   * */
-  var Embed = function (meta)
+  /* Module-wide attributes and interface
+   * --
+   * Attributes
+   */
+  var monitor = null;
+
+
+  /* Interface */
+  var initialise = function (meta)
   {
     console.log("Initialising embeddable content");
 
+    monitor = new DragDropMonitor();
     BackgroundListener.initialise();
-    this.monitor_ = new DraggableImageMonitor();
 
+    /* Let extension know embedded content is ready. */
     chrome.runtime.sendMessage({ operation: "embeddable-active" });
 
     console.info("Initialised embeddable content");
   };
 
-  Embed.prototype = {
-    monitor_: null,
 
-    get monitor () { return this.monitor_; }
-  };
-
-  /* Attempt to initialize extension class responsible for the UI. */
+  /* Initialise only if the extension is running and thus its configuration is
+   * available, and it is active. */
   chrome.runtime.sendMessage({ operation: "get-meta" }, function (result) {
     /* Do not proceed with UI initialisation if extension not currently enabled,
      * current tab not active or current page's URL is secure (using HTTPS) and
@@ -219,7 +248,7 @@ var Embeddable = (function ($, std, DraggableImageMonitor, undefined) {
     if(!result.config.active || !window.location.href)
       console.info("Skipping activation: inactive or unsupported");
     else
-      embed_ = new Embed(result);
+      initialise(result);
   } );
 
-})($, SortingCommon, DraggableImageMonitor);
+})($, SortingCommon, DragDropMonitor);

@@ -128,6 +128,16 @@ var Main = (function (window, chrome, $, std, sq, sd, Api, undefined) {
       } );
     };
 
+    var onCheckSelection_ = function ()
+    {
+      return do_active_tab_(function (deferred) {
+        chrome.tabs.sendMessage(active.id, { operation: 'check-selection' },
+          function (result) {
+            deferred.resolve(result);
+          } );
+      } );
+    };
+
     var onCreateManualItem_ = function (text)
     {
       return do_active_tab_(function (deferred) {
@@ -149,12 +159,37 @@ var Main = (function (window, chrome, $, std, sq, sd, Api, undefined) {
       } );
     };
 
+    var netfails_ = {
+      'folder-list': "retrieving the list of folders",
+      'folder-add': "adding a new folder",
+      'folder-load': "loading the folder's subfolders",
+      'subfolder-load': "loading the subfolder's items",
+      'subfolder-add': "adding an item to the subfolder",
+      'item-dismissal': "processing the item's dismissal",
+      'fc-create': "saving the item's data",
+      'fc-save': "saving the item's data",
+      'label': "saving state data"
+    };
+
+    var onNetworkFailure_ = function (type, data)
+    {
+      var action = netfails_[type] || "contacting the server";
+
+      alert([ "Unfortunately we have encountered a problem whilst ",
+              action, ".\n\n",
+              "Please try again. If the problem persists, contact the support",
+              " team.",
+            ].join(''));
+    };
+
     /* Interface */
     return {
       callbacks: {
         sorter: {
           getSelection: onGetSelection_,
-          createManualItem: onCreateManualItem_
+          checkSelection: onCheckSelection_,
+          createManualItem: onCreateManualItem_,
+          networkFailure: onNetworkFailure_
         }
       }
     };
@@ -274,6 +309,13 @@ var Main = (function (window, chrome, $, std, sq, sd, Api, undefined) {
       sorter: new LoadingStatus($('#sd-folder-explorer .sd-loading')),
       queue:  new LoadingStatus($('#sd-queue .sd-loading'))
     };
+
+    /* Prevent drag and drop events on extension window's document. */
+    $(document).on( {
+      dragover: function ()   { return false; },
+      dragleave: function ()  { return false; },
+      drop: function ()       { return false; }
+    } );
 
     chrome.runtime.sendMessage({ operation: "get-meta" }, function (meta) {
       /* Cache jQuery references to nodes used. */
