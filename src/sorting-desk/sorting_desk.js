@@ -1655,7 +1655,7 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
   {
     if(Item.prototype.onGotFeatureCollection.call(this, fc)) {
       this.item_.data = fc.feature(
-        this.api.makeRawSubId(this.item_.subtopic_id));
+        this.api.makeRawSubId(this.item_.subtopic_id, 'data'));
       return true;
     }
 
