@@ -1810,6 +1810,10 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
           this.clear_target_(true);
         }
 
+        /* Disallow drops when folder/subfolder is in a loading state. */
+        if(fl.loading())
+          return fl;
+
         var d = this.sd_.callbacks.invokeMaybe("checkSelection");
         if(d === null)
           this.on_selection_queried_(el, true);
@@ -1851,7 +1855,7 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
     if(el && el.parentNode && el.parentNode.id) {
       var fl = this.owner_.getAnyById(el.parentNode.id);
 
-      if(std.instanceany(fl, Folder, Subfolder))
+      if(std.instanceany(fl, Folder, Subfolder) && !fl.loading())
         return fl;
     }
 
