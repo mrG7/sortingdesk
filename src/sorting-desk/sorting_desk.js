@@ -508,6 +508,8 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
 
     /* Stop ALL AJAX requests. */
     this.api.getDossierJs().stop();
+
+    /* Reset state and trigger refresh event. */
     this.refreshing_ = true;
     this.reset_tree_();
     this.events_.trigger('refresh-begin');
