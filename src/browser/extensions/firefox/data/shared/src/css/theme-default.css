@@ -190,16 +190,16 @@ BODY {
 }
 
 .sd-text-item-content A {
-  color: #0B9DCC;
+  color: #0b9dcc;
 }
 
 .sd-text-item-content A:hover {
-  color: #85B7E4;
+  color: #85b7e4;
   text-decoration: underline;
 }
 
 .sd-text-item-content A:visited {
-  color: #85B7E4 !important;
+  color: #1153ab;
 }
 
 A.sd-text-item-title {

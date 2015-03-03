@@ -506,6 +506,8 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
       return;
     }
 
+    /* Stop ALL AJAX requests. */
+    this.api.getDossierJs().stop();
     this.refreshing_ = true;
     this.reset_tree_();
     this.events_.trigger('refresh-begin');
@@ -1554,6 +1556,9 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
     else {
       this.fc_ = fc;
 
+      /* Return if the item has been reset meanwhile. */
+      if(this.item_ === null) return;
+
       /* If this item does not yet have content, it exists and thus its feature,
        * given by its subtopic id, must exist in the feature collection.
        * Otherwise, the item is being created. */
@@ -1810,6 +1815,10 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
           this.clear_target_(true);
         }
 
+        /* Disallow drops when folder/subfolder is in a loading state. */
+        if(fl.loading())
+          return fl;
+
         var d = this.sd_.callbacks.invokeMaybe("checkSelection");
         if(d === null)
           this.on_selection_queried_(el, true);
@@ -1851,7 +1860,7 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
     if(el && el.parentNode && el.parentNode.id) {
       var fl = this.owner_.getAnyById(el.parentNode.id);
 
-      if(std.instanceany(fl, Folder, Subfolder))
+      if(std.instanceany(fl, Folder, Subfolder) && !fl.loading())
         return fl;
     }
 

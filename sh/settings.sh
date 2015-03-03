@@ -10,7 +10,8 @@
 #
 
 # URL of Dossier stack excluding prefixes
-readonly URL_DOSSIER_STACK=http://54.174.195.250:8080
+#readonly URL_DOSSIER_STACK=http://54.174.195.250:8080
+readonly URL_DOSSIER_STACK=http://localhost:8080
 
 # Prefix to append to Dossier Stack URL
 # Note: ensure prefix BEGINS with a forward slash but does NOT end with one.
