@@ -1653,6 +1653,9 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
 
   ItemImage.prototype.onGotFeatureCollection = function (fc)
   {
+    /* Delegate to base class' method to retrieve the item's feature
+     * collection.  If successful, retrieve the item's data since here, the item's
+     * data may contain the actual image data. */
     if(Item.prototype.onGotFeatureCollection.call(this, fc)) {
       this.item_.data = fc.feature(
         this.api.makeRawSubId(this.item_.subtopic_id, 'data'));
