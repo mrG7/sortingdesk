@@ -89,9 +89,20 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
       opts.constructors.createItemDismissal = function (item) {
         return (new sq.ItemDismissalReplaceTight(
           item, {
-            tooltipClose: "Ignore",
-            choices: [ { id: 'duplicate', title: 'Duplicate?' },
-                       { id: 'negative', title: 'Wrong?' }  ]
+            tooltipClose: "Click again to ignore this result without asserting"
+              + " that it is either wrong or a redundant; will automatically"
+              + " select this choice for you in a few seconds.",
+            choices: [
+              { id: 'redundant',
+                title: 'Redundant?',
+                tooltip: 'Result is correct and either redundant, a duplicate,'
+                + ' or simply not something you want to see any more in the'
+                + ' results.'},
+              { id: 'wrong',
+                title: 'Wrong?',
+                tooltip: 'Result is not correct, not relevant, and not what'
+                + ' you want the system to learn as your objective of this'
+                + ' query; will be removed from future results.' } ]
           } ))
           .on('dismissed', function (id) {
             console.log('User chose: %s', id);
@@ -106,9 +117,9 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
                     self.api.getQuerySubtopicId());
             if (id === null)
               label.coref_value = djs.COREF_VALUE_UNKNOWN;
-            else if (id === 'duplicate')
+            else if (id === 'redundant')
               label.coref_value = djs.COREF_VALUE_POSITIVE;
-            else if (id === 'negative')
+            else if (id === 'wrong')
               label.coref_value = djs.COREF_VALUE_NEGATIVE;
             else {
               item.owner.remove(item);
