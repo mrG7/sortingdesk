@@ -20,3 +20,8 @@ readonly URL_DOSSIER_STACK_PREFIX=/dossier
 # URL of local service responsible for reloading the Sorting Desk Firefox
 # extension
 readonly URL_FIREFOX_RELOAD=http://localhost:8888
+
+# Delay in seconds before the `update-deps´ script is executed when a file is
+# created, modified, deleted or moved in within the `src/´ subtree.  This
+# applies to the `watch-deps´ script.
+readonly DELAY_UPDATE=1
