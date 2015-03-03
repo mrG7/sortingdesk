@@ -506,6 +506,8 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
       return;
     }
 
+    /* Stop ALL AJAX requests. */
+    this.api.getDossierJs().stop();
     this.refreshing_ = true;
     this.reset_tree_();
     this.events_.trigger('refresh-begin');
@@ -1553,6 +1555,9 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
     if(!fc) remove = true;
     else {
       this.fc_ = fc;
+
+      /* Return if the item has been reset meanwhile. */
+      if(this.item_ === null) return;
 
       /* If this item does not yet have content, it exists and thus its feature,
        * given by its subtopic id, must exist in the feature collection.
