@@ -6,15 +6,16 @@
 # Comments:
 #
 
+readonly dir_root="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. && pwd )"
+source "$dir_root/sh/libtools.sh"
+
 ! command -v cfx &>/dev/null 2>&1 \
-  && >&2 echo "E: \`cfx´ program not found" \
+  && >&2 error "\`cfx´ program not found" \
   && exit 1
 
 set -e
 
-readonly dir_root="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. && pwd )"
 cd "$dir_root/src/browser/extensions/firefox"
-
-echo "I: building Firefox extension"
+info "building Firefox extension"
 cfx xpi >/dev/null
 echo "done."

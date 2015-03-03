@@ -14,19 +14,7 @@ readonly dir_src="$dir_root/src"
 readonly dir_lib="$dir_root/lib"
 readonly dir_ext="$dir_src/browser/extensions"
 
-# Function definition
-function message () {
-  echo -e "\033[32m$1\033[0m"
-}
-
-function info () {
-  message "I: $1"
-}
-
-function error () {
-  echo -e "\033[31mE: $1\033[0m"
-  exit 1
-}
+source "$dir_root/sh/libtools.sh"
 
 # mkdirx <dir[/child0..n]>
 # Create directory, or directories, specified by `dir´ inside extension's `lib´
@@ -149,5 +137,5 @@ find ./chrome/shared/ -type f -exec chmod -v =r {} +
 find ./firefox/data/lib/ -type f -exec chmod -v =r {} +
 find ./firefox/data/shared/ -type f -exec chmod -v =r {} +
 
-message "\ndone."
+echo -e "\ndone."
 # End: main

@@ -8,8 +8,9 @@
 
 readonly dir_root="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. && pwd )"
 source "$dir_root/sh/settings.sh"
+source "$dir_root/sh/libtools.sh"
 
-echo "I: deleting all labels: $URL_DOSSIER_STACK"
+info "deleting all labels: $URL_DOSSIER_STACK"
 curl -X DELETE "$URL_DOSSIER_STACK$URL_DOSSIER_STACK_PREFIX/v1/delete-all-labels"
 
 echo "done."

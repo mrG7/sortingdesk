@@ -6,8 +6,11 @@
 # Comments:
 #
 
+readonly dir_root="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. && pwd )"
+source "$dir_root/sh/libtools.sh"
+
 ! command -v wmctrl &>/dev/null 2>&1 \
-  && >&2 echo "E: \`wmctrl´ program not found" \
+  && >&2 error "\`wmctrl´ program not found" \
   && exit 1
 
 set -e

@@ -10,15 +10,16 @@
 set -e
 
 function fail() {
-  [ ! -z "$2" ] && >&2 echo "E: failed to reload extension: $2"
+  [ ! -z "$2" ] && error "failed to reload extension: $2"
   exit $1
 }
 
 readonly dir_root="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. && pwd )"
 source "$dir_root/sh/settings.sh"
+source "$dir_root/sh/libtools.sh"
 cd "$dir_root/src/browser/extensions/firefox"
 
-echo "I: reloading extension"
+info "reloading extension"
 "$dir_root/sh/build-firefox" >/dev/null
 
 # Disable exiting immediately if a command fails, since the subsequent wget
