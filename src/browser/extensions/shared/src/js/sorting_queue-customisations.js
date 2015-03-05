@@ -16,6 +16,8 @@ var SortingQueueCustomisations = (function ($, std, sq) {
 
   Item.prototype.render = function(text, view, less)
   {
+    var self = this;
+
     /* Nodes */
     var node = $('<div class="' + sq.Css.item.container + '"/>'),
         content = $('<div class="' + sq.Css.item.content + '"/>'),
@@ -49,6 +51,8 @@ var SortingQueueCustomisations = (function ($, std, sq) {
 
       var info = raw.feature_cmp_info;
       if(std.is_obj(info)) {
+        var cloud = [];
+
         css = css.dict;
 
         for(var i in info) {
@@ -56,40 +60,63 @@ var SortingQueueCustomisations = (function ($, std, sq) {
               values = j.common_values;
 
           if(std.is_arr(values) && values.length > 0) {
-            var container = $('<div/>').addClass(css.container),
-                hasPhi = std.is_num(j.phi) && j.phi > 0,
-                el;
+            var descr = { },
+                a, b;
 
-            el = $('<div/>').addClass(css.weight.outer);
-            if(hasPhi)
-              el.append(this.create_score_('&phi;:', 1 - j.phi));
+            descr.title = i;
+            a = descr.phi = std.is_num(j.phi) ? j.phi : 0;
+            b = descr.weight = std.is_num(j.weight) ? j.weight : 0;
+            a = descr.score = a * b;
+            descr.is_image = i === 'image_url';
+            descr.values = values;
 
-            if(std.is_num(j.weight) && j.weight > 0) {
-              if(hasPhi)
-                el.append('<br/>');
+            /* `b´ refers to index in `cloud´ where to place this descriptor.
+             * `a´ refers to score, computed by multiplying phi and weight. */
+            b = 0;
+            if(cloud.some(function (ci, ndx) {
+              if(a > ci.score) {
+                console.log(a, ci.score, ndx);
+                b = ndx;
+                return true;
+              }
+            } ) === true)
+              cloud.splice(b, 0, descr);
+            else
+              cloud.push(descr);
+          }
+        }
 
-              el.append(this.create_score_('Weight:', j.weight));
-            }
+        if(cloud.length > 0) {
+          var container = $('<div/>').addClass(css.container),
+              el = $('<div/>').addClass(css.values),
+              elul = $('<ul/>');
 
-            container.append(el);
-            container.append($('<h1/>').text(i));
+          cloud.forEach(function (i) {
+            if(i.is_image) {
+              i.values.forEach(function (v) {
+                var n = $('<img/>')
+                      .attr('src', v)
+                      .css('height', i.score * 20 + 5);
 
-            el = $('<div/>').addClass(css.values);
-
-            if(i === 'image_url') {
-              values.forEach(function (v) {
-                el.append($('<img/>').attr('src', v));
+                self.set_value_attributes_(n, i);
+                elul.append($('<li/>').append(n));
               } );
             } else {
-              values.forEach(function (v) {
-                el.append($('<span/>').text(v));
+              i.values.forEach(function (v) {
+                var n = $('<span/>').text(v)
+                      .css( {
+                        'font-size': parseInt(i.score * 200 + 60) + '%',
+                        'font-weight': Math.ceil(i.score * 9) * 100
+                      } );
+
+                self.set_value_attributes_(n, i);
+                elul.append($('<li/>').append(n));
               } );
             }
+          } );
 
-            container.append(el);
-            content.append(container);
-            content.append($('<div/>').addClass(Css.clear));
-          }
+          container.append(el.append(elul));
+          content.append(container);
         }
       }
     }
@@ -98,14 +125,22 @@ var SortingQueueCustomisations = (function ($, std, sq) {
     return node;
   };
 
+  Item.prototype.set_value_attributes_ = function (el, descriptor)
+  {
+    el.attr('title',
+            [ descriptor.title, ' | ',
+              'Phi: ', descriptor.phi.toFixed(4), ' | ',
+              'Weight: ', descriptor.weight.toFixed(4), ' | ',
+              'Score: ', descriptor.score.toFixed(4) ].join(''));
+  };
+
   Item.prototype.create_score_ = function (caption, weight, css)
   {
-    var elc = $('<span/>').addClass(css || Css.item.dict.weight.inner),
+    var elc = $('<span/>').addClass(css || Css.item.dict.score),
         els = $('<span/>');
 
     elc.append($('<span/>').html(caption))
-      .append($('<span/>').text(weight.toFixed(4))
-              .addClass(Css.item.dict.score));
+      .append($('<span/>').text(weight.toFixed(4)));
 
     var ns = Math.round(weight / 0.2),
         nc = 5 - ns;
@@ -129,10 +164,6 @@ var SortingQueueCustomisations = (function ($, std, sq) {
       score: 'sd-text-item-score',
       dict: {
         container: 'sd-dict-container',
-        weight: {
-          outer: 'sd-dict-weight-outer',
-          inner: 'sd-dict-weight-inner'
-        },
         score: 'sd-dict-score',
         values: 'sd-dict-values'
       }
