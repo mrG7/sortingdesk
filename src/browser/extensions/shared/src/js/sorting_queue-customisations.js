@@ -105,7 +105,7 @@ var SortingQueueCustomisations = (function ($, std, sq) {
           .attr('title', weight.toFixed(4)),
         els = $('<span/>');
 
-    elc.append($('<span/>').text(caption));
+    elc.append($('<span/>').html(caption));
 
     var ns = Math.round(weight / 0.2),
         nc = 5 - ns;
