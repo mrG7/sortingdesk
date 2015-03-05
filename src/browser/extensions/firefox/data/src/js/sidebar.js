@@ -219,11 +219,11 @@ var Main = (function (window, $, std, sq, sqc, sd, Api, undefined) {
 
         /* Ensure click event originated in a A tag and it contains a valid href
          * value. */
-        if(target.nodeName.toLowerCase() === 'a'
-           && target.href !== window.location.href + '#')
-        {
-          console.log("click event!", target);
-          ev.preventDefault();
+        if(target.nodeName.toLowerCase() === 'a') {
+          if(target.href === window.location.href + '#')
+              ev.preventDefault();
+          else
+            return true;
         }
 
         return false;
