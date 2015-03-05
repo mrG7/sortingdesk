@@ -1255,7 +1255,9 @@ var SortingQueue_ = function (window, $, std) {
           ci = $('<tr/>').appendTo(co);
 
         $([ '<button',
-            '" data-id="', o.id, '">', o.title, '</button>' ]
+            '" data-id="', o.id,
+            '" title="', o.tooltip || '',
+            '">', o.title, '</button>' ]
           .join(''))
           .addClass(Css.dismissal.option)
           .appendTo($('<td/>').appendTo(ci));

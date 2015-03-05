@@ -181,8 +181,12 @@ BODY {
   margin: 8px 0 0 0;
 }
 
-.sd-text-item-score > .sd-dict-weight {
-  float: none;
+.sd-dict-score > :not(:first-child) {
+  margin-left: 5px;
+}
+
+.sd-dict-score > :not(:first-child):not(:last-child) {
+  color: #555;
 }
 
 .sd-text-item-content > P {
@@ -272,40 +276,27 @@ A.sd-text-item-title {
   color: #37434F;
 }
 
-DIV.sd-dict-weight {
-  float: right;
-}
-
-SPAN.sd-dict-weight > SPAN:last-child {
-  padding-left: 5px;
-  color: #666;
-}
-
 .sd-dict-values {
   clear: both;
 }
 
-.sd-dict-values > IMG {
-  display: block;
-  float: left;
-  margin-top: 5px;
-  margin-left: 10px;
-  height: 24px;
-  overflow-y: auto;
+.sd-dict-values > UL {
+  flex-wrap: wrap;
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  justify-content: center;
 }
 
-.sd-dict-values > SPAN {
-  display: block;
-  float: left;
-  margin-left: 10px;
-  border-radius: 4px;
-  border: 1px solid #b1bcd5;
-  background-color: #e3eaf4;
-  padding: 3px 5px 3px 5px;
-  margin-top: 5px;
-  text-overflow: ellipsis;
-  max-width: 150px;
-  overflow: hidden;
+.sd-dict-values > UL LI {
+  display: inline;
+  margin-right: 9px;
+}
+
+.sd-dict-values > UL LI:hover {
+  color: #666;
+  text-shadow: 1px 1px 1px silver;
 }
 
 /* Dismissal */

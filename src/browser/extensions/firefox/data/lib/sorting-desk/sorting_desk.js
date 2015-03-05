@@ -79,7 +79,6 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
 
     /* Specify our custom `Item´ class if client hasn't provided one. */
     if(!opts.constructors) opts.constructors = { };
-    if(!opts.constructors.Item) opts.constructors.Item = SqItem;
 
     if(!std.is_obj(opts.constructors))
       opts.constructors = { };
@@ -89,9 +88,20 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
       opts.constructors.createItemDismissal = function (item) {
         return (new sq.ItemDismissalReplaceTight(
           item, {
-            tooltipClose: "Ignore",
-            choices: [ { id: 'duplicate', title: 'Duplicate?' },
-                       { id: 'negative', title: 'Wrong?' }  ]
+            tooltipClose: "Click again to ignore this result without asserting"
+              + " that it is either wrong or a redundant; will automatically"
+              + " select this choice for you in a few seconds.",
+            choices: [
+              { id: 'redundant',
+                title: 'Redundant?',
+                tooltip: 'Result is correct and either redundant, a duplicate,'
+                + ' or simply not something you want to see any more in the'
+                + ' results.'},
+              { id: 'wrong',
+                title: 'Wrong?',
+                tooltip: 'Result is not correct, not relevant, and not what'
+                + ' you want the system to learn as your objective of this'
+                + ' query; will be removed from future results.' } ]
           } ))
           .on('dismissed', function (id) {
             console.log('User chose: %s', id);
@@ -106,9 +116,9 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
                     self.api.getQuerySubtopicId());
             if (id === null)
               label.coref_value = djs.COREF_VALUE_UNKNOWN;
-            else if (id === 'duplicate')
+            else if (id === 'redundant')
               label.coref_value = djs.COREF_VALUE_POSITIVE;
-            else if (id === 'negative')
+            else if (id === 'wrong')
               label.coref_value = djs.COREF_VALUE_NEGATIVE;
             else {
               item.owner.remove(item);
@@ -508,6 +518,8 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
 
     /* Stop ALL AJAX requests. */
     this.api.getDossierJs().stop();
+
+    /* Reset state and trigger refresh event. */
     this.refreshing_ = true;
     this.reset_tree_();
     this.events_.trigger('refresh-begin');
@@ -1161,7 +1173,7 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
     /* Getters */
     var def = Object.defineProperty;
     def(this, 'data', { get: function () { return this.folder_; } } );
-    def(this, 'subfolders', { get: function () { return this.subfolders_; } } );
+    def(this, 'subfolders', { get: function () { return this.subfolders_; } });
 
     /* Initialisation sequence. */
     if(!std.is_obj(folder))
@@ -1174,25 +1186,28 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
     /* Retrieve all subfolders for this folder. */
     var self = this;
 
+    /* Render now. */
+    this.render();
+
+    /* If the folder was loaded from persistent storage load its subfolders
+     * now. */
     if(folder.exists) {
-      window.setTimeout(function () { self.loading(true); } );
+      this.loading(true);
 
       this.api.foldering.listSubfolders(folder)
         .done(function (coll) {
           coll.forEach(function (sf) {
             self.subfolders_.push(new Subfolder(self, sf));
           } );
-
-          self.loading(false);
         } )
         .fail(function () {
           self.controller.owner.networkFailure.incident(
             NetworkFailure.types.folder.load, folder);
+        } )
+        .always(function () {
+          self.loading(false);
         } );
     }
-
-    /* Now render. */
-    this.render();
   };
 
   Folder.prototype = Object.create(ItemBase.prototype);
@@ -1640,9 +1655,12 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
 
   ItemImage.prototype.onGotFeatureCollection = function (fc)
   {
+    /* Delegate to base class' method to retrieve the item's feature
+     * collection.  If successful, retrieve the item's data since here, the item's
+     * data may contain the actual image data. */
     if(Item.prototype.onGotFeatureCollection.call(this, fc)) {
       this.item_.data = fc.feature(
-        this.api.makeRawSubId(this.item_.subtopic_id));
+        this.api.makeRawSubId(this.item_.subtopic_id, 'data'));
       return true;
     }
 
@@ -1903,114 +1921,6 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
   };
 
 
-  /**
-   * @class
-   * */
-  var SqItem = function(owner, item)
-  {
-    if(!owner.owner.initialised)
-      return;
-
-    sq.Item.call(this, owner, item);
-  };
-
-  SqItem.prototype = Object.create(sq.Item.prototype);
-
-  SqItem.prototype.render = function(text, view, less)
-  {
-    /* Nodes */
-    var node = $('<div class="' + sq.Css.item.container + '"/>'),
-        content = $('<div class="' + sq.Css.item.content + '"/>'),
-        css = Css.item;
-
-    /* Data */
-    var raw = this.content_.raw,
-        fc = this.content_.fc,
-        desc = fc.value('meta_clean_visible').trim(),
-        url = fc.value('meta_url');
-
-    desc = desc.replace(/\s+/g, ' ').slice(0, 200);
-
-    /* Begin appending data */
-    node.append('<a class="' + sq.Css.item.close + '" href="#">x</a>');
-
-    content.append($('<p/>').addClass(css.title)
-                   .text(fc.value('title')
-                         || (desc.slice(0, 50) + '...')));
-
-    content.append($('<p/>').text(desc + '...')
-                   .addClass(css.description));
-
-    content.append($('<p/>').addClass(css.url)
-                   .append($('<a/>').attr('href', url).text(url)));
-
-    if(std.is_num(raw.probability)) {
-      content.append($('<p/>')
-                     .append(this.create_weight_('Score:', raw.probability))
-                     .addClass(css.score));
-
-      var info = raw.feature_cmp_info;
-      if(std.is_obj(info)) {
-        css = css.dict;
-
-        for(var i in info) {
-          var j = info[i],
-              values = j.common_values;
-
-          if(std.is_arr(values) && values.length > 0) {
-            var container = $('<div/>').addClass(css.container),
-                hasPhi = std.is_num(j.phi) && j.phi > 0,
-                el;
-
-            el = $('<div/>').addClass(css.weight);
-            if(hasPhi)
-              el.append(this.create_weight_('Score:', 1 - j.phi));
-
-           if(std.is_num(j.weight) && j.weight > 0) {
-              if(hasPhi)
-                el.append('<br/>');
-
-              el.append(this.create_weight_('Weight:', j.weight));
-           }
-
-            container.append(el);
-            container.append($('<h1/>').text(i));
-
-            el = $('<div/>').addClass(css.values);
-
-            if(i === 'image_url') {
-              values.forEach(function (v) {
-                el.append($('<img/>').attr('src', v));
-              } );
-            } else {
-              values.forEach(function (v) {
-                el.append($('<span/>').text(v));
-              } );
-            }
-
-            container.append(el);
-            content.append(container);
-            content.append($('<div/>').addClass(Css.clear));
-          }
-        }
-      }
-    }
-
-    node.append(content);
-    return node;
-  };
-
-  SqItem.prototype.create_weight_ = function (caption, weight, css)
-  {
-    var el = $('<span/>').addClass(css || Css.item.dict.weight);
-
-    el.append($('<span/>').text(caption));
-    el.append($('<span/>').text(weight.toFixed(4)));
-
-    return el;
-  };
-
-
   /* Css classes */
   var Css = {
     clear: 'sd-clear',
@@ -2020,17 +1930,6 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
       hover: 'sd-droppable-hover'
     },
     icon: {
-    },
-    item: {
-      title: 'sd-text-item-title',
-      description: 'sd-text-item-description',
-      url: 'sd-text-item-url',
-      score: 'sd-text-item-score',
-      dict: {
-        container: 'sd-dict-container',
-        weight: 'sd-dict-weight',
-        values: 'sd-dict-values'
-      }
     }
   };
 
