@@ -92,11 +92,13 @@ var SortingQueueCustomisations = (function ($, std, sq) {
               elul = $('<ul/>');
 
           cloud.forEach(function (i) {
+            var score = Math.max(0, i.score);
+
             if(i.is_image) {
               i.values.forEach(function (v) {
                 var n = $('<img/>')
                       .attr('src', v)
-                      .css('height', i.score * 20 + 5);
+                      .css('height', score * 20 + 5);
 
                 self.set_value_attributes_(n, i);
                 elul.append($('<li/>').append(n));
@@ -105,8 +107,8 @@ var SortingQueueCustomisations = (function ($, std, sq) {
               i.values.forEach(function (v) {
                 var n = $('<span/>').text(v)
                       .css( {
-                        'font-size': parseInt(i.score * 200 + 60) + '%',
-                        'font-weight': Math.ceil(i.score * 9) * 100
+                        'font-size': parseInt(score * 200 + 60) + '%',
+                        'font-weight': Math.ceil(score * 9) * 100
                       } );
 
                 self.set_value_attributes_(n, i);
