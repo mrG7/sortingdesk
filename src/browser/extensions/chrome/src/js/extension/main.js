@@ -10,7 +10,7 @@
 
 /*jshint laxbreak:true */
 
-var Main = (function (window, chrome, $, std, sq, sd, Api, undefined) {
+var Main = (function (window, chrome, $, std, sq, sqc, sd, Api, undefined) {
 
   /* Module-wide variables */
   var nodes = { },
@@ -406,7 +406,10 @@ var Main = (function (window, chrome, $, std, sq, sd, Api, undefined) {
         options: {
           container: $('#sd-queue'),
           visibleItems: 20,
-          itemsDraggable: false
+          itemsDraggable: false,
+          constructors: {
+            Item: sqc.Item
+          }
         }
       }
     }, $.extend(true, Api, HandlerCallbacks.callbacks.sorter ) ) )
@@ -444,4 +447,5 @@ var Main = (function (window, chrome, $, std, sq, sd, Api, undefined) {
       } );
   } );
 
-} )(window, chrome, jQuery, SortingCommon, SortingQueue, SortingDesk, Api);
+} )(window, chrome, jQuery, SortingCommon, SortingQueue,
+    SortingQueueCustomisations, SortingDesk, Api);
