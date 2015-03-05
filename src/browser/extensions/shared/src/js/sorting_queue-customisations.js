@@ -64,7 +64,7 @@ var SortingQueueCustomisations = (function ($, std, sq) {
             if(hasPhi)
               el.append(this.create_score_('&phi;:', 1 - j.phi));
 
-            if(std.is_num(j.weight) && j.weight >= 0) {
+            if(std.is_num(j.weight) && j.weight > 0) {
               if(hasPhi)
                 el.append('<br/>');
 
