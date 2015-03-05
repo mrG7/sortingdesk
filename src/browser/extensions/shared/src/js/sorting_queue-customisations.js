@@ -60,11 +60,11 @@ var SortingQueueCustomisations = (function ($, std, sq) {
                 hasPhi = std.is_num(j.phi) && j.phi > 0,
                 el;
 
-            el = $('<div/>').addClass(css.weight);
+            el = $('<div/>').addClass(css.weight.outer);
             if(hasPhi)
               el.append(this.create_score_('&phi;:', 1 - j.phi));
 
-            if(std.is_num(j.weight) && j.weight > 0) {
+            if(std.is_num(j.weight) && j.weight >= 0) {
               if(hasPhi)
                 el.append('<br/>');
 
@@ -100,12 +100,12 @@ var SortingQueueCustomisations = (function ($, std, sq) {
 
   Item.prototype.create_score_ = function (caption, weight, css)
   {
-    var elc = $('<span/>')
-          .addClass(css || Css.item.dict.weight)
-          .attr('title', weight.toFixed(4)),
+    var elc = $('<span/>').addClass(css || Css.item.dict.weight.inner),
         els = $('<span/>');
 
-    elc.append($('<span/>').html(caption));
+    elc.append($('<span/>').html(caption))
+      .append($('<span/>').text(weight.toFixed(4))
+              .addClass(Css.item.dict.score));
 
     var ns = Math.round(weight / 0.2),
         nc = 5 - ns;
@@ -129,7 +129,11 @@ var SortingQueueCustomisations = (function ($, std, sq) {
       score: 'sd-text-item-score',
       dict: {
         container: 'sd-dict-container',
-        weight: 'sd-dict-weight',
+        weight: {
+          outer: 'sd-dict-weight-outer',
+          inner: 'sd-dict-weight-inner'
+        },
+        score: 'sd-dict-score',
         values: 'sd-dict-values'
       }
     }
