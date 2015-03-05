@@ -44,7 +44,7 @@ var SortingQueueCustomisations = (function ($, std, sq) {
 
     if(std.is_num(raw.probability)) {
       content.append($('<p/>')
-                     .append(this.create_weight_('Score:', raw.probability))
+                     .append(this.create_score_('Score:', raw.probability))
                      .addClass(css.score));
 
       var info = raw.feature_cmp_info;
@@ -62,14 +62,14 @@ var SortingQueueCustomisations = (function ($, std, sq) {
 
             el = $('<div/>').addClass(css.weight);
             if(hasPhi)
-              el.append(this.create_weight_('Score:', 1 - j.phi));
+              el.append(this.create_score_('&phi;:', 1 - j.phi));
 
-           if(std.is_num(j.weight) && j.weight > 0) {
+            if(std.is_num(j.weight) && j.weight > 0) {
               if(hasPhi)
                 el.append('<br/>');
 
-              el.append(this.create_weight_('Weight:', j.weight));
-           }
+              el.append(this.create_score_('Weight:', j.weight));
+            }
 
             container.append(el);
             container.append($('<h1/>').text(i));
@@ -98,7 +98,7 @@ var SortingQueueCustomisations = (function ($, std, sq) {
     return node;
   };
 
-  Item.prototype.create_weight_ = function (caption, weight, css)
+  Item.prototype.create_score_ = function (caption, weight, css)
   {
     var elc = $('<span/>')
           .addClass(css || Css.item.dict.weight)
