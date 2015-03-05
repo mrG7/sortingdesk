@@ -11,7 +11,7 @@
 /*global addon */
 /*jshint laxbreak:true */
 
-var Main = (function (window, $, std, sq, sd, Api, undefined) {
+var Main = (function (window, $, std, sq, sqc, sd, Api, undefined) {
 
   /* Module-wide variables */
   var preferences,
@@ -219,11 +219,11 @@ var Main = (function (window, $, std, sq, sd, Api, undefined) {
 
         /* Ensure click event originated in a A tag and it contains a valid href
          * value. */
-        if(target.nodeName.toLowerCase() === 'a'
-           && target.href !== window.location.href + '#')
-        {
-          console.log("click event!", target);
-          ev.preventDefault();
+        if(target.nodeName.toLowerCase() === 'a') {
+          if(target.href === window.location.href + '#')
+              ev.preventDefault();
+          else
+            return true;
         }
 
         return false;
@@ -245,7 +245,10 @@ var Main = (function (window, $, std, sq, sd, Api, undefined) {
         options: {
           container: $('#sd-queue'),
           visibleItems: 20,
-          itemsDraggable: false
+          itemsDraggable: false,
+          constructors: {
+            Item: sqc.Item
+          }
         }
       }
     }, $.extend(true, Api, HandlerCallbacks.callbacks.sorter ) ) )
@@ -265,4 +268,5 @@ var Main = (function (window, $, std, sq, sd, Api, undefined) {
     addon.port.emit('get-preferences');
   } );
 
-} )(window, jQuery, SortingCommon, SortingQueue, SortingDesk, Api);
+} )(window, jQuery, SortingCommon, SortingQueue, SortingQueueCustomisations,
+    SortingDesk, Api);
