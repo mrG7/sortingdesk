@@ -1174,7 +1174,7 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
     /* Getters */
     var def = Object.defineProperty;
     def(this, 'data', { get: function () { return this.folder_; } } );
-    def(this, 'subfolders', { get: function () { return this.subfolders_; } } );
+    def(this, 'subfolders', { get: function () { return this.subfolders_; } });
 
     /* Initialisation sequence. */
     if(!std.is_obj(folder))
@@ -1187,25 +1187,28 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
     /* Retrieve all subfolders for this folder. */
     var self = this;
 
+    /* Render now. */
+    this.render();
+
+    /* If the folder was loaded from persistent storage load its subfolders
+     * now. */
     if(folder.exists) {
-      window.setTimeout(function () { self.loading(true); } );
+      this.loading(true);
 
       this.api.foldering.listSubfolders(folder)
         .done(function (coll) {
           coll.forEach(function (sf) {
             self.subfolders_.push(new Subfolder(self, sf));
           } );
-
-          self.loading(false);
         } )
         .fail(function () {
           self.controller.owner.networkFailure.incident(
             NetworkFailure.types.folder.load, folder);
+        } )
+        .always(function () {
+          self.loading(false);
         } );
     }
-
-    /* Now render. */
-    this.render();
   };
 
   Folder.prototype = Object.create(ItemBase.prototype);
