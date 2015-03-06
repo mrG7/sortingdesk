@@ -130,7 +130,7 @@ var SortingQueueCustomisations = (function ($, std, sq) {
   {
     el.attr('title',
             [ descriptor.title, ' | ',
-              'Kernel value: ', descriptor.kernel_value.toFixed(4), ' | ',
+              'Kernel: ', descriptor.kernel_value.toFixed(4), ' | ',
               'Weight: ', descriptor.weight.toFixed(4), ' | ',
               'Score: ', descriptor.score.toFixed(4) ].join(''));
   };
