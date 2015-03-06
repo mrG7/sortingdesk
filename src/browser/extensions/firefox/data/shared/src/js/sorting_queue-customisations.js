@@ -49,37 +49,36 @@ var SortingQueueCustomisations = (function ($, std, sq) {
                      .append(this.create_score_('Score:', raw.probability))
                      .addClass(css.score));
 
-      var info = raw.feature_cmp_info;
-      if(std.is_obj(info)) {
+      var info = raw.intermediate_model_results;
+      if(std.is_arr(info)) {
         var cloud = [];
-
         css = css.dict;
 
-        for(var i in info) {
+        for(var i = 0, l = info.length; i < l; ++i) {
           var j = info[i],
-              values = j.common_values;
+              values = j.common_feature_values;
 
           if(std.is_arr(values) && values.length > 0) {
             var descr = { },
                 a, b;
 
             descr.title = i;
-            a = descr.phi = std.is_num(j.phi) ? j.phi : 0;
+            a = descr.kernel_value = std.is_num(j.kernel_value) ?
+              j.kernel_value : 0;
             b = descr.weight = std.is_num(j.weight) ? j.weight : 0;
             a = descr.score = a * b;
-            descr.is_image = i === 'image_url';
+            descr.is_image = j.feature1 === 'image_url';
             descr.values = values;
 
             /* `b´ refers to index in `cloud´ where to place this descriptor.
-             * `a´ refers to score, computed by multiplying phi and weight. */
+             * `a´ refers to score, computed by multiplying kernel_value and
+             *     weight. */
             b = 0;
             if(cloud.some(function (ci, ndx) {
               if(a > ci.score) {
-                console.log(a, ci.score, ndx);
                 b = ndx;
                 return true;
-              }
-            } ) === true)
+              } } ) === true)
               cloud.splice(b, 0, descr);
             else
               cloud.push(descr);
@@ -107,8 +106,8 @@ var SortingQueueCustomisations = (function ($, std, sq) {
               i.values.forEach(function (v) {
                 var n = $('<span/>').text(v)
                       .css( {
-                        'font-size': parseInt(score * 200 + 60) + '%',
-                        'font-weight': Math.ceil(score * 9) * 100
+                        'font-size': Math.min(score * 200 + 60, 290) + '%',
+                        'font-weight': Math.min(Math.ceil(score*9)*100, 900)
                       } );
 
                 self.set_value_attributes_(n, i);
@@ -131,7 +130,7 @@ var SortingQueueCustomisations = (function ($, std, sq) {
   {
     el.attr('title',
             [ descriptor.title, ' | ',
-              'Phi: ', descriptor.phi.toFixed(4), ' | ',
+              'Kernel value: ', descriptor.kernel_value.toFixed(4), ' | ',
               'Weight: ', descriptor.weight.toFixed(4), ' | ',
               'Score: ', descriptor.score.toFixed(4) ].join(''));
   };
