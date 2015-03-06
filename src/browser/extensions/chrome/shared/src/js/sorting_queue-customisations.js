@@ -62,12 +62,12 @@ var SortingQueueCustomisations = (function ($, std, sq) {
             var descr = { },
                 a, b;
 
-            descr.title = i;
+            a = descr.title = j.feature1;
+            descr.is_image = a === 'image_url';
             a = descr.kernel_value = std.is_num(j.kernel_value) ?
               j.kernel_value : 0;
             b = descr.weight = std.is_num(j.weight) ? j.weight : 0;
             a = descr.score = a * b;
-            descr.is_image = j.feature1 === 'image_url';
             descr.values = values;
 
             /* `b´ refers to index in `cloud´ where to place this descriptor.
