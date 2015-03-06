@@ -1,0 +1,15 @@
+#!/bin/bash
+# start-server --- Start local dossier.models server
+#
+# Copyright (c) 2015 Diffeo
+#
+# Comments:
+#
+
+readonly dir_root="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. && pwd )"
+source "$dir_root/sh/settings.sh"
+source "$dir_root/sh/libtools.sh"
+
+info "starting dossier.models instance"
+DOSSIER_WEB_DEV=1 dossier.models -c "$PATH_DOSSIER_MODELS_YAML" \
+  --reload --port 8080 --bottle-debug

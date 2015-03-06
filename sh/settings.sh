@@ -25,3 +25,6 @@ readonly URL_FIREFOX_RELOAD=http://localhost:8888
 # created, modified, deleted or moved in within the `src/´ subtree.  This
 # applies to the `watch-deps´ script.
 readonly DELAY_UPDATE=1
+
+# Full path to yaml file containing the settings for a dossier.models instance.
+readonly PATH_DOSSIER_MODELS_YAML=~/dev/diffeo/miguel.yaml
