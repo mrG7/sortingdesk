@@ -75,7 +75,6 @@ var SortingQueueCustomisations = (function ($, std, sq) {
             b = 0;
             if(cloud.some(function (ci, ndx) {
               if(a > ci.score) {
-                console.log(a, ci.score, ndx);
                 b = ndx;
                 return true;
               }
@@ -107,8 +106,8 @@ var SortingQueueCustomisations = (function ($, std, sq) {
               i.values.forEach(function (v) {
                 var n = $('<span/>').text(v)
                       .css( {
-                        'font-size': parseInt(score * 200 + 60) + '%',
-                        'font-weight': Math.ceil(score * 9) * 100
+                        'font-size': Math.min(score * 200 + 60, 290) + '%',
+                        'font-weight': Math.min(Math.ceil(score*9)*100, 900)
                       } );
 
                 self.set_value_attributes_(n, i);
