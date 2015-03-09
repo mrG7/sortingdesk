@@ -373,7 +373,7 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
                 console.info("Successfully added folder", f.data);
               } )
               .fail(function () {
-                owner.NetworkFailure.incident(
+                owner.networkFailure.incident(
                   NetworkFailure.types.folder.add, f.data
                 );
               } )
