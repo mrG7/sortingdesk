@@ -30,10 +30,20 @@ var Config = (function (window, chrome, $, std, undefined) {
         cin = str.split(',');
 
     cin.forEach(function (i) {
-      var j = i.split('@').map(function (k) { return k.trim(); } );
+      var j = i.indexOf('@');
 
-      if(j.length !== 2 || j.some(function (k) { return k.length === 0; } ))
+      if(j <= 0) {
+        console.error("URL identifier not specified: ", i);
+        return;
+      }
+
+      j = [ i.slice(0, j), i.slice(j + 1) ]
+        .map(function (i) { return i.trim(); });
+
+      if(j.some(function (k) { return k.length === 0; } ))
         console.error("Invalid URL entry: ", i);
+      else if(!/^[a-zA-Z0-9_-]+$/.test(j[0]))
+        console.error("Invalid URL identifier: ", j[0]);
       else
         urls[j[0]] = j[1];
     } );
