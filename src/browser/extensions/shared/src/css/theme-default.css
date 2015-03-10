@@ -304,10 +304,6 @@ A.sd-text-item-title {
   float: right;
 }
 
-.sd-dict-more.sd-active >:first-child {
-  transform: rotate(90deg);
-}
-
 .sd-dict-more.sd-active > A::after {
   content: "less";
 }
@@ -321,6 +317,19 @@ A.sd-text-item-title {
   margin-right: 3px;
   color: #666;
   transition: all .2s ease-in;
+}
+
+.sd-dict-more-icon {
+  position: absolute;
+  margin-left: -10px;
+}
+
+.sd-dict-more >.sd-dict-more-icon:before {
+  content: "\25b6";
+}
+
+.sd-dict-more.sd-active >.sd-dict-more-icon {
+  transform: rotate(90deg);
 }
 
 .sd-dict-more A {

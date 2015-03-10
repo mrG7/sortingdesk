@@ -165,7 +165,7 @@ var SortingQueueCustomisations = (function ($, std, sq) {
   {
     var el = $('<span/>')
           .addClass(Css.item.dict.more)
-          .append($('<span/>').addClass('glyphicon glyphicon-triangle-right'));
+          .append($('<span/>').addClass(Css.item.dict.moreIcon));
 
     el.append($('<a/>')
               .attr('href', '#')
@@ -203,7 +203,8 @@ var SortingQueueCustomisations = (function ($, std, sq) {
         container: 'sd-dict-container',
         score: 'sd-dict-score',
         values: 'sd-dict-values',
-        more: 'sd-dict-more'
+        more: 'sd-dict-more',
+        moreIcon: 'sd-dict-more-icon'
       }
     }
   };
