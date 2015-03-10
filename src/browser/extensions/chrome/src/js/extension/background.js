@@ -155,8 +155,8 @@ var Background = function (window, chrome, $, std, undefined)
         size.width -= DEFAULT_EXTENSION_WIDTH;
 
         win.focused = true;
-        chrome.windows.update(win.id, $.extend( {state: "normal" },
-                                                size.toObject()));
+/*         chrome.windows.update(win.id, $.extend( {state: "normal" }, */
+/*                                                 size.toObject())); */
       }
 
       ext = new std.PositionSize(size.right, size.top,

@@ -34,8 +34,8 @@ var _DossierJS = function(window, $, undefined) {
     var API = function(url_prefix, api_versions) {
         this.api_versions = $.extend(true, {}, API_VERSION,
                                      api_versions || {});
-        this.prefix = url_prefix || '';
-        this.xhr = new Xhr(url_prefix);
+        this.xhr = new Xhr(url_prefix || '');
+        this.prefix = this.xhr.url;
     };
 
     // Constructs a URL given a service (e.g., `dossier` or `streamcorpus`),
@@ -919,6 +919,8 @@ var _DossierJS = function(window, $, undefined) {
             /* Remove `username:password´ form from URL. */
             url = url.replace(/([a-zA-Z0-9_-]+:[a-zA-Z0-9_-]+@)/, "");
         }
+
+        Object.defineProperty(this, 'url', { value: url });
     };
 
     /* Interface */
