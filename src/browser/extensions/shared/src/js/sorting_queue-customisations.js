@@ -45,11 +45,13 @@ var SortingQueueCustomisations = (function ($, std, sq) {
                    .append($('<a/>').attr('href', url).text(url)));
 
     if(std.is_num(raw.probability)) {
-      content.append($('<p/>')
-                     .append(this.create_score_('Score:', raw.probability))
-                     .addClass(css.score));
+      var info = raw.intermediate_model_results,
+          els = $('<p/>')
+            .append(this.create_score_('Score:', raw.probability))
+            .addClass(css.score);
 
-      var info = raw.intermediate_model_results;
+      content.append(els);
+
       if(std.is_arr(info)) {
         var cloud = [];
         css = css.dict;
@@ -86,7 +88,8 @@ var SortingQueueCustomisations = (function ($, std, sq) {
         }
 
         if(cloud.length > 0) {
-          var container = $('<div/>').addClass(css.container),
+          var container = $('<div/>').addClass(
+            [ css.container, Css.inactive ].join(' ')),
               el = $('<div/>').addClass(css.values),
               elul = $('<ul/>');
 
@@ -117,6 +120,7 @@ var SortingQueueCustomisations = (function ($, std, sq) {
           } );
 
           container.append(el.append(elul));
+          new ItemMoreHandler(els);
           content.append(container);
         }
       }
@@ -156,8 +160,41 @@ var SortingQueueCustomisations = (function ($, std, sq) {
   };
 
 
+  /**
+   * @class */
+  var ItemMoreHandler = function (container)
+  {
+    var el = $('<span/>')
+          .addClass(Css.item.dict.more)
+          .append($('<span/>').addClass('glyphicon glyphicon-triangle-right'));
+
+    el.append($('<a/>')
+              .attr('href', '#')
+              .click(ItemMoreHandler.onClickMore));
+
+    container.prepend(el);
+  };
+
+  ItemMoreHandler.onClickMore = function (ev)
+  {
+    var more = $(ev.target).parent(),
+        el = more.parent().next();
+
+    if(el.length === 0) {
+      console.error("Failed to retrieve dict container element");
+      return;
+    }
+
+    var active = !el.hasClass(Css.active);
+    el.toggleClass(Css.active, active);
+    more.toggleClass(Css.active, active);
+  };
+
+
   var Css = {
     clear: 'sd-clear',
+    active: 'sd-active',
+    inactive: 'sd-inactive',
     item: {
       title: 'sd-text-item-title',
       description: 'sd-text-item-description',
@@ -166,7 +203,8 @@ var SortingQueueCustomisations = (function ($, std, sq) {
       dict: {
         container: 'sd-dict-container',
         score: 'sd-dict-score',
-        values: 'sd-dict-values'
+        values: 'sd-dict-values',
+        more: 'sd-dict-more'
       }
     }
   };

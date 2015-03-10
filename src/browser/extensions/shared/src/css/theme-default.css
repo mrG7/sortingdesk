@@ -195,6 +195,7 @@ BODY {
 
 .sd-text-item-content A {
   color: #0b9dcc;
+  transition: all .2s ease;
 }
 
 .sd-text-item-content A:hover {
@@ -246,6 +247,7 @@ A.sd-text-item-title {
 .sd-text-item-close:hover {
   color: black;
   background-color: #ececec;
+  text-decoration: none;
 }
 
 .sd-text-item-close:active {
@@ -259,21 +261,20 @@ A.sd-text-item-title {
 }
 
 .sd-dict-container {
-  max-height: 200px;
+  max-height: 35px;
   margin: 8px 0 8px 8px;
   padding: 5px;
   border: 1px solid #ccc;
   background-color: #fcfcfc;
   clear: both;
-  overflow-y: auto;
-  overflow-x: hidden;
+  transition: all 0.25s ease;
+  overflow: hidden;
 }
 
-.sd-dict-container H1 {
-  font-size: 12px;
-  font-weight: bold;
-  margin: 0 0 10px 0;
-  color: #37434F;
+.sd-dict-container.sd-active {
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: 200px;
 }
 
 .sd-dict-values {
@@ -297,6 +298,40 @@ A.sd-text-item-title {
 .sd-dict-values > UL LI:hover {
   color: #666;
   text-shadow: 1px 1px 1px silver;
+}
+
+.sd-dict-more {
+  float: right;
+}
+
+.sd-dict-more.sd-active >:first-child {
+  transform: rotate(90deg);
+}
+
+.sd-dict-more.sd-active > A::after {
+  content: "less";
+}
+
+.sd-dict-more > A::after {
+  content: "more";
+}
+
+.sd-dict-more >:first-child {
+  font-size: 80%;
+  margin-right: 3px;
+  color: #666;
+  transition: all .2s ease-in;
+}
+
+.sd-dict-more A {
+  text-decoration: none;
+  color: #475979;
+  transition: all .2s ease;
+}
+
+.sd-dict-more A:hover {
+  text-decoration: none;
+  color: #7490c2;
 }
 
 /* Dismissal */
