@@ -116,9 +116,9 @@ cpx "$dir_lib/jquery-2.1.1.min.js" lib/
 cpx "$dir_lib/CryptoJS-3.1.2/rollups/md5.js" lib/CryptoJS/
 
 # Bootstrap
-cpxa "$dir_lib/bootstrap-3.3.1/css/"*.min.css lib/bootstrap/css/
-cpxa "$dir_lib/bootstrap-3.3.1/fonts/"* lib/bootstrap/fonts/
-cpxa "$dir_lib/bootstrap-3.3.1/js/"*.min.js lib/bootstrap/js/
+cpxa "$dir_lib/bootstrap-3.3.2/css/"*.min.css lib/bootstrap/css/
+cpxa "$dir_lib/bootstrap-3.3.2/fonts/"* lib/bootstrap/fonts/
+cpxa "$dir_lib/bootstrap-3.3.2/js/"*.min.js lib/bootstrap/js/
 
 # Js Tree
 cpx "$dir_lib/jstree-3.0.9/dist/jstree.min.js" lib/jstree/
