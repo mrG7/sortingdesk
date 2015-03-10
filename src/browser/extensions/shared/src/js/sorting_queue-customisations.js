@@ -88,8 +88,7 @@ var SortingQueueCustomisations = (function ($, std, sq) {
         }
 
         if(cloud.length > 0) {
-          var container = $('<div/>').addClass(
-            [ css.container, Css.inactive ].join(' ')),
+          var container = $('<div/>').addClass(css.container),
               el = $('<div/>').addClass(css.values),
               elul = $('<ul/>');
 
