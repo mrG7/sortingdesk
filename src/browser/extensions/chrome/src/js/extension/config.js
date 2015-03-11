@@ -13,7 +13,7 @@
 var Config = (function (window, chrome, $, std, undefined) {
 
   var defaults_ = {
-    dossierUrls: [ 'memex@http://memex:memex@10.3.2.42:9090',
+    dossierUrls: [ 'memex@http://10.3.2.42:9090',
                    'dev@http://54.174.195.250:8080',
                    'local@http://localhost:8080' ].join(', '),
     activeUrl: 'memex',
