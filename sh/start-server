@@ -11,5 +11,5 @@ source "$dir_root/sh/settings.sh"
 source "$dir_root/sh/libtools.sh"
 
 info "starting dossier.models instance"
-DOSSIER_WEB_DEV=1 dossier.models -c "$PATH_DOSSIER_MODELS_YAML" \
-  --reload --port 8080 --bottle-debug
+DOSSIER_WEB_DEV=1 dossier.models -c "$DOSSIER_MODELS_PATH_YAML" \
+  --reload --port "$DOSSIER_MODELS_PORT" --bottle-debug
