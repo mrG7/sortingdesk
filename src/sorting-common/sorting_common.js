@@ -820,6 +820,13 @@ var SortingCommon_ = function (window, $) {
     this.observers_ = [ ];
   };
 
+  Observable.prototype.exists = function (observer)
+  {
+    return this.observers.some(function (ob) {
+      return ob == observer;
+    } );
+  };
+
   Observable.prototype.register = function (observer)
   {
     if(this.exists(observer))
