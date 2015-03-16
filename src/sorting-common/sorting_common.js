@@ -831,8 +831,8 @@ var SortingCommon_ = function (window, $) {
   {
     if(this.exists(observer))
       throw "Observer already registered";
-    else if(!(observer instanceof Observer))
-      throw "Invalid observer instance reference specified";
+    else if(typeof observer !== 'function' && !(observer instanceof Observer))
+      throw "Invalid observer instance or function reference specified";
 
     this.observers_.push(observer);
   };
@@ -841,16 +841,23 @@ var SortingCommon_ = function (window, $) {
   {
     var index = this.observers_.indexOf(observer);
 
-    if(index === -1)
-      throw "Observer not registered";
-    else
+    if(index !== -1) {
       this.observers_.splice(index, 1);
+      return;
+    }
+
+    throw "Observer not registered";
   };
 
   Observable.prototype.notify = function ( /* (arg0..n) */ )
   {
     this.observers_.forEach(function (observer) {
-      observer.update.apply(observer, arguments);
+      /* `observer´ here may be either a function or is expected to be a class
+       * instance implementing a method by the name `update´.  */
+      if(typeof observer === 'function')
+        observer.apply(observer, arguments);
+      else
+        observer.update.apply(observer, arguments);
     } );
   };
 
