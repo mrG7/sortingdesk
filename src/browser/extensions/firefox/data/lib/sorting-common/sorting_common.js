@@ -268,13 +268,15 @@ var SortingCommon_ = function (window, $) {
   } )();
 
 
-  var NodeFinder = function (prefix, root)
+  var NodeFinder = function (tag, prefix, root)
   {
-    this.prefix_ = [ '[data-sd-scope="', prefix, '-' ].join('');
+    this.tag_ = tag;
+    this.prefix_ = [ '[', tag, '="', prefix, '-' ].join('');
     this.root_ = root;
   };
 
   NodeFinder.prototype = {
+    tag_: null,
     prefix_: null,
     root_: null,
 
@@ -296,7 +298,7 @@ var SortingCommon_ = function (window, $) {
       if(!is_fn(callback))
         throw "Invalid or no callback function specified";
 
-      var nf = new NodeFinder(this.prefix_, newRoot);
+      var nf = new NodeFinder(this.tag_, this.prefix_, newRoot);
       return callback.call(this);
     }
   };

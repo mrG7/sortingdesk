@@ -184,7 +184,9 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
         throw "Sorting Desk component already initialised";
 
       var self = this,
-          finder = new std.NodeFinder('sorting-desk', this.options_.container),
+          finder = new std.NodeFinder('data-sd-scope',
+                                      'sorting-desk',
+                                      this.options_.container),
           els;
 
       /* Find nodes. */

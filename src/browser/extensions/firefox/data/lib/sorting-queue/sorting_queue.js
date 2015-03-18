@@ -105,7 +105,8 @@ var SortingQueue_ = function (window, $, std) {
         throw "Sorting Queue component already initialised";
 
       var self = this,
-          finder = new std.NodeFinder('sorting-queue',
+          finder = new std.NodeFinder('data-sd-scope',
+                                      'sorting-queue',
                                       this.options_.container);
 
       /* Find nodes. */
