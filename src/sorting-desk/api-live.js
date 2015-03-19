@@ -514,8 +514,6 @@ var Api_ = (function (window, $, CryptoJS, DossierJS, undefined) {
       .then(function(data) {
         var items = [];
         data.results.forEach(function(cobj) {
-          var idparts = cobj.content_id.split("|"),
-              url = idparts[idparts.length - 1];
           items.push({
             raw: cobj,
             content_id: cobj.content_id,
