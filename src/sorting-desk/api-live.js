@@ -507,9 +507,9 @@ var Api_ = (function (window, $, CryptoJS, DossierJS, undefined) {
 
     self._processing = true;
     var p = $.extend({limit: num.toString()}, self.params);
-    if (self.query_subtopic_id !== null) {
-        p['subtopic_id'] = self.query_subtopic_id;
-    }
+    if (self.query_subtopic_id !== null)
+      p.subtopic_id = self.query_subtopic_id;
+
     return self.api.search(self.engine_name, self.query_content_id, p)
       .then(function(data) {
         var items = [];
@@ -527,12 +527,8 @@ var Api_ = (function (window, $, CryptoJS, DossierJS, undefined) {
         });
         return items;
       })
-      .always(function() {
-        self._processing = false;
-      })
-      .fail(function() {
-        console.error("moreTexts: request failed");
-      });
+      .always(function() { self._processing = false; })
+      .fail(function() { console.error("moreTexts: request failed"); });
   };
 
 
