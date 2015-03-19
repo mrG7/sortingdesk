@@ -317,7 +317,9 @@
   var NodeFinder = function (tag, prefix, root)
   {
     this.tag_ = tag;
-    this.prefix_ = [ '[', tag, '="', prefix, '-' ].join('');
+    this.prefix_ = [ '[', tag, '="',
+                     prefix && prefix.length > 0 ? prefix + '-' : ''
+                   ].join('');
     this.root_ = root;
   };
 
