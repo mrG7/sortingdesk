@@ -11,11 +11,18 @@
 /*jshint laxbreak:true */
 
 
-/**
- * The base module.
- * */
-var SortingCommon_ = function (window, $) {
 
+(function (factory, root) {
+
+  /* Compatibility with RequireJs. */
+  if(typeof define === "function" && define.amd) {
+    define("SortingCommon", [ "jquery" ], function ($) {
+      return factory(root, $);
+    });
+  } else
+    root.SortingCommon = factory(root, $);
+
+} )(function (window, $) {
 
   /* Module-wide function */
   var absm_noti = function ( ) { throw "Abstract method not implemented"; };
@@ -237,6 +244,43 @@ var SortingCommon_ = function (window, $) {
       return result.reverse().join('/');
     };
 
+    var visit = function (node, cb)
+    {
+      if(!is_fn(cb))
+        throw 'Invalid or no callback function specified';
+
+      var visitor = function (el) {
+        var children = el.childNodes;
+
+        if(children.length) {
+          for(var i = 0, l = children.length; i < l; ++i)
+            visitor(children[i]);
+        } else
+          cb(el);
+      };
+
+      visitor(node);
+    };
+
+    var subtreeBetween = function (node, parent /* = document.body */)
+    {
+      if(parent === undefined)
+        parent = document.body;
+
+      var subtree = [ node ];
+
+      while(node !== parent) {
+        node = node.parentNode;
+        if(node === null)
+          return [ ];
+
+        subtree.push(node);
+      }
+
+      return subtree;
+    }
+
+
     /* Is-type functions */
     var is_image = function (el)
     {
@@ -262,7 +306,9 @@ var SortingCommon_ = function (window, $) {
     return {
       imageToBase64: imageToBase64,
       getXpathSimple: getXpathSimple,
-      is_image: is_image
+      is_image: is_image,
+      visit: visit,
+      subtreeBetween: subtreeBetween
     };
 
   } )();
@@ -271,7 +317,9 @@ var SortingCommon_ = function (window, $) {
   var NodeFinder = function (tag, prefix, root)
   {
     this.tag_ = tag;
-    this.prefix_ = [ '[', tag, '="', prefix, '-' ].join('');
+    this.prefix_ = [ '[', tag, '="',
+                     prefix && prefix.length > 0 ? prefix + '-' : ''
+                   ].join('');
     this.root_ = root;
   };
 
@@ -1228,13 +1276,5 @@ var SortingCommon_ = function (window, $) {
     Position: Position,
     PositionSize: PositionSize
   };
-};
 
-
-/* Compatibility with RequireJs. */
-if(typeof define === "function" && define.amd) {
-  define("SortingCommon", [ "jquery" ], function ($) {
-    return SortingCommon_(window, $);
-  });
-} else
-  window.SortingCommon = SortingCommon_(window, $);
+}, this);

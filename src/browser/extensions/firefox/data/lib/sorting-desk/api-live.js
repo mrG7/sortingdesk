@@ -35,6 +35,8 @@ var Api_ = (function (window, $, CryptoJS, DossierJS, undefined) {
     qitems_ = new DossierJS.SortingQueueItems(
       api_, 'similar', '', annotator_);
     qitems_.limit = 30;
+
+    /* TODO: remove this bypass.  This is just nasty. */
     DossierJS.SortingQueueItems.prototype._itemDismissed = function(cobj) {
       console.log('Adding a negative label between ' + cobj.content_id
                   + ' and ...');
@@ -56,9 +58,11 @@ var Api_ = (function (window, $, CryptoJS, DossierJS, undefined) {
       }
     };
 
+
     /* Return module public API -- post initialization */
     return {
       /* Functions */
+      cache: new Cache(),
       getFeatureCollection: getFeatureCollection,
       getAllFeatureCollections: getAllFeatureCollections,
       putFeatureCollection: putFeatureCollection,
@@ -98,6 +102,32 @@ var Api_ = (function (window, $, CryptoJS, DossierJS, undefined) {
       COREF_VALUE_NEGATIVE: DossierJS.COREF_VALUE_NEGATIVE
     };
   };
+
+
+  /**
+   * @class
+   *
+   * Note: requires instantiation, unlike `foldering´ below. */
+  var Cache = function ()
+  {
+    var enabled_ = null;
+
+    /* Initialisation sequence */
+    api_.fcCacheEnabled()
+      .done(function (result) {
+        enabled_ = result === true;
+      } );
+
+
+    /* Interface */
+    this.enabled = function () { return enabled_; };
+
+    this.url = function (content_id)
+    {
+      return enabled_ === true ? api_.fcCacheUrl(content_id) : null;
+    };
+  };
+
 
   var getFeatureCollection = function (content_id)
   {
@@ -462,7 +492,7 @@ var Api_ = (function (window, $, CryptoJS, DossierJS, undefined) {
     if(typeof num !== 'number' || num <= 0)
       throw "Invalid number of items specified";
 
-    if (self._processing || !qitems_.query_content_id) {
+    if (this._processing || !qitems_.query_content_id) {
       var deferred = $.Deferred();
 
       window.setTimeout(function () {
@@ -478,34 +508,26 @@ var Api_ = (function (window, $, CryptoJS, DossierJS, undefined) {
       return deferred.promise();
     }
 
-    self._processing = true;
-    var p = $.extend({limit: num.toString()}, self.params);
-    if (self.query_subtopic_id !== null) {
-        p['subtopic_id'] = self.query_subtopic_id;
-    }
+    this._processing = true;
+    var p = $.extend({limit: num.toString()}, this.params);
+    if (this.query_subtopic_id !== null)
+      p.subtopic_id = this.query_subtopic_id;
+
     return self.api.search(self.engine_name, self.query_content_id, p)
       .then(function(data) {
-        var items = [];
-        data.results.forEach(function(cobj) {
-          var idparts = cobj.content_id.split("|"),
-              url = idparts[idparts.length - 1];
-          items.push({
+        return data.results.map(function(cobj) {
+          return {
             raw: cobj,
             content_id: cobj.content_id,
             fc: cobj.fc,
             node_id: cobj.content_id,
             name: '',
             url: cobj.fc.value('meta_url')
-          });
+          };
         });
-        return items;
       })
-      .always(function() {
-        self._processing = false;
-      })
-      .fail(function() {
-        console.error("moreTexts: request failed");
-      });
+      .always(function() { self._processing = false; })
+      .fail(function()   { console.error("moreTexts: request failed"); });
   };
 
 

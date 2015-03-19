@@ -12,12 +12,17 @@
 /*jshint laxbreak:true */
 
 
-/**
- * The Sorting Queue module.
- *
- * @returns an object containing class constructors.
- * */
-var SortingQueue_ = function (window, $, std) {
+(function (factory, root) {
+
+  /* Compatibility with RequireJs. */
+  if(typeof define === "function" && define.amd) {
+    define("SortingQueue", [ "jquery", "SortingCommon" ], function ($, std) {
+      return factory(root, $, std);
+    });
+  } else
+    window.SortingQueue = factory(root, $, SortingCommon);
+
+} )(function (window, $, std) {
 
   /**
    * @class
@@ -1368,13 +1373,4 @@ var SortingQueue_ = function (window, $, std) {
     ItemDismissalReplaceTight: ItemDismissalReplaceTight
   };
 
-};
-
-
-/* Compatibility with RequireJs. */
-if(typeof define === "function" && define.amd) {
-  define("SortingQueue", [ "jquery", "SortingCommon" ], function ($, std) {
-    return SortingQueue_(window, $, std);
-  });
-} else
-  window.SortingQueue = SortingQueue_(window, $, SortingCommon);
+}, this);

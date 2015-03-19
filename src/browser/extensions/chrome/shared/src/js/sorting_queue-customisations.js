@@ -1,14 +1,27 @@
 
-var SortingQueueCustomisations = (function ($, std, sq) {
+var SortingQueueCustomisations = (function (window, $, std, sq) {
 
   /**
    * @class
    * */
   var Item = function(owner, item)
   {
-    if(!owner.owner.initialised)
-      return;
+    var o = owner.owner;
 
+    /* Sorting Queue is no longer in an initialised state, so we do not proceed
+     * with instantiation of this item. */
+    if(!o.initialised) return;
+
+    o = o.options;
+    if(!o.instances || !o.instances.api)
+      throw 'Reference to API instance not found';
+
+    /* Attributes */
+    /* Note: this attribute must be set before the base class is
+     * constructed. */
+    this.api = o.instances.api;
+
+    /* Now invoke base class' constructor */
     sq.Item.call(this, owner, item);
   };
 
@@ -19,7 +32,8 @@ var SortingQueueCustomisations = (function ($, std, sq) {
     var self = this;
 
     /* Nodes */
-    var node = $('<div class="' + sq.Css.item.container + '"/>'),
+    var el,
+        node = $('<div class="' + sq.Css.item.container + '"/>'),
         content = $('<div class="' + sq.Css.item.content + '"/>'),
         css = Css.item;
 
@@ -41,8 +55,19 @@ var SortingQueueCustomisations = (function ($, std, sq) {
     content.append($('<p/>').text(desc + '...')
                    .addClass(css.description));
 
-    content.append($('<p/>').addClass(css.url)
-                   .append($('<a/>').attr('href', url).text(url)));
+    el = $('<div/>').addClass(css.url);
+
+    /* Add cache link if available. */
+    if(this.api.cache.enabled()) {
+      el.append($('<div/>').append(
+        $('<a/>')
+          .attr('href', this.api.cache.url(this.content_.raw.content_id))
+          .text('cache')));
+    }
+
+    /* Main URL. */
+    el.append($('<div/>').append($('<a/>').attr('href', url).text(url)));
+    content.append(el);
 
     if(std.is_num(raw.probability)) {
       var info = raw.intermediate_model_results,
@@ -140,11 +165,11 @@ var SortingQueueCustomisations = (function ($, std, sq) {
 
   Item.prototype.create_score_ = function (caption, weight, css)
   {
-    var elc = $('<span/>').addClass(css || Css.item.dict.score),
+    var elc = $('<span/>')
+          .addClass(css || Css.item.dict.score)
+          .append($('<span/>').html(caption)),
         els = $('<span/>');
 
-    elc.append($('<span/>').html(caption))
-      .append($('<span/>').text(weight.toFixed(4)));
 
     var ns = Math.round(weight / 0.2),
         nc = 5 - ns;
@@ -155,7 +180,7 @@ var SortingQueueCustomisations = (function ($, std, sq) {
     while(nc-- > 0)
       els.append($('<span/>').addClass('glyphicon glyphicon-star-empty'));
 
-    return elc.append(els);
+    return elc.append(els.attr('title', weight.toFixed(4)));
   };
 
 
@@ -172,11 +197,15 @@ var SortingQueueCustomisations = (function ($, std, sq) {
               .click(ItemMoreHandler.onClickMore));
 
     container.prepend(el);
+
+    /* Attributes */
+    this.timeout = null;
   };
 
   ItemMoreHandler.onClickMore = function (ev)
   {
-    var more = $(ev.target).parent(),
+    var self = this,
+        more = $(ev.target).parent(),
         el = more.parent().next();
 
     if(el.length === 0) {
@@ -187,6 +216,24 @@ var SortingQueueCustomisations = (function ($, std, sq) {
     var active = !el.hasClass(Css.active);
     el.toggleClass(Css.active, active);
     more.toggleClass(Css.active, active);
+
+    if(this.timeout !== null)
+      window.clearTimeout(this.timeout);
+
+    /* This is a workaround to prevent a visual artifact from occurring which
+     * can be observed when the number of items in the dict container is too
+     * small and results in a momentary flicker when the user clicks to expand
+     * the container.  To work around this, we set the vertical overflow
+     * property manually *after* the animation has finished, if the container
+     * is set to active; otherwise, the overflow is set to hidden immediately.
+     * */
+    if(active) {
+      this.timeout = window.setTimeout(function () {
+        el.css('overflow-y', 'auto');
+        self.timeout = null;
+      }, 250);
+    } else
+      el.css('overflow-y', 'hidden');
   };
 
 
@@ -214,4 +261,4 @@ var SortingQueueCustomisations = (function ($, std, sq) {
     Item: Item
   };
 
-})($, SortingCommon, SortingQueue);
+})(window, $, SortingCommon, SortingQueue);
