@@ -140,11 +140,11 @@ var SortingQueueCustomisations = (function (window, $, std, sq) {
 
   Item.prototype.create_score_ = function (caption, weight, css)
   {
-    var elc = $('<span/>').addClass(css || Css.item.dict.score),
+    var elc = $('<span/>')
+          .addClass(css || Css.item.dict.score)
+          .append($('<span/>').html(caption)),
         els = $('<span/>');
 
-    elc.append($('<span/>').html(caption))
-      .append($('<span/>').text(weight.toFixed(4)));
 
     var ns = Math.round(weight / 0.2),
         nc = 5 - ns;
@@ -155,7 +155,7 @@ var SortingQueueCustomisations = (function (window, $, std, sq) {
     while(nc-- > 0)
       els.append($('<span/>').addClass('glyphicon glyphicon-star-empty'));
 
-    return elc.append(els);
+    return elc.append(els.attr('title', weight.toFixed(4)));
   };
 
 
