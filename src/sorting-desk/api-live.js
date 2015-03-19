@@ -489,7 +489,7 @@ var Api_ = (function (window, $, CryptoJS, DossierJS, undefined) {
     if(typeof num !== 'number' || num <= 0)
       throw "Invalid number of items specified";
 
-    if (self._processing || !qitems_.query_content_id) {
+    if (this._processing || !qitems_.query_content_id) {
       var deferred = $.Deferred();
 
       window.setTimeout(function () {
@@ -505,10 +505,10 @@ var Api_ = (function (window, $, CryptoJS, DossierJS, undefined) {
       return deferred.promise();
     }
 
-    self._processing = true;
-    var p = $.extend({limit: num.toString()}, self.params);
-    if (self.query_subtopic_id !== null)
-      p.subtopic_id = self.query_subtopic_id;
+    this._processing = true;
+    var p = $.extend({limit: num.toString()}, this.params);
+    if (this.query_subtopic_id !== null)
+      p.subtopic_id = this.query_subtopic_id;
 
     return self.api.search(self.engine_name, self.query_content_id, p)
       .then(function(data) {
