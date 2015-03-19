@@ -524,7 +524,7 @@ var Api_ = (function (window, $, CryptoJS, DossierJS, undefined) {
         });
       })
       .always(function() { self._processing = false; })
-      .fail(function() { console.error("moreTexts: request failed"); });
+      .fail(function()   { console.error("moreTexts: request failed"); });
   };
 
 
