@@ -244,6 +244,24 @@
       return result.reverse().join('/');
     };
 
+    var visit = function (node, cb)
+    {
+      if(!is_fn(cb))
+        throw 'Invalid or no callback function specified';
+
+      var visitor = function (el) {
+        var children = el.childNodes;
+
+        if(children.length) {
+          for(var i = 0, l = children.length; i < l; ++i)
+            visitor(children[i]);
+        } else
+          cb(el);
+      };
+
+      visitor(node);
+    };
+
     /* Is-type functions */
     var is_image = function (el)
     {
