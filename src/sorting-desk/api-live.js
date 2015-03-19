@@ -512,18 +512,16 @@ var Api_ = (function (window, $, CryptoJS, DossierJS, undefined) {
 
     return self.api.search(self.engine_name, self.query_content_id, p)
       .then(function(data) {
-        var items = [];
-        data.results.forEach(function(cobj) {
-          items.push({
+        return data.results.map(function(cobj) {
+          return {
             raw: cobj,
             content_id: cobj.content_id,
             fc: cobj.fc,
             node_id: cobj.content_id,
             name: '',
             url: cobj.fc.value('meta_url')
-          });
+          };
         });
-        return items;
       })
       .always(function() { self._processing = false; })
       .fail(function() { console.error("moreTexts: request failed"); });
