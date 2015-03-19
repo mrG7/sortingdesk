@@ -519,10 +519,10 @@
 
   ControllerExplorer.prototype.initialise = function ()
   {
-    this.refresh();
+    this.refresh(true);
   };
 
-  ControllerExplorer.prototype.refresh = function ()
+  ControllerExplorer.prototype.refresh = function (init)
   {
     var self = this;
 
@@ -532,7 +532,8 @@
     }
 
     /* Stop ALL AJAX requests. */
-    this.api.getDossierJs().stop();
+    if(init !== true)
+      this.api.getDossierJs().stop();
 
     /* Reset state and trigger refresh event. */
     this.refreshing_ = true;

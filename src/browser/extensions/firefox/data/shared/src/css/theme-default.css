@@ -179,13 +179,6 @@ BODY {
   clear: both;
 }
 
-.sd-text-item-url > * {
-/*   display: table-cell; */
-}
-
-.sd-text-item-url > :first-child {
-}
-
 .sd-text-item-url > :last-child {
   width: 85%;
   text-overflow: ellipsis;
