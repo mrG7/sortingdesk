@@ -22,8 +22,7 @@ var Api_ = (function (window, $, CryptoJS, DossierJS, undefined) {
   var sortingDesk_,
       api_,
       qitems_,
-      annotator_,
-      cacheEnabled_ = null;
+      annotator_;
 
 
   /* Interface */
@@ -59,17 +58,11 @@ var Api_ = (function (window, $, CryptoJS, DossierJS, undefined) {
       }
     };
 
-    api_.fcCacheEnabled()
-      .done(function (result) {
-        console.log("Cache enabled: %b", result);
-        cacheEnabled_ = result === true;
-      } );
-
 
     /* Return module public API -- post initialization */
     return {
       /* Functions */
-      cache: cache,
+      cache: new Cache(),
       getFeatureCollection: getFeatureCollection,
       getAllFeatureCollections: getAllFeatureCollections,
       putFeatureCollection: putFeatureCollection,
@@ -113,16 +106,26 @@ var Api_ = (function (window, $, CryptoJS, DossierJS, undefined) {
 
   /**
    * @class
-   * */
-  var cache = {
-    get enabled () { return cacheEnabled_; },
+   *
+   * Note: requires instantiation, unlike `foldering´ below. */
+  var Cache = function ()
+  {
+    var enabled_ = null;
 
-    url: function (content_id)
+    /* Initialisation sequence */
+    api_.fcCacheEnabled()
+      .done(function (result) {
+        enabled_ = result === true;
+      } );
+
+
+    /* Interface */
+    this.enabled = function () { return enabled_ = true; };
+
+    this.url = function (content_id)
     {
-      return cacheEnabled_ === true
-        ? api_.fcCacheUrl(content_id)
-        : null;
-    }
+      return enabled_ === true ? api_.fcCacheUrl(content_id) : null;
+    };
   };
 
 
