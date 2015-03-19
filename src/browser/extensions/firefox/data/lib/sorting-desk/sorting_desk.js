@@ -154,7 +154,7 @@
 
     this.sortingQueue_ = new sq.Sorter(
       $.extend(true, opts, {
-        visibleItems: 30,
+        visibleItems: 40,
         loadItemsAtStartup: false /* IMPORTANT: Explicitly deny loading of items
                                    * at startup as this would potentially break
                                    * request-(start|stop) event handlers set up

@@ -34,7 +34,7 @@ var Api_ = (function (window, $, CryptoJS, DossierJS, undefined) {
 
     qitems_ = new DossierJS.SortingQueueItems(
       api_, 'similar', '', annotator_);
-    qitems_.limit = 30;
+    qitems_.limit = 40;
 
     /* TODO: remove this bypass.  This is just nasty. */
     DossierJS.SortingQueueItems.prototype._itemDismissed = function(cobj) {
