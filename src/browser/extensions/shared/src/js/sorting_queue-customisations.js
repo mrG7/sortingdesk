@@ -6,9 +6,22 @@ var SortingQueueCustomisations = (function (window, $, std, sq) {
    * */
   var Item = function(owner, item)
   {
-    if(!owner.owner.initialised)
-      return;
+    var o = owner.owner;
 
+    /* Sorting Queue is no longer in an initialised state, so we do not proceed
+     * with instantiation of this item. */
+    if(!o.initialised) return;
+
+    o = o.options;
+    if(!o.instances || !o.instances.api)
+      throw 'Reference to API instance not found';
+
+    /* Attributes */
+    /* Note: this attribute must be set before the base class is
+     * constructed. */
+    this.api = o.instances.api;
+
+    /* Now invoke base class' constructor */
     sq.Item.call(this, owner, item);
   };
 
@@ -19,7 +32,8 @@ var SortingQueueCustomisations = (function (window, $, std, sq) {
     var self = this;
 
     /* Nodes */
-    var node = $('<div class="' + sq.Css.item.container + '"/>'),
+    var el,
+        node = $('<div class="' + sq.Css.item.container + '"/>'),
         content = $('<div class="' + sq.Css.item.content + '"/>'),
         css = Css.item;
 
@@ -41,8 +55,19 @@ var SortingQueueCustomisations = (function (window, $, std, sq) {
     content.append($('<p/>').text(desc + '...')
                    .addClass(css.description));
 
-    content.append($('<p/>').addClass(css.url)
-                   .append($('<a/>').attr('href', url).text(url)));
+    el = $('<div/>').addClass(css.url);
+
+    /* Add cache link if available. */
+    if(this.api.cache.enabled()) {
+      el.append($('<div/>').append(
+        $('<a/>')
+          .attr('href', this.api.cache.url(this.content_.raw.content_id))
+          .text('cache')));
+    }
+
+    /* Main URL. */
+    el.append($('<div/>').append($('<a/>').attr('href', url).text(url)));
+    content.append(el);
 
     if(std.is_num(raw.probability)) {
       var info = raw.intermediate_model_results,

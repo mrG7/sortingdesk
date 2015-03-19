@@ -88,6 +88,14 @@
     if(!std.is_obj(opts.constructors))
       opts.constructors = { };
 
+    /* Pass reference to API instance. */
+    if(opts.instances !== undefined)
+      throw 'Expected undefined `opts.instances´';
+
+    opts.instances = {
+      api: this.api_
+    };
+
     /* Specify text dismissal handler if client hasn't supplying its own. */
     if(!std.Constructor.exists(opts.constructors, 'ItemDismissal')) {
       opts.constructors.createItemDismissal = function (item) {

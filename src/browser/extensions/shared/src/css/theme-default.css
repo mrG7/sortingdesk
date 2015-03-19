@@ -174,7 +174,27 @@ BODY {
 }
 
 .sd-text-item-url {
+  width: 100%;
   margin: 8px 0 0 0;
+  clear: both;
+}
+
+.sd-text-item-url > * {
+/*   display: table-cell; */
+}
+
+.sd-text-item-url > :first-child {
+}
+
+.sd-text-item-url > :last-child {
+  width: 85%;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.sd-text-item-url > :first-child:not(:last-child) > A {
+  float: right;
+  color: green !important;
 }
 
 .sd-text-item-score {
