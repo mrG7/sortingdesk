@@ -1,5 +1,5 @@
 
-var SortingQueueCustomisations = (function ($, std, sq) {
+var SortingQueueCustomisations = (function (window, $, std, sq) {
 
   /**
    * @class
@@ -214,4 +214,4 @@ var SortingQueueCustomisations = (function ($, std, sq) {
     Item: Item
   };
 
-})($, SortingCommon, SortingQueue);
+})(window, $, SortingCommon, SortingQueue);
