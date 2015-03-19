@@ -272,7 +272,10 @@ A.sd-text-item-title {
 }
 
 .sd-dict-container.sd-active {
-  overflow-y: auto;
+  /* The following property disabled because in some instances it causes
+   * flicker whilst the transition animation occurs.  We instead set it
+   * manually *once* the animation finishes. */
+  /* overflow-y: auto; */
   overflow-x: hidden;
   max-height: 200px;
 }

@@ -172,11 +172,15 @@ var SortingQueueCustomisations = (function (window, $, std, sq) {
               .click(ItemMoreHandler.onClickMore));
 
     container.prepend(el);
+
+    /* Attributes */
+    this.timeout = null;
   };
 
   ItemMoreHandler.onClickMore = function (ev)
   {
-    var more = $(ev.target).parent(),
+    var self = this,
+        more = $(ev.target).parent(),
         el = more.parent().next();
 
     if(el.length === 0) {
@@ -187,6 +191,24 @@ var SortingQueueCustomisations = (function (window, $, std, sq) {
     var active = !el.hasClass(Css.active);
     el.toggleClass(Css.active, active);
     more.toggleClass(Css.active, active);
+
+    if(this.timeout !== null)
+      window.clearTimeout(this.timeout);
+
+    /* This is a workaround to prevent a visual artifact from occurring which
+     * can be observed when the number of items in the dict container is too
+     * small and results in a momentary flicker when the user clicks to expand
+     * the container.  To work around this, we set the vertical overflow
+     * property manually *after* the animation has finished, if the container
+     * is set to active; otherwise, the overflow is set to hidden immediately.
+     * */
+    if(active) {
+      this.timeout = window.setTimeout(function () {
+        el.css('overflow-y', 'auto');
+        self.timeout = null;
+      }, 250);
+    } else
+      el.css('overflow-y', 'hidden');
   };
 
 
