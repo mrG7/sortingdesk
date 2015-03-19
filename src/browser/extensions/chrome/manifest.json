@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Sorting Desk",
-  "version": "0.3.2",
+  "version": "0.3.4",
   "options_page": "src/html/options.html",
   "web_accessible_resources": [
     "lib/*.js",
