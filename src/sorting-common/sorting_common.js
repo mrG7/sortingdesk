@@ -262,6 +262,25 @@
       visitor(node);
     };
 
+    var subtreeBetween = function (node, parent /* = document.body */)
+    {
+      if(parent === undefined)
+        parent = document.body;
+
+      var subtree = [ node ];
+
+      while(node !== parent) {
+        node = node.parentNode;
+        if(node === null)
+          return [ ];
+
+        subtree.push(node);
+      }
+
+      return subtree;
+    }
+
+
     /* Is-type functions */
     var is_image = function (el)
     {
@@ -287,7 +306,9 @@
     return {
       imageToBase64: imageToBase64,
       getXpathSimple: getXpathSimple,
-      is_image: is_image
+      is_image: is_image,
+      visit: visit,
+      subtreeBetween: subtreeBetween
     };
 
   } )();
