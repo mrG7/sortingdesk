@@ -11,11 +11,18 @@
 /*jshint laxbreak:true */
 
 
-/**
- * The base module.
- * */
-var SortingCommon_ = function (window, $) {
 
+(function (factory, root) {
+
+  /* Compatibility with RequireJs. */
+  if(typeof define === "function" && define.amd) {
+    define("SortingCommon", [ "jquery" ], function ($) {
+      return factory(root, $);
+    });
+  } else
+    root.SortingCommon = factory(root, $);
+
+} )(function (window, $) {
 
   /* Module-wide function */
   var absm_noti = function ( ) { throw "Abstract method not implemented"; };
@@ -1228,13 +1235,5 @@ var SortingCommon_ = function (window, $) {
     Position: Position,
     PositionSize: PositionSize
   };
-};
 
-
-/* Compatibility with RequireJs. */
-if(typeof define === "function" && define.amd) {
-  define("SortingCommon", [ "jquery" ], function ($) {
-    return SortingCommon_(window, $);
-  });
-} else
-  window.SortingCommon = SortingCommon_(window, $);
+}, this);

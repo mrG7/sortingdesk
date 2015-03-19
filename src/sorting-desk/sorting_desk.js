@@ -12,13 +12,18 @@
 /*jshint laxbreak:true */
 
 
-/**
- * The Sorting Desk module.
- *
- * @returns an object containing the module's public interface.
- * */
-var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
+(function (factory, root) {
 
+  /* Compatibility with RequireJs. */
+  if(typeof define === "function" && define.amd) {
+    var deps = [ "jquery", "SortingQueue", "SortingCommon", "API" ];
+    define("SortingDesk", deps, function ($, sq, std, api) {
+      return factory(root, $, sq, std, api);
+    } );
+  } else
+    root.SortingDesk = factory(root, $, SortingQueue, SortingCommon, Api);
+
+} )(function (window, $, sq, std, Api, undefined) {
 
   /**
    * @class
@@ -1960,13 +1965,4 @@ var SortingDesk_ = function (window, $, sq, std, Api, undefined) {
     NetworkFailure: NetworkFailure
   };
 
-};
-
-
-/* Compatibility with RequireJs. */
-if(typeof define === "function" && define.amd) {
-  define("SortingDesk", [ "jquery", "SortingQueue", "SortingCommon", "API" ], function ($, sq, std, api) {
-    return SortingDesk_(window, $, sq, std, api);
-  });
-} else
-  window.SortingDesk = SortingDesk_(window, $, SortingQueue, SortingCommon, Api);
+}, this);
