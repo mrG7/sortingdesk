@@ -120,7 +120,7 @@ var Api_ = (function (window, $, CryptoJS, DossierJS, undefined) {
 
 
     /* Interface */
-    this.enabled = function () { return enabled_ = true; };
+    this.enabled = function () { return enabled_; };
 
     this.url = function (content_id)
     {
