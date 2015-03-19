@@ -22,7 +22,8 @@ var Api_ = (function (window, $, CryptoJS, DossierJS, undefined) {
   var sortingDesk_,
       api_,
       qitems_,
-      annotator_;
+      annotator_,
+      cacheEnabled_ = null;
 
 
   /* Interface */
@@ -56,9 +57,17 @@ var Api_ = (function (window, $, CryptoJS, DossierJS, undefined) {
       }
     };
 
+    api_.fcCacheEnabled()
+      .done(function (result) {
+        console.log("Cache enabled: %b", result);
+        cacheEnabled_ = result === true;
+      } );
+
+
     /* Return module public API -- post initialization */
     return {
       /* Functions */
+      cache: cache,
       getFeatureCollection: getFeatureCollection,
       getAllFeatureCollections: getAllFeatureCollections,
       putFeatureCollection: putFeatureCollection,
@@ -98,6 +107,22 @@ var Api_ = (function (window, $, CryptoJS, DossierJS, undefined) {
       COREF_VALUE_NEGATIVE: DossierJS.COREF_VALUE_NEGATIVE
     };
   };
+
+
+  /**
+   * @class
+   * */
+  var cache = {
+    get enabled () { return cacheEnabled_; },
+
+    url: function (content_id)
+    {
+      return cacheEnabled_ === true
+        ? api_.fcCacheUrl(content_id)
+        : null;
+    }
+  };
+
 
   var getFeatureCollection = function (content_id)
   {
