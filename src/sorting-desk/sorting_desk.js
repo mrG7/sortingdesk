@@ -181,7 +181,15 @@
        * Start by explicitly initialising SortingQueue's instance and proceed
        * to initialising our own instance. */
       this.sortingQueue_.initialise();
+
+      /* TODO: place in class of its own. */
+      /* BEGIN_BLOCK |=> */
       this.sortingQueue_.on('pre-render', this.onPreRender_.bind(this));
+      this.sortingQueue_.on('items-updated', function (count) {
+        if(count === 0)
+          $('#' + self.options.suggestion.id).remove();
+      } );
+      /* <=| END */
 
       (this.explorer_ = new ControllerExplorer(this))
         .on( {
