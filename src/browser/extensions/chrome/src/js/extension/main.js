@@ -184,7 +184,7 @@ var Main = (function (window, chrome, $, std, sq, sqc, sd, Api, undefined) {
           els = $('<span/>');
 
 
-      var ns = Math.round(weight / 0.2),
+      var ns = Math.round(Math.min(weight, 1) / 0.2),
           nc = 5 - ns;
 
       while(ns-- > 0)
