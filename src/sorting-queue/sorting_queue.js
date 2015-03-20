@@ -574,9 +574,7 @@
 
   ControllerItems.prototype.redraw = function ()
   {
-    this.removeNodes_();
-    this.items_ = [ ];
-    this.check();
+    this.removeAll(true);
   };
 
   // Returns a de-duped `items`.
