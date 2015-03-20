@@ -74,7 +74,8 @@
     this.events_ = new std.Events(
       this,
       [ 'request-begin', 'request-end', 'items-updated', 'item-dismissed',
-        'item-deselected', 'item-selected', 'loading-begin', 'loading-end' ]);
+        'item-deselected', 'item-selected', 'loading-begin', 'loading-end',
+        'pre-render' ]);
   };
 
   Sorter.prototype = {
