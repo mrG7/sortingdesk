@@ -291,7 +291,6 @@
 
     onPreRender_: function (data)
     {
-      console.log('pre-render: ', data);
       var node,
           self = this,
           opts = this.options_.suggestion,
@@ -332,9 +331,13 @@
       container.append($('<h2/>').html(sugg.phrase));
       container.append(this.callbacks.invoke('renderScore', sugg.score));
 
-      sugg.hits.forEach(function (s) {
-        container.append($('<p/>').html(s.title));
-      } );
+      container.append($('<p/>')
+                       .html('This suggestion links <strong>'
+                             + sugg.hits.length
+                             + '</strong> '
+                             + (sugg.hits.length === 1
+                                ? 'page.'
+                                : 'pages.')));
 
       container.find('BUTTON').on('click', function () {
         if(self.explorer.addSuggestions(sugg.phrase, sugg.hits)) {
