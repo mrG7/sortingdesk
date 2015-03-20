@@ -1,4 +1,5 @@
 * Generic
+** TODO Use =defineProperty=
 ** TODO Replace methods with (prefix) string =initialis= for =initializ=
 
 *** TODO Request feedback from Diffeo about other British-isms and use American English variations
@@ -12,28 +13,28 @@ First iteration would include modules and classes.
 
 * =SortingQueue=
 * =SortingDesk=
-** IN-PROGRESS Show loader when item being created or modified
+** DONE Show loader when item being created or modified
+- State "DONE"       from "IN-PROGRESS" [2015-03-18 Wed 10:06]
 - State "IN-PROGRESS" from "TODO"       [2015-02-12 Thu 11:48]
 
-** IN-PROGRESS Load subfolder's items only when opened
+** DONE Load subfolder's items only when opened
+- State "DONE"       from "IN-PROGRESS" [2015-03-18 Wed 10:06]
 - State "IN-PROGRESS" from "TODO"       [2015-02-12 Thu 11:48]
 
 ** DONE Use image data to display it
 - State "DONE"       from "TODO"       [2015-02-12 Thu 11:49]
-
-** IN-PROGRESS =__define(Getter|Setter)__= has been deprecated
-- State "IN-PROGRESS" from "TODO"       [2015-02-12 Thu 11:49]
-Use  =defineProperty= instead.
 
 ** CANCELED [#A] Why can't an attribute be added in the =SubfolderNew= constructor and accessed in =render=?
 - State "CANCELED"   from "TODO"       [2015-02-12 Thu 11:27] \\
   Must have been tired.  Attributes *can* be added with no issue!
 
 * Chrome extension
-** TODO Inject content script into all opened tabs
+** DONE Inject content script into all opened tabs
+- State "DONE"       from "TODO"       [2015-03-18 Wed 10:06]
 On start up.
 
-** TODO theme-default: special rule =.sd-text-item-content > DIV > P=
+** DONE theme-default: special rule =.sd-text-item-content > DIV > P=
+- State "DONE"       from "TODO"       [2015-03-18 Wed 10:07]
 Remove special rule when =Item= in =main.js= is reworked.
 
 * Examples
