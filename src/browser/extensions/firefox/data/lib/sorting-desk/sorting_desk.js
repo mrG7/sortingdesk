@@ -98,67 +98,18 @@
 
     /* Specify text dismissal handler if client hasn't supplying its own. */
     if(!std.Constructor.exists(opts.constructors, 'ItemDismissal')) {
-      opts.constructors.createItemDismissal = function (item) {
-        return (new sq.ItemDismissalReplaceTight(
-          item, {
-            tooltipClose: "Click again to ignore this result without asserting"
-              + " that it is either wrong or a redundant; will automatically"
-              + " select this choice for you in a few seconds.",
-            choices: [
-              { id: 'redundant',
-                title: 'Redundant?',
-                tooltip: 'Result is correct and either redundant, a duplicate,'
-                + ' or simply not something you want to see any more in the'
-                + ' results.'},
-              { id: 'wrong',
-                title: 'Wrong?',
-                tooltip: 'Result is not correct, not relevant, and not what'
-                + ' you want the system to learn as your objective of this'
-                + ' query; will be removed from future results.' } ]
-          } ))
-          .on('dismissed', function (id) {
-            console.log('User chose: %s', id);
-
-            var cid = item.content.content_id,
-                djs = self.api.DossierJS,
-                label = new djs.Label(
-                    self.api.getQueryContentId(),
-                    cid,
-                    'unknown',
-                    0, // coref value is filled in below
-                    self.api.getQuerySubtopicId());
-            if (id === null)
-              label.coref_value = djs.COREF_VALUE_UNKNOWN;
-            else if (id === 'redundant')
-              label.coref_value = djs.COREF_VALUE_POSITIVE;
-            else if (id === 'wrong')
-              label.coref_value = djs.COREF_VALUE_NEGATIVE;
-            else {
-              item.owner.remove(item);
-              console.error("Unrecognized dismissal identifier: " + id);
-              return;
-            }
-
-            this.setResetHtml("Processing...");
-
-            self.api.addLabel(label)
-              .done(function () { item.owner.remove(item); })
-              .fail(function () {
-                self.networkFailure.incident(
-                  NetworkFailure.types.dismissal, item
-                );
-              } );
-          } );
-      };
+      opts.constructors.createItemDismissal =
+        this.createItemDismissal_.bind(this);
     }
 
     this.sortingQueue_ = new sq.Sorter(
       $.extend(true, opts, {
         visibleItems: 40,
-        loadItemsAtStartup: false /* IMPORTANT: Explicitly deny loading of items
-                                   * at startup as this would potentially break
-                                   * request-(start|stop) event handlers set up
-                                   * only *AFTER* this constructor exits. */
+        loadItemsAtStartup: false /* IMPORTANT: Explicitly deny loading of
+                                   * items at startup as this would potentially
+                                   * break request-(start|stop) event handlers
+                                   * set up only *AFTER* this constructor
+                                   * exits. */
       }),
       $.extend(this.api_.getCallbacks(), cbs));
   };
@@ -196,11 +147,11 @@
       if(this.initialised_)
         throw "Sorting Desk component already initialised";
 
-      var self = this,
+      var els,
+          self = this,
           finder = new std.NodeFinder('data-sd-scope',
                                       'sorting-desk',
-                                      this.options_.container),
-          els;
+                                      this.options_.container);
 
       /* Find nodes. */
       els = this.nodes_ = {
@@ -227,9 +178,10 @@
 
       /* Begin instantiating and initialising controllers.
        *
-       * Start by explicitly initialising SortingQueue's instance and proceed to
-       * initialising our own instance. */
+       * Start by explicitly initialising SortingQueue's instance and proceed
+       * to initialising our own instance. */
       this.sortingQueue_.initialise();
+      this.sortingQueue_.on('pre-render', this.onPreRender_.bind(this));
 
       (this.explorer_ = new ControllerExplorer(this))
         .on( {
@@ -271,6 +223,118 @@
 
           console.info("Sorting Desk UI reset");
         } );
+    },
+
+    /* Private interface */
+    createItemDismissal_: function (item) {
+      var self = this;
+
+      return (new sq.ItemDismissalReplaceTight(
+        item, {
+          tooltipClose: "Click again to ignore this result without asserting"
+            + " that it is either wrong or a redundant; will automatically"
+            + " select this choice for you in a few seconds.",
+          choices: [
+            { id: 'redundant',
+              title: 'Redundant?',
+              tooltip: 'Result is correct and either redundant, a duplicate,'
+              + ' or simply not something you want to see any more in the'
+              + ' results.'},
+            { id: 'wrong',
+              title: 'Wrong?',
+              tooltip: 'Result is not correct, not relevant, and not what'
+              + ' you want the system to learn as your objective of this'
+              + ' query; will be removed from future results.' } ]
+        } ))
+        .on('dismissed', function (id) {
+          console.log('User chose: %s', id);
+
+          var cid = item.content.content_id,
+              djs = self.api.DossierJS,
+              label = new djs.Label(
+                self.api.getQueryContentId(),
+                cid,
+                'unknown',
+                0, // coref value is filled in below
+                self.api.getQuerySubtopicId());
+          if (id === null)
+            label.coref_value = djs.COREF_VALUE_UNKNOWN;
+          else if (id === 'redundant')
+            label.coref_value = djs.COREF_VALUE_POSITIVE;
+          else if (id === 'wrong')
+            label.coref_value = djs.COREF_VALUE_NEGATIVE;
+          else {
+            item.owner.remove(item);
+            console.error("Unrecognized dismissal identifier: " + id);
+            return;
+          }
+
+          this.setResetHtml("Processing...");
+
+          self.api.addLabel(label)
+            .done(function () { item.owner.remove(item); })
+            .fail(function () {
+              self.networkFailure.incident(
+                NetworkFailure.types.dismissal, item
+              );
+            } );
+        } );
+    },
+
+    onPreRender_: function (data)
+    {
+      console.log('pre-render: ', data);
+      var node,
+          self = this,
+          opts = this.options_.suggestion,
+          container = $('#' + opts.id),
+          sugg = data.suggestions;
+
+      /* If there are no suggestions or no suggestion hits in the first
+       * element, self-destruct after a fade out animation and get out of
+       * here. */
+      if(!std.is_arr(sugg)
+         || sugg.length === 0
+         || !std.is_arr(sugg[0].hits)
+         || sugg[0].hits.length === 0)
+      {
+        /* Note: it doesn't really matter if the container doesn't actually
+         * exist yet. */
+        container.fadeOut(function () { container.remove(); } );
+        return;
+      }
+
+      /* Important that we cancel any running animations or the container may
+       * be removed (see above). */
+      container.stop();
+      sugg = sugg[0];
+
+      /* Always re-create the suggestion container. */
+      container.remove();
+      container = this.callbacks.invoke('createSuggestionContainer');
+      node = this.sortingQueue_.nodes.items;
+
+      /* Insert our container before the top child node of the search results
+       * list. */
+      if(node.children().length > 0)
+        container.insertBefore(node.children().first());
+      else
+        node.append(container);
+
+      container.append($('<h2/>').html(sugg.phrase));
+      container.append(this.callbacks.invoke('renderScore', sugg.score));
+
+      sugg.hits.forEach(function (s) {
+        container.append($('<p/>').html(s.title));
+      } );
+
+      container.find('BUTTON').on('click', function () {
+        if(self.explorer.addSuggestions(sugg.phrase, sugg.hits)) {
+          container.fadeOut(function () {
+            container.remove();
+          } );
+        }
+      } );
     }
   };
 
@@ -519,10 +583,10 @@
 
   ControllerExplorer.prototype.initialise = function ()
   {
-    this.refresh();
+    this.refresh(true);
   };
 
-  ControllerExplorer.prototype.refresh = function ()
+  ControllerExplorer.prototype.refresh = function (init)
   {
     var self = this;
 
@@ -532,7 +596,8 @@
     }
 
     /* Stop ALL AJAX requests. */
-    this.api.getDossierJs().stop();
+    if(init !== true)
+      this.api.getDossierJs().stop();
 
     /* Reset state and trigger refresh event. */
     this.refreshing_ = true;
@@ -618,6 +683,50 @@
       obj: new SubfolderNew(folder, name),
       descriptor: descriptor
     };
+  };
+
+  ControllerExplorer.prototype.addSuggestions = function (title, suggestions)
+  {
+    if(!std.is_str(title) || (title = title.trim()).length === 0)
+      throw 'Invalid or no title specified';
+    else if(!std.is_arr(suggestions) || suggestions.length === 0)
+      throw 'Invalid or no array of suggestions specified';
+
+    if(!(this.selected_ instanceof Folder)) {
+      window.alert('Please select a folder to add the soft selectors to.');
+      return false;
+    }
+
+    var self = this,
+        index = 0,
+        subfolder = this.selected_.add(
+          new this.owner.api.foldering.subfolderFromName(
+            this.selected_.data, title));
+
+    var on_loaded = function () { console.log('on loaded'); next(); };
+    var next = function () {
+      if(std.is_fn(this.off))
+        this.off('loaded', on_loaded);
+
+      if(index >= suggestions.length)
+        return;
+
+      var s = suggestions[index],
+          descriptor = {
+            id: (window.performance.now()*100000000000).toString(),
+            type: 'manual',
+            content_id: s.content_id,
+            content: s.title
+          };
+
+      ++index;
+      descriptor.subtopic_id = self.generate_subtopic_id_(descriptor);
+      subfolder.add(descriptor)
+        .on('loading-end', on_loaded);
+    };
+    next();
+
+    return true;
   };
 
   ControllerExplorer.prototype.createItem = function (subfolder, name)
@@ -830,11 +939,11 @@
 
         console.info("Feature collection GET failed: creating new (id=%s)",
                      descriptor.content_id);
-        return self.api.createFeatureCollection(
-          descriptor.content_id,
-          descriptor.document).done(function(fc) {
+        return self.api.createFeatureCollection(descriptor.content_id,
+                                                descriptor.document)
+          .done(function(fc) {
             console.log('Feature collection created: (id=%s)',
-                       descriptor.content_id);
+                        descriptor.content_id);
 
             self.set_fc_content_(fc, descriptor);
             self.api.setFeatureCollectionContent(
@@ -844,10 +953,7 @@
           } )
           .fail(function () {
             self.owner_.networkFailure.incident(
-              NetworkFailure.types.fc.create, {
-                content_id: descriptor.content_id,
-                fc: fc
-              } );
+              NetworkFailure.types.fc.create, descriptor);
           } );
       } );
   };
@@ -1077,7 +1183,9 @@
     this.id_ = null;
     this.opening_ = false;
     this.loaded_ = false;
-    this.events_ = new std.Events(this, [ 'loading-start', 'loading-end' ] );
+    this.events_ = new std.Events(
+      this,
+      [ 'loading-start', 'loading-end', 'ready' ] );
 
     this.on( {
       "loading-end": function () {
@@ -1394,9 +1502,12 @@
     if(!std.is_obj(descriptor))
       throw "Invalid or no descriptor specified";
 
-    /* First create `Api.Item´ instance after generating a valid content_id,
-     * and then create and contain our UI representation of an item.*/
-    descriptor.content_id = this.api.generateContentId(descriptor.href);
+    /* First create `Api.Item´ instance after generating a valid content_id, if
+     * it isn't already present in the descriptor, and then create and contain
+     * our UI representation of an item.*/
+    if(!descriptor.hasOwnProperty('content_id'))
+      descriptor.content_id = this.api.generateContentId(descriptor.href);
+
     item = new this.api.foldering.Item(this.data, descriptor);
 
     /* Pass in `descriptor´ because we don't want it to retrieve the item's
@@ -1414,7 +1525,9 @@
         self.controller.owner.networkFailure.incident(
           NetworkFailure.types.subfolder.add, descriptor
         );
-      } );
+      } )
+
+    return obj;
   };
 
   Subfolder.prototype.remove = function (item)
@@ -1508,7 +1621,6 @@
 
     /* Attributes */
     this.item_ = item;
-    this.events_ = new std.Events(this, [ 'ready' ]);
 
     var self = this,
         ready = function () {
@@ -1538,14 +1650,8 @@
 
       /* Create or update feature collection. */
       this.controller.updateFc(descriptor, false)
-        .done(function (fc) { self.onGotFeatureCollection(fc); } )
-        .fail(function ()   {
-          self.controller.owner.networkFailure.incident(
-            NetworkFailure.types.fc.save, descriptor
-          );
-
-          self.onGotFeatureCollection(null);
-        } )
+        .done(function (fc) { self.onGotFeatureCollection(fc);   } )
+        .fail(function ()   { self.onGotFeatureCollection(null); } )
         .always(function () { self.loading(false); } );
     }
   };
@@ -1943,8 +2049,6 @@
     disabled: 'sd-disabled',
     droppable: {
       hover: 'sd-droppable-hover'
-    },
-    icon: {
     }
   };
 
@@ -1962,7 +2066,10 @@
       ControllerExplorer: ControllerExplorer
     },
     container: null,
-    folderNewCaption: "Enter folder name"
+    folderNewCaption: "Enter folder name",
+    suggestion: {
+      id: 'sd-suggestion'
+    }
   };
 
 

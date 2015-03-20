@@ -118,7 +118,6 @@ var Api_ = (function (window, $, CryptoJS, DossierJS, undefined) {
         enabled_ = result === true;
       } );
 
-
     /* Interface */
     this.enabled = function () { return enabled_; };
 
@@ -515,7 +514,13 @@ var Api_ = (function (window, $, CryptoJS, DossierJS, undefined) {
 
     return self.api.search(self.engine_name, self.query_content_id, p)
       .then(function(data) {
-        return data.results.map(function(cobj) {
+        /* Fault tolerance: */
+        if(data === null || typeof data !== 'object')
+          data = { };
+        if(!(data.results instanceof Array))
+          data.results = [ ];
+
+        data.results = data.results.map(function(cobj) {
           return {
             raw: cobj,
             content_id: cobj.content_id,
@@ -525,9 +530,11 @@ var Api_ = (function (window, $, CryptoJS, DossierJS, undefined) {
             url: cobj.fc.value('meta_url')
           };
         });
+
+        return data;
       })
-      .always(function() { self._processing = false; })
-      .fail(function()   { console.error("moreTexts: request failed"); });
+      .fail(  function() { console.error("moreTexts: request failed"); })
+      .always(function() { self._processing = false; });
   };
 
 

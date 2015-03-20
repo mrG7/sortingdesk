@@ -74,7 +74,8 @@
     this.events_ = new std.Events(
       this,
       [ 'request-begin', 'request-end', 'items-updated', 'item-dismissed',
-        'item-deselected', 'item-selected', 'loading-begin', 'loading-end' ]);
+        'item-deselected', 'item-selected', 'loading-begin', 'loading-end',
+        'pre-render' ]);
   };
 
   Sorter.prototype = {
@@ -608,16 +609,27 @@
     this.owner_.events_.trigger('loading-begin');
     this.owner_.callbacks.invoke("moreTexts",
                                  this.owner_.options.visibleItems)
-      .done(function (items) {
+      .done(function (data) {
+        /* Rendering of items is asynchronous, which means we need to manually
+         * begin a "request".
+         * NOTE: `requests´ should really be renamed to convey a more generic
+         * meaning of asynchronous task processing. */
         self.owner_.requests.begin('check-items');
 
+        /* Trigger event 'pre-render' to signal that we've received data and
+         * are about to render items. */
+        self.owner_.events.trigger('pre-render', data);
+
+        /* We're only using the actual search results, which are found in the
+         * `results´ property. */
+        data = data.results;
+
         /* Ensure we've received a valid items array. */
-        if(!std.is_arr(items))
-          throw "Invalid or no items array";
+        if(!std.is_arr(data))
+          throw "Invalid or no results array";
 
-        items = self.dedupItems(items);
-
-        items.forEach(function (item, index) {
+        /* Now drop duplicates and render each item. */
+        self.dedupItems(data).forEach(function (item, index) {
           window.setTimeout( function () {
             /* Only continue adding items if the owning Sorting Queue is still
              * in an `initialised´ state. Given the asynchronous nature of this
@@ -640,7 +652,7 @@
           self.owner_.events.trigger('items-updated', self.items_.length);
           self.owner_.events.trigger('loading-end');
           self.updateEmptyNotification_();
-        }, Math.pow(items.length - 1, 2) * 1.1 + 10);
+        }, Math.pow(data.length - 1, 2) * 1.1 + 10);
       } )
       .fail(function () {
         self.updateEmptyNotification_();

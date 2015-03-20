@@ -136,18 +136,65 @@ BODY {
  *  Sorting Desk
  * ---------------------------------------------------------------------- */
 /* Text item */
-.sd-text-item {
+.sd-text-item,
+#sd-suggestion {
   position: relative;
   margin: 15px 5px;
   padding: 10px;
-  background-color: #FFFFFA;
-  border: 1px solid #ccc;
   color: #242922;
   text-align: justify;
   font-size: 12px;
   cursor: default;
   line-height: 15px;
   box-shadow: 1px 1px 1px 2px rgba(0,0,0,0.1);
+}
+
+.sd-text-item {
+  background-color: #FFFFFA;
+  border: 1px solid #ccc;
+}
+
+#sd-suggestion {
+  background-color: #dbdfab;
+  border: 1px solid #cfc734;
+  white-space: normal;
+  color: #474523;
+}
+
+#sd-suggestion > H1 {
+  font-size: 12px;
+  margin: 0;
+  color: #7F6A33;
+}
+
+#sd-suggestion > H1 > BUTTON {
+  float: right;
+  border-radius: 20px;
+  outline: none;
+  opacity: 0;
+  transition: all .25s;
+}
+
+#sd-suggestion:hover > H1 > BUTTON {
+  opacity: 1;
+}
+
+#sd-suggestion > H1 > SPAN {
+  margin-right: 5px;
+}
+
+#sd-suggestion > H2 {
+  font-size: 16px;
+  color: #59531d;
+}
+
+#sd-suggestion > .sd-score {
+  margin-bottom: 10px;
+  display: block;
+}
+
+#sd-suggestion > P {
+  color: #574e2a;
 }
 
 .sd-text-item B:not(:first-child),
@@ -177,13 +224,6 @@ BODY {
   width: 100%;
   margin: 8px 0 0 0;
   clear: both;
-}
-
-.sd-text-item-url > * {
-/*   display: table-cell; */
-}
-
-.sd-text-item-url > :first-child {
 }
 
 .sd-text-item-url > :last-child {
