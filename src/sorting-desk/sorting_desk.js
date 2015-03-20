@@ -147,11 +147,11 @@
       if(this.initialised_)
         throw "Sorting Desk component already initialised";
 
-      var self = this,
+      var els,
+          self = this,
           finder = new std.NodeFinder('data-sd-scope',
                                       'sorting-desk',
-                                      this.options_.container),
-          els;
+                                      this.options_.container);
 
       /* Find nodes. */
       els = this.nodes_ = {
