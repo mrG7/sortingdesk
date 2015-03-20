@@ -118,7 +118,6 @@ var Api_ = (function (window, $, CryptoJS, DossierJS, undefined) {
         enabled_ = result === true;
       } );
 
-
     /* Interface */
     this.enabled = function () { return enabled_; };
 
