@@ -181,7 +181,15 @@
        * Start by explicitly initialising SortingQueue's instance and proceed
        * to initialising our own instance. */
       this.sortingQueue_.initialise();
+
+      /* TODO: place in class of its own. */
+      /* BEGIN_BLOCK |=> */
       this.sortingQueue_.on('pre-render', this.onPreRender_.bind(this));
+      this.sortingQueue_.on('items-updated', function (count) {
+        if(count === 0)
+          $('#' + self.options.suggestion.id).remove();
+      } );
+      /* <=| END */
 
       (this.explorer_ = new ControllerExplorer(this))
         .on( {
@@ -283,7 +291,6 @@
 
     onPreRender_: function (data)
     {
-      console.log('pre-render: ', data);
       var node,
           self = this,
           opts = this.options_.suggestion,
@@ -324,9 +331,13 @@
       container.append($('<h2/>').html(sugg.phrase));
       container.append(this.callbacks.invoke('renderScore', sugg.score));
 
-      sugg.hits.forEach(function (s) {
-        container.append($('<p/>').html(s.title));
-      } );
+      container.append($('<p/>')
+                       .html('This suggestion links <strong>'
+                             + sugg.hits.length
+                             + '</strong> '
+                             + (sugg.hits.length === 1
+                                ? 'page.'
+                                : 'pages.')));
 
       container.find('BUTTON').on('click', function () {
         if(self.explorer.addSuggestions(sugg.phrase, sugg.hits)) {
@@ -703,7 +714,7 @@
           new this.owner.api.foldering.subfolderFromName(
             this.selected_.data, title));
 
-    var on_loaded = function () { console.log('on loaded'); next(); };
+    var on_loaded = function () { next(); };
     var next = function () {
       if(std.is_fn(this.off))
         this.off('loaded', on_loaded);
