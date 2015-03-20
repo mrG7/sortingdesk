@@ -610,15 +610,15 @@
     this.owner_.callbacks.invoke("moreTexts",
                                  this.owner_.options.visibleItems)
       .done(function (data) {
-        /* Trigger event 'pre-render' to signal that we've received data and
-         * are about to render items. */
-        self.owner_.events.trigger('pre-render', data);
-
         /* Rendering of items is asynchronous, which means we need to manually
          * begin a "request".
          * NOTE: `requests´ should really be renamed to convey a more generic
          * meaning of asynchronous task processing. */
         self.owner_.requests.begin('check-items');
+
+        /* Trigger event 'pre-render' to signal that we've received data and
+         * are about to render items. */
+        self.owner_.events.trigger('pre-render', data);
 
         /* We're only using the actual search results, which are found in the
          * `results´ property. */
