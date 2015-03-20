@@ -98,67 +98,18 @@
 
     /* Specify text dismissal handler if client hasn't supplying its own. */
     if(!std.Constructor.exists(opts.constructors, 'ItemDismissal')) {
-      opts.constructors.createItemDismissal = function (item) {
-        return (new sq.ItemDismissalReplaceTight(
-          item, {
-            tooltipClose: "Click again to ignore this result without asserting"
-              + " that it is either wrong or a redundant; will automatically"
-              + " select this choice for you in a few seconds.",
-            choices: [
-              { id: 'redundant',
-                title: 'Redundant?',
-                tooltip: 'Result is correct and either redundant, a duplicate,'
-                + ' or simply not something you want to see any more in the'
-                + ' results.'},
-              { id: 'wrong',
-                title: 'Wrong?',
-                tooltip: 'Result is not correct, not relevant, and not what'
-                + ' you want the system to learn as your objective of this'
-                + ' query; will be removed from future results.' } ]
-          } ))
-          .on('dismissed', function (id) {
-            console.log('User chose: %s', id);
-
-            var cid = item.content.content_id,
-                djs = self.api.DossierJS,
-                label = new djs.Label(
-                    self.api.getQueryContentId(),
-                    cid,
-                    'unknown',
-                    0, // coref value is filled in below
-                    self.api.getQuerySubtopicId());
-            if (id === null)
-              label.coref_value = djs.COREF_VALUE_UNKNOWN;
-            else if (id === 'redundant')
-              label.coref_value = djs.COREF_VALUE_POSITIVE;
-            else if (id === 'wrong')
-              label.coref_value = djs.COREF_VALUE_NEGATIVE;
-            else {
-              item.owner.remove(item);
-              console.error("Unrecognized dismissal identifier: " + id);
-              return;
-            }
-
-            this.setResetHtml("Processing...");
-
-            self.api.addLabel(label)
-              .done(function () { item.owner.remove(item); })
-              .fail(function () {
-                self.networkFailure.incident(
-                  NetworkFailure.types.dismissal, item
-                );
-              } );
-          } );
-      };
+      opts.constructors.createItemDismissal =
+        this.createItemDismissal_.bind(this);
     }
 
     this.sortingQueue_ = new sq.Sorter(
       $.extend(true, opts, {
         visibleItems: 40,
-        loadItemsAtStartup: false /* IMPORTANT: Explicitly deny loading of items
-                                   * at startup as this would potentially break
-                                   * request-(start|stop) event handlers set up
-                                   * only *AFTER* this constructor exits. */
+        loadItemsAtStartup: false /* IMPORTANT: Explicitly deny loading of
+                                   * items at startup as this would potentially
+                                   * break request-(start|stop) event handlers
+                                   * set up only *AFTER* this constructor
+                                   * exits. */
       }),
       $.extend(this.api_.getCallbacks(), cbs));
   };
@@ -270,6 +221,62 @@
           self.initialised_ = false;
 
           console.info("Sorting Desk UI reset");
+        } );
+    },
+
+    /* Private interface */
+    createItemDismissal_: function (item) {
+      var self = this;
+
+      return (new sq.ItemDismissalReplaceTight(
+        item, {
+          tooltipClose: "Click again to ignore this result without asserting"
+            + " that it is either wrong or a redundant; will automatically"
+            + " select this choice for you in a few seconds.",
+          choices: [
+            { id: 'redundant',
+              title: 'Redundant?',
+              tooltip: 'Result is correct and either redundant, a duplicate,'
+              + ' or simply not something you want to see any more in the'
+              + ' results.'},
+            { id: 'wrong',
+              title: 'Wrong?',
+              tooltip: 'Result is not correct, not relevant, and not what'
+              + ' you want the system to learn as your objective of this'
+              + ' query; will be removed from future results.' } ]
+        } ))
+        .on('dismissed', function (id) {
+          console.log('User chose: %s', id);
+
+          var cid = item.content.content_id,
+              djs = self.api.DossierJS,
+              label = new djs.Label(
+                self.api.getQueryContentId(),
+                cid,
+                'unknown',
+                0, // coref value is filled in below
+                self.api.getQuerySubtopicId());
+          if (id === null)
+            label.coref_value = djs.COREF_VALUE_UNKNOWN;
+          else if (id === 'redundant')
+            label.coref_value = djs.COREF_VALUE_POSITIVE;
+          else if (id === 'wrong')
+            label.coref_value = djs.COREF_VALUE_NEGATIVE;
+          else {
+            item.owner.remove(item);
+            console.error("Unrecognized dismissal identifier: " + id);
+            return;
+          }
+
+          this.setResetHtml("Processing...");
+
+          self.api.addLabel(label)
+            .done(function () { item.owner.remove(item); })
+            .fail(function () {
+              self.networkFailure.incident(
+                NetworkFailure.types.dismissal, item
+              );
+            } );
         } );
     }
   };
