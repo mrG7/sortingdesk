@@ -714,7 +714,7 @@
           new this.owner.api.foldering.subfolderFromName(
             this.selected_.data, title));
 
-    var on_loaded = function () { console.log('on loaded'); next(); };
+    var on_loaded = function () { next(); };
     var next = function () {
       if(std.is_fn(this.off))
         this.off('loaded', on_loaded);
