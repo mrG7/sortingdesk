@@ -159,6 +159,43 @@ var Main = (function (window, chrome, $, std, sq, sqc, sd, Api, undefined) {
       } );
     };
 
+    var onCreateSuggestionContainer_ = function ()
+    {
+      var node,
+          opts = sorter.options.suggestion,
+          container = $('<div/>').attr('id', opts.id);
+
+      node = $('<h1/>');
+      node.append($('<button/>')
+                  .addClass('btn btn-default btn-sm')
+                  .html('<span class="glyphicon glyphicon-plus"></span>'));
+      node.append('<span class="glyphicon glyphicon-info-sign"></span>');
+      node.append('Suggestion');
+      container.append(node);
+
+      return container;
+    };
+
+    var onRenderScore_ = function (weight)
+    {
+      var elc = $('<span/>')
+            .addClass('sd-score')
+            .append($('<span/>').html('Score: ')),
+          els = $('<span/>');
+
+
+      var ns = Math.round(weight / 0.2),
+          nc = 5 - ns;
+
+      while(ns-- > 0)
+        els.append($('<span/>').addClass('glyphicon glyphicon-star'));
+
+      while(nc-- > 0)
+        els.append($('<span/>').addClass('glyphicon glyphicon-star-empty'));
+
+      return elc.append(els.attr('title', weight.toFixed(4)));
+    };
+
     var netfails_ = {
       'folder-list': "retrieving the list of folders",
       'folder-add': "adding a new folder",
@@ -189,6 +226,8 @@ var Main = (function (window, chrome, $, std, sq, sqc, sd, Api, undefined) {
           getSelection: onGetSelection_,
           checkSelection: onCheckSelection_,
           createManualItem: onCreateManualItem_,
+          createSuggestionContainer: onCreateSuggestionContainer_,
+          renderScore: onRenderScore_,
           networkFailure: onNetworkFailure_
         }
       }
