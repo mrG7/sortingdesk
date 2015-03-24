@@ -420,7 +420,14 @@
               }
             };
 
-          if(obj instanceof Subfolder) {
+          if(obj instanceof Folder) {
+            items["report"] = {
+              label: "Export data",
+              icon: "glyphicon glyphicon-download-alt",
+              separator_before: true,
+              action: function () { self.export(); }
+            };
+          } else if(obj instanceof Subfolder) {
             items["create"] = {
               label: "Create manual item",
               icon: "glyphicon glyphicon-plus",
