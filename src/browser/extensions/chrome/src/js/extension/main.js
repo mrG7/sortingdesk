@@ -12,6 +12,10 @@
 
 var Main = (function (window, chrome, $, std, sq, sqc, sd, Api, undefined) {
 
+  /* Constants */
+  /* `%ID%´ below is replace with actual folder id. */
+  var URL_EXPORT = 'http://domain.sub/path/to/endpoint?id=%ID%';
+
   /* Module-wide variables */
   var nodes = { },
       active = null,
@@ -219,9 +223,9 @@ var Main = (function (window, chrome, $, std, sq, sqc, sd, Api, undefined) {
             ].join(''));
     };
 
-    var onDownloadReport_ = function (folder)
+    var onExport_ = function (id)
     {
-      window.open('https://google.com');
+      window.open(URL_EXPORT.replace('%ID%', id));
     };
 
     /* Interface */
@@ -234,7 +238,7 @@ var Main = (function (window, chrome, $, std, sq, sqc, sd, Api, undefined) {
           createSuggestionContainer: onCreateSuggestionContainer_,
           renderScore: onRenderScore_,
           networkFailure: onNetworkFailure_,
-          downloadReport: onDownloadReport_
+          export: onExport_
         }
       }
     };

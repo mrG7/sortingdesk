@@ -13,6 +13,10 @@
 
 var Main = (function (window, $, std, sq, sqc, sd, Api, undefined) {
 
+  /* Constants */
+  /* `%ID%´ below is replace with actual folder id. */
+  var URL_EXPORT = 'http://domain.sub/path/to/endpoint?id=%ID%';
+
   /* Module-wide variables */
   var preferences,
       nodes = { },
@@ -171,6 +175,11 @@ var Main = (function (window, $, std, sq, sqc, sd, Api, undefined) {
             ].join(''));
     };
 
+    var onExport_ = function (id)
+    {
+      window.open(URL_EXPORT.replace('%ID%', id));
+    };
+
     /* interface */
     return {
       callbacks: {
@@ -180,7 +189,8 @@ var Main = (function (window, $, std, sq, sqc, sd, Api, undefined) {
           createManualItem: onCreateManualItem_,
           createSuggestionContainer: onCreateSuggestionContainer_,
           renderScore: onRenderScore_,
-          networkFailure: onNetworkFailure_
+          networkFailure: onNetworkFailure_,
+          export: onExport_
         }
       }
     };
