@@ -1004,6 +1004,8 @@
              && this.selected_.loaded));
 
     ela.refresh.toggleClass('disabled', loading);
+    ela.report.toggleClass('disabled', loading
+                           || !(this.selected_ instanceof Folder))
   };
 
   /* Private interface */
