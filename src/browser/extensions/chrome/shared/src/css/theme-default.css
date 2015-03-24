@@ -576,6 +576,11 @@ A.sd-text-item-title {
   padding: 0;
 }
 
+.sd-header .btn-group,
+.sd-footer .btn-group {
+  margin-top: 5px;
+}
+
 .sd-container-view-outer {
   overflow: auto;
   margin: 5px;

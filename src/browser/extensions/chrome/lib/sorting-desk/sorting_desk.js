@@ -167,6 +167,7 @@
         return {
           actions: {
             add: this.find('toolbar-add'),
+            report: this.find('toolbar-report'),
             addContextual: this.find('toolbar-add-contextual'),
             remove: this.find('toolbar-remove'),
             rename: this.find('toolbar-rename'),
@@ -546,6 +547,7 @@
     /* Hook up to toolbar events. */
     els.toolbar.actions.refresh.click(function () { self.refresh(); } );
     els.toolbar.actions.add.click(function () { self.createFolder(); } );
+    els.toolbar.actions.report.click(function () { self.report(); } );
 
     els.toolbar.actions.addContextual.click(function () {
       if(self.selected_ instanceof Folder)
@@ -694,6 +696,14 @@
       obj: new SubfolderNew(folder, name),
       descriptor: descriptor
     };
+  };
+
+  ControllerExplorer.prototype.report = function ()
+  {
+    if(!(this.selected_ instanceof Folder))
+      return;
+
+    this.owner_.callbacks.invoke('downloadReport', this.selected_.data.id);
   };
 
   ControllerExplorer.prototype.addSuggestions = function (title, suggestions)
