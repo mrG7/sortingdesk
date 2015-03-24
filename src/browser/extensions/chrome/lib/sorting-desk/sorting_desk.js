@@ -256,8 +256,6 @@
               + ' query; will be removed from future results.' } ]
         } ))
         .on('dismissed', function (id) {
-          console.log('User chose: %s', id);
-
           var cid = item.content.content_id,
               djs = self.api.DossierJS,
               label = new djs.Label(
@@ -422,7 +420,14 @@
               }
             };
 
-          if(obj instanceof Subfolder) {
+          if(obj instanceof Folder) {
+            items["report"] = {
+              label: "Export data",
+              icon: "glyphicon glyphicon-download-alt",
+              separator_before: true,
+              action: function () { self.export(); }
+            };
+          } else if(obj instanceof Subfolder) {
             items["create"] = {
               label: "Create manual item",
               icon: "glyphicon glyphicon-plus",
@@ -547,7 +552,7 @@
     /* Hook up to toolbar events. */
     els.toolbar.actions.refresh.click(function () { self.refresh(); } );
     els.toolbar.actions.add.click(function () { self.createFolder(); } );
-    els.toolbar.actions.report.click(function () { self.report(); } );
+    els.toolbar.actions.report.click(function () { self.export(); } );
 
     els.toolbar.actions.addContextual.click(function () {
       if(self.selected_ instanceof Folder)
@@ -698,12 +703,12 @@
     };
   };
 
-  ControllerExplorer.prototype.report = function ()
+  ControllerExplorer.prototype.export = function ()
   {
     if(!(this.selected_ instanceof Folder))
       return;
 
-    this.owner_.callbacks.invoke('downloadReport', this.selected_.data.id);
+    this.owner_.callbacks.invoke('export', this.selected_.data.id);
   };
 
   ControllerExplorer.prototype.addSuggestions = function (title, suggestions)
@@ -999,6 +1004,8 @@
              && this.selected_.loaded));
 
     ela.refresh.toggleClass('disabled', loading);
+    ela.report.toggleClass('disabled', loading
+                           || !(this.selected_ instanceof Folder))
   };
 
   /* Private interface */
