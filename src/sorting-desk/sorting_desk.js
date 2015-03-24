@@ -552,7 +552,7 @@
     /* Hook up to toolbar events. */
     els.toolbar.actions.refresh.click(function () { self.refresh(); } );
     els.toolbar.actions.add.click(function () { self.createFolder(); } );
-    els.toolbar.actions.report.click(function () { self.report(); } );
+    els.toolbar.actions.report.click(function () { self.export(); } );
 
     els.toolbar.actions.addContextual.click(function () {
       if(self.selected_ instanceof Folder)
@@ -703,12 +703,12 @@
     };
   };
 
-  ControllerExplorer.prototype.report = function ()
+  ControllerExplorer.prototype.export = function ()
   {
     if(!(this.selected_ instanceof Folder))
       return;
 
-    this.owner_.callbacks.invoke('downloadReport', this.selected_.data.id);
+    this.owner_.callbacks.invoke('export', this.selected_.data.id);
   };
 
   ControllerExplorer.prototype.addSuggestions = function (title, suggestions)
