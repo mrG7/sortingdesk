@@ -219,6 +219,11 @@ var Main = (function (window, chrome, $, std, sq, sqc, sd, Api, undefined) {
             ].join(''));
     };
 
+    var onDownloadReport_ = function (folder)
+    {
+      window.open('https://google.com');
+    };
+
     /* Interface */
     return {
       callbacks: {
@@ -228,7 +233,8 @@ var Main = (function (window, chrome, $, std, sq, sqc, sd, Api, undefined) {
           createManualItem: onCreateManualItem_,
           createSuggestionContainer: onCreateSuggestionContainer_,
           renderScore: onRenderScore_,
-          networkFailure: onNetworkFailure_
+          networkFailure: onNetworkFailure_,
+          downloadReport: onDownloadReport_
         }
       }
     };
