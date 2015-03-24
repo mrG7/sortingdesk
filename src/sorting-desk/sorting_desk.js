@@ -256,8 +256,6 @@
               + ' query; will be removed from future results.' } ]
         } ))
         .on('dismissed', function (id) {
-          console.log('User chose: %s', id);
-
           var cid = item.content.content_id,
               djs = self.api.DossierJS,
               label = new djs.Label(
