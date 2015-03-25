@@ -13,10 +13,6 @@
 
 var Main = (function (window, $, std, sq, sqc, sd, Api, undefined) {
 
-  /* Constants */
-  /* `%ID%´ below is replace with actual folder id. */
-  var URL_EXPORT = 'http://domain.sub/path/to/endpoint?id=%ID%';
-
   /* Module-wide variables */
   var preferences,
       nodes = { },
@@ -177,7 +173,7 @@ var Main = (function (window, $, std, sq, sqc, sd, Api, undefined) {
 
     var onExport_ = function (id)
     {
-      window.open(URL_EXPORT.replace('%ID%', id));
+      window.open(sorter.api.makeReportUrl(id));
     };
 
     /* interface */
