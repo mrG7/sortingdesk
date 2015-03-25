@@ -91,6 +91,7 @@ var Api_ = (function (window, $, CryptoJS, DossierJS, undefined) {
       getClass: getClass,
       getDossierJs: getDossierJs,
       getCallbacks: getCallbacks,
+      makeReportUrl: makeReportUrl,
       DossierJS: DossierJS,
 
       /* Namespaces */
@@ -391,6 +392,11 @@ var Api_ = (function (window, $, CryptoJS, DossierJS, undefined) {
   var getCallbacks = function ()
   {
     return qitems_.callbacks();
+  };
+
+  var makeReportUrl = function (id)
+  {
+    return api_.reportUrl(id);
   };
 
 

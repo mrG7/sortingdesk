@@ -76,6 +76,10 @@ var _DossierJS = function(window, $, undefined) {
         return this.url(['feature-collection', content_id, 'cache'].join('/'));
     };
 
+    API.prototype.reportUrl = function(folder_id) {
+        return this.url(['folder', folder_id, 'report'].join('/'));
+    };
+
     // Performs a search using the given search engine name. The search
     // engine name must correspond to a name returned by the `search_engines`
     // method.
