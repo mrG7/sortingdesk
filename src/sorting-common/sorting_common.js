@@ -1,6 +1,6 @@
 /**
  * @file The Sorting Desk's base module.
- * @copyright 2014 Diffeo
+ * @copyright 2015 Diffeo
  *
  * Comments:
  *
