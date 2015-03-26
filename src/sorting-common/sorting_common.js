@@ -98,6 +98,19 @@
     throw x;
   };
 
+  var is_obj_empty = function (x)
+  {
+    if(!like_obj(x))
+      throw "Reference not provided or not an object";
+
+    for(var k in x) {
+      if(x.hasOwnProperty(k))
+        return false;
+    }
+
+    return true;
+  };
+
 
   /* jQuery-related */
   var jQueryExtensions = (function () {
@@ -1282,6 +1295,7 @@
     chainize: chainize,
     instanceany: instanceany,
     on_exception: on_exception,
+    is_obj_empty: is_obj_empty,
 
     /* Classes */
     Url: Url,
