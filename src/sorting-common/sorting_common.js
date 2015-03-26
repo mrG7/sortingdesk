@@ -314,6 +314,9 @@
   } )();
 
 
+  /**
+   * @class
+   * */
   var NodeFinder = function (tag, prefix, root)
   {
     this.tag_ = tag;
@@ -349,6 +352,29 @@
       var nf = new NodeFinder(this.tag_, this.prefix_, newRoot);
       return callback.call(this);
     }
+  };
+
+
+  /**
+   * @class
+   * */
+  var TemplateFinder = function (type)
+  {
+    this.scripts = Array.prototype.slice.call(
+      document.getElementsByTagName('script'), 0)
+      .filter(function (i) {
+        return i.type === type;
+      } );
+  };
+
+  TemplateFinder.prototype.find = function (id)
+  {
+    for(var i = 0, l = this.scripts.length; i < l; ++i) {
+      if(this.scripts[i].id === id)
+        return this.scripts[i];
+    }
+
+    return null;
   };
 
 
@@ -1270,6 +1296,7 @@
     Events: Events,
     View: View,
     NodeFinder: NodeFinder,
+    TemplateFinder: TemplateFinder,
     $: jQueryExtensions,
     Html: Html,
     Size: Size,
