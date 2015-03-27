@@ -204,13 +204,46 @@
       return true;
     };
 
+    var inview = function (el)
+    {
+      if(!is(el))
+        el = $(el);
+
+      var $window = $(window),
+          docTop = $window.scrollTop(),
+          docBottom = docTop + $window.height(),
+          top = el.offset().top,
+          bottom = top + el.height();
+
+      return ((bottom <= docBottom) && (top >= docTop));
+    };
+
+    var scrollIntoView = function (el, c)
+    {
+      if(!is(el))
+        el = $(el);
+
+      var container = c === undefined ? $(window) : (is(c) ? c : $(c)),
+          containerTop = container.scrollTop(),
+          containerBottom = containerTop + container.height(),
+          elemTop = el.offset().top,
+          elemBottom = elemTop + el.height();
+
+      if (elemTop < containerTop)
+        container.off().scrollTop(elemTop);
+      else if (elemBottom > containerBottom)
+        container.off().scrollTop(elemBottom - container.height());
+    };
+
 
     /* Public interface */
     return {
       alloff: alloff,
       is: is,
       any: any,
-      same: same
+      same: same,
+      inview: inview,
+      scrollIntoView: scrollIntoView
     };
 
   } )();
@@ -1312,6 +1345,8 @@
     is_num: is_num,
     like: like,
     like_obj: like_obj,
+    first_key: first_key,
+    next_key: next_key,
     is_in: is_in,
     any_in: any_in,
     chainize: chainize,
