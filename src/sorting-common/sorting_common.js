@@ -71,6 +71,28 @@
   var like = function (l, r) { return r instanceof Object && l instanceof r; };
   var like_obj = function (r) { return r instanceof Object; };
 
+  var first_key = function (obj)
+  {
+    if(!like_obj(obj))
+      throw "Invalid object reference specified";
+
+    for(var k in obj)
+      return k;
+
+    return null;
+  };
+
+  var next_key = function (obj, key)
+  {
+    if(!like_obj(obj))
+      throw "Invalid object reference specified";
+
+    var coll = Object.keys(obj),
+        index = coll.indexOf(key);
+
+    return index === -1 || index >= coll.length ? null : coll[index + 1];
+  };
+
   var chainize = function (context, fn)
   {
     return function () {
