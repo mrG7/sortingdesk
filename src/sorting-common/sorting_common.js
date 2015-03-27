@@ -426,23 +426,60 @@
   /**
    * @class
    * */
-  var TemplateFinder = function (type)
+  var TemplateFinder = function (type, tag)
   {
     this.scripts = Array.prototype.slice.call(
       document.getElementsByTagName('script'), 0)
       .filter(function (i) {
         return i.type === type;
       } );
+
+    this.tag = tag || 'data-scope';
   };
 
   TemplateFinder.prototype.find = function (id)
   {
     for(var i = 0, l = this.scripts.length; i < l; ++i) {
       if(this.scripts[i].id === id)
-        return this.scripts[i];
+        return new Template(this.scripts[i].innerHTML, this.tag);
     }
 
     return null;
+  };
+
+
+  /**
+   * @class
+   * */
+  var Template = function (html, tag)
+  {
+    this.html = html;
+    this.tag = tag || null;
+
+    Object.defineProperty(this, 'html', { value: html } );
+  };
+
+  Template.prototype.clone = function ()
+  {
+    return new TemplateInstance($(this.html), this.tag);
+  };
+
+
+  /**
+   * @class
+   * */
+  var TemplateInstance = function (node, tag)
+  {
+    this.node = node;
+    this.tag = tag || null;
+  };
+
+  TemplateInstance.prototype.get = function () { return this.node; };
+
+  TemplateInstance.prototype.find = function (scope)
+  {
+    if(this.prefix === null) return $();
+    return this.node.find('[' + this.tag + '=' + scope + ']');
   };
 
 
