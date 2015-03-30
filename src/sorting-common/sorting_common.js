@@ -296,20 +296,32 @@
       return deferred.promise();
     };
 
-    var getXpathSimple = function (node)
+    var xpathOf = function (node)
     {
-      var result = [ ];
+      var id, xpath = '';
 
       if(jQueryExtensions.is(node))
         node = node.get(0);
 
-      if(node) {
-        do {
-          result.push(node.nodeName);
-        } while( (node = node.parentNode) );
+      for( ; node !== null && node.nodeType === 1 || node.nodeType === 3;
+           node = node.parentNode) {
+        id = indexOf(node) + 1;
+        xpath = '/' + node.nodeName.toLowerCase()
+          + (id === 1 ? '' : '[' + id + ']')
+          + xpath;
       }
 
-      return result.reverse().join('/');
+      return xpath;
+    };
+
+    var indexOf = function (node)
+    {
+      var index = 0;
+
+      while( (node = node.previousSibling) !== null)
+        ++ index;
+
+      return index;
     };
 
     var visit = function (node, cb)
@@ -373,7 +385,7 @@
     /* Public interface */
     return {
       imageToBase64: imageToBase64,
-      getXpathSimple: getXpathSimple,
+      xpathOf: xpathOf,
       is_image: is_image,
       visit: visit,
       subtreeBetween: subtreeBetween
