@@ -139,9 +139,10 @@
 
     /* Interface
      * -- */
-    /** Given a map of identifier -> jQuery instance references, unbind all
-     * events on all nodes. The map can be multiple levels deep, with each level
-     * processed recursively. This function can never be a jQuery plugin.
+    /** Given a map of <code>identifier</code> -> <code>jQuery</code> instance
+     * references, unbind all events on all nodes. The map can be multiple
+     * levels deep, with each level processed recursively. This function can
+     * never be a jQuery plugin.
      *
      * @param {object} n - Object containing jQuery instance references and
      * possibly other objects.
