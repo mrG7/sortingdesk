@@ -135,7 +135,7 @@ var Embeddable = (function ($, std, DragDropMonitor, undefined) {
            * Xpath representation, offset from selection start and length.
            * This id is subsequently used to generate a unique and collision
            * free unique subtopic id. */
-          result.xpath = std.Html.getXpathSimple(sel.anchorNode);
+          result.xpath = std.Html.xpathOf(sel.anchorNode);
           result.id = [ val,
                         result.xpath,
                         sel.anchorOffset,

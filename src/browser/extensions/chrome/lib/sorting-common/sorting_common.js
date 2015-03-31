@@ -1,6 +1,6 @@
 /**
  * @file The Sorting Desk's base module.
- * @copyright 2014 Diffeo
+ * @copyright 2015 Diffeo
  *
  * Comments:
  *
@@ -71,6 +71,28 @@
   var like = function (l, r) { return r instanceof Object && l instanceof r; };
   var like_obj = function (r) { return r instanceof Object; };
 
+  var first_key = function (obj)
+  {
+    if(!like_obj(obj))
+      throw "Invalid object reference specified";
+
+    for(var k in obj)
+      return k;
+
+    return null;
+  };
+
+  var next_key = function (obj, key)
+  {
+    if(!like_obj(obj))
+      throw "Invalid object reference specified";
+
+    var coll = Object.keys(obj),
+        index = coll.indexOf(key);
+
+    return index === -1 || index >= coll.length ? null : coll[index + 1];
+  };
+
   var chainize = function (context, fn)
   {
     return function () {
@@ -96,6 +118,19 @@
                   x.stack || "\n<no stack information available>");
 
     throw x;
+  };
+
+  var is_obj_empty = function (x)
+  {
+    if(!like_obj(x))
+      throw "Reference not provided or not an object";
+
+    for(var k in x) {
+      if(x.hasOwnProperty(k))
+        return false;
+    }
+
+    return true;
   };
 
 
@@ -169,13 +204,46 @@
       return true;
     };
 
+    var inview = function (el)
+    {
+      if(!is(el))
+        el = $(el);
+
+      var $window = $(window),
+          docTop = $window.scrollTop(),
+          docBottom = docTop + $window.height(),
+          top = el.offset().top,
+          bottom = top + el.height();
+
+      return ((bottom <= docBottom) && (top >= docTop));
+    };
+
+    var scrollIntoView = function (el, c)
+    {
+      if(!is(el))
+        el = $(el);
+
+      var container = c === undefined ? $(window) : (is(c) ? c : $(c)),
+          containerTop = container.scrollTop(),
+          containerBottom = containerTop + container.height(),
+          elemTop = el.offset().top,
+          elemBottom = elemTop + el.height();
+
+      if (elemTop < containerTop)
+        container.off().scrollTop(elemTop);
+      else if (elemBottom > containerBottom)
+        container.off().scrollTop(elemBottom - container.height());
+    };
+
 
     /* Public interface */
     return {
       alloff: alloff,
       is: is,
       any: any,
-      same: same
+      same: same,
+      inview: inview,
+      scrollIntoView: scrollIntoView
     };
 
   } )();
@@ -228,20 +296,32 @@
       return deferred.promise();
     };
 
-    var getXpathSimple = function (node)
+    var xpathOf = function (node)
     {
-      var result = [ ];
+      var id, xpath = '';
 
       if(jQueryExtensions.is(node))
         node = node.get(0);
 
-      if(node) {
-        do {
-          result.push(node.nodeName);
-        } while( (node = node.parentNode) );
+      for( ; node !== null && node.nodeType === 1 || node.nodeType === 3;
+           node = node.parentNode) {
+        id = indexOf(node) + 1;
+        xpath = '/' + node.nodeName.toLowerCase()
+          + (id === 1 ? '' : '[' + id + ']')
+          + xpath;
       }
 
-      return result.reverse().join('/');
+      return xpath;
+    };
+
+    var indexOf = function (node)
+    {
+      var index = 0;
+
+      while( (node = node.previousSibling) !== null)
+        ++ index;
+
+      return index;
     };
 
     var visit = function (node, cb)
@@ -305,7 +385,7 @@
     /* Public interface */
     return {
       imageToBase64: imageToBase64,
-      getXpathSimple: getXpathSimple,
+      xpathOf: xpathOf,
       is_image: is_image,
       visit: visit,
       subtreeBetween: subtreeBetween
@@ -314,6 +394,9 @@
   } )();
 
 
+  /**
+   * @class
+   * */
   var NodeFinder = function (tag, prefix, root)
   {
     this.tag_ = tag;
@@ -349,6 +432,66 @@
       var nf = new NodeFinder(this.tag_, this.prefix_, newRoot);
       return callback.call(this);
     }
+  };
+
+
+  /**
+   * @class
+   * */
+  var TemplateFinder = function (type, tag)
+  {
+    this.scripts = Array.prototype.slice.call(
+      document.getElementsByTagName('script'), 0)
+      .filter(function (i) {
+        return i.type === type;
+      } );
+
+    this.tag = tag || 'data-scope';
+  };
+
+  TemplateFinder.prototype.find = function (id)
+  {
+    for(var i = 0, l = this.scripts.length; i < l; ++i) {
+      if(this.scripts[i].id === id)
+        return new Template(this.scripts[i].innerHTML, this.tag);
+    }
+
+    return null;
+  };
+
+
+  /**
+   * @class
+   * */
+  var Template = function (html, tag)
+  {
+    this.html = html;
+    this.tag = tag || null;
+
+    Object.defineProperty(this, 'html', { value: html } );
+  };
+
+  Template.prototype.clone = function ()
+  {
+    return new TemplateInstance($(this.html), this.tag);
+  };
+
+
+  /**
+   * @class
+   * */
+  var TemplateInstance = function (node, tag)
+  {
+    this.node = node;
+    this.tag = tag || null;
+  };
+
+  TemplateInstance.prototype.get = function () { return this.node; };
+
+  TemplateInstance.prototype.find = function (scope)
+  {
+    if(this.prefix === null) return $();
+    return this.node.find('[' + this.tag + '=' + scope + ']');
   };
 
 
@@ -1251,11 +1394,14 @@
     is_num: is_num,
     like: like,
     like_obj: like_obj,
+    first_key: first_key,
+    next_key: next_key,
     is_in: is_in,
     any_in: any_in,
     chainize: chainize,
     instanceany: instanceany,
     on_exception: on_exception,
+    is_obj_empty: is_obj_empty,
 
     /* Classes */
     Url: Url,
@@ -1270,6 +1416,7 @@
     Events: Events,
     View: View,
     NodeFinder: NodeFinder,
+    TemplateFinder: TemplateFinder,
     $: jQueryExtensions,
     Html: Html,
     Size: Size,
