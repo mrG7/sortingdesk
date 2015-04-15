@@ -20,11 +20,12 @@ all: build man
 help:
 	echo "Usage: make [ build | man | clean | deps ]"
 
-build: minify ext-chrome
+build: minify ext-chrome ext-firefox
 
 man:
-	test -d "$(DIR_OUTPUT_DOC)" || mkdir -p "$(DIR_OUTPUT_DOC)"
-	$(JSDOC) -c="$(JSDOC_CONF)" -d="$(DIR_OUTPUT_DOC)" $(JSDOC_SOURCES)
+	>&2 echo "W: generation of documentation disabled"
+	# test -d "$(DIR_OUTPUT_DOC)" || mkdir -p "$(DIR_OUTPUT_DOC)"
+	# $(JSDOC) -c="$(JSDOC_CONF)" -d="$(DIR_OUTPUT_DOC)" $(JSDOC_SOURCES)
 
 clean:
 	echo "I: removing output directory"
@@ -42,7 +43,12 @@ minify:
 
 ext-chrome:
 	echo "I: packaging chrome extension"
-	(cd src/browser/extensions && zip -r sortingdesk_chrome.zip chrome)
+	(cd src/browser/extensions && zip -r sortingdesk_chrome.zip chrome >/dev/null)
 	mv src/browser/extensions/sortingdesk_chrome.zip ./
+
+ext-firefox:
+	echo "I: packaging firefox extension"
+	sh/build-firefox >/dev/null
+	mv src/browser/extensions/firefox/sortingdesk.xpi ./
 
 .SILENT:
