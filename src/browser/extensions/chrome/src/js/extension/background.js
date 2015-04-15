@@ -39,39 +39,41 @@ var Background = function (window, chrome, $, std, undefined)
 
     Config.load(function (options) {
       /* Spawn the extension window if active in config. */
-      if(!options.active)
-        console.log("Sorting Desk not active");
-      else
-        spawn(options);
+/*       if(!options.active) */
+/*         console.log("Sorting Desk not active"); */
+/*       else */
+/*         spawn(options); */
+      console.log("NOT spawning Sorting Desk");
 
       /* Process removal of extension window. */
       chrome.windows.onRemoved.addListener(function (id) {
-        if(window_.extension !== null) {
-          if(window_.extension.id === id) {
-            var m = window_.main;
+        if(window_.extension === null) return;
 
-            console.info("Extension window removed");
-            chrome.windows.update(
-              m.id,
-              { state: m.state,
-                top: m.top, left: m.left, height: m.height,
-                width: m.width } );
+        if(window_.extension.id === id) {
+          var m = window_.main;
 
-            window_.main = window_.extension = null;
-          } else {
-            chrome.windows.getAll(function (wins) {
-              var count = 0;
+          console.info("Extension window removed");
+          chrome.windows.update(
+            m.id,
+            { state: m.state,
+              top: m.top, left: m.left, height: m.height,
+              width: m.width } );
 
-              wins.forEach(function (w) {
-                if(w.type === 'normal')
-                  ++ count;
-              } );
-
-              if(count === 0)
-                close();
-            } );
-          }
+          window_.main = window_.extension = null;
+          return;
         }
+
+        chrome.windows.getAll(function (wins) {
+          var count = 0;
+
+          wins.forEach(function (w) {
+            if(w.type === 'normal')
+              ++ count;
+          } );
+
+          if(count === 0)
+            close();
+        } );
       } );
 
       console.log("Initialised background script");
