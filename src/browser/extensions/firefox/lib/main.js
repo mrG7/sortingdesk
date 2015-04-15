@@ -243,7 +243,7 @@ var Main = (function (undefined) {
     if(!mpreferences.getDossierUrl())
       alertInvalidUrl_();
     else
-      constructSidebar_(mpreferences.get().active);
+      constructSidebar_(/* mpreferences.get().active */ false);
   }
 
   mbuttons.ActionButton({
