@@ -32,7 +32,6 @@
       "matches": ["<all_urls>"],
       "js": [ "lib/jquery-2.1.1.min.js",
               "shared/src/js/drag_drop_monitor.js",
-              "shared/src/js/sorting_queue-customisations.js",
               "lib/sorting-common/sorting_common.js",
               "src/js/content/embed.js" ]
     }
