@@ -10,7 +10,7 @@
 
 /*jshint laxbreak:true */
 
-var Main = (function (window, chrome, $, std, sq, sqc, sd, Api, undefined) {
+var Main = (function (window, chrome, $, std, sq, sqc, sd, undefined) {
 
   /* Module-wide variables */
   var nodes = { },
@@ -457,7 +457,7 @@ var Main = (function (window, chrome, $, std, sq, sqc, sd, Api, undefined) {
           }
         }
       }
-    }, $.extend(true, Api, HandlerCallbacks.callbacks.sorter ) ) )
+    }, HandlerCallbacks.callbacks.sorter ) )
       .on(loading.sorter.events)
       .initialise();
 
@@ -493,4 +493,4 @@ var Main = (function (window, chrome, $, std, sq, sqc, sd, Api, undefined) {
   } );
 
 } )(window, chrome, jQuery, SortingCommon, SortingQueue,
-    SortingQueueCustomisations, SortingDesk, Api);
+    SortingQueueCustomisations, SortingDesk);
