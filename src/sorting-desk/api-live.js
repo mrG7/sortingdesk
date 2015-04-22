@@ -12,7 +12,17 @@
 /*jshint laxbreak:true */
 
 
-var Api_ = (function (window, $, CryptoJS, DossierJS, undefined) {
+(function (Module, root) {
+
+  /* Compatibility with RequireJs. */
+  if(typeof define === "function" && define.amd) {
+    define("API", [ "jquery", "CryptoJS", "DossierJS" ], function ($, CryptoJS, DossierJS) {
+      return Module(window, $, CryptoJS, DossierJS);
+    });
+  } else
+    window.Api = Module(window, $, CryptoJS, DossierJS);
+
+} )(function (window, $, CryptoJS, DossierJS, undefined) {
 
   /* Constants */
   var DEFAULT_DOSSIER_STACK_API_URL = 'http://10.3.2.42:9090';
@@ -548,13 +558,5 @@ var Api_ = (function (window, $, CryptoJS, DossierJS, undefined) {
   return {
     initialize: initialize
   };
-} );
 
-
-/* Compatibility with RequireJs. */
-if(typeof define === "function" && define.amd) {
-  define("API", [ "jquery", "CryptoJS", "DossierJS" ], function ($, CryptoJS, DossierJS) {
-    return Api_(window, $, CryptoJS, DossierJs);
-  });
-} else
-  window.Api = Api_(window, $, CryptoJS, DossierJS);
+}, this);
