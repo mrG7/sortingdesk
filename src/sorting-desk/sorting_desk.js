@@ -48,7 +48,7 @@
     var self = this;
 
     /* TODO: must pass in Dossier API URL. */
-    this.api_ = Api.initialize(this, opts.dossierUrl);
+    this.api_ = new Api(this, opts.dossierUrl);
     this.options_ = $.extend(true, $.extend(true, {}, defaults_), opts);
     delete this.options_.sortingQueue; /* don't keep SQ options */
     this.callbacks_ = new std.Callbacks(cbs);
