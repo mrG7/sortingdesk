@@ -11,16 +11,15 @@
 /*jshint laxbreak:true */
 
 
-
-(function (Factory, root) {
+(function (Module, root) {
 
   /* Compatibility with RequireJs. */
   if(typeof define === "function" && define.amd) {
     define("SortingCommon", [ "jquery" ], function ($) {
-      return new Factory(root, $);
+      return new Module(root, $);
     });
   } else
-    root.SortingCommon = new Factory(root, $);
+    root.SortingCommon = new Module(root, $);
 
 } )(function (window, $) {
 
