@@ -8,7 +8,7 @@
 
 
 /*global $, define */
-/*jshint laxbreak:true */
+/*jshint laxbreak:true, -W057, -W058 */
 
 
 (function (Module, root) {
@@ -154,7 +154,7 @@
 
 
   /* jQuery-related */
-  this.$ = this.jQueryExtensions = (function () {
+  this.$ = this.jQueryExtensions = new (function () {
 
     /* Interface
      * -- */
@@ -260,13 +260,10 @@
       else if (elemBottom > containerBottom)
         container.off().scrollTop(elemBottom - container.height());
     }
-
-    /* Exports */
-    return this;
-  } )();
+  });
 
 
-  this.Html = (function () {
+  this.Html = new (function () {
 
     /* Interface
      * -- */
@@ -404,9 +401,7 @@
       return canvas.toDataURL("image/png");
     };
 
-    /* Exports */
-    return this;
-  } )();
+  });
 
 
   /**
@@ -517,7 +512,7 @@
   /**
    * @class
    * */
-  this.Url = (function () {
+  this.Url = new (function () {
     this.encode = encode;
     function encode(s)
     {
@@ -533,9 +528,7 @@
     function decode(s)
     { return decodeURIComponent(s); }
 
-    /* Exports */
-    return this;
-  } )();
+  });
 
 
   /**
@@ -816,7 +809,7 @@
    *
    * Static class.
    * */
-  this.DragDropManager = (function () {
+  this.DragDropManager = new (function () {
     var activeNode = null;
 
     /* Interface */
@@ -871,9 +864,7 @@
     this.reset = reset;
     function reset() { activeNode = null; }
 
-    /* Exports */
-    return this;
-  } )();
+  } );
 
 
   /**
@@ -915,7 +906,7 @@
           options.dragend(e);
       }
     } ).prop('draggable', true);
-  };
+  }
 
 
   /**
@@ -1414,6 +1405,5 @@
     };
   };
 
-  console.log("Using new Sorting Common");
   return this;
 }, this);
