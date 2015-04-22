@@ -12,33 +12,43 @@
 
 
 
-(function (factory, root) {
+(function (Factory, root) {
 
   /* Compatibility with RequireJs. */
   if(typeof define === "function" && define.amd) {
     define("SortingCommon", [ "jquery" ], function ($) {
-      return factory(root, $);
+      return new Factory(root, $);
     });
   } else
-    root.SortingCommon = factory(root, $);
+    root.SortingCommon = new Factory(root, $);
 
 } )(function (window, $) {
 
-  /* Module-wide function */
-  var absm_noti = function ( ) { throw "Abstract method not implemented"; };
+  this.absm_noti = absm_noti;
+  function absm_noti( ) { throw "Abstract method not implemented"; }
 
-  var is_obj = function (r) { return r !== null && typeof r === 'object'; };
-  var is_fn  = function (r) { return typeof r === 'function'; };
-  var is_und = function (r) { return typeof r === typeof undefined; };
-  var is_arr = function (r) { return r instanceof Array; };
+  this.is_obj = is_obj;
+  function is_obj(r) { return r !== null && typeof r === 'object'; }
 
-  var is_str = function (r)
-  { return typeof r === 'string' || r instanceof String; };
+  this.is_fn  = is_fn;
+  function is_fn(r) { return typeof r === 'function'; }
 
-  var is_num = function (r)
-  { return typeof r === 'number' || r instanceof Number; };
+  this.is_und = is_und;
+  function is_und(r) { return typeof r === typeof undefined; }
 
-  var is_in  = function (/* (r, k) | (r, k0..n) */)
+  this.is_arr = is_arr;
+  function is_arr(r) { return r instanceof Array; }
+
+  this.is_str = is_str;
+  function is_str(r)
+  { return typeof r === 'string' || r instanceof String; }
+
+  this.is_num = is_num;
+  function is_num(r)
+  { return typeof r === 'number' || r instanceof Number; }
+
+  this.is_in = is_in;
+  function is_in(/* (r, k) | (r, k0..n) */)
   {
     var r = arguments[0];
 
@@ -51,9 +61,10 @@
     }
 
     return true;
-  };
+  }
 
-  var any_in  = function (/* (r, k) | (r, k0..n) */)
+  this.any_in = any_in;
+  function any_in(/* (r, k) | (r, k0..n) */)
   {
     var r = arguments[0];
 
@@ -66,12 +77,16 @@
     }
 
     return false;
-  };
+  }
 
-  var like = function (l, r) { return r instanceof Object && l instanceof r; };
-  var like_obj = function (r) { return r instanceof Object; };
+  this.like = like;
+  function like(l, r) { return r instanceof Object && l instanceof r; }
 
-  var first_key = function (obj)
+  this.like_obj = like_obj;
+  function like_obj(r) { return r instanceof Object; }
+
+  this.first_key = first_key;
+  function first_key(obj)
   {
     if(!like_obj(obj))
       throw "Invalid object reference specified";
@@ -80,9 +95,10 @@
       return k;
 
     return null;
-  };
+  }
 
-  var next_key = function (obj, key)
+  this.next_key = next_key;
+  function next_key(obj, key)
   {
     if(!like_obj(obj))
       throw "Invalid object reference specified";
@@ -91,17 +107,19 @@
         index = coll.indexOf(key);
 
     return index === -1 || index >= coll.length ? null : coll[index + 1];
-  };
+  }
 
-  var chainize = function (context, fn)
+  this.chainize = chainize;
+  function chainize(context, fn)
   {
     return function () {
       fn.apply(context, arguments);
       return context;
     };
-  };
+  }
 
-  var instanceany = function ()
+  this.instanceany = instanceany;
+  function instanceany()
   {
     var a = arguments, o = a[0];
     for(var i = 1, l = a.length; i < l; ++i) {
@@ -110,17 +128,19 @@
     }
 
     return false;
-  };
+  }
 
-  var on_exception = function (x)
+  this.on_exception = on_exception;
+  function on_exception(x)
   {
     console.error("Exception thrown: " + x,
                   x.stack || "\n<no stack information available>");
 
     throw x;
-  };
+  }
 
-  var is_obj_empty = function (x)
+  this.is_obj_empty = is_obj_empty;
+  function is_obj_empty(x)
   {
     if(!like_obj(x))
       throw "Reference not provided or not an object";
@@ -131,11 +151,11 @@
     }
 
     return true;
-  };
+  }
 
 
   /* jQuery-related */
-  var jQueryExtensions = (function () {
+  this.$ = this.jQueryExtensions = (function () {
 
     /* Interface
      * -- */
@@ -148,7 +168,8 @@
      * possibly other objects.
      *
      * @returns {undefined} */
-    var alloff = function (n)
+    this.alloff = alloff;
+    function alloff(n)
     {
       for(var k in n) {
         var i = n[k];
@@ -156,7 +177,7 @@
         if(i instanceof $) i.off();
         else if(is_obj(i)) alloff(i);
       }
-    };
+    }
 
     /** Convenient method that returns true if a given variable contains a valid
      * reference to a <code>jQuery</code> instance.
@@ -165,8 +186,9 @@
      *
      * @returns {boolean} True, if <code>r</code> is a <code>jQuery</code>
      * instance. */
-    var is = function (r)
-    { return r instanceof $; };
+    this.is = is;
+    function is(r)
+    { return r instanceof $; }
 
     /** Convenient method meant to be used as a means of ensuring a given
      * variable contains a valid reference to a <code>jQuery</code> instance and
@@ -177,8 +199,9 @@
      * @returns {boolean} True, if <code>r</code> is a <code>jQuery</code>
      * instance <strong>and</strong> contains at least one element; False
      * otherwise. */
-    var any = function (r)
-    { return is(r) && r.length > 0; };
+    this.any = any;
+    function any(r)
+    { return is(r) && r.length > 0; }
 
     /** Returns true if two jQuery collections contain the exact same DOM
      * elements.
@@ -190,7 +213,8 @@
      * elements as <code>l</code>.  This implies that the collections of both
      * <code>l</code> and <code>r</code> contain the same number of elements
      * too. */
-    var same = function (l, r)
+    this.same = same;
+    function same(l, r)
     {
       if(!is(l) || !is(r))
         throw "Invalid jQuery reference(s) specified";
@@ -203,9 +227,10 @@
       }
 
       return true;
-    };
+    }
 
-    var inview = function (el)
+    this.inview = inview;
+    function inview(el)
     {
       if(!is(el))
         el = $(el);
@@ -217,9 +242,10 @@
           bottom = top + el.height();
 
       return ((bottom <= docBottom) && (top >= docTop));
-    };
+    }
 
-    var scrollIntoView = function (el, c)
+    this.scrollIntoView = scrollIntoView;
+    function scrollIntoView(el, c)
     {
       if(!is(el))
         el = $(el);
@@ -234,23 +260,14 @@
         container.off().scrollTop(elemTop);
       else if (elemBottom > containerBottom)
         container.off().scrollTop(elemBottom - container.height());
-    };
+    }
 
-
-    /* Public interface */
-    return {
-      alloff: alloff,
-      is: is,
-      any: any,
-      same: same,
-      inview: inview,
-      scrollIntoView: scrollIntoView
-    };
-
+    /* Exports */
+    return this;
   } )();
 
 
-  var Html = (function () {
+  this.Html = (function () {
 
     /* Interface
      * -- */
@@ -269,7 +286,8 @@
      *
      * @returns {string} Image data in base64 encoding without the prefix
      * <code>data:image/TYPE;base64,</code>. */
-    var imageToBase64 = function (ent)
+    this.imageToBase64 = imageToBase64;
+    function imageToBase64(ent)
     {
       var deferred = $.Deferred();
 
@@ -295,13 +313,14 @@
         throw "Invalid image source specified";
 
       return deferred.promise();
-    };
+    }
 
-    var xpathOf = function (node)
+    this.xpathOf = xpathOf;
+    function xpathOf(node)
     {
       var id, xpath = '';
 
-      if(jQueryExtensions.is(node))
+      if(self.jQueryExtensions.is(node))
         node = node.get(0);
 
       for( ; node !== null && node.nodeType === 1 || node.nodeType === 3;
@@ -313,9 +332,10 @@
       }
 
       return xpath;
-    };
+    }
 
-    var indexOf = function (node)
+    this.indexOf = indexOf;
+    function indexOf(node)
     {
       var index = 0;
 
@@ -323,9 +343,10 @@
         ++ index;
 
       return index;
-    };
+    }
 
-    var visit = function (node, cb)
+    this.visit = visit;
+    function visit(node, cb)
     {
       if(!is_fn(cb))
         throw 'Invalid or no callback function specified';
@@ -341,9 +362,10 @@
       };
 
       visitor(node);
-    };
+    }
 
-    var subtreeBetween = function (node, parent /* = document.body */)
+    this.subtreeBetween = subtreeBetween;
+    function subtreeBetween(node, parent /* = document.body */)
     {
       if(parent === undefined)
         parent = document.body;
@@ -363,11 +385,12 @@
 
 
     /* Is-type functions */
-    var is_image = function (el)
+    this.is_image = is_image;
+    function is_image(el)
     {
       return el instanceof window.HTMLImageElement
         || el instanceof window.Image;
-    };
+    }
 
     /* Private interface */
     var getImageData_ = function (img)
@@ -382,30 +405,23 @@
       return canvas.toDataURL("image/png");
     };
 
-
-    /* Public interface */
-    return {
-      imageToBase64: imageToBase64,
-      xpathOf: xpathOf,
-      is_image: is_image,
-      visit: visit,
-      subtreeBetween: subtreeBetween
-    };
-
+    /* Exports */
+    return this;
   } )();
 
 
   /**
    * @class
    * */
-  var NodeFinder = function (tag, prefix, root)
+  this.NodeFinder = NodeFinder;
+  function NodeFinder(tag, prefix, root)
   {
     this.tag_ = tag;
     this.prefix_ = [ '[', tag, '="',
                      prefix && prefix.length > 0 ? prefix + '-' : ''
                    ].join('');
     this.root_ = root;
-  };
+  }
 
   NodeFinder.prototype = {
     tag_: null,
@@ -439,7 +455,8 @@
   /**
    * @class
    * */
-  var TemplateFinder = function (type, tag)
+  this.TemplateFinder = TemplateFinder;
+  function TemplateFinder(type, tag)
   {
     this.scripts = Array.prototype.slice.call(
       document.getElementsByTagName('script'), 0)
@@ -448,7 +465,7 @@
       } );
 
     this.tag = tag || 'data-scope';
-  };
+  }
 
   TemplateFinder.prototype.find = function (id)
   {
@@ -464,13 +481,14 @@
   /**
    * @class
    * */
-  var Template = function (html, tag)
+  this.Template = Template;
+  function Template(html, tag)
   {
     this.html = html;
     this.tag = tag || null;
 
     Object.defineProperty(this, 'html', { value: html } );
-  };
+  }
 
   Template.prototype.clone = function ()
   {
@@ -481,11 +499,12 @@
   /**
    * @class
    * */
-  var TemplateInstance = function (node, tag)
+  this.TemplateInstance = TemplateInstance;
+  function TemplateInstance(node, tag)
   {
     this.node = node;
     this.tag = tag || null;
-  };
+  }
 
   TemplateInstance.prototype.get = function () { return this.node; };
 
@@ -499,30 +518,32 @@
   /**
    * @class
    * */
-  var Url = (function () {
-    /* Public interface */
-    return {
-      encode: function (s)
-      {
-        /* Taken from: http://goo.gl/kRTxRW
-         * (Javascript's default `encodeURIComponent` does not strictly conform to
-         * RFC 3986.) */
-        return encodeURIComponent(s).replace(/[!'()*]/g, function(c) {
-          return '%' + c.charCodeAt(0).toString(16);
-        });
-      },
-      decode: function (s)
-      {
-        return decodeURIComponent(s);
-      }
-    };
+  this.Url = (function () {
+    this.encode = encode;
+    function encode(s)
+    {
+      /* Taken from: http://goo.gl/kRTxRW
+       * (Javascript's default `encodeURIComponent` does not strictly conform to
+       * RFC 3986.) */
+      return encodeURIComponent(s).replace(/[!'()*]/g, function(c) {
+        return '%' + c.charCodeAt(0).toString(16);
+      });
+    }
+
+    this.decode = decode;
+    function decode(s)
+    { return decodeURIComponent(s); }
+
+    /* Exports */
+    return this;
   } )();
 
 
   /**
    * @class
    * */
-  var /* abstract */ Owned = function (owner)
+  this.Owned = Owned;
+  /* abstract */ function Owned(owner)
   {
     if(!like_obj(owner))
       throw "Invalid owner instance reference specified";
@@ -533,17 +554,18 @@
 
     /* Attributes */
     this.owner_ = owner;
-  };
+  }
 
 
   /**
    * @class
    * */
-  var /* abstract */ Controller = function (owner)
+  this.Controller = Controller;
+  /* abstract */ function Controller(owner)
   {
     /* Invoke super constructor. */
     Owned.call(this, owner);
-  };
+  }
 
   /* Following method to allow for deferred initialisation. */
   /* abstract */ Controller.prototype.initialise = absm_noti;
@@ -554,11 +576,12 @@
   /**
    * @class
    * */
-  var /* abstract */ Drawable = function (owner)
+  this.Drawable = Drawable;
+  /* abstract */ function Drawable(owner)
   {
     /* Invoke super constructor. */
     Owned.call(this, owner);
-  };
+  }
 
   /* abstract */ Drawable.prototype.render = absm_noti;
 
@@ -566,7 +589,8 @@
   /**
    * @class
    * */
-  var Callbacks = function (map)
+  this.Callbacks = Callbacks;
+  function Callbacks(map)
   {
     if(!is_und(map)) {
       if(!is_obj(map))
@@ -581,7 +605,7 @@
       this.map_ = map;
     } else
       this.map_ = { };
-  };
+  }
 
   Callbacks.prototype.exists = function (callback)
   { return this.map_.hasOwnProperty(callback); };
@@ -669,7 +693,8 @@
   /**
    * @class
    * */
-  var Constructor = function (map)
+  this.Constructor = Constructor;
+  function Constructor(map)
   {
     if(!is_obj(map))
       throw "Invalid map of constructors given";
@@ -682,7 +707,7 @@
 
     /* Attributes */
     this.map_ = map;
-  };
+  }
 
   /* Static interface */
   Constructor.exists = function (obj, name)
@@ -753,11 +778,12 @@
   /**
    * @class
    * */
-  var ControllerGlobalKeyboard = function (owner)
+  this.ControllerGlobalKeyboard = ControllerGlobalKeyboard;
+  function ControllerGlobalKeyboard(owner)
   {
     /* Invoke super constructor. */
     Controller.call(this, owner);
-  };
+  }
 
   ControllerGlobalKeyboard.prototype = Object.create(Controller.prototype);
 
@@ -791,11 +817,12 @@
    *
    * Static class.
    * */
-  var DragDropManager = (function () {
+  this.DragDropManager = (function () {
     var activeNode = null;
 
     /* Interface */
-    var isScope = function (event, scopes)
+    this.isScope = isScope;
+    function isScope(event, scopes)
     {
       if(!scopes)
         return true;
@@ -810,53 +837,51 @@
       return isFilter
         ? scopes(current)
         : hasScope(scopes, current);
-    };
+    }
 
-    var getScope = function (event)
+    this.getScope = getScope;
+    function getScope(event)
     {
       return activeNode
         ? activeNode.getAttribute('data-scope')
         : null;
-    };
+    }
 
-    var hasScope = function (all, target)
+    this.hasScope = hasScope;
+    function hasScope(all, target)
     {
       return (is_arr(all) ? all : [ all ])
         .some(function (s) {
           return s === target;
         } );
-    };
+    }
 
     /* Event handlers */
-    var onDragStart = function (event) {
+    this.onDragStart = onDragStart;
+    function onDragStart(event) {
       activeNode = (event.originalEvent || event).target;
-    };
+    }
 
-    var onDragEnd = function (event) {
+    this.onDragEnd = onDragEnd;
+    function onDragEnd(event) {
       if(activeNode === (event.originalEvent || event).target) {
         activeNode = null;
       }
-    };
+    }
 
-    var reset = function () { activeNode = null; };
+    this.reset = reset;
+    function reset() { activeNode = null; }
 
-
-    /* Public interface */
-    return {
-      isScope: isScope,
-      getScope: getScope,
-      hasScope: hasScope,
-      reset: reset,
-      onDragStart: onDragStart,
-      onDragEnd: onDragEnd
-    };
+    /* Exports */
+    return this;
   } )();
 
 
   /**
    * @class
    * */
-  var Draggable = function (node, options)
+  this.Draggable = Draggable;
+  function Draggable(node, options)
   {
     node.on( {
       dragstart: function (e) {
@@ -870,7 +895,7 @@
         if(options.classDragging)
           node.addClass(options.classDragging);
 
-        DragDropManager.onDragStart(e);
+        self.DragDropManager.onDragStart(e);
 
         if(options.dragstart)
           options.dragstart(e);
@@ -885,7 +910,7 @@
         if(options.classDragging)
           node.removeClass(options.classDragging);
 
-        DragDropManager.onDragEnd(e);
+        self.DragDropManager.onDragEnd(e);
 
         if(options.dragend)
           options.dragend(e);
@@ -897,9 +922,10 @@
   /**
    * @class
    * */
-  var Droppable = function (node, options)
+  this.Droppable = Droppable;
+  function Droppable(node, options)
   {
-    var dm = DragDropManager;
+    var dm = self.DragDropManager;
 
     if(!(node instanceof $))
       throw "Invalid or no jQuery reference specified";
@@ -1008,11 +1034,12 @@
   /**
    * @class
    * */
-  var Observable = function ()
+  this.Observable = Observable;
+  function Observable()
   {
     /* Attributes */
     this.observers_ = [ ];
-  };
+  }
 
   Observable.prototype.exists = function (observer)
   {
@@ -1059,7 +1086,8 @@
   /**
    * @class
    * */
-  var Observer = function (owner, callback)
+  this.Observer = Observer;
+  function Observer(owner, callback)
   {
     Owned.call(this, owner);
 
@@ -1068,7 +1096,7 @@
 
     /* Attributes */
     this.callback_ = callback;
-  };
+  }
 
   Observer.prototype = Object.create(Owned.prototype);
 
@@ -1081,7 +1109,8 @@
   /**
    * @class
    * */
-  var Events = function ( /* <owner, names> | <names> */ )
+  this.Events = Events;
+  function Events( /* <owner, names> | <names> */ )
   {
     var ent;
 
@@ -1128,7 +1157,7 @@
 
     var self = this;
     ent.forEach(function (n) { self.map_[n] = [ ]; } );
-  };
+  }
 
   Events.prototype.add = function (ev)
   {
@@ -1273,11 +1302,12 @@
   /**
    * @class
    * */
-  var View = function (owner)
+  this.View = View;
+  function View(owner)
   {
     /* Invoke super constructor. */
     Drawable.call(this, owner);
-  };
+  }
 
   View.prototype = Object.create(Drawable.prototype);
 
@@ -1287,7 +1317,8 @@
   /**
    * @class
    * */
-  var Position = function (l, t)
+  this.Position = Position;
+  function Position(l, t)
   {
     if(arguments.length === 2) this.set(l, t);
     else this.set(0, 0);
@@ -1297,7 +1328,7 @@
 
     this.__defineSetter__("left", function (l) { this.left_ = l; } );
     this.__defineSetter__("top", function (t) { this.top_ = t; } );
-  };
+  }
 
   Position.prototype.set = function (l, t)
   {
@@ -1309,7 +1340,8 @@
   /**
    * @class
    * */
-  var Size = function (w, h)
+  this.Size = Size;
+  function Size(w, h)
   {
     if(arguments.length === 2) this.set(w, h);
     else this.set(0, 0);
@@ -1319,7 +1351,7 @@
 
     this.__defineSetter__("width", function (w) { this.width_ = w; } );
     this.__defineSetter__("height", function (h) { this.height_ = h; } );
-  };
+  }
 
   Size.prototype.set = function (w, h)
   {
@@ -1331,7 +1363,8 @@
   /**
    * @class
    * */
-  var PositionSize = function (l, t, w, h)
+  this.PositionSize = PositionSize;
+  function PositionSize(l, t, w, h)
   {
     if(arguments.length === 1) {
       if(!is_obj(l))
@@ -1360,7 +1393,7 @@
 
     this.__defineSetter__("width", function (w) { this.width_ = w; } );
     this.__defineSetter__("height", function (h) { this.height_ = h; } );
-  };
+  }
 
   /* Interface */
   PositionSize.prototype.set = function (l, t, w, h)
@@ -1382,47 +1415,6 @@
     };
   };
 
-
-  /* Return public interface. */
-  return {
-    /* Functions */
-    absm_noti: absm_noti,
-    is_obj: is_obj,
-    is_fn: is_fn,
-    is_und: is_und,
-    is_arr: is_arr,
-    is_str: is_str,
-    is_num: is_num,
-    like: like,
-    like_obj: like_obj,
-    first_key: first_key,
-    next_key: next_key,
-    is_in: is_in,
-    any_in: any_in,
-    chainize: chainize,
-    instanceany: instanceany,
-    on_exception: on_exception,
-    is_obj_empty: is_obj_empty,
-
-    /* Classes */
-    Url: Url,
-    Owned: Owned,
-    Controller: Controller,
-    Drawable: Drawable,
-    Callbacks: Callbacks,
-    Constructor: Constructor,
-    ControllerGlobalKeyboard: ControllerGlobalKeyboard,
-    Draggable: Draggable,
-    Droppable: Droppable,
-    Events: Events,
-    View: View,
-    NodeFinder: NodeFinder,
-    TemplateFinder: TemplateFinder,
-    $: jQueryExtensions,
-    Html: Html,
-    Size: Size,
-    Position: Position,
-    PositionSize: PositionSize
-  };
-
+  console.log("Using new Sorting Common");
+  return this;
 }, this);
