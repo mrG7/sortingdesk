@@ -1149,6 +1149,21 @@
     ent.forEach(function (n) { self.map_[n] = [ ]; } );
   }
 
+  Events.prototype.extend = function (names)
+  {
+    var self = this;
+
+    if(!is_str(names))
+      throw "Invalid or no event array specified";
+
+    names.forEach(function (e) {
+      if(self.map_.hasOwnProperty(e))
+        console.info("Event already defined: %s", e);
+      else
+        self.map_[e] = [ ];
+    } );
+  };
+
   Events.prototype.add = function (ev)
   {
     if(!is_str(ev) || ev.length === 0)
