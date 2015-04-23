@@ -24,7 +24,13 @@
 } )(function (window, $, CryptoJS, DossierJS, undefined) {
 
   /* Constants */
-  var DEFAULT_DOSSIER_STACK_API_URL = 'http://10.3.2.42:9090';
+  var DEFAULT_DOSSIER_STACK_API_URL = 'http://10.3.2.42:9090',
+      DEFAULT_ITEMS_LIMIT = 40;
+
+  /* For convenience: */
+  var COREF_VALUE_POSITIVE = DossierJS.COREF_VALUE_POSITIVE,
+      COREF_VALUE_UNKNOWN  = DossierJS.COREF_VALUE_UNKNOWN,
+      COREF_VALUE_NEGATIVE = DossierJS.COREF_VALUE_NEGATIVE;
 
 
   /* Interface */
