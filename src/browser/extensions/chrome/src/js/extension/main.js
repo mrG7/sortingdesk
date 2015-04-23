@@ -250,7 +250,6 @@ var Main = (function (window, chrome, $, std, sq, sqc, sd, undefined) {
     /* Event handlers */
     var onConfigSaved_ = function (request, sender)
     {
-      console.log("RELOAD");
       console.info("Reloading extension window");
       window.location = window.location;
     };
