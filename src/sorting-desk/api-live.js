@@ -36,91 +36,9 @@
   /* Interface */
   var Api = function (sortingDesk, url)
   {
-    var api_ = new DossierJS.API(url || DEFAULT_DOSSIER_STACK_API_URL),
-        annotator_ = 'unknown',
-        qitems_ = new DossierJS.SortingQueueItems(
-          api_, 'similar', '', annotator_);
-
-    qitems_.limit = 40;
-
-    /* TODO: remove this bypass.  This is just nasty. */
-    DossierJS.SortingQueueItems.prototype._itemDismissed = function(cobj) {
-      console.log('Adding a negative label between ' + cobj.content_id
-                  + ' and ...');
-      for (var i = 0; i < sortingDesk.folder_.bins_.length; i++) {
-        var bin = sortingDesk.folder_.bins_[i];
-        (new DossierJS.LabelFetcher(api_))
-          .cid(bin.data_.content_id)
-          .which('connected')
-          .get().done(function(labels) {
-            var cids = uniqueContentIdsFromLabels(labels);
-            console.log('... these content ids:', cids);
-
-            api_.addLabels(cids.map(function(cid) {
-              return new DossierJS.Label(
-                cobj.content_id, cid, annotator_,
-                DossierJS.COREF_VALUE_NEGATIVE);
-            }));
-          });
-      }
-    };
-
-    /* TODO:
-     *
-     * Remove the following bypass of
-     * DossierJS.SortingQueueItems.prototype._moreTexts . It is here so as to
-     * ensure that we receive items in the format expected by SortingQueue. */
-    DossierJS.SortingQueueItems.prototype._moreTexts = function(num) {
-      var self = this;
-
-      if(typeof num !== 'number' || num <= 0)
-        throw "Invalid number of items specified";
-
-      if (this._processing || !qitems_.query_content_id) {
-        var deferred = $.Deferred();
-
-        window.setTimeout(function () {
-          if(self._processing) {
-            console.warn('moreTexts in progress, ignoring new request');
-            deferred.reject( { error: "Request in progress" } );
-          } else {
-            console.error('Query content id not yet set');
-            deferred.reject( { error: "No query content id" } );
-          }
-        } );
-
-        return deferred.promise();
-      }
-
-      this._processing = true;
-      var p = $.extend({limit: num.toString()}, this.params);
-      if (this.query_subtopic_id !== null)
-        p.subtopic_id = this.query_subtopic_id;
-
-      return self.api.search(self.engine_name, self.query_content_id, p)
-        .then(function(data) {
-          /* Fault tolerance: */
-          if(data === null || typeof data !== 'object')
-            data = { };
-          if(!(data.results instanceof Array))
-            data.results = [ ];
-
-          data.results = data.results.map(function(cobj) {
-            return {
-              raw: cobj,
-              content_id: cobj.content_id,
-              fc: cobj.fc,
-              node_id: cobj.content_id,
-              name: '',
-              url: cobj.fc.value('meta_url')
-            };
-          });
-
-          return data;
-        })
-        .fail(  function() { console.error("moreTexts: request failed"); })
-        .always(function() { self._processing = false; });
-    };
+    var module = this,
+        api_ = new DossierJS.API(url || DEFAULT_DOSSIER_STACK_API_URL),
+        annotator_ = 'unknown';
 
 
     /**
@@ -141,7 +59,7 @@
 
       this.url = function (content_id)
       { return enabled_ === true ? api_.fcCacheUrl(content_id) : null; };
-    });
+    })();
 
 
     /**
@@ -202,7 +120,7 @@
 
         fc.raw[subtopic_id] = content;
       }
-    });
+    })();
 
 
     /**
@@ -281,44 +199,8 @@
         }
         return cids;
       }
-    });
+    })();
 
-
-    this.setQueryContentId = setQueryContentId;
-    function setQueryContentId(id, subid)
-    {
-      if(id !== null && (typeof id !== 'string' || id.length === 0))
-        throw "Invalid query content id";
-
-      qitems_.query_content_id = id;
-      if (typeof subid !== 'undefined') {
-        qitems_.query_subtopic_id = subid;
-      }
-    }
-
-    this.getQueryContentId = getQueryContentId;
-    function getQueryContentId()
-    {
-      return qitems_.query_content_id;
-    }
-
-    this.getQuerySubtopicId = getQuerySubtopicId;
-    function getQuerySubtopicId()
-    {
-      return qitems_.query_subtopic_id;
-    }
-
-    this.setSearchEngine = setSearchEngine;
-    function setSearchEngine(name)
-    {
-      qitems_.engine_name = name;
-    }
-
-    this.getSearchEngine = getSearchEngine;
-    function getSearchEngine(name)
-    {
-      return qitems_.engine_name;
-    }
 
     this.generateContentId = generateContentId;
     function generateContentId(content)
@@ -415,12 +297,6 @@
       return map;
     }
 
-    this.getAnnotator = getAnnotator;
-    function getAnnotator()
-    {
-      return annotator_;
-    }
-
     this.getClass = getClass;
     function getClass(cl)
     {
@@ -434,12 +310,6 @@
     function getDossierJs()
     {
       return api_;
-    }
-
-    this.getCallbacks = getCallbacks;
-    function getCallbacks()
-    {
-      return qitems_.callbacks();
     }
 
     this.makeReportUrl = makeReportUrl;
@@ -514,7 +384,160 @@
       this.folderFromName = DossierJS.Folder.from_name;
       this.subfolderFromName = DossierJS.Subfolder.from_name;
       this.addFolder = api_.addFolder.bind(api_);
-    });
+    })();
+
+
+
+    // SortingQueueItems provides SortingQueue integration with DossierJS.
+    // Namely, it provides the following callback functions:
+    //
+    //   moreTexts - Returns results from a search.
+    //   itemDismissed - Adds a label between the `query_content_id` and
+    //                   the text item that was dismissed. The coref value
+    //                   used is `-1`.
+    //
+    // An instance of `SortingQueueItems` can be used to initialize an
+    // instance of `SortingQueue` with the appropriate callbacks. e.g.,
+    //
+    //   var qitems = new SortingQueueItems(...);
+    //   new SortingQueue.Sorter(
+    //     config, $.extend(qitems.callbacks(), yourCallbacks));
+    //
+    // The query and search engine can be changed by modifying the contents
+    // of the `query_content_id` and `engine_name` instance attributes,
+    // respectively. When an attribute is modified, no changes will occur
+    // visually. To cause the queue to be refreshed with the new settings,
+    // you can forcefully empty it, which will cause SortingQueue to refill
+    // it with the new settings:
+    //
+    //   qitems.engine_name = '<engine name>';
+    //   qitems.query_content_id = '<content id>';
+    //   sorting_desk_instance.items.removeAll();
+    //
+    // There are a number of attributes that can be set on an instance of
+    // `SortingQueueItems` that affect search engine behavior:
+    //
+    //   annotator   - Used whenever a label is created.
+    //   limit       - Limits the number of results returned to the user.
+    //                 Defaults to `5`.
+    //   query_subtopic_id - Causes a search engine to use subtopic querying.
+    //                       This only works if the search engine supports it!
+    //   params      - Pass arbitrary query parameters to the search engine.
+    //
+    // The `api` parameter should be an instance of `DossierJS.API`.
+    //
+    // Each instance of `SortingQueueItems` may be used with precisely
+    // one instance of `SortingQueue`.
+    this.qitems = new (function (engine_name, query_content_id, annotator) {
+
+      /* NOTE: the constructor's arguments `engine_name´, `query_content_id´
+       * and `annotator´ are also used as instance attributes. */
+      var query_subtopic_id = null,
+          limit = DEFAULT_ITEMS_LIMIT,
+          params = {},
+          _processing = false;
+
+
+      this.setQueryContentId = setQueryContentId;
+      function setQueryContentId (id, subid)
+      {
+        if(id !== null && (typeof id !== 'string' || id.length === 0))
+          throw "Invalid query content id";
+
+        query_content_id = id;
+        if (typeof subid !== 'undefined') query_subtopic_id = subid;
+      }
+
+      this.getQueryContentId = getQueryContentId;
+      function getQueryContentId()
+      { return query_content_id; }
+
+      this.getQuerySubtopicId = getQuerySubtopicId;
+      function getQuerySubtopicId()
+      { return query_subtopic_id; }
+
+      this.setSearchEngine = setSearchEngine;
+      function setSearchEngine(name)
+      { engine_name = name; }
+
+      this.getSearchEngine = getSearchEngine;
+      function getSearchEngine(name)
+      { return engine_name; }
+
+      this.getAnnotator = getAnnotator;
+      function getAnnotator()
+      { return annotator; }
+
+      // Returns an object of callbacks that may be given directly to the
+      // `SortingQueue` constructor.
+      this.getCallbacks = getCallbacks;
+      function getCallbacks()
+      { return { moreTexts: moreTexts }; }
+
+      // This is just like `DossierJS.API.addLabel`, except it fixes one of
+      // the content ids to the current value of
+      // `SortingQueueItems.query_content_id`, and it fixes the value of
+      // `annotator` to `SortingQueueItems.annotator`.
+      //
+      // (It returns the jQuery promise returned by `DossierJS.API.addLabel`.)
+      this.addLabel = addLabel;
+      function addLabel(cid, coref_value)
+      {
+        return api_.addLabel(query_content_id,
+                             cid, annotator, coref_value);
+      };
+
+      function moreTexts(num)
+      {
+        if(typeof num !== 'number' || num <= 0)
+          throw "Invalid number of items specified";
+
+        if (_processing || !query_content_id) {
+          var deferred = $.Deferred();
+
+          window.setTimeout(function () {
+            if(_processing) {
+              console.warn('moreTexts in progress, ignoring new request');
+              deferred.reject( { error: "Request in progress" } );
+            } else {
+              console.error('Query content id not yet set');
+              deferred.reject( { error: "No query content id" } );
+            }
+          } );
+
+          return deferred.promise();
+        }
+
+        _processing = true;
+        var p = $.extend({limit: num.toString()}, params);
+        if (query_subtopic_id !== null)
+          p.subtopic_id = query_subtopic_id;
+
+        return api_.search(engine_name, query_content_id, p)
+          .then(function(data) {
+            /* Fault tolerance: */
+            if(data === null || typeof data !== 'object')
+              data = { };
+            if(!(data.results instanceof Array))
+              data.results = [ ];
+
+            data.results = data.results.map(function(cobj) {
+              return {
+                raw: cobj,
+                content_id: cobj.content_id,
+                fc: cobj.fc,
+                node_id: cobj.content_id,
+                name: '',
+                url: cobj.fc.value('meta_url')
+              };
+            });
+
+            return data;
+          })
+          .fail(  function() { console.error("moreTexts: request failed"); })
+          .always(function() { _processing = false; });
+      }
+    })('similar', '', annotator_);
 
   };
 
