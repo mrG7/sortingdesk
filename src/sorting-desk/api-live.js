@@ -16,9 +16,8 @@
 
   /* Compatibility with RequireJs. */
   if(typeof define === "function" && define.amd) {
-    define("API", [ "jquery", "CryptoJS", "DossierJS" ], function ($, CryptoJS, DossierJS) {
-      return Module(window, $, CryptoJS, DossierJS);
-    });
+    var d = [ "jquery", "CryptoJS", "DossierJS" ];
+    define("API", d, function (i, s, o) { return Module(window, i, s, o); });
   } else
     window.Api = Module(window, $, CryptoJS, DossierJS);
 
