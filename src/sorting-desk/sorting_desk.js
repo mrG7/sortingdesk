@@ -182,15 +182,10 @@
        * Start by explicitly initialising SortingQueue's instance and proceed
        * to initialising our own instance. */
       this.sortingQueue_.initialise();
-
-      /* TODO: place in class of its own. */
-      /* BEGIN_BLOCK |=> */
-      this.sortingQueue_.on('pre-render', this.onPreRender_.bind(this));
-      this.sortingQueue_.on('items-updated', function (count) {
-        if(count === 0)
-          $('#' + self.options.suggestion.id).remove();
-      } );
-      /* <=| END */
+      new SortingQueueRenderer(this.sortingQueue_,
+                               this.explorer_,
+                               this.callbacks_,
+                               this.options.suggestion);
 
       (this.explorer_ = new ControllerExplorer(this))
         .on( {
@@ -286,66 +281,84 @@
               );
             } );
         } );
-    },
-
-    onPreRender_: function (data)
-    {
-      var node,
-          self = this,
-          opts = this.options_.suggestion,
-          container = $('#' + opts.id),
-          sugg = data.suggestions;
-
-      /* If there are no suggestions or no suggestion hits in the first
-       * element, self-destruct after a fade out animation and get out of
-       * here. */
-      if(!std.is_arr(sugg)
-         || sugg.length === 0
-         || !std.is_arr(sugg[0].hits)
-         || sugg[0].hits.length === 0)
-      {
-        /* Note: it doesn't really matter if the container doesn't actually
-         * exist yet. */
-        container.fadeOut(function () { container.remove(); } );
-        return;
-      }
-
-      /* Important that we cancel any running animations or the container may
-       * be removed (see above). */
-      container.stop();
-      sugg = sugg[0];
-
-      /* Always re-create the suggestion container. */
-      container.remove();
-      container = this.callbacks.invoke('createSuggestionContainer');
-      node = this.sortingQueue_.nodes.items;
-
-      /* Insert our container before the top child node of the search results
-       * list. */
-      if(node.children().length > 0)
-        container.insertBefore(node.children().first());
-      else
-        node.append(container);
-
-      container.append($('<h2/>').html(sugg.phrase));
-      container.append(this.callbacks.invoke('renderScore', sugg.score));
-
-      container.append($('<p/>')
-                       .html('This suggestion links <strong>'
-                             + sugg.hits.length
-                             + '</strong> '
-                             + (sugg.hits.length === 1
-                                ? 'page.'
-                                : 'pages.')));
-
-      container.find('BUTTON').on('click', function () {
-        if(self.explorer.addSuggestions(sugg.phrase, sugg.hits)) {
-          container.fadeOut(function () {
-            container.remove();
-          } );
-        }
-      } );
     }
+  };
+
+
+  /**
+   * @class
+   * */
+  var SortingQueueRenderer = function (sq, explorer, callbacks, options)
+  {
+    var self = this;
+
+    this.sortingQueue = sq;
+    this.explorer = explorer;
+    this.callbacks = callbacks;
+    this.options = options;
+
+    this.sortingQueue.on('pre-render', this.onPreRender_.bind(this));
+    this.sortingQueue.on('items-updated', function (count) {
+      if(count === 0)
+        $('#' + options.id).remove();
+    } );
+  };
+
+  SortingQueueRenderer.prototype.onPreRender_ = function (data) {
+    var node,
+        self = this,
+        container = $('#' + this.options.id),
+        sugg = data.suggestions;
+
+    /* If there are no suggestions or no suggestion hits in the first
+     * element, self-destruct after a fade out animation and get out of
+     * here. */
+    if(!std.is_arr(sugg)
+       || sugg.length === 0
+       || !std.is_arr(sugg[0].hits)
+       || sugg[0].hits.length === 0)
+    {
+      /* Note: it doesn't really matter if the container doesn't actually
+       * exist yet. */
+      container.fadeOut(function () { container.remove(); } );
+      return;
+    }
+
+    /* Important that we cancel any running animations or the container may
+     * be removed (see above). */
+    container.stop();
+    sugg = sugg[0];
+
+    /* Always re-create the suggestion container. */
+    container.remove();
+    container = this.callbacks.invoke('createSuggestionContainer');
+    node = this.sortingQueue.nodes.items;
+
+    /* Insert our container before the top child node of the search results
+     * list. */
+    if(node.children().length > 0)
+      container.insertBefore(node.children().first());
+    else
+      node.append(container);
+
+    container.append($('<h2/>').html(sugg.phrase));
+    container.append(this.callbacks.invoke('renderScore', sugg.score));
+
+    container.append($('<p/>')
+                     .html('This suggestion links <strong>'
+                           + sugg.hits.length
+                           + '</strong> '
+                           + (sugg.hits.length === 1
+                              ? 'page.'
+                              : 'pages.')));
+
+    container.find('BUTTON').on('click', function () {
+      if(self.explorer.addSuggestions(sugg.phrase, sugg.hits)) {
+        container.fadeOut(function () {
+          container.remove();
+        } );
+      }
+    } );
   };
 
 
