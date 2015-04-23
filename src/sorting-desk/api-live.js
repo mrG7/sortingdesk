@@ -139,59 +139,66 @@
     });
 
 
-    this.getFeatureCollection = getFeatureCollection;
-    function getFeatureCollection(content_id)
-    {
-      return api_.fcGet(content_id);
-    }
+    /**
+     * @class
+     * */
+    this.fc = new (function () {
 
-    this.getAllFeatureCollections = getAllFeatureCollections;
-    function getAllFeatureCollections(ids)
-    {
-      if(!(ids instanceof Array))
-        throw "Invalid ids array container";
+      this.get = get;
+      function get(content_id)
+      {
+        return api_.fcGet(content_id);
+      }
 
-      return api_.fcGetAll(ids);
-    }
+      this.getAll = getAll;
+      function getAll(ids)
+      {
+        if(!(ids instanceof Array))
+          throw "Invalid ids array container";
 
-    this.putFeatureCollection = putFeatureCollection;
-    function putFeatureCollection(content_id, fc)
-    {
-      return api_.fcPut(content_id, fc)
-        .then(function () {
-          return fc;
-        } );
-    }
+        return api_.fcGetAll(ids);
+      }
 
-    this.createFeatureCollection = createFeatureCollection;
-    function createFeatureCollection(content_id, html)
-    {
-      var self = this;
-      var url = api_.url('feature-collection/' + encodeURIComponent(content_id));
+      this.put = put;
+      function put(content_id, fc)
+      {
+        return api_.fcPut(content_id, fc)
+          .then(function () {
+            return fc;
+          } );
+      }
 
-      return $.ajax({
-        type: 'PUT',
-        contentType: 'text/html',
-        url: url,
-        data: html
-      }).fail(function() {
-        console.error("Could not save feature collection " +
-                      "(content id: '" + content_id + "')");
-      }).then(function(fc) {
-        return new (self.getClass('FeatureCollection'))(content_id, fc);
-      });
-    }
+      this.create = create;
+      function create(content_id, html)
+      {
+        var self = this;
+        var url = api_.url('feature-collection/' + encodeURIComponent(content_id));
 
-    this.setFeatureCollectionContent = setFeatureCollectionContent;
-    function setFeatureCollectionContent(fc, subtopic_id, content)
-    {
-      if(typeof content !== 'string' || content.length === 0)
-        throw "Invalid item content";
-      else if(typeof subtopic_id !== 'string' || subtopic_id === 0)
-        throw "Invalid subtopic id";
+        return $.ajax({
+          type: 'PUT',
+          contentType: 'text/html',
+          url: url,
+          data: html
+        }).fail(function() {
+          console.error("Could not save feature collection " +
+                        "(content id: '" + content_id + "')");
+        }).then(function(fc) {
+          return new (self.getClass('FeatureCollection'))(content_id, fc);
+        });
+      }
 
-      fc.raw[subtopic_id] = content;
-    }
+      this.setContent = setContent;
+      function setContent(fc, subtopic_id, content)
+      {
+        if(typeof content !== 'string' || content.length === 0)
+          throw "Invalid item content";
+        else if(typeof subtopic_id !== 'string' || subtopic_id === 0)
+          throw "Invalid subtopic id";
+
+        fc.raw[subtopic_id] = content;
+      }
+    });
+
 
     this.addLabel = addLabel;
     function addLabel(label)
