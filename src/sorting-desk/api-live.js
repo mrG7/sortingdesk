@@ -200,77 +200,84 @@
     });
 
 
-    this.addLabel = addLabel;
-    function addLabel(label)
-    { return api_.addLabel(label); }
+    /**
+     * @class
+     * */
+    this.label = new (function () {
 
-    this.getLabelsUniqueById = getLabelsUniqueById;
-    function getLabelsUniqueById(
-      content_id, subtopic_id, which /* = "connected" */)
-    {
-      if(typeof content_id !== 'string' || content_id.length === 0)
-        throw "Invalid content id";
-      else if(!_opt_arg_good(which) && typeof which !== 'string')
-        throw "Invalid type for specified `which´ value";
+      this.add = add;
+      function add(label)
+      { return api_.addLabel(label); }
 
-      var self = this;
+      this.get = get;
+      function get(
+        content_id, subtopic_id, which /* = "connected" */)
+      {
+        if(typeof content_id !== 'string' || content_id.length === 0)
+          throw "Invalid content id";
+        else if(!_opt_arg_good(which) && typeof which !== 'string')
+          throw "Invalid type for specified `which´ value";
 
-      console.log('LabelFetcher GET (id=%s)', content_id);
+        var self = this;
 
-      return (new DossierJS.LabelFetcher(api_))
-        .cid(content_id)
-        .subtopic(subtopic_id)
-        .which(which || 'connected')
-        .get()
-        .then(function (labels) {
-          console.log('LabelFetcher GET successful:', labels);
-          return self.dedupLabelsBySubtopic(labels);
-        } );
-    }
+        console.log('LabelFetcher GET (id=%s)', content_id);
 
-    this.dedupLabelsBySubtopic = dedupLabelsBySubtopic;
-    function dedupLabelsBySubtopic(labels)
-    {
-      if(!(labels instanceof Array))
-        throw "Labels collection not an array";
-
-      var result = [ ],
-          seen = { };
-
-      labels.forEach(function (label) {
-        var pair1 = [label.cid1, label.subtopic_id1],
-            pair2 = [label.cid2, label.subtopic_id2];
-        if (!seen[pair1]) {
-          result.push({cid: pair1[0], subid: pair1[1]});
-          seen[pair1] = true;
-        }
-        if (!seen[pair2]) {
-          result.push({cid: pair2[0], subid: pair2[1]});
-          seen[pair2] = true;
-        }
-      } );
-      return result;
-    }
-
-    this.uniqueContentIdsFromLabels = uniqueContentIdsFromLabels;
-    function uniqueContentIdsFromLabels(labels)
-    {
-      var seen = { },
-          cids = [ ];
-      for (var i = 0; i < labels.length; i++) {
-        var cid1 = labels[i].cid1,
-            cid2 = labels[i].cid2;
-        if (!seen[cid1]) {
-          seen[cid1] = true;
-          cids.push(cid1);
-        }
-        if (!seen[cid2]) {
-          seen[cid2] = true;
-          cids.push(cid2);
-        }
+        return (new DossierJS.LabelFetcher(api_))
+          .cid(content_id)
+          .subtopic(subtopic_id)
+          .which(which || 'connected')
+          .get()
+          .then(function (labels) {
+            console.log('LabelFetcher GET successful:', labels);
+            return self.dedupLabelsBySubtopic(labels);
+          } );
       }
-      return cids;
-    }
+
+      this.dedup = dedup;
+      function dedup(labels)
+      {
+        if(!(labels instanceof Array))
+          throw "Labels collection not an array";
+
+        var result = [ ],
+            seen = { };
+
+        labels.forEach(function (label) {
+          var pair1 = [label.cid1, label.subtopic_id1],
+              pair2 = [label.cid2, label.subtopic_id2];
+          if (!seen[pair1]) {
+            result.push({cid: pair1[0], subid: pair1[1]});
+            seen[pair1] = true;
+          }
+          if (!seen[pair2]) {
+            result.push({cid: pair2[0], subid: pair2[1]});
+            seen[pair2] = true;
+          }
+        } );
+        return result;
+      }
+
+      this.ids = ids;
+      function ids(labels)
+      {
+        var seen = { },
+            cids = [ ];
+        for (var i = 0; i < labels.length; i++) {
+          var cid1 = labels[i].cid1,
+              cid2 = labels[i].cid2;
+          if (!seen[cid1]) {
+            seen[cid1] = true;
+            cids.push(cid1);
+          }
+          if (!seen[cid2]) {
+            seen[cid2] = true;
+            cids.push(cid2);
+          }
+        }
+        return cids;
+      }
+    });
+
 
     this.setQueryContentId = setQueryContentId;
     function setQueryContentId(id, subid)
