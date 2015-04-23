@@ -384,20 +384,13 @@
       /* Create a map of every word, where each key is a word in `string´ that
        * maps to the count said word occurs in `string´.
        *
-       * This method is O(n^2). */
+       * This method is O(n). */
       words.forEach(function (word) {
         /* Ignore word if it has been processed. */
         if(map.hasOwnProperty(word))
-          return;
-
-        /* Count times word occurs. */
-        map[word] = (function () {
-          var count = 0;
-
-          words.forEach(function (wi) { if(wi === word) ++count; } );
-
-          return count;
-        } )();
+          ++map[word];
+        else
+          map[word] = 1;
       } );
 
       return map;
