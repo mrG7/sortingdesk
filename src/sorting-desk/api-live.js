@@ -27,11 +27,6 @@
   var DEFAULT_DOSSIER_STACK_API_URL = 'http://10.3.2.42:9090',
       DEFAULT_ITEMS_LIMIT = 40;
 
-  /* For convenience: */
-  var COREF_VALUE_POSITIVE = DossierJS.COREF_VALUE_POSITIVE,
-      COREF_VALUE_UNKNOWN  = DossierJS.COREF_VALUE_UNKNOWN,
-      COREF_VALUE_NEGATIVE = DossierJS.COREF_VALUE_NEGATIVE;
-
 
   /* Interface */
   var Api = function (sortingDesk, url)
@@ -39,6 +34,16 @@
     var module = this,
         api_ = new DossierJS.API(url || DEFAULT_DOSSIER_STACK_API_URL),
         annotator_ = 'unknown';
+
+
+    /* Constants: */
+    this.consts = {
+      coref: {
+        POSITIVE: DossierJS.COREF_VALUE_POSITIVE,
+        UNKNOWN: DossierJS.COREF_VALUE_UNKNOWN,
+        NEGATIVE: DossierJS.COREF_VALUE_NEGATIVE
+      }
+    };
 
 
     /**
