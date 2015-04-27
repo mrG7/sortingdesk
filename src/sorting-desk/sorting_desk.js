@@ -1996,7 +1996,7 @@
           return fl;
 
         var d = this.sd_.callbacks.invokeMaybe("checkSelection");
-        if(d === null)
+        if(d === undefined)
           this.on_selection_queried_(el, true);
         else {
           d.done(function (result) {
