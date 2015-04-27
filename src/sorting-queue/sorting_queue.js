@@ -739,7 +739,6 @@
   ControllerItems.prototype.removeAll = function(check /* = true */)
   {
     this.removeNodes_();
-    this.items_ = [];
 
     if(std.is_und(check) || check === true)
       this.check();
@@ -908,6 +907,7 @@
   ControllerItems.prototype.removeNodes_ = function ()
   {
     this.items_.forEach(function (item) { item.node.remove(); } );
+    this.items_ = [];
   };
 
 
