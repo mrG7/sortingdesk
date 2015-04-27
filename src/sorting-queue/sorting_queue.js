@@ -540,13 +540,10 @@
     /* Invoke super constructor. */
     std.Controller.call(this, owner);
 
-    this.node_ = this.owner_.nodes.items;
+    this.node_ = owner.nodes.items;
     this.items_ = [ ];
     this.loading_ = false;
     this.fnDisableEvent_ = function (e) { return false; };
-
-    /* Define getters. */
-    this.__defineGetter__("items", function () { return this.items_; } );
   };
 
   ControllerItems.prototype = Object.create(std.Controller.prototype);
