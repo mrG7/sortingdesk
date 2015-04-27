@@ -542,6 +542,7 @@
 
     this.node_ = this.owner_.nodes.items;
     this.items_ = [ ];
+    this.loading_ = false;
     this.fnDisableEvent_ = function (e) { return false; };
 
     /* Define getters. */
@@ -612,7 +613,10 @@
 
   ControllerItems.prototype.check = function ()
   {
-    if(this.items_.length >= this.owner_.options.items.visible)
+    if(this.loading_) {
+      console.info("check: ignoring: currently loading");
+      return;
+    } else if(this.items_.length >= this.owner_.options.items.visible)
       return;
 
     var self = this,
@@ -620,8 +624,10 @@
           self.owner_.async.end('check-items');
           self.owner_.events.trigger('loading-end');
           self.updateEmptyNotification_();
+          self.loading_ = false;
         };
 
+    this.loading_ = true;
     this.updateEmptyNotification_(true);
     this.owner_.events_.trigger('loading-begin');
     this.owner_.callbacks.invoke("moreTexts",
