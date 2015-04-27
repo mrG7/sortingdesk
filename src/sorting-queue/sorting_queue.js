@@ -905,7 +905,7 @@
   ControllerItems.prototype.updateEmptyNotification_ = function (loading)
   {
     this.owner_.nodes.empty.items.stop();
-    if(loading !== true && this.items.length === 0) {
+    if(loading !== true && this.items_.length === 0) {
       this.owner_.nodes.empty.items.fadeIn(
         this.owner_.options.delays.queueEmptyFadeIn);
     } else {
