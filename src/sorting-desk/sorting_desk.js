@@ -111,7 +111,7 @@
                                    * set up only *AFTER* this constructor
                                    * exits. */
       }),
-      $.extend(this.api_.getCallbacks(), cbs));
+      $.extend(this.api_.qitems.getCallbacks(), cbs));
   };
 
   Sorter.prototype = {
@@ -252,19 +252,18 @@
         } ))
         .on('dismissed', function (id) {
           var cid = item.content.content_id,
-              djs = self.api.DossierJS,
-              label = new djs.Label(
-                self.api.getQueryContentId(),
+              label = new (self.api.getClass('Label'))(
+                self.api.qitems.getQueryContentId(),
                 cid,
                 'unknown',
                 0, // coref value is filled in below
-                self.api.getQuerySubtopicId());
+                self.api.qitems.getQuerySubtopicId());
           if (id === null)
-            label.coref_value = djs.COREF_VALUE_UNKNOWN;
+            label.coref_value = self.api.consts.coref.UNKNOWN;
           else if (id === 'redundant')
-            label.coref_value = djs.COREF_VALUE_POSITIVE;
+            label.coref_value = self.api.consts.coref.POSITIVE;
           else if (id === 'wrong')
-            label.coref_value = djs.COREF_VALUE_NEGATIVE;
+            label.coref_value = self.api.consts.coref.NEGATIVE;
           else {
             item.owner.remove(item);
             console.error("Unrecognized dismissal identifier: " + id);
@@ -273,7 +272,7 @@
 
           this.setResetHtml("Processing...");
 
-          self.api.addLabel(label)
+          self.api.label.add(label)
             .done(function () { item.owner.remove(item); })
             .fail(function () {
               self.networkFailure.incident(
@@ -588,14 +587,14 @@
 
     /* Handle item dismissal. */
     this.owner_.sortingQueue.on('item-dismissed', function (item) {
-      var query_id = api.getQueryContentId();
+      var query_id = api.qitems.getQueryContentId();
 
       if(query_id) {
         self.do_add_label_(new (api.getClass('Label'))(
           item.content_id,
           query_id,
-          api.getAnnotator(),
-          api.COREF_VALUE_NEGATIVE));
+          api.qitems.getAnnotator(),
+          api.consts.coref.NEGATIVE));
       }
     } );
 
@@ -788,8 +787,8 @@
     var label = new (this.api.getClass('Label'))(
           dropped.id,
           dragged.id,
-          this.api.getAnnotator(),
-          this.api.COREF_VALUE_POSITIVE,
+          this.api.qitems.getAnnotator(),
+          this.api.consts.coref.POSITIVE,
           dropped.data.subtopic_id,
           dragged.data.subtopic_id);
 
@@ -812,8 +811,8 @@
         var label = new (self.api.getClass('Label'))(
           item.data.content_id,
           descriptor.content_id,
-          self.api.getAnnotator(),
-          self.api.COREF_VALUE_POSITIVE,
+          self.api.qitems.getAnnotator(),
+          self.api.consts.coref.POSITIVE,
           item.data.subtopic_id,
           descriptor.subtopic_id);
 
@@ -925,8 +924,8 @@
       item.activate();
 
       if(this.owner_.initialised) {
-        this.api.setQueryContentId(item.data.content_id,
-                                   item.data.subtopic_id);
+        this.api.qitems.setQueryContentId(item.data.content_id,
+                                          item.data.subtopic_id);
         this.owner_.sortingQueue.items.redraw();
       }
     } else {
@@ -952,7 +951,7 @@
     var self = this;
 
     /* Attempt to retrieve the feature collection for the bin's content id. */
-    return this.api.getFeatureCollection(descriptor.content_id)
+    return this.api.fc.get(descriptor.content_id)
       .then(function (fc) {
         console.log("Feature collection GET successful (id=%s)",
                     descriptor.content_id);
@@ -978,15 +977,13 @@
 
         console.info("Feature collection GET failed: creating new (id=%s)",
                      descriptor.content_id);
-        return self.api.createFeatureCollection(descriptor.content_id,
-                                                descriptor.document)
+        return self.api.fc.create(descriptor.content_id, descriptor.document)
           .done(function(fc) {
             console.log('Feature collection created: (id=%s)',
                         descriptor.content_id);
 
             self.set_fc_content_(fc, descriptor);
-            self.api.setFeatureCollectionContent(
-              fc, 'meta_url', descriptor.href.toString());
+            self.api.fc.setContent(fc, 'meta_url', descriptor.href.toString());
 
             return self.do_update_fc_(descriptor.content_id, fc);
           } )
@@ -1024,7 +1021,7 @@
   /* Private interface */
   ControllerExplorer.prototype.set_fc_content_ = function (fc, descriptor)
   {
-    var set = this.api.setFeatureCollectionContent;
+    var set = this.api.fc.setContent;
     set(fc, descriptor.subtopic_id, descriptor.content);
 
     if(descriptor.type === 'image'
@@ -1039,7 +1036,7 @@
   ControllerExplorer.prototype.reset_query_ = function ()
   {
     this.api.getDossierJs().stop('API.search');
-    this.api.setQueryContentId(null);
+    this.api.qitems.setQueryContentId(null);
     this.owner_.sortingQueue.items.removeAll(false);
   };
 
@@ -1047,7 +1044,7 @@
   {
     var self = this;
 
-    return this.api.putFeatureCollection(content_id, fc)
+    return this.api.fc.put(content_id, fc)
       .done(function () {
         console.log("Feature collection PUT successful (id=%s)",
                     content_id);
@@ -1064,11 +1061,11 @@
   {
     var self = this;
 
-    return this.api.addLabel(label)
+    return this.api.label.add(label)
       .done(function () {
         console.log("Label ADD successful: '%s' %s '%s'",
                     label.cid1,
-                    label.coref_value === self.api.COREF_VALUE_POSITIVE
+                    label.coref_value === self.api.consts.coref.POSITIVE
                     ? '==' : '!=',
                     label.cid2);
       } )
@@ -1680,7 +1677,7 @@
     this.owner_.loading(true);
 
     if(!descriptor) {
-      this.api.getFeatureCollection(item.content_id)
+      this.api.fc.get(item.content_id)
         .done(function (fc) { if(self.onGotFeatureCollection(fc)) ready(); } )
         .fail(function ()   { self.onGotFeatureCollection(null); } );
     } else {
