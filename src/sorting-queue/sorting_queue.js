@@ -79,11 +79,11 @@
     }
 
     /* Begin instantiating and initialising classes needed. */
-    (this.requests_ = new ControllerRequests(this))
+    (this.async_ = new ControllerAsync(this))
       .initialise();
 
     this.constructor_ = new std.Constructor(this.options_.constructors);
-    this.callbacks_ = new Callbacks(cbs, this.requests_);
+    this.callbacks_ = new Callbacks(cbs, this.async_);
 
     this.events_ = new std.Events(
       this,
@@ -101,7 +101,7 @@
     constructor_: null,
     callbacks_: null,
     events_: null,
-    requests_: null,
+    async_: null,
     dismiss_: null,
     keyboard_: null,
     items_: null,
@@ -114,7 +114,7 @@
     get constructor ()  { return this.constructor_; },
     get callbacks ()    { return this.callbacks_; },
     get events ()       { return this.events_; },
-    get requests ()     { return this.requests_; },
+    get async ()        { return this.async_; },
     get dismiss ()      { return this.dismiss_; },
     get items ()        { return this.items_; },
 
@@ -170,14 +170,14 @@
         return this.resetter_;
 
       this.resetter_ = new InstanceResetter(this).reset(
-        [ this.requests_,
+        [ this.async_,
           this.keyboard_,
           this.dismiss_,
           [ this.items_ ]
         ] )
         .done(function () {
           self.options_ = self.callbacks_ = self.events_ = self.items_ = null;
-          self.requests_ = self.dismiss_ = self.keyboard_ = null;
+          self.async_ = self.dismiss_ = self.keyboard_ = null;
 
           self.initialised_ = false;
 
@@ -300,13 +300,13 @@
   /**
    * @class
    * */
-  var Callbacks = function (callbacks, requests)
+  var Callbacks = function (callbacks, async)
   {
     /* invoke super constructor. */
     std.Callbacks.call(this, callbacks);
 
     /* Attributes */
-    this.requests_ = requests;
+    this.async_ = async;
   };
 
   Callbacks.prototype = Object.create(std.Callbacks.prototype);
@@ -314,11 +314,11 @@
   Callbacks.prototype.onPostCall = function (name, result)
   {
     if(std.like_obj(result) && result.hasOwnProperty('always')) {
-      this.requests_.begin(name);
+      this.async_.begin(name);
 
       var self = this;
       result.always(function () {
-        self.requests_.end(name);
+        self.async_.end(name);
       } );
     }
 
@@ -329,29 +329,29 @@
   /**
    * @class
    * */
-  var ControllerRequests = function (owner)
+  var ControllerAsync = function (owner)
   {
     /* invoke super constructor. */
     std.Controller.call(this, owner);
 
     /* Set initial state. */
-    this.requests_ = { };
+    this.async_ = { };
     this.count_ = 0;
 
     /* Define getters. */
     this.__defineGetter__("count", function () { return this.count_; } );
   };
 
-  ControllerRequests.prototype = Object.create(std.Controller.prototype);
+  ControllerAsync.prototype = Object.create(std.Controller.prototype);
 
-  ControllerRequests.prototype.initialise = function () {  };
-  ControllerRequests.prototype.reset = function ()
+  ControllerAsync.prototype.initialise = function () {  };
+  ControllerAsync.prototype.reset = function ()
   {
     var self = this,
         deferred = $.Deferred(),
         interval;
 
-    /* Don't signal state reset until all requests processed. */
+    /* Don't signal state reset until all async processes finished. */
     interval = window.setInterval(function () {
       if(self.count_)
         return;
@@ -363,12 +363,12 @@
     return deferred.promise();
   };
 
-  ControllerRequests.prototype.begin = function (id)
+  ControllerAsync.prototype.begin = function (id)
   {
-    if(!this.requests_[id])
-      this.requests_[id] = 1;
+    if(!this.async_[id])
+      this.async_[id] = 1;
     else
-      ++this.requests_[id];
+      ++this.async_[id];
 
     ++this.count_;
 
@@ -376,17 +376,17 @@
     this.owner_.events.trigger("request-begin", id);
   };
 
-  ControllerRequests.prototype.end = function (id)
+  ControllerAsync.prototype.end = function (id)
   {
-    if(this.requests_.hasOwnProperty(id)) {
-      /* Delete request from internal collection if last one, otherwise
+    if(this.async_.hasOwnProperty(id)) {
+      /* Delete async process from internal collection if last one, otherwise
        * decrement reference count. */
-      if(this.requests_[id] === 1)
-        delete this.requests_[id];
-      else if(this.requests_[id] > 1)
-        --this.requests_[id];
+      if(this.async_[id] === 1)
+        delete this.async_[id];
+      else if(this.async_[id] > 1)
+        --this.async_[id];
       else
-        throw "Requests controller in invalid state";
+        throw "Async controller in invalid state";
 
       --this.count_;
     } else
@@ -615,7 +615,12 @@
     if(this.items_.length >= this.owner_.options.items.visible)
       return;
 
-    var self = this;
+    var self = this,
+        end_ = function () {
+          self.owner_.async.end('check-items');
+          self.owner_.events.trigger('loading-end');
+          self.updateEmptyNotification_();
+        };
 
     this.updateEmptyNotification_(true);
     this.owner_.events_.trigger('loading-begin');
@@ -623,10 +628,8 @@
                                  this.owner_.options.items.visible)
       .done(function (data) {
         /* Rendering of items is asynchronous, which means we need to manually
-         * begin a "request".
-         * NOTE: `requests´ should really be renamed to convey a more generic
-         * meaning of asynchronous task processing. */
-        self.owner_.requests.begin('check-items');
+         * begin an async process. */
+        self.owner_.async.begin('check-items');
 
         /* Trigger event 'pre-render' to signal that we've received data and
          * are about to render items. */
@@ -637,8 +640,11 @@
         data = data.results;
 
         /* Ensure we've received a valid items array. */
-        if(!std.is_arr(data))
-          throw "Invalid or no results array";
+        if(!std.is_arr(data)) {
+          console.error("Invalid or no results array");
+          end_();
+          return;
+        }
 
         /* Now drop duplicates and render each item. */
         self.dedupItems(data).forEach(function (item, index) {
@@ -660,15 +666,12 @@
 
         /* Ensure event is fired after the last item is added. */
         window.setTimeout( function () {
-          self.owner_.requests.end('check-items');
+          end_();
           self.owner_.events.trigger('items-updated', self.items_.length);
-          self.owner_.events.trigger('loading-end');
-          self.updateEmptyNotification_();
         }, Math.pow(data.length - 1, 2) * 1.1 + 10);
       } )
       .fail(function () {
-        self.updateEmptyNotification_();
-        self.owner_.events_.trigger('loading-end');
+        end_();
       } );
   };
 
@@ -1380,7 +1383,7 @@
     },
     items: {
       visible: 20,
-      cache: 20
+      cache: 20                 /* This default isn't actually used. */
     },
     binCharsLeft: 25,
     binCharsRight: 25,
