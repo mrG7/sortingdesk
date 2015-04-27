@@ -21,7 +21,7 @@
   } else
     root.SortingCommon = new Module(root, $);
 
-} )(function (window, $) {
+} )(function (window, $, undefined) {
 
   this.absm_noti = absm_noti;
   function absm_noti( ) { throw "Abstract method not implemented"; }
@@ -619,11 +619,11 @@
                       Array.prototype.splice.call(arguments, 1));
   };
 
-  /** Invoke a callback with optional parameters <strong>if</strong> it
+  /** Invoke a callback with optional parameters <strong>if</strong>, if it
    * exists.
    *
-   * The callback is not required to exist and, in thie event,
-   * <code>null</code> is returned.
+   * The callback is not required to exist and, in this event,
+   * <code>undefined</code> is returned.
    *
    * @param {string} name       - Name of callback to invoke.
    * @param {*}      parameters - One or more parameters to pass to callback.
@@ -673,7 +673,7 @@
       if(mandatory === true)
         throw "Attempting to invoke nonexistent callback: " + name;
 
-      return null;
+      return undefined;
     }
 
     var result = callback.apply(null, args);

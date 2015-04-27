@@ -104,7 +104,6 @@
 
     this.sortingQueue_ = new sq.Sorter(
       $.extend(true, opts, {
-        visibleItems: 40,
         loadItemsAtStartup: false /* IMPORTANT: Explicitly deny loading of
                                    * items at startup as this would potentially
                                    * break request-(start|stop) event handlers
@@ -1997,7 +1996,7 @@
           return fl;
 
         var d = this.sd_.callbacks.invokeMaybe("checkSelection");
-        if(d === null)
+        if(d === undefined)
           this.on_selection_queried_(el, true);
         else {
           d.done(function (result) {
