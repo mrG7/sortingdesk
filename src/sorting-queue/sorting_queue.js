@@ -584,9 +584,23 @@
     this.node_ = this.items_ = this.fnDisableEvent_ = null;
   };
 
-  ControllerItems.prototype.redraw = function ()
+  ControllerItems.prototype.refresh = function ()
   {
     this.removeAll(true);
+  };
+
+  ControllerItems.prototype.redraw = function ()
+  {
+    var it = this.items_;
+
+    this.removeAll(false);
+
+    for (var i = 0, l = it.length; i < l; ++i) {
+      this.items_.push(
+        this.owner_.constructor.instantiate('Item', this, it[i].content));
+    }
+
+    this.select();
   };
 
   // Returns a de-duped `items`.
