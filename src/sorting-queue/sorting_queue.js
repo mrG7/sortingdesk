@@ -962,7 +962,7 @@
       } );
 
     /* Do not set up drag and drop on the item if not supposed to. */
-    if(!parentOwner.options.itemsDraggable)
+    if(!parentOwner.options.items.draggable)
       return;
 
     new std.Draggable(this.node_, {
@@ -1391,10 +1391,8 @@
     },
     items: {
       visible: 20,
+      draggable: true
     },
-    binCharsLeft: 25,
-    binCharsRight: 25,
-    itemsDraggable: true,
     loadItemsAtStartup: true
   };
 
