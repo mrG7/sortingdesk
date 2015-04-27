@@ -583,16 +583,30 @@
 
   ControllerItems.prototype.redraw = function ()
   {
-    var it = this.items_;
-
-    this.removeAll(false);
-
-    for (var i = 0, l = it.length; i < l; ++i) {
-      this.items_.push(
-        this.owner_.constructor.instantiate('Item', this, it[i].content));
+    for (var i = 0, l = this.items_.length, c = 0; i < l; ++i) {
+      var it = this.items_[i];
+      if(this.owner_.callbacks.invokeMaybe('filter', it.content) === false)
+        it.disable();
+      else {
+        ++ c;
+        it.enable();
+      }
     }
 
+    this.owner_.events.trigger('items-updated', c);
+    this.updateEmptyNotification_();
     this.select();
+  };
+
+  ControllerItems.prototype.count = function ()
+  {
+    var c = 0;
+
+    for (var i = 0, l = this.items_.length; i < l; ++i) {
+      if(this.items_[i].enabled) ++c;
+    }
+
+    return c;
   };
 
   // Returns a de-duped `items`.
@@ -653,29 +667,28 @@
         }
 
         /* Now drop duplicates and render each item. */
-        data = self.dedup(data);
-
-        data.forEach(function (item, index) {
+        self.dedup(data).forEach(function (item, index) {
           window.setTimeout( function () {
             /* Only continue adding items if the owning Sorting Queue is still
              * in an `initialised´ state. Given the asynchronous nature of this
              * method, it might be the case that the owning instance might have
-             * been issued a reset, in which case no more items are loaded. */
-            if(self.owner_.initialised) {
-              self.items_.push(
-                self.owner_.constructor.instantiate('Item', self, item));
-            }
+             * been issued a reset, in which case no more items are to be
+             * loaded. */
+            if(!self.owner_.initialised) return;
+
+            var inst = self.owner_.constructor.instantiate('Item', self, item);
+            self.items_.push(inst);
+            if(self.owner_.callbacks.invokeMaybe('filter', item) === false)
+              inst.disable();
           }, Math.pow(index, 2) * 1.1);
         } );
 
-        window.setTimeout( function () {
-          self.select();
-        }, 10);
+        window.setTimeout( function () { self.select(); }, 10);
 
         /* Ensure event is fired after the last item is added. */
         window.setTimeout( function () {
           end_();
-          self.owner_.events.trigger('items-updated', self.items_.length);
+          self.owner_.events.trigger('items-updated', self.count());
         }, Math.pow(data.length - 1, 2) * 1.1 + 10);
       } )
       .fail(function () {
@@ -1025,12 +1038,11 @@
     return node;
   };
 
-  Item.prototype.enable = function (state)
-  {
-    if(this.node_ === null) throw "Invalid or no item node";
-    this.node_.css('display', state !== false ? 'block' : 'none');
-    this.enabled_ = state !== false;
-  };
+  Item.prototype.enable = function ()
+  { this.setEnabled_(true); }
+
+  Item.prototype.disable = function ()
+  { this.setEnabled_(false); }
 
   /* Not mandatory. */
   /* overridable */
@@ -1047,6 +1059,13 @@
   {
     this.node.addClass(Css.item.selected);
     this.owner_.owner.events.trigger("item-selected", this.content, ev);
+  };
+
+  Item.prototype.setEnabled_ = function (state)
+  {
+    if(this.node_ === null) throw "Invalid or no item node";
+    this.node_.css('display', state !== false ? 'block' : 'none');
+    this.enabled_ = state !== false;
   };
 
 
