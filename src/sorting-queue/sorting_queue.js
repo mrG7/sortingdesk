@@ -605,20 +605,17 @@
 
   // Returns a de-duped `items`.
   // This includes de-duping with respect to items currently in the queue.
-  ControllerItems.prototype.dedupItems = function(items)
+  ControllerItems.prototype.dedup = function(items)
   {
-    var seen = {},
-        deduped = [];
-    for (var i = 0; i < this.items.length; i++) {
-      seen[this.items[i].content.node_id] = true;
-    }
-    for (var i = 0; i < items.length; i++) {
-      var id = items[i].node_id;
-      if (!seen[id]) {
-        seen[id] = true;
-        deduped.push(items[i]);
+    var seen = {}, deduped = [];
+
+    for (var i = 0, l = items.length; i < l; ++i) {
+      var j = items[i], id = j.node_id;
+      if (!seen.hasOwnProperty(id)) {
+        seen[id] = true; deduped.push(j);
       }
     }
+
     return deduped;
   };
 
@@ -664,7 +661,9 @@
         }
 
         /* Now drop duplicates and render each item. */
-        self.dedupItems(data).forEach(function (item, index) {
+        data = self.dedup(data);
+
+        data.forEach(function (item, index) {
           window.setTimeout( function () {
             /* Only continue adding items if the owning Sorting Queue is still
              * in an `initialised´ state. Given the asynchronous nature of this
