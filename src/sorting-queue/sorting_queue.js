@@ -922,12 +922,14 @@
     this.content_ = item;
     this.node_ = null;
     this.dismissing_ = false;
+    this.enabled_ = false;
 
     /* Getters */
     this.__defineGetter__("content", function () { return this.content_; } );
     this.__defineGetter__("node", function () { return this.node_; } );
     this.__defineGetter__("dismissing", function ()
                           { return this.dismissing_; } );
+    this.__defineGetter__("enabled", function () {return this.enabled_;});
 
     /* Setters */
     this.__defineSetter__("dismissing", function (state)
@@ -1021,6 +1023,13 @@
     content.children().removeClass();
     node.append(content);
     return node;
+  };
+
+  Item.prototype.enable = function (state)
+  {
+    if(this.node_ === null) throw "Invalid or no item node";
+    this.node_.css('display', state !== false ? 'block' : 'none');
+    this.enabled_ = state !== false;
   };
 
   /* Not mandatory. */
