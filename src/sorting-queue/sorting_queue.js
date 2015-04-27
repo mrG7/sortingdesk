@@ -81,7 +81,7 @@
       this,
       [ 'request-begin', 'request-end', 'items-updated', 'item-dismissed',
         'item-deselected', 'item-selected', 'loading-begin', 'loading-end',
-        'pre-render' ]);
+        'pre-render', 'items-redrawn' ]);
   };
 
   Sorter.prototype = {
@@ -593,7 +593,7 @@
       }
     }
 
-    this.owner_.events.trigger('items-updated', c);
+    this.owner_.events.trigger('items-redrawn', c);
     this.updateEmptyNotification_();
     this.select();
   };
