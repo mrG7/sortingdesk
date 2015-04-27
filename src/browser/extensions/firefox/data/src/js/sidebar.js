@@ -289,7 +289,9 @@ var Main = (function (window, $, std, sq, sqc, sd, undefined) {
       sortingQueue: {
         options: {
           container: $('#sd-queue'),
-          visibleItems: 20,
+          items: {
+            visible: 20
+          },
           itemsDraggable: false,
           constructors: {
             Item: sqc.Item
