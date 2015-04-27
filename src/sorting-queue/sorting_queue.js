@@ -583,6 +583,8 @@
 
   ControllerItems.prototype.redraw = function ()
   {
+    console.log("REDRAWING");
+
     for (var i = 0, l = this.items_.length, c = 0; i < l; ++i) {
       var it = this.items_[i];
       if(this.owner_.callbacks.invokeMaybe('filter', it.content) === false)

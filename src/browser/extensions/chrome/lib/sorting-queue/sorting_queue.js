@@ -64,18 +64,10 @@
 
     this.options_ = $.extend(true, $.extend(true, {}, defaults_), opts);
 
-    /* Force-set `items.cache´ to the same value of `items.visible` if not
-     * specified.  Otherwise, ensure `items.cache` isn't smaller than
-     * `items.visible`. */
-    if(!opts.hasOwnProperty('items') || !opts.items.hasOwnProperty('cache'))
-      this.options_.items.cache = this.options_.items.visible;
-    else if(this.options_.items.visible < 1) {
+    /* Ensure visible items setting > 0. */
+    if(this.options_.items.visible < 1) {
       console.info("Invalid visible items setting: < 1");
       this.options_.items.visible = 1;
-    } else if(this.options_.items.cache < this.options_.items.visible) {
-      console.info("Invalid items cache value: smaller than visible: %d < %d",
-                   this.options_.items.cache, this.options_.items.visible);
-      this.options_.items.cache = this.options_.items.visible;
     }
 
     /* Begin instantiating and initialising classes needed. */
@@ -540,13 +532,10 @@
     /* Invoke super constructor. */
     std.Controller.call(this, owner);
 
-    this.node_ = this.owner_.nodes.items;
+    this.node_ = owner.nodes.items;
     this.items_ = [ ];
     this.loading_ = false;
     this.fnDisableEvent_ = function (e) { return false; };
-
-    /* Define getters. */
-    this.__defineGetter__("items", function () { return this.items_; } );
   };
 
   ControllerItems.prototype = Object.create(std.Controller.prototype);
@@ -587,27 +576,54 @@
     this.node_ = this.items_ = this.fnDisableEvent_ = null;
   };
 
-  ControllerItems.prototype.redraw = function ()
+  ControllerItems.prototype.refresh = function ()
   {
     this.removeAll(true);
   };
 
-  // Returns a de-duped `items`.
-  // This includes de-duping with respect to items currently in the queue.
-  ControllerItems.prototype.dedupItems = function(items)
+  ControllerItems.prototype.redraw = function ()
   {
-    var seen = {},
-        deduped = [];
-    for (var i = 0; i < this.items.length; i++) {
-      seen[this.items[i].content.node_id] = true;
-    }
-    for (var i = 0; i < items.length; i++) {
-      var id = items[i].node_id;
-      if (!seen[id]) {
-        seen[id] = true;
-        deduped.push(items[i]);
+    console.log("REDRAWING");
+
+    for (var i = 0, l = this.items_.length, c = 0; i < l; ++i) {
+      var it = this.items_[i];
+      if(this.owner_.callbacks.invokeMaybe('filter', it.content) === false)
+        it.disable();
+      else {
+        ++ c;
+        it.enable();
       }
     }
+
+    this.owner_.events.trigger('items-updated', c);
+    this.updateEmptyNotification_();
+    this.select();
+  };
+
+  ControllerItems.prototype.count = function ()
+  {
+    var c = 0;
+
+    for (var i = 0, l = this.items_.length; i < l; ++i) {
+      if(this.items_[i].enabled) ++c;
+    }
+
+    return c;
+  };
+
+  // Returns a de-duped `items`.
+  // This includes de-duping with respect to items currently in the queue.
+  ControllerItems.prototype.dedup = function(items)
+  {
+    var seen = {}, deduped = [];
+
+    for (var i = 0, l = items.length; i < l; ++i) {
+      var j = items[i], id = j.node_id;
+      if (!seen.hasOwnProperty(id)) {
+        seen[id] = true; deduped.push(j);
+      }
+    }
+
     return deduped;
   };
 
@@ -653,27 +669,28 @@
         }
 
         /* Now drop duplicates and render each item. */
-        self.dedupItems(data).forEach(function (item, index) {
+        self.dedup(data).forEach(function (item, index) {
           window.setTimeout( function () {
             /* Only continue adding items if the owning Sorting Queue is still
              * in an `initialised´ state. Given the asynchronous nature of this
              * method, it might be the case that the owning instance might have
-             * been issued a reset, in which case no more items are loaded. */
-            if(self.owner_.initialised) {
-              self.items_.push(
-                self.owner_.constructor.instantiate('Item', self, item));
-            }
+             * been issued a reset, in which case no more items are to be
+             * loaded. */
+            if(!self.owner_.initialised) return;
+
+            var inst = self.owner_.constructor.instantiate('Item', self, item);
+            self.items_.push(inst);
+            if(self.owner_.callbacks.invokeMaybe('filter', item) === false)
+              inst.disable();
           }, Math.pow(index, 2) * 1.1);
         } );
 
-        window.setTimeout( function () {
-          self.select();
-        }, 10);
+        window.setTimeout( function () { self.select(); }, 10);
 
         /* Ensure event is fired after the last item is added. */
         window.setTimeout( function () {
           end_();
-          self.owner_.events.trigger('items-updated', self.items_.length);
+          self.owner_.events.trigger('items-updated', self.count());
         }, Math.pow(data.length - 1, 2) * 1.1 + 10);
       } )
       .fail(function () {
@@ -737,7 +754,6 @@
   ControllerItems.prototype.removeAll = function(check /* = true */)
   {
     this.removeNodes_();
-    this.items_ = [];
 
     if(std.is_und(check) || check === true)
       this.check();
@@ -894,7 +910,7 @@
   ControllerItems.prototype.updateEmptyNotification_ = function (loading)
   {
     this.owner_.nodes.empty.items.stop();
-    if(loading !== true && this.items.length === 0) {
+    if(loading !== true && this.count() === 0) {
       this.owner_.nodes.empty.items.fadeIn(
         this.owner_.options.delays.queueEmptyFadeIn);
     } else {
@@ -906,6 +922,7 @@
   ControllerItems.prototype.removeNodes_ = function ()
   {
     this.items_.forEach(function (item) { item.node.remove(); } );
+    this.items_ = [];
   };
 
 
@@ -920,12 +937,14 @@
     this.content_ = item;
     this.node_ = null;
     this.dismissing_ = false;
+    this.enabled_ = false;
 
     /* Getters */
     this.__defineGetter__("content", function () { return this.content_; } );
     this.__defineGetter__("node", function () { return this.node_; } );
     this.__defineGetter__("dismissing", function ()
                           { return this.dismissing_; } );
+    this.__defineGetter__("enabled", function () {return this.enabled_;});
 
     /* Setters */
     this.__defineSetter__("dismissing", function (state)
@@ -960,7 +979,7 @@
       } );
 
     /* Do not set up drag and drop on the item if not supposed to. */
-    if(!parentOwner.options.itemsDraggable)
+    if(!parentOwner.options.items.draggable)
       return;
 
     new std.Draggable(this.node_, {
@@ -1021,6 +1040,12 @@
     return node;
   };
 
+  Item.prototype.enable = function ()
+  { this.setEnabled_(true); }
+
+  Item.prototype.disable = function ()
+  { this.setEnabled_(false); }
+
   /* Not mandatory. */
   /* overridable */
   Item.prototype.getNodeClose = function()
@@ -1036,6 +1061,13 @@
   {
     this.node.addClass(Css.item.selected);
     this.owner_.owner.events.trigger("item-selected", this.content, ev);
+  };
+
+  Item.prototype.setEnabled_ = function (state)
+  {
+    if(this.node_ === null) throw "Invalid or no item node";
+    this.node_.css('display', state !== false ? 'block' : 'none');
+    this.enabled_ = state !== false;
   };
 
 
@@ -1389,11 +1421,8 @@
     },
     items: {
       visible: 20,
-      cache: 20                 /* This default isn't actually used. */
+      draggable: true
     },
-    binCharsLeft: 25,
-    binCharsRight: 25,
-    itemsDraggable: true,
     loadItemsAtStartup: true
   };
 

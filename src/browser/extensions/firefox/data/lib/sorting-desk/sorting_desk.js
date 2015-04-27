@@ -925,7 +925,7 @@
       if(this.owner_.initialised) {
         this.api.qitems.setQueryContentId(item.data.content_id,
                                           item.data.subtopic_id);
-        this.owner_.sortingQueue.items.redraw();
+        this.owner_.sortingQueue.items.refresh();
       }
     } else {
       /* There is no active subfolder, which means we need to clear the list of
