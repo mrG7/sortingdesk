@@ -598,7 +598,7 @@
 
   ControllerItems.prototype.check = function ()
   {
-    if(this.items_.length >= this.owner_.options.visibleItems)
+    if(this.items_.length >= this.owner_.options.items.visible)
       return;
 
     var self = this;
@@ -606,7 +606,7 @@
     this.updateEmptyNotification_(true);
     this.owner_.events_.trigger('loading-begin');
     this.owner_.callbacks.invoke("moreTexts",
-                                 this.owner_.options.visibleItems)
+                                 this.owner_.options.items.visible)
       .done(function (data) {
         /* Rendering of items is asynchronous, which means we need to manually
          * begin a "request".
@@ -1364,7 +1364,10 @@
     constructors: {
       Item: Item
     },
-    visibleItems: 20,           /* Arbitrary.           */
+    items: {
+      visible: 20,
+      cache: 20
+    },
     binCharsLeft: 25,
     binCharsRight: 25,
     itemsDraggable: true,
