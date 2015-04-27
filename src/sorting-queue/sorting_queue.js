@@ -64,6 +64,20 @@
 
     this.options_ = $.extend(true, $.extend(true, {}, defaults_), opts);
 
+    /* Force-set `items.cache´ to the same value of `items.visible` if not
+     * specified.  Otherwise, ensure `items.cache` isn't smaller than
+     * `items.visible`. */
+    if(!opts.hasOwnProperty('items') || !opts.items.hasOwnProperty('cache'))
+      this.options_.items.cache = this.options_.items.visible;
+    else if(this.options_.items.visible < 1) {
+      console.info("Invalid visible items setting: < 1");
+      this.options_.items.visible = 1;
+    } else if(this.options_.items.cache < this.options_.items.visible) {
+      console.info("Invalid items cache value: smaller than visible: %d < %d",
+                   this.options_.items.cache, this.options_.items.visible);
+      this.options_.items.cache = this.options_.items.visible;
+    }
+
     /* Begin instantiating and initialising classes needed. */
     (this.requests_ = new ControllerRequests(this))
       .initialise();
