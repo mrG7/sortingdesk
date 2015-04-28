@@ -56,8 +56,10 @@
 
       /* Initialisation sequence */
       api_.fcCacheEnabled()
-        .done(function (result) {
-          enabled_ = result === true;
+        .done(function (r) { enabled_ = r === true; } )
+        .fail(function () {
+          enabled_ = false;
+          console.warn("Unable to determine cache enabled: assuming not");
         } );
 
       this.enabled = function () { return enabled_; };
@@ -138,8 +140,7 @@
       { return api_.addLabel(label); }
 
       this.get = get;
-      function get(
-        content_id, subtopic_id, which /* = "connected" */)
+      function get(content_id, subtopic_id, which /* = "connected" */)
       {
         if(typeof content_id !== 'string' || content_id.length === 0)
           throw "Invalid content id";
