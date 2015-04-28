@@ -153,8 +153,11 @@
   }
 
 
-  /* jQuery-related */
-  this.$ = this.jQueryExtensions = new (function () {
+  /**
+   * @class
+   * */
+  var jQueryExtensions;
+  jQueryExtensions = this.$ = this.jQueryExtensions = new (function () {
 
     /* Interface
      * -- */
@@ -263,7 +266,11 @@
   });
 
 
-  this.Html = new (function () {
+  /**
+   * @class
+   * */
+  var Html;
+  Html = this.Html = new (function () {
 
     /* Interface
      * -- */
@@ -316,7 +323,7 @@
     {
       var id, xpath = '';
 
-      if(self.jQueryExtensions.is(node))
+      if(jQueryExtensions.is(node))
         node = node.get(0);
 
       for( ; node !== null && node.nodeType === 1 || node.nodeType === 3;
@@ -512,7 +519,9 @@
   /**
    * @class
    * */
-  this.Url = new (function () {
+  var Url;
+  Url = this.Url = new (function () {
+
     this.encode = encode;
     function encode(s)
     {
@@ -809,7 +818,9 @@
    *
    * Static class.
    * */
-  this.DragDropManager = new (function () {
+  var DragDropManager;
+  DragDropManager = this.DragDropManager = new (function () {
+
     var activeNode = null;
 
     /* Interface */
@@ -885,7 +896,7 @@
         if(options.classDragging)
           node.addClass(options.classDragging);
 
-        self.DragDropManager.onDragStart(e);
+        DragDropManager.onDragStart(e);
 
         if(options.dragstart)
           options.dragstart(e);
@@ -900,7 +911,7 @@
         if(options.classDragging)
           node.removeClass(options.classDragging);
 
-        self.DragDropManager.onDragEnd(e);
+        DragDropManager.onDragEnd(e);
 
         if(options.dragend)
           options.dragend(e);
@@ -915,7 +926,7 @@
   this.Droppable = Droppable;
   function Droppable(node, options)
   {
-    var dm = self.DragDropManager;
+    var dm = DragDropManager;
 
     if(!(node instanceof $))
       throw "Invalid or no jQuery reference specified";

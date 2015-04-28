@@ -56,8 +56,10 @@
 
       /* Initialisation sequence */
       api_.fcCacheEnabled()
-        .done(function (result) {
-          enabled_ = result === true;
+        .done(function (r) { enabled_ = r === true; } )
+        .fail(function () {
+          enabled_ = false;
+          console.warn("Unable to determine cache enabled: assuming not");
         } );
 
       this.enabled = function () { return enabled_; };
@@ -99,7 +101,6 @@
       this.create = create;
       function create(content_id, html)
       {
-        var self = this;
         var url = api_.url('feature-collection/' + encodeURIComponent(content_id));
 
         return $.ajax({
@@ -111,7 +112,7 @@
           console.error("Could not save feature collection " +
                         "(content id: '" + content_id + "')");
         }).then(function(fc) {
-          return new (self.getClass('FeatureCollection'))(content_id, fc);
+          return new (getClass('FeatureCollection'))(content_id, fc);
         });
       }
 
@@ -138,15 +139,12 @@
       { return api_.addLabel(label); }
 
       this.get = get;
-      function get(
-        content_id, subtopic_id, which /* = "connected" */)
+      function get(content_id, subtopic_id, which /* = "connected" */)
       {
         if(typeof content_id !== 'string' || content_id.length === 0)
           throw "Invalid content id";
         else if(!_opt_arg_good(which) && typeof which !== 'string')
           throw "Invalid type for specified `which´ value";
-
-        var self = this;
 
         console.log('LabelFetcher GET (id=%s)', content_id);
 
@@ -157,7 +155,7 @@
           .get()
           .then(function (labels) {
             console.log('LabelFetcher GET successful:', labels);
-            return self.dedupLabelsBySubtopic(labels);
+            return dedup(labels);
           } );
       }
 
