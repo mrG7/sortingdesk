@@ -95,7 +95,7 @@ var Main = (function (window, chrome, $, std, sq, sqc, sd, undefined) {
           function (result) {
             if(!std.is_obj(result)) {
               console.error("Invalid result type received: not object");
-              deferred.reject_();
+              deferred.reject();
               return;
             } else if(result.type === 'image') {
               /* There is a pretty good chance that image data will have
