@@ -101,7 +101,6 @@
       this.create = create;
       function create(content_id, html)
       {
-        var self = this;
         var url = api_.url('feature-collection/' + encodeURIComponent(content_id));
 
         return $.ajax({
@@ -113,7 +112,7 @@
           console.error("Could not save feature collection " +
                         "(content id: '" + content_id + "')");
         }).then(function(fc) {
-          return new (self.getClass('FeatureCollection'))(content_id, fc);
+          return new (getClass('FeatureCollection'))(content_id, fc);
         });
       }
 
@@ -147,8 +146,6 @@
         else if(!_opt_arg_good(which) && typeof which !== 'string')
           throw "Invalid type for specified `which´ value";
 
-        var self = this;
-
         console.log('LabelFetcher GET (id=%s)', content_id);
 
         return (new DossierJS.LabelFetcher(api_))
@@ -158,7 +155,7 @@
           .get()
           .then(function (labels) {
             console.log('LabelFetcher GET successful:', labels);
-            return self.dedupLabelsBySubtopic(labels);
+            return dedup(labels);
           } );
       }
 
