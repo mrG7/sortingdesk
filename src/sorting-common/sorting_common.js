@@ -22,6 +22,7 @@
     root.SortingCommon = new Module(root, $);
 
 } )(function (window, $, undefined) {
+  var self = this;
 
   this.absm_noti = absm_noti;
   function absm_noti( ) { throw "Abstract method not implemented"; }
