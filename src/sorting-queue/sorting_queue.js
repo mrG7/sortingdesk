@@ -808,6 +808,8 @@
 
     this.items_.splice(index, 1);
     this.check();
+
+    /* TODO: Why is it passing 0 to the event? */
     this.owner_.events.trigger('items-updated', 0);
 
     return true;
