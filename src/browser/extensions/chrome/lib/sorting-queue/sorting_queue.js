@@ -583,8 +583,6 @@
 
   ControllerItems.prototype.redraw = function ()
   {
-    console.log("REDRAWING");
-
     for (var i = 0, l = this.items_.length, c = 0; i < l; ++i) {
       var it = this.items_[i];
       if(this.owner_.callbacks.invokeMaybe('filter', it.content) === false)
@@ -810,6 +808,8 @@
 
     this.items_.splice(index, 1);
     this.check();
+
+    /* TODO: Why is it passing 0 to the event? */
     this.owner_.events.trigger('items-updated', 0);
 
     return true;
@@ -910,13 +910,15 @@
   ControllerItems.prototype.updateEmptyNotification_ = function (loading)
   {
     this.owner_.nodes.empty.items.stop();
+
     if(loading !== true && this.count() === 0) {
       this.owner_.nodes.empty.items.fadeIn(
         this.owner_.options.delays.queueEmptyFadeIn);
-    } else {
-      this.owner_.nodes.empty.items.fadeOut(
-        this.owner_.options.delays.queueEmptyFadeOut);
+      return;
     }
+
+    this.owner_.nodes.empty.items.fadeOut(
+      this.owner_.options.delays.queueEmptyFadeOut);
   };
 
   ControllerItems.prototype.removeNodes_ = function ()
@@ -937,7 +939,7 @@
     this.content_ = item;
     this.node_ = null;
     this.dismissing_ = false;
-    this.enabled_ = false;
+    this.enabled_ = true;
 
     /* Getters */
     this.__defineGetter__("content", function () { return this.content_; } );
