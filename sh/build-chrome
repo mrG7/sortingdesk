@@ -1,0 +1,32 @@
+#!/bin/bash
+# build-chrome --- Builds and packages the extension.
+#
+# Copyright (c) 2015 Diffeo
+#
+# Comments:
+#
+
+function preexit () {
+  cd "$dir_root/src/browser/extensions"
+  if [ -d sorting-desk ]; then
+    mv sorting-desk chrome
+  fi
+}
+
+readonly dir_root="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. && pwd )"
+source "$dir_root/sh/libtools.sh"
+
+! command -v zip &>/dev/null 2>&1 \
+  && error "\`zip´ program not found" \
+  && exit 1
+
+set -e
+trap preexit EXIT
+
+mkdir -p "$dir_root/out"
+cd "$dir_root/src/browser/extensions"
+info "building chrome extension"
+mv chrome sorting-desk && \
+  zip -r "$dir_root/out/sortingdesk.crx" sorting-desk >/dev/null
+
+echo "done."
