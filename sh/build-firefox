@@ -15,7 +15,9 @@ source "$dir_root/sh/libtools.sh"
 
 set -e
 
+mkdir -p "$dir_root/out"
 cd "$dir_root/src/browser/extensions/firefox"
 info "building Firefox extension"
 cfx xpi >/dev/null
+mv sortingdesk.xpi "$dir_root/out"
 echo "done."
