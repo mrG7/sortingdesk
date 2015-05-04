@@ -14,6 +14,7 @@ function preexit () {
 }
 
 readonly dir_root="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. && pwd )"
+source "$dir_root/sh/settings.sh"
 source "$dir_root/sh/libtools.sh"
 
 ! command -v zip &>/dev/null 2>&1 \
@@ -27,6 +28,6 @@ mkdir -p "$dir_root/out"
 cd "$dir_root/src/browser/extensions"
 info "building chrome extension"
 mv chrome sorting-desk && \
-  zip -r "$dir_root/out/sortingdesk.crx" sorting-desk >/dev/null
+  zip -r "$DIR_OUT/sortingdesk.crx" sorting-desk >/dev/null
 
 echo "done."

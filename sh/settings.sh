@@ -30,3 +30,6 @@ readonly DOSSIER_MODELS_URL_PREFIX=/dossier
 
 # Full path to yaml file containing the settings for a dossier.models instance.
 readonly DOSSIER_MODELS_PATH_YAML=~/dev/diffeo/miguel.yaml
+
+# Full path to output directory.
+readonly DIR_OUT="$dir_root/out"

@@ -7,6 +7,7 @@
 #
 
 readonly dir_root="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. && pwd )"
+source "$dir_root/sh/settings.sh"
 source "$dir_root/sh/libtools.sh"
 
 ! command -v cfx &>/dev/null 2>&1 \
@@ -18,6 +19,5 @@ set -e
 mkdir -p "$dir_root/out"
 cd "$dir_root/src/browser/extensions/firefox"
 info "building Firefox extension"
-cfx xpi >/dev/null
-mv sortingdesk.xpi "$dir_root/out"
+cfx xpi >/dev/null && mv sortingdesk.xpi "$DIR_OUT"
 echo "done."
