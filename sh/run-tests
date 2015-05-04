@@ -1,0 +1,39 @@
+#!/bin/bash
+
+function preexit () {
+  info "restoring configuration file"
+  mv "$dir_ext/chrome/src/js/extension/config.js" \
+    "$dir_ext/chrome/src/js/extension/config.js.testing"
+  mv "$dir_ext/chrome/src/js/extension/config.js.disabled" \
+    "$dir_ext/chrome/src/js/extension/config.js"
+  echo done.
+}
+
+readonly dir_root="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. && pwd )"
+readonly dir_ext="$dir_root/src/browser/extensions"
+source "$dir_root/sh/libtools.sh"
+
+# Ensure needed binaries are present in the system.
+if ! command -v node &>/dev/null; then
+  error "Nodejs binary not found"
+elif ! command -v chromedriver &>/dev/null; then
+  error "chromedriver not found"
+elif ! command -v chromium-browser &>/dev/null; then
+  error "Chromium browser not found"
+fi
+
+set -e
+info "activating test configuration file"
+mv "$dir_ext/chrome/src/js/extension/config.js" \
+  "$dir_ext/chrome/src/js/extension/config.js.disabled"
+mv "$dir_ext/chrome/src/js/extension/config.js.testing" \
+  "$dir_ext/chrome/src/js/extension/config.js"
+set +e
+trap preexit EXIT
+
+info "resetting database"
+sh -c "$dir_root/sh/reset-labels" >/dev/null
+sh -c "$dir_root/sh/reset-fcs" >/dev/null
+
+info "running tests..."
+sh -c "node $dir_root/node_modules/mocha/bin/mocha $dir_root/test/chrome/main.js"

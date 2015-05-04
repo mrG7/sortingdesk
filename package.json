@@ -1,0 +1,19 @@
+{
+  "name": "sorting-desk",
+  "version": "",
+  "description": "Social bookmarking tool for gathering text and images to build reports; alpha prototype built on Dossier Stack",
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "dependencies": { },
+  "devDependencies": {
+    "mocha": "2.x",
+    "chai": "2.x",
+    "selenium-webdriver": "2.x"
+  },
+  "scripts": {
+    "pretest": "npm install",
+    "test": "node_modules/mocha/bin/mocha test/chrome"
+  }
+}
