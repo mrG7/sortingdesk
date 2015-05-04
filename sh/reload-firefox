@@ -25,5 +25,5 @@ info "reloading extension"
 # Disable exiting immediately if a command fails, since the subsequent wget
 # invocation *always* results in an error code.
 set +e
-wget --post-file=sortingdesk.xpi $URL_FIREFOX_RELOAD &>/dev/null
+wget --post-file="$dir_root/out/sortingdesk.xpi" "$URL_FIREFOX_RELOAD" &>/dev/null
 [ $? -eq 8 ] && echo "done." || fail 1 "service failure"
