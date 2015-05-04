@@ -12,15 +12,15 @@ DIR_OUTPUT_SRC=$(DIR_OUTPUT)/src
 
 JSDOC=jsdoc
 JSDOC_CONF=jsdoc.conf
-JSDOC_SOURCES=src/SortingQueue/SortingQueue.js
+JSDOC_SOURCES=src/sorting-queue/sorting_queue.js
 
 
-all: build man
+all: test build man
 
 help:
-	echo "Usage: make [ build | man | clean | deps ]"
+	echo "Usage: make [ build | man | clean | deps | test ]"
 
-build: minify ext-chrome ext-firefox
+build: deps minify build-chrome build-firefox
 
 man:
 	>&2 echo "W: generation of documentation disabled"
@@ -31,24 +31,31 @@ clean:
 	echo "I: removing output directory"
 	rm -vfr "$(DIR_OUTPUT)"
 	echo "I: deleting extraneous files"
-	find -type f \( -name '*~' -or -name '\#*' -or -name '.\#*' \) -exec rm -fv {} +
+	find -type f \( -name '*~' -or -name '\#*' -or -name '.\#*' \) \
+		-exec rm -fv {} +
 
 deps:
 	echo "I: updating dependencies"
-	sh/update-deps
+	sh/update-deps >/dev/null
+
+test: testExtensions
+
+testExtensions:
+	echo "I: running all tests"
+	sh/run-tests
 
 minify:
 	>&2 echo "W: minification of javascript files not yet implemented"
 	# test -d "$(DIR_OUTPUT_SRC)" || mkdir -p "$(DIR_OUTPUT_SRC)"
 
-ext-chrome:
+build-chrome:
 	echo "I: packaging chrome extension"
-	(cd src/browser/extensions && zip -r sortingdesk_chrome.zip chrome >/dev/null)
-	mv src/browser/extensions/sortingdesk_chrome.zip ./
+	sh/build-chrome >/dev/null
 
-ext-firefox:
+build-firefox:
 	echo "I: packaging firefox extension"
 	sh/build-firefox >/dev/null
-	mv src/browser/extensions/firefox/sortingdesk.xpi ./
 
 .SILENT:
+
+.NOTPARALLEL:
