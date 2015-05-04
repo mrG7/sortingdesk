@@ -447,8 +447,11 @@
       if(!is_fn(callback))
         throw "Invalid or no callback function specified";
 
-      var nf = new NodeFinder(this.tag_, this.prefix_, newRoot);
-      return callback.call(this);
+      var v, t = this.root_;
+      this.root_ = newRoot;
+      v = callback.call(this);
+      this.root_ = t;
+      return v;
     }
   };
 
