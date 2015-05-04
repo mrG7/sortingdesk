@@ -171,7 +171,10 @@
             remove: this.find('toolbar-remove'),
             rename: this.find('toolbar-rename'),
             jump: this.find('toolbar-jump'),
-            refresh: this.find('toolbar-refresh')
+            refresh: {
+              explorer: this.find('toolbar-refresh-explorer'),
+              search: this.find('toolbar-refresh-search')
+            }
           }
         };
       } );
@@ -561,7 +564,11 @@
     } );
 
     /* Hook up to toolbar events. */
-    els.toolbar.actions.refresh.click(function () { self.refresh(); } );
+    els.toolbar.actions.refresh.explorer.click(function () { self.refresh();});
+    els.toolbar.actions.refresh.search.click(function () {
+      self.owner_.sortingQueue.items.refresh();
+    });
+
     els.toolbar.actions.add.click(function () { self.createFolder(); } );
     els.toolbar.actions.report.click(function () { self.export(); } );
 
@@ -585,15 +592,23 @@
     } );
 
     /* Handle item dismissal. */
-    this.owner_.sortingQueue.on('item-dismissed', function (item) {
-      var query_id = api.qitems.getQueryContentId();
+    this.owner_.sortingQueue.on( {
+      "item-dismissed": function (item) {
+        var query_id = api.qitems.getQueryContentId();
 
-      if(query_id) {
-        self.do_add_label_(new (api.getClass('Label'))(
-          item.content_id,
-          query_id,
-          api.qitems.getAnnotator(),
-          api.consts.coref.NEGATIVE));
+        if(query_id) {
+          self.do_add_label_(new (api.getClass("Label"))(
+            item.content_id,
+            query_id,
+            api.qitems.getAnnotator(),
+            api.consts.coref.NEGATIVE));
+        }
+      },
+      "request-begin": function () {
+        els.toolbar.actions.refresh.search.addClass('disabled');
+      },
+      "request-end": function () {
+        els.toolbar.actions.refresh.search.removeClass('disabled');
       }
     } );
 
@@ -1012,7 +1027,8 @@
       'disabled', loading || !(this.selected_ instanceof Item
              && this.selected_.loaded));
 
-    ela.refresh.toggleClass('disabled', loading);
+    ela.refresh.explorer.toggleClass('disabled', loading);
+    ela.refresh.search.toggleClass('disabled', loading);
     ela.report.toggleClass('disabled', loading
                            || !(this.selected_ instanceof Folder))
   };
