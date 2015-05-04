@@ -47,56 +47,25 @@ Remove special rule when =Item= in =main.js= is reworked.
 *** TODO No content ids
 
 * Tests
-** TODO instance: ensure reset doesn't run twice
-
-** TODO instance: require =visibleItems= to be greater than 0
-
-** TODO interface: ensure 'bin add' button is created prior to using it
-
-** TODO interface: ensure correct number of sub-bins are created
-
-** TODO interface: removed test for adding of sub-bin
+** TODO Extension window opens
+** TODO Set active tab
+** TODO Add folder
+** TODO Add subfolder
+** TODO Add item via drag & drop
+** TODO Add manual item
+** TODO Add item via drag & drop and create subfolder
+** TODO Refresh folder view
+** TODO Open a subfolder
+** TODO Close a subfolder
+** TODO Close a folder
+** TODO Manually set active query
+** TODO Navigate to bookmarked page
+** TODO Refresh search results
+** TODO Dismiss search result: redundant
+** TODO Dismiss search result: wrong
+** TODO Dismiss search result: ignore
 
 * Unclassified
-** TODO Revamp errors returned via promises to include error *codes*
-It is easier for programs to process errors if they are given as a code. Errors in human natural language are only useful to humans, not programs.
-
-** TODO Review data structures
-This includes =Sorting Desk='s bin data structure and =Sorting Queue='s item
-data structure. Changes to any of the components will require updating the
-different API and example source files, as well as dossier.js .
-
-For instance, Sorting Queue expects an item to be composed of the following properties:
-
-+ =raw=: reference to raw structure; probably not needed
-+ =node_id=: the item's id
-+ =name=: (a sort of) label/tag
-+ =url=: URL to point =name= above to
-+ =text=: actual item content
-+ =title=: optional; appended to =name= above
-
-The above could instead be:
-
-+ =id=
-+ =label= (or =tag=)
-  - =name=
-  - =title=
-  - =url=
-+ =text=
-
-A similar discussion could be had regarding bins' data structure.
-
 ** WAIT Resolve all annotated TODO items
 - State "WAIT"       from "TODO"       [2014-10-15 Wed 13:57] \\
   To be done when Sorting Desk has reached a significant milestone.
-
-** WAIT Implement user notifications
-- State "WAIT"       from "CANCELED"   [2014-11-26 Wed 09:08] \\
-  Requires explicit approval.
-- State "CANCELED"   from "WAIT"       [2014-10-09 Thu 10:43] \\
-  This will have to be implemented by the client via notification of events. Not Sorting Desk's concern.
-- State "WAIT"       from "TODO"       [2014-09-05 Fri 11:21] \\
-  Need further information.
-A mechanism for displaying notifications to the user is needed for the purpose
-of providing feedback, in particular in the cases when a user action is invalid
-and results in an error.
