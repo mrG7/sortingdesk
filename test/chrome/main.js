@@ -640,7 +640,10 @@ var selectFolder = function (fid)
 {
   return getFolder(fid).then(function (f) {
     assert.equal(f.length, 1);
-    if(f.length === 1) f[0].click();
+    if(f.length === 1) {
+      f[0].click();
+      verifySelected(folders[fid].title);
+    }
   } );
 };
 
@@ -648,7 +651,10 @@ var selectSubfolder = function (sid)
 {
   return getSubfolder(sid).then(function (sf) {
     assert.equal(sf.length, 1);
-    if(sf.length === 1) sf[0].click();
+    if(sf.length === 1) {
+      sf[0].click();
+      verifySelected(subfolders[sid].title);
+    }
   } );
 };
 
@@ -656,7 +662,22 @@ var selectItem = function (sid, iid)
 {
   return getItem(sid, iid).then(function (i) {
     assert.equal(i.length, 1);
-    if(i.length === 1) i[0].click();
+    if(i.length === 1) {
+      i[0].click();
+      verifySelected(subfolders[sid].items[iid].title);
+    }
+  } );
+};
+
+var activateItem = function (sid, iid)
+{
+  selectItem(sid, iid);
+  return getItem(sid, iid).then(function (i) {
+    assert.equal(i.length, 1);
+    browser.actions()
+      .mouseMove(i[0])
+      .doubleClick()
+      .perform();
   } );
 };
 
@@ -771,25 +792,36 @@ var verifyItemsInSubfolder = function (sid, items)
   } );
 };
 
-var verifyItemsInQueue = function (count)
+var verifyItemsInQueue = function (count, wait)
 {
-  browser.switchTo().window(windowExt);
-  browser.wait(until.elementIsVisible(getLoader(PANE_QUEUE)),
-               TIMEOUT_LOADER_SHOW)
-    .then(function () {
-      waitUntilRequestsFinished();
-      browser.wait(until.elementIsNotVisible(getLoader(PANE_QUEUE)),
-                   TIMEOUT_LOADER);
+  var check_ = function () {
+    waitUntilRequestsFinished();
+    browser.wait(until.elementIsNotVisible(getLoader(PANE_QUEUE)),
+                 TIMEOUT_LOADER);
+    if(count > 0) {
       browser.wait(until.elementsLocated(
-        By.xpath("//*[@id='sd-queue']/div/div/*[@data-scope='text-item'][" +
+        By.xpath(XPATH_QUEUE + "/*[@data-scope='text-item'][" +
                  count + "]")), TIMEOUT_QUEUE_ITEMS);
-      browser.findElements(
-        By.xpath("//*[@id='sd-queue']/div/div/*[@data-scope='text-item']"))
-        .then(function (i) {
-          assert.equal(i.length, count);
-        } );
-    }, function () {
-      assert.equal(0, count);
+    }
+
+    browser.findElements(
+      By.xpath(XPATH_QUEUE + "/*[@data-scope='text-item']"))
+      .then(function (i) {
+        assert.equal(i.length, count);
+      } );
+  };
+
+
+  browser.switchTo().window(windowExt);
+  if(wait !== false) {
+    return browser.wait(until.elementIsVisible(getLoader(PANE_QUEUE)),
+                 TIMEOUT_LOADER_SHOW)
+    .then(check_,
+          function () {
+            assert.equal(0, count);
+          } );
+  } else
+    return check_();
 };
 
 var verifySelected = function (title)
