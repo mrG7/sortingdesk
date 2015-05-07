@@ -5,9 +5,11 @@ var TIMEOUT_RUNNER       = 60000,     /* account for slow VMs */
     TIMEOUT_LOADER       = 10000,
     TIMEOUT_LOADER_SHOW  = 500,
     TIMEOUT_QUEUE_ITEMS  = 500,
-    TIMEOUT_WAITREQUESTS = 30000;
+    TIMEOUT_WAITREQUESTS = 30000,
+    TIMEOUT_STALE        = 500;
 
-var XPATH_TREE = "//*[@id='sd-folder-explorer']/div/div";
+var XPATH_TREE  = "//*[@id='sd-folder-explorer']/div/div",
+    XPATH_QUEUE = "//*[@id='sd-queue']/div/div";
 
 var test           = require("selenium-webdriver/testing"),
 //    assert         = require("assert"),
@@ -196,8 +198,76 @@ test.describe("Sorting Desk -- E2E", function () {
     } );
 
     test.it("selects item", function () {
+      expandSubfolder(0);
       expandSubfolder(1);
-      return selectItem(1, 0);
+      selectItem(1, 0);
+      return verifyItemsInQueue(2, false);
+    } );
+
+    test.it("selects two items sequentially", function () {
+      expandSubfolder(0);
+      expandSubfolder(1);
+      selectItem(1, 0);
+      expandSubfolder(2);
+      selectItem(2, 0);
+      return verifyItemsInQueue(2, false);
+    } );
+
+    test.it("manually activates an item", function () {
+      expandSubfolder(0);       /* this folder's item is made active */
+      expandSubfolder(1);
+      verifyItemsInQueue(2);
+      return getSearchResult(0).then(function (i) {
+        activateItem(1, 0);
+        browser.wait(until.stalenessOf(i), 500);
+        verifyItemsInQueue(2);
+      } );
+    } );
+
+    test.it("manually activates two items sequentially", function () {
+      expandSubfolder(0);
+      expandSubfolder(1);
+      expandSubfolder(2);
+      verifyItemsInQueue(2, false);
+      return getSearchResult(0).then(function (i) {
+        activateItem(1, 0);
+        browser.wait(until.stalenessOf(i), TIMEOUT_STALE);
+        verifyItemsInQueue(2);
+
+        return getSearchResult(1).then(function (j) {
+          activateItem(2, 0);
+          browser.wait(until.stalenessOf(j), 500);
+          verifyItemsInQueue(2);
+        } );
+      } );
+    } );
+
+    test.it("refreshes the folder explorer", function () {
+      expandSubfolder(0);
+      verifyItemsInQueue(2);
+      return getFolders().then(function (c) {
+        getButton("sorting-desk-toolbar-refresh-explorer").click();
+        c.forEach(function (f) {
+          browser.wait(until.stalenessOf(f), TIMEOUT_STALE);
+        } );
+
+        verifyItemsInQueue(0);
+        expandSubfolder(0);
+        verifyItemsInQueue(2);
+      } );
+    } );
+
+    test.it("refreshes the search results", function () {
+      expandSubfolder(0);
+      verifyItemsInQueue(2);
+      return getSearchResults().then(function (c) {
+        getButton("sorting-desk-toolbar-refresh-search").click();
+        c.forEach(function (r) {
+          browser.wait(until.stalenessOf(r), TIMEOUT_STALE);
+        } );
+
+        verifyItemsInQueue(2, false);
+      } );
     } );
   } );
 
@@ -518,11 +588,26 @@ var getItem = function (sid, iid)
              + sf.items[iid].title + "')]]"));
 };
 
+var getSearchResult = function (index)
+{
+  browser.switchTo().window(windowExt);
+  return browser.findElement(
+    By.xpath(XPATH_QUEUE + "/*[@data-scope='text-item']["
+             + (index + 1) + "]"));
+};
+
 var getFolders = function ()
 {
   browser.switchTo().window(windowExt);
   return browser.findElements(
     By.xpath(XPATH_TREE + "/ul/li"));
+};
+
+var getSearchResults = function ()
+{
+  browser.switchTo().window(windowExt);
+  return browser.findElements(
+    By.xpath(XPATH_QUEUE + "/*[@data-scope='text-item']"));
 };
 
 var buttonEnabled = function (scope, enabled)
@@ -709,6 +794,18 @@ var verifyItemsInQueue = function (count)
         } );
     }, function () {
       assert.equal(0, count);
+};
+
+var verifySelected = function (title)
+{
+  browser.switchTo().window(windowExt);
+  return browser.findElements(
+    By.xpath(XPATH_TREE + "//*[@aria-selected='true']"))
+    .then(function (els) {
+      assert.equal(els.length, 1);
+      els[0].getText().then(function (text) {
+        assert.equal(title, text);
+      } );
     } );
 };
 
