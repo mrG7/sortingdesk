@@ -1,3 +1,5 @@
+/* var DEBUG = { fid: 0, sid: 0 }; */
+
 var PANE_EXPLORER = "sd-folder-explorer",
     PANE_QUEUE    = "sd-queue";
 
@@ -402,17 +404,18 @@ test.describe("Sorting Desk -- E2E", function () {
 
 } );
 
-
 /* Meta functions */
 function newFolder()
 {
-  var id = generateGuid();
+  var id = typeof DEBUG !== 'undefined'
+        ? ('folder-' + DEBUG.fid++) : generateGuid();
   return { id: id, title: id };
 }
 
 function newSubfolder(i)
 {
-  var id = generateGuid();
+  var id = typeof DEBUG !== 'undefined'
+        ? ('subfolder-' + DEBUG.fid++) : generateGuid();
   return { id: id, title: id, items: i };
 }
 
