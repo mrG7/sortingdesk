@@ -1,99 +1,726 @@
-var test           = require('selenium-webdriver/testing'),
-    assert         = require('assert'),
-    webdriver      = require('selenium-webdriver'),
-    chrome         = require('selenium-webdriver/chrome'),
-    chai           = require('chai'),
+var PANE_EXPLORER = "sd-folder-explorer",
+    PANE_QUEUE    = "sd-queue";
 
-    expect         = chai.expect,
+var TIMEOUT_RUNNER       = 60000,     /* account for slow VMs */
+    TIMEOUT_LOADER       = 10000,
+    TIMEOUT_LOADER_SHOW  = 500,
+    TIMEOUT_QUEUE_ITEMS  = 500,
+    TIMEOUT_WAITREQUESTS = 30000;
+
+var XPATH_TREE = "//*[@id='sd-folder-explorer']/div/div";
+
+var test           = require("selenium-webdriver/testing"),
+//    assert         = require("assert"),
+    webdriver      = require("selenium-webdriver"),
+    chrome         = require("selenium-webdriver/chrome"),
+    firefox        = require("selenium-webdriver/firefox"),
+    chai           = require("chai"),
+
+    assert         = chai.assert,
     By             = webdriver.By,
     Key            = webdriver.Key,
     until          = webdriver.until;
 
-var pathRoot = __dirname + '/../..',
-    browser,
+var pathRoot     = __dirname + "/../..";
+
+var browser,
     capabilities = webdriver.Capabilities.chrome(),
-    options = new chrome.Options();
+    options      = new chrome.Options();
 
-var windowExt,
-    windowMain;
+var windowExt, windowMain;
 
+var folders = [ newFolder(), newFolder() ],
+    subfolders = [
+      newSubfolder([
+        newItem("http://www.bbc.co.uk/news/world-asia-25034461",
+                "Nepal's Maoists digest impending electoral wipe-out")]),
+      newSubfolder([
+        newItem("http://www.bbc.co.uk/news/world-asia-24059900",
+                "Nepal strike shuts down capital Kathmandu")]),
+      newSubfolder([
+        newItem("http://en.wikipedia.org/wiki/Himalayas",
+                "Himalayas")])
+    ];
 
 /* Configure  */
 options.addArguments("load-extension=" + pathRoot
-                     + '/src/browser/extensions/chrome');
+                     + "/src/browser/extensions/chrome");
 
 /* Test specs */
-test.describe('Sorting Desk -- E2E', function () {
+test.describe("Sorting Desk -- E2E", function () {
 
-  this.timeout(15000);
+  this.timeout(TIMEOUT_RUNNER);
 
-  test.beforeEach(function (done) {
+  describe("Toolbar -- blank state", function () {
 
-    /* Detect main and extension windows. */
-    windowMain = windowExt = null;
-    browser = new webdriver.Builder().usingServer()
-      .withCapabilities(capabilities)
-      .setChromeOptions(options)
-      .build();
+    test.before(function (done) {
+      instantiateBrowser(done);
+    } );
 
-    browser.sleep(500).then(function () {
-      var count = 0;
+    test.after(function () {
+      destroyBrowser();
+    } );
 
-      browser.getAllWindowHandles()
-        .then(function (windows) {
-          windows.forEach(function (win) {
-            ++count;
+    test.it("add is enabled", function () {
+      return buttonEnabled('sorting-desk-toolbar-add');
+    } );
 
-            browser.switchTo().window(win);
-            browser.getTitle().then(function (title) {
-              /* Detect windows only once. */
-              if(title === 'Sorting Desk') {
-                assert.equal(windowExt, null);
-                windowExt = win;
-              } else {
-                assert.equal(windowMain, null);
-                windowMain = win;
-              }
+    test.it("report is disabled", function () {
+      return buttonEnabled('sorting-desk-toolbar-report', false);
+    } );
 
-              if(-- count === 0) {
-                assert.notEqual(windowMain, null);
-                assert.notEqual(windowExt,  null);
-                assert.notEqual(windowMain, windowExt);
-                done();
-              }
-            } );
-          } );
-        } );
+    test.it("sub-add is disabled", function () {
+      return buttonEnabled('sorting-desk-toolbar-add-contextual', false);
+    } );
+
+    test.it("rename is disabled", function () {
+      return buttonEnabled('sorting-desk-toolbar-rename', false);
+    } );
+
+    test.it("remove is disabled", function () {
+      return buttonEnabled('sorting-desk-toolbar-remove', false);
+    } );
+
+    test.it("navigate is disabled", function () {
+      return buttonEnabled('sorting-desk-toolbar-jump', false);
+    } );
+
+    test.it("explorer refresh is enabled", function () {
+      return buttonEnabled('sorting-desk-toolbar-refresh-explorer');
+    } );
+
+    test.it("queue refresh is disabled", function () {
+      return buttonEnabled('sorting-desk-toolbar-refresh-search', false);
     } );
   } );
 
-  test.afterEach(function () {
-    browser.quit();
+  describe("Functionality", function () {
+
+    test.beforeEach(function (done) {
+      instantiateBrowser(done);
+    } );
+
+    test.afterEach(function () {
+      destroyBrowser();
+    } );
+
+    test.it("creates a folder", function () {
+      return createFolder(0);
+    } );
+
+    test.it("disallows creation of duplicate folders", function () {
+      createFolder(0);
+      return selectFolder(0);
+    } );
+
+    test.it("loads one folder", function () {
+      return verifyFolders( [ 0 ] );
+    } );
+
+    test.it("creates a (manual) subfolder", function () {
+      createSubfolder(0, 0);
+      return selectSubfolder(0);
+    } );
+
+    test.it("adds a snippet of text via drag and drop", function () {
+      createSubfolder(0, 0);
+      selectSubfolder(0);
+
+      browser.switchTo().window(windowMain);
+      browser.get(subfolders[0].items[0].url);
+      selectText('h1');
+      dropInSubfolder(0);
+      return verifyItemsInSubfolder(0, [ 0 ]);
+    } );
+
+    test.it("adds a snippet of text manually", function () {
+      createFolder(1);
+      createSubfolder(1, 1);
+      selectSubfolder(1);
+
+      browser.switchTo().window(windowMain);
+      browser.get(subfolders[1].items[0].url);
+      selectText('h1');
+      dropInSubfolder(1);
+      return verifyItemsInSubfolder(1, [ 0 ]);
+    } );
+
+    test.it("creates a subfolder and adds an item", function () {
+      browser.switchTo().window(windowMain);
+      browser.get(subfolders[2].items[0].url);
+      selectText('h1');
+      dropInFolder(0);
+      waitUntilInputVisible();
+      getInput().sendKeys(subfolders[2].title, Key.ENTER);
+      return verifyItemsInSubfolder(2, [ 0 ]);
+    } );
+
+    test.it("loads two folders", function () {
+      return verifyFolders( [ 0, 1 ] );
+    } );
+
+    test.it("doesn't load any items", function () {
+      verifyItemsInSubfolder(0, []);
+      verifyItemsInSubfolder(1, []);
+      verifyItemsInSubfolder(2, []);
+    } );
+
+    test.it("loads expected items when first subfolder expanded", function () {
+      expandSubfolder(0);
+      return verifyItemsInSubfolder(0, [0]);
+    } );
+
+    test.it("loads expected items when second subfolder expanded", function () {
+      expandSubfolder(0);
+      expandSubfolder(1);
+      verifyItemsInSubfolder(0, [0]);
+      return verifyItemsInSubfolder(1, [0]);
+    } );
+
+    test.it("loads expected items when third subfolder expanded", function () {
+      expandSubfolder(0);
+      expandSubfolder(1);
+      expandSubfolder(2);
+      verifyItemsInSubfolder(0, [0]);
+      verifyItemsInSubfolder(1, [0]);
+      return verifyItemsInSubfolder(2, [0]);
+    } );
+
+    test.it("doesn't load search results on load", function () {
+      return verifyItemsInQueue(0);
+    } );
+
+    test.it("loads search results when subfolder expanded", function () {
+      expandSubfolder(0);
+      return verifyItemsInQueue(2);
+    } );
+
+    test.it("selects item", function () {
+      expandSubfolder(1);
+      return selectItem(1, 0);
+    } );
   } );
 
-/*   test.it('extension window opens', function () { */
-/*     return browser.switchTo().window(windowExt); */
-/*   } ); */
+  describe("Toolbar -- state", function () {
 
-  test.it('test', function () {
-    browser.switchTo().window(windowMain);
-    browser.get('http://www.bbc.co.uk/news/world-asia-25034461');
-
-    browser.findElement(By.tagName("h1")).then(function (el) {
-      console.log("executing");
-      browser.actions()
-        .mouseMove(el, { x: 0, y: 0 })
-        .mouseDown(el)
-        .mouseMove(el, { x: 500, y: 500 })
-        .mouseUp(el)
-        .perform();
-
-      console.log("sleeping");
-      browser.sleep(3500);
+    test.before(function (done) {
+      instantiateBrowser(done);
     } );
+
+    test.after(function () {
+      destroyBrowser();
+    } );
+
+    describe("folder", function () {
+
+      test.before(function () {
+        return selectFolder(0);
+      } );
+
+      test.it("add is enabled", function () {
+        return buttonEnabled('sorting-desk-toolbar-add');
+      } );
+
+      test.it("report is enabled", function () {
+        return buttonEnabled('sorting-desk-toolbar-report');
+      } );
+
+      test.it("sub-add is enabled", function () {
+        return buttonEnabled('sorting-desk-toolbar-add-contextual');
+      } );
+
+      test.it("rename is enabled", function () {
+        return buttonEnabled('sorting-desk-toolbar-rename');
+      } );
+
+      test.it("remove is enabled", function () {
+        return buttonEnabled('sorting-desk-toolbar-remove');
+      } );
+
+      test.it("navigate is disabled", function () {
+        return buttonEnabled('sorting-desk-toolbar-jump', false);
+      } );
+
+      test.it("explorer refresh is enabled", function () {
+        return buttonEnabled('sorting-desk-toolbar-refresh-explorer');
+      } );
+
+      test.it("queue refresh is enabled", function () {
+        return buttonEnabled('sorting-desk-toolbar-refresh-search');
+      } );
+    } );
+
+    describe("subfolder", function () {
+
+      test.before(function () {
+        return selectSubfolder(0);
+      } );
+
+      test.it("add is enabled", function () {
+        return buttonEnabled('sorting-desk-toolbar-add');
+      } );
+
+      test.it("report is enabled", function () {
+        return buttonEnabled('sorting-desk-toolbar-report');
+      } );
+
+      test.it("sub-add is enabled", function () {
+        return buttonEnabled('sorting-desk-toolbar-add-contextual');
+      } );
+
+      test.it("rename is enabled", function () {
+        return buttonEnabled('sorting-desk-toolbar-rename');
+      } );
+
+      test.it("remove is enabled", function () {
+        return buttonEnabled('sorting-desk-toolbar-remove');
+      } );
+
+      test.it("navigate is disabled", function () {
+        return buttonEnabled('sorting-desk-toolbar-jump', false);
+      } );
+
+      test.it("explorer refresh is enabled", function () {
+        return buttonEnabled('sorting-desk-toolbar-refresh-explorer');
+      } );
+
+      test.it("queue refresh is enabled", function () {
+        return buttonEnabled('sorting-desk-toolbar-refresh-search');
+      } );
+    } );
+
+    describe("item", function () {
+
+      test.before(function () {
+        expandSubfolder(1);
+        return selectItem(1, 0);
+      } );
+
+      test.it("add is enabled", function () {
+        return buttonEnabled('sorting-desk-toolbar-add');
+      } );
+
+      test.it("report is disabled", function () {
+        return buttonEnabled('sorting-desk-toolbar-report', false);
+      } );
+
+      test.it("sub-add is disabled", function () {
+        return buttonEnabled('sorting-desk-toolbar-add-contextual', false);
+      } );
+
+      test.it("rename is enabled", function () {
+        return buttonEnabled('sorting-desk-toolbar-rename');
+      } );
+
+      test.it("remove is enabled", function () {
+        return buttonEnabled('sorting-desk-toolbar-remove');
+      } );
+
+      test.it("navigate is enabled", function () {
+        return buttonEnabled('sorting-desk-toolbar-jump');
+      } );
+
+      test.it("explorer refresh is enabled", function () {
+        return buttonEnabled('sorting-desk-toolbar-refresh-explorer');
+      } );
+
+      test.it("queue refresh is enabled", function () {
+        return buttonEnabled('sorting-desk-toolbar-refresh-search');
+      } );
+    } );
+
   } );
 
 } );
 
 
- /* Helper methods */
+/* Meta functions */
+function newFolder()
+{
+  var id = generateGuid();
+  return { id: id, title: id };
+}
+
+function newSubfolder(i)
+{
+  var id = generateGuid();
+  return { id: id, title: id, items: i };
+}
+
+function newItem(u, t)
+{
+  return { url: u, title: t };
+}
+
+/* From: http://stackoverflow.com/a/105074/3001914 . */
+function generateGuid ()  /* Note: function can't be assigned to var. */
+{
+  function s4() {
+    return Math.floor((1 + Math.random()) * 0x10000)
+      .toString(16)
+      .substring(1);
+  }
+
+  return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-'
+    + s4() + s4() + s4();
+}
+
+/* Injectable scripts */
+var inj = {
+  dropInFolder: function (name)
+  {
+    var ev, t;
+
+    t = document.evaluate(
+      "//*[@id='sd-folder-explorer']/div/div/ul/li//*[text()[contains(.,'"
+        + name + "')]]", document, null, XPathResult.ANY_TYPE, null)
+      .iterateNext();
+    if(!t) return;
+
+    ev = document.createEvent("MouseEvents");
+    ev.initMouseEvent("drop", true, true, window, 0);
+    t.dispatchEvent(ev);
+  },
+
+  dropInSubfolder: function (name)
+  {
+    var ev, t;
+
+    t = document.evaluate(
+      "//*[@id='sd-folder-explorer']/div/div/ul/li/ul/li//*[text()[contains(.,'"
+        + name + "')]]", document, null, XPathResult.ANY_TYPE, null)
+      .iterateNext();
+    if(!t) return;
+
+    ev = document.createEvent("MouseEvents");
+    ev.initMouseEvent("drop", true, true, window, 0);
+    t.dispatchEvent(ev);
+  },
+
+  selectText: function (tag, index)
+  {
+    var el = document.getElementsByTagName(tag)[index || 0],
+        sel = window.getSelection(),
+        range = document.createRange();
+
+    range.selectNodeContents(el);
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+};
+
+/* Helper methods */
+var instantiateBrowser = function (done)
+{
+  /* Detect main and extension windows. */
+  windowMain = windowExt = null;
+  browser = new webdriver.Builder().usingServer()
+    .withCapabilities(capabilities)
+    .setChromeOptions(options)
+    .build();
+
+  var poll = function () {
+    browser.sleep(100).then(function () {
+      var count = 0;
+
+      browser.getAllWindowHandles().then(function (windows) {
+        if(windows.length < 2) {
+          poll();
+          return;
+        }
+
+        windows.forEach(function (win) {
+          ++count;
+
+          browser.switchTo().window(win);
+          browser.getTitle().then(function (title) {
+            /* Detect windows only once. */
+            if(title === "Sorting Desk") {
+              assert.equal(windowExt, null);
+              windowExt = win;
+            } else {
+              assert.equal(windowMain, null);
+              windowMain = win;
+            }
+
+            if(--count === 0) {
+              assert.notEqual(windowMain, null);
+              assert.notEqual(windowExt,  null); /* assert not needed */
+              assert.notEqual(windowMain, windowExt);
+
+              browser.switchTo().window(windowExt);
+              browser.wait(until.elementIsNotVisible(getLoader(PANE_EXPLORER)),
+                           TIMEOUT_LOADER)
+                .then(function () {
+                  done();
+                }, function () {
+                  /* Loader not found or some other error occurred. */
+                  assert.equal(true, false);
+                } );
+            }
+          } );
+        } );
+      } );
+    } );
+  };
+
+  poll();
+};
+
+var destroyBrowser = function ()
+{
+  browser.quit();
+  browser = windowMain = windowExt = null;
+};
+
+var getLoader = function (pane)
+{
+  browser.switchTo().window(windowExt);
+  return browser.findElement(
+    By.xpath("//*[@id='" + pane + "']/*[@class='sd-loading']"));
+};
+
+var getButton = function (scope)
+{
+  browser.switchTo().window(windowExt);
+  return browser.findElement(By.xpath("//*[@data-sd-scope='" + scope + "']"));
+};
+
+var getInput = function ()
+{
+  browser.switchTo().window(windowExt);
+  return browser.findElement(By.xpath("//*[@id='sd-folder-explorer']//input"));
+};
+
+var getFolder = function (fid)
+{
+  browser.switchTo().window(windowExt);
+  return browser.findElements(
+    By.xpath(XPATH_TREE + "/ul/li/*[text()[contains(.,'"
+             + folders[fid].title + "')]]"));
+};
+
+var getSubfolder = function (sid)
+{
+  browser.switchTo().window(windowExt);
+  return browser.findElements(
+    By.xpath(XPATH_TREE + "/ul/li/ul/li/*[text()[contains(.,'"
+             + subfolders[sid].title + "')]]"));
+};
+
+var getItem = function (sid, iid)
+{
+  var sf = subfolders[sid];
+  browser.switchTo().window(windowExt);
+  return browser.findElements(
+    By.xpath(XPATH_TREE + "/ul/li/ul/li/*[text()[contains(.,'"
+             + sf.title + "')]]/../ul/li/*[text()[contains(.,'"
+             + sf.items[iid].title + "')]]"));
+};
+
+var getFolders = function ()
+{
+  browser.switchTo().window(windowExt);
+  return browser.findElements(
+    By.xpath(XPATH_TREE + "/ul/li"));
+};
+
+var buttonEnabled = function (scope, enabled)
+{
+  return getButton(scope).getAttribute("className").then(function (value) {
+    if(enabled !== false) assert.equal   (value.indexOf(' disabled'), -1);
+    else                  assert.notEqual(value.indexOf(' disabled'), -1);
+  } );
+};
+
+var createFolder = function (fid)
+{
+  getButton('sorting-desk-toolbar-add').click();
+  getInput().sendKeys(folders[fid].title, Key.ENTER);
+  return getFolder(fid).then(function (f) { assert.equal(true, true);  },
+                             function ( ) { assert.equal(true, false); } );
+};
+
+var createSubfolder = function (fid, sid)
+{
+  selectFolder(fid);
+  return getButton('sorting-desk-toolbar-add-contextual').then(function (el) {
+    el.getAttribute("className").then(function (value) {
+      assert.equal(value.indexOf(' disabled'), -1);
+      el.click();
+      getInput().sendKeys(subfolders[sid].title, Key.ENTER);
+      getSubfolder(sid).then(function (f) { assert.equal(true, true);  },
+                             function ( ) { assert.equal(true, false); } );
+    } );
+  } );
+};
+
+var selectFolder = function (fid)
+{
+  return getFolder(fid).then(function (f) {
+    assert.equal(f.length, 1);
+    if(f.length === 1) f[0].click();
+  } );
+};
+
+var selectSubfolder = function (sid)
+{
+  return getSubfolder(sid).then(function (sf) {
+    assert.equal(sf.length, 1);
+    if(sf.length === 1) sf[0].click();
+  } );
+};
+
+var selectItem = function (sid, iid)
+{
+  return getItem(sid, iid).then(function (i) {
+    assert.equal(i.length, 1);
+    if(i.length === 1) i[0].click();
+  } );
+};
+
+var expandFolder = function (sid)
+{
+  return getFolder(sid).then(function (f) {
+    assert.equal(f.length, 1);
+    if(f.length === 1) {
+      browser.actions()
+        .mouseMove(f[0])
+        .doubleClick()
+        .perform();
+    }
+  } );
+};
+
+var expandSubfolder = function (sid)
+{
+  getSubfolder(sid).then(function (f) {
+    assert.equal(f.length, 1);
+    if(f.length === 1) {
+      browser.actions()
+        .mouseMove(f[0])
+        .doubleClick()
+        .perform();
+    }
+  } );
+
+  return waitUntilRequestsFinished();
+};
+
+var selectText = function (tag)
+{
+  browser.switchTo().window(windowMain);
+  return browser.executeScript(inj.selectText, tag);
+};
+
+var dropInFolder = function (fid)
+{
+  browser.switchTo().window(windowExt);
+  return browser.executeScript(inj.dropInFolder, folders[fid].title);
+};
+
+var dropInSubfolder = function (sid)
+{
+  browser.switchTo().window(windowExt);
+  return browser.executeScript(inj.dropInSubfolder, subfolders[sid].title);
+};
+
+var waitUntilRequestsFinished = function ()
+{
+  browser.switchTo().window(windowExt);
+  browser.sleep(100);
+  return browser.wait(new until.Condition(
+    "Waiting for AJAX requests to finish",
+    function (driver) {
+      return driver.findElements(
+        By.xpath("//*[contains(@class, 'jstree-loading')]"))
+        .then(function (els) {
+          return els.length === 0;
+        } );
+    } ), TIMEOUT_WAITREQUESTS);
+};
+
+var waitUntilInputVisible = function ()
+{
+  browser.switchTo().window(windowExt);
+  browser.wait(new until.Condition(
+    "Waiting for input element to be visible",
+    function (driver) {
+      return driver.findElements(
+        By.xpath("//*[@id='sd-folder-explorer']//input"))
+        .then(function (i) {
+          return i.length > 0;
+        } );
+    } ), TIMEOUT_WAITREQUESTS);
+
+  return getInput().sendKeys(Key.chord(Key.CONTROL, 'a'), Key.DELETE);
+};
+
+var verifyFolders = function (coll)
+{
+  return getFolders().then(function (i) {
+    assert.equal(i.length, coll.length);
+    i.forEach(function (j) {
+      j.findElement(By.xpath("a")).getText().then(function (text) {
+        assert.notEqual(coll.length, 0);
+        removeByTitle(folders, coll, text);
+      } );
+    } );
+  } ).then(function () {
+    assert.equal(coll.length, 0);
+  } );
+};
+
+var verifyItemsInSubfolder = function (sid, items)
+{
+  waitUntilRequestsFinished();
+  return getSubfolder(sid).then(function (el) {
+    assert.equal(el.length, 1);
+    el[0].findElements(By.xpath("../ul/li")).then(function (els) {
+      assert.equal(items.length, els.length);
+      els.forEach(function (i) {
+        i.getText().then(function (text) {
+          assert.notEqual(items.length, 0);
+          removeByTitle(subfolders[sid].items, items, text);
+        } );
+      } );
+    } );
+  } ).then(function () {
+    assert.equal(items.length, 0);
+  } );
+};
+
+var verifyItemsInQueue = function (count)
+{
+  browser.switchTo().window(windowExt);
+  browser.wait(until.elementIsVisible(getLoader(PANE_QUEUE)),
+               TIMEOUT_LOADER_SHOW)
+    .then(function () {
+      waitUntilRequestsFinished();
+      browser.wait(until.elementIsNotVisible(getLoader(PANE_QUEUE)),
+                   TIMEOUT_LOADER);
+      browser.wait(until.elementsLocated(
+        By.xpath("//*[@id='sd-queue']/div/div/*[@data-scope='text-item'][" +
+                 count + "]")), TIMEOUT_QUEUE_ITEMS);
+      browser.findElements(
+        By.xpath("//*[@id='sd-queue']/div/div/*[@data-scope='text-item']"))
+        .then(function (i) {
+          assert.equal(i.length, count);
+        } );
+    }, function () {
+      assert.equal(0, count);
+    } );
+};
+
+var removeByTitle = function (cl, cr, title)
+{
+  var ndx = -1;
+
+  cr.some(function (j, i) {
+    if(cl[j].title === title) { ndx = i; return true; }
+    return false;
+  } );
+
+  assert.notEqual(ndx, -1);
+  if(ndx >= 0) cr.splice(ndx, 1);
+};
