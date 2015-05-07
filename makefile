@@ -38,9 +38,9 @@ deps:
 	echo "I: updating dependencies"
 	sh/update-deps >/dev/null
 
-test: testExtensions
+test: build-chrome build-firefox test-extensions
 
-testExtensions:
+test-extensions:
 	echo "I: running all tests"
 	sh/run-tests
 
