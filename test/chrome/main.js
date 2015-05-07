@@ -26,8 +26,7 @@ var test           = require("selenium-webdriver/testing"),
 var pathRoot     = __dirname + "/../..";
 
 var browser,
-    capabilities = webdriver.Capabilities.chrome(),
-    options      = new chrome.Options();
+    options = new chrome.Options();
 
 var windowExt, windowMain;
 
@@ -484,10 +483,7 @@ var instantiateBrowser = function (done)
 {
   /* Detect main and extension windows. */
   windowMain = windowExt = null;
-  browser = new webdriver.Builder().usingServer()
-    .withCapabilities(capabilities)
-    .setChromeOptions(options)
-    .build();
+  browser = new chrome.Driver(options);
 
   var poll = function () {
     browser.sleep(100).then(function () {
