@@ -184,11 +184,6 @@
        * Start by explicitly initialising SortingQueue's instance and proceed
        * to initialising our own instance. */
       this.sortingQueue_.initialise();
-      new SortingQueueRenderer(this.sortingQueue_,
-                               this.explorer_,
-                               this.callbacks_,
-                               this.options.suggestion);
-
       (this.explorer_ = new ControllerExplorer(this))
         .on( {
           "refresh-begin": function () {
@@ -201,6 +196,11 @@
         .initialise();
 
       this.networkFailure_ = new NetworkFailure(this);
+
+      new SortingQueueRenderer(this.sortingQueue_,
+                               this.explorer_,
+                               this.callbacks_,
+                               this.options.suggestion);
 
       this.initialised_ = true;
       console.info("Sorting Desk UI initialised");
