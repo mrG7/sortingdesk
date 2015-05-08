@@ -32,7 +32,7 @@ var browser,
 
 var windowExt, windowMain;
 
-var folders = [ newFolder(), newFolder() ],
+var folders = [ newFolder(), newFolder(), newFolder('dev') ],
     subfolders = [
       newSubfolder([
         newItem("http://www.bbc.co.uk/news/world-asia-25034461",
@@ -42,7 +42,12 @@ var folders = [ newFolder(), newFolder() ],
                 "Nepal strike shuts down capital Kathmandu")]),
       newSubfolder([
         newItem("http://en.wikipedia.org/wiki/Himalayas",
-                "Himalayas")])
+                "Himalayas")]),
+      newSubfolder([
+        newItem(null, "rotors"),
+        newItem(null, "calipers"),
+        newItem(null, "brakes")], "auto"),
+      newSubfolder([newItem(null, "klingon bird")], "games")
     ];
 
 /* Configure  */
@@ -405,17 +410,23 @@ test.describe("Sorting Desk -- E2E", function () {
 } );
 
 /* Meta functions */
-function newFolder()
+function generateId(prefix, id)
 {
-  var id = typeof DEBUG !== 'undefined'
-        ? ('folder-' + DEBUG.fid++) : generateGuid();
+  return id !== undefined ? id
+    : typeof DEBUG !== 'undefined'
+      ? prefix + '-' + DEBUG.id++
+      : generateGuid();
+}
+
+function newFolder(id)
+{
+  id = generateId('folder', id);
   return { id: id, title: id };
 }
 
-function newSubfolder(i)
+function newSubfolder(i, id)
 {
-  var id = typeof DEBUG !== 'undefined'
-        ? ('subfolder-' + DEBUG.fid++) : generateGuid();
+  id = generateId('subfolder', id);
   return { id: id, title: id, items: i };
 }
 
