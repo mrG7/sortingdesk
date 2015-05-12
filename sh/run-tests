@@ -1,16 +1,34 @@
 #!/bin/bash
 
+function kill_dossier_model () {
+  while [ true ]; do
+    local pid=`ps -x|grep -v -e 'grep.*dossier.models'|grep dossier.models|grep -o '[0-9]\+'|head -n1`
+    [ -z "$pid" ] && break
+    kill -9 "$pid";
+  done
+}
+
 function preexit () {
   info "restoring configuration file"
   mv "$dir_ext/chrome/src/js/extension/config.js" \
     "$dir_ext/chrome/src/js/extension/config.js.testing"
   mv "$dir_ext/chrome/src/js/extension/config.js.disabled" \
     "$dir_ext/chrome/src/js/extension/config.js"
+
+  info "removing temporary directory"
+  rm "$dir_tmp" -rf
+
+  info "killing dossier.models instance"
+  kill_dossier_model
+  ps -x|grep dossier.models|grep -o '[0-9]\+'|head -n1|xargs kill -9
+
   echo done.
 }
 
 readonly dir_root="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. && pwd )"
 readonly dir_ext="$dir_root/src/browser/extensions"
+readonly dir_test="$dir_root/test"
+readonly dir_tmp="/tmp/sorting-desk.test"
 source "$dir_root/sh/libtools.sh"
 
 # Ensure needed binaries are present in the system.
@@ -23,11 +41,28 @@ elif ! command -v chromium-browser &>/dev/null; then
 fi
 
 set -e
+
+info "initialising database"
+[ -d /tmp/sorting-desk.test ] && rm /tmp/sorting-desk.test -rf
+mkdir /tmp/sorting-desk.test
+cp "$dir_test/db"/* "$dir_tmp"
+echo -e "\n  filename: $dir_tmp/soft-selector.db" >> "$dir_tmp/config.yaml"
+
+info "starting dossier.models instance"
+kill_dossier_model
+DOSSIER_WEB_DEV=1 dossier.models -c "$dir_tmp/config.yaml" \
+  --reload --port 8001 --bottle-debug &>/dev/null &
+
+# Will this be enough a wait?  How can we know it's safe to proceed with the
+# tests?
+sleep 5
+
 info "activating test configuration file"
 mv "$dir_ext/chrome/src/js/extension/config.js" \
   "$dir_ext/chrome/src/js/extension/config.js.disabled"
 mv "$dir_ext/chrome/src/js/extension/config.js.testing" \
   "$dir_ext/chrome/src/js/extension/config.js"
+
 set +e
 trap preexit EXIT
 
