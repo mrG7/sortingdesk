@@ -1,0 +1,12 @@
+logging:
+  root:
+    level: DEBUG
+
+dossier.store:
+  feature_indexes: ['bowNP_sip', 'phone', 'region', 'bowNP']
+
+kvlayer:
+  app_name: diffeo
+  namespace: dev-soft-selector
+  storage_type: filestorage
+  storage_addresses: []
