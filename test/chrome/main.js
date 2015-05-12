@@ -112,6 +112,10 @@ test.describe("Sorting Desk -- E2E", function () {
       destroyBrowser();
     } );
 
+    test.it("loads one folder", function () {
+      return verifyFolders( [ 2 ] );
+    } );
+
     test.it("creates a folder", function () {
       return createFolder(0);
     } );
@@ -121,8 +125,8 @@ test.describe("Sorting Desk -- E2E", function () {
       return selectFolder(0);
     } );
 
-    test.it("loads one folder", function () {
-      return verifyFolders( [ 0 ] );
+    test.it("loads two folders", function () {
+      return verifyFolders( [ 0, 2 ] );
     } );
 
     test.it("creates a (manual) subfolder", function () {
