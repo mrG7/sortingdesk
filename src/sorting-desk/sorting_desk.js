@@ -207,9 +207,7 @@
     },
 
     /**
-     * Resets the component to a virgin state. Removes all nodes contained by
-     * `nodes_.bins', if any, after the active `SortingQueue' instance has
-     * successfully reset.
+     * Resets the component to a virgin state.
      *
      * @returns {Promise}   Returns promise that is fulfilled upon successful
      *                      instance reset. */
@@ -676,28 +674,6 @@
       } );
   };
 
-  ControllerExplorer.prototype.construct = function (descriptor)
-  {
-    var map = { 'text': 'Bin',
-                'image': 'BinImage' },
-        type;
-
-    if(!descriptor)
-      throw "Invalid bin descriptor";
-
-    /* Extract bin type. */
-    type = this.api.getSubtopicType(descriptor.subtopic_id);
-
-    if(!map.hasOwnProperty(type))
-      throw "Invalid bin type: " + type;
-
-    /* Finaly instantiate correct Bin class. */
-    return this.owner_.constructor.instantiate(
-      map[type],
-      this,
-      descriptor);
-  };
-
   ControllerExplorer.prototype.reset = function ()
   {
     this.reset_tree_();
@@ -812,37 +788,6 @@
   ControllerExplorer.prototype.indexOf = function (folder)
   {
     return this.folders_.indexOf(folder);
-  };
-
-  ControllerExplorer.prototype.remove = function (bin)
-  {
-    return this.removeAt(this.bins_.indexOf(bin));
-  };
-
-  ControllerExplorer.prototype.removeAt = function (index)
-  {
-    var bin;
-
-    if(index < 0 || index >= this.bins_.length)
-      throw "Invalid bin index";
-
-    bin = this.bins_[index];
-    this.bins_.splice(index, 1);
-
-    bin.node.remove();
-
-    if(bin === this.active_)
-      this.setActive(this.bins_.length > 0 && this.bins_[0] || null);
-
-    this.update_empty_state_();
-  };
-
-  ControllerExplorer.prototype.getAt = function (index)
-  {
-    if(index < 0 || index >= this.bins_.length)
-      throw "Invalid bin index";
-
-    return this.bins_[index];
   };
 
   ControllerExplorer.prototype.getById = function (id)
@@ -1662,7 +1607,7 @@
   {
     var self = this;
 
-    /* Attempt to retrieve the feature collection for the bin's content id. */
+    /* Attempt to retrieve the feature collection for the content id. */
     return this.api.fc.get(descriptor.content_id)
       .then(function (fc) {
         console.log("Feature collection GET successful (id=%s)",
@@ -2063,8 +2008,6 @@
   /* Default options */
   var defaults_ = {
     delays: {                   /* In milliseconds.     */
-      binRemoval: 200,          /* Bin is removed from container. */
-      addBinShow: 200,          /* Fade in of temporary bin when adding. */
       emptyFadeIn: 250,
       emptyFadeOut: 100,
       emptyHide: 50
