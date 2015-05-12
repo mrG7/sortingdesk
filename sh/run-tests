@@ -20,7 +20,6 @@ function preexit () {
 
   info "killing dossier.models instance"
   kill_dossier_model
-  ps -x|grep dossier.models|grep -o '[0-9]\+'|head -n1|xargs kill -9
 
   echo done.
 }
