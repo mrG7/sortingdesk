@@ -3,12 +3,12 @@
 var PANE_EXPLORER = "sd-folder-explorer",
     PANE_QUEUE    = "sd-queue";
 
-var TIMEOUT_RUNNER       = 60000,     /* account for slow VMs */
-    TIMEOUT_LOADER       = 10000,
-    TIMEOUT_LOADER_SHOW  = 500,
-    TIMEOUT_QUEUE_ITEMS  = 500,
-    TIMEOUT_WAITREQUESTS = 30000,
-    TIMEOUT_STALE        = 500;
+var TIMEOUT_RUNNER       = 80000,     /* account for slow VMs */
+    TIMEOUT_LOADER       = 40000,
+    TIMEOUT_LOADER_SHOW  = 1000,
+    TIMEOUT_QUEUE_ITEMS  = 1000,
+    TIMEOUT_WAITREQUESTS = 50000,
+    TIMEOUT_STALE        = 1000;
 
 var XPATH_TREE  = "//*[@id='sd-folder-explorer']/div/div",
     XPATH_QUEUE = "//*[@id='sd-queue']/div/div";
