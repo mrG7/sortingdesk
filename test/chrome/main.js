@@ -141,6 +141,7 @@ test.describe("Sorting Desk -- E2E", function () {
       browser.switchTo().window(windowMain);
       browser.get(subfolders[0].items[0].url);
       selectText('h1');
+      browser.switchTo().window(windowExt);
       dropInSubfolder(0);
       return verifyItemsInSubfolder(0, [ 0 ]);
     } );
@@ -153,6 +154,7 @@ test.describe("Sorting Desk -- E2E", function () {
       browser.switchTo().window(windowMain);
       browser.get(subfolders[1].items[0].url);
       selectText('h1');
+      browser.switchTo().window(windowExt);
       dropInSubfolder(1);
       return verifyItemsInSubfolder(1, [ 0 ]);
     } );
@@ -161,20 +163,23 @@ test.describe("Sorting Desk -- E2E", function () {
       browser.switchTo().window(windowMain);
       browser.get(subfolders[2].items[0].url);
       selectText('h1');
+      browser.switchTo().window(windowExt);
       dropInFolder(0);
       waitUntilInputVisible();
       getInput().sendKeys(subfolders[2].title, Key.ENTER);
       return verifyItemsInSubfolder(2, [ 0 ]);
     } );
 
-    test.it("loads two folders", function () {
-      return verifyFolders( [ 0, 1 ] );
+    test.it("loads three folders", function () {
+      return verifyFolders( [ 0, 1, 2 ] );
     } );
 
     test.it("doesn't load any items", function () {
       verifyItemsInSubfolder(0, []);
       verifyItemsInSubfolder(1, []);
       verifyItemsInSubfolder(2, []);
+      verifyItemsInSubfolder(3, []);
+      return verifyItemsInSubfolder(4, []);
     } );
 
     test.it("loads expected items when first subfolder expanded", function () {
@@ -557,69 +562,68 @@ var destroyBrowser = function ()
   browser = windowMain = windowExt = null;
 };
 
+var getElement = function (xpath)
+{
+  xpath = By.xpath(xpath);
+  browser.findElements(xpath)
+//    .then(function (c) { assert.equal(c.length, 1); });
+    .then(function (c) { assert.notEqual(c.length, 0); });
+  return browser.findElement(xpath);
+};
+
 var getLoader = function (pane)
 {
-  browser.switchTo().window(windowExt);
-  return browser.findElement(
-    By.xpath("//*[@id='" + pane + "']/*[@class='sd-loading']"));
+  return getElement("//*[@id='" + pane + "']/*[@class='sd-loading']");
 };
 
 var getButton = function (scope)
 {
-  browser.switchTo().window(windowExt);
-  return browser.findElement(By.xpath("//*[@data-sd-scope='" + scope + "']"));
+  return getElement("//*[@data-sd-scope='" + scope + "']");
 };
 
 var getInput = function ()
 {
-  browser.switchTo().window(windowExt);
-  return browser.findElement(By.xpath("//*[@id='sd-folder-explorer']//input"));
+  return getElement("//*[@id='sd-folder-explorer']//input");
 };
 
 var getFolder = function (fid)
 {
-  browser.switchTo().window(windowExt);
-  return browser.findElements(
-    By.xpath(XPATH_TREE + "/ul/li/*[text()[contains(.,'"
-             + folders[fid].title + "')]]"));
+  return getElement(XPATH_TREE + "/ul/li/*[text()[contains(.,'"
+                    + folders[fid].title + "')]]");
 };
 
 var getSubfolder = function (sid)
 {
-  browser.switchTo().window(windowExt);
-  return browser.findElements(
-    By.xpath(XPATH_TREE + "/ul/li/ul/li/*[text()[contains(.,'"
-             + subfolders[sid].title + "')]]"));
+  return getElement(XPATH_TREE + "/ul/li/ul/li/*[text()[contains(.,'"
+                    + subfolders[sid].title + "')]]");
 };
 
 var getItem = function (sid, iid)
 {
   var sf = subfolders[sid];
-  browser.switchTo().window(windowExt);
-  return browser.findElements(
-    By.xpath(XPATH_TREE + "/ul/li/ul/li/*[text()[contains(.,'"
-             + sf.title + "')]]/../ul/li/*[text()[contains(.,'"
-             + sf.items[iid].title + "')]]"));
+  return getElement(XPATH_TREE + "/ul/li/ul/li/*[text()[contains(.,'"
+                    + sf.title + "')]]/../ul/li/*[text()[contains(.,'"
+                    + sf.items[iid].title + "')]]");
 };
 
 var getSearchResult = function (index)
 {
-  browser.switchTo().window(windowExt);
-  return browser.findElement(
-    By.xpath(XPATH_QUEUE + "/*[@data-scope='text-item']["
-             + (index + 1) + "]"));
+  return getElement(XPATH_QUEUE + "/*[@data-scope='text-item']["
+                    + (index + 1) + "]");
+};
+
+var getSuggestionBox = function ()
+{
+  return getElement(XPATH_QUEUE + "/*[@id='sd-suggestion']");
 };
 
 var getFolders = function ()
 {
-  browser.switchTo().window(windowExt);
-  return browser.findElements(
-    By.xpath(XPATH_TREE + "/ul/li"));
+  return browser.findElements(By.xpath(XPATH_TREE + "/ul/li"));
 };
 
 var getSearchResults = function ()
 {
-  browser.switchTo().window(windowExt);
   return browser.findElements(
     By.xpath(XPATH_QUEUE + "/*[@data-scope='text-item']"));
 };
@@ -636,8 +640,7 @@ var createFolder = function (fid)
 {
   getButton('sorting-desk-toolbar-add').click();
   getInput().sendKeys(folders[fid].title, Key.ENTER);
-  return getFolder(fid).then(function (f) { assert.equal(true, true);  },
-                             function ( ) { assert.equal(true, false); } );
+  return getFolder(fid);
 };
 
 var createSubfolder = function (fid, sid)
@@ -648,8 +651,7 @@ var createSubfolder = function (fid, sid)
       assert.equal(value.indexOf(' disabled'), -1);
       el.click();
       getInput().sendKeys(subfolders[sid].title, Key.ENTER);
-      getSubfolder(sid).then(function (f) { assert.equal(true, true);  },
-                             function ( ) { assert.equal(true, false); } );
+      getSubfolder(sid);
     } );
   } );
 };
@@ -657,33 +659,24 @@ var createSubfolder = function (fid, sid)
 var selectFolder = function (fid)
 {
   return getFolder(fid).then(function (f) {
-    assert.equal(f.length, 1);
-    if(f.length === 1) {
-      f[0].click();
-      verifySelected(folders[fid].title);
-    }
+    f.click();
+    verifySelected(folders[fid].title);
   } );
 };
 
 var selectSubfolder = function (sid)
 {
   return getSubfolder(sid).then(function (sf) {
-    assert.equal(sf.length, 1);
-    if(sf.length === 1) {
-      sf[0].click();
-      verifySelected(subfolders[sid].title);
-    }
+    sf.click();
+    verifySelected(subfolders[sid].title);
   } );
 };
 
 var selectItem = function (sid, iid)
 {
   return getItem(sid, iid).then(function (i) {
-    assert.equal(i.length, 1);
-    if(i.length === 1) {
-      i[0].click();
-      verifySelected(subfolders[sid].items[iid].title);
-    }
+    i.click();
+    verifySelected(subfolders[sid].items[iid].title);
   } );
 };
 
@@ -691,9 +684,8 @@ var activateItem = function (sid, iid)
 {
   selectItem(sid, iid);
   return getItem(sid, iid).then(function (i) {
-    assert.equal(i.length, 1);
     browser.actions()
-      .mouseMove(i[0])
+      .mouseMove(i)
       .doubleClick()
       .perform();
   } );
@@ -702,26 +694,20 @@ var activateItem = function (sid, iid)
 var expandFolder = function (sid)
 {
   return getFolder(sid).then(function (f) {
-    assert.equal(f.length, 1);
-    if(f.length === 1) {
-      browser.actions()
-        .mouseMove(f[0])
-        .doubleClick()
-        .perform();
-    }
+    browser.actions()
+      .mouseMove(f[0])
+      .doubleClick()
+      .perform();
   } );
 };
 
 var expandSubfolder = function (sid)
 {
   getSubfolder(sid).then(function (f) {
-    assert.equal(f.length, 1);
-    if(f.length === 1) {
-      browser.actions()
-        .mouseMove(f[0])
-        .doubleClick()
-        .perform();
-    }
+    browser.actions()
+      .mouseMove(f)
+      .doubleClick()
+      .perform();
   } );
 
   return waitUntilRequestsFinished();
@@ -730,24 +716,22 @@ var expandSubfolder = function (sid)
 var selectText = function (tag)
 {
   browser.switchTo().window(windowMain);
-  return browser.executeScript(inj.selectText, tag);
+  browser.executeScript(inj.selectText, tag);
+  return browser.switchTo().window(windowExt);
 };
 
 var dropInFolder = function (fid)
 {
-  browser.switchTo().window(windowExt);
   return browser.executeScript(inj.dropInFolder, folders[fid].title);
 };
 
 var dropInSubfolder = function (sid)
 {
-  browser.switchTo().window(windowExt);
   return browser.executeScript(inj.dropInSubfolder, subfolders[sid].title);
 };
 
 var waitUntilRequestsFinished = function ()
 {
-  browser.switchTo().window(windowExt);
   browser.sleep(100);
   return browser.wait(new until.Condition(
     "Waiting for AJAX requests to finish",
@@ -762,7 +746,6 @@ var waitUntilRequestsFinished = function ()
 
 var waitUntilInputVisible = function ()
 {
-  browser.switchTo().window(windowExt);
   browser.wait(new until.Condition(
     "Waiting for input element to be visible",
     function (driver) {
@@ -795,8 +778,7 @@ var verifyItemsInSubfolder = function (sid, items)
 {
   waitUntilRequestsFinished();
   return getSubfolder(sid).then(function (el) {
-    assert.equal(el.length, 1);
-    el[0].findElements(By.xpath("../ul/li")).then(function (els) {
+    el.findElements(By.xpath("../ul/li")).then(function (els) {
       assert.equal(items.length, els.length);
       els.forEach(function (i) {
         i.getText().then(function (text) {
@@ -830,7 +812,6 @@ var verifyItemsInQueue = function (count, wait)
   };
 
 
-  browser.switchTo().window(windowExt);
   if(wait !== false) {
     return browser.wait(until.elementIsVisible(getLoader(PANE_QUEUE)),
                  TIMEOUT_LOADER_SHOW)
@@ -844,9 +825,8 @@ var verifyItemsInQueue = function (count, wait)
 
 var verifySelected = function (title)
 {
-  browser.switchTo().window(windowExt);
   return browser.findElements(
-    By.xpath(XPATH_TREE + "//*[@aria-selected='true']"))
+    By.xpath(XPATH_TREE + "//*[@aria-selected='true']/a"))
     .then(function (els) {
       assert.equal(els.length, 1);
       els[0].getText().then(function (text) {
