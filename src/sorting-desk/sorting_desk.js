@@ -267,7 +267,6 @@
           else if (id === 'wrong')
             label.coref_value = self.api.consts.coref.NEGATIVE;
           else {
-            item.owner.remove(item);
             console.error("Unrecognized dismissal identifier: " + id);
             return;
           }
