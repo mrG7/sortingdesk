@@ -19,3 +19,5 @@ while [ true ]; do
   [ -z "$pid" ] && break
   kill -9 "$pid";
 done
+
+echo done.
