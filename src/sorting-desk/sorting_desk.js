@@ -915,55 +915,6 @@
       this.active_.activate();
   };
 
-  ControllerExplorer.prototype.updateFc = function (descriptor,
-                                                    readonly /* = false */)
-  {
-    var self = this;
-
-    /* Attempt to retrieve the feature collection for the bin's content id. */
-    return this.api.fc.get(descriptor.content_id)
-      .then(function (fc) {
-        console.log("Feature collection GET successful (id=%s)",
-                    descriptor.content_id);
-
-        /* A feature collection was received. No further operations are carried
-         * out if `readonly´ is true; otherwise its contents are updated. */
-        if(!readonly) {
-          self.set_fc_content_(fc, descriptor);
-          return self.do_update_fc_(descriptor.content_id, fc);
-        }
-
-        return fc;
-      },
-      function () {
-        /* It was not possible to retrieve the feature collection for this
-         * descriptor's content id. */
-        if(readonly) {
-          console.error("Feature collection GET failed: "
-                        + "NOT creating new (id=%s)",
-                        descriptor.content_id);
-          return null;
-        }
-
-        console.info("Feature collection GET failed: creating new (id=%s)",
-                     descriptor.content_id);
-        return self.api.fc.create(descriptor.content_id, descriptor.document)
-          .done(function(fc) {
-            console.log('Feature collection created: (id=%s)',
-                        descriptor.content_id);
-
-            self.set_fc_content_(fc, descriptor);
-            self.api.fc.setContent(fc, 'meta_url', descriptor.href.toString());
-
-            return self.do_update_fc_(descriptor.content_id, fc);
-          } )
-          .fail(function () {
-            self.owner_.networkFailure.incident(
-              NetworkFailure.types.fc.create, descriptor);
-          } );
-      } );
-  };
-
   ControllerExplorer.prototype.updateToolbar = function (loading)
   {
     var ela = this.owner_.nodes.toolbar.actions;
@@ -989,45 +940,6 @@
                            || !(this.selected_ instanceof Folder))
   };
 
-  /* Private interface */
-  ControllerExplorer.prototype.set_fc_content_ = function (fc, descriptor)
-  {
-    var set = this.api.fc.setContent;
-    set(fc, descriptor.subtopic_id, descriptor.content);
-
-    if(descriptor.type === 'image'
-       && std.is_str(descriptor.data)
-       && descriptor.data.length > 0)
-    {
-      set(fc, this.api.makeRawSubId(descriptor.subtopic_id, "data"),
-          descriptor.data);
-    }
-  };
-
-  ControllerExplorer.prototype.reset_query_ = function ()
-  {
-    this.api.getDossierJs().stop('API.search');
-    this.api.qitems.setQueryContentId(null);
-    this.owner_.sortingQueue.items.removeAll(false);
-  };
-
-  ControllerExplorer.prototype.do_update_fc_ = function (content_id, fc)
-  {
-    var self = this;
-
-    return this.api.fc.put(content_id, fc)
-      .done(function () {
-        console.log("Feature collection PUT successful (id=%s)",
-                    content_id);
-      } )
-      .fail(function () {
-        self.owner_.networkFailure.incident(
-          NetworkFailure.types.fc.save, {
-            content_id: content_id, fc: fc
-          } );
-      } );
-  };
-
   ControllerExplorer.prototype.addLabel = function (label)
   {
     var self = this;
@@ -1038,6 +950,14 @@
           NetworkFailure.types.label, label
         );
       } );
+  };
+
+  /* Private interface */
+  ControllerExplorer.prototype.reset_query_ = function ()
+  {
+    this.api.getDossierJs().stop('API.search');
+    this.api.qitems.setQueryContentId(null);
+    this.owner_.sortingQueue.items.removeAll(false);
   };
 
   ControllerExplorer.prototype.update_empty_state_ = function (hide)
@@ -1651,7 +1571,7 @@
       this.loading(true);
 
       /* Create or update feature collection. */
-      this.controller.updateFc(descriptor, false)
+      this.updateFc(descriptor, false)
         .done(function (fc) { self.onGotFeatureCollection(fc);   } )
         .fail(function ()   { self.onGotFeatureCollection(null); } )
         .always(function () { self.loading(false); } );
@@ -1739,6 +1659,76 @@
       console.warn("No meta URL in feature collection");
   };
 
+  Item.prototype.updateFc = function (descriptor, readonly /* = false */)
+  {
+    var self = this;
+
+    /* Attempt to retrieve the feature collection for the bin's content id. */
+    return this.api.fc.get(descriptor.content_id)
+      .then(function (fc) {
+        console.log("Feature collection GET successful (id=%s)",
+                    descriptor.content_id);
+
+        /* A feature collection was received. No further operations are carried
+         * out if `readonly´ is true; otherwise its contents are updated. */
+        if(!readonly)
+          return self.do_update_fc_(fc, descriptor);
+
+        return fc;
+      },
+      function () {
+        /* It was not possible to retrieve the feature collection for this
+         * descriptor's content id. */
+        if(readonly) {
+          console.error("Feature collection GET failed: "
+                        + "NOT creating new (id=%s)",
+                        descriptor.content_id);
+          return null;
+        }
+
+        console.info("Feature collection GET failed: creating new (id=%s)",
+                     descriptor.content_id);
+        return self.api.fc.create(descriptor.content_id, descriptor.document)
+          .done(function(fc) {
+            console.log('Feature collection created: (id=%s)',
+                        descriptor.content_id);
+
+            return self.do_update_fc_(fc, descriptor);
+          } )
+          .fail(function () {
+            self.controller.owner.networkFailure.incident(
+              NetworkFailure.types.fc.create, descriptor);
+          } );
+      } );
+  };
+
+  /* Private/protected interface */
+  Item.prototype.do_update_fc_ = function (fc, descriptor)
+  {
+    console.log("Item: updating feature collection");
+    var self = this,
+        set = this.api.fc.setContent;
+
+    /* Ensure there is a `meta_url´ attribute and assign content. */
+    if(!this.api.fc.exists(fc, "meta_url"))
+      set(fc, "meta_url", descriptor.href.toString());
+
+    set(fc, descriptor.subtopic_id, descriptor.content);
+
+    /* Instruct backend to update feature collection. */
+    return this.api.fc.put(descriptor.content_id, fc)
+      .done(function () {
+        console.log("Feature collection PUT successful (id=%s)",
+                    descriptor.content_id);
+      } )
+      .fail(function () {
+        self.controller.owner.networkFailure.incident(
+          NetworkFailure.types.fc.save, {
+            content_id: descriptor.content_id, fc: fc
+          } );
+      } );
+  };
+
 
   /**
    * @class
@@ -1804,6 +1794,22 @@
       throw "Failed to create subfolder";
 
     this.owner_.open();
+  };
+
+  /* Private/protected interface */
+  ItemImage.prototype.do_update_fc_ = function (fc, descriptor)
+  {
+    console.log("ItemImage: updating feature collection");
+    if(descriptor.type !== 'image')
+      throw "Invalid descriptor: not image";
+    else if(std.is_str(descriptor.data) || descriptor.data.length > 0) {
+      this.api.fc.setContent(
+        fc, this.api.makeRawSubId(descriptor.subtopic_id, "data"),
+        descriptor.data);
+    }
+
+    /* Now invoke base class method. */
+    return Item.prototype.do_update_fc_.call(this, fc, descriptor);
   };
 
 

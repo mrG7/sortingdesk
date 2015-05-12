@@ -117,14 +117,21 @@
       }
 
       this.setContent = setContent;
-      function setContent(fc, subtopic_id, content)
+      function setContent(fc, id, content)
       {
         if(typeof content !== 'string' || content.length === 0)
           throw "Invalid item content";
-        else if(typeof subtopic_id !== 'string' || subtopic_id === 0)
-          throw "Invalid subtopic id";
+        else if(typeof id !== 'string' || id === 0)
+          throw "Invalid id";
 
-        fc.raw[subtopic_id] = content;
+        fc.raw[id] = content;
+      }
+
+      this.exists = exists;
+      function exists(fc, id)
+      {
+        if(typeof id !== 'string' || id === 0) throw "Invalid id";
+        return id in fc.raw;
       }
     })();
 
