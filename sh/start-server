@@ -6,9 +6,15 @@
 # Comments:
 #
 
+function preexit () {
+  sh -c "$dir_root/sh/stop-server"
+}
+
 readonly dir_root="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. && pwd )"
 source "$dir_root/sh/settings.sh"
 source "$dir_root/sh/libtools.sh"
+
+trap preexit EXIT
 
 info "starting dossier.models instance"
 DOSSIER_WEB_DEV=1 dossier.models -c "$DOSSIER_MODELS_PATH_YAML" \
