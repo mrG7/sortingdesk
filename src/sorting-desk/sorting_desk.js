@@ -597,7 +597,7 @@
         var query_id = api.qitems.getQueryContentId();
 
         if(query_id) {
-          self.do_add_label_(new (api.getClass("Label"))(
+          self.addLabel(new (api.getClass("Label"))(
             item.content_id,
             query_id,
             api.qitems.getAnnotator(),
@@ -1072,18 +1072,11 @@
       } );
   };
 
-  ControllerExplorer.prototype.do_add_label_ = function (label)
+  ControllerExplorer.prototype.addLabel = function (label)
   {
     var self = this;
 
     return this.api.label.add(label)
-      .done(function () {
-        console.log("Label ADD successful: '%s' %s '%s'",
-                    label.cid1,
-                    label.coref_value === self.api.consts.coref.POSITIVE
-                    ? '==' : '!=',
-                    label.cid2);
-      } )
       .fail(function () {
         self.owner_.networkFailure.incident(
           NetworkFailure.types.label, label
