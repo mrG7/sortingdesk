@@ -1,0 +1,21 @@
+#!/bin/bash
+# stop-server --- Stops local dossier.models server instance(s)
+#
+# Copyright (c) 2015 Diffeo
+#
+# Comments:
+# There is an issue with the dossier.models server in that it doesn't
+# (seem to) respond to C-c or kill signals and remains resident in memory.
+# This script should help killing any dossier.models instance(s) found to be
+# running.
+#
+
+readonly dir_root="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. && pwd )"
+source "$dir_root/sh/libtools.sh"
+
+info "stopping ALL dossier.models instances"
+while [ true ]; do
+  pid=`ps -x|grep -v -e 'grep.*dossier.models'|grep dossier.models|grep -o '[0-9]\+'|head -n1`
+  [ -z "$pid" ] && break
+  kill -9 "$pid";
+done
