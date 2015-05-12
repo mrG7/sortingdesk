@@ -796,50 +796,6 @@
     };
   };
 
-  ControllerExplorer.prototype.merge = function (dropped, dragged)
-  {
-    var label = new (this.api.getClass('Label'))(
-          dropped.id,
-          dragged.id,
-          this.api.qitems.getAnnotator(),
-          this.api.consts.coref.POSITIVE,
-          dropped.data.subtopic_id,
-          dragged.data.subtopic_id);
-
-    /* NOTE: since bins are UI creations and don't exist as such in the backend,
-     * we always remove the bin regardless what the result is from adding the
-     * label. */
-    this.removeAt(this.indexOf(dragged));
-    this.owner_.save();
-
-    return this.do_add_label_(label);
-  };
-
-  ControllerExplorer.prototype.addLabel = function (item, descriptor)
-  {
-    var self = this;
-
-    return this.updateFc(descriptor)
-      .then(function (fc) {
-        /* Create label between snippet/image and item. */
-        var label = new (self.api.getClass('Label'))(
-          item.data.content_id,
-          descriptor.content_id,
-          self.api.qitems.getAnnotator(),
-          self.api.consts.coref.POSITIVE,
-          item.data.subtopic_id,
-          descriptor.subtopic_id);
-
-        return self.do_add_label_(label);
-      },
-      function () {
-        console.error("Unable to add label between '%s' and '%s': "
-                      + "feature collection not found",
-                      item.id,
-                      descriptor.content_id);
-      } );
-  };
-
   ControllerExplorer.prototype.each = function (callback)
   {
     var result = null;
