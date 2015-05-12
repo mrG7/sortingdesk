@@ -1,13 +1,5 @@
 #!/bin/bash
 
-function kill_dossier_model () {
-  while [ true ]; do
-    local pid=`ps -x|grep -v -e 'grep.*dossier.models'|grep dossier.models|grep -o '[0-9]\+'|head -n1`
-    [ -z "$pid" ] && break
-    kill -9 "$pid";
-  done
-}
-
 function preexit () {
   info "restoring configuration file"
   mv "$dir_ext/chrome/src/js/extension/config.js" \
@@ -18,9 +10,7 @@ function preexit () {
   info "removing temporary directory"
   rm "$dir_tmp" -rf
 
-  info "killing dossier.models instance"
-  kill_dossier_model
-
+  sh -c "$dir_root/sh/stop-server"
   echo done.
 }
 
@@ -48,7 +38,7 @@ cp "$dir_test/db"/* "$dir_tmp"
 echo -e "\n  filename: $dir_tmp/soft-selector.db" >> "$dir_tmp/config.yaml"
 
 info "starting dossier.models instance"
-kill_dossier_model
+sh -c "$dir_root/sh/stop-server" >/dev/null
 DOSSIER_WEB_DEV=1 dossier.models -c "$dir_tmp/config.yaml" \
   --reload --port 8001 --bottle-debug &>/dev/null &
 
