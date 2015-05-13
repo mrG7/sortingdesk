@@ -701,7 +701,7 @@
         index = 0,
         subfolder = this.selected_.add(
           this.owner.api.foldering.subfolderFromName(
-            this.selected_.data, title));
+            this.selected_.data, title.replace(/\//g, "_")));
 
     var on_loaded = function () { next(); };
     var next = function () {
