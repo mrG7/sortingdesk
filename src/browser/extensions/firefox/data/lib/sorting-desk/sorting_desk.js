@@ -184,11 +184,6 @@
        * Start by explicitly initialising SortingQueue's instance and proceed
        * to initialising our own instance. */
       this.sortingQueue_.initialise();
-      new SortingQueueRenderer(this.sortingQueue_,
-                               this.explorer_,
-                               this.callbacks_,
-                               this.options.suggestion);
-
       (this.explorer_ = new ControllerExplorer(this))
         .on( {
           "refresh-begin": function () {
@@ -202,14 +197,17 @@
 
       this.networkFailure_ = new NetworkFailure(this);
 
+      new SortingQueueRenderer(this.sortingQueue_,
+                               this.explorer_,
+                               this.callbacks_,
+                               this.options.suggestion);
+
       this.initialised_ = true;
       console.info("Sorting Desk UI initialised");
     },
 
     /**
-     * Resets the component to a virgin state. Removes all nodes contained by
-     * `nodes_.bins', if any, after the active `SortingQueue' instance has
-     * successfully reset.
+     * Resets the component to a virgin state.
      *
      * @returns {Promise}   Returns promise that is fulfilled upon successful
      *                      instance reset. */
@@ -238,7 +236,7 @@
       return (new sq.ItemDismissalReplaceTight(
         item, {
           tooltipClose: "Click again to ignore this result without asserting"
-            + " that it is either wrong or a redundant; will automatically"
+            + " that it is either wrong or redundant; will automatically"
             + " select this choice for you in a few seconds.",
           choices: [
             { id: 'redundant',
@@ -267,7 +265,6 @@
           else if (id === 'wrong')
             label.coref_value = self.api.consts.coref.NEGATIVE;
           else {
-            item.owner.remove(item);
             console.error("Unrecognized dismissal identifier: " + id);
             return;
           }
@@ -386,7 +383,7 @@
         'selected-folder',
         'selected-subfolder' ] );
 
-    this.creating_ = null;
+    this.processing_ = null;
     this.selected_ = null;
 
     /* Drag and drop handler */
@@ -425,12 +422,15 @@
               "rename": {
                 label: "Rename",
                 icon: "glyphicon glyphicon-pencil",
-                _disabled: true
+                action: self.on_rename_.bind(self),
+                _disabled: obj === null || obj.loading()
+                  || obj instanceof ItemImage
               },
               "remove": {
                 label: "Remove",
                 icon: "glyphicon glyphicon-remove",
-                _disabled: true
+                action: self.on_remove_.bind(self),
+                _disabled: obj === null || obj.loading() || !obj.loaded
               }
             };
 
@@ -439,14 +439,14 @@
               label: "Export data",
               icon: "glyphicon glyphicon-download-alt",
               separator_before: true,
-              action: function () { self.export(); }
+              action: self.export.bind(self)
             };
           } else if(obj instanceof Subfolder) {
             items["create"] = {
               label: "Create manual item",
               icon: "glyphicon glyphicon-plus",
               separator_before: true,
-              action: function () { self.createItem(); }
+              action: self.createItem.bind(self)
             };
           } else if(obj instanceof Item) {
             items["jump"] = {
@@ -465,55 +465,17 @@
 
     owner.nodes.explorer.on( {
       "rename_node.jstree": function (ev, data) {
-        if(self.creating_ === null)
-          throw "Renaming of nodes not currently implemented";
-
-        data.text = data.text.trim();
-
-        if(data.text !== owner.options.folderNewCaption) {
-          var f;
-
-          if(self.creating_.parent === null) {
-            f = new Folder(self, api.foldering.folderFromName(data.text));
-            self.folders_.push(f);
-            f.loading(true);
-
-            api.foldering.addFolder(f.data)
-              .done(function () {
-                console.info("Successfully added folder", f.data);
-              } )
-              .fail(function () {
-                owner.networkFailure.incident(
-                  NetworkFailure.types.folder.add, f.data
-                );
-              } )
-              .always(function () { f.loading(false); } );
-
-            if(self.folders_.length === 1)
-              self.tree_.select_node(f.id);
-          } else if(self.creating_.obj instanceof Subfolder) {
-            f = new api.foldering.subfolderFromName(
-              self.creating_.parent.data,
-              data.text);
-            f = self.creating_.parent.add(f);
-            if(self.creating_.descriptor)
-              f.add(self.creating_.descriptor);
-          } else if(self.creating_.obj instanceof ItemBase) {
-            var p = self.creating_.parent;
-
-            self.owner_.callbacks.invoke('createManualItem', data.text)
-              .done(function (descriptor) {
-                descriptor.subtopic_id =
-                  self.generate_subtopic_id_(descriptor);
-
-                if(descriptor.subtopic_id !== null)
-                  p.add(descriptor);
-              } );
-          }
+        if(self.processing_ === null) {
+          console.warn("No descriptor available");
+          return;
         }
 
-        self.creating_.obj.reset();
-        self.creating_ = null;
+        self.processing_.do(data.text.trim());
+        if(data.text !== owner.options.folderNewCaption) {
+        }
+
+        self.processing_.reset();
+        self.processing_ = null;
         self.update_empty_state_();
       },
       "before_open.jstree": function (ev, data) {
@@ -580,11 +542,11 @@
     } );
 
     els.toolbar.actions.remove.click(function () {
-      console.info("Not implemented yet");
+      self.on_remove_();
     } );
 
     els.toolbar.actions.rename.click(function () {
-      console.info("Not implemented yet");
+      self.on_rename_();
     } );
 
     els.toolbar.actions.jump.click(function () {
@@ -597,7 +559,7 @@
         var query_id = api.qitems.getQueryContentId();
 
         if(query_id) {
-          self.do_add_label_(new (api.getClass("Label"))(
+          self.addLabel(new (api.getClass("Label"))(
             item.content_id,
             query_id,
             api.qitems.getAnnotator(),
@@ -677,28 +639,6 @@
       } );
   };
 
-  ControllerExplorer.prototype.construct = function (descriptor)
-  {
-    var map = { 'text': 'Bin',
-                'image': 'BinImage' },
-        type;
-
-    if(!descriptor)
-      throw "Invalid bin descriptor";
-
-    /* Extract bin type. */
-    type = this.api.getSubtopicType(descriptor.subtopic_id);
-
-    if(!map.hasOwnProperty(type))
-      throw "Invalid bin type: " + type;
-
-    /* Finaly instantiate correct Bin class. */
-    return this.owner_.constructor.instantiate(
-      map[type],
-      this,
-      descriptor);
-  };
-
   ControllerExplorer.prototype.reset = function ()
   {
     this.reset_tree_();
@@ -713,20 +653,28 @@
   ControllerExplorer.prototype.createFolder = function ()
   {
     this.update_empty_state_(true);
-    this.creating_ = {
-      parent: null,
-      obj: new FolderNew(this)
-    };
+    this.processing_ = new DeferredCreationFolder(
+      this, new FolderNew(this));
   };
 
   ControllerExplorer.prototype.createSubfolder = function (
     folder, name, descriptor)
   {
-    this.creating_ = {
-      parent: folder,
-      obj: new SubfolderNew(folder, name),
-      descriptor: descriptor
-    };
+    this.processing_ = new DeferredCreationSubfolder(
+      this, folder, new SubfolderNew(folder, name), descriptor);
+  };
+
+  ControllerExplorer.prototype.createItem = function (subfolder, name)
+  {
+    if(subfolder === undefined)
+      subfolder = this.selected_;
+    if(!(subfolder instanceof Subfolder)) {
+      console.error("Invalid or no subfolder");
+      return;
+    }
+
+    this.processing_ = new DeferredCreationItem(
+      this, subfolder, new ItemNew(subfolder, name));
   };
 
   ControllerExplorer.prototype.export = function ()
@@ -752,7 +700,7 @@
     var self = this,
         index = 0,
         subfolder = this.selected_.add(
-          new this.owner.api.foldering.subfolderFromName(
+          this.owner.api.foldering.subfolderFromName(
             this.selected_.data, title));
 
     var on_loaded = function () { next(); };
@@ -781,65 +729,6 @@
     return true;
   };
 
-  ControllerExplorer.prototype.createItem = function (subfolder, name)
-  {
-    if(subfolder === undefined)
-      subfolder = this.selected_;
-    if(!(subfolder instanceof Subfolder)) {
-      console.error("Invalid or no subfolder");
-      return;
-    }
-
-    this.creating_ = {
-      parent: subfolder,
-      obj: new ItemNew(subfolder, name)
-    };
-  };
-
-  ControllerExplorer.prototype.merge = function (dropped, dragged)
-  {
-    var label = new (this.api.getClass('Label'))(
-          dropped.id,
-          dragged.id,
-          this.api.qitems.getAnnotator(),
-          this.api.consts.coref.POSITIVE,
-          dropped.data.subtopic_id,
-          dragged.data.subtopic_id);
-
-    /* NOTE: since bins are UI creations and don't exist as such in the backend,
-     * we always remove the bin regardless what the result is from adding the
-     * label. */
-    this.removeAt(this.indexOf(dragged));
-    this.owner_.save();
-
-    return this.do_add_label_(label);
-  };
-
-  ControllerExplorer.prototype.addLabel = function (item, descriptor)
-  {
-    var self = this;
-
-    return this.updateFc(descriptor)
-      .then(function (fc) {
-        /* Create label between snippet/image and item. */
-        var label = new (self.api.getClass('Label'))(
-          item.data.content_id,
-          descriptor.content_id,
-          self.api.qitems.getAnnotator(),
-          self.api.consts.coref.POSITIVE,
-          item.data.subtopic_id,
-          descriptor.subtopic_id);
-
-        return self.do_add_label_(label);
-      },
-      function () {
-        console.error("Unable to add label between '%s' and '%s': "
-                      + "feature collection not found",
-                      item.id,
-                      descriptor.content_id);
-      } );
-  };
-
   ControllerExplorer.prototype.each = function (callback)
   {
     var result = null;
@@ -857,37 +746,6 @@
   ControllerExplorer.prototype.indexOf = function (folder)
   {
     return this.folders_.indexOf(folder);
-  };
-
-  ControllerExplorer.prototype.remove = function (bin)
-  {
-    return this.removeAt(this.bins_.indexOf(bin));
-  };
-
-  ControllerExplorer.prototype.removeAt = function (index)
-  {
-    var bin;
-
-    if(index < 0 || index >= this.bins_.length)
-      throw "Invalid bin index";
-
-    bin = this.bins_[index];
-    this.bins_.splice(index, 1);
-
-    bin.node.remove();
-
-    if(bin === this.active_)
-      this.setActive(this.bins_.length > 0 && this.bins_[0] || null);
-
-    this.update_empty_state_();
-  };
-
-  ControllerExplorer.prototype.getAt = function (index)
-  {
-    if(index < 0 || index >= this.bins_.length)
-      throw "Invalid bin index";
-
-    return this.bins_[index];
   };
 
   ControllerExplorer.prototype.getById = function (id)
@@ -919,10 +777,12 @@
   ControllerExplorer.prototype.setActive = function (item)
   {
     /* Don't activate item if currently active already. */
-    if(!(item instanceof Item))
-      throw "Invalid or no item specified";
-    else if(this.active_ === item)
-      return;
+    if(item !== null) {
+      if(!(item instanceof Item))
+        throw "Invalid item specified";
+      else if(this.active_ === item)
+        return;
+    }
 
     /* Stop all ongoing request at once. */
     this.api.getDossierJs().stop('API.search');
@@ -953,67 +813,22 @@
     this.owner_.events.trigger('active', this.active_);
   };
 
-  ControllerExplorer.prototype.updateActive = function ()
-  {
-    if(this.active_)
-      this.active_.activate();
-  };
-
-  ControllerExplorer.prototype.updateFc = function (descriptor,
-                                                    readonly /* = false */)
-  {
-    var self = this;
-
-    /* Attempt to retrieve the feature collection for the bin's content id. */
-    return this.api.fc.get(descriptor.content_id)
-      .then(function (fc) {
-        console.log("Feature collection GET successful (id=%s)",
-                    descriptor.content_id);
-
-        /* A feature collection was received. No further operations are carried
-         * out if `readonly´ is true; otherwise its contents are updated. */
-        if(!readonly) {
-          self.set_fc_content_(fc, descriptor);
-          return self.do_update_fc_(descriptor.content_id, fc);
-        }
-
-        return fc;
-      },
-      function () {
-        /* It was not possible to retrieve the feature collection for this
-         * descriptor's content id. */
-        if(readonly) {
-          console.error("Feature collection GET failed: "
-                        + "NOT creating new (id=%s)",
-                        descriptor.content_id);
-          return null;
-        }
-
-        console.info("Feature collection GET failed: creating new (id=%s)",
-                     descriptor.content_id);
-        return self.api.fc.create(descriptor.content_id, descriptor.document)
-          .done(function(fc) {
-            console.log('Feature collection created: (id=%s)',
-                        descriptor.content_id);
-
-            self.set_fc_content_(fc, descriptor);
-            self.api.fc.setContent(fc, 'meta_url', descriptor.href.toString());
-
-            return self.do_update_fc_(descriptor.content_id, fc);
-          } )
-          .fail(function () {
-            self.owner_.networkFailure.incident(
-              NetworkFailure.types.fc.create, descriptor);
-          } );
-      } );
-  };
-
   ControllerExplorer.prototype.updateToolbar = function (loading)
   {
     var ela = this.owner_.nodes.toolbar.actions;
     loading = loading === true;
 
     ela.add.toggleClass('disabled', loading);
+
+    ela.rename.toggleClass('disabled',
+                           this.selected_ === null || loading
+                           || this.selected_.loading()
+                           || this.selected_ instanceof ItemImage);
+
+    ela.remove.toggleClass('disabled',
+                           this.selected_ === null || loading
+                           || this.selected_.loading()
+                           || !this.selected_.loaded);
 
     ela.addContextual.toggleClass(
       'disabled',
@@ -1033,62 +848,35 @@
                            || !(this.selected_ instanceof Folder))
   };
 
-  /* Private interface */
-  ControllerExplorer.prototype.set_fc_content_ = function (fc, descriptor)
-  {
-    var set = this.api.fc.setContent;
-    set(fc, descriptor.subtopic_id, descriptor.content);
-
-    if(descriptor.type === 'image'
-       && std.is_str(descriptor.data)
-       && descriptor.data.length > 0)
-    {
-      set(fc, this.api.makeRawSubId(descriptor.subtopic_id, "data"),
-          descriptor.data);
-    }
-  };
-
-  ControllerExplorer.prototype.reset_query_ = function ()
-  {
-    this.api.getDossierJs().stop('API.search');
-    this.api.qitems.setQueryContentId(null);
-    this.owner_.sortingQueue.items.removeAll(false);
-  };
-
-  ControllerExplorer.prototype.do_update_fc_ = function (content_id, fc)
-  {
-    var self = this;
-
-    return this.api.fc.put(content_id, fc)
-      .done(function () {
-        console.log("Feature collection PUT successful (id=%s)",
-                    content_id);
-      } )
-      .fail(function () {
-        self.owner_.networkFailure.incident(
-          NetworkFailure.types.fc.save, {
-            content_id: content_id, fc: fc
-          } );
-      } );
-  };
-
-  ControllerExplorer.prototype.do_add_label_ = function (label)
+  ControllerExplorer.prototype.addLabel = function (label)
   {
     var self = this;
 
     return this.api.label.add(label)
-      .done(function () {
-        console.log("Label ADD successful: '%s' %s '%s'",
-                    label.cid1,
-                    label.coref_value === self.api.consts.coref.POSITIVE
-                    ? '==' : '!=',
-                    label.cid2);
-      } )
       .fail(function () {
         self.owner_.networkFailure.incident(
           NetworkFailure.types.label, label
         );
       } );
+  };
+
+  ControllerExplorer.prototype.remove = function (folder)
+  {
+    var ndx = this.folders_.indexOf(folder);
+    if(ndx < 0) throw "Folder not contained: already removed?";
+    folder.reset();
+    this.folders_.splice(ndx, 1);
+    if(this.selected_ === folder)
+      this.selected_ = null;
+    this.update_empty_state_();
+  };
+
+  /* Private interface */
+  ControllerExplorer.prototype.reset_query_ = function ()
+  {
+    this.api.getDossierJs().stop('API.search');
+    this.api.qitems.setQueryContentId(null);
+    this.owner_.sortingQueue.items.removeAll(false);
   };
 
   ControllerExplorer.prototype.update_empty_state_ = function (hide)
@@ -1113,8 +901,11 @@
     } );
 
     /* Reset relevant state. */
+    if(this.processing_ !== null)
+      this.processing_.reset();
+
     this.folders_ = [ ];
-    this.selected_ = this.creating_ = this.active_ = null;
+    this.selected_ = this.processing_ = this.active_ = null;
 
     this.reset_query_();
   };
@@ -1146,15 +937,40 @@
     } );
   };
 
+  ControllerExplorer.prototype.on_rename_ = function ()
+  {
+    if(this.selected_ === null) {
+      console.error("No selected nodes found");
+      return;
+    } else if(this.selected instanceof ItemImage)
+      throw "Can't rename items of type image";
+
+    var self = this;
+    this.processing_ = new DeferredRename(this, this.selected);
+  };
+
+  ControllerExplorer.prototype.on_remove_ = function ()
+  {
+    if(this.selected_ === null) {
+      console.error("No selected nodes found");
+      return;
+    }
+
+    var self = this;
+    this.selected_.remove().done(function () {
+      self.selected_ = null;
+      self.updateToolbar();
+    } );
+  };
+
   ControllerExplorer.prototype.on_jump_bookmarked_page_ = function ()
   {
-    if(this.selected_ !== null) {
-      if(this.selected_ instanceof Item)
-        this.selected_.jump();
-      else
-        console.error("Selected node not an item");
-    } else
+    if(this.selected_ === null)
       console.error("No selected nodes found");
+    else if(this.selected_ instanceof Item)
+      this.selected_.jump();
+    else
+      console.error("Selected node not an item");
   };
 
   ControllerExplorer.prototype.get_selection_ = function ()
@@ -1359,22 +1175,21 @@
     this.folder_ = folder;
     this.subfolders_ = [ ];
 
-    /* Retrieve all subfolders for this folder. */
     var self = this;
 
     /* Render now. */
     this.render();
 
-    /* If the folder was loaded from persistent storage load its subfolders
-     * now. */
     if(folder.exists) {
       this.loading(true);
 
+      /* Retrieve all subfolders for this folder. */
       this.api.foldering.listSubfolders(folder)
         .done(function (coll) {
           coll.forEach(function (sf) {
             self.subfolders_.push(new Subfolder(self, sf));
           } );
+          self.setLoaded(true);
         } )
         .fail(function () {
           self.controller.owner.networkFailure.incident(
@@ -1383,7 +1198,8 @@
         .always(function () {
           self.loading(false);
         } );
-    }
+    } else
+      self.setLoaded(true);
   };
 
   Folder.prototype = Object.create(ItemBase.prototype);
@@ -1411,6 +1227,51 @@
     var sf = new Subfolder(this, subfolder);
     this.subfolders_.push(sf);
     return sf;
+  };
+
+  Folder.prototype.remove = function (subfolder)
+  {
+    var self = this;
+
+    /* Remove self when `subfolder´ not given. */
+    if(subfolder === undefined) {
+      if(this.loading()) return null;
+      this.loading(true);
+      return this.api.foldering.deleteFolder(this.folder_)
+        .done(function () { self.controller.remove(self); } )
+        .fail(function () {
+          self.controller.owner.networkFailure.incident(
+            NetworkFailure.types.folder.remove, self.folder_);
+        } )
+        .always(function () { self.loading(false); } );
+    }
+
+    var index = this.subfolders_.indexOf(subfolder);
+    if(index < 0) throw "Subfolder not contained: not removing";
+
+    subfolder.reset();
+    self.subfolders_.splice(index, 1);
+  };
+
+  Folder.prototype.rename = function (name)
+  {
+    if(name === this.folder_.name) {
+      console.error("Not renaming: same name");
+      return null;
+    } else if(this.loading())
+      return null;
+
+    var self = this,
+        to = this.api.foldering.folderFromName(name);
+
+    this.loading(true);
+    return this.api.foldering.renameFolder(this.folder_, to)
+      .done(function () { self.folder_ = to; } )
+      .fail(function () {
+        self.controller.owner.networkFailure.incident(
+          NetworkFailure.types.folder.rename, self.folder_);
+      } )
+      .always(function () { self.loading(false); } );
   };
 
 
@@ -1585,16 +1446,67 @@
 
   Subfolder.prototype.remove = function (item)
   {
-    var index = this.items_.indexOf(item);
+    var self = this;
 
-    if(index < 0)
-      throw "Item not contained: not removing";
+    /* Removing self when `item´ not given. */
+    if(item === undefined) {
+      if(this.loading()) return null;
+
+      if(!this.subfolder_.exists && this.items_.length === 0) {
+        var d = $.Deferred();
+        self.owner_.remove(self);
+        window.setTimeout(function () { d.resolve(); }, 0);
+        return d.promise();
+      }
+
+      this.loading(true);
+      return this.api.foldering.deleteSubfolder(this.subfolder_)
+        .done(function () {
+          self.owner_.remove(self);
+        } )
+        .fail(function () {
+          self.controller.owner.networkFailure.incident(
+            NetworkFailure.types.subfolder.remove, self.subfolder_
+          );
+        } )
+        .always(function () { self.loading(false); } );
+    }
+
+    var index = this.items_.indexOf(item);
+    if(index < 0) throw "Item not contained: not removing";
 
     item.reset();
     this.items_.splice(index, 1);
+  };
 
-    if(this.controller.active === item)
-      this.controller.setActive(null);
+  Subfolder.prototype.rename = function (name)
+  {
+    if(name === this.subfolder_.name) {
+      console.error("Not renaming: same name");
+      return null;
+    } else if(this.loading())
+      return null;
+
+    var self = this,
+        to = this.api.foldering.subfolderFromName(this.owner_.data, name);
+
+    /* Edge case: subfolder does not exist in the backend and there are no
+     * items.  In this case, rename locally only. */
+    if(!this.subfolder_.exists && this.items_.length === 0) {
+      this.subfolder_ = to;
+      var d = $.Deferred();
+      window.setTimeout(function () { d.resolve(); }, 0);
+      return d.promise();
+    }
+
+    this.loading(true);
+    return this.api.foldering.renameSubfolder(this.subfolder_, to)
+      .done(function () { self.subfolder_ = to; } )
+      .fail(function () {
+        self.controller.owner.networkFailure.incident(
+          NetworkFailure.types.folder.rename, self.subfolder_);
+      } )
+      .always(function () { self.loading(false); } );
   };
 
   /* Private interface */
@@ -1702,7 +1614,7 @@
       this.loading(true);
 
       /* Create or update feature collection. */
-      this.controller.updateFc(descriptor, false)
+      this.updateFc(descriptor, false)
         .done(function (fc) { self.onGotFeatureCollection(fc);   } )
         .fail(function ()   { self.onGotFeatureCollection(null); } )
         .always(function () { self.loading(false); } );
@@ -1733,9 +1645,36 @@
 
   Item.prototype.reset = function ()
   {
+    if(this.controller.active === this)
+      this.controller.setActive(null);
+
     this.tree.delete_node(this.tree.get_node(this.id_));
     this.item_ = this.id_ = null;
   };
+
+  Item.prototype.remove = function ()
+  {
+    var self = this;
+
+    if(this.loading()) return null;
+    this.loading(true);
+    return this.api.foldering.deleteSubfolderItem(
+      this.owner_.data, this.item_.content_id, this.item_.subtopic_id)
+      .done(function () {
+        self.owner_.remove(self);
+      } )
+      .fail(function () {
+        self.controller.owner.networkFailure.incident(
+          NetworkFailure.types.fc.remove, self.item_
+        );
+      } )
+      .always(function () {
+        self.loading(false);
+      } );
+  };
+
+  Item.prototype.rename = function ()
+  { throw "Only items of text type can be renamed"; };
 
   /* overridable */ Item.prototype.onGotFeatureCollection = function (fc)
   {
@@ -1790,6 +1729,76 @@
       console.warn("No meta URL in feature collection");
   };
 
+  Item.prototype.updateFc = function (descriptor, readonly /* = false */)
+  {
+    var self = this;
+
+    /* Attempt to retrieve the feature collection for the content id. */
+    return this.api.fc.get(descriptor.content_id)
+      .then(function (fc) {
+        console.log("Feature collection GET successful (id=%s)",
+                    descriptor.content_id);
+
+        /* A feature collection was received. No further operations are carried
+         * out if `readonly´ is true; otherwise its contents are updated. */
+        if(!readonly)
+          return self.do_update_fc_(fc, descriptor);
+
+        return fc;
+      },
+      function () {
+        /* It was not possible to retrieve the feature collection for this
+         * descriptor's content id. */
+        if(readonly) {
+          console.error("Feature collection GET failed: "
+                        + "NOT creating new (id=%s)",
+                        descriptor.content_id);
+          return null;
+        }
+
+        console.info("Feature collection GET failed: creating new (id=%s)",
+                     descriptor.content_id);
+        return self.api.fc.create(descriptor.content_id, descriptor.document)
+          .done(function(fc) {
+            console.log('Feature collection created: (id=%s)',
+                        descriptor.content_id);
+
+            return self.do_update_fc_(fc, descriptor);
+          } )
+          .fail(function () {
+            self.controller.owner.networkFailure.incident(
+              NetworkFailure.types.fc.create, descriptor);
+          } );
+      } );
+  };
+
+  /* Private/protected interface */
+  Item.prototype.do_update_fc_ = function (fc, descriptor)
+  {
+    console.log("Item: updating feature collection");
+    var self = this,
+        set = this.api.fc.setContent;
+
+    /* Ensure there is a `meta_url´ attribute and assign content. */
+    if(!this.api.fc.exists(fc, "meta_url"))
+      set(fc, "meta_url", descriptor.href.toString());
+
+    set(fc, descriptor.subtopic_id, descriptor.content);
+
+    /* Instruct backend to update feature collection. */
+    return this.api.fc.put(descriptor.content_id, fc)
+      .done(function () {
+        console.log("Feature collection PUT successful (id=%s)",
+                    descriptor.content_id);
+      } )
+      .fail(function () {
+        self.controller.owner.networkFailure.incident(
+          NetworkFailure.types.fc.save, {
+            content_id: descriptor.content_id, fc: fc
+          } );
+      } );
+  };
+
 
   /**
    * @class
@@ -1813,6 +1822,27 @@
       throw "Failed to create subfolder";
 
     this.owner_.open();
+  };
+
+  ItemText.prototype.rename = function (name)
+  {
+    var self = this;
+
+    if(this.loading()) return null;
+    this.loading(true);
+    return this.api.fc.get(this.item_.content_id)
+      .then(function (fc) {
+        self.api.fc.setContent(fc, self.item_.subtopic_id, name);
+        self.item_.content = fc.feature(self.item_.subtopic_id);
+        return self.api.fc.put(self.item_.content_id, fc);
+      } )
+      .fail(function () {
+        self.controller.owner.networkFailure.incident(
+          NetworkFailure.types.fc.rename, {
+            content_id: self.item_.content_id
+          } );
+      } )
+      .always(function () { self.loading(false); } );
   };
 
 
@@ -1857,6 +1887,22 @@
     this.owner_.open();
   };
 
+  /* Private/protected interface */
+  ItemImage.prototype.do_update_fc_ = function (fc, descriptor)
+  {
+    console.log("ItemImage: updating feature collection");
+    if(descriptor.type !== 'image')
+      throw "Invalid descriptor: not image";
+    else if(std.is_str(descriptor.data) || descriptor.data.length > 0) {
+      this.api.fc.setContent(
+        fc, this.api.makeRawSubId(descriptor.subtopic_id, "data"),
+        descriptor.data);
+    }
+
+    /* Now invoke base class method. */
+    return Item.prototype.do_update_fc_.call(this, fc, descriptor);
+  };
+
 
   /**
    * @class
@@ -1899,6 +1945,156 @@
   ItemNew.prototype.reset = function ()
   {
     this.tree.delete_node(this.tree.get_node(this.id_));
+  };
+
+
+  /**
+   * @class
+   * */
+  var DeferredProcessing = function (explorer, obj)
+  {
+    if(!obj) throw "Object not specified";
+    std.Owned.call(this, explorer);
+
+    Object.defineProperties(this, {
+      api:    { value: explorer.owner.api },
+      obj:    { value: obj }
+    } );
+  };
+
+  DeferredProcessing.prototype = Object.create(std.Owned.prototype);
+  DeferredProcessing.prototype.reset = function () { };
+
+
+  /**
+   * @class
+   * */
+  var DeferredRename = function (explorer, node)
+  {
+    DeferredProcessing.call(this, explorer, node);
+    node = explorer.tree.get_node(node.id);
+    Object.defineProperty(this, 'old', { value: node.text } );
+    explorer.tree.edit(node);
+  };
+
+  DeferredRename.prototype = Object.create(DeferredProcessing.prototype);
+
+  DeferredRename.prototype.do = function (name)
+  {
+    var self = this,
+        deferred = this.obj.rename(name);
+
+    if(deferred !== null) {
+      deferred.fail(function () {
+        self.owner.tree.rename_node(self.obj.id, self.old);
+      } );
+    }
+  };
+
+
+  /**
+   * @class
+   * */
+  var DeferredCreation = function (explorer, parent, obj)
+  {
+    DeferredProcessing.call(this, explorer, obj);
+    Object.defineProperty(this, "parent", { value: parent });
+  };
+
+  DeferredCreation.prototype = Object.create(DeferredProcessing.prototype);
+
+  DeferredCreation.prototype.reset = function ()
+  {
+    if(this.obj !== null) this.obj.reset();
+  };
+
+
+  /**
+   * @class
+   * */
+  var DeferredCreationFolder = function (owner, folder)
+  {
+    DeferredCreation.call(this, owner, null, folder);
+  };
+
+  DeferredCreationFolder.prototype = Object.create(
+    DeferredCreation.prototype);
+
+  DeferredCreationFolder.prototype.do = function (name)
+  {
+    if(name === this.owner.owner.options.folderNewCaption)
+      return;
+
+    var self = this,
+        f = new Folder(this.owner,
+                       this.api.foldering.folderFromName(name));
+
+    this.owner.folders_.push(f);
+    f.loading(true);
+
+    this.api.foldering.addFolder(f.data)
+      .fail(function () {
+        self.owner.owner.networkFailure.incident(
+          NetworkFailure.types.folder.add, f.data);
+      } )
+      .always(function () { f.loading(false); } );
+
+    if(this.owner.folders_.length === 1)
+      this.owner.tree_.select_node(f.id);
+  };
+
+
+  /**
+   * @class
+   * */
+  var DeferredCreationSubfolder = function (
+    explorer, parent, subfolder, descriptor)
+  {
+    if(!parent)
+      throw "Parent not specified";
+
+    DeferredCreation.call(this, explorer, parent, subfolder);
+    Object.defineProperty(this, "descriptor", { value: descriptor || null } );
+  };
+
+  DeferredCreationSubfolder.prototype = Object.create(
+    DeferredCreation.prototype);
+
+  DeferredCreationSubfolder.prototype.do = function (name)
+  {
+    if(name === this.owner.owner.options.folderNewCaption)
+      return;
+
+    var f = new this.api.foldering.subfolderFromName(this.parent.data, name);
+    f = this.parent.add(f);
+    if(this.descriptor !== null)
+      f.add(this.descriptor);
+  };
+
+
+  /**
+   * @class
+   * */
+  var DeferredCreationItem = function (explorer, parent, item)
+  {
+    if(!parent)
+      throw "Parent not specified";
+
+    DeferredCreation.call(this, explorer, parent, item);
+  };
+
+  DeferredCreationItem.prototype = Object.create(DeferredCreation.prototype);
+
+  DeferredCreationItem.prototype.do = function (name)
+  {
+    var self = this;
+
+    this.owner.owner.callbacks.invoke('createManualItem', name)
+      .done(function (descriptor) {
+        descriptor.subtopic_id = self.owner.generate_subtopic_id_(descriptor);
+        if(descriptor.subtopic_id !== null)
+          self.parent.add(descriptor);
+      } );
   };
 
 
@@ -2073,16 +2269,22 @@
     folder: {
       list: 'folder-list',
       add: 'folder-add',
+      remove: 'folder-remove',
+      rename: 'folder-rename',
       load: 'folder-load'
     },
     subfolder: {
       load: 'subfolder-load',
-      add: 'subfolder-add'
+      add: 'subfolder-add',
+      remove: 'subfolder-remove',
+      rename: 'subfolder-rename'
     },
     dismissal: 'item-dismissal',
     fc: {
       create: 'fc-create',
-      save: 'fc-save'
+      save: 'fc-save',
+      remove: 'fc-remove',
+      rename: 'fc-rename'
     },
     label: 'label-add'
   };
@@ -2109,8 +2311,6 @@
   /* Default options */
   var defaults_ = {
     delays: {                   /* In milliseconds.     */
-      binRemoval: 200,          /* Bin is removed from container. */
-      addBinShow: 200,          /* Fade in of temporary bin when adding. */
       emptyFadeIn: 250,
       emptyFadeOut: 100,
       emptyHide: 50

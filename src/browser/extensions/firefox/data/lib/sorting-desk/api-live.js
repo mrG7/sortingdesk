@@ -117,14 +117,21 @@
       }
 
       this.setContent = setContent;
-      function setContent(fc, subtopic_id, content)
+      function setContent(fc, id, content)
       {
         if(typeof content !== 'string' || content.length === 0)
           throw "Invalid item content";
-        else if(typeof subtopic_id !== 'string' || subtopic_id === 0)
-          throw "Invalid subtopic id";
+        else if(typeof id !== 'string' || id === 0)
+          throw "Invalid id";
 
-        fc.raw[subtopic_id] = content;
+        fc.raw[id] = content;
+      }
+
+      this.exists = exists;
+      function exists(fc, id)
+      {
+        if(typeof id !== 'string' || id === 0) throw "Invalid id";
+        return id in fc.raw;
       }
     })();
 
@@ -367,6 +374,12 @@
       {
         return api_.addSubfolderItem(subfolder, item.content_id,item.subtopic_id);
       }
+
+      this.deleteFolder = api_.deleteFolder.bind(api_);
+      this.deleteSubfolder = api_.deleteSubfolder.bind(api_);
+      this.deleteSubfolderItem = api_.deleteSubfolderItem.bind(api_);
+      this.renameFolder = api_.renameFolder.bind(api_);
+      this.renameSubfolder = api_.renameSubfolder.bind(api_);
 
 
       /**
