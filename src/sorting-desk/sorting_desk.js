@@ -383,7 +383,7 @@
         'selected-folder',
         'selected-subfolder' ] );
 
-    this.creating_ = null;
+    this.processing_ = null;
     this.selected_ = null;
 
     /* Drag and drop handler */
@@ -462,55 +462,17 @@
 
     owner.nodes.explorer.on( {
       "rename_node.jstree": function (ev, data) {
-        if(self.creating_ === null)
-          throw "Renaming of nodes not currently implemented";
-
-        data.text = data.text.trim();
-
-        if(data.text !== owner.options.folderNewCaption) {
-          var f;
-
-          if(self.creating_.parent === null) {
-            f = new Folder(self, api.foldering.folderFromName(data.text));
-            self.folders_.push(f);
-            f.loading(true);
-
-            api.foldering.addFolder(f.data)
-              .done(function () {
-                console.info("Successfully added folder", f.data);
-              } )
-              .fail(function () {
-                owner.networkFailure.incident(
-                  NetworkFailure.types.folder.add, f.data
-                );
-              } )
-              .always(function () { f.loading(false); } );
-
-            if(self.folders_.length === 1)
-              self.tree_.select_node(f.id);
-          } else if(self.creating_.obj instanceof Subfolder) {
-            f = new api.foldering.subfolderFromName(
-              self.creating_.parent.data,
-              data.text);
-            f = self.creating_.parent.add(f);
-            if(self.creating_.descriptor)
-              f.add(self.creating_.descriptor);
-          } else if(self.creating_.obj instanceof ItemBase) {
-            var p = self.creating_.parent;
-
-            self.owner_.callbacks.invoke('createManualItem', data.text)
-              .done(function (descriptor) {
-                descriptor.subtopic_id =
-                  self.generate_subtopic_id_(descriptor);
-
-                if(descriptor.subtopic_id !== null)
-                  p.add(descriptor);
-              } );
-          }
+        if(self.processing_ === null) {
+          console.warn("No descriptor available");
+          return;
         }
 
-        self.creating_.obj.reset();
-        self.creating_ = null;
+        self.processing_.do(data.text.trim());
+        if(data.text !== owner.options.folderNewCaption) {
+        }
+
+        self.processing_.reset();
+        self.processing_ = null;
         self.update_empty_state_();
       },
       "before_open.jstree": function (ev, data) {
@@ -688,20 +650,28 @@
   ControllerExplorer.prototype.createFolder = function ()
   {
     this.update_empty_state_(true);
-    this.creating_ = {
-      parent: null,
-      obj: new FolderNew(this)
-    };
+    this.processing_ = new DeferredCreationFolder(
+      this, new FolderNew(this));
   };
 
   ControllerExplorer.prototype.createSubfolder = function (
     folder, name, descriptor)
   {
-    this.creating_ = {
-      parent: folder,
-      obj: new SubfolderNew(folder, name),
-      descriptor: descriptor
-    };
+    this.processing_ = new DeferredCreationSubfolder(
+      this, folder, new SubfolderNew(folder, name), descriptor);
+  };
+
+  ControllerExplorer.prototype.createItem = function (subfolder, name)
+  {
+    if(subfolder === undefined)
+      subfolder = this.selected_;
+    if(!(subfolder instanceof Subfolder)) {
+      console.error("Invalid or no subfolder");
+      return;
+    }
+
+    this.processing_ = new DeferredCreationItem(
+      this, subfolder, new ItemNew(subfolder, name));
   };
 
   ControllerExplorer.prototype.export = function ()
@@ -754,21 +724,6 @@
     next();
 
     return true;
-  };
-
-  ControllerExplorer.prototype.createItem = function (subfolder, name)
-  {
-    if(subfolder === undefined)
-      subfolder = this.selected_;
-    if(!(subfolder instanceof Subfolder)) {
-      console.error("Invalid or no subfolder");
-      return;
-    }
-
-    this.creating_ = {
-      parent: subfolder,
-      obj: new ItemNew(subfolder, name)
-    };
   };
 
   ControllerExplorer.prototype.each = function (callback)
@@ -926,8 +881,11 @@
     } );
 
     /* Reset relevant state. */
+    if(this.processing_ !== null)
+      this.processing_.reset();
+
     this.folders_ = [ ];
-    this.selected_ = this.creating_ = this.active_ = null;
+    this.selected_ = this.processing_ = this.active_ = null;
 
     this.reset_query_();
   };
@@ -1798,6 +1756,134 @@
   ItemNew.prototype.reset = function ()
   {
     this.tree.delete_node(this.tree.get_node(this.id_));
+  };
+
+
+  /**
+   * @class
+   * */
+  var DeferredProcessing = function (explorer, parent, obj)
+  {
+    std.Owned.call(this, explorer);
+
+    Object.defineProperties(this, {
+      api:    { value: explorer.owner.api },
+      parent: { value: parent },
+      obj:    { value: obj }
+    } );
+  };
+
+  DeferredProcessing.prototype = Object.create(std.Owned.prototype);
+  DeferredProcessing.prototype.reset = function () { };
+
+
+  var DeferredCreation = function (explorer, parent, obj)
+  {
+    if(!obj) throw "Object not specified";
+    DeferredProcessing.call(this, explorer, parent, obj);
+  };
+
+  DeferredCreation.prototype = Object.create(DeferredProcessing.prototype);
+
+  DeferredCreation.prototype.reset = function ()
+  {
+    console.log("INVOKING RESET");
+    if(this.obj !== null) this.obj.reset();
+  };
+
+
+  /**
+   * @class
+   * */
+  var DeferredCreationFolder = function (owner, folder)
+  {
+    DeferredCreation.call(this, owner, null, folder);
+  };
+
+  DeferredCreationFolder.prototype = Object.create(
+    DeferredCreation.prototype);
+
+  DeferredCreationFolder.prototype.do = function (name)
+  {
+    if(name === this.owner.owner.options.folderNewCaption)
+      return;
+
+    var self = this,
+        f = new Folder(this.owner,
+                       this.api.foldering.folderFromName(name));
+
+    this.owner.folders_.push(f);
+    f.loading(true);
+
+    this.api.foldering.addFolder(f.data)
+      .done(function () {
+        console.info("Successfully added folder", f.data);
+      } )
+      .fail(function () {
+        self.owner.owner.networkFailure.incident(
+          NetworkFailure.types.folder.add, f.data
+        );
+      } )
+      .always(function () { f.loading(false); } );
+
+    if(this.owner.folders_.length === 1)
+      this.owner.tree_.select_node(f.id);
+  };
+
+
+  /**
+   * @class
+   * */
+  var DeferredCreationSubfolder = function (
+    explorer, parent, subfolder, descriptor)
+  {
+    if(!parent)
+      throw "Parent not specified";
+
+    DeferredCreation.call(this, explorer, parent, subfolder);
+    Object.defineProperty(this, "descriptor", { value: descriptor || null } );
+  };
+
+  DeferredCreationSubfolder.prototype = Object.create(
+    DeferredCreation.prototype);
+
+  DeferredCreationSubfolder.prototype.do = function (name)
+  {
+    if(name === this.owner.owner.options.folderNewCaption)
+      return;
+
+    var f = new this.api.foldering.subfolderFromName(
+      this.parent.data, name);
+
+    f = this.parent.add(f);
+    if(this.descriptor !== null)
+      f.add(this.descriptor);
+  };
+
+
+  /**
+   * @class
+   * */
+  var DeferredCreationItem = function (explorer, parent, item)
+  {
+    if(!parent)
+      throw "Parent not specified";
+
+    DeferredCreation.call(this, explorer, parent, item);
+  };
+
+  DeferredCreationItem.prototype = Object.create(DeferredCreation.prototype);
+
+  DeferredCreationItem.prototype.do = function (name)
+  {
+    var self = this;
+
+    this.owner.owner.callbacks.invoke('createManualItem', name)
+      .done(function (descriptor) {
+        descriptor.subtopic_id = self.owner.generate_subtopic_id_(descriptor);
+        if(descriptor.subtopic_id !== null)
+          self.parent.add(descriptor);
+      } );
   };
 
 
