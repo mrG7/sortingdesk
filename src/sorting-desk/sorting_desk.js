@@ -236,7 +236,7 @@
       return (new sq.ItemDismissalReplaceTight(
         item, {
           tooltipClose: "Click again to ignore this result without asserting"
-            + " that it is either wrong or a redundant; will automatically"
+            + " that it is either wrong or redundant; will automatically"
             + " select this choice for you in a few seconds.",
           choices: [
             { id: 'redundant',
