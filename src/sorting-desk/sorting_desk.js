@@ -436,14 +436,14 @@
               label: "Export data",
               icon: "glyphicon glyphicon-download-alt",
               separator_before: true,
-              action: function () { self.export(); }
+              action: self.export.bind(self)
             };
           } else if(obj instanceof Subfolder) {
             items["create"] = {
               label: "Create manual item",
               icon: "glyphicon glyphicon-plus",
               separator_before: true,
-              action: function () { self.createItem(); }
+              action: self.createItem.bind(self)
             };
           } else if(obj instanceof Item) {
             items["jump"] = {
@@ -697,7 +697,7 @@
     var self = this,
         index = 0,
         subfolder = this.selected_.add(
-          new this.owner.api.foldering.subfolderFromName(
+          this.owner.api.foldering.subfolderFromName(
             this.selected_.data, title));
 
     var on_loaded = function () { next(); };
@@ -774,10 +774,12 @@
   ControllerExplorer.prototype.setActive = function (item)
   {
     /* Don't activate item if currently active already. */
-    if(!(item instanceof Item))
-      throw "Invalid or no item specified";
-    else if(this.active_ === item)
-      return;
+    if(item !== null) {
+      if(!(item instanceof Item))
+        throw "Invalid item specified";
+      else if(this.active_ === item)
+        return;
+    }
 
     /* Stop all ongoing request at once. */
     this.api.getDossierJs().stop('API.search');
@@ -913,13 +915,12 @@
 
   ControllerExplorer.prototype.on_jump_bookmarked_page_ = function ()
   {
-    if(this.selected_ !== null) {
-      if(this.selected_ instanceof Item)
-        this.selected_.jump();
-      else
-        console.error("Selected node not an item");
-    } else
+    if(this.selected_ === null)
       console.error("No selected nodes found");
+    else if(this.selected_ instanceof Item)
+      this.selected_.jump();
+    else
+      console.error("Selected node not an item");
   };
 
   ControllerExplorer.prototype.get_selection_ = function ()
@@ -1124,22 +1125,21 @@
     this.folder_ = folder;
     this.subfolders_ = [ ];
 
-    /* Retrieve all subfolders for this folder. */
     var self = this;
 
     /* Render now. */
     this.render();
 
-    /* If the folder was loaded from persistent storage load its subfolders
-     * now. */
     if(folder.exists) {
       this.loading(true);
 
+      /* Retrieve all subfolders for this folder. */
       this.api.foldering.listSubfolders(folder)
         .done(function (coll) {
           coll.forEach(function (sf) {
             self.subfolders_.push(new Subfolder(self, sf));
           } );
+          self.setLoaded(true);
         } )
         .fail(function () {
           self.controller.owner.networkFailure.incident(
@@ -1148,7 +1148,8 @@
         .always(function () {
           self.loading(false);
         } );
-    }
+    } else
+      self.setLoaded(true);
   };
 
   Folder.prototype = Object.create(ItemBase.prototype);
