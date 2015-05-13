@@ -808,12 +808,6 @@
     this.owner_.events.trigger('active', this.active_);
   };
 
-  ControllerExplorer.prototype.updateActive = function ()
-  {
-    if(this.active_)
-      this.active_.activate();
-  };
-
   ControllerExplorer.prototype.updateToolbar = function (loading)
   {
     var ela = this.owner_.nodes.toolbar.actions;
