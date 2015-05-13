@@ -1763,6 +1763,8 @@
             console.log('Feature collection created: (id=%s)',
                         descriptor.content_id);
 
+            /* Set `meta_url´ attribute. */
+            self.api.fc.setContent(fc, "meta_url", descriptor.href.toString());
             return self.do_update_fc_(fc, descriptor);
           } )
           .fail(function () {
@@ -1776,14 +1778,9 @@
   Item.prototype.do_update_fc_ = function (fc, descriptor)
   {
     console.log("Item: updating feature collection");
-    var self = this,
-        set = this.api.fc.setContent;
+    var self = this;
 
-    /* Ensure there is a `meta_url´ attribute and assign content. */
-    if(!this.api.fc.exists(fc, "meta_url"))
-      set(fc, "meta_url", descriptor.href.toString());
-
-    set(fc, descriptor.subtopic_id, descriptor.content);
+    this.api.fc.setContent(fc, descriptor.subtopic_id, descriptor.content);
 
     /* Instruct backend to update feature collection. */
     return this.api.fc.put(descriptor.content_id, fc)
