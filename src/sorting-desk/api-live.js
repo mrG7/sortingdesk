@@ -375,6 +375,12 @@
         return api_.addSubfolderItem(subfolder, item.content_id,item.subtopic_id);
       }
 
+      this.deleteFolder = api_.deleteFolder.bind(api_);
+      this.deleteSubfolder = api_.deleteSubfolder.bind(api_);
+      this.deleteSubfolderItem = api_.deleteSubfolderItem.bind(api_);
+      this.renameFolder = api_.renameFolder.bind(api_);
+      this.renameSubfolder = api_.renameSubfolder.bind(api_);
+
 
       /**
        * @class
