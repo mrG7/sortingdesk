@@ -422,12 +422,15 @@
               "rename": {
                 label: "Rename",
                 icon: "glyphicon glyphicon-pencil",
-                _disabled: true
+                action: self.on_rename_.bind(self),
+                _disabled: obj === null || obj.loading()
+                  || obj instanceof ItemImage
               },
               "remove": {
                 label: "Remove",
                 icon: "glyphicon glyphicon-remove",
-                _disabled: true
+                action: self.on_remove_.bind(self),
+                _disabled: obj === null || obj.loading() || !obj.loaded
               }
             };
 
@@ -539,11 +542,11 @@
     } );
 
     els.toolbar.actions.remove.click(function () {
-      console.info("Not implemented yet");
+      self.on_remove_();
     } );
 
     els.toolbar.actions.rename.click(function () {
-      console.info("Not implemented yet");
+      self.on_rename_();
     } );
 
     els.toolbar.actions.jump.click(function () {
@@ -817,6 +820,16 @@
 
     ela.add.toggleClass('disabled', loading);
 
+    ela.rename.toggleClass('disabled',
+                           this.selected_ === null || loading
+                           || this.selected_.loading()
+                           || this.selected_ instanceof ItemImage);
+
+    ela.remove.toggleClass('disabled',
+                           this.selected_ === null || loading
+                           || this.selected_.loading()
+                           || !this.selected_.loaded);
+
     ela.addContextual.toggleClass(
       'disabled',
       loading || !this.selected_
@@ -845,6 +858,17 @@
           NetworkFailure.types.label, label
         );
       } );
+  };
+
+  ControllerExplorer.prototype.remove = function (folder)
+  {
+    var ndx = this.folders_.indexOf(folder);
+    if(ndx < 0) throw "Folder not contained: already removed?";
+    folder.reset();
+    this.folders_.splice(ndx, 1);
+    if(this.selected_ === folder)
+      this.selected_ = null;
+    this.update_empty_state_();
   };
 
   /* Private interface */
@@ -910,6 +934,32 @@
       } catch (x) {
         std.on_exception(x);
       }
+    } );
+  };
+
+  ControllerExplorer.prototype.on_rename_ = function ()
+  {
+    if(this.selected_ === null) {
+      console.error("No selected nodes found");
+      return;
+    } else if(this.selected instanceof ItemImage)
+      throw "Can't rename items of type image";
+
+    var self = this;
+    this.processing_ = new DeferredRename(this, this.selected);
+  };
+
+  ControllerExplorer.prototype.on_remove_ = function ()
+  {
+    if(this.selected_ === null) {
+      console.error("No selected nodes found");
+      return;
+    }
+
+    var self = this;
+    this.selected_.remove().done(function () {
+      self.selected_ = null;
+      self.updateToolbar();
     } );
   };
 
@@ -1179,6 +1229,51 @@
     return sf;
   };
 
+  Folder.prototype.remove = function (subfolder)
+  {
+    var self = this;
+
+    /* Remove self when `subfolder´ not given. */
+    if(subfolder === undefined) {
+      if(this.loading()) return null;
+      this.loading(true);
+      return this.api.foldering.deleteFolder(this.folder_)
+        .done(function () { self.controller.remove(self); } )
+        .fail(function () {
+          self.controller.owner.networkFailure.incident(
+            NetworkFailure.types.folder.remove, self.folder_);
+        } )
+        .always(function () { self.loading(false); } );
+    }
+
+    var index = this.subfolders_.indexOf(subfolder);
+    if(index < 0) throw "Subfolder not contained: not removing";
+
+    subfolder.reset();
+    self.subfolders_.splice(index, 1);
+  };
+
+  Folder.prototype.rename = function (name)
+  {
+    if(name === this.folder_.name) {
+      console.error("Not renaming: same name");
+      return null;
+    } else if(this.loading())
+      return null;
+
+    var self = this,
+        to = this.api.foldering.folderFromName(name);
+
+    this.loading(true);
+    return this.api.foldering.renameFolder(this.folder_, to)
+      .done(function () { self.folder_ = to; } )
+      .fail(function () {
+        self.controller.owner.networkFailure.incident(
+          NetworkFailure.types.folder.rename, self.folder_);
+      } )
+      .always(function () { self.loading(false); } );
+  };
+
 
   /**
    * @class
@@ -1351,16 +1446,67 @@
 
   Subfolder.prototype.remove = function (item)
   {
-    var index = this.items_.indexOf(item);
+    var self = this;
 
-    if(index < 0)
-      throw "Item not contained: not removing";
+    /* Removing self when `item´ not given. */
+    if(item === undefined) {
+      if(this.loading()) return null;
+
+      if(!this.subfolder_.exists && this.items_.length === 0) {
+        var d = $.Deferred();
+        self.owner_.remove(self);
+        window.setTimeout(function () { d.resolve(); }, 0);
+        return d.promise();
+      }
+
+      this.loading(true);
+      return this.api.foldering.deleteSubfolder(this.subfolder_)
+        .done(function () {
+          self.owner_.remove(self);
+        } )
+        .fail(function () {
+          self.controller.owner.networkFailure.incident(
+            NetworkFailure.types.subfolder.remove, self.subfolder_
+          );
+        } )
+        .always(function () { self.loading(false); } );
+    }
+
+    var index = this.items_.indexOf(item);
+    if(index < 0) throw "Item not contained: not removing";
 
     item.reset();
     this.items_.splice(index, 1);
+  };
 
-    if(this.controller.active === item)
-      this.controller.setActive(null);
+  Subfolder.prototype.rename = function (name)
+  {
+    if(name === this.subfolder_.name) {
+      console.error("Not renaming: same name");
+      return null;
+    } else if(this.loading())
+      return null;
+
+    var self = this,
+        to = this.api.foldering.subfolderFromName(this.owner_.data, name);
+
+    /* Edge case: subfolder does not exist in the backend and there are no
+     * items.  In this case, rename locally only. */
+    if(!this.subfolder_.exists && this.items_.length === 0) {
+      this.subfolder_ = to;
+      var d = $.Deferred();
+      window.setTimeout(function () { d.resolve(); }, 0);
+      return d.promise();
+    }
+
+    this.loading(true);
+    return this.api.foldering.renameSubfolder(this.subfolder_, to)
+      .done(function () { self.subfolder_ = to; } )
+      .fail(function () {
+        self.controller.owner.networkFailure.incident(
+          NetworkFailure.types.folder.rename, self.subfolder_);
+      } )
+      .always(function () { self.loading(false); } );
   };
 
   /* Private interface */
@@ -1499,9 +1645,36 @@
 
   Item.prototype.reset = function ()
   {
+    if(this.controller.active === this)
+      this.controller.setActive(null);
+
     this.tree.delete_node(this.tree.get_node(this.id_));
     this.item_ = this.id_ = null;
   };
+
+  Item.prototype.remove = function ()
+  {
+    var self = this;
+
+    if(this.loading()) return null;
+    this.loading(true);
+    return this.api.foldering.deleteSubfolderItem(
+      this.owner_.data, this.item_.content_id, this.item_.subtopic_id)
+      .done(function () {
+        self.owner_.remove(self);
+      } )
+      .fail(function () {
+        self.controller.owner.networkFailure.incident(
+          NetworkFailure.types.fc.remove, self.item_
+        );
+      } )
+      .always(function () {
+        self.loading(false);
+      } );
+  };
+
+  Item.prototype.rename = function ()
+  { throw "Only items of text type can be renamed"; };
 
   /* overridable */ Item.prototype.onGotFeatureCollection = function (fc)
   {
@@ -1651,6 +1824,27 @@
     this.owner_.open();
   };
 
+  ItemText.prototype.rename = function (name)
+  {
+    var self = this;
+
+    if(this.loading()) return null;
+    this.loading(true);
+    return this.api.fc.get(this.item_.content_id)
+      .then(function (fc) {
+        self.api.fc.setContent(fc, self.item_.subtopic_id, name);
+        self.item_.content = fc.feature(self.item_.subtopic_id);
+        return self.api.fc.put(self.item_.content_id, fc);
+      } )
+      .fail(function () {
+        self.controller.owner.networkFailure.incident(
+          NetworkFailure.types.fc.rename, {
+            content_id: self.item_.content_id
+          } );
+      } )
+      .always(function () { self.loading(false); } );
+  };
+
 
   /**
    * @class
@@ -1757,13 +1951,13 @@
   /**
    * @class
    * */
-  var DeferredProcessing = function (explorer, parent, obj)
+  var DeferredProcessing = function (explorer, obj)
   {
+    if(!obj) throw "Object not specified";
     std.Owned.call(this, explorer);
 
     Object.defineProperties(this, {
       api:    { value: explorer.owner.api },
-      parent: { value: parent },
       obj:    { value: obj }
     } );
   };
@@ -1772,17 +1966,45 @@
   DeferredProcessing.prototype.reset = function () { };
 
 
+  /**
+   * @class
+   * */
+  var DeferredRename = function (explorer, node)
+  {
+    DeferredProcessing.call(this, explorer, node);
+    node = explorer.tree.get_node(node.id);
+    Object.defineProperty(this, 'old', { value: node.text } );
+    explorer.tree.edit(node);
+  };
+
+  DeferredRename.prototype = Object.create(DeferredProcessing.prototype);
+
+  DeferredRename.prototype.do = function (name)
+  {
+    var self = this,
+        deferred = this.obj.rename(name);
+
+    if(deferred !== null) {
+      deferred.fail(function () {
+        self.owner.tree.rename_node(self.obj.id, self.old);
+      } );
+    }
+  };
+
+
+  /**
+   * @class
+   * */
   var DeferredCreation = function (explorer, parent, obj)
   {
-    if(!obj) throw "Object not specified";
-    DeferredProcessing.call(this, explorer, parent, obj);
+    DeferredProcessing.call(this, explorer, obj);
+    Object.defineProperty(this, "parent", { value: parent });
   };
 
   DeferredCreation.prototype = Object.create(DeferredProcessing.prototype);
 
   DeferredCreation.prototype.reset = function ()
   {
-    console.log("INVOKING RESET");
     if(this.obj !== null) this.obj.reset();
   };
 
@@ -1811,13 +2033,9 @@
     f.loading(true);
 
     this.api.foldering.addFolder(f.data)
-      .done(function () {
-        console.info("Successfully added folder", f.data);
-      } )
       .fail(function () {
         self.owner.owner.networkFailure.incident(
-          NetworkFailure.types.folder.add, f.data
-        );
+          NetworkFailure.types.folder.add, f.data);
       } )
       .always(function () { f.loading(false); } );
 
@@ -1847,9 +2065,7 @@
     if(name === this.owner.owner.options.folderNewCaption)
       return;
 
-    var f = new this.api.foldering.subfolderFromName(
-      this.parent.data, name);
-
+    var f = new this.api.foldering.subfolderFromName(this.parent.data, name);
     f = this.parent.add(f);
     if(this.descriptor !== null)
       f.add(this.descriptor);
@@ -2053,16 +2269,22 @@
     folder: {
       list: 'folder-list',
       add: 'folder-add',
+      remove: 'folder-remove',
+      rename: 'folder-rename',
       load: 'folder-load'
     },
     subfolder: {
       load: 'subfolder-load',
-      add: 'subfolder-add'
+      add: 'subfolder-add',
+      remove: 'subfolder-remove',
+      rename: 'subfolder-rename'
     },
     dismissal: 'item-dismissal',
     fc: {
       create: 'fc-create',
-      save: 'fc-save'
+      save: 'fc-save',
+      remove: 'fc-remove',
+      rename: 'fc-rename'
     },
     label: 'label-add'
   };
