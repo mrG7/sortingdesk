@@ -670,7 +670,8 @@ A.sd-text-item-title {
 
 /* Hack for JsTree. */
 #sd-folder-explorer .sd-container-view {
-  overflow: hidden;
+  overflow: auto;
+  height: 100%;
 }
 
 #sd-folder-explorer .sd-loading {
