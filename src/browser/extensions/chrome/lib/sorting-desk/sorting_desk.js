@@ -299,7 +299,7 @@
     this.sortingQueue.on('items-updated', function (count) {
       if(count === 0) {
         $('#' + options.suggestion).remove();
-/*        $('#' + options.recommendation).remove(); */
+        $('#' + options.recommendation).remove();
       }
     } );
   };
