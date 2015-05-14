@@ -74,6 +74,10 @@ BODY {
   font-size: 13px;
 }
 
+#sd-folder-explorer .sd-header > H1 {
+  font-size: 14px;
+}
+
 .sd-panel > .sd-header > .sd-header-title,
 .sd-panel > .sd-footer > .sd-footer-title {
   margin-top: 7px;

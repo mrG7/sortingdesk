@@ -302,7 +302,8 @@
     } );
   };
 
-  SortingQueueRenderer.prototype.onPreRender_ = function (data) {
+  SortingQueueRenderer.prototype.onPreRender_ = function (data)
+  {
     var node,
         self = this,
         container = $('#' + this.options.id),
