@@ -1535,7 +1535,11 @@
         to = this.api.foldering.subfolderFromName(this.owner_.data, name);
 
     /* Edge case: subfolder does not exist in the backend and there are no
-     * items.  In this case, rename locally only. */
+     * items.  In this case, rename locally only.
+     *
+     * This is because subfolders aren't actually created in the backend in the
+     * same way that folders are. */
+    to.exists = this.subfolder_.exists;
     if(!this.subfolder_.exists && this.items_.length === 0) {
       this.subfolder_ = to;
       var d = $.Deferred();
