@@ -165,13 +165,13 @@ BODY {
   color: #474523;
 }
 
-#sd-suggestion > H1 {
+#sd-suggestion > H3 {
   font-size: 12px;
   margin: 0;
   color: #7F6A33;
 }
 
-#sd-suggestion > H1 > BUTTON {
+#sd-suggestion > H3 > BUTTON {
   float: right;
   border-radius: 20px;
   outline: none;
@@ -179,25 +179,34 @@ BODY {
   transition: all .25s;
 }
 
-#sd-suggestion:hover > H1 > BUTTON {
+#sd-suggestion:hover > H3 > BUTTON {
   opacity: 1;
 }
 
-#sd-suggestion > H1 > SPAN {
+#sd-suggestion > H3 > SPAN {
   margin-right: 5px;
+}
+
+#sd-suggestion > H1 {
+  font-size: 13px;
+  font-weight: bold;
+  margin: 10px 0 10px 0;
+  color: #574e2a;
 }
 
 #sd-suggestion > H2 {
   display: block;
-  display: -webkit-box;
   font-size: 14px;
   color: #59531d;
+  margin: 10px 0 10px 0;
   line-height: 15px;
-  max-height: 30px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+  text-shadow: 1px 1px 1px #A5A883;
+/*   display: -webkit-box; */
+/*   max-height: 30px; */
+/*   overflow: hidden; */
+/*   text-overflow: ellipsis; */
+/*   -webkit-line-clamp: 2; */
+/*   -webkit-box-orient: vertical; */
 }
 
 #sd-suggestion > .sd-score {
@@ -207,6 +216,19 @@ BODY {
 
 #sd-suggestion > P {
   color: #574e2a;
+}
+
+.sd-sr-hint {
+  margin-left: 10px;
+  cursor: pointer;
+  color: #3B5C77;
+}
+
+#sd-recommendation {
+  font-size: 16px;
+  margin-left: 15px;
+  color: #3d3d3d;
+  text-shadow: 1px 1px 1px #bebebe;
 }
 
 .sd-text-item B:not(:first-child),

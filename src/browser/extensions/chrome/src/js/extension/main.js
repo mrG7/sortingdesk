@@ -162,10 +162,10 @@ var Main = (function (window, chrome, $, std, sq, sqc, sd, undefined) {
     var onCreateSuggestionContainer_ = function ()
     {
       var node,
-          opts = sorter.options.suggestion,
-          container = $('<div/>').attr('id', opts.id);
+          opts = sorter.options.renderer,
+          container = $('<div/>').attr('id', opts.suggestion);
 
-      node = $('<h1/>');
+      node = $('<h3/>');
       node.append($('<button/>')
                   .addClass('btn btn-default btn-sm')
                   .html('<span class="glyphicon glyphicon-plus"></span>'));
