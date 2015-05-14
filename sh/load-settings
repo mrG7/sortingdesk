@@ -1,0 +1,22 @@
+# load-settings --- Sets active settings file.
+#
+# Copyright (c) 2015 Diffeo
+#
+# Comments:
+#
+
+readonly dir_root="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. && pwd )"
+readonly dir_sh="$dir_root/sh"
+source "$dir_root/sh/libtools.sh"
+
+[ -z "$1" ] && error "settings file suffix not given"
+[ "$1" == "default" ] && error "default settings file cannot be used"
+[ ! -f "$dir_sh/settings.sh.$1" ] && error "settings file not found: settings.$1"
+[ -e "$dir_sh/settings.sh" ] && [ ! -L "$dir_sh/settings.sh" ] \
+  && error "settings file NOT a symlink"
+
+set -e
+[ -L "$dir_sh/settings.sh" ] && rm "$dir_sh/settings.sh"
+ln -s "settings.sh.$1" "$dir_sh/settings.sh"
+
+info "active settings file is now: settings.sh.$1"
