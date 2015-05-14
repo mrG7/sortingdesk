@@ -612,12 +612,19 @@
   // This includes de-duping with respect to items currently in the queue.
   ControllerItems.prototype.dedup = function(items)
   {
-    var seen = {}, deduped = [];
+    var i, l, seen = {}, deduped = [];
 
-    for (var i = 0, l = items.length; i < l; ++i) {
+    /* The search result engine may return entries that are presently being
+     * shown. */
+    for (i = 0, l = this.items_.length; i < l; ++i)
+      seen[this.items_[i].content.node_id] = true;
+
+    /* Add only those `items` that are unique. */
+    for (i = 0, l = items.length; i < l; ++i) {
       var j = items[i], id = j.node_id;
       if (!seen.hasOwnProperty(id)) {
-        seen[id] = true; deduped.push(j);
+        seen[id] = true;
+        deduped.push(j);
       }
     }
 
