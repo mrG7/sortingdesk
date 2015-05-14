@@ -747,10 +747,11 @@
           this.owner.api.foldering.subfolderFromName(
             this.selected_.data, title.replace(/\//g, "_")));
 
-    var on_loaded = function () { next(); };
     var next = function () {
+      /* Detach listener previously attached below when adding the subfolder.
+       * */
       if(std.is_fn(this.off))
-        this.off('loaded', on_loaded);
+        this.off('loading-end', next);
 
       if(index >= suggestions.length)
         return;
@@ -766,7 +767,7 @@
       ++index;
       descriptor.subtopic_id = self.generate_subtopic_id_(descriptor);
       subfolder.add(descriptor)
-        .on('loading-end', on_loaded);
+        .on('loading-end', next);
     };
     next();
 
