@@ -602,9 +602,8 @@
   {
     var c = 0;
 
-    for (var i = 0, l = this.items_.length; i < l; ++i) {
+    for (var i = 0, l = this.items_.length; i < l; ++i)
       if(this.items_[i].enabled) ++c;
-    }
 
     return c;
   };
@@ -808,9 +807,7 @@
 
     this.items_.splice(index, 1);
     this.check();
-
-    /* TODO: Why is it passing 0 to the event? */
-    this.owner_.events.trigger('items-updated', 0);
+    this.owner_.events.trigger('items-updated', this.count());
 
     return true;
   };
@@ -1194,7 +1191,7 @@
     this.node_ = this.options_ = this.events_ = this.dismissing_ = null;
     this.timer_ = null;
 
-    /* Change the owning item's HTML to the set in `resetHtml_´, if any. */
+    /* Change the owning item's HTML to the one set in `resetHtml_´, if any. */
     if(this.resetHtml_ !== null)
       this.owner_.node.html(this.resetHtml_);
   };

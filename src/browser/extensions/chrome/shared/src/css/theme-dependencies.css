@@ -21,6 +21,17 @@ BUTTON.dropdown-toggle > .caret {
   color: #888;
 }
 
+.popover {
+  font-size: 12px;
+  line-height: 13px;
+  text-align: justify;
+}
+
+.popover.in {
+  opacity: .93;
+  background-color: #fafafa;
+}
+
 /* Jstree */
 .jstree UL > LI > A > IMG {
   height: 99%;

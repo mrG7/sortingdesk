@@ -200,7 +200,7 @@
       new SortingQueueRenderer(this.sortingQueue_,
                                this.explorer_,
                                this.callbacks_,
-                               this.options.suggestion);
+                               this.options.renderer);
 
       this.initialised_ = true;
       console.info("Sorting Desk UI initialised");
@@ -297,21 +297,43 @@
 
     this.sortingQueue.on('pre-render', this.onPreRender_.bind(this));
     this.sortingQueue.on('items-updated', function (count) {
-      if(count === 0)
-        $('#' + options.id).remove();
+      if(count === 0) {
+        $('#' + options.suggestion).remove();
+/*        $('#' + options.recommendation).remove(); */
+      }
     } );
   };
 
+  SortingQueueRenderer.hints = [
+    'Special phrases are longer strings of characters observed frequently in'
+      + ' pages similar to the page you selected above, and less frequently'
+      + ' observed elsewhere.',
+
+    'Recommendations are pages that have features in common with the page you'
+      + ' selected above. SortingDesk orders the recommendations by similarity'
+      + ' to prominent features from all of the pages in the subfolder'
+      + ' containing the result you selected.' ];
+
   SortingQueueRenderer.prototype.onPreRender_ = function (data)
   {
-    var node,
-        self = this,
-        container = $('#' + this.options.id),
+    var self = this,
+        node = this.sortingQueue.nodes.items,
+        container = $('#' + this.options.recommendation),
         sugg = data.suggestions;
 
-    /* If there are no suggestions or no suggestion hits in the first
-     * element, self-destruct after a fade out animation and get out of
-     * here. */
+    /* Ensure there is a "recommendations" caption.  Create caption if it
+     * doesn't exist. */
+    if(container.length === 0) {
+      container = $('<h1/>').html('Recommendations:' + this.hint(1))
+        .attr('id', this.options.recommendation);
+      this.insert(container, node);
+      this.popover(container.find('.' + this.options.hint));
+    }
+
+    container = $('#' + this.options.suggestion);
+
+    /* If there are no suggestion data, self-destruct after a fade out
+     * animation and get out of here. */
     if(!std.is_arr(sugg)
        || sugg.length === 0
        || !std.is_arr(sugg[0].hits)
@@ -331,25 +353,16 @@
     /* Always re-create the suggestion container. */
     container.remove();
     container = this.callbacks.invoke('createSuggestionContainer');
-    node = this.sortingQueue.nodes.items;
 
-    /* Insert our container before the top child node of the search results
-     * list. */
-    if(node.children().length > 0)
-      container.insertBefore(node.children().first());
-    else
-      node.append(container);
+    container.append(
+      $('<h1/>').html('This special phrase links <strong>'
+                     + sugg.hits.length + '</strong> '
+                     + (sugg.hits.length === 1 ? 'page.' : 'pages.')
+                     + this.hint(0))
+    );
 
-    container.append($('<h2/>').html(sugg.phrase));
+    container.append($('<h2/>').html('"' + sugg.phrase + '"'));
     container.append(this.callbacks.invoke('renderScore', sugg.score));
-
-    container.append($('<p/>')
-                     .html('This suggestion links <strong>'
-                           + sugg.hits.length
-                           + '</strong> '
-                           + (sugg.hits.length === 1
-                              ? 'page.'
-                              : 'pages.')));
 
     container.find('BUTTON').on('click', function () {
       if(self.explorer.addSuggestions(sugg.phrase, sugg.hits)) {
@@ -358,6 +371,36 @@
         } );
       }
     } );
+
+    this.insert(container, node);
+    this.popover(container.find('.' + this.options.hint));
+  };
+
+  SortingQueueRenderer.prototype.hint = function (index)
+  {
+    if(index >= SortingQueueRenderer.hints.length)
+      throw "Invalid hint index";
+
+    return '<a class="' + this.options.hint
+      + '" data-content="' + SortingQueueRenderer.hints[index]
+      + '" data-placement="bottom" data-trigger="hover">'
+      + '<span class="glyphicon glyphicon-question-sign"></span></a>';
+  };
+
+  SortingQueueRenderer.prototype.insert = function (container, node)
+  {
+    /* Insert `container` before the top child node of the search results
+     * list, given by `node`. */
+    if(node.children().length > 0)
+      container.insertBefore(node.children().first());
+    else
+      node.append(container);
+  };
+
+  SortingQueueRenderer.prototype.popover = function (node)
+  {
+    if(std.is_fn($.fn.popover))
+      node.popover({ delay: { show: 250, hide: 250 } });
   };
 
 
@@ -2318,8 +2361,10 @@
     },
     container: null,
     folderNewCaption: "Enter folder name",
-    suggestion: {
-      id: 'sd-suggestion'
+    renderer: {
+      hint: 'sd-sr-hint',
+      suggestion: 'sd-suggestion',
+      recommendation: 'sd-recommendation'
     }
   };
 
