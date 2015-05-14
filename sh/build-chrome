@@ -28,6 +28,6 @@ mkdir -p "$dir_root/out"
 cd "$dir_root/src/browser/extensions"
 info "building chrome extension"
 mv chrome sorting-desk && \
-  zip -r "$DIR_OUT/sortingdesk.crx" sorting-desk >/dev/null
+  zip -r "$DIR_OUT/sortingdesk.zip" sorting-desk >/dev/null
 
 echo "done."
