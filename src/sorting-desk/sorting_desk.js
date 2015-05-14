@@ -365,7 +365,7 @@
     container.append(this.callbacks.invoke('renderScore', sugg.score));
 
     container.find('BUTTON').on('click', function () {
-      if(self.explorer.addSuggestions(sugg.phrase, sugg.hits)) {
+      if(self.explorer.setSuggestions(sugg.phrase, sugg.hits)) {
         container.fadeOut(function () {
           container.remove();
         } );
@@ -729,7 +729,7 @@
     this.owner_.callbacks.invoke('export', this.selected_.data.id);
   };
 
-  ControllerExplorer.prototype.addSuggestions = function (title, suggestions)
+  ControllerExplorer.prototype.setSuggestions = function (title, suggestions)
   {
     if(!std.is_str(title) || (title = title.trim()).length === 0)
       throw 'Invalid or no title specified';
