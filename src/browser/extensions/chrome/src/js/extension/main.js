@@ -366,7 +366,7 @@ var Main = (function (window, chrome, $, std, sq, sqc, sd, undefined) {
       nodes.loading = $('#sd-sorting-desk .sd-loading');
 
       /* Initialise tooltips. */
-      $('[data-toggle="tooltip"]').tooltip();
+      $('[data-toggle="tooltip"]').tooltip({ container: 'body' });
 
       /* Set initial heights */
       resize_();
