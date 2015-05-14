@@ -499,9 +499,8 @@
       this.addLabel = addLabel;
       function addLabel(cid, coref_value)
       {
-        return api_.addLabel(query_content_id,
-                             cid, annotator, coref_value);
-      };
+        return api_.addLabel(query_content_id, cid, annotator, coref_value);
+      }
 
       function moreTexts(num)
       {

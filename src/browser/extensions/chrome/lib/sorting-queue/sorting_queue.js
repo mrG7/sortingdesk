@@ -842,8 +842,8 @@
   };
 
   /* Private methods */
-  ControllerItems.prototype.select_ = function (variant,
-                                                /* optional */ ev)
+  ControllerItems.prototype.select_ = function (
+    variant, /* optional */ ev)
   {
     var csel = Css.item.selected;
 
@@ -876,11 +876,8 @@
     var current = this.getNodeSelected(),
         next = this.getByNode(variant);
 
-    if(current.length)
-      this.getByNode(current).deselect();
-
-    if(next)
-      next.select_(ev);
+    if(current.length) this.getByNode(current).deselect();
+    if(next)           next.select_(ev);
 
     /* WARNING: the present implementation requires knowledge of the list
      * items' container's height or it will fail to ensure the currently
