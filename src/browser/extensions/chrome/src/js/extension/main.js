@@ -169,8 +169,6 @@ var Main = (function (window, chrome, $, std, sq, sqc, sd, undefined) {
       node.append($('<button/>')
                   .addClass('btn btn-default btn-sm')
                   .html('<span class="glyphicon glyphicon-plus"></span>'));
-      node.append('<span class="glyphicon glyphicon-info-sign"></span>');
-      node.append('Suggestion');
       container.append(node);
 
       return container;
