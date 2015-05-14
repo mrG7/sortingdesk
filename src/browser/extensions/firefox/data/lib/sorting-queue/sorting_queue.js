@@ -614,8 +614,8 @@
   {
     var i, l, seen = {}, deduped = [];
 
-    /* The search result engine may return entries that are presently being
-     * shown. */
+    /* The search result engine may return entries that are presently
+     * contained. */
     for (i = 0, l = this.items_.length; i < l; ++i)
       seen[this.items_[i].content.node_id] = true;
 
