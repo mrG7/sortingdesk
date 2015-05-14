@@ -10,5 +10,4 @@ out/
 *.zip
 *.xpi
 node_modules/
-
-sh/settings.sh.testing
+sh/settings.sh.*
