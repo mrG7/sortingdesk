@@ -2030,9 +2030,14 @@
         deferred = this.obj.rename(name);
 
     if(deferred !== null) {
-      deferred.fail(function () {
-        self.owner.tree.rename_node(self.obj.id, self.old);
-      } );
+      this.owner_.updateToolbar();
+      deferred
+        .fail(function () {
+          self.owner.tree.rename_node(self.obj.id, self.old);
+        } )
+        .always(function () {
+          self.owner_.updateToolbar();
+        } );
     }
   };
 
