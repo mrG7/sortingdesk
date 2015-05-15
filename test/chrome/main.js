@@ -10,7 +10,7 @@ var TIMEOUT_RUNNER       = 80000,     /* account for slow VMs */
     TIMEOUT_WAITREQUESTS = 50000,
     TIMEOUT_STALE        = 1000;
 
-var XPATH_TREE  = "//*[@id='sd-folder-explorer']/div/div",
+var XPATH_TREE  = "//*[@id='sd-folder-explorer']/div/div/div",
     XPATH_QUEUE = "//*[@id='sd-queue']/div/div";
 
 var test           = require("selenium-webdriver/testing"),
@@ -32,7 +32,7 @@ var browser,
 
 var windowExt, windowMain;
 
-var folders = [ newFolder(), newFolder(), newFolder('dev') ],
+var folders = [ newFolder(), newFolder(), newFolder('Soft selectors') ],
     subfolders = [
       newSubfolder([
         newItem("http://www.bbc.co.uk/news/world-asia-25034461",
@@ -44,10 +44,9 @@ var folders = [ newFolder(), newFolder(), newFolder('dev') ],
         newItem("http://en.wikipedia.org/wiki/Himalayas",
                 "Himalayas")]),
       newSubfolder([
-        newItem(null, "rotors"),
-        newItem(null, "calipers"),
-        newItem(null, "brakes")], "auto"),
-      newSubfolder([newItem(null, "klingon bird")], "games")
+        newItem(null, "LOTS OF LEG0"),
+        newItem(null, "LEGO minifigure")], "Lego"),
+      newSubfolder([newItem(null, "Vintage~Star~Wars")], "Star Wars")
     ];
 
 /* Configure  */
@@ -209,14 +208,14 @@ test.describe("Sorting Desk -- E2E", function () {
 
     test.it("loads search results when subfolder expanded", function () {
       expandSubfolder(0);
-      return verifyItemsInQueue(2);
+      return verifyItemsInQueue(5);
     } );
 
     test.it("selects item", function () {
       expandSubfolder(0);
       expandSubfolder(1);
       selectItem(1, 0);
-      return verifyItemsInQueue(2, false);
+      return verifyItemsInQueue(5, false);
     } );
 
     test.it("selects two items sequentially", function () {
@@ -225,17 +224,17 @@ test.describe("Sorting Desk -- E2E", function () {
       selectItem(1, 0);
       expandSubfolder(2);
       selectItem(2, 0);
-      return verifyItemsInQueue(2, false);
+      return verifyItemsInQueue(5, false);
     } );
 
     test.it("manually activates an item", function () {
       expandSubfolder(0);       /* this folder's item is made active */
       expandSubfolder(1);
-      verifyItemsInQueue(2);
+      verifyItemsInQueue(5);
       return getSearchResult(0).then(function (i) {
         activateItem(1, 0);
         browser.wait(until.stalenessOf(i), 500);
-        verifyItemsInQueue(2);
+        verifyItemsInQueue(4);
       } );
     } );
 
@@ -243,23 +242,23 @@ test.describe("Sorting Desk -- E2E", function () {
       expandSubfolder(0);
       expandSubfolder(1);
       expandSubfolder(2);
-      verifyItemsInQueue(2, false);
+      verifyItemsInQueue(5, false);
       return getSearchResult(0).then(function (i) {
         activateItem(1, 0);
         browser.wait(until.stalenessOf(i), TIMEOUT_STALE);
-        verifyItemsInQueue(2);
+        verifyItemsInQueue(5);
 
         return getSearchResult(1).then(function (j) {
           activateItem(2, 0);
           browser.wait(until.stalenessOf(j), 500);
-          verifyItemsInQueue(2);
+          verifyItemsInQueue(5);
         } );
       } );
     } );
 
     test.it("refreshes the folder explorer", function () {
       expandSubfolder(0);
-      verifyItemsInQueue(2);
+      verifyItemsInQueue(5);
       return getFolders().then(function (c) {
         getButton("sorting-desk-toolbar-refresh-explorer").click();
         c.forEach(function (f) {
@@ -268,21 +267,27 @@ test.describe("Sorting Desk -- E2E", function () {
 
         verifyItemsInQueue(0);
         expandSubfolder(0);
-        verifyItemsInQueue(2);
+        verifyItemsInQueue(5);
       } );
     } );
 
     test.it("refreshes the search results", function () {
       expandSubfolder(0);
-      verifyItemsInQueue(2);
+      verifyItemsInQueue(5);
       return getSearchResults().then(function (c) {
         getButton("sorting-desk-toolbar-refresh-search").click();
         c.forEach(function (r) {
           browser.wait(until.stalenessOf(r), TIMEOUT_STALE);
         } );
 
-        verifyItemsInQueue(2, false);
+        verifyItemsInQueue(5, false);
       } );
+    } );
+
+    test.it("shows the suggestion box", function () {
+      expandSubfolder(4);
+      verifyItemsInQueue(4);
+      return getSuggestionBox();
     } );
   } );
 
@@ -464,7 +469,7 @@ var inj = {
     var ev, t;
 
     t = document.evaluate(
-      "//*[@id='sd-folder-explorer']/div/div/ul/li//*[text()[contains(.,'"
+      "//*[@id='sd-folder-explorer']/div/div/div/ul/li//*[text()[contains(.,'"
         + name + "')]]", document, null, XPathResult.ANY_TYPE, null)
       .iterateNext();
     if(!t) return;
@@ -479,7 +484,7 @@ var inj = {
     var ev, t;
 
     t = document.evaluate(
-      "//*[@id='sd-folder-explorer']/div/div/ul/li/ul/li//*[text()[contains(.,'"
+      "//*[@id='sd-folder-explorer']/div/div/div/ul/li/ul/li//*[text()[contains(.,'"
         + name + "')]]", document, null, XPathResult.ANY_TYPE, null)
       .iterateNext();
     if(!t) return;
@@ -566,8 +571,8 @@ var getElement = function (xpath)
 {
   xpath = By.xpath(xpath);
   browser.findElements(xpath)
-//    .then(function (c) { assert.equal(c.length, 1); });
-    .then(function (c) { assert.notEqual(c.length, 0); });
+    .then(function (c) { assert.equal(c.length, 1); });
+//    .then(function (c) { assert.notEqual(c.length, 0); });
   return browser.findElement(xpath);
 };
 
