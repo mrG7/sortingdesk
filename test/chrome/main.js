@@ -1,4 +1,4 @@
-var DEBUG = { id: 0 };
+/* var DEBUG = { id: 0 }; */
 
 var PANE_EXPLORER = "sd-folder-explorer",
     PANE_QUEUE    = "sd-queue";
