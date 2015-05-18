@@ -1,4 +1,4 @@
-/* var DEBUG = { fid: 0, sid: 0 }; */
+/* var DEBUG = { id: 0 }; */
 
 var PANE_EXPLORER = "sd-folder-explorer",
     PANE_QUEUE    = "sd-queue";
@@ -8,9 +8,16 @@ var TIMEOUT_RUNNER       = 80000,     /* account for slow VMs */
     TIMEOUT_LOADER_SHOW  = 1000,
     TIMEOUT_QUEUE_ITEMS  = 1000,
     TIMEOUT_WAITREQUESTS = 50000,
-    TIMEOUT_STALE        = 1000;
+    TIMEOUT_STALE        = 1000,
+    TIMEOUT_BUTTON       = 1000,
+    TIMEOUT_ALERT        = 500,
+    TIMEOUT_ANIMATIONS   = 250;
 
-var XPATH_TREE  = "//*[@id='sd-folder-explorer']/div/div",
+var DISMISSAL_IGNORE    = 0,
+    DISMISSAL_REDUNDANT = 1,
+    DISMISSAL_WRONG     = 2;
+
+var XPATH_TREE  = "//*[@id='sd-folder-explorer']/div/div/div",
     XPATH_QUEUE = "//*[@id='sd-queue']/div/div";
 
 var test           = require("selenium-webdriver/testing"),
@@ -32,7 +39,7 @@ var browser,
 
 var windowExt, windowMain;
 
-var folders = [ newFolder(), newFolder(), newFolder('dev') ],
+var folders = [ newFolder(), newFolder(), newFolder('Soft selectors') ],
     subfolders = [
       newSubfolder([
         newItem("http://www.bbc.co.uk/news/world-asia-25034461",
@@ -44,10 +51,9 @@ var folders = [ newFolder(), newFolder(), newFolder('dev') ],
         newItem("http://en.wikipedia.org/wiki/Himalayas",
                 "Himalayas")]),
       newSubfolder([
-        newItem(null, "rotors"),
-        newItem(null, "calipers"),
-        newItem(null, "brakes")], "auto"),
-      newSubfolder([newItem(null, "klingon bird")], "games")
+        newItem(null, "LOTS OF LEG0"),
+        newItem(null, "LEGO minifigure")], "Lego"),
+      newSubfolder([newItem(null, "Vintage~Star~Wars")], "Star Wars")
     ];
 
 /* Configure  */
@@ -58,49 +64,6 @@ options.addArguments("load-extension=" + pathRoot
 test.describe("Sorting Desk -- E2E", function () {
 
   this.timeout(TIMEOUT_RUNNER);
-
-  describe("Toolbar -- blank state", function () {
-
-    test.before(function (done) {
-      instantiateBrowser(done);
-    } );
-
-    test.after(function () {
-      destroyBrowser();
-    } );
-
-    test.it("add is enabled", function () {
-      return buttonEnabled('sorting-desk-toolbar-add');
-    } );
-
-    test.it("report is disabled", function () {
-      return buttonEnabled('sorting-desk-toolbar-report', false);
-    } );
-
-    test.it("sub-add is disabled", function () {
-      return buttonEnabled('sorting-desk-toolbar-add-contextual', false);
-    } );
-
-    test.it("rename is disabled", function () {
-      return buttonEnabled('sorting-desk-toolbar-rename', false);
-    } );
-
-    test.it("remove is disabled", function () {
-      return buttonEnabled('sorting-desk-toolbar-remove', false);
-    } );
-
-    test.it("navigate is disabled", function () {
-      return buttonEnabled('sorting-desk-toolbar-jump', false);
-    } );
-
-    test.it("explorer refresh is enabled", function () {
-      return buttonEnabled('sorting-desk-toolbar-refresh-explorer');
-    } );
-
-    test.it("queue refresh is disabled", function () {
-      return buttonEnabled('sorting-desk-toolbar-refresh-search', false);
-    } );
-  } );
 
   describe("Functionality", function () {
 
@@ -166,8 +129,10 @@ test.describe("Sorting Desk -- E2E", function () {
       browser.switchTo().window(windowExt);
       dropInFolder(0);
       waitUntilInputVisible();
-      getInput().sendKeys(subfolders[2].title, Key.ENTER);
-      return verifyItemsInSubfolder(2, [ 0 ]);
+      return getInput().then(function (i) {
+        i.sendKeys(subfolders[2].title, Key.ENTER);
+        verifyItemsInSubfolder(2, [ 0 ]);
+      } );
     } );
 
     test.it("loads three folders", function () {
@@ -209,14 +174,14 @@ test.describe("Sorting Desk -- E2E", function () {
 
     test.it("loads search results when subfolder expanded", function () {
       expandSubfolder(0);
-      return verifyItemsInQueue(2);
+      return verifyItemsInQueue(5);
     } );
 
     test.it("selects item", function () {
       expandSubfolder(0);
       expandSubfolder(1);
       selectItem(1, 0);
-      return verifyItemsInQueue(2, false);
+      return verifyItemsInQueue(5, false);
     } );
 
     test.it("selects two items sequentially", function () {
@@ -225,17 +190,17 @@ test.describe("Sorting Desk -- E2E", function () {
       selectItem(1, 0);
       expandSubfolder(2);
       selectItem(2, 0);
-      return verifyItemsInQueue(2, false);
+      return verifyItemsInQueue(5, false);
     } );
 
     test.it("manually activates an item", function () {
       expandSubfolder(0);       /* this folder's item is made active */
       expandSubfolder(1);
-      verifyItemsInQueue(2);
+      verifyItemsInQueue(5);
       return getSearchResult(0).then(function (i) {
         activateItem(1, 0);
-        browser.wait(until.stalenessOf(i), 500);
-        verifyItemsInQueue(2);
+        browser.wait(until.stalenessOf(i), TIMEOUT_STALE);
+        verifyItemsInQueue(4);
       } );
     } );
 
@@ -243,47 +208,136 @@ test.describe("Sorting Desk -- E2E", function () {
       expandSubfolder(0);
       expandSubfolder(1);
       expandSubfolder(2);
-      verifyItemsInQueue(2, false);
+      verifyItemsInQueue(5, false);
       return getSearchResult(0).then(function (i) {
         activateItem(1, 0);
         browser.wait(until.stalenessOf(i), TIMEOUT_STALE);
-        verifyItemsInQueue(2);
+        verifyItemsInQueue(4);
 
         return getSearchResult(1).then(function (j) {
           activateItem(2, 0);
-          browser.wait(until.stalenessOf(j), 500);
-          verifyItemsInQueue(2);
+          browser.wait(until.stalenessOf(j), TIMEOUT_STALE);
+          verifyItemsInQueue(4);
         } );
       } );
     } );
 
     test.it("refreshes the folder explorer", function () {
       expandSubfolder(0);
-      verifyItemsInQueue(2);
-      return getFolders().then(function (c) {
-        getButton("sorting-desk-toolbar-refresh-explorer").click();
-        c.forEach(function (f) {
-          browser.wait(until.stalenessOf(f), TIMEOUT_STALE);
-        } );
-
-        verifyItemsInQueue(0);
-        expandSubfolder(0);
-        verifyItemsInQueue(2);
-      } );
+      verifyItemsInQueue(5);
+      refreshExplorer();
+      verifyItemsInQueue(0);
+      expandSubfolder(0);
+      return verifyItemsInQueue(5);
     } );
 
     test.it("refreshes the search results", function () {
       expandSubfolder(0);
-      verifyItemsInQueue(2);
+      verifyItemsInQueue(5);
       return getSearchResults().then(function (c) {
-        getButton("sorting-desk-toolbar-refresh-search").click();
-        c.forEach(function (r) {
-          browser.wait(until.stalenessOf(r), TIMEOUT_STALE);
-        } );
+        getButton("sorting-desk-toolbar-refresh-search").then(function (b) {
+          b.click();
+          c.forEach(function (r) {
+            browser.wait(until.stalenessOf(r), TIMEOUT_STALE);
+          } );
 
-        verifyItemsInQueue(2, false);
+          verifyItemsInQueue(5, false);
+        } );
       } );
     } );
+
+    test.it("shows the suggestion box", function () {
+      expandSubfolder(4);
+      verifyItemsInQueue(4);
+      return getSuggestionBox();
+    } );
+
+    test.it("shows the suggestion box's add button on hover", function () {
+      expandSubfolder(4);
+      verifyItemsInQueue(4);
+      return getSuggestionAddButton();
+    } );
+
+    test.it("does not add soft selectors if folder not selected", function () {
+      expandSubfolder(4);
+      verifyItemsInQueue(4);
+      getSuggestionAddButton().then(function (b) { b.click(); } );
+      return browser.wait(until.alertIsPresent(), TIMEOUT_ALERT);
+    } );
+
+    test.it("adds the soft selectors when folder selected", function () {
+      expandSubfolder(4);
+      verifyItemsInQueue(4);
+      selectFolder(1);
+      return getSuggestionAddButton().then(function (b) {
+        b.click();
+        waitUntilRequestsFinished();
+        getSubfolders(1).then(function (i) {
+          assert.equal(i.length, 2);
+        } );
+      } );
+    } );
+
+    test.it("shows a search result's dismissal button on hover", function () {
+      expandSubfolder(4);
+      verifyItemsInQueue(4);
+      return getDismissalButton(0);
+    } );
+
+    test.it("dismisses item -- ignore", function () {
+      expandSubfolder(4);
+      verifyItemsInQueue(4);
+
+      return getSearchResult(0).then(function(i) {
+        getDismissalButton(0).then(function (b) {
+          b.click();
+          browser.sleep(TIMEOUT_ANIMATIONS);
+          b.click();
+          browser.sleep(TIMEOUT_ANIMATIONS);
+          browser.wait(until.stalenessOf(i), TIMEOUT_STALE);
+          verifyItemsInQueue(3);
+        } );
+      } );
+    } );
+
+    test.it("dismisses item -- wrong", function () {
+      expandSubfolder(4);
+      verifyItemsInQueue(3);
+
+      return getSearchResult(0).then(function (i) {
+        getDismissalButton(0).then(function (b) {
+          b.click();
+          browser.sleep(TIMEOUT_ANIMATIONS);
+
+          getDismissalButton(0, DISMISSAL_REDUNDANT).then(function (b2) {
+            b2.click();
+            browser.sleep(TIMEOUT_ANIMATIONS);
+            browser.wait(until.stalenessOf(i), TIMEOUT_STALE);
+            verifyItemsInQueue(2);
+          } );
+        } );
+      } );
+    } );
+
+    test.it("dismisses item -- duplicate", function () {
+      expandSubfolder(4);
+      verifyItemsInQueue(2);
+
+      return getSearchResult(0).then(function (i) {
+        getDismissalButton(0).then(function (b) {
+          b.click();
+          browser.sleep(TIMEOUT_ANIMATIONS);
+
+          getDismissalButton(0, DISMISSAL_REDUNDANT).then(function (b2) {
+            b2.click();
+            browser.sleep(TIMEOUT_ANIMATIONS);
+            browser.wait(until.stalenessOf(i), TIMEOUT_STALE);
+            verifyItemsInQueue(1);
+          } );
+        } );
+      } );
+    } );
+
   } );
 
   describe("Toolbar -- state", function () {
@@ -330,48 +384,92 @@ test.describe("Sorting Desk -- E2E", function () {
         return buttonEnabled('sorting-desk-toolbar-refresh-explorer');
       } );
 
-      test.it("queue refresh is enabled", function () {
-        return buttonEnabled('sorting-desk-toolbar-refresh-search');
+      test.it("queue refresh is disabled", function () {
+        return buttonEnabled('sorting-desk-toolbar-refresh-search', false);
       } );
     } );
 
     describe("subfolder", function () {
 
-      test.before(function () {
-        return selectSubfolder(0);
+      describe("expanded", function () {
+
+        test.before(function () {
+          expandSubfolder(0);
+          return verifyItemsInQueue(5);
+        } );
+
+        test.it("add is enabled", function () {
+          return buttonEnabled('sorting-desk-toolbar-add');
+        } );
+
+        test.it("report is disabled", function () {
+          return buttonEnabled('sorting-desk-toolbar-report', false);
+        } );
+
+        test.it("sub-add is enabled", function () {
+          return buttonEnabled('sorting-desk-toolbar-add-contextual');
+        } );
+
+        test.it("rename is enabled", function () {
+          return buttonEnabled('sorting-desk-toolbar-rename');
+        } );
+
+        test.it("remove is enabled", function () {
+          return buttonEnabled('sorting-desk-toolbar-remove');
+        } );
+
+        test.it("navigate is disabled", function () {
+          return buttonEnabled('sorting-desk-toolbar-jump', false);
+        } );
+
+        test.it("explorer refresh is enabled", function () {
+          return buttonEnabled('sorting-desk-toolbar-refresh-explorer');
+        } );
+
+        test.it("queue refresh is enabled", function () {
+          return buttonEnabled('sorting-desk-toolbar-refresh-search');
+        } );
       } );
 
-      test.it("add is enabled", function () {
-        return buttonEnabled('sorting-desk-toolbar-add');
+      describe("not expanded", function () {
+
+        test.before(function () {
+          return selectSubfolder(1);
+        } );
+
+        test.it("add is enabled", function () {
+          return buttonEnabled('sorting-desk-toolbar-add');
+        } );
+
+        test.it("report is disabled", function () {
+          return buttonEnabled('sorting-desk-toolbar-report', false);
+        } );
+
+        test.it("sub-add is disabled", function () {
+          return buttonEnabled('sorting-desk-toolbar-add-contextual', false);
+        } );
+
+        test.it("rename is disabled", function () {
+          return buttonEnabled('sorting-desk-toolbar-rename', false);
+        } );
+
+        test.it("remove is disabled", function () {
+          return buttonEnabled('sorting-desk-toolbar-remove', false);
+        } );
+
+        test.it("navigate is disabled", function () {
+          return buttonEnabled('sorting-desk-toolbar-jump', false);
+        } );
+
+        test.it("explorer refresh is enabled", function () {
+          return buttonEnabled('sorting-desk-toolbar-refresh-explorer');
+        } );
+
+        test.it("queue refresh is enabled", function () {
+          return buttonEnabled('sorting-desk-toolbar-refresh-search');
+        } );
       } );
 
-      test.it("report is enabled", function () {
-        return buttonEnabled('sorting-desk-toolbar-report');
-      } );
-
-      test.it("sub-add is enabled", function () {
-        return buttonEnabled('sorting-desk-toolbar-add-contextual');
-      } );
-
-      test.it("rename is enabled", function () {
-        return buttonEnabled('sorting-desk-toolbar-rename');
-      } );
-
-      test.it("remove is enabled", function () {
-        return buttonEnabled('sorting-desk-toolbar-remove');
-      } );
-
-      test.it("navigate is disabled", function () {
-        return buttonEnabled('sorting-desk-toolbar-jump', false);
-      } );
-
-      test.it("explorer refresh is enabled", function () {
-        return buttonEnabled('sorting-desk-toolbar-refresh-explorer');
-      } );
-
-      test.it("queue refresh is enabled", function () {
-        return buttonEnabled('sorting-desk-toolbar-refresh-search');
-      } );
     } );
 
     describe("item", function () {
@@ -414,6 +512,109 @@ test.describe("Sorting Desk -- E2E", function () {
       } );
     } );
 
+  } );
+
+  describe("renaming/removing", function () {
+
+    test.beforeEach(function (done) {
+      instantiateBrowser(done);
+    } );
+
+    test.afterEach(function () {
+      destroyBrowser();
+    } );
+
+    test.it("renames a folder", function () {
+      renameFolder(0, 'RENAMED-' + folders[0].title);
+      refreshExplorer();
+      return getFolder(0);
+    } );
+
+    test.it("renames a subfolder", function () {
+      renameSubfolder(0, 'RENAMED-' + subfolders[0].title);
+      refreshExplorer();
+      return getSubfolder(0);
+    } );
+
+    test.it("renames an item", function () {
+      renameItem(2, 0, 'RENAMED-' + subfolders[2].items[0].title);
+      refreshExplorer();
+      expandSubfolder(2);
+      return getItem(2, 0);
+    } );
+
+    test.it("removes an item", function () {
+      removeItem(2, 0);
+      refreshExplorer();
+      return getItem(2, 0).then(function () { throw "Item should not exist"; },
+                                function () { });
+    } );
+
+    test.it("removes a subfolder", function () {
+      removeSubfolder(2);
+      refreshExplorer();
+      return getSubfolder(2).then(
+        function () { throw "Subfolder should not exist"; },
+        function () { }
+      );
+    } );
+
+    test.it("removes a folder", function () {
+      removeFolder(0);
+      refreshExplorer();
+      return getFolder(0).then(
+        function () { throw "Folder should not exist"; },
+        function () { }
+      );
+    } );
+
+  } );
+
+  describe("Toolbar -- blank state", function () {
+
+    test.before(function (done) {
+      instantiateBrowser(done);
+
+      /* Remove remaining folders. */
+      removeFolder(1);
+      removeFolder(2);
+    } );
+
+    test.after(function () {
+      destroyBrowser();
+    } );
+
+    test.it("add is enabled", function () {
+      return buttonEnabled('sorting-desk-toolbar-add');
+    } );
+
+    test.it("report is disabled", function () {
+      return buttonEnabled('sorting-desk-toolbar-report', false);
+    } );
+
+    test.it("sub-add is disabled", function () {
+      return buttonEnabled('sorting-desk-toolbar-add-contextual', false);
+    } );
+
+    test.it("rename is disabled", function () {
+      return buttonEnabled('sorting-desk-toolbar-rename', false);
+    } );
+
+    test.it("remove is disabled", function () {
+      return buttonEnabled('sorting-desk-toolbar-remove', false);
+    } );
+
+    test.it("navigate is disabled", function () {
+      return buttonEnabled('sorting-desk-toolbar-jump', false);
+    } );
+
+    test.it("explorer refresh is enabled", function () {
+      return buttonEnabled('sorting-desk-toolbar-refresh-explorer');
+    } );
+
+    test.it("queue refresh is disabled", function () {
+      return buttonEnabled('sorting-desk-toolbar-refresh-search', false);
+    } );
   } );
 
 } );
@@ -464,7 +665,7 @@ var inj = {
     var ev, t;
 
     t = document.evaluate(
-      "//*[@id='sd-folder-explorer']/div/div/ul/li//*[text()[contains(.,'"
+      "//*[@id='sd-folder-explorer']/div/div/div/ul/li//*[text()[contains(.,'"
         + name + "')]]", document, null, XPathResult.ANY_TYPE, null)
       .iterateNext();
     if(!t) return;
@@ -479,7 +680,7 @@ var inj = {
     var ev, t;
 
     t = document.evaluate(
-      "//*[@id='sd-folder-explorer']/div/div/ul/li/ul/li//*[text()[contains(.,'"
+      "//*[@id='sd-folder-explorer']/div/div/div/ul/li/ul/li//*[text()[contains(.,'"
         + name + "')]]", document, null, XPathResult.ANY_TYPE, null)
       .iterateNext();
     if(!t) return;
@@ -538,14 +739,11 @@ var instantiateBrowser = function (done)
               assert.notEqual(windowMain, windowExt);
 
               browser.switchTo().window(windowExt);
-              browser.wait(until.elementIsNotVisible(getLoader(PANE_EXPLORER)),
-                           TIMEOUT_LOADER)
-                .then(function () {
-                  done();
-                }, function () {
-                  /* Loader not found or some other error occurred. */
-                  assert.equal(true, false);
-                } );
+              getLoader(PANE_EXPLORER).then(function (l) {
+                browser.wait(until.elementIsNotVisible(l), TIMEOUT_LOADER)
+                  .then(function () { done(); },
+                        function () { throw "Loader element not found"; } );
+              } );
             }
           } );
         } );
@@ -565,10 +763,12 @@ var destroyBrowser = function ()
 var getElement = function (xpath)
 {
   xpath = By.xpath(xpath);
-  browser.findElements(xpath)
-//    .then(function (c) { assert.equal(c.length, 1); });
-    .then(function (c) { assert.notEqual(c.length, 0); });
-  return browser.findElement(xpath);
+  return browser.findElements(xpath)
+    .then(function (c) {
+      assert.equal(c.length, 1);
+      return c[0];
+    });
+//    .then(function (c) { assert.notEqual(c.length, 0); });
 };
 
 var getLoader = function (pane)
@@ -617,9 +817,57 @@ var getSuggestionBox = function ()
   return getElement(XPATH_QUEUE + "/*[@id='sd-suggestion']");
 };
 
+var getSuggestionAddButton = function ()
+{
+  return getSuggestionBox().then(function (b) {
+    browser.actions()
+      .mouseMove(b)
+      .perform();
+
+    return b.findElement(By.xpath(".//button")).then(function (c) {
+      browser.wait(until.elementIsVisible(c), TIMEOUT_BUTTON);
+      return c;
+    } );
+  } );
+};
+
+var getDismissalButton = function (rid, did)
+{
+  return getSearchResult(rid).then(function (r) {
+    switch(did || DISMISSAL_IGNORE) {
+    case DISMISSAL_IGNORE:
+      browser.actions()
+        .mouseMove(r)
+        .perform();
+
+      return r.findElement(By.className("sd-text-item-close"))
+        .then(function (c) {
+          browser.wait(until.elementIsVisible(c), TIMEOUT_BUTTON);
+          return c;
+        } );
+
+    case DISMISSAL_REDUNDANT:
+      return r.findElement(By.xpath(".//button[@data-id='redundant']"));
+
+    case DISMISSAL_WRONG:
+      return r.findElement(By.xpath(".//button[@data-id='wrong']"));
+
+    default:
+      throw "Invalid dismissal button id";
+    }
+  } );
+};
+
 var getFolders = function ()
 {
   return browser.findElements(By.xpath(XPATH_TREE + "/ul/li"));
+};
+
+var getSubfolders = function (fid)
+{
+  return browser.findElements(
+    By.xpath(XPATH_TREE + "/ul/li/*[text()[contains(.,'"
+             + folders[fid].title + "')]]/../ul/li"));
 };
 
 var getSearchResults = function ()
@@ -630,17 +878,23 @@ var getSearchResults = function ()
 
 var buttonEnabled = function (scope, enabled)
 {
-  return getButton(scope).getAttribute("className").then(function (value) {
-    if(enabled !== false) assert.equal   (value.indexOf(' disabled'), -1);
-    else                  assert.notEqual(value.indexOf(' disabled'), -1);
+  return getButton(scope).then(function (b) {
+    b.getAttribute("className").then(function (value) {
+      if(enabled !== false) assert.equal   (value.indexOf(' disabled'), -1);
+      else                  assert.notEqual(value.indexOf(' disabled'), -1);
+    } );
   } );
 };
 
 var createFolder = function (fid)
 {
-  getButton('sorting-desk-toolbar-add').click();
-  getInput().sendKeys(folders[fid].title, Key.ENTER);
-  return getFolder(fid);
+  return getButton('sorting-desk-toolbar-add').then(function (b) {
+    b.click();
+    getInput().then(function (i) {
+      i.sendKeys(folders[fid].title, Key.ENTER);
+      return getFolder(fid);
+    } );
+  } );
 };
 
 var createSubfolder = function (fid, sid)
@@ -650,8 +904,10 @@ var createSubfolder = function (fid, sid)
     el.getAttribute("className").then(function (value) {
       assert.equal(value.indexOf(' disabled'), -1);
       el.click();
-      getInput().sendKeys(subfolders[sid].title, Key.ENTER);
-      getSubfolder(sid);
+      getInput().then(function (i) {
+        i.sendKeys(subfolders[sid].title, Key.ENTER);
+        return getSubfolder(sid);
+      } );
     } );
   } );
 };
@@ -756,7 +1012,9 @@ var waitUntilInputVisible = function ()
         } );
     } ), TIMEOUT_WAITREQUESTS);
 
-  return getInput().sendKeys(Key.chord(Key.CONTROL, 'a'), Key.DELETE);
+  return getInput().then(function (i) {
+    i.sendKeys(Key.chord(Key.CONTROL, 'a'), Key.DELETE);
+  } );
 };
 
 var verifyFolders = function (coll)
@@ -796,31 +1054,31 @@ var verifyItemsInQueue = function (count, wait)
 {
   var check_ = function () {
     waitUntilRequestsFinished();
-    browser.wait(until.elementIsNotVisible(getLoader(PANE_QUEUE)),
-                 TIMEOUT_LOADER);
-    if(count > 0) {
-      browser.wait(until.elementsLocated(
-        By.xpath(XPATH_QUEUE + "/*[@data-scope='text-item'][" +
-                 count + "]")), TIMEOUT_QUEUE_ITEMS);
-    }
+    return getLoader(PANE_QUEUE).then(function (l) {
+      browser.wait(until.elementIsNotVisible(l), TIMEOUT_LOADER);
+      if(count > 0) {
+        browser.wait(until.elementsLocated(
+          By.xpath(XPATH_QUEUE + "/*[@data-scope='text-item'][" +
+                   count + "]")), TIMEOUT_QUEUE_ITEMS);
+      }
 
-    browser.findElements(
-      By.xpath(XPATH_QUEUE + "/*[@data-scope='text-item']"))
-      .then(function (i) {
-        assert.equal(i.length, count);
-      } );
+      browser.findElements(
+        By.xpath(XPATH_QUEUE + "/*[@data-scope='text-item']"))
+        .then(function (i) { assert.equal(i.length, count); } );
+    } );
   };
 
 
   if(wait !== false) {
-    return browser.wait(until.elementIsVisible(getLoader(PANE_QUEUE)),
-                 TIMEOUT_LOADER_SHOW)
-    .then(check_,
-          function () {
-            assert.equal(0, count);
-          } );
-  } else
-    return check_();
+    return getLoader(PANE_QUEUE).then(function (l) {
+      browser.wait(until.elementIsVisible(l),
+                          TIMEOUT_LOADER_SHOW)
+        .then(check_,
+              function () { assert.equal(0, count); } );
+    } );
+  }
+
+  return check_();
 };
 
 var verifySelected = function (title)
@@ -846,4 +1104,111 @@ var removeByTitle = function (cl, cr, title)
 
   assert.notEqual(ndx, -1);
   if(ndx >= 0) cr.splice(ndx, 1);
+};
+
+var renameFolder = function (fid, title)
+{
+  selectFolder(fid);
+  getButton('sorting-desk-toolbar-rename').then(function (b) {
+    browser.wait(until.elementIsEnabled(b), TIMEOUT_BUTTON);
+  } );
+  return getButton('sorting-desk-toolbar-rename').then(function (b) {
+    b.click();
+    folders[fid].title = title;
+    getInput().then(function (i) { i.sendKeys(title, Key.ENTER); } );
+    waitUntilRequestsFinished();
+    return getFolder(fid);
+  } );
+};
+
+var renameSubfolder = function (sid, title)
+{
+  expandSubfolder(sid);
+  getButton('sorting-desk-toolbar-rename').then(function (b) {
+    browser.wait(until.elementIsEnabled(b), TIMEOUT_BUTTON);
+  } );
+  return getButton('sorting-desk-toolbar-rename').then(function (b) {
+    b.click();
+    subfolders[sid].title = title;
+    getInput().then(function (i) { i.sendKeys(title, Key.ENTER); } );
+    waitUntilRequestsFinished();
+    return getSubfolder(sid);
+  } );
+};
+
+var renameItem = function (sid, iid, title)
+{
+  expandSubfolder(sid);
+  selectItem(sid, iid);
+  getButton('sorting-desk-toolbar-rename').then(function (b) {
+    browser.wait(until.elementIsEnabled(b), TIMEOUT_BUTTON);
+  } );
+  return getButton('sorting-desk-toolbar-rename').then(function (b) {
+    b.click();
+    subfolders[sid].items[iid].title = title;
+    getInput().then(function (i) { i.sendKeys(title, Key.ENTER); } );
+    waitUntilRequestsFinished();
+    return getItem(sid, iid);
+  } );
+};
+
+var removeFolder = function (fid)
+{
+  selectFolder(fid);
+  getButton('sorting-desk-toolbar-remove').then(function (b) {
+    browser.wait(until.elementIsEnabled(b), TIMEOUT_BUTTON);
+  } );
+  return getButton('sorting-desk-toolbar-remove').then(function (b) {
+    b.click();
+    waitUntilRequestsFinished();
+    return getFolder(fid).then(
+      function () { throw "Folder should not exist"; },
+      function () { }
+    );
+  } );
+};
+
+var removeSubfolder = function (sid)
+{
+  expandSubfolder(sid);
+  getButton('sorting-desk-toolbar-remove').then(function (b) {
+    browser.wait(until.elementIsEnabled(b), TIMEOUT_BUTTON);
+  } );
+  return getButton('sorting-desk-toolbar-remove').then(function (b) {
+    b.click();
+    waitUntilRequestsFinished();
+    return getSubfolder(sid).then(
+      function () { throw "Subfolder should not exist"; },
+      function () { }
+    );
+  } );
+};
+
+var removeItem = function (sid, iid)
+{
+  expandSubfolder(sid);
+  selectItem(sid, iid);
+  getButton('sorting-desk-toolbar-remove').then(function (b) {
+    browser.wait(until.elementIsEnabled(b), TIMEOUT_BUTTON);
+  } );
+  return getButton('sorting-desk-toolbar-remove').then(function (b) {
+    b.click();
+    waitUntilRequestsFinished();
+    return getItem(sid, iid).then(
+      function () { throw "Item should not exist"; },
+      function () { }
+    );
+  } );
+};
+
+var refreshExplorer = function ()
+{
+  return getFolders().then(function (c) {
+    getButton("sorting-desk-toolbar-refresh-explorer").then(function (b) {
+      b.click();
+      c.forEach(function (f) {
+        browser.wait(until.stalenessOf(f), TIMEOUT_STALE);
+      } );
+    } );
+  } );
 };

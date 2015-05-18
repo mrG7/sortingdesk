@@ -3,10 +3,11 @@
 # Copyright (c) 2015 Diffeo
 #
 # Comments:
-# By default, the settings file (`settings.sh´) is a symbolic link to this file.
 # This file contains default settings and should *never* be changed. If you wish
-# to customise your own settings, please copy this file and name it
-# `settings.sh´.
+# to customise your own settings, please copy this file and either name it
+# `settings.<identifier>.sh´ or `settings.sh´, depending on whether you intend
+# to use multiple settings.  If using multiple settings, use the script
+# `load-settings´ to conveniently switch between settings.
 #
 
 # URL of local service responsible for reloading the Sorting Desk Firefox
@@ -33,7 +34,7 @@ readonly DOSSIER_MODELS_URL="$DOSSIER_MODELS_HOST:$DOSSIER_MODELS_PORT"
 readonly DOSSIER_MODELS_URL_PREFIX=/dossier
 
 # Full path to yaml file containing the settings for a dossier.models instance.
-readonly DOSSIER_MODELS_PATH_YAML=
+readonly DOSSIER_MODELS_PATH_YAML=/full/or/relative/path/to/config.yaml
 
 # Full path to output directory.
 readonly DIR_OUT="$dir_root/out"
