@@ -467,7 +467,7 @@
                 label: "Rename",
                 icon: "glyphicon glyphicon-pencil",
                 action: self.on_rename_.bind(self),
-                _disabled: obj === null || obj.loading()
+                _disabled: obj === null || obj.loading() || !obj.loaded
                   || obj instanceof ItemImage
               },
               "remove": {
@@ -490,7 +490,8 @@
               label: "Create manual item",
               icon: "glyphicon glyphicon-plus",
               separator_before: true,
-              action: self.createItem.bind(self)
+              action: self.createItem.bind(self),
+              _disabled: obj.loading() || !obj.loaded
             };
           } else if(obj instanceof Item) {
             items["jump"] = {
@@ -868,6 +869,7 @@
     ela.rename.toggleClass('disabled',
                            this.selected_ === null || loading
                            || this.selected_.loading()
+                           || !this.selected_.loaded
                            || this.selected_ instanceof ItemImage);
 
     ela.remove.toggleClass('disabled',
@@ -888,9 +890,12 @@
              && this.selected_.loaded));
 
     ela.refresh.explorer.toggleClass('disabled', loading);
-    ela.refresh.search.toggleClass('disabled', loading);
+
+    ela.refresh.search.toggleClass('disabled',
+                                   loading || !this.active_);
+
     ela.report.toggleClass('disabled', loading
-                           || !(this.selected_ instanceof Folder))
+                           || !(this.selected_ instanceof Folder));
   };
 
   ControllerExplorer.prototype.addLabel = function (label)
