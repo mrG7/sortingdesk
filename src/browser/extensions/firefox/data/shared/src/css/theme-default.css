@@ -219,9 +219,15 @@ BODY {
 }
 
 .sd-sr-hint {
-  margin-left: 10px;
+  margin-left: 7px;
   cursor: pointer;
   color: #3B5C77;
+}
+
+.sd-sr-hint > SPAN.glyphicon {
+  font-size: 12px;
+  position: relative;
+  top: -3px;
 }
 
 #sd-recommendation {

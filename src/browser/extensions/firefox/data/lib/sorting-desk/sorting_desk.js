@@ -365,7 +365,7 @@
     container.append(this.callbacks.invoke('renderScore', sugg.score));
 
     container.find('BUTTON').on('click', function () {
-      if(self.explorer.addSuggestions(sugg.phrase, sugg.hits)) {
+      if(self.explorer.setSuggestions(sugg.phrase, sugg.hits)) {
         container.fadeOut(function () {
           container.remove();
         } );
@@ -467,7 +467,7 @@
                 label: "Rename",
                 icon: "glyphicon glyphicon-pencil",
                 action: self.on_rename_.bind(self),
-                _disabled: obj === null || obj.loading()
+                _disabled: obj === null || obj.loading() || !obj.loaded
                   || obj instanceof ItemImage
               },
               "remove": {
@@ -490,7 +490,8 @@
               label: "Create manual item",
               icon: "glyphicon glyphicon-plus",
               separator_before: true,
-              action: self.createItem.bind(self)
+              action: self.createItem.bind(self),
+              _disabled: obj.loading() || !obj.loaded
             };
           } else if(obj instanceof Item) {
             items["jump"] = {
@@ -729,7 +730,7 @@
     this.owner_.callbacks.invoke('export', this.selected_.data.id);
   };
 
-  ControllerExplorer.prototype.addSuggestions = function (title, suggestions)
+  ControllerExplorer.prototype.setSuggestions = function (title, suggestions)
   {
     if(!std.is_str(title) || (title = title.trim()).length === 0)
       throw 'Invalid or no title specified';
@@ -747,10 +748,11 @@
           this.owner.api.foldering.subfolderFromName(
             this.selected_.data, title.replace(/\//g, "_")));
 
-    var on_loaded = function () { next(); };
     var next = function () {
+      /* Detach listener previously attached below when adding the subfolder.
+       * */
       if(std.is_fn(this.off))
-        this.off('loaded', on_loaded);
+        this.off('loading-end', next);
 
       if(index >= suggestions.length)
         return;
@@ -766,7 +768,7 @@
       ++index;
       descriptor.subtopic_id = self.generate_subtopic_id_(descriptor);
       subfolder.add(descriptor)
-        .on('loading-end', on_loaded);
+        .on('loading-end', next);
     };
     next();
 
@@ -867,6 +869,7 @@
     ela.rename.toggleClass('disabled',
                            this.selected_ === null || loading
                            || this.selected_.loading()
+                           || !this.selected_.loaded
                            || this.selected_ instanceof ItemImage);
 
     ela.remove.toggleClass('disabled',
@@ -887,9 +890,12 @@
              && this.selected_.loaded));
 
     ela.refresh.explorer.toggleClass('disabled', loading);
-    ela.refresh.search.toggleClass('disabled', loading);
+
+    ela.refresh.search.toggleClass('disabled',
+                                   loading || !this.active_);
+
     ela.report.toggleClass('disabled', loading
-                           || !(this.selected_ instanceof Folder))
+                           || !(this.selected_ instanceof Folder));
   };
 
   ControllerExplorer.prototype.addLabel = function (label)

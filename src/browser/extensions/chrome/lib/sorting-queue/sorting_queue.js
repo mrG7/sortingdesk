@@ -1329,7 +1329,7 @@
           ci = $('<tr/>').appendTo(co);
 
         $([ '<button',
-            '" data-id="', o.id,
+            ' data-id="', o.id,
             '" title="', o.tooltip || '',
             '">', o.title, '</button>' ]
           .join(''))
