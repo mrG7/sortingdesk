@@ -200,7 +200,7 @@ test.describe("Sorting Desk -- E2E", function () {
       return getSearchResult(0).then(function (i) {
         activateItem(1, 0);
         browser.wait(until.stalenessOf(i), TIMEOUT_STALE);
-        verifyItemsInQueue(5);
+        verifyItemsInQueue(4);
       } );
     } );
 
@@ -212,12 +212,12 @@ test.describe("Sorting Desk -- E2E", function () {
       return getSearchResult(0).then(function (i) {
         activateItem(1, 0);
         browser.wait(until.stalenessOf(i), TIMEOUT_STALE);
-        verifyItemsInQueue(5);
+        verifyItemsInQueue(4);
 
         return getSearchResult(1).then(function (j) {
           activateItem(2, 0);
-          browser.wait(until.stalenessOf(j), 500);
-          verifyItemsInQueue(5);
+          browser.wait(until.stalenessOf(j), TIMEOUT_STALE);
+          verifyItemsInQueue(4);
         } );
       } );
     } );
@@ -248,26 +248,26 @@ test.describe("Sorting Desk -- E2E", function () {
 
     test.it("shows the suggestion box", function () {
       expandSubfolder(4);
-      verifyItemsInQueue(5);
+      verifyItemsInQueue(4);
       return getSuggestionBox();
     } );
 
     test.it("shows the suggestion box's add button on hover", function () {
       expandSubfolder(4);
-      verifyItemsInQueue(5);
+      verifyItemsInQueue(4);
       return getSuggestionAddButton();
     } );
 
     test.it("does not add soft selectors if folder not selected", function () {
       expandSubfolder(4);
-      verifyItemsInQueue(5);
-      getSuggestionAddButton().click();
+      verifyItemsInQueue(4);
+      getSuggestionAddButton().then(function (b) { b.click(); } );
       return browser.wait(until.alertIsPresent(), TIMEOUT_ALERT);
     } );
 
     test.it("adds the soft selectors when folder selected", function () {
       expandSubfolder(4);
-      verifyItemsInQueue(5);
+      verifyItemsInQueue(4);
       selectFolder(1);
       return getSuggestionAddButton().then(function (b) {
         b.click();
@@ -280,13 +280,13 @@ test.describe("Sorting Desk -- E2E", function () {
 
     test.it("shows a search result's dismissal button on hover", function () {
       expandSubfolder(4);
-      verifyItemsInQueue(5);
+      verifyItemsInQueue(4);
       return getDismissalButton(0);
     } );
 
     test.it("dismisses item -- ignore", function () {
       expandSubfolder(4);
-      verifyItemsInQueue(5);
+      verifyItemsInQueue(4);
 
       return getSearchResult(0).then(function(i) {
         getDismissalButton(0).then(function (b) {
@@ -302,25 +302,6 @@ test.describe("Sorting Desk -- E2E", function () {
 
     test.it("dismisses item -- wrong", function () {
       expandSubfolder(4);
-      verifyItemsInQueue(4);
-
-      return getSearchResult(0).then(function (i) {
-        getDismissalButton(0).then(function (b) {
-          b.click();
-          browser.sleep(TIMEOUT_ANIMATIONS);
-
-          getDismissalButton(0, DISMISSAL_REDUNDANT).then(function (b2) {
-            b2.click();
-            browser.sleep(TIMEOUT_ANIMATIONS);
-            browser.wait(until.stalenessOf(i), TIMEOUT_STALE);
-            verifyItemsInQueue(3);
-          } );
-        } );
-      } );
-    } );
-
-    test.it("dismisses item -- duplicate", function () {
-      expandSubfolder(4);
       verifyItemsInQueue(3);
 
       return getSearchResult(0).then(function (i) {
@@ -333,6 +314,25 @@ test.describe("Sorting Desk -- E2E", function () {
             browser.sleep(TIMEOUT_ANIMATIONS);
             browser.wait(until.stalenessOf(i), TIMEOUT_STALE);
             verifyItemsInQueue(2);
+          } );
+        } );
+      } );
+    } );
+
+    test.it("dismisses item -- duplicate", function () {
+      expandSubfolder(4);
+      verifyItemsInQueue(2);
+
+      return getSearchResult(0).then(function (i) {
+        getDismissalButton(0).then(function (b) {
+          b.click();
+          browser.sleep(TIMEOUT_ANIMATIONS);
+
+          getDismissalButton(0, DISMISSAL_REDUNDANT).then(function (b2) {
+            b2.click();
+            browser.sleep(TIMEOUT_ANIMATIONS);
+            browser.wait(until.stalenessOf(i), TIMEOUT_STALE);
+            verifyItemsInQueue(1);
           } );
         } );
       } );
@@ -384,8 +384,8 @@ test.describe("Sorting Desk -- E2E", function () {
         return buttonEnabled('sorting-desk-toolbar-refresh-explorer');
       } );
 
-      test.it("queue refresh is enabled", function () {
-        return buttonEnabled('sorting-desk-toolbar-refresh-search');
+      test.it("queue refresh is disabled", function () {
+        return buttonEnabled('sorting-desk-toolbar-refresh-search', false);
       } );
     } );
 
