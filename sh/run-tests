@@ -10,7 +10,7 @@ function preexit () {
   info "removing temporary directory"
   rm "$dir_tmp" -rf
 
-  sh -c "$dir_root/sh/stop-server"
+  sh -c "$dir_root/sh/stop-server" &>/dev/null
   echo done.
 }
 
@@ -39,8 +39,8 @@ echo -e "\n  filename: $dir_tmp/soft-selector.db" >> "$dir_tmp/config.yaml"
 
 info "starting dossier.models instance"
 sh -c "$dir_root/sh/stop-server" >/dev/null
-DOSSIER_WEB_DEV=1 dossier.models -c "$dir_tmp/config.yaml" \
-  --reload --port 8001 --bottle-debug &>/dev/null &
+DOSSIER_WEB_DEV=0 dossier.models -c "$dir_tmp/config.yaml" \
+  --reload --port 8001 &>/dev/null &
 
 # Will this be enough a wait?  How can we know it's safe to proceed with the
 # tests?
