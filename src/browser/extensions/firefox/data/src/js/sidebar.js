@@ -121,8 +121,6 @@ var Main = (function (window, $, std, sq, sqc, sd, undefined) {
       node.append($('<button/>')
                   .addClass('btn btn-default btn-sm')
                   .html('<span class="glyphicon glyphicon-plus"></span>'));
-      node.append('<span class="glyphicon glyphicon-info-sign"></span>');
-      node.append('Soft selectors');
       container.append(node);
 
       return container;
