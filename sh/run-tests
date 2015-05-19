@@ -21,10 +21,6 @@ function init () {
   # tests?
   sleep 3
 
-  info "resetting database"
-  sh -c "$dir_root/sh/reset-labels" >/dev/null
-  sh -c "$dir_root/sh/reset-fcs" >/dev/null
-
   activate_config
 }
 
