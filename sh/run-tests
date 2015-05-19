@@ -1,7 +1,10 @@
 #!/bin/bash
 
 function init () {
-  [ $test_local != "true" ] && return
+  if [ $test_local != "true" ]; then
+    activate_config
+    return
+  fi
 
   info "initialising local database"
   [ -d "$dir_tmp" ] && rm "$dir_tmp" -rf
@@ -21,6 +24,16 @@ function init () {
   info "resetting database"
   sh -c "$dir_root/sh/reset-labels" >/dev/null
   sh -c "$dir_root/sh/reset-fcs" >/dev/null
+
+  activate_config
+}
+
+function activate_config () {
+  info "activating test configuration file"
+  mv "$dir_ext/chrome/src/js/extension/config.js" \
+    "$dir_ext/chrome/src/js/extension/config.js.disabled"
+  mv "$dir_ext/chrome/src/js/extension/config.js.testing" \
+    "$dir_ext/chrome/src/js/extension/config.js"
 }
 
 function preexit () {
@@ -60,22 +73,13 @@ if [ -z "$SELENIUM_SERVER_URL" ] \
     error "chromedriver not found"
   elif ! command -v chromium-browser &>/dev/null; then
     error "Chromium browser not found"
+  fi
 else
   test_local="false"
 fi
 
 set -e
 init
-
-# Only activate the test configuration file if `init´ above succeeds; it'll
-# cause the script to abort otherwise with no cleanup performed.  Exit trap is
-# activated subsequently to ensure the configuration files are restored when
-# either the script terminates execution or an error occurs.
-info "activating test configuration file"
-mv "$dir_ext/chrome/src/js/extension/config.js" \
-  "$dir_ext/chrome/src/js/extension/config.js.disabled"
-mv "$dir_ext/chrome/src/js/extension/config.js.testing" \
-  "$dir_ext/chrome/src/js/extension/config.js"
 
 trap preexit EXIT
 
