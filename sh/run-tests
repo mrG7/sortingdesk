@@ -1,5 +1,37 @@
 #!/bin/bash
 
+function init () {
+  if [ $test_local != "true" ]; then
+    activate_config
+    return
+  fi
+
+  info "initialising local database"
+  [ -d "$dir_tmp" ] && rm "$dir_tmp" -rf
+  mkdir "$dir_tmp"
+  cp "$dir_test/db"/* "$dir_tmp"
+  echo -e "\n  filename: $dir_tmp/soft-selector.db" >> "$dir_tmp/config.yaml"
+
+  info "starting local dossier stack instance"
+  sh -c "$dir_root/sh/stop-server" >/dev/null
+  DOSSIER_WEB_DEV=0 dossier.models -c "$dir_tmp/config.yaml" \
+    --reload --port 8001 &>/dev/null &
+
+  # Will this be enough a wait?  How can we know it's safe to proceed with the
+  # tests?
+  sleep 3
+
+  activate_config
+}
+
+function activate_config () {
+  info "activating test configuration file"
+  mv "$dir_ext/chrome/src/js/extension/config.js" \
+    "$dir_ext/chrome/src/js/extension/config.js.disabled"
+  mv "$dir_ext/chrome/src/js/extension/config.js.testing" \
+    "$dir_ext/chrome/src/js/extension/config.js"
+}
+
 function preexit () {
   info "restoring configuration file"
   mv "$dir_ext/chrome/src/js/extension/config.js" \
@@ -7,9 +39,12 @@ function preexit () {
   mv "$dir_ext/chrome/src/js/extension/config.js.disabled" \
     "$dir_ext/chrome/src/js/extension/config.js"
 
+  [ $test_local != "true" ] && return
+
   info "removing temporary directory"
   rm "$dir_tmp" -rf
 
+  info "stopping local dossier stack instance"
   sh -c "$dir_root/sh/stop-server" &>/dev/null
   echo done.
 }
@@ -18,46 +53,45 @@ readonly dir_root="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. && pwd )"
 readonly dir_ext="$dir_root/src/browser/extensions"
 readonly dir_test="$dir_root/test"
 readonly dir_tmp="/tmp/sorting-desk.test"
+readonly dir_out="$dir_root/out"
 source "$dir_root/sh/libtools.sh"
 
 # Ensure needed binaries are present in the system.
 if ! command -v node &>/dev/null; then
   error "Nodejs binary not found"
-elif ! command -v chromedriver &>/dev/null; then
-  error "chromedriver not found"
-elif ! command -v chromium-browser &>/dev/null; then
-  error "Chromium browser not found"
+fi
+
+if command -v google-chrome &>/dev/null; then
+  browser="google-chrome"
+elif command -v chromium-browser &>/dev/null; then
+  browser="chromium-browser"
+else
+  error "either Chrome or Chromium browser required to package extension"
+fi
+
+if [ -z "$SELENIUM_SERVER_URL" ] \
+  && ([ -z "$SAUCE_USERNAME" ] || [ -z "$SAUCE_ACCESS_KEY" ]); then
+  test_local="true"
+
+  if ! command -v chromedriver &>/dev/null; then
+    error "chromedriver not found"
+  elif ! command -v chromium-browser &>/dev/null; then
+    error "chromium browser not found"
+  fi
+else
+  test_local="false"
 fi
 
 set -e
+init
 
-info "initialising database"
-[ -d /tmp/sorting-desk.test ] && rm /tmp/sorting-desk.test -rf
-mkdir /tmp/sorting-desk.test
-cp "$dir_test/db"/* "$dir_tmp"
-echo -e "\n  filename: $dir_tmp/soft-selector.db" >> "$dir_tmp/config.yaml"
-
-info "starting dossier.models instance"
-sh -c "$dir_root/sh/stop-server" >/dev/null
-DOSSIER_WEB_DEV=0 dossier.models -c "$dir_tmp/config.yaml" \
-  --reload --port 8001 &>/dev/null &
-
-# Will this be enough a wait?  How can we know it's safe to proceed with the
-# tests?
-sleep 5
-
-info "activating test configuration file"
-mv "$dir_ext/chrome/src/js/extension/config.js" \
-  "$dir_ext/chrome/src/js/extension/config.js.disabled"
-mv "$dir_ext/chrome/src/js/extension/config.js.testing" \
-  "$dir_ext/chrome/src/js/extension/config.js"
-
-set +e
 trap preexit EXIT
 
-info "resetting database"
-sh -c "$dir_root/sh/reset-labels" >/dev/null
-sh -c "$dir_root/sh/reset-fcs" >/dev/null
+info "packaging extension"
+[ ! -d "$dir_out" ] && mkdir "$dir_out"
+$browser --pack-extension="$dir_ext/chrome" \
+  --pack-extension-key="$dir_ext/chrome-testing.pem" &>/dev/null
+mv "$dir_ext/chrome.crx" "$dir_out/sortingdesk.crx"
 
 info "running tests..."
 sh -c "node $dir_root/node_modules/mocha/bin/mocha $dir_root/test/chrome/main.js"

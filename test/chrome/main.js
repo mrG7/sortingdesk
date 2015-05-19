@@ -20,12 +20,19 @@ var DISMISSAL_IGNORE    = 0,
 var XPATH_TREE  = "//*[@id='sd-folder-explorer']/div/div/div",
     XPATH_QUEUE = "//*[@id='sd-queue']/div/div";
 
+var TEST_LOCAL     = 0,
+    TEST_SAUCELABS = 1,
+    TEST_REMOTE    = 2;
+
+var DEFAULT_PLATFORM = "Linux";
+
 var test           = require("selenium-webdriver/testing"),
 //    assert         = require("assert"),
     webdriver      = require("selenium-webdriver"),
     chrome         = require("selenium-webdriver/chrome"),
     firefox        = require("selenium-webdriver/firefox"),
     chai           = require("chai"),
+    fs             = require("fs"),
 
     assert         = chai.assert,
     By             = webdriver.By,
@@ -34,7 +41,7 @@ var test           = require("selenium-webdriver/testing"),
 
 var pathRoot     = __dirname + "/../..";
 
-var browser,
+var browser, testType, testUrl,
     options = new chrome.Options();
 
 var windowExt, windowMain;
@@ -56,9 +63,24 @@ var folders = [ newFolder(), newFolder(), newFolder('Soft selectors') ],
       newSubfolder([newItem(null, "Vintage~Star~Wars")], "Star Wars")
     ];
 
+if(!fs.existsSync(pathRoot + "/out/sortingdesk.crx")) {
+  console.error("Sorting Desk extension package not found");
+  throw new Error("Sorting Desk extension package not found");
+} else if(process.env.SELENIUM_SERVER_URL) {
+  console.info("Testing on remote server");
+  testType = TEST_REMOTE;
+  testUrl = process.env.SELENIUM_SERVER_URL;
+} else if(process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY){
+  console.info("Testing on Sauce Labs");
+  testType = TEST_SAUCELABS;
+  testUrl = "http://ondemand.saucelabs.com:80/wd/hub";
+} else {
+  console.info("Testing locally");
+  testType = TEST_LOCAL;
+}
+
 /* Configure  */
-options.addArguments("load-extension=" + pathRoot
-                     + "/src/browser/extensions/chrome");
+options.addExtensions(pathRoot + "/out/sortingdesk.crx");
 
 /* Test specs */
 test.describe("Sorting Desk -- E2E", function () {
@@ -707,7 +729,21 @@ var instantiateBrowser = function (done)
 {
   /* Detect main and extension windows. */
   windowMain = windowExt = null;
-  browser = new chrome.Driver(options);
+
+  var capabilities = webdriver.Capabilities.chrome();
+  capabilities.set("name", "Sorting Desk");
+
+  if(testType === TEST_SAUCELABS) {
+    capabilities.set("username", process.env.SAUCE_USERNAME);
+    capabilities.set("accessKey", process.env.SAUCE_ACCESS_KEY);
+    capabilities.set("platform", process.env.PLATFORM || DEFAULT_PLATFORM);
+  }
+
+  browser = new webdriver.Builder();
+  if(testUrl) browser.usingServer(testUrl);
+  browser = browser.withCapabilities(capabilities)
+    .setChromeOptions(options)
+    .build();
 
   var poll = function () {
     browser.sleep(100).then(function () {
