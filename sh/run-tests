@@ -61,6 +61,14 @@ if ! command -v node &>/dev/null; then
   error "Nodejs binary not found"
 fi
 
+if command -v google-chrome &>/dev/null; then
+  browser="google-chrome"
+elif command -v chromium-browser &>/dev/null; then
+  browser="chromium-browser"
+else
+  error "either Chrome or Chromium browser required to package extension"
+fi
+
 if [ -z "$SELENIUM_SERVER_URL" ] \
   && ([ -z "$SAUCE_USERNAME" ] || [ -z "$SAUCE_ACCESS_KEY" ]); then
   test_local="true"
@@ -68,7 +76,7 @@ if [ -z "$SELENIUM_SERVER_URL" ] \
   if ! command -v chromedriver &>/dev/null; then
     error "chromedriver not found"
   elif ! command -v chromium-browser &>/dev/null; then
-    error "Chromium browser not found"
+    error "chromium browser not found"
   fi
 else
   test_local="false"
@@ -81,7 +89,7 @@ trap preexit EXIT
 
 info "packaging extension"
 [ ! -d "$dir_out" ] && mkdir "$dir_out"
-google-chrome --pack-extension="$dir_ext/chrome" \
+$browser --pack-extension="$dir_ext/chrome" \
   --pack-extension-key="$dir_ext/chrome-testing.pem" &>/dev/null
 mv "$dir_ext/chrome.crx" "$dir_out/sortingdesk.crx"
 
