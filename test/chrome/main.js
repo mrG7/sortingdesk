@@ -809,8 +809,7 @@ var destroyBrowser = function ()
 
 var getElement = function (xpath)
 {
-  xpath = By.xpath(xpath);
-  return browser.findElements(xpath)
+  return browser.findElements(By.xpath(xpath))
     .then(function (c) {
       assert.equal(c.length, 1);
       return c[0];
