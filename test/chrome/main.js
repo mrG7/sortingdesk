@@ -643,7 +643,10 @@ test.describe("Sorting Desk -- E2E", function () {
 
 } );
 
-/* Meta functions */
+/* Begin: meta functions
+ * --
+ * Note that the functions in this section should *not* be assigned to vars
+ * since they need to be available at the end of the first code parse. */
 function generateId(prefix, id)
 {
   return id !== undefined ? id
@@ -670,7 +673,7 @@ function newItem(u, t)
 }
 
 /* From: http://stackoverflow.com/a/105074/3001914 . */
-function generateGuid ()  /* Note: function can't be assigned to var. */
+function generateGuid ()
 {
   function s4() {
     return Math.floor((1 + Math.random()) * 0x10000)
@@ -681,6 +684,8 @@ function generateGuid ()  /* Note: function can't be assigned to var. */
   return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-'
     + s4() + s4() + s4();
 }
+/* End: meta functions */
+
 
 /* Injectable scripts */
 var inj = {
