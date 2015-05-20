@@ -1070,7 +1070,7 @@ var verifyFolders = function (coll)
     i.forEach(function (j) {
       j.findElement(By.xpath("a")).getText().then(function (text) {
         assert.notEqual(coll.length, 0);
-        removeByTitle(folders, coll, text);
+        removeByTitle_(folders, coll, text);
       } );
     } );
   } ).then(function () {
@@ -1087,7 +1087,7 @@ var verifyItemsInSubfolder = function (sid, items)
       els.forEach(function (i) {
         i.getText().then(function (text) {
           assert.notEqual(items.length, 0);
-          removeByTitle(subfolders[sid].items, items, text);
+          removeByTitle_(subfolders[sid].items, items, text);
         } );
       } );
     } );
@@ -1137,19 +1137,6 @@ var verifySelected = function (title)
         assert.equal(title, text);
       } );
     } );
-};
-
-var removeByTitle = function (cl, cr, title)
-{
-  var ndx = -1;
-
-  cr.some(function (j, i) {
-    if(cl[j].title === title) { ndx = i; return true; }
-    return false;
-  } );
-
-  assert.notEqual(ndx, -1);
-  if(ndx >= 0) cr.splice(ndx, 1);
 };
 
 var renameFolder = function (fid, title)
@@ -1257,4 +1244,17 @@ var refreshExplorer = function ()
       } );
     } );
   } );
+};
+
+var removeByTitle_ = function (cl, cr, title)
+{
+  var ndx = -1;
+
+  cr.some(function (j, i) {
+    if(cl[j].title === title) { ndx = i; return true; }
+    return false;
+  } );
+
+  assert.notEqual(ndx, -1);
+  if(ndx >= 0) cr.splice(ndx, 1);
 };
