@@ -3,7 +3,9 @@
 var PANE_EXPLORER = "sd-folder-explorer",
     PANE_QUEUE    = "sd-queue";
 
-var TIMEOUT_RUNNER       = 80000,     /* account for slow VMs */
+var TIMEOUT_POLL         = 100,
+    TIMEOUT_POLL_WINDOWS = 5000,
+    TIMEOUT_RUNNER       = 80000,     /* account for slow VMs */
     TIMEOUT_LOADER       = 40000,
     TIMEOUT_LOADER_SHOW  = 1000,
     TIMEOUT_QUEUE_ITEMS  = 1000,
@@ -745,9 +747,13 @@ var instantiateBrowser = function (done)
     .setChromeOptions(options)
     .build();
 
+  var iter = 0;
   var poll = function () {
-    browser.sleep(100).then(function () {
+    browser.sleep(TIMEOUT_POLL).then(function () {
       var count = 0;
+
+      if((iter += TIMEOUT_POLL) > TIMEOUT_POLL_WINDOWS)
+        throw "Timed out polling for windows";
 
       browser.getAllWindowHandles().then(function (windows) {
         if(windows.length < 2) {
