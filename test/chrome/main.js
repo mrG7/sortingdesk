@@ -87,7 +87,7 @@ test.describe("Sorting Desk -- E2E", function () {
 
   this.timeout(TIMEOUT_RUNNER);
 
-  describe("Functionality", function () {
+  test.describe("Functionality", function () {
 
     test.beforeEach(function (done) {
       instantiateBrowser(done);
@@ -362,7 +362,7 @@ test.describe("Sorting Desk -- E2E", function () {
 
   } );
 
-  describe("Toolbar -- state", function () {
+  test.describe("Toolbar -- state", function () {
 
     test.before(function (done) {
       instantiateBrowser(done);
@@ -372,7 +372,7 @@ test.describe("Sorting Desk -- E2E", function () {
       destroyBrowser();
     } );
 
-    describe("folder", function () {
+    test.describe("folder", function () {
 
       test.before(function () {
         return selectFolder(0);
@@ -411,9 +411,9 @@ test.describe("Sorting Desk -- E2E", function () {
       } );
     } );
 
-    describe("subfolder", function () {
+    test.describe("subfolder", function () {
 
-      describe("expanded", function () {
+      test.describe("expanded", function () {
 
         test.before(function () {
           expandSubfolder(0);
@@ -453,7 +453,7 @@ test.describe("Sorting Desk -- E2E", function () {
         } );
       } );
 
-      describe("not expanded", function () {
+      test.describe("not expanded", function () {
 
         test.before(function () {
           return selectSubfolder(1);
@@ -494,7 +494,7 @@ test.describe("Sorting Desk -- E2E", function () {
 
     } );
 
-    describe("item", function () {
+    test.describe("item", function () {
 
       test.before(function () {
         expandSubfolder(1);
@@ -536,7 +536,7 @@ test.describe("Sorting Desk -- E2E", function () {
 
   } );
 
-  describe("renaming/removing", function () {
+  test.describe("renaming/removing", function () {
 
     test.beforeEach(function (done) {
       instantiateBrowser(done);
@@ -592,7 +592,7 @@ test.describe("Sorting Desk -- E2E", function () {
 
   } );
 
-  describe("Toolbar -- blank state", function () {
+  test.describe("Toolbar -- blank state", function () {
 
     test.before(function (done) {
       instantiateBrowser(done);
