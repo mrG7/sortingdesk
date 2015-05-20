@@ -5,6 +5,7 @@
 .emacs.desktop.lock
 BROWSE
 doc/*.pdf
+doc/testing.md
 .*.swp
 out/
 *.zip
