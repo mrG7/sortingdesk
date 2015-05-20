@@ -258,16 +258,8 @@ test.describe("Sorting Desk -- E2E", function () {
     test.it("refreshes the search results", function () {
       expandSubfolder(0);
       verifyItemsInQueue(5);
-      return getSearchResults().then(function (c) {
-        getButton("sorting-desk-toolbar-refresh-search").then(function (b) {
-          b.click();
-          c.forEach(function (r) {
-            browser.wait(until.stalenessOf(r), TIMEOUT_STALE);
-          } );
-
-          verifyItemsInQueue(5, false);
-        } );
-      } );
+      refreshSearchResults();
+      return verifyItemsInQueue(5, false);
     } );
 
     test.it("shows the suggestion box", function () {
@@ -1241,6 +1233,18 @@ var refreshExplorer = function ()
       b.click();
       c.forEach(function (f) {
         browser.wait(until.stalenessOf(f), TIMEOUT_STALE);
+      } );
+    } );
+  } );
+};
+
+var refreshSearchResults = function ()
+{
+  return getSearchResults().then(function (c) {
+    getButton("sorting-desk-toolbar-refresh-search").then(function (b) {
+      b.click();
+      c.forEach(function (r) {
+        browser.wait(until.stalenessOf(r), TIMEOUT_STALE);
       } );
     } );
   } );
