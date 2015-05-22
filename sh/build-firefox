@@ -19,5 +19,5 @@ set -e
 mkdir -p "$dir_root/out"
 cd "$dir_root/src/browser/extensions/firefox"
 info "building Firefox extension"
-cfx xpi >/dev/null && mv sortingdesk.xpi "$DIR_OUT"
+cfx xpi >/dev/null && mv sortingdesk.xpi "$dir_root/out/"
 echo "done."

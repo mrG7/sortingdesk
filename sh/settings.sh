@@ -1,1 +1,1 @@
-settings.sh.standard
+settings.sh.default
