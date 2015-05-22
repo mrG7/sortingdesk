@@ -61,11 +61,15 @@ if ! command -v node &>/dev/null; then
   error "Nodejs binary not found"
 fi
 
-if command -v google-chrome &>/dev/null; then
-  browser="google-chrome"
-elif command -v chromium-browser &>/dev/null; then
-  browser="chromium-browser"
-else
+browser=
+bins=(google-chrome google-chrome-stable chromium-browser)
+for try in "${bins[@]}"; do
+  if command -v "$try" > /dev/null 2>&1; then
+    browser="$try"
+    break
+  fi
+done
+if [ -z "$browser" ]; then
   error "either Chrome or Chromium browser required to package extension"
 fi
 
@@ -75,8 +79,6 @@ if [ -z "$SELENIUM_SERVER_URL" ] \
 
   if ! command -v chromedriver &>/dev/null; then
     error "chromedriver not found"
-  elif ! command -v chromium-browser &>/dev/null; then
-    error "chromium browser not found"
   fi
 else
   test_local="false"
