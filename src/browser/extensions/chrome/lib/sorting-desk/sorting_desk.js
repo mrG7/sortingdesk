@@ -298,6 +298,7 @@
     this.sortingQueue.on('pre-render', this.onPreRender_.bind(this));
     this.sortingQueue.on('items-updated', function (count) {
       if(count === 0) {
+        self.dismiss(true);
         $('#' + options.suggestion).remove();
         $('#' + options.recommendation).remove();
       }
@@ -324,7 +325,7 @@
     /* Ensure there is a "recommendations" caption.  Create caption if it
      * doesn't exist. */
     if(container.length === 0) {
-      container = $('<h1/>').html('Recommendations:' + this.hint(1))
+      container = $('<h1/>').html('Recommendations' + this.hint(1))
         .attr('id', this.options.recommendation);
       this.insert(container, node);
       this.popover(container.find('.' + this.options.hint));
@@ -339,9 +340,7 @@
        || !std.is_arr(sugg[0].hits)
        || sugg[0].hits.length === 0)
     {
-      /* Note: it doesn't really matter if the container doesn't actually
-       * exist yet. */
-      container.fadeOut(function () { container.remove(); } );
+      self.dismiss();
       return;
     }
 
@@ -354,6 +353,9 @@
     container.remove();
     container = this.callbacks.invoke('createSuggestionContainer');
 
+    container.append($('<a class="' + Css.close + '" href="#">x</a>')
+      .click(function () { self.dismiss(); } ));
+
     container.append(
       $('<h1/>').html('This special phrase links <strong>'
                      + sugg.hits.length + '</strong> '
@@ -362,7 +364,13 @@
     );
 
     container.append($('<h2/>').html('"' + sugg.phrase + '"'));
-    container.append(this.callbacks.invoke('renderScore', sugg.score));
+
+    var i = $('<div/>');
+    i.append($('<span/>').html(
+      $('<a class="' + Css.preview + '" href="#"></a>')
+        .click(function () { self.expand(sugg.hits); } )));
+    i.append(this.callbacks.invoke('renderScore', sugg.score));
+    container.append(i);
 
     container.find('BUTTON').on('click', function () {
       if(self.explorer.setSuggestions(sugg.phrase, sugg.hits)) {
@@ -373,7 +381,69 @@
     } );
 
     this.insert(container, node);
+    $('<hr/>').insertAfter(container);
     this.popover(container.find('.' + this.options.hint));
+  };
+
+  SortingQueueRenderer.prototype.dismiss = function (now)
+  {
+    var id = '#' + this.options.suggestion,
+        container = $(id);
+
+    container.fadeOut(now === true ? 0 : 250, function () {
+      $(id + '+HR').remove();
+      container.remove();
+    });
+  };
+
+  SortingQueueRenderer.prototype.expand = function (hits)
+  {
+    var container = $('#' + this.options.suggestion),
+        ul = container.find('UL'),
+        preview = container.find('.' + Css.preview);
+
+    if(ul.length > 0) {
+      preview.toggleClass(Css.active, !ul.is(':visible'));
+      ul.slideToggle('fast');
+      return;
+    } else if(preview.hasClass(Css.loading))
+      return;
+
+    preview.addClass(Css.loading);
+
+    /* Load feature collections so we may retrieve the URL for each
+     * suggestion. */
+    var self = this,
+        links = [ ],
+        count = hits.length;
+
+    hits.forEach(function (i) {
+      self.explorer.api.fc.get(i.content_id).done(function (fc) {
+        links.push( { title: i.title, url: fc.raw.meta_url } );
+      } ).always(function () {
+        if(--count === 0) {
+          preview.removeClass(Css.loading);
+          self.show_(links);
+        }
+      } );
+    } );
+  };
+
+  SortingQueueRenderer.prototype.show_ = function (links)
+  {
+    var container = $('#' + this.options.suggestion),
+        ul = $('<ul/>').hide();
+
+    if(links.length === 0)
+      ul.append('<li>Unable to preview results</li>');
+    else {
+      links.forEach(function (i) {
+        ul.append('<li><a href="' + i.url + '">' + i.title + '</a></li>');
+      } );
+    }
+
+    container.append(ul);
+    this.expand();
   };
 
   SortingQueueRenderer.prototype.hint = function (index)
@@ -2360,7 +2430,10 @@
     disabled: 'sd-disabled',
     droppable: {
       hover: 'sd-droppable-hover'
-    }
+    },
+    close: 'sd-close',
+    preview: 'sd-preview',
+    loading: 'sd-loading'
   };
 
 
