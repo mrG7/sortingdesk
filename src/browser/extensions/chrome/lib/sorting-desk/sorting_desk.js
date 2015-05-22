@@ -373,11 +373,8 @@
     container.append(i);
 
     container.find('BUTTON').on('click', function () {
-      if(self.explorer.setSuggestions(sugg.phrase, sugg.hits)) {
-        container.fadeOut(function () {
-          container.remove();
-        } );
-      }
+      if(self.explorer.setSuggestions(sugg.phrase, sugg.hits))
+        self.dismiss();
     } );
 
     this.insert(container, node);
