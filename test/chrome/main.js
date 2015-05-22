@@ -3,7 +3,9 @@
 var PANE_EXPLORER = "sd-folder-explorer",
     PANE_QUEUE    = "sd-queue";
 
-var TIMEOUT_RUNNER       = 80000,     /* account for slow VMs */
+var TIMEOUT_POLL         = 100,
+    TIMEOUT_POLL_WINDOWS = 5000,
+    TIMEOUT_RUNNER       = 80000,     /* account for slow VMs */
     TIMEOUT_LOADER       = 40000,
     TIMEOUT_LOADER_SHOW  = 1000,
     TIMEOUT_QUEUE_ITEMS  = 1000,
@@ -87,7 +89,7 @@ test.describe("Sorting Desk -- E2E", function () {
 
   this.timeout(TIMEOUT_RUNNER);
 
-  describe("Functionality", function () {
+  test.describe("Functionality", function () {
 
     test.beforeEach(function (done) {
       instantiateBrowser(done);
@@ -256,16 +258,8 @@ test.describe("Sorting Desk -- E2E", function () {
     test.it("refreshes the search results", function () {
       expandSubfolder(0);
       verifyItemsInQueue(5);
-      return getSearchResults().then(function (c) {
-        getButton("sorting-desk-toolbar-refresh-search").then(function (b) {
-          b.click();
-          c.forEach(function (r) {
-            browser.wait(until.stalenessOf(r), TIMEOUT_STALE);
-          } );
-
-          verifyItemsInQueue(5, false);
-        } );
-      } );
+      refreshSearchResults();
+      return verifyItemsInQueue(5, false);
     } );
 
     test.it("shows the suggestion box", function () {
@@ -362,7 +356,7 @@ test.describe("Sorting Desk -- E2E", function () {
 
   } );
 
-  describe("Toolbar -- state", function () {
+  test.describe("Toolbar -- state", function () {
 
     test.before(function (done) {
       instantiateBrowser(done);
@@ -372,7 +366,7 @@ test.describe("Sorting Desk -- E2E", function () {
       destroyBrowser();
     } );
 
-    describe("folder", function () {
+    test.describe("folder", function () {
 
       test.before(function () {
         return selectFolder(0);
@@ -411,9 +405,9 @@ test.describe("Sorting Desk -- E2E", function () {
       } );
     } );
 
-    describe("subfolder", function () {
+    test.describe("subfolder", function () {
 
-      describe("expanded", function () {
+      test.describe("expanded", function () {
 
         test.before(function () {
           expandSubfolder(0);
@@ -453,7 +447,7 @@ test.describe("Sorting Desk -- E2E", function () {
         } );
       } );
 
-      describe("not expanded", function () {
+      test.describe("not expanded", function () {
 
         test.before(function () {
           return selectSubfolder(1);
@@ -494,7 +488,7 @@ test.describe("Sorting Desk -- E2E", function () {
 
     } );
 
-    describe("item", function () {
+    test.describe("item", function () {
 
       test.before(function () {
         expandSubfolder(1);
@@ -536,7 +530,7 @@ test.describe("Sorting Desk -- E2E", function () {
 
   } );
 
-  describe("renaming/removing", function () {
+  test.describe("renaming/removing", function () {
 
     test.beforeEach(function (done) {
       instantiateBrowser(done);
@@ -592,7 +586,7 @@ test.describe("Sorting Desk -- E2E", function () {
 
   } );
 
-  describe("Toolbar -- blank state", function () {
+  test.describe("Toolbar -- blank state", function () {
 
     test.before(function (done) {
       instantiateBrowser(done);
@@ -641,7 +635,10 @@ test.describe("Sorting Desk -- E2E", function () {
 
 } );
 
-/* Meta functions */
+/* Begin: meta functions
+ * --
+ * Note that the functions in this section should *not* be assigned to vars
+ * since they need to be available at the end of the first code parse. */
 function generateId(prefix, id)
 {
   return id !== undefined ? id
@@ -668,7 +665,7 @@ function newItem(u, t)
 }
 
 /* From: http://stackoverflow.com/a/105074/3001914 . */
-function generateGuid ()  /* Note: function can't be assigned to var. */
+function generateGuid ()
 {
   function s4() {
     return Math.floor((1 + Math.random()) * 0x10000)
@@ -679,6 +676,8 @@ function generateGuid ()  /* Note: function can't be assigned to var. */
   return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-'
     + s4() + s4() + s4();
 }
+/* End: meta functions */
+
 
 /* Injectable scripts */
 var inj = {
@@ -745,9 +744,13 @@ var instantiateBrowser = function (done)
     .setChromeOptions(options)
     .build();
 
+  var iter = 0;
   var poll = function () {
-    browser.sleep(100).then(function () {
+    browser.sleep(TIMEOUT_POLL).then(function () {
       var count = 0;
+
+      if((iter += TIMEOUT_POLL) > TIMEOUT_POLL_WINDOWS)
+        throw "Timed out polling for windows";
 
       browser.getAllWindowHandles().then(function (windows) {
         if(windows.length < 2) {
@@ -798,8 +801,7 @@ var destroyBrowser = function ()
 
 var getElement = function (xpath)
 {
-  xpath = By.xpath(xpath);
-  return browser.findElements(xpath)
+  return browser.findElements(By.xpath(xpath))
     .then(function (c) {
       assert.equal(c.length, 1);
       return c[0];
@@ -1060,7 +1062,7 @@ var verifyFolders = function (coll)
     i.forEach(function (j) {
       j.findElement(By.xpath("a")).getText().then(function (text) {
         assert.notEqual(coll.length, 0);
-        removeByTitle(folders, coll, text);
+        removeByTitle_(folders, coll, text);
       } );
     } );
   } ).then(function () {
@@ -1077,7 +1079,7 @@ var verifyItemsInSubfolder = function (sid, items)
       els.forEach(function (i) {
         i.getText().then(function (text) {
           assert.notEqual(items.length, 0);
-          removeByTitle(subfolders[sid].items, items, text);
+          removeByTitle_(subfolders[sid].items, items, text);
         } );
       } );
     } );
@@ -1127,19 +1129,6 @@ var verifySelected = function (title)
         assert.equal(title, text);
       } );
     } );
-};
-
-var removeByTitle = function (cl, cr, title)
-{
-  var ndx = -1;
-
-  cr.some(function (j, i) {
-    if(cl[j].title === title) { ndx = i; return true; }
-    return false;
-  } );
-
-  assert.notEqual(ndx, -1);
-  if(ndx >= 0) cr.splice(ndx, 1);
 };
 
 var renameFolder = function (fid, title)
@@ -1247,4 +1236,29 @@ var refreshExplorer = function ()
       } );
     } );
   } );
+};
+
+var refreshSearchResults = function ()
+{
+  return getSearchResults().then(function (c) {
+    getButton("sorting-desk-toolbar-refresh-search").then(function (b) {
+      b.click();
+      c.forEach(function (r) {
+        browser.wait(until.stalenessOf(r), TIMEOUT_STALE);
+      } );
+    } );
+  } );
+};
+
+var removeByTitle_ = function (cl, cr, title)
+{
+  var ndx = -1;
+
+  cr.some(function (j, i) {
+    if(cl[j].title === title) { ndx = i; return true; }
+    return false;
+  } );
+
+  assert.notEqual(ndx, -1);
+  if(ndx >= 0) cr.splice(ndx, 1);
 };
