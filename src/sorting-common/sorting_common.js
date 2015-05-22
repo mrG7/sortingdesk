@@ -1311,7 +1311,7 @@
       if(index === -1)
         return false;
 
-      this.map_splice(index, 1);
+      this.map_[ev].splice(index, 1);
     }
 
     return true;
