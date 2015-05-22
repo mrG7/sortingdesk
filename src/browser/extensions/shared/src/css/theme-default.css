@@ -93,7 +93,7 @@ BODY {
   clear: both;
 }
 
-.sd-loading {
+DIV.sd-loading {
   display: none;
   position: absolute;
   top: 135px;
@@ -143,9 +143,7 @@ BODY {
 .sd-text-item,
 #sd-suggestion {
   position: relative;
-  margin: 15px 5px;
   padding: 10px;
-  color: #242922;
   text-align: justify;
   font-size: 12px;
   cursor: default;
@@ -154,21 +152,29 @@ BODY {
 }
 
 .sd-text-item {
-  background-color: #FFFFFA;
-  border: 1px solid #ccc;
+  margin: 15px 5px;
+  background-color: #d7dede;
+  border: 1px solid #c0cbcd;
+  color: #374a4c;
 }
 
 #sd-suggestion {
-  background-color: #dbdfab;
-  border: 1px solid #cfc734;
+  margin: 5px;
+  background-color: #ffd6d6;
+  border: 1px solid #edc8c8;
   white-space: normal;
-  color: #474523;
+  color: #ad5e58;
+}
+
+#sd-suggestion + HR {
+  border-color: #ddd;
+  border-bottom: 1px solid #aaa;
 }
 
 #sd-suggestion > H3 {
   font-size: 12px;
   margin: 0;
-  color: #7F6A33;
+  color: #7f6a33;
 }
 
 #sd-suggestion > H3 > BUTTON {
@@ -177,6 +183,7 @@ BODY {
   outline: none;
   opacity: 0;
   transition: all .25s;
+  border-color: #b57676;
 }
 
 #sd-suggestion:hover > H3 > BUTTON {
@@ -190,17 +197,17 @@ BODY {
 #sd-suggestion > H1 {
   font-size: 13px;
   font-weight: bold;
-  margin: 10px 0 10px 0;
-  color: #574e2a;
+  margin: 5px 0 10px 0;
+  color: #83231c;
 }
 
 #sd-suggestion > H2 {
   display: block;
   font-size: 14px;
-  color: #59531d;
+  color: #83231c;
   margin: 10px 0 10px 0;
   line-height: 15px;
-  text-shadow: 1px 1px 1px #A5A883;
+  text-shadow: 1px 1px 1px #fffcfc;
 /*   display: -webkit-box; */
 /*   max-height: 30px; */
 /*   overflow: hidden; */
@@ -209,8 +216,9 @@ BODY {
 /*   -webkit-box-orient: vertical; */
 }
 
-#sd-suggestion > .sd-score {
-  margin-bottom: 10px;
+#sd-suggestion .sd-score {
+  padding-top: 5px;
+  margin-bottom: 5px;
   display: block;
 }
 
@@ -218,10 +226,65 @@ BODY {
   color: #574e2a;
 }
 
+#sd-suggestion .sd-preview {
+  float: right;
+}
+
+.sd-preview {
+  display: block;
+  background: url('../../media/images/folder-sub.png') -1px -1px no-repeat;
+  height: 24px;
+  width: 24px;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  opacity: .7;
+  transition: opacity .25s;
+}
+
+.sd-preview.sd-loading {
+  background: url('../../media/images/throbber.gif') 3px 3px no-repeat;
+}
+
+.sd-preview:hover:not(.sd-loading) {
+  border: 1px solid #d3afaf;
+  background-color: #fafafa;
+  opacity: 1;
+}
+
+.sd-preview:active:not(.sd-loading),
+.sd-preview.sd-active {
+  border: 1px solid #d3afaf;
+  background-color: #f0e7e7;
+}
+
 .sd-sr-hint {
   margin-left: 7px;
   cursor: pointer;
-  color: #3B5C77;
+  color: #3b5c77;
+}
+
+#sd-suggestion .sd-sr-hint SPAN.glyphicon {
+  color: #d73e3e;
+}
+
+#sd-suggestion UL {
+  flex-wrap: wrap;
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border: 1px solid #F4BCBC;
+  padding: 5px;
+  display: block;
+  background-color: #FAF2F2;
+  max-height: 150px;
+  overflow: auto;
+}
+
+#sd-suggestion UL > LI {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .sd-sr-hint > SPAN.glyphicon {
@@ -247,12 +310,12 @@ BODY {
 }
 
 .sd-text-item-title {
-  color: #565656;
   font-size: 14px;
+  color: #375054;
   margin: 0 0 8px 0;
   font-weight: bold;
   text-overflow: ellipsis;
-  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.25);
+  text-shadow: 1px 1px 1px #b6c4c5;
 }
 
 .sd-text-item-description {
@@ -318,12 +381,14 @@ A.sd-text-item-title {
   border-radius: 6px;
 }
 
+#sd-suggestion:hover .sd-close,
 .sd-text-item:hover .sd-text-item-close,
 .sd-text-item.sd-selected .sd-text-item-close {
   display: block;
   opacity: 1;
 }
 
+.sd-close,
 .sd-text-item-close {
   position: absolute;
   top: -8px;
@@ -339,19 +404,23 @@ A.sd-text-item-title {
   transition: all 200ms;
 }
 
+.sd-close,
 .sd-text-item-close,
 .sd-text-item-close:visited {
   color: grey !important;
 }
 
+.sd-close:hover,
 .sd-text-item-close:hover {
   color: black;
   background-color: #ececec;
   text-decoration: none;
 }
 
+.sd-close:active,
 .sd-text-item-close:active {
   background-color: #eee;
+  text-decoration: none;
 }
 
 .sd-text-item.sd-dragging {
@@ -365,7 +434,7 @@ A.sd-text-item-title {
   margin: 8px 0 8px 8px;
   padding: 5px;
   border: 1px solid #ccc;
-  background-color: #fcfcfc;
+  background-color: #f2f5f7;
   clear: both;
   transition: all 0.25s ease;
   overflow: hidden;
@@ -615,7 +684,7 @@ A.sd-text-item-title {
 
 .sd-container-view-outer {
   overflow: auto;
-  margin: 5px;
+/*   margin: 5px; */
   position: absolute;
   top: 0;
   left: 0;
