@@ -166,7 +166,11 @@
         return {
           actions: {
             add: this.find('toolbar-add'),
-            report: this.find('toolbar-report'),
+            report: {
+              excel: this.find('toolbar-report-excel'),
+              simple: this.find('toolbar-report-simple'),
+              rich: this.find('toolbar-report-rich')
+            },
             addContextual: this.find('toolbar-add-contextual'),
             remove: this.find('toolbar-remove'),
             rename: this.find('toolbar-rename'),
@@ -644,7 +648,12 @@
     });
 
     els.toolbar.actions.add.click(function () { self.createFolder(); } );
-    els.toolbar.actions.report.click(function () { self.export(); } );
+    els.toolbar.actions.report.excel.click(function () {
+      self.onExport(this, 'excel'); } );
+    els.toolbar.actions.report.simple.click(function () {
+      self.onExport(this, 'simple-pdf'); } );
+    els.toolbar.actions.report.rich.click(function () {
+      self.onExport(this, 'rich-pdf'); } );
 
     els.toolbar.actions.addContextual.click(function () {
       if(self.selected_ instanceof Folder)
@@ -789,12 +798,16 @@
       this, subfolder, new ItemNew(subfolder, name));
   };
 
-  ControllerExplorer.prototype.export = function ()
+  ControllerExplorer.prototype.onExport = function (item, type)
   {
-    if(!(this.selected_ instanceof Folder))
-      return;
+    if($(item).hasClass('disabled')) return;
+    this.export(type);
+  };
 
-    this.owner_.callbacks.invoke('export', this.selected_.data.id);
+  ControllerExplorer.prototype.export = function (type)
+  {
+    if(!(this.selected_ instanceof Folder)) return;
+    this.owner_.callbacks.invoke('export', type, this.selected_.data.id);
   };
 
   ControllerExplorer.prototype.setSuggestions = function (title, suggestions)
@@ -928,21 +941,17 @@
 
   ControllerExplorer.prototype.updateToolbar = function (loading)
   {
-    var ela = this.owner_.nodes.toolbar.actions;
+    var flag, ela = this.owner_.nodes.toolbar.actions;
     loading = loading === true;
 
     ela.add.toggleClass('disabled', loading);
 
+    flag = this.selected_ === null || loading
+      || this.selected_.loading()
+      || !this.selected_.loaded;
+    ela.remove.toggleClass('disabled', flag);
     ela.rename.toggleClass('disabled',
-                           this.selected_ === null || loading
-                           || this.selected_.loading()
-                           || !this.selected_.loaded
-                           || this.selected_ instanceof ItemImage);
-
-    ela.remove.toggleClass('disabled',
-                           this.selected_ === null || loading
-                           || this.selected_.loading()
-                           || !this.selected_.loaded);
+                           flag || this.selected_ instanceof ItemImage);
 
     ela.addContextual.toggleClass(
       'disabled',
@@ -953,16 +962,16 @@
                 || this.selected_.loading())));
 
     ela.jump.toggleClass(
-      'disabled', loading || !(this.selected_ instanceof Item
-             && this.selected_.loaded));
+      'disabled',
+      loading || !(this.selected_ instanceof Item && this.selected_.loaded));
 
     ela.refresh.explorer.toggleClass('disabled', loading);
+    ela.refresh.search.toggleClass('disabled', loading || !this.active_);
 
-    ela.refresh.search.toggleClass('disabled',
-                                   loading || !this.active_);
-
-    ela.report.toggleClass('disabled', loading
-                           || !(this.selected_ instanceof Folder));
+    flag = loading || !(this.selected_ instanceof Folder);
+    ela.report.excel.toggleClass('disabled', flag);
+    ela.report.simple.toggleClass('disabled', flag);
+    ela.report.rich.toggleClass('disabled', /* flag */ true);
   };
 
   ControllerExplorer.prototype.addLabel = function (label)
