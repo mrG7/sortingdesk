@@ -178,6 +178,18 @@ var Main = (function (window, $, std, sq, sqc, sd, undefined) {
       return true;
     };
 
+    var onCapturePage_ = function ()
+    {
+      var deferred = $.Deferred();
+
+      addon.port.emit('capture-page');
+      addon.port.once('capture-page', function (result) {
+        deferred.resolve(result);
+      } );
+
+      return deferred.promise();
+    };
+
     /* interface */
     return {
       callbacks: {
@@ -188,7 +200,8 @@ var Main = (function (window, $, std, sq, sqc, sd, undefined) {
           createSuggestionContainer: onCreateSuggestionContainer_,
           renderScore: onRenderScore_,
           networkFailure: onNetworkFailure_,
-          export: onExport_
+          export: onExport_,
+          capturePage: onCapturePage_
         }
       }
     };

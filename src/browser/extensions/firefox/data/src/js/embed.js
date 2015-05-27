@@ -99,6 +99,14 @@ var Embeddable = (function ($, std, DragDropMonitor, undefined) {
     } );
   } );
 
+  self.port.on("capture-page", function () {
+    html2canvas(window.document.body, {
+      onrendered: function (canvas) {
+        self.port.emit("capture-page", canvas.toDataURL('image/png'));
+      }
+    } );
+  } );
+
 
   /* Module-wide functions */
   var initialise = function () {
