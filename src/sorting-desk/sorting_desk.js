@@ -1886,13 +1886,23 @@
         console.info("Feature collection GET failed: creating new (id=%s)",
                      descriptor.content_id);
         return self.api.fc.create(descriptor.content_id, descriptor.document)
-          .done(function(fc) {
+          .then(function(fc) {
             console.log('Feature collection created: (id=%s)',
                         descriptor.content_id);
 
-            /* Set `meta_url´ attribute. */
-            self.api.fc.setContent(fc, "meta_url", descriptor.href.toString());
-            return self.do_update_fc_(fc, descriptor);
+            /* Capture page as an image. */
+            return self.controller_.owner.callbacks.invoke('capturePage')
+              .then(function (capture) {
+                return { fc: fc, capture: capture };
+              } );
+          } )
+          .then(function (data) {
+            /* Set meta attributes. */
+            self.api.fc.setContent(data.fc, "meta_url",
+                                   descriptor.href.toString());
+            self.api.fc.setContent(data.fc, "meta_capture", data.capture);
+
+            return self.do_update_fc_(data.fc, descriptor);
           } )
           .fail(function () {
             self.controller.owner.networkFailure.incident(
