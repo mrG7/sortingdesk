@@ -23,8 +23,8 @@
   "background": {
     "scripts": [ "lib/jquery-2.1.1.min.js",
                  "lib/sorting-common/sorting_common.js",
-                 "src/js/extension/config.js",
-                 "src/js/extension/background.js" ]
+                 "src/js/config.js",
+                 "src/js/background.js" ]
   },
 
   "content_scripts": [
@@ -34,7 +34,7 @@
               "lib/html2canvas-0.4.1.js",
               "shared/src/js/drag_drop_monitor.js",
               "lib/sorting-common/sorting_common.js",
-              "src/js/content/embed.js" ]
+              "src/js/embed.js" ]
     }
   ],
 

@@ -27,7 +27,7 @@ var Background = function (window, chrome, $, std, undefined)
         scripts: [ "lib/jquery-2.1.1.min.js",
                    "shared/src/js/draggable_image_monitor.js",
                    "lib/sorting-common/sorting_common.js",
-                   "src/js/content/embed.js" ]
+                   "src/js/embed.js" ]
       };
 
 
