@@ -682,6 +682,10 @@ A.sd-text-item-title {
   margin-top: 5px;
 }
 
+.sd-header .open>.dropdown-menu {
+  left: -135px;
+}
+
 .sd-container-view-outer {
   overflow: auto;
 /*   margin: 5px; */
