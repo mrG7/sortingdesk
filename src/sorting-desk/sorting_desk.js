@@ -405,7 +405,7 @@
 
     if(ul.length > 0) {
       preview.toggleClass(Css.active, !ul.is(':visible'));
-      ul.slideToggle('fast');
+      ul.slideToggle(100);
       return;
     } else if(preview.hasClass(Css.loading))
       return;
@@ -660,15 +660,12 @@
         self.createSubfolder(self.selected_);
       else if(self.selected_ instanceof Subfolder)
         self.createItem(self.selected_);
+      else
+        console.error('Invalid selected item: contextual action unavailable');
     } );
 
-    els.toolbar.actions.remove.click(function () {
-      self.on_remove_();
-    } );
-
-    els.toolbar.actions.rename.click(function () {
-      self.on_rename_();
-    } );
+    els.toolbar.actions.remove.click(function () { self.on_remove_(); } );
+    els.toolbar.actions.rename.click(function () { self.on_rename_(); } );
 
     els.toolbar.actions.jump.click(function () {
       self.on_jump_bookmarked_page_();
