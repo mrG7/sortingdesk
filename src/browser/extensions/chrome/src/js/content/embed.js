@@ -42,7 +42,6 @@ var Embeddable = (function ($, std, DragDropMonitor, undefined) {
 
     xhr.open('GET', url);
     xhr.responseType = 'blob';
-
     xhr.send(null);
   };
 
@@ -180,12 +179,26 @@ var Embeddable = (function ($, std, DragDropMonitor, undefined) {
       } );
     };
 
+    var onCapturePage_ = function (request, sender, callback)
+    {
+      if(!check_callback_(callback)) return;
+
+      html2canvas(document.body, {
+        onrendered: function (canvas) {
+          callback(canvas.toDataURL('image/png'));
+        }
+      } );
+
+      return true;
+    };
+
 
     /* Map message operations to handlers. */
     var methods_ = {
       "get-selection": onGetSelection_,
       "check-selection": onCheckSelection_,
-      "get-page-meta": onGetPageMeta_
+      "get-page-meta": onGetPageMeta_,
+      "capture-page": onCapturePage_
     };
 
     /* Interface */

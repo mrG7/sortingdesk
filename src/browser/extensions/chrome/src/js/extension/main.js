@@ -194,6 +194,19 @@ var Main = (function (window, chrome, $, std, sq, sqc, sd, undefined) {
       return elc.append(els.attr('title', weight.toFixed(4)));
     };
 
+    var onCapturePage_ = function ()
+    {
+      return do_active_tab_(function (deferred) {
+        chrome.tabs.sendMessage(
+          active.id,
+          { operation: 'capture-page' },
+          function (data) {
+            deferred.resolve(data);
+          }
+        );
+      } );
+    };
+
     var netfails_ = {
       'folder-list': "retrieving the list of folders",
       'folder-add': "adding a new folder",
@@ -232,7 +245,8 @@ var Main = (function (window, chrome, $, std, sq, sqc, sd, undefined) {
           createSuggestionContainer: onCreateSuggestionContainer_,
           renderScore: onRenderScore_,
           networkFailure: onNetworkFailure_,
-          export: onExport_
+          export: onExport_,
+          capturePage: onCapturePage_
         }
       }
     };
