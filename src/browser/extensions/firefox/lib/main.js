@@ -163,8 +163,7 @@ var Main = (function (undefined) {
 
   var constructSidebar_ = function (force)
   {
-    if(sidebar)
-      sidebar.dispose();
+    if(sidebar) sidebar.dispose();
 
     sidebar = msidebar.Sidebar( {
       id: "sidebar-sorting-desk",
@@ -173,8 +172,7 @@ var Main = (function (undefined) {
       onAttach: onAttachSidebar_
     } );
 
-    if(active || force === true)
-      show_(true);
+    if(active || force === true) show_(true);
   };
 
   var onAttachSidebar_ = function (worker)

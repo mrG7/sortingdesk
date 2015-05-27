@@ -10,7 +10,7 @@
 
 
 /*global */
-/*jshint lax break:true */
+/*jshint laxbreak:true */
 
 
 var Embeddable = (function ($, std, DragDropMonitor, undefined) {
@@ -85,9 +85,7 @@ var Embeddable = (function ($, std, DragDropMonitor, undefined) {
         result = !!active.get(0).src;
       else {
         active = window.getSelection();
-        result = active
-                 && active.anchorNode
-                 && active.toString().length > 0;
+        result = active && active.anchorNode && active.toString().length > 0;
       }
     }
 
@@ -104,7 +102,7 @@ var Embeddable = (function ($, std, DragDropMonitor, undefined) {
 
   /* Module-wide functions */
   var initialise = function () {
-    console.log("Initialising embeddable content");
+    console.log("Initialising embeddable content: ", window.location.href);
     monitor = new DragDropMonitor();
     console.info("Initialised embeddable content");
   };
