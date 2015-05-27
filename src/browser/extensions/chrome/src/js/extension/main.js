@@ -104,13 +104,12 @@ var Main = (function (window, chrome, $, std, sq, sqc, sd, undefined) {
                * Otherwise, an attempt is made in addon space to retrieve
                * the base64 encoding of the image data. */
               if(!std.is_str(result.data)) {
-                console.info("Attempting to retrieve image data from"
-                             + " background script");
+                console.info("Attempting to retrieve image data");
                 std.Html.imageToBase64(result.content)
                   .done(function (data) { result.data = data; } )
                   .fail(function () {
-                    console.error("Failed to retrieve image data in"
-                                  + " base64 encoding");
+                    console.error(
+                      "Failed to retrieve image data in base64 encoding");
                     result.data = null; /* force null */
                   } )
                   .always(function () {
