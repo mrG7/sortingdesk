@@ -44,9 +44,21 @@
           <button type="button" class="btn btn-default" data-toggle="tooltip" data-placement="bottom" title="Create a top level folder" data-sd-scope="sorting-desk-toolbar-add">
             <span class="glyphicon glyphicon-plus"></span>
           </button>
-          <button type="button" class="btn btn-default" data-toggle="tooltip" data-placement="bottom" title="Export data" data-sd-scope="sorting-desk-toolbar-report">
+          <button id="sd-dd-export" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false" data-placement="bottom" title="Export data">
             <span class="glyphicon glyphicon-download-alt"></span>
+            <span class="caret"></span>
           </button>
+          <ul class="dropdown-menu"  role="menu" aria-labelledby="sd-dd-export">
+            <li role="presentation" data-sd-scope="sorting-desk-toolbar-report-excel">
+              <a role="menuitem" tabindex="-1" href="#">Create Excel sheet</a>
+            </li>
+            <li role="presentation" data-sd-scope="sorting-desk-toolbar-report-simple">
+              <a role="menuitem" tabindex="-1" href="#">Create simple PDF document</a>
+            </li>
+            <li role="presentation" data-sd-scope="sorting-desk-toolbar-report-rich">
+              <a role="menuitem" tabindex="-1" href="#">Create rich PDF document</a>
+            </li>
+          </ul>
         </div>
 
         <div class="btn-group btn-group-xs">

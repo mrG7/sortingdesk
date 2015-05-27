@@ -169,9 +169,13 @@ var Main = (function (window, $, std, sq, sqc, sd, undefined) {
             ].join(''));
     };
 
-    var onExport_ = function (id)
+    var onExport_ = function (type, id)
     {
-      window.open(sorter.api.makeReportUrl(id));
+      var url = sorter.api.makeReportUrl(type, id);
+      if(url === null) return false;
+
+      window.open(url);
+      return true;
     };
 
     /* interface */
