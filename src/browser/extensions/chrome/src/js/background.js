@@ -166,7 +166,7 @@ var Background = function (window, chrome, $, std, undefined)
 
       console.info("Creating Sorting Desk's window:", ext.toObject());
       chrome.windows.create( $.extend( {
-        url: chrome.runtime.getURL("/src/html/main.html"),
+        url: chrome.runtime.getURL("/src/html/sidebar.html"),
         focused: false,
         type: "popup"
       }, ext.toObject() ), function (nw) {
