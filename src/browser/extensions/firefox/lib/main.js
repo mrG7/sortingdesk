@@ -177,8 +177,8 @@ var Main = (function (undefined) {
 
   var onAttachSidebar_ = function (worker)
   {
-    var make_handler_ = function (id, description, cb) {
-      return function () {
+    var setup_handler_ = function (id, description, cb) {
+      worker.port.on(id, function () {
         console.log(id + ": " + description);
         var cs = getActiveTabWorker_(worker);
         if(!cs) worker.port.emit(id, null);
@@ -192,7 +192,7 @@ var Main = (function (undefined) {
 
           worker.port.emit(id, result);
         } );
-      };
+      } );
     };
 
     worker.port.on('get-preferences', function () {
@@ -200,19 +200,8 @@ var Main = (function (undefined) {
       worker.port.emit('get-preferences', mpreferences.get());
     } );
 
-    worker.port.on('get-selection', function () {
-      console.log("get-selection: returning active tab's selection");
-      var cs = getActiveTabWorker_(worker);
-      if(!cs) worker.port.emit('get-selection', null);
-
-      cs.port.emit('get-selection');
-      cs.port.once('get-selection', function (result) {
-      } );
-    } );
-
-    worker.port.on('get-selection', make_handler_(
-      'check-selection',
-      "returning active tab's selection",
+    setup_handler_(
+      'get-selection', "returning active tab's selection",
       function (result) {
         if(result && result.type === 'image') {
           if(/^data:/.test(result.content)) {
@@ -231,19 +220,11 @@ var Main = (function (undefined) {
 
         return result;
       }
-    ) );
+    );
 
-    worker.port.on(
-      'check-selection',
-      make_handler_('check-selection', 'testing selected content'));
-
-    worker.port.on(
-      'get-page-meta',
-      make_handler_('get-page-meta', 'returning page meta'));
-
-    worker.port.on(
-      'capture-page',
-      make_handler_('capture-page', 'capturing page as image'));
+    setup_handler_('check-selection', 'testing selected content');
+    setup_handler_('get-page-meta', 'returning page meta');
+    setup_handler_('capture-page', 'capturing page as image');
 
     console.log("Attached sidebar");
   };
