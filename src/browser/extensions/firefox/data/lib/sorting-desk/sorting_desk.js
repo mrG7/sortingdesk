@@ -166,7 +166,11 @@
         return {
           actions: {
             add: this.find('toolbar-add'),
-            report: this.find('toolbar-report'),
+            report: {
+              excel: this.find('toolbar-report-excel'),
+              simple: this.find('toolbar-report-simple'),
+              rich: this.find('toolbar-report-rich')
+            },
             addContextual: this.find('toolbar-add-contextual'),
             remove: this.find('toolbar-remove'),
             rename: this.find('toolbar-rename'),
@@ -401,7 +405,7 @@
 
     if(ul.length > 0) {
       preview.toggleClass(Css.active, !ul.is(':visible'));
-      ul.slideToggle('fast');
+      ul.slideToggle(100);
       return;
     } else if(preview.hasClass(Css.loading))
       return;
@@ -644,22 +648,24 @@
     });
 
     els.toolbar.actions.add.click(function () { self.createFolder(); } );
-    els.toolbar.actions.report.click(function () { self.export(); } );
+    els.toolbar.actions.report.excel.click(function () {
+      self.onExport(this, 'excel'); } );
+    els.toolbar.actions.report.simple.click(function () {
+      self.onExport(this, 'simple-pdf'); } );
+    els.toolbar.actions.report.rich.click(function () {
+      self.onExport(this, 'rich-pdf'); } );
 
     els.toolbar.actions.addContextual.click(function () {
       if(self.selected_ instanceof Folder)
         self.createSubfolder(self.selected_);
       else if(self.selected_ instanceof Subfolder)
         self.createItem(self.selected_);
+      else
+        console.error('Invalid selected item: contextual action unavailable');
     } );
 
-    els.toolbar.actions.remove.click(function () {
-      self.on_remove_();
-    } );
-
-    els.toolbar.actions.rename.click(function () {
-      self.on_rename_();
-    } );
+    els.toolbar.actions.remove.click(function () { self.on_remove_(); } );
+    els.toolbar.actions.rename.click(function () { self.on_rename_(); } );
 
     els.toolbar.actions.jump.click(function () {
       self.on_jump_bookmarked_page_();
@@ -789,12 +795,16 @@
       this, subfolder, new ItemNew(subfolder, name));
   };
 
-  ControllerExplorer.prototype.export = function ()
+  ControllerExplorer.prototype.onExport = function (item, type)
   {
-    if(!(this.selected_ instanceof Folder))
-      return;
+    if($(item).hasClass('disabled')) return;
+    this.export(type);
+  };
 
-    this.owner_.callbacks.invoke('export', this.selected_.data.id);
+  ControllerExplorer.prototype.export = function (type)
+  {
+    if(!(this.selected_ instanceof Folder)) return;
+    this.owner_.callbacks.invoke('export', type, this.selected_.data.id);
   };
 
   ControllerExplorer.prototype.setSuggestions = function (title, suggestions)
@@ -928,21 +938,17 @@
 
   ControllerExplorer.prototype.updateToolbar = function (loading)
   {
-    var ela = this.owner_.nodes.toolbar.actions;
+    var flag, ela = this.owner_.nodes.toolbar.actions;
     loading = loading === true;
 
     ela.add.toggleClass('disabled', loading);
 
+    flag = this.selected_ === null || loading
+      || this.selected_.loading()
+      || !this.selected_.loaded;
+    ela.remove.toggleClass('disabled', flag);
     ela.rename.toggleClass('disabled',
-                           this.selected_ === null || loading
-                           || this.selected_.loading()
-                           || !this.selected_.loaded
-                           || this.selected_ instanceof ItemImage);
-
-    ela.remove.toggleClass('disabled',
-                           this.selected_ === null || loading
-                           || this.selected_.loading()
-                           || !this.selected_.loaded);
+                           flag || this.selected_ instanceof ItemImage);
 
     ela.addContextual.toggleClass(
       'disabled',
@@ -953,16 +959,16 @@
                 || this.selected_.loading())));
 
     ela.jump.toggleClass(
-      'disabled', loading || !(this.selected_ instanceof Item
-             && this.selected_.loaded));
+      'disabled',
+      loading || !(this.selected_ instanceof Item && this.selected_.loaded));
 
     ela.refresh.explorer.toggleClass('disabled', loading);
+    ela.refresh.search.toggleClass('disabled', loading || !this.active_);
 
-    ela.refresh.search.toggleClass('disabled',
-                                   loading || !this.active_);
-
-    ela.report.toggleClass('disabled', loading
-                           || !(this.selected_ instanceof Folder));
+    flag = loading || !(this.selected_ instanceof Folder);
+    ela.report.excel.toggleClass('disabled', flag);
+    ela.report.simple.toggleClass('disabled', flag);
+    ela.report.rich.toggleClass('disabled', flag);
   };
 
   ControllerExplorer.prototype.addLabel = function (label)
@@ -1880,13 +1886,23 @@
         console.info("Feature collection GET failed: creating new (id=%s)",
                      descriptor.content_id);
         return self.api.fc.create(descriptor.content_id, descriptor.document)
-          .done(function(fc) {
+          .then(function(fc) {
             console.log('Feature collection created: (id=%s)',
                         descriptor.content_id);
 
-            /* Set `meta_url´ attribute. */
-            self.api.fc.setContent(fc, "meta_url", descriptor.href.toString());
-            return self.do_update_fc_(fc, descriptor);
+            /* Capture page as an image. */
+            return self.controller_.owner.callbacks.invoke('capturePage')
+              .then(function (capture) {
+                return { fc: fc, capture: capture };
+              } );
+          } )
+          .then(function (data) {
+            /* Set meta attributes. */
+            self.api.fc.setContent(data.fc, "meta_url",
+                                   descriptor.href.toString());
+            self.api.fc.setContent(data.fc, "meta_capture", data.capture);
+
+            return self.do_update_fc_(data.fc, descriptor);
           } )
           .fail(function () {
             self.controller.owner.networkFailure.incident(
