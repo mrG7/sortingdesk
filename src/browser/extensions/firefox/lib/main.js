@@ -177,6 +177,24 @@ var Main = (function (undefined) {
 
   var onAttachSidebar_ = function (worker)
   {
+    var make_handler_ = function (id, description, cb) {
+      return function () {
+        console.log(id + ": " + description);
+        var cs = getActiveTabWorker_(worker);
+        if(!cs) worker.port.emit(id, null);
+
+        cs.port.emit(id);
+        cs.port.once(id, function (result) {
+          if(typeof cb === 'function') {
+            result = cb(result);
+            if(result === false) return;
+          }
+
+          worker.port.emit(id, result);
+        } );
+      };
+    };
+
     worker.port.on('get-preferences', function () {
       console.log("get-preferences: returning preferences");
       worker.port.emit('get-preferences', mpreferences.get());
@@ -189,6 +207,13 @@ var Main = (function (undefined) {
 
       cs.port.emit('get-selection');
       cs.port.once('get-selection', function (result) {
+      } );
+    } );
+
+    worker.port.on('get-selection', make_handler_(
+      'check-selection',
+      "returning active tab's selection",
+      function (result) {
         if(result && result.type === 'image') {
           if(/^data:/.test(result.content)) {
             console.info("Image already in base64");
@@ -199,35 +224,26 @@ var Main = (function (undefined) {
               worker.port.emit('get-selection', result);
             } );
 
-            return;
+            /* DO NOT emit response: we'll take care of that. */
+            return false;
           }
         }
 
-        worker.port.emit('get-selection', result);
-      } );
-    } );
+        return result;
+      }
+    ) );
 
-    worker.port.on('check-selection', function () {
-      console.log("check-selection: testing selected content");
-      var cs = getActiveTabWorker_(worker);
-      if(!cs) worker.port.emit('check-selection', null);
+    worker.port.on(
+      'check-selection',
+      make_handler_('check-selection', 'testing selected content'));
 
-      cs.port.emit('check-selection');
-      cs.port.once('check-selection', function (result) {
-        worker.port.emit('check-selection', result);
-      } );
-    } );
+    worker.port.on(
+      'get-page-meta',
+      make_handler_('get-page-meta', 'returning page meta'));
 
-    worker.port.on('get-page-meta', function () {
-      console.log("get-page-meta: returning page meta");
-      var cs = getActiveTabWorker_(worker);
-      if(!cs) worker.port.emit('get-page-meta', null);
-
-      cs.port.emit('get-page-meta');
-      cs.port.once('get-page-meta', function (result) {
-        worker.port.emit('get-page-meta', result);
-      } );
-    } );
+    worker.port.on(
+      'capture-page',
+      make_handler_('capture-page', 'capturing page as image'));
 
     console.log("Attached sidebar");
   };
