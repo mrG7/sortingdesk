@@ -968,7 +968,7 @@
     flag = loading || !(this.selected_ instanceof Folder);
     ela.report.excel.toggleClass('disabled', flag);
     ela.report.simple.toggleClass('disabled', flag);
-    ela.report.rich.toggleClass('disabled', /* flag */ true);
+    ela.report.rich.toggleClass('disabled', flag);
   };
 
   ControllerExplorer.prototype.addLabel = function (label)
