@@ -683,7 +683,7 @@ A.sd-text-item-title {
 }
 
 .sd-header .open>.dropdown-menu {
-  left: -135px;
+/*   left: -135px; */
 }
 
 .sd-container-view-outer {
