@@ -1900,7 +1900,11 @@
             /* Set meta attributes. */
             self.api.fc.setContent(data.fc, "meta_url",
                                    descriptor.href.toString());
-            self.api.fc.setContent(data.fc, "meta_capture", data.capture);
+
+            if(std.is_str(data.capture) && data.capture.length > 0)
+              self.api.fc.setContent(data.fc, "meta_capture", data.capture);
+            else
+              console.info("Page capture data unavailable");
 
             return self.do_update_fc_(data.fc, descriptor);
           } )
