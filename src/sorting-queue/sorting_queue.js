@@ -947,6 +947,7 @@
   {
     this.items_.forEach(function (item) { item.node.remove(); } );
     this.items_ = [];
+    this.filtered_ = false;
   };
 
 
