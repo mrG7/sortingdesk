@@ -586,13 +586,16 @@
   ControllerFacets.prototype.assign = function (data)
   {
     var self = this,
+        nodes = this.owner.nodes.facets,
         sf = [ ];
 
     if(!std.is_obj(data) || !std.is_obj(data.facets)) {
+      $.each(nodes, function (k, n) { n.addClass('disabled'); } );
       this.facets = null;
       return;
     }
 
+    $.each(nodes, function (k, n) { n.removeClass('disabled'); } );
     this.facets = data.facets;
 
     /* Sort facets before updating the user interface. */
