@@ -535,6 +535,7 @@
     this.node_ = owner.nodes.items;
     this.items_ = [ ];
     this.loading_ = false;
+    this.filtered_ = false;
     this.fnDisableEvent_ = function (e) { return false; };
   };
 
@@ -648,6 +649,7 @@
         };
 
     this.loading_ = true;
+    this.filtered_ = false;
     this.updateEmptyNotification_(true);
     this.owner_.events_.trigger('loading-begin');
     this.owner_.callbacks.invoke("moreTexts",
@@ -700,6 +702,22 @@
       .fail(function () {
         end_();
       } );
+  };
+
+  ControllerItems.prototype.filter = function (cb)
+  {
+    if(!std.is_fn(cb))
+      throw "Invalid or no callback specified";
+
+    this.items_.forEach(function (item) {
+      if(cb(item.content) === false)
+        item.disable();
+      else
+        item.enable();
+    } );
+
+    this.filtered_ = true;
+    this.updateEmptyNotification_();
   };
 
   ControllerItems.prototype.select = function (variant)
