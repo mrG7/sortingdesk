@@ -241,7 +241,6 @@ var Main = (function (window, $, std, sq, sqc, sd, undefined) {
       height - (q.outerHeight(true) - q.innerHeight()));
   };
 
-
   /* Private interface */
   var initialise_ = function ()
   {
