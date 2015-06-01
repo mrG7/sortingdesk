@@ -545,7 +545,6 @@
     this.active = false;
     this.facets = null;
     this.timer = null;
-    this.excluder = null;
   };
 
   ControllerFacets.prototype = Object.create(std.Controller.prototype);
@@ -557,7 +556,6 @@
 
     this.container = nodes.container;
     this.ul = this.container.find('UL');
-    this.excluder = new FacetExcluder(this, this.ul);
 
     this.active = this.container.is(':visible');
     this.owner.nodes.toolbar.filter
@@ -601,17 +599,23 @@
     for(var k in data.facets) sf.push(k);
     sf.sort().forEach(function (k) {
       self.ul.append($('<li><label><input type="checkbox" value="' + k +
-                  '" checked>' + k + '</label></li>'));
+                       '" checked>' + k + '</label>'
+                       + '<a href="#">(only)</a></li>'));
     } );
 
-    this.ul.find('INPUT')
-      .click(function (ev) { self.schedule(); } );
+    this.ul.find('LI')
+      .click(function (ev) {
+        var target = ev.originalEvent.target.nodeName.toLowerCase(),
+            $inp = $('INPUT', this);
 
-    this.owner.nodes.facets.empty.fadeOut(function () {
-      self.ul.fadeIn();
-    } );
+        if(target === 'a')
+          self.exclude($inp);
+        else
+          self.schedule();
+      } );
 
-    this.excluder.update();
+
+    this.owner.nodes.facets.empty.fadeOut(function () { self.ul.fadeIn(); } );
   };
 
   ControllerFacets.prototype.exclude = function (input)
@@ -698,68 +702,6 @@
     this.container.fadeOut('fast', function () {
       $(this).slideUp("fast");
     } );
-  };
-
-
-  /**
-   * @class
-   * */
-  var FacetExcluder = function (ctrl, ul)
-  {
-    var active = null,
-        timer = null;
-
-    this.update = function () {
-      ul.find('LI')
-        .mouseover(function () {
-          if(active !== null) {
-            if(active === this) {
-              clear();
-              return;
-            }
-
-            remove();
-          }
-
-          var $this = $(this),
-              n = $this.find('a');
-
-          if(n.length > 0) return;
-          n = $('<a href="#">only</a>')
-            .mouseover(function () { clear();          } )
-            .mouseout( function () { deferredRemove(); } )
-            .click(function () {
-              ctrl.exclude($('input', this.parentNode));
-            });
-
-          n.fadeIn("fast");
-          $this.append(n);
-          active = this;
-        } )
-        .mouseout(function () { deferredRemove(); } );
-    };
-
-    var deferredRemove = function () {
-      clear();
-      timer = window.setTimeout(function () {
-        timer = null;
-        if(active === null) return;
-        $('a', active).fadeOut("fast", function () { remove(); } );
-      }, 250);
-    };
-
-    var remove = function () {
-      clear();
-      if(active === null) return;
-      $('a', active).remove();
-      active = null;
-    };
-
-    var clear = function () {
-      if(timer === null) return;
-      window.clearTimeout(timer);
-      timer = null;
-    };
   };
 
 

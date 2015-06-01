@@ -190,6 +190,15 @@ DIV.sd-loading {
   white-space: normal;
 }
 
+#sd-facets > DIV > UL > LI > LABEL + A {
+  visibility: hidden;
+  margin-left: 10px;
+}
+
+#sd-facets > DIV > UL > LI:hover > LABEL + A {
+  visibility: visible;
+}
+
 /* Text item */
 .sd-text-item,
 #sd-suggestion {
