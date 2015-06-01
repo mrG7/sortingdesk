@@ -142,6 +142,10 @@ DIV.sd-loading {
   box-shadow: 1px 1px 1px #888;
 }
 
+#sd-facets {
+  display: none;
+}
+
 #sd-facets > DIV {
   margin: 10px;
 }
