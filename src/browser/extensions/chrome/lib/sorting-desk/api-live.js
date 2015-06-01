@@ -323,9 +323,16 @@
     }
 
     this.makeReportUrl = makeReportUrl;
-    function makeReportUrl(id)
+    function makeReportUrl(type, id)
     {
-      return api_.reportUrl(id);
+      var types = [ 'excel', 'simple-pdf', 'rich-pdf' ];
+
+      if(types.indexOf(type) === -1) {
+        console.error("Invalid report type specified: %s", type);
+        return null;
+      }
+
+      return api_.reportUrl(id, type);
     }
 
 

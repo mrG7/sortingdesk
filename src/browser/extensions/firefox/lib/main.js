@@ -163,8 +163,7 @@ var Main = (function (undefined) {
 
   var constructSidebar_ = function (force)
   {
-    if(sidebar)
-      sidebar.dispose();
+    if(sidebar) sidebar.dispose();
 
     sidebar = msidebar.Sidebar( {
       id: "sidebar-sorting-desk",
@@ -173,24 +172,37 @@ var Main = (function (undefined) {
       onAttach: onAttachSidebar_
     } );
 
-    if(active || force === true)
-      show_(true);
+    if(active || force === true) show_(true);
   };
 
   var onAttachSidebar_ = function (worker)
   {
+    var setup_handler_ = function (id, description, cb) {
+      worker.port.on(id, function () {
+        console.log(id + ": " + description);
+        var cs = getActiveTabWorker_(worker);
+        if(!cs) worker.port.emit(id, null);
+
+        cs.port.emit(id);
+        cs.port.once(id, function (result) {
+          if(typeof cb === 'function') {
+            result = cb(result);
+            if(result === false) return;
+          }
+
+          worker.port.emit(id, result);
+        } );
+      } );
+    };
+
     worker.port.on('get-preferences', function () {
       console.log("get-preferences: returning preferences");
       worker.port.emit('get-preferences', mpreferences.get());
     } );
 
-    worker.port.on('get-selection', function () {
-      console.log("get-selection: returning active tab's selection");
-      var cs = getActiveTabWorker_(worker);
-      if(!cs) worker.port.emit('get-selection', null);
-
-      cs.port.emit('get-selection');
-      cs.port.once('get-selection', function (result) {
+    setup_handler_(
+      'get-selection', "returning active tab's selection",
+      function (result) {
         if(result && result.type === 'image') {
           if(/^data:/.test(result.content)) {
             console.info("Image already in base64");
@@ -201,35 +213,18 @@ var Main = (function (undefined) {
               worker.port.emit('get-selection', result);
             } );
 
-            return;
+            /* DO NOT emit response: we'll take care of that. */
+            return false;
           }
         }
 
-        worker.port.emit('get-selection', result);
-      } );
-    } );
+        return result;
+      }
+    );
 
-    worker.port.on('check-selection', function () {
-      console.log("check-selection: testing selected content");
-      var cs = getActiveTabWorker_(worker);
-      if(!cs) worker.port.emit('check-selection', null);
-
-      cs.port.emit('check-selection');
-      cs.port.once('check-selection', function (result) {
-        worker.port.emit('check-selection', result);
-      } );
-    } );
-
-    worker.port.on('get-page-meta', function () {
-      console.log("get-page-meta: returning page meta");
-      var cs = getActiveTabWorker_(worker);
-      if(!cs) worker.port.emit('get-page-meta', null);
-
-      cs.port.emit('get-page-meta');
-      cs.port.once('get-page-meta', function (result) {
-        worker.port.emit('get-page-meta', result);
-      } );
-    } );
+    setup_handler_('check-selection', 'testing selected content');
+    setup_handler_('get-page-meta', 'returning page meta');
+    setup_handler_('capture-page', 'capturing page as image');
 
     console.log("Attached sidebar");
   };

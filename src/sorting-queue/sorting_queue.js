@@ -81,7 +81,7 @@
       this,
       [ 'request-begin', 'request-end', 'items-updated', 'item-dismissed',
         'item-deselected', 'item-selected', 'loading-begin', 'loading-end',
-        'pre-render', 'items-redrawn' ]);
+        'pre-render', 'items-redrawn', 'empty' ]);
   };
 
   Sorter.prototype = {
@@ -535,6 +535,7 @@
     this.node_ = owner.nodes.items;
     this.items_ = [ ];
     this.loading_ = false;
+    this.filtered_ = false;
     this.fnDisableEvent_ = function (e) { return false; };
   };
 
@@ -648,6 +649,7 @@
         };
 
     this.loading_ = true;
+    this.filtered_ = false;
     this.updateEmptyNotification_(true);
     this.owner_.events_.trigger('loading-begin');
     this.owner_.callbacks.invoke("moreTexts",
@@ -700,6 +702,22 @@
       .fail(function () {
         end_();
       } );
+  };
+
+  ControllerItems.prototype.filter = function (cb)
+  {
+    if(!std.is_fn(cb))
+      throw "Invalid or no callback specified";
+
+    this.items_.forEach(function (item) {
+      if(cb(item.content) === false)
+        item.disable();
+      else
+        item.enable();
+    } );
+
+    this.filtered_ = true;
+    this.updateEmptyNotification_();
   };
 
   ControllerItems.prototype.select = function (variant)
@@ -910,22 +928,26 @@
 
   ControllerItems.prototype.updateEmptyNotification_ = function (loading)
   {
-    this.owner_.nodes.empty.items.stop();
+    var ne = this.owner_.nodes.empty,
+        delay = this.owner_.options.delays.queueEmptyFadeIn;
+
+    ne.items.stop();
 
     if(loading !== true && this.count() === 0) {
-      this.owner_.nodes.empty.items.fadeIn(
-        this.owner_.options.delays.queueEmptyFadeIn);
+      this.owner_.events.trigger('empty', true, this.filtered_);
+      ne.items.fadeIn(delay);
       return;
     }
 
-    this.owner_.nodes.empty.items.fadeOut(
-      this.owner_.options.delays.queueEmptyFadeOut);
+    if(!loading) this.owner_.events.trigger('empty', false, this.filtered_);
+    ne.items.fadeOut(delay);
   };
 
   ControllerItems.prototype.removeNodes_ = function ()
   {
     this.items_.forEach(function (item) { item.node.remove(); } );
     this.items_ = [];
+    this.filtered_ = false;
   };
 
 

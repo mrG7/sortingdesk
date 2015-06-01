@@ -108,10 +108,9 @@ cpx "$dir_src/sorting-desk/api-live.js" lib/sorting-desk/
 # dossier.js
 cpx "$dir_lib/dossier.js/Dossier.js" lib/dossier.js/
 
-# jQuery
+# Various
 cpx "$dir_lib/jquery-2.1.1.min.js" lib/
-
-# Crypto
+cpx "$dir_lib/html2canvas-0.4.1.js" lib/
 cpx "$dir_lib/CryptoJS-3.1.2/rollups/md5.js" lib/CryptoJS/
 
 # Bootstrap

@@ -1,3 +1,19 @@
+2015-06-01  Diffeo  <support@diffeo.com>
+
+	* Implemented filtering by facets.
+
+	* Many minor improvements.
+
+2015-05-27  Diffeo  <support@diffeo.com>
+
+	* Page now captured as image so richer reports can be devised
+
+	* Prepared Sorting Desk to support generation of multiple report
+	  types
+
+	* Several improvements to internals of Chrome, Firefox and
+	  TorBrowser extensions
+
 2015-05-22  Diffeo  <support@diffeo.com>
 
 	* Tweaks to display of soft selectors

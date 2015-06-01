@@ -105,18 +105,25 @@ DIV.sd-loading {
   left: -40px;
 }
 
-.sd-empty {
+.sd-empty, .sd-empty-inline {
   display: none;
-  position: absolute;
-  top: 150px;
-  left: -100px;
-  margin-left: 50%;
-  width: 200px;
   color: gray;
   font-size: 13px;
   text-align: center;
   text-shadow: 1px 1px 1px rgba(150, 150, 150, .75);
   white-space: normal;
+}
+
+.sd-empty {
+  position: absolute;
+  width: 200px;
+  top: 150px;
+  left: -100px;
+  margin-left: 50%;
+}
+
+.sd-empty-inline {
+  margin: 50px 0;
 }
 
 .sd-empty.sd-wider {
@@ -135,10 +142,67 @@ DIV.sd-loading {
   box-shadow: 1px 1px 1px #888;
 }
 
+#sd-facets {
+  display: none;
+}
 
-/* ----------------------------------------------------------------------
- *  Sorting Desk
- * ---------------------------------------------------------------------- */
+#sd-facets > DIV {
+  margin: 10px;
+}
+
+#sd-facets > DIV > H1 {
+  font-size: 16px;
+  color: #3d3d3d;
+  text-shadow: 1px 1px 1px #bebebe;
+  margin: 0 0 10px 0
+}
+
+#sd-facets > DIV > DIV.btn-group {
+  float: right;
+}
+
+#sd-facets > DIV > UL {
+  clear: both;
+  flex-wrap: wrap;
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border: 1px solid #d5e0f2;
+  padding: 5px;
+  display: block;
+  background-color: #f1f4f9;
+  max-height: 200px;
+  overflow: auto;
+}
+
+#sd-facets > DIV > UL > LI > LABEL {
+  margin: 0;
+  font-weight: normal;
+}
+
+#sd-facets > DIV > UL > LI > LABEL > INPUT {
+  margin-right: 6px;
+}
+
+#sd-facets > DIV > P[data-sd-scope="sorting-desk-facets-empty"] {
+  display: none;
+  text-align: center;
+  color: gray;
+  font-size: 13px;
+  text-shadow: 1px 1px 1px rgba(150, 150, 150, .75);
+  white-space: normal;
+}
+
+#sd-facets > DIV > UL > LI > LABEL + A {
+  visibility: hidden;
+  margin-left: 10px;
+}
+
+#sd-facets > DIV > UL > LI:hover > LABEL + A {
+  visibility: visible;
+}
+
 /* Text item */
 .sd-text-item,
 #sd-suggestion {
@@ -166,7 +230,7 @@ DIV.sd-loading {
   color: #ad5e58;
 }
 
-#sd-suggestion + HR {
+HR {
   border-color: #ddd;
   border-bottom: 1px solid #aaa;
 }
@@ -680,6 +744,10 @@ A.sd-text-item-title {
 .sd-header .btn-group,
 .sd-footer .btn-group {
   margin-top: 5px;
+}
+
+.sd-header .open>.dropdown-menu {
+/*   left: -135px; */
 }
 
 .sd-container-view-outer {

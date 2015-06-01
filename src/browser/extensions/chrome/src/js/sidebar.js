@@ -104,13 +104,12 @@ var Main = (function (window, chrome, $, std, sq, sqc, sd, undefined) {
                * Otherwise, an attempt is made in addon space to retrieve
                * the base64 encoding of the image data. */
               if(!std.is_str(result.data)) {
-                console.info("Attempting to retrieve image data from"
-                             + " background script");
+                console.info("Attempting to retrieve image data");
                 std.Html.imageToBase64(result.content)
                   .done(function (data) { result.data = data; } )
                   .fail(function () {
-                    console.error("Failed to retrieve image data in"
-                                  + " base64 encoding");
+                    console.error(
+                      "Failed to retrieve image data in base64 encoding");
                     result.data = null; /* force null */
                   } )
                   .always(function () {
@@ -194,6 +193,19 @@ var Main = (function (window, chrome, $, std, sq, sqc, sd, undefined) {
       return elc.append(els.attr('title', weight.toFixed(4)));
     };
 
+    var onCapturePage_ = function ()
+    {
+      return do_active_tab_(function (deferred) {
+        chrome.tabs.sendMessage(
+          active.id,
+          { operation: 'capture-page' },
+          function (data) {
+            deferred.resolve(data);
+          }
+        );
+      } );
+    };
+
     var netfails_ = {
       'folder-list': "retrieving the list of folders",
       'folder-add': "adding a new folder",
@@ -217,9 +229,13 @@ var Main = (function (window, chrome, $, std, sq, sqc, sd, undefined) {
             ].join(''));
     };
 
-    var onExport_ = function (id)
+    var onExport_ = function (type, id)
     {
-      window.open(sorter.api.makeReportUrl(id));
+      var url = sorter.api.makeReportUrl(type, id);
+      if(url === null) return false;
+
+      window.open(url);
+      return true;
     };
 
     /* Interface */
@@ -232,7 +248,8 @@ var Main = (function (window, chrome, $, std, sq, sqc, sd, undefined) {
           createSuggestionContainer: onCreateSuggestionContainer_,
           renderScore: onRenderScore_,
           networkFailure: onNetworkFailure_,
-          export: onExport_
+          export: onExport_,
+          capturePage: onCapturePage_
         }
       }
     };
@@ -413,25 +430,22 @@ var Main = (function (window, chrome, $, std, sq, sqc, sd, undefined) {
       .resize(function () { resize_(); } )
       .click(function (ev) {
         ev = ev.originalEvent;
-
         var target = ev.target;
 
         /* Ensure click event originated in a A tag and it contains a valid href
          * value. */
-        if(target.nodeName.toLowerCase() === 'a'
-           && target.href !== window.location.href + '#')
-        {
-          chrome.windows.getLastFocused(function (win) {
-            chrome.tabs.create( {
-              windowId: win.id,
-              url: target.href,
-              active: true } );
-          } );
+        if(target.nodeName.toLowerCase() === 'a') {
+          if(target.href !== window.location.href + '#') {
+            chrome.windows.getLastFocused(function (win) {
+              chrome.tabs.create( {
+                windowId: win.id,
+                url: target.href,
+                active: true } );
+            } );
+          }
 
-          ev.preventDefault();
+          return false;
         }
-
-        return false;
       } );
 
     console.log("Initialised main");

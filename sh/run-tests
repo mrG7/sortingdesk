@@ -26,18 +26,18 @@ function init () {
 
 function activate_config () {
   info "activating test configuration file"
-  mv "$dir_ext/chrome/src/js/extension/config.js" \
-    "$dir_ext/chrome/src/js/extension/config.js.disabled"
-  mv "$dir_ext/chrome/src/js/extension/config.js.testing" \
-    "$dir_ext/chrome/src/js/extension/config.js"
+  mv "$dir_ext/chrome/src/js/config.js" \
+    "$dir_ext/chrome/src/js/config.js.disabled"
+  mv "$dir_ext/chrome/src/js/config.js.testing" \
+    "$dir_ext/chrome/src/js/config.js"
 }
 
 function preexit () {
   info "restoring configuration file"
-  mv "$dir_ext/chrome/src/js/extension/config.js" \
-    "$dir_ext/chrome/src/js/extension/config.js.testing"
-  mv "$dir_ext/chrome/src/js/extension/config.js.disabled" \
-    "$dir_ext/chrome/src/js/extension/config.js"
+  mv "$dir_ext/chrome/src/js/config.js" \
+    "$dir_ext/chrome/src/js/config.js.testing"
+  mv "$dir_ext/chrome/src/js/config.js.disabled" \
+    "$dir_ext/chrome/src/js/config.js"
 
   [ $test_local != "true" ] && return
 

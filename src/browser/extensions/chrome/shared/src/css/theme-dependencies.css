@@ -37,3 +37,7 @@ BUTTON.dropdown-toggle > .caret {
   height: 99%;
   max-width: 90%;
 }
+
+.dropdown-menu > LI > A {
+  text-shadow: none;
+}

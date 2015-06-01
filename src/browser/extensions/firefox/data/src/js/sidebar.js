@@ -169,9 +169,25 @@ var Main = (function (window, $, std, sq, sqc, sd, undefined) {
             ].join(''));
     };
 
-    var onExport_ = function (id)
+    var onExport_ = function (type, id)
     {
-      window.open(sorter.api.makeReportUrl(id));
+      var url = sorter.api.makeReportUrl(type, id);
+      if(url === null) return false;
+
+      window.open(url);
+      return true;
+    };
+
+    var onCapturePage_ = function ()
+    {
+      var deferred = $.Deferred();
+
+      addon.port.emit('capture-page');
+      addon.port.once('capture-page', function (result) {
+        deferred.resolve(result);
+      } );
+
+      return deferred.promise();
     };
 
     /* interface */
@@ -184,7 +200,8 @@ var Main = (function (window, $, std, sq, sqc, sd, undefined) {
           createSuggestionContainer: onCreateSuggestionContainer_,
           renderScore: onRenderScore_,
           networkFailure: onNetworkFailure_,
-          export: onExport_
+          export: onExport_,
+          capturePage: onCapturePage_
         }
       }
     };
@@ -224,7 +241,6 @@ var Main = (function (window, $, std, sq, sqc, sd, undefined) {
       height - (q.outerHeight(true) - q.innerHeight()));
   };
 
-
   /* Private interface */
   var initialise_ = function ()
   {
@@ -262,14 +278,8 @@ var Main = (function (window, $, std, sq, sqc, sd, undefined) {
 
         /* Ensure click event originated in a A tag and it contains a valid href
          * value. */
-        if(target.nodeName.toLowerCase() === 'a') {
-          if(target.href === window.location.href + '#')
-              ev.preventDefault();
-          else
-            return true;
-        }
-
-        return false;
+        if(target.nodeName.toLowerCase() === 'a')
+          return target.href !== window.location.href + '#';
       } );
   };
 
