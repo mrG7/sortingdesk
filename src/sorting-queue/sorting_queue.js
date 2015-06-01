@@ -81,7 +81,7 @@
       this,
       [ 'request-begin', 'request-end', 'items-updated', 'item-dismissed',
         'item-deselected', 'item-selected', 'loading-begin', 'loading-end',
-        'pre-render', 'items-redrawn' ]);
+        'pre-render', 'items-redrawn', 'empty' ]);
   };
 
   Sorter.prototype = {
@@ -910,16 +910,19 @@
 
   ControllerItems.prototype.updateEmptyNotification_ = function (loading)
   {
-    this.owner_.nodes.empty.items.stop();
+    var ne = this.owner_.nodes.empty,
+        delay = this.owner_.options.delays.queueEmptyFadeIn;
+
+    ne.items.stop();
 
     if(loading !== true && this.count() === 0) {
-      this.owner_.nodes.empty.items.fadeIn(
-        this.owner_.options.delays.queueEmptyFadeIn);
+      this.owner_.events.trigger('empty', true, this.filtered_);
+      ne.items.fadeIn(delay);
       return;
     }
 
-    this.owner_.nodes.empty.items.fadeOut(
-      this.owner_.options.delays.queueEmptyFadeOut);
+    if(!loading) this.owner_.events.trigger('empty', false, this.filtered_);
+    ne.items.fadeOut(delay);
   };
 
   ControllerItems.prototype.removeNodes_ = function ()
