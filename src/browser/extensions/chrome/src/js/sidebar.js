@@ -430,25 +430,22 @@ var Main = (function (window, chrome, $, std, sq, sqc, sd, undefined) {
       .resize(function () { resize_(); } )
       .click(function (ev) {
         ev = ev.originalEvent;
-
         var target = ev.target;
 
         /* Ensure click event originated in a A tag and it contains a valid href
          * value. */
-        if(target.nodeName.toLowerCase() === 'a'
-           && target.href !== window.location.href + '#')
-        {
-          chrome.windows.getLastFocused(function (win) {
-            chrome.tabs.create( {
-              windowId: win.id,
-              url: target.href,
-              active: true } );
-          } );
+        if(target.nodeName.toLowerCase() === 'a') {
+          if(target.href !== window.location.href + '#') {
+            chrome.windows.getLastFocused(function (win) {
+              chrome.tabs.create( {
+                windowId: win.id,
+                url: target.href,
+                active: true } );
+            } );
+          }
 
-          ev.preventDefault();
+          return false;
         }
-
-        return false;
       } );
 
     console.log("Initialised main");
