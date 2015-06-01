@@ -279,14 +279,8 @@ var Main = (function (window, $, std, sq, sqc, sd, undefined) {
 
         /* Ensure click event originated in a A tag and it contains a valid href
          * value. */
-        if(target.nodeName.toLowerCase() === 'a') {
-          if(target.href === window.location.href + '#')
-              ev.preventDefault();
-          else
-            return true;
-        }
-
-        return false;
+        if(target.nodeName.toLowerCase() === 'a')
+          return target.href !== window.location.href + '#';
       } );
   };
 
