@@ -118,24 +118,25 @@
   <!-- Queue of Items -->
   <div id="sd-queue" class="sd-panel">
     <div class="sd-container-view-outer">
-      <div id="sd-facets" class="sd-container-facets" data-sd-scope="sorting-desk-facets">
-        <div>
-          <div class="btn-group btn-group-xs">
-            <button type="button" class="btn btn-default" data-toggle="tooltip" data-placement="left" title="Uncheck all" data-sd-scope="sorting-desk-facets-none">
-              <span class="glyphicon glyphicon-unchecked"></span>
-            </button>
-            <button type="button" class="btn btn-default" data-toggle="tooltip" data-placement="left" title="Check all" data-sd-scope="sorting-desk-facets-all">
-              <span class="glyphicon glyphicon-check"></span>
-            </button>
+      <div class="sd-container-view">
+        <div id="sd-facets" class="sd-container-facets" data-sd-scope="sorting-desk-facets">
+          <div>
+            <div class="btn-group btn-group-xs">
+              <button type="button" class="btn btn-default" data-toggle="tooltip" data-placement="left" title="Uncheck all" data-sd-scope="sorting-desk-facets-none">
+                <span class="glyphicon glyphicon-unchecked"></span>
+              </button>
+              <button type="button" class="btn btn-default" data-toggle="tooltip" data-placement="left" title="Check all" data-sd-scope="sorting-desk-facets-all">
+                <span class="glyphicon glyphicon-check"></span>
+              </button>
+            </div>
+            <h1>Filter recommendations</h1>
+            <ul></ul>
+            <p data-sd-scope="sorting-desk-facets-empty">Facets not available</p>
           </div>
-          <h1>Filter recommendations</h1>
-          <ul></ul>
-          <p data-sd-scope="sorting-desk-facets-empty">Facets not available</p>
+          <hr>
         </div>
-        <hr>
+        <div data-sd-scope="sorting-queue-items"></div>
       </div>
-      <div class="sd-container-view" data-sd-scope="sorting-queue-items"></div>
-    </div>
     </div>
 
     <!-- Footer -->
