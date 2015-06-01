@@ -185,6 +185,17 @@
         }
       };
 
+      finder = new std.TemplateFinder('text/sd-template',
+                                      'data-sd-scope');
+      var templates = {
+        empty: {
+          items: finder.find('items-empty'),
+          filtered: finder.find('items-empty-filtered')
+        }
+      };
+
+      new EmptyNotificator(this.sortingQueue_, templates.empty, {
+        fadeIn: this.options.delays.fadeIn
       } );
 
       /* Begin instantiating and initialising controllers.
@@ -295,6 +306,39 @@
    * @class
    * */
   var SortingQueueRenderer = function (sq, explorer, callbacks, options)
+  var EmptyNotificator = function (sq, tpl, opt)
+  {
+    var node = null;
+
+    sq.on( {
+      'loading-begin': function () {
+        if(node === null) return;
+        node.fadeOut(function () { clear(); } );
+      },
+      'empty': function (empty, filtered) {
+        clear();
+        if(!empty) return;
+
+        var t = filtered ? tpl.filtered : tpl.items;
+        if(t === null) return;
+
+        node = t.clone().get()
+          .fadeIn(opt.fadeIn);
+        sq.nodes.items.append(node);
+      }
+    } );
+
+    var clear = function () {
+      if(node === null) return;
+      node.remove();
+      node = null;
+    };
+  };
+
+
+  /**
+   * @class
+   * */
   {
     var self = this;
 
@@ -1010,16 +1054,16 @@
 
   ControllerExplorer.prototype.update_empty_state_ = function (hide)
   {
-    var o = this.owner_;
+    var o = this.owner_, n = o.nodes.empty.explorer;
 
-    o.nodes.empty.stop();
+    n.stop();
 
     if(hide === true)
-      o.nodes.empty.fadeOut(o.options.delays.emptyHide);
+      n.fadeOut(o.options.delays.emptyHide);
     else if(this.folders_.length === 0)
-      o.nodes.empty.fadeIn(o.options.delays.emptyFadeIn);
+      n.fadeIn(o.options.delays.emptyFadeIn);
     else
-      o.nodes.empty.fadeOut(o.options.delays.emptyFadeOut);
+      n.fadeOut(o.options.delays.emptyFadeOut);
   };
 
   ControllerExplorer.prototype.reset_tree_ = function ()
