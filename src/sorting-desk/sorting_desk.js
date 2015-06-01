@@ -126,6 +126,7 @@
     api_: null,
     sortingQueue_: null,
     explorer_: null,
+    facets_: null,
 
     /* Getters */
     get sortingQueue ()  { return this.sortingQueue_; },
@@ -139,6 +140,7 @@
     get options ()       { return this.options_; },
     get nodes ()         { return this.nodes_; },
     get explorer ()      { return this.explorer_; },
+    get facets ()        { return this.facets_; },
 
     /* Interface */
     initialise: function ()
@@ -182,6 +184,7 @@
             explorer: finder.find('toolbar-refresh-explorer'),
             search: finder.find('toolbar-refresh-search')
           },
+          filter: finder.find('toolbar-filter')
         }
       };
 
@@ -216,8 +219,12 @@
 
       this.networkFailure_ = new NetworkFailure(this);
 
+      (this.facets_ = new ControllerFacets(this))
+        .initialise();
+
       new SortingQueueRenderer(this.sortingQueue_,
                                this.explorer_,
+                               this.facets_,
                                this.callbacks_,
                                this.options.renderer);
 
@@ -305,7 +312,6 @@
   /**
    * @class
    * */
-  var SortingQueueRenderer = function (sq, explorer, callbacks, options)
   var EmptyNotificator = function (sq, tpl, opt)
   {
     var node = null;
@@ -339,11 +345,14 @@
   /**
    * @class
    * */
+  var SortingQueueRenderer = function (sq, explorer, facets,
+                                       callbacks, options)
   {
     var self = this;
 
     this.sortingQueue = sq;
     this.explorer = explorer;
+    this.facets = facets;
     this.callbacks = callbacks;
     this.options = options;
 
@@ -373,6 +382,8 @@
         node = this.sortingQueue.nodes.items,
         container = $('#' + this.options.recommendation),
         sugg = data.suggestions;
+
+    this.facets.assign(data);
 
     /* Ensure there is a "recommendations" caption.  Create caption if it
      * doesn't exist. */
@@ -520,6 +531,235 @@
   {
     if(std.is_fn($.fn.popover))
       node.popover({ delay: { show: 250, hide: 250 } });
+  };
+
+
+  /**
+   * @class
+   * */
+  var ControllerFacets = function (owner, nodes)
+  {
+    std.Controller.call(this, owner);
+
+    this.container = null;
+    this.active = false;
+    this.facets = null;
+    this.timer = null;
+    this.excluder = null;
+  };
+
+  ControllerFacets.prototype = Object.create(std.Controller.prototype);
+
+  ControllerFacets.prototype.initialise = function ()
+  {
+    var self = this,
+        nodes = this.owner.nodes.facets;
+
+    this.container = nodes.container;
+    this.ul = this.container.find('UL');
+    this.excluder = new FacetExcluder(this, this.ul);
+
+    this.active = this.container.is(':visible');
+    this.owner.nodes.toolbar.filter
+      .toggleClass('active', this.active)
+      .click(function () { self.toggle(); } );
+
+    nodes.all.click( function () { self.checkAll(true); } );
+    nodes.none.click(function () { self.checkAll(false); } );
+
+    this.owner.sortingQueue.on('loading-begin', function () {
+      self.clear(true);
+    } );
+    this.owner.explorer.on('refresh-begin', this.hide.bind(this));
+    this.clear();
+  };
+
+  ControllerFacets.prototype.reset = function ()
+  {
+    var nodes = this.owner.nodes.facets;
+
+    this.clear();
+    nodes.all.off(); nodes.none.off();
+
+    /* TODO: dettach events for `sortingQueue` and `explorer` (see initialise
+     * above). */
+  };
+
+  ControllerFacets.prototype.assign = function (data)
+  {
+    var self = this,
+        sf = [ ];
+
+    if(!std.is_obj(data) || !std.is_obj(data.facets)) {
+      this.facets = null;
+      return;
+    }
+
+    this.facets = data.facets;
+
+    /* Sort facets before updating the user interface. */
+    for(var k in data.facets) sf.push(k);
+    sf.sort().forEach(function (k) {
+      self.ul.append($('<li><label><input type="checkbox" value="' + k +
+                  '" checked>' + k + '</label></li>'));
+    } );
+
+    this.ul.find('INPUT')
+      .click(function (ev) { self.schedule(); } );
+
+    this.owner.nodes.facets.empty.fadeOut(function () {
+      self.ul.fadeIn();
+    } );
+
+    this.excluder.update();
+  };
+
+  ControllerFacets.prototype.exclude = function (input)
+  {
+    this.checkAll(false);
+    input.prop('checked', true);
+  };
+
+  ControllerFacets.prototype.checkAll = function (state)
+  {
+    this.container.find('UL INPUT').prop('checked', state);
+    this.schedule();
+  };
+
+  ControllerFacets.prototype.clear = function (now)
+  {
+    var self = this;
+
+    this.ul
+      .fadeOut(now === true ? 0 : "fast",
+               function () { self.owner.nodes.facets.empty.fadeIn(); } )
+      .find('LI').remove();
+  };
+
+  ControllerFacets.prototype.schedule = function ()
+  {
+    var self = this;
+
+    this.timer = window.setTimeout(function () {
+      self.timer = null;
+      self.update();
+    }, this.owner.options.delays.facets);
+  };
+
+  ControllerFacets.prototype.cancel = function ()
+  {
+    if(this.timer !== null) {
+      window.clearTimeout(this.timer);
+      this.timer = null;
+    }
+  };
+
+  ControllerFacets.prototype.update = function ()
+  {
+    if(this.facets === null) {
+      console.error("Facets unavailable");
+      return;
+    }
+
+    var self = this,
+        ids = { };
+
+    this.cancel();
+
+    this.ul.find('INPUT:checked').each(function () {
+      self.facets[this.value].forEach(function (cid) {
+        if(ids[cid] !== true)
+          ids[cid] = true;
+      } );
+    } );
+
+    this.owner.sortingQueue.items.filter(function (item) {
+      return item.content_id in ids;
+    } );
+  };
+
+  ControllerFacets.prototype.toggle = function ()
+  {
+    if(this.active) this.hide();
+    else            this.show();
+  };
+
+  ControllerFacets.prototype.show = function ()
+  {
+    this.owner.nodes.toolbar.filter.toggleClass('active', this.active = true);
+    this.container.slideDown('fast', function () {
+      $(this).css('visibility', 'visible').fadeIn("fast");
+    } );
+  };
+
+  ControllerFacets.prototype.hide = function ()
+  {
+    this.owner.nodes.toolbar.filter.toggleClass('active', this.active = false);
+    this.container.fadeOut('fast', function () {
+      $(this).slideUp("fast");
+    } );
+  };
+
+
+  /**
+   * @class
+   * */
+  var FacetExcluder = function (ctrl, ul)
+  {
+    var active = null,
+        timer = null;
+
+    this.update = function () {
+      ul.find('LI')
+        .mouseover(function () {
+          if(active !== null) {
+            if(active === this) {
+              clear();
+              return;
+            }
+
+            remove();
+          }
+
+          var $this = $(this),
+              n = $this.find('a');
+
+          if(n.length > 0) return;
+          n = $('<a href="#">only</a>')
+            .mouseover(function () { clear();          } )
+            .mouseout( function () { deferredRemove(); } )
+            .click(function () {
+              ctrl.exclude($('input', this.parentNode));
+            });
+
+          n.fadeIn("fast");
+          $this.append(n);
+          active = this;
+        } )
+        .mouseout(function () { deferredRemove(); } );
+    };
+
+    var deferredRemove = function () {
+      clear();
+      timer = window.setTimeout(function () {
+        timer = null;
+        if(active === null) return;
+        $('a', active).fadeOut("fast", function () { remove(); } );
+      }, 250);
+    };
+
+    var remove = function () {
+      clear();
+      if(active === null) return;
+      $('a', active).remove();
+      active = null;
+    };
+
+    var clear = function () {
+      if(timer === null) return;
+      window.clearTimeout(timer);
+      timer = null;
+    };
   };
 
 
@@ -734,9 +974,11 @@
       },
       "request-begin": function () {
         els.toolbar.refresh.search.addClass('disabled');
+        els.toolbar.filter.addClass('disabled');
       },
       "request-end": function () {
         els.toolbar.refresh.search.removeClass('disabled');
+        els.toolbar.filter.removeClass('disabled');
       }
     } );
 
@@ -1014,6 +1256,7 @@
 
     flag = loading || !this.active_;
     ela.refresh.search.toggleClass('disabled', flag);
+    ela.filter.toggleClass('disabled', flag);
 
     flag = loading || !(this.selected_ instanceof Folder);
     ela.report.excel.toggleClass('disabled', flag);
@@ -2509,7 +2752,8 @@
     delays: {                   /* In milliseconds.     */
       emptyFadeIn: 250,
       emptyFadeOut: 100,
-      emptyHide: 50
+      emptyHide: 50,
+      facets: 500
     },
     constructors: {
       ControllerExplorer: ControllerExplorer
