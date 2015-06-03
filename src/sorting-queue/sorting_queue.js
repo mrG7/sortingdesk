@@ -717,6 +717,17 @@
     this.updateEmptyNotification_();
   };
 
+  ControllerItems.prototype.sort = function (cb)
+  {
+    if(!std.is_fn(cb)) throw "Invalid or no callback specified";
+    this.items_.sort(function (l, r) { return cb(l.content, r.content); } );
+
+    var self = this;
+    this.items_.forEach(function (item) {
+      self.owner.nodes.items.append(item.node_);
+    } );
+  };
+
   ControllerItems.prototype.select = function (variant)
   { this.select_(variant); };
 
