@@ -706,14 +706,11 @@
 
   ControllerItems.prototype.filter = function (cb)
   {
-    if(!std.is_fn(cb))
-      throw "Invalid or no callback specified";
+    if(!std.is_fn(cb)) throw "Invalid or no callback specified";
 
     this.items_.forEach(function (item) {
-      if(cb(item.content) === false)
-        item.disable();
-      else
-        item.enable();
+      if(cb(item.content) === false)  item.disable();
+      else                            item.enable();
     } );
 
     this.filtered_ = true;
