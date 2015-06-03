@@ -181,8 +181,13 @@ DIV.sd-loading {
   font-weight: normal;
 }
 
+#sd-facets > DIV > UL > LI > LABEL > SPAN {
+  margin: 0 10px 0;
+  font-weight: bold;
+}
+
 #sd-facets > DIV > UL > LI > LABEL > INPUT {
-  margin-right: 6px;
+/*   margin-right: 6px; */
 }
 
 #sd-facets > DIV > P[data-sd-scope="sorting-desk-facets-empty"] {
