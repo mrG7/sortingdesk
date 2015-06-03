@@ -602,10 +602,10 @@
     for(var k in data.facets) sf.push({ label: k,
                                         count: data.facets[k].length });
     sf.sort(function (l, r) {
+      /* Note that we're sorting the facets in reverse order. */
       if(l.count < r.count)       return 1;
       else if(l.count > r.count)  return -1;
-      return l.label === r.label ? 0
-        : (l.label < r.label ? 1 : -1);
+      return l.label === r.label ? 0 : (l.label < r.label ? 1 : -1);
     } );
 
     sf.forEach(function (k) {
