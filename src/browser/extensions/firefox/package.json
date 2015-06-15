@@ -46,6 +46,13 @@
       "description": "Paste the translation API key here.",
       "type": "string",
       "value": ""
+    },
+    {
+      "name": "active",
+      "title": "Sorting Desk active",
+      "description": "Check to construct the Sorting Desk sidebar.",
+      "type": "bool",
+      "value": true
     }
   ]
 }

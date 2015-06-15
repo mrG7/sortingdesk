@@ -91,36 +91,39 @@ var Preferences = (function () {
     return urls.join(', ');
   };
 
-  var timedSetDossierUrl_ = function (name, delay)
+  var timedSetDossierUrl_ = function ()
   {
-    if(timerSet_ !== null)
-      mtimers.clearTimeout(timerSet_);
-
+    if(timerSet_ !== null) mtimers.clearTimeout(timerSet_);
     timerSet_ = mtimers.setTimeout(function () {
-      activeUrl_ = dossierUrls_[name];
-      mmain.onUrlUpdated(activeUrl_);
+      activeUrl_ = dossierUrls_[prefs.urlName];
+      mmain.onPreferencesChanged();
       timerSet_ = null;
-    }, delay === undefined ? 1500 : delay);
+    }, 1500);
   };
 
-  var timedUpdate_ = function ()
+  var timedUpdate_ = function (delay)
   {
-    if(timerUpdate_ !== null)
-      mtimers.clearTimeout(timerUpdate_);
-
+    if(timerUpdate_ !== null) mtimers.clearTimeout(timerUpdate_);
     timerUpdate_ = mtimers.setTimeout(function () {
-      updateDossierUrls_();
+      update_();
       timerUpdate_ = null;
-    }, 2500);
+    }, delay || 1500);
   };
+
+  var update_ = function ()
+  {
+    var url = prefs.urlName;
+    updateDossierUrls_();
+    mmain.onPreferencesChanged();
+  };
+
 
   /* Initialisation sequence */
-  mprefs.on('active',      function () { mmain.toggle(prefs.active); } );
-  mprefs.on('dossierUrls', function () { timedUpdate_(); } );
-
-  mprefs.on('urlName', function () {
-    timedSetDossierUrl_(prefs.urlName);
-  } );
+  mprefs.on('active',         function () { mmain.onSetActive(prefs.active);});
+  mprefs.on('dossierUrls',    function () { timedUpdate_(2000); } );
+  mprefs.on('urlName',        timedSetDossierUrl_);
+  mprefs.on('translationApi', function () { timedUpdate_(); } );
+  mprefs.on('translationKey', function () { timedUpdate_(); } );
 
   updateDossierUrls_();
   activeUrl_ = dossierUrls_[prefs.urlName];
