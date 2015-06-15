@@ -17,8 +17,10 @@ var Config = (function (window, chrome, $, std, undefined) {
                    'dev@http://54.174.195.250:8080',
                    'local@http://localhost:8080' ].join(', '),
     activeUrl: 'memex',
-    translationApi: 'google',
-    translationKey: null,
+    translation: {
+      api: 'google',
+      key: null
+    },
     active: true,
     startPosition: 0
   };

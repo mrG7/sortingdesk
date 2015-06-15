@@ -459,8 +459,8 @@ var Main = (function (window, chrome, $, std, sq, sqc, sd, undefined) {
       container: $('#sd-folder-explorer'),
       dossierUrl: meta.config.activeUrl,
       translation: {
-        api: meta.config.translationApi,
-        key: meta.config.translationKey
+        api: meta.config.translation.api,
+        key: meta.config.translation.key
       },
       sortingQueue: {
         options: {

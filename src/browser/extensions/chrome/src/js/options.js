@@ -25,8 +25,10 @@ var Options = (function (window, $, std, undefined) {
         Config.save( {
           dossierUrls: $('#dossier-urls').val(),
           activeUrl: $('#active-url').val(),
-          translationApi: $('#translation-api').val(),
-          translationKey: $('#translation-key').val(),
+          translation: {
+            api: $('#translation-api').val(),
+            key: $('#translation-key').val()
+          },
           active: $('#active').is(':checked'),
           startPosition: $('#start-position').val()
         } );
@@ -118,8 +120,8 @@ var Options = (function (window, $, std, undefined) {
 
       $('#active').prop('checked', state.active);
       setDropdownValue_($('#active-url'), state.activeUrl);
-      setDropdownValue_($('#translation-api'), state.translationApi);
-      $('#translation-key').val(state.translationKey);
+      setDropdownValue_($('#translation-api'), state.translation.api);
+      $('#translation-key').val(state.translation.key);
       setDropdownValue_($('#start-position'), state.startPosition, 0);
 
       if(std.is_fn(callback)) callback();
