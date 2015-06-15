@@ -1362,7 +1362,7 @@
         deferred.reject();
       else
         deferred.resolve(result);
-    } );
+    } ).fail(function () { deferred.reject(); } );
 
     return deferred.promise();
   };
