@@ -71,6 +71,7 @@
     if(!std.is_str(options.key) || options.key.length === 0)
       throw "API key not specified";
     this.key = options.key;
+    this.useJsonp = options.useJsonp === true;
   };
   translation.Factory.register('google', translation.ServiceGoogle);
 
@@ -87,10 +88,15 @@
     return url + '?key=' + this.key + '&q=' + encodeURIComponent(query);
   };
 
+  translation.ServiceGoogle.prototype.query = function (url)
+  {
+    return $.ajax( { url: url, dataType: this.useJsonp ? "jsonp" : "json" } );
+  };
+
   translation.ServiceGoogle.prototype.detect = function (query)
   {
     var url = this.url(query, 'detect');
-    return $.getJSON(url).then(function (response) {
+    return this.query(url).then(function (response) {
       return $.Deferred(function (deferred) {
         if(!std.is_obj(response.data)
            || !std.is_arr(response.data.detections)
@@ -133,7 +139,7 @@
     else if(!std.is_str(tgt)) throw "Invalid or no target language specified";
     url += '&source=' + src + '&target=' + tgt;
 
-    return $.getJSON(url).then(function (response) {
+    return this.query(url).then(function (response) {
       return $.Deferred(function (deferred) {
         if(!std.is_obj(response.data)
            || !std.is_arr(response.data.translations)
@@ -212,6 +218,7 @@
         .done(function (response) {
           console.log("All ok!: ", response);
           selection.content = response;
+          return;
           subfolder.add(selection);
         } )
         .fail(function () {
