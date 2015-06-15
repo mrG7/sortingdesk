@@ -1,5 +1,5 @@
 /**
- * @file Sorting Desk component.
+ * @file Sorting Desk main component.
  * @copyright 2015 Diffeo
  *
  * Comments:
@@ -134,6 +134,7 @@
     get constructor ()   { return this.constructor_; },
     get callbacks ()     { return this.callbacks_; },
     get networkFailure() { return this.networkFailure_; },
+    get translator()     { return this.translator_; },
     get events ()        { return this.events_; },
     get api ()           { return this.api_; },
     get resetting ()     { return this.sortingQueue_.resetting(); },
@@ -180,6 +181,7 @@
           remove: finder.find('toolbar-remove'),
           rename: finder.find('toolbar-rename'),
           jump: finder.find('toolbar-jump'),
+          translate: finder.find('toolbar-translate'),
           refresh: {
             explorer: finder.find('toolbar-refresh-explorer'),
             search: finder.find('toolbar-refresh-search')
@@ -228,6 +230,14 @@
                                this.callbacks_,
                                this.options.renderer);
 
+      (this.translator_ = new translation.Controller(
+        this.explorer_,
+        this.callbacks_,
+        {
+          button: els.toolbar.translate,
+          service: this.options.translation
+        } )).initialise();
+
       this.initialised_ = true;
       console.info("Sorting Desk UI initialised");
     },
@@ -245,10 +255,12 @@
       var self = this;
 
       this.explorer_.reset();
+      this.translator_.reset();
 
       return this.sortingQueue_.reset()
         .done(function () {
           self.explorer_ = self.options_ = self.sortingQueue_ = null;
+          self.translator_ = null;
           self.initialised_ = false;
 
           console.info("Sorting Desk UI reset");
