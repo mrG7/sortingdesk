@@ -13,6 +13,9 @@
 	translation service and pasting the API key string.  Presently
 	only the Google Translate service is available.
 
+	* Improvements to extension sidebar and preferences page in
+	Firefox
+
 2015-06-03  Diffeo  <support@diffeo.com>
 
 	* Recommendations list can now be sorted and filtered.
