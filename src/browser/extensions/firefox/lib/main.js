@@ -35,7 +35,15 @@ var Main = (function (undefined) {
   /* Interface */
   var construct_ = function (force)
   {
-    destroy_();
+    if(!mpreferences.getDossierUrl()) {
+      Services.prompt.alert(null, 'Dossier stack URL',
+                            'Please select a valid dossier stack URL in '
+                            + 'Sorting Desk\'s preferences page.');
+      destroy_();
+      return;
+    }
+
+    if(sidebar) sidebar.dispose();
     sidebar = msidebar.Sidebar( {
       id: "sidebar-sorting-desk",
       title: "Sorting Desk",
@@ -44,6 +52,7 @@ var Main = (function (undefined) {
     } );
 
     if(visible || force === true) show_(true);
+    mpreferences.set("active", true);
   };
 
   var destroy_ = function ()
@@ -52,6 +61,8 @@ var Main = (function (undefined) {
       sidebar.dispose();
       sidebar = null;
     }
+
+    mpreferences.set("active", false);
   };
 
   var show_ = function (force)
@@ -79,26 +90,15 @@ var Main = (function (undefined) {
     else                    hide_();
   };
 
-  var alertInvalidUrl_ = function ()
-  {
-    Services.prompt.alert(null, 'Dossier stack URL',
-                          'Please select a valid dossier stack URL in Sorting '
-                          + 'Desk\'s preferences page.');
-  };
-
   var onSetActive = function (state)
   {
-    if(state === true) construct_();
-    else               destroy_();
+    if(state === true)  construct_();
+    else                destroy_();
   };
 
   var onPreferencesChanged = function ()
   {
-    if(!mpreferences.getDossierUrl()) {
-      alertInvalidUrl_();
-      hide_();
-    } else if(mpreferences.get().active)
-      construct_();
+    if(mpreferences.get().active) construct_();
   };
 
   var getBlob_ = function(url, callback)
@@ -240,11 +240,7 @@ var Main = (function (undefined) {
    * --
    * Sorting desk related */
   minjector.initialise();
-
-  if(mpreferences.get().active) {
-    if(!mpreferences.getDossierUrl()) alertInvalidUrl_();
-    else  construct_(/* mpreferences.get().active */ false);
-  }
+  if(mpreferences.get().active) construct_(false);
 
   mbuttons.ActionButton({
     id: "button-diffeo",
@@ -254,7 +250,17 @@ var Main = (function (undefined) {
       "32": data.url("shared/media/icons/icon_32.png"),
       "64": data.url("shared/media/icons/icon_64.png")
     },
-    onClick: function (state) { toggle(); }
+    onClick: function (state) {
+      if(!mpreferences.get().active && !sidebar) {
+        Services.prompt.alert(null, 'Sorting Desk inactive',
+                              'Sorting Desk is currently inactive.  Please'
+                              + ' activate it in the preferences page by'
+                              + ' checking the "active" setting.');
+        return;
+      }
+
+      toggle();
+    }
   });
 
   /* Public interface */

@@ -24,7 +24,8 @@ var Preferences = (function () {
   var dossierUrls_ = { },
       activeUrl_ = null,
       timerSet_ = null,
-      timerUpdate_ = null;
+      timerUpdate_ = null,
+      ignore_ = false;
 
 
   /* Interface */
@@ -39,21 +40,19 @@ var Preferences = (function () {
     };
   };
 
-  var getDossierUrl = function () {
-    return activeUrl_;
-  };
+  var getDossierUrl = function () { return activeUrl_; };
 
-  var set = function (name, value) {
-    if(!(name in prefs))
-      throw "Invalid preference name: " + name;
+  var set = function (name, value)
+  {
+    if(!(name in prefs)) throw "Invalid preference name: " + name;
 
-    prefs[name] = value;
+    ignore_ = prefs[name] !== value;
+    if(ignore_) prefs[name] = value;
   };
 
   var updateDossierUrls_ = function ()
   {
-    var cin = prefs.dossierUrls.split(','),
-        urls;
+    var cin = prefs.dossierUrls.split(',');
 
     dossierUrls_ = { };
 
@@ -76,9 +75,8 @@ var Preferences = (function () {
         dossierUrls_[j[0]] = j[1];
     } );
 
-    urls = getDossierUrlsAsString_();
-    if(urls !== prefs.dossierUrls)
-      prefs.dossierUrls = urls;
+    set("dossierUrls", getDossierUrlsAsString_());
+    activeUrl_ = dossierUrls_[prefs.urlName];
   };
 
   var getDossierUrlsAsString_ = function ()
@@ -93,6 +91,7 @@ var Preferences = (function () {
 
   var timedSetDossierUrl_ = function ()
   {
+    if(ignoring_()) return;
     if(timerSet_ !== null) mtimers.clearTimeout(timerSet_);
     timerSet_ = mtimers.setTimeout(function () {
       activeUrl_ = dossierUrls_[prefs.urlName];
@@ -103,23 +102,31 @@ var Preferences = (function () {
 
   var timedUpdate_ = function (delay)
   {
+    if(ignoring_()) return;
     if(timerUpdate_ !== null) mtimers.clearTimeout(timerUpdate_);
     timerUpdate_ = mtimers.setTimeout(function () {
-      update_();
+      updateDossierUrls_();
+      mmain.onPreferencesChanged();
       timerUpdate_ = null;
     }, delay || 1500);
   };
 
-  var update_ = function ()
+  var ignoring_ = function ()
   {
-    var url = prefs.urlName;
-    updateDossierUrls_();
-    mmain.onPreferencesChanged();
+    if(ignore_) {
+      ignore_ = false;
+      return true;
+    }
+
+    return false;
   };
 
 
   /* Initialisation sequence */
-  mprefs.on('active',         function () { mmain.onSetActive(prefs.active);});
+  mprefs.on('active', function () {
+    if(!ignoring_()) mmain.onSetActive(prefs.active);
+  });
+
   mprefs.on('dossierUrls',    function () { timedUpdate_(2000); } );
   mprefs.on('urlName',        timedSetDossierUrl_);
   mprefs.on('translationApi', function () { timedUpdate_(); } );
