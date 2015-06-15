@@ -294,6 +294,11 @@ var Main = (function (window, $, std, sq, sqc, sd, undefined) {
     (sorter = new sd.Sorter( {
       container: $('#sd-folder-explorer'),
       dossierUrl: preferences.dossierUrl,
+      translation: {
+        api: preferences.translation.api,
+        key: preferences.translation.key,
+        useJsonp: true
+      },
       sortingQueue: {
         options: {
           container: $('#sd-queue'),

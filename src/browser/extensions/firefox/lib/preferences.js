@@ -31,8 +31,12 @@ var Preferences = (function () {
   var get = function () {
     return {
       dossierUrl: activeUrl_,
-      active: prefs.active
-    }
+      active: prefs.active,
+      translation: {
+        api: prefs.translationApi,
+        key: prefs.translationKey
+      }
+    };
   };
 
   var getDossierUrl = function () {
