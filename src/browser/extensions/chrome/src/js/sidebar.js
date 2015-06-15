@@ -458,6 +458,10 @@ var Main = (function (window, chrome, $, std, sq, sqc, sd, undefined) {
     (sorter = new sd.Sorter( {
       container: $('#sd-folder-explorer'),
       dossierUrl: meta.config.activeUrl,
+      translation: {
+        api: meta.config.translationApi,
+        key: meta.config.translationKey
+      },
       sortingQueue: {
         options: {
           container: $('#sd-queue'),
