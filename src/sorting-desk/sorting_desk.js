@@ -2727,7 +2727,11 @@
   return {
     Sorter: Sorter,
     ControllerExplorer: ControllerExplorer,
-    NetworkFailure: NetworkFailure
+    NetworkFailure: NetworkFailure,
+    Folder: Folder,
+    Subfolder: Subfolder,
+    ItemText: ItemText,
+    ItemImage: ItemImage
   };
 
 }, this);
