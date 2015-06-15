@@ -216,7 +216,7 @@
       console.info("Translating: ", selection.content);
       self.service.translate(selection.content)
         .done(function (response) {
-          console.log("All ok!: ", response);
+          console.log("Translation: ", response);
           selection.content = response;
           subfolder.add(selection);
         } )
@@ -225,6 +225,9 @@
           console.error("Translation failed");
         } )
         .always(function () { self.enable_(); } );
+    } ).fail(function () {
+      window.alert("Unable to translate text.  Please ensure text is currently"
+                   + " selected in the active tab");
     } ).always(function () { self.enable_(); } );
   };
 
