@@ -24,32 +24,35 @@ var Preferences = (function () {
   var dossierUrls_ = { },
       activeUrl_ = null,
       timerSet_ = null,
-      timerUpdate_ = null;
+      timerUpdate_ = null,
+      ignore_ = false;
 
 
   /* Interface */
   var get = function () {
     return {
       dossierUrl: activeUrl_,
-      active: prefs.active
-    }
+      active: prefs.active,
+      translation: {
+        api: prefs.translationApi,
+        key: prefs.translationKey
+      }
+    };
   };
 
-  var getDossierUrl = function () {
-    return activeUrl_;
-  };
+  var getDossierUrl = function () { return activeUrl_; };
 
-  var set = function (name, value) {
-    if(!(name in prefs))
-      throw "Invalid preference name: " + name;
+  var set = function (name, value)
+  {
+    if(!(name in prefs)) throw "Invalid preference name: " + name;
 
-    prefs[name] = value;
+    ignore_ = prefs[name] !== value;
+    if(ignore_) prefs[name] = value;
   };
 
   var updateDossierUrls_ = function ()
   {
-    var cin = prefs.dossierUrls.split(','),
-        urls;
+    var cin = prefs.dossierUrls.split(',');
 
     dossierUrls_ = { };
 
@@ -72,9 +75,8 @@ var Preferences = (function () {
         dossierUrls_[j[0]] = j[1];
     } );
 
-    urls = getDossierUrlsAsString_();
-    if(urls !== prefs.dossierUrls)
-      prefs.dossierUrls = urls;
+    set("dossierUrls", getDossierUrlsAsString_());
+    activeUrl_ = dossierUrls_[prefs.urlName];
   };
 
   var getDossierUrlsAsString_ = function ()
@@ -87,36 +89,48 @@ var Preferences = (function () {
     return urls.join(', ');
   };
 
-  var timedSetDossierUrl_ = function (name, delay)
+  var timedSetDossierUrl_ = function ()
   {
-    if(timerSet_ !== null)
-      mtimers.clearTimeout(timerSet_);
-
+    if(ignoring_()) return;
+    if(timerSet_ !== null) mtimers.clearTimeout(timerSet_);
     timerSet_ = mtimers.setTimeout(function () {
-      activeUrl_ = dossierUrls_[name];
-      mmain.onUrlUpdated(activeUrl_);
+      activeUrl_ = dossierUrls_[prefs.urlName];
+      mmain.onPreferencesChanged();
       timerSet_ = null;
-    }, delay === undefined ? 1500 : delay);
+    }, 1500);
   };
 
-  var timedUpdate_ = function ()
+  var timedUpdate_ = function (delay)
   {
-    if(timerUpdate_ !== null)
-      mtimers.clearTimeout(timerUpdate_);
-
+    if(ignoring_()) return;
+    if(timerUpdate_ !== null) mtimers.clearTimeout(timerUpdate_);
     timerUpdate_ = mtimers.setTimeout(function () {
       updateDossierUrls_();
+      mmain.onPreferencesChanged();
       timerUpdate_ = null;
-    }, 2500);
+    }, delay || 1500);
   };
 
-  /* Initialisation sequence */
-  mprefs.on('active',      function () { mmain.toggle(prefs.active); } );
-  mprefs.on('dossierUrls', function () { timedUpdate_(); } );
+  var ignoring_ = function ()
+  {
+    if(ignore_) {
+      ignore_ = false;
+      return true;
+    }
 
-  mprefs.on('urlName', function () {
-    timedSetDossierUrl_(prefs.urlName);
-  } );
+    return false;
+  };
+
+
+  /* Initialisation sequence */
+  mprefs.on('active', function () {
+    if(!ignoring_()) mmain.onSetActive(prefs.active);
+  });
+
+  mprefs.on('dossierUrls',    function () { timedUpdate_(2000); } );
+  mprefs.on('urlName',        timedSetDossierUrl_);
+  mprefs.on('translationApi', function () { timedUpdate_(); } );
+  mprefs.on('translationKey', function () { timedUpdate_(); } );
 
   updateDossierUrls_();
   activeUrl_ = dossierUrls_[prefs.urlName];

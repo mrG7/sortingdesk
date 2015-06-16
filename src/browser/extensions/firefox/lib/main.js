@@ -29,55 +29,76 @@ var Main = (function (undefined) {
 
   /* Module attributes */
   var sidebar = null,
-      active = false;
+      visible = false;
 
 
   /* Interface */
+  var construct_ = function (force)
+  {
+    if(!mpreferences.getDossierUrl()) {
+      Services.prompt.alert(null, 'Dossier stack URL',
+                            'Please select a valid dossier stack URL in '
+                            + 'Sorting Desk\'s preferences page.');
+      destroy_();
+      return;
+    }
+
+    if(sidebar) sidebar.dispose();
+    sidebar = msidebar.Sidebar( {
+      id: "sidebar-sorting-desk",
+      title: "Sorting Desk",
+      url: data.url("src/html/sidebar.html"),
+      onAttach: onAttachSidebar_
+    } );
+
+    if(visible || force === true) show_(true);
+    mpreferences.set("active", true);
+  };
+
+  var destroy_ = function ()
+  {
+    if(sidebar) {
+      sidebar.dispose();
+      sidebar = null;
+    }
+
+    mpreferences.set("active", false);
+  };
+
   var show_ = function (force)
   {
-    if(sidebar === null)
-      throw "Sidebar not yet instantiated";
-
-    if(!active || force === true) {
+    if(sidebar === null) throw "Sidebar not yet instantiated";
+    if(!visible || force === true) {
       sidebar.show();
-      mpreferences.set('active', active = true);
+      visible = true;
     }
   };
 
   var hide_ = function ()
   {
-    if(sidebar === null)
-      throw "Sidebar not yet instantiated";
-
-    if(active) {
+    if(sidebar === null) throw "Sidebar not yet instantiated";
+    if(visible) {
       sidebar.hide();
-      mpreferences.set('active', active = false);
-    }
-  };
-
-  var alertInvalidUrl_ = function ()
-  {
-    Services.prompt.alert(null, 'Dossier stack URL',
-                          'Please select a valid dossier stack URL in Sorting '
-                          + 'Desk\'s preferences page.');
-  };
-
-  var onUrlUpdated = function (url)
-  {
-    if(!url) {
-      alertInvalidUrl_();
-      if(sidebar) sidebar.hide();
-    } else {
-      if(mpreferences.get().active)
-        constructSidebar_();
+      visible = false;
     }
   };
 
   var toggle = function (state)
   {
-    if(state === undefined) state = !active;
+    if(state === undefined) state = !visible;
     if(state === true)      show_();
     else                    hide_();
+  };
+
+  var onSetActive = function (state)
+  {
+    if(state === true)  construct_();
+    else                destroy_();
+  };
+
+  var onPreferencesChanged = function ()
+  {
+    if(mpreferences.get().active) construct_();
   };
 
   var getBlob_ = function(url, callback)
@@ -147,11 +168,11 @@ var Main = (function (undefined) {
 
   var getActiveTabWorker_ = function (worker)
   {
-    var active = mtabs.activeTab,
+    var tab = mtabs.activeTab,
         cs;
 
-    if(active && mblacklist.valid(active.url)) {
-      cs = minjector.get(active.id);
+    if(tab && mblacklist.valid(tab.url)) {
+      cs = minjector.get(tab.id);
 
       if(cs) return cs;
       else   console.error("No content script attached to tab");
@@ -159,20 +180,6 @@ var Main = (function (undefined) {
       console.info("No active tab or invalid URL");
 
     worker.port.emit('get-selection', null);
-  };
-
-  var constructSidebar_ = function (force)
-  {
-    if(sidebar) sidebar.dispose();
-
-    sidebar = msidebar.Sidebar( {
-      id: "sidebar-sorting-desk",
-      title: "Sorting Desk",
-      url: data.url("src/html/sidebar.html"),
-      onAttach: onAttachSidebar_
-    } );
-
-    if(active || force === true) show_(true);
   };
 
   var onAttachSidebar_ = function (worker)
@@ -233,29 +240,32 @@ var Main = (function (undefined) {
    * --
    * Sorting desk related */
   minjector.initialise();
-
-  if(mpreferences.get().active) {
-    if(!mpreferences.getDossierUrl())
-      alertInvalidUrl_();
-    else
-      constructSidebar_(/* mpreferences.get().active */ false);
-  }
+  if(mpreferences.get().active) construct_(false);
 
   mbuttons.ActionButton({
     id: "button-diffeo",
-    label: "Activate Sorting Desk",
+    label: "Toggle visibility of Sorting Desk extension sidebar",
     icon: {
       "16": data.url("shared/media/icons/icon_16.png"),
       "32": data.url("shared/media/icons/icon_32.png"),
       "64": data.url("shared/media/icons/icon_64.png")
     },
     onClick: function (state) {
+      if(!mpreferences.get().active && !sidebar) {
+        Services.prompt.alert(null, 'Sorting Desk inactive',
+                              'Sorting Desk is currently inactive.  Please'
+                              + ' activate it in the preferences page by'
+                              + ' checking the "active" setting.');
+        return;
+      }
+
       toggle();
     }
   });
 
   /* Public interface */
-  exports.toggle = toggle;
-  exports.onUrlUpdated = onUrlUpdated;
+  exports.onSetActive = onSetActive;
+  exports.onPrePreferencesChanged = hide_;
+  exports.onPreferencesChanged = onPreferencesChanged;
 
 } )();

@@ -1,3 +1,27 @@
+2015-06-15  Diffeo  <support@diffeo.com>
+
+	* Implemented translation of selected text snippets.
+
+	Further work required to enable/disable the translation toolbar
+	button depending on whether a text selection exists; currently the
+	button is always enabled.
+
+	The translation service is made available after it has been
+	suitably configured.  Configuring the translation service can be
+	achieved by accessing the extension's options/preferences window
+	(for Chrome and Firefox, respectively) and selecting the desired
+	translation service and pasting the API key string.  Presently
+	only the Google Translate service is available.
+
+	* Improvements to extension sidebar and preferences page in
+	Firefox
+
+2015-06-03  Diffeo  <support@diffeo.com>
+
+	* Recommendations list can now be sorted and filtered.
+
+	* Several improvements to facets display and UI.
+
 2015-06-01  Diffeo  <support@diffeo.com>
 
 	* Implemented filtering by facets.

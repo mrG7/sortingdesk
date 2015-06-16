@@ -25,6 +25,10 @@ var Options = (function (window, $, std, undefined) {
         Config.save( {
           dossierUrls: $('#dossier-urls').val(),
           activeUrl: $('#active-url').val(),
+          translation: {
+            api: $('#translation-api').val(),
+            key: $('#translation-key').val()
+          },
           active: $('#active').is(':checked'),
           startPosition: $('#start-position').val()
         } );
@@ -115,17 +119,17 @@ var Options = (function (window, $, std, undefined) {
       updateActiveUrl_();
 
       $('#active').prop('checked', state.active);
-      setDropdownValue_($('#start-position'), state.startPosition, 0);
       setDropdownValue_($('#active-url'), state.activeUrl);
+      setDropdownValue_($('#translation-api'), state.translation.api);
+      $('#translation-key').val(state.translation.key);
+      setDropdownValue_($('#start-position'), state.startPosition, 0);
 
-      if(std.is_fn(callback))
-        callback();
+      if(std.is_fn(callback)) callback();
     } );
   };
 
 
   /* Initialize options page controller. */
-  $(function () {
-    initialise_();
-  } );
+  $(function () { initialise_(); } );
+
 })(window, $, SortingCommon);

@@ -28,9 +28,29 @@
       "value": "memex"
     },
     {
+      "name": "translationApi",
+      "title": "Translation API service",
+      "description": "Select the translation service you would like to use.",
+      "type": "menulist",
+      "value": "google",
+      "options": [
+        {
+          "value": "google",
+          "label": "Google Translate"
+        }
+      ]
+    },
+    {
+      "name": "translationKey",
+      "title": "Translation API key",
+      "description": "Paste the translation API key here.",
+      "type": "string",
+      "value": ""
+    },
+    {
       "name": "active",
       "title": "Sorting Desk active",
-      "description": "Check to activate Sorting Desk",
+      "description": "Check to construct the Sorting Desk sidebar.",
       "type": "bool",
       "value": true
     }

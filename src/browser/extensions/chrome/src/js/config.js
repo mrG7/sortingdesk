@@ -17,6 +17,10 @@ var Config = (function (window, chrome, $, std, undefined) {
                    'dev@http://54.174.195.250:8080',
                    'local@http://localhost:8080' ].join(', '),
     activeUrl: 'memex',
+    translation: {
+      api: 'google',
+      key: null
+    },
     active: true,
     startPosition: 0
   };
@@ -93,11 +97,9 @@ var Config = (function (window, chrome, $, std, undefined) {
       state.config = $.extend(true, { },
                               $.extend(true, { }, defaults_),
                               state.config || { });
-      if(!exists)
-        save(state.config);
 
-      if(callback)
-        callback(state.config);
+      if(!exists)  save(state.config);
+      if(callback) callback(state.config);
     } );
   };
 
@@ -110,8 +112,7 @@ var Config = (function (window, chrome, $, std, undefined) {
     chrome.storage.local.set( { "config": options }, function () {
       console.log("Configuration saved");
 
-      if(std.is_fn(callback))
-        callback();
+      if(std.is_fn(callback)) callback();
 
       /* Instruct background to reload extension window. */
       chrome.runtime.sendMessage( { operation: "config-saved" } );
