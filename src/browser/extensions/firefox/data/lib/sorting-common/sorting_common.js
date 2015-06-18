@@ -263,6 +263,20 @@
       else if (elemBottom > containerBottom)
         container.off().scrollTop(elemBottom - container.height());
     }
+
+    this.mapTo$ = mapTo$;
+    function mapTo$(map)
+    {
+      for(var k in map) {
+        var e = map[k];
+
+             if(is_str(e))        map[k] = $("#" + e);
+        else if(Html.is_node(e))  map[k] = $(e);
+        else if(is(e))            continue;
+        else if(is_obj(e))        mapTo$(e);
+        else                      map[k] = $();
+      }
+    }
   });
 
 
@@ -393,6 +407,26 @@
     {
       return el instanceof window.HTMLImageElement
         || el instanceof window.Image;
+    }
+
+    this.is_node = is_node;
+    function is_node(o)
+    {
+      return (
+        is_obj(Node) === "object"
+          ? o instanceof Node
+          : is_obj(o) && is_num(o.nodeType) && is_str(o.nodeName)
+      );
+    }
+
+    this.is_element = is_element;
+    function is_element(o)
+    {
+      return (
+        is_obj(HTMLElement)
+          ? o instanceof HTMLElement
+          : is_obj(o) && o.nodeType === 1 && is_str(o.nodeName)
+      );
     }
 
     /* Private interface */
