@@ -662,13 +662,14 @@
     this.ul
       .fadeOut(now === true ? 0 : "fast",
                function () { self.owner.nodes.facets.empty.fadeIn(); } )
-      .find('LI').remove();
+      .empty();
   };
 
   ControllerFacets.prototype.schedule = function ()
   {
     var self = this;
 
+    this.cancel();
     this.timer = window.setTimeout(function () {
       self.timer = null;
       self.update();
