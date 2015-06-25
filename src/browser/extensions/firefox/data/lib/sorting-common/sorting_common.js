@@ -7,10 +7,6 @@
  */
 
 
-/*global $, define */
-/*jshint laxbreak:true, -W057, -W058 */
-
-
 (function (Module, root) {
 
   /* Compatibility with RequireJs. */

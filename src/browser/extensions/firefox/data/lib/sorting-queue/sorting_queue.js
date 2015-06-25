@@ -8,10 +8,6 @@
  */
 
 
-/*global $, define */
-/*jshint laxbreak:true */
-
-
 (function (factory, root) {
 
   /* Compatibility with RequireJs. */

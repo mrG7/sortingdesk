@@ -1,5 +1,5 @@
 /**
- * @file Translation component.
+ * @file Sorting Desk: translation component.
  * @copyright 2015 Diffeo
  *
  * Comments:
@@ -7,27 +7,13 @@
  *
  */
 
+this.SortingDesk = (function (window, $, std, sd, undefined) {
 
-/*global $, define */
-/*jshint laxbreak:true */
-
-
-(function (factory, root) {
-
-  /* Compatibility with RequireJs. */
-  if(typeof define === "function" && define.amd) {
-    var deps = [ "jquery", "SortingCommon", "SortingDesk" ];
-    define("sorting_desk-translation", deps, function ($, std, sd) {
-      return factory(root, $, std, sd);
-    } );
-  } else
-    root.translation = factory(root, $, SortingCommon, SortingDesk);
-
-} )(function (window, $, std, sd, undefined) {
-
-
-  /* component namespace */
-  var translation = { };
+  /**
+   * @namespace
+   * */
+  sd = sd || { };
+  var translation = sd.translation = sd.translation || { };
 
 
   /**
@@ -196,7 +182,7 @@
     var subfolder = this.explorer.selected;
 
     if(this.processing) return;
-    else if(!(subfolder instanceof sd.Subfolder)) {
+    else if(!(subfolder instanceof sd.explorer.Subfolder)) {
       window.alert("Please select a subfolder to add the translated"
                    + " text item to.");
       return;
@@ -238,6 +224,9 @@
   };
 
 
-  return translation;
+  return sd;
 
-}, this);
+})(this,
+   this.$,
+   this.SortingCommon,
+   this.SortingDesk);
