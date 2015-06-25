@@ -41,7 +41,7 @@ this.SortingDesk = (function (window, $, std, sq, sd, Api, undefined) {
 
     /* TODO: must pass in Dossier API URL. */
     this.api_ = new Api(this, opts.dossierUrl);
-    this.options_ = $.extend(true, $.extend(true, {}, defaults_), opts);
+    this.options_ = $.extend(true, {}, defaults_, opts);
     delete this.options_.sortingQueue; /* don't keep SQ options */
     this.callbacks_ = new std.Callbacks(cbs);
     this.events_ = new std.Events(
