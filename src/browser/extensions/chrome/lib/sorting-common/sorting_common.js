@@ -603,8 +603,7 @@
 
   /* Following method to allow for deferred initialisation. */
   /* abstract */ Controller.prototype.initialise = absm_noti;
-
-  /* abstract */ Controller.prototype.reset = absm_noti;
+  /* abstract */ Controller.prototype.reset      = absm_noti;
 
 
   /**

@@ -37,11 +37,13 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
       [ 'refresh-begin',
         'refresh-end',
         'selected-folder',
-        'selected-subfolder' ] );
+        'selected-subfolder'
+      ]
+    );
 
     this.processing_ = null;
     this.selected_ = null;
-console.log(sd, explorer);
+
     /* Drag and drop handler */
     this.dnd_ = new explorer.DragDropHandler(this);
     this.dnd_.on( {

@@ -167,7 +167,7 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
       return;
     }
 
-    this.$button.on("click", this.onClick.bind(this));
+    this.$button.on("click", this.onClick_.bind(this));
   };
 
   translation.Controller.prototype.reset = function ()
@@ -177,7 +177,8 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
     this.$button = this.service = null;
   };
 
-  translation.Controller.prototype.onClick = function ()
+  /* Private interface */
+  translation.Controller.prototype.onClick_ = function ()
   {
     var subfolder = this.explorer.selected;
 

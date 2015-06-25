@@ -41,7 +41,7 @@ this.SortingDesk = (function (window, $, std, sq, sd, Api, undefined) {
 
     /* TODO: must pass in Dossier API URL. */
     this.api_ = new Api(this, opts.dossierUrl);
-    this.options_ = $.extend(true, $.extend(true, {}, defaults_), opts);
+    this.options_ = $.extend(true, {}, defaults_, opts);
     delete this.options_.sortingQueue; /* don't keep SQ options */
     this.callbacks_ = new std.Callbacks(cbs);
     this.events_ = new std.Events(
@@ -114,6 +114,7 @@ this.SortingDesk = (function (window, $, std, sq, sd, Api, undefined) {
     sortingQueue_: null,
     explorer_: null,
     facets_: null,
+    openquery_: null,
 
     /* Getters */
     get sortingQueue ()  { return this.sortingQueue_; },
@@ -129,6 +130,7 @@ this.SortingDesk = (function (window, $, std, sq, sd, Api, undefined) {
     get nodes ()         { return this.nodes_; },
     get explorer ()      { return this.explorer_; },
     get facets ()        { return this.facets_; },
+    get openquery ()     { return this.openquery_; },
 
     /* Interface */
     initialise: function ()
@@ -164,6 +166,7 @@ this.SortingDesk = (function (window, $, std, sq, sd, Api, undefined) {
             simple: finder.find('toolbar-report-simple'),
             rich: finder.find('toolbar-report-rich')
           },
+          openquery: finder.find('toolbar-openquery'),
           addContextual: finder.find('toolbar-add-contextual'),
           remove: finder.find('toolbar-remove'),
           rename: finder.find('toolbar-rename'),
@@ -223,7 +226,14 @@ this.SortingDesk = (function (window, $, std, sq, sd, Api, undefined) {
         {
           button: els.toolbar.translate,
           service: this.options.translation
-        } )).initialise();
+        } )
+      ).initialise();
+
+      this.openquery_ = new sd.openquery.Controller(
+        this.explorer_,
+        this.api_, {
+          button: els.toolbar.openquery
+      } ).initialise();
 
       this.initialised_ = true;
       console.info("Sorting Desk UI initialised");

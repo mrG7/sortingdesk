@@ -879,6 +879,63 @@
 
     /**
      * @class
+     * */
+    var OpenQuery = function (api, folder, subfolder)
+    {
+        this.api = api;
+        this.folder = folder;
+        this.subfolder = subfolder;
+        this.url = api.url(
+            [
+                "folder",    this.folder.id,
+                "subfolder", this.subfolder.id,
+                "extract"
+            ].join("/"),
+            { }
+        );
+
+        this.xhr = { };
+    };
+
+    OpenQuery.prototype.post = function ()
+    { return this.request_("post"); };
+
+    OpenQuery.prototype.get = function ()
+    { return this.request_("get"); };
+
+    OpenQuery.prototype.abort = function ()
+    {
+        for(var k in this.xhr) {
+            var xhr = this.xhr[k];
+            if(xhr === null) continue;
+
+            xhr.abort();
+            this.xhr[k] = null;
+        }
+    };
+
+    /* Private interface */
+    OpenQuery.prototype.request_ = function (req)
+    {
+        if(this.xhr[req]) throw "Already processing: " + req.toUpperCase();
+
+        var self = this;
+        return this.xhr[req] = this.api.xhr.ajax('OQ.' + req, {
+            type: req.toUpperCase(),
+            url: this.url
+        } ).fail(function () {
+            console.error(
+                "OpenQuery %s request failed: f:%s|s:%s",
+                req.toUpperCase(),
+                self.folder.id,
+                self.subfolder.id
+            );
+        } ).always(function () { self.xhr[req] = null; } );
+    };
+
+
+    /**
+     * @class
      * Internal XHR handling.
      *
      * Useful for cancelling existing requests.
@@ -1037,7 +1094,8 @@
         Label: Label,
         LabelFetcher: LabelFetcher,
         Folder: Folder,
-        Subfolder: Subfolder
+        Subfolder: Subfolder,
+        OpenQuery: OpenQuery
     };
 
 }, window);
