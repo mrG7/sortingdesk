@@ -86,6 +86,7 @@ mkdirx lib/sorting-common
 mkdirx lib/sorting-queue
 mkdirx lib/sorting-desk/explorer
 mkdirx lib/sorting-desk/ui
+mkdirx lib/sorting-desk/openquery
 mkdirx lib/dossier.js
 mkdirx lib/CryptoJS
 mkdirx lib/bootstrap/css
@@ -116,6 +117,8 @@ cpx "$dir_src/sorting-desk/explorer/subfolder.js" lib/sorting-desk/explorer/
 cpx "$dir_src/sorting-desk/explorer/item.js" lib/sorting-desk/explorer/
 cpx "$dir_src/sorting-desk/ui/css.js" lib/sorting-desk/ui/
 cpx "$dir_src/sorting-desk/ui/failure.js" lib/sorting-desk/ui/
+cpx "$dir_src/sorting-desk/openquery/controller.js" lib/sorting-desk/openquery/
+cpx "$dir_src/sorting-desk/openquery/processor.js" lib/sorting-desk/openquery/
 cpx "$dir_src/sorting-desk/api-live.js" lib/sorting-desk/
 
 # dossier.js
