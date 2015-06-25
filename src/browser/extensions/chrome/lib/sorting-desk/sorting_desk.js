@@ -73,12 +73,7 @@ this.SortingDesk = (function (window, $, std, sq, sd, Api, undefined) {
      * } */
     cbs = opts.sortingQueue.callbacks || { };
     opts = opts.sortingQueue.options;
-
-    /* Specify our custom `Item´ class if client hasn't provided one. */
-    if(!opts.constructors) opts.constructors = { };
-
-    if(!std.is_obj(opts.constructors))
-      opts.constructors = { };
+    if(!std.is_obj(opts.constructors)) opts.constructors = { };
 
     /* Pass reference to API instance. */
     if(opts.instances !== undefined)
@@ -90,8 +85,8 @@ this.SortingDesk = (function (window, $, std, sq, sd, Api, undefined) {
 
     /* Specify text dismissal handler if client hasn't supplying its own. */
     if(!std.Constructor.exists(opts.constructors, 'ItemDismissal')) {
-      opts.constructors.createItemDismissal =
-        this.createItemDismissal_.bind(this);
+      opts.constructors.createItemDismissal
+        = this.createItemDismissal_.bind(this);
     }
 
     this.sortingQueue_ = new sq.Sorter(
