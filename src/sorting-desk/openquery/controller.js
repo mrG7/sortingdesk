@@ -19,7 +19,10 @@ this.SortingDesk = (function (window, $, djs, std, sd, undefined) {
   /* Default options */
   var defaults_ = {
     button:   null,
-    interval: 15000
+    delays: {
+      interval: 2000,
+      end: 5000
+    }
   };
 
 
@@ -33,17 +36,16 @@ this.SortingDesk = (function (window, $, djs, std, sd, undefined) {
     Object.defineProperties(this, {
       explorer:   { value: explorer },
       api:        { value: api },
-      options:    { value: $.extend(true, { }, defaults_, options) },
-
-      /* Writable */
-      processing: { value: null, writable: true }
+      options:    { value: $.extend(true, { }, defaults_, options) }
     } );
+
+    this.subfolder = null;
+    this.status = null;
   };
 
   openquery.Controller.prototype.initialise = function ()
   {
     var self = this;
-    this.processing = false;
     this.options.button.on("click", this.onClick_.bind(this));
 
     console.info("OpenQuery controller initialised");
@@ -52,7 +54,13 @@ this.SortingDesk = (function (window, $, djs, std, sd, undefined) {
   openquery.Controller.prototype.reset = function ()
   {
     this.options.button.off();
-    this.explorer = this.options = this.processing = null;
+    if(this.subfolder !== null) {
+      if(this.subfolder.status === this.status)
+        this.subfolder.setStatus(null);
+      this.subfolder = this.status = null;
+    }
+
+    this.explorer = this.options = null;
 
     console.info("OpenQuery controller reset");
   };
@@ -62,7 +70,7 @@ this.SortingDesk = (function (window, $, djs, std, sd, undefined) {
   {
     var sel = this.explorer.selected;
 
-    if(this.processing) return;
+    if(this.subfolder !== null) return;
     else if(!std.instanceany(sel, sd.explorer.Subfolder, sd.explorer.Item)) {
       window.alert(
         'Please select a subfolder or item to conduct "OpenQuery" on.'
@@ -73,8 +81,13 @@ this.SortingDesk = (function (window, $, djs, std, sd, undefined) {
     this.options.button.addClass("disabled");
 
     if(sel instanceof sd.explorer.Item) sel = sel.owner;
+
+    this.subfolder = sel;
+    this.status = new sd.explorer.Status("WAIT");
+    sel.setStatus(this.status);
+
     this.processor = new openquery.Processor(
-      this.api, sel.owner.data, sel.data, this.options.interval
+      this.api, sel.owner.data, sel.data, this.options.delays.interval
     );
 
     var self = this;
@@ -88,9 +101,15 @@ this.SortingDesk = (function (window, $, djs, std, sd, undefined) {
     } );
   };
 
-  openquery.Controller.prototype.cleanup_ = function ()
+  openquery.Controller.prototype.cleanup_ = function (result)
   {
-    this.processing = false;
+    var sf = this.subfolder, st = this.status;
+    window.setTimeout(function () {
+      if(sf.status === st) sf.setStatus(null);
+    }, this.options.delays.end);
+
+    this.status.setContent(result && result.state.toUpperCase() || "FAIL");
+    this.subfolder = this.status = null;
     this.options.button.removeClass("disabled");
   };
 

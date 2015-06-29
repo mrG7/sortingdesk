@@ -115,6 +115,7 @@ cpx "$dir_src/sorting-desk/explorer/itembase.js" lib/sorting-desk/explorer/
 cpx "$dir_src/sorting-desk/explorer/folder.js" lib/sorting-desk/explorer/
 cpx "$dir_src/sorting-desk/explorer/subfolder.js" lib/sorting-desk/explorer/
 cpx "$dir_src/sorting-desk/explorer/item.js" lib/sorting-desk/explorer/
+cpx "$dir_src/sorting-desk/explorer/status.js" lib/sorting-desk/explorer/
 cpx "$dir_src/sorting-desk/ui/css.js" lib/sorting-desk/ui/
 cpx "$dir_src/sorting-desk/ui/failure.js" lib/sorting-desk/ui/
 cpx "$dir_src/sorting-desk/openquery/controller.js" lib/sorting-desk/openquery/

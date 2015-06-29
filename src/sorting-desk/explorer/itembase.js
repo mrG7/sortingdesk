@@ -33,6 +33,7 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
     def(this, 'opening', { get: function () { return this.opening_; } } );
     def(this, 'events', { get: function () { return this.events_; } } );
     def(this, 'loaded', { get: function () { return this.loaded_; } } );
+    def(this, 'status', { get: function () { return this.status_; } } );
 
     def(this, 'node', { get: function () {
       return this.controller.tree.get_node(this.id_, true); } } );
@@ -51,6 +52,7 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
     this.controller_ = ctrl;
     this.loading_ = 0;
     this.id_ = null;
+    this.status_ = null;
     this.opening_ = false;
     this.loaded_ = false;
     this.events_ = new std.Events(
@@ -144,6 +146,15 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
       console.warn("CSS class not found: %s", cl);
   };
 
+  explorer.ItemBase.prototype.setStatus = function (status)
+  {
+    if(this.status_ !== null)  this.status_.dettach();
+    if(status !== null)        status.attach(this.node);
+
+    this.status_ = status;
+  };
+
+  /* Private interface */
   explorer.ItemBase.prototype.get_classes_ = function (attr)
   {
     if(!std.is_str(attr.class)) {
