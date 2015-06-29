@@ -7,10 +7,6 @@
  */
 
 
-/*global $, define */
-/*jshint laxbreak:true, -W057, -W058 */
-
-
 (function (Module, root) {
 
   /* Compatibility with RequireJs. */
@@ -607,8 +603,7 @@
 
   /* Following method to allow for deferred initialisation. */
   /* abstract */ Controller.prototype.initialise = absm_noti;
-
-  /* abstract */ Controller.prototype.reset = absm_noti;
+  /* abstract */ Controller.prototype.reset      = absm_noti;
 
 
   /**

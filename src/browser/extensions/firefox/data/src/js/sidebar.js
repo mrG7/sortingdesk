@@ -291,7 +291,7 @@ var Main = (function (window, $, std, sq, sqc, sd, undefined) {
     } else
       console.log("Using ", preferences.dossierUrl);
 
-    (sorter = new sd.Sorter( {
+    (sorter = new sd.SortingDesk( {
       container: $('#sd-folder-explorer'),
       dossierUrl: preferences.dossierUrl,
       translation: {

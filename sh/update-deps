@@ -84,7 +84,9 @@ info "copying dependencies: chrome browser extension"
 # + Create directories
 mkdirx lib/sorting-common
 mkdirx lib/sorting-queue
-mkdirx lib/sorting-desk/components
+mkdirx lib/sorting-desk/explorer
+mkdirx lib/sorting-desk/ui
+mkdirx lib/sorting-desk/openquery
 mkdirx lib/dossier.js
 mkdirx lib/CryptoJS
 mkdirx lib/bootstrap/css
@@ -104,6 +106,20 @@ cpx "$dir_src/sorting-common/sorting_common.js" lib/sorting-common/
 cpx "$dir_src/sorting-queue/sorting_queue.js" lib/sorting-queue/
 cpx "$dir_src/sorting-desk/sorting_desk.js" lib/sorting-desk/
 cpx "$dir_src/sorting-desk/translation.js" lib/sorting-desk/
+cpx "$dir_src/sorting-desk/facets.js" lib/sorting-desk/
+cpx "$dir_src/sorting-desk/queue.js" lib/sorting-desk/
+cpx "$dir_src/sorting-desk/explorer/controller.js" lib/sorting-desk/explorer/
+cpx "$dir_src/sorting-desk/explorer/deferred.js" lib/sorting-desk/explorer/
+cpx "$dir_src/sorting-desk/explorer/dnd.js" lib/sorting-desk/explorer/
+cpx "$dir_src/sorting-desk/explorer/itembase.js" lib/sorting-desk/explorer/
+cpx "$dir_src/sorting-desk/explorer/folder.js" lib/sorting-desk/explorer/
+cpx "$dir_src/sorting-desk/explorer/subfolder.js" lib/sorting-desk/explorer/
+cpx "$dir_src/sorting-desk/explorer/item.js" lib/sorting-desk/explorer/
+cpx "$dir_src/sorting-desk/explorer/status.js" lib/sorting-desk/explorer/
+cpx "$dir_src/sorting-desk/ui/css.js" lib/sorting-desk/ui/
+cpx "$dir_src/sorting-desk/ui/failure.js" lib/sorting-desk/ui/
+cpx "$dir_src/sorting-desk/openquery/controller.js" lib/sorting-desk/openquery/
+cpx "$dir_src/sorting-desk/openquery/processor.js" lib/sorting-desk/openquery/
 cpx "$dir_src/sorting-desk/api-live.js" lib/sorting-desk/
 
 # dossier.js

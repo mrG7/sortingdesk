@@ -26,6 +26,20 @@
   <script src="../../lib/sorting-desk/api-live.js"></script>
   <script src="../../lib/sorting-desk/sorting_desk.js"></script>
   <script src="../../lib/sorting-desk/translation.js"></script>
+  <script src="../../lib/sorting-desk/facets.js"></script>
+  <script src="../../lib/sorting-desk/queue.js"></script>
+  <script src="../../lib/sorting-desk/explorer/controller.js"></script>
+  <script src="../../lib/sorting-desk/explorer/deferred.js"></script>
+  <script src="../../lib/sorting-desk/explorer/dnd.js"></script>
+  <script src="../../lib/sorting-desk/explorer/itembase.js"></script>
+  <script src="../../lib/sorting-desk/explorer/folder.js"></script>
+  <script src="../../lib/sorting-desk/explorer/subfolder.js"></script>
+  <script src="../../lib/sorting-desk/explorer/item.js"></script>
+  <script src="../../lib/sorting-desk/explorer/status.js"></script>
+  <script src="../../lib/sorting-desk/ui/css.js"></script>
+  <script src="../../lib/sorting-desk/ui/failure.js"></script>
+  <script src="../../lib/sorting-desk/openquery/controller.js"></script>
+  <script src="../../lib/sorting-desk/openquery/processor.js"></script>
   <!-- Sorting Desk: components -->
   <script src="../js/sidebar.js"></script>
 
@@ -70,8 +84,10 @@
 <!--               <a role="menuitem" tabindex="-1" href="#">Create rich PDF document</a> -->
 <!--             </li> -->
           </ul>
+          <button type="button" class="btn btn-default" data-toggle="tooltip" data-placement="bottom" title="Open query" data-sd-scope="sorting-desk-toolbar-openquery">
+            <span class="glyphicon glyphicon-cloud"></span>
+          </button>
         </div>
-
         <div class="btn-group btn-group-xs">
           <button type="button" class="btn btn-default" data-toggle="tooltip" data-placement="bottom" title="Create a subfolder or manual item" data-sd-scope="sorting-desk-toolbar-add-contextual">
             <span class="glyphicon glyphicon-plus-sign"></span>

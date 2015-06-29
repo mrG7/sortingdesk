@@ -7,8 +7,8 @@
  *
  */
 
-
 /*jshint laxbreak:true */
+
 
 var Main = (function (window, chrome, $, std, sq, sqc, sd, undefined) {
 
@@ -71,7 +71,7 @@ var Main = (function (window, chrome, $, std, sq, sqc, sd, undefined) {
        * information about current text selection. */
       if(active !== null) {
         chrome.tabs.get(active.id, function (tab) {
-          if(/^https?:/.test(tab.url)) {
+          if(tab && std.is_str(tab.url) && /^https?:/.test(tab.url)) {
             callback(deferred);
           } else {
             console.error("Active tab's URL not valid");
@@ -455,7 +455,7 @@ var Main = (function (window, chrome, $, std, sq, sqc, sd, undefined) {
   {
     console.log("Active Dossier stack URL: %s", meta.config.activeUrl);
 
-    (sorter = new sd.Sorter( {
+    (sorter = new sd.SortingDesk( {
       container: $('#sd-folder-explorer'),
       dossierUrl: meta.config.activeUrl,
       translation: {

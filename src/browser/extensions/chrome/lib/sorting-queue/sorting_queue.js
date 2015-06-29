@@ -8,10 +8,6 @@
  */
 
 
-/*global $, define */
-/*jshint laxbreak:true */
-
-
 (function (factory, root) {
 
   /* Compatibility with RequireJs. */
@@ -62,7 +58,7 @@
 
     console.log("Initialising Sorting Queue UI");
 
-    this.options_ = $.extend(true, $.extend(true, {}, defaults_), opts);
+    this.options_ = $.extend(true, { }, defaults_, opts);
 
     /* Ensure visible items setting > 0. */
     if(this.options_.items.visible < 1) {
