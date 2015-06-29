@@ -54,6 +54,7 @@ this.SortingDesk = (function (window, $, djs, std, sd, undefined) {
   openquery.Controller.prototype.reset = function ()
   {
     this.options.button.off();
+
     if(this.subfolder !== null) {
       if(this.subfolder.status === this.status)
         this.subfolder.setStatus(null);
