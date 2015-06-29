@@ -33,19 +33,20 @@ this.SortingDesk = (function (window, $, djs, std, sd, undefined) {
     var oq = new djs.OpenQuery(api.getDossierJs(), folder, subfolder);
     oq.post().then( function (result) {
       console.log("POST: got result: ", result);
-      schedule();
+      schedule_();
     } ).fail(function () {
       events.trigger("failed");
       oq = null;
     } );
 
 
-    var schedule = function ()
+    /* Private interface */
+    var schedule_ = function ()
     {
-      window.setTimeout(function () { next(); }, interval);
+      window.setTimeout(function () { next_(); }, interval);
     };
 
-    var next = function ()
+    var next_ = function ()
     {
       oq.get().then(function (result) {
         console.log("GET: got result: ", result);
@@ -56,7 +57,7 @@ this.SortingDesk = (function (window, $, djs, std, sd, undefined) {
           throw "Invalid state in response";
 
         events.trigger(result.state, result);
-        if(result.state === "pending") schedule();
+        if(result.state === "pending") schedule_();
       } ).fail(function () { events.trigger("fail"); } );
     };
   };
