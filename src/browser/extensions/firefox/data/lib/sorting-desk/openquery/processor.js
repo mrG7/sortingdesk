@@ -42,7 +42,7 @@ this.SortingDesk = (function (window, $, djs, std, sd, undefined) {
 
     var schedule = function ()
     {
-      window.setTimeout(function () { next(); }, 1 || interval);
+      window.setTimeout(function () { next(); }, interval);
     };
 
     var next = function ()

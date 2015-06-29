@@ -816,6 +816,19 @@ A.sd-text-item-title {
   border-bottom: 1px solid silver;
 }
 
+.sd-status {
+  position: absolute;
+  right: 10px;
+  margin-top: -25px;
+  padding: 1px 4px 1px 4px;
+  background-color: #f4f1e6;
+  border-radius: 7px;
+  border: 1px solid #d58080;
+  line-height: 21px;
+  color: #ab2e2e;
+  opacity: .9;
+}
+
 /* Hack for JsTree. */
 #sd-folder-explorer .sd-container-view {
   overflow: auto;
