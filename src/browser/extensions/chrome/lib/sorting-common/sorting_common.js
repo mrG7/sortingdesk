@@ -445,13 +445,16 @@
    * @class
    * */
   this.NodeFinder = NodeFinder;
-  function NodeFinder(tag, prefix, root)
-  {
-    this.tag_ = tag;
-    this.prefix_ = [ '[', tag, '="',
+  function NodeFinder(
+    tag,    /* = "data-scope"  */
+    prefix, /* = ""            */
+    root    /* = document.body */
+  ) {
+    this.tag_ = tag || "data-scope";
+    this.prefix_ = [ '[', this.tag_, '="',
                      prefix && prefix.length > 0 ? prefix + '-' : ''
                    ].join('');
-    this.root_ = root;
+    this.root_ = root || $(document.body);
   }
 
   NodeFinder.prototype = {
@@ -482,6 +485,30 @@
       v = callback.call(this);
       this.root_ = t;
       return v;
+    },
+
+    map: function (dict)
+    {
+      var result = { };
+
+      for(var k in dict) {
+        var n = dict[k];
+
+        if(n === undefined)
+          result[k] = this.root;
+        else if(is_obj(n)) {
+          if("withroot" in n) {
+            result[k] = this.withroot(this.find(n.withroot), function () {
+              return this.map(n);
+            } );
+            delete result[k].withroot;
+          } else
+            result[k] = this.map(n);
+        } else
+          result[k] = this.find(n || k);
+      }
+
+      return result;
     }
   };
 
@@ -490,7 +517,7 @@
    * @class
    * */
   this.TemplateFinder = TemplateFinder;
-  function TemplateFinder(type, tag)
+  function TemplateFinder(type, tag /* = "data-scope" */)
   {
     this.scripts = Array.prototype.slice.call(
       document.getElementsByTagName('script'), 0)
@@ -509,6 +536,20 @@
     }
 
     return null;
+  };
+
+  TemplateFinder.prototype.map = function (dict)
+  {
+    var result = { };
+
+    for(var k in dict) {
+      var n = dict[k];
+
+      if(is_obj(n)) result[k] = this.map(n);
+      else          result[k] = this.find(n || k);
+    }
+
+    return result;
   };
 
 
