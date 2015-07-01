@@ -445,13 +445,16 @@
    * @class
    * */
   this.NodeFinder = NodeFinder;
-  function NodeFinder(tag, prefix, root)
-  {
-    this.tag_ = tag;
+  function NodeFinder(
+    tag,    /* = "data-scope"  */
+    prefix, /* = ""            */
+    root    /* = document.body */
+  ) {
+    this.tag_ = tag || "data-scope";
     this.prefix_ = [ '[', tag, '="',
                      prefix && prefix.length > 0 ? prefix + '-' : ''
                    ].join('');
-    this.root_ = root;
+    this.root_ = root || $(document.body);
   }
 
   NodeFinder.prototype = {
