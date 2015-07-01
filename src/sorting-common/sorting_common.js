@@ -505,7 +505,7 @@
           } else
             result[k] = this.map(n);
         } else
-          result[k] = this.find(n);
+          result[k] = this.find(n || k);
       }
 
       return result;
