@@ -517,7 +517,7 @@
    * @class
    * */
   this.TemplateFinder = TemplateFinder;
-  function TemplateFinder(type, tag)
+  function TemplateFinder(type, tag /* = "data-scope" */)
   {
     this.scripts = Array.prototype.slice.call(
       document.getElementsByTagName('script'), 0)
@@ -536,6 +536,20 @@
     }
 
     return null;
+  };
+
+  TemplateFinder.prototype.map = function (dict)
+  {
+    var result = { };
+
+    for(var k in dict) {
+      var n = dict[k];
+
+      if(is_obj(n)) result[k] = this.map(n);
+      else          result[k] = this.find(n || k);
+    }
+
+    return result;
   };
 
 
