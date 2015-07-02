@@ -18,8 +18,7 @@ var Background = function (window, chrome, $, std, undefined)
       DEFAULT_EXTENSION_WIDTH = 350;
 
   /* Attributes */
-  var handlerTabs_ = null,
-      window_ = {
+  var window_ = {
         main: null,
         extension: null
       },
@@ -34,8 +33,6 @@ var Background = function (window, chrome, $, std, undefined)
   var initialize = function ()
   {
     console.log("Initialising background script");
-
-    handlerTabs_ = MessageHandlerTabs;
 
     Config.load(function (options) {
       /* Spawn the extension window if active in config. */
@@ -250,9 +247,11 @@ var Background = function (window, chrome, $, std, undefined)
   /**
    * @class
    * */
-  var MessageHandler = (function () {
+  var receiver = (function () {
 
-    var onReadFile_ = function (request, sender, callback)
+    var methods = { };
+
+    methods.readFile = function (request, sender, callback)
     {
       $.ajax( {
         url: chrome.extension.getURL(request.identifier),
@@ -264,13 +263,14 @@ var Background = function (window, chrome, $, std, undefined)
       } );
     };
 
-    var onGetMeta_ = function (request, sender, callback)
+    methods.getMeta = function (request, sender, callback)
     {
       if(!std.is_fn(callback)) return;
 
       Config.load(function (options) {
-        options.activeUrl = Config.getUrlByIdFromString(options.activeUrl,
-                                                        options.dossierUrls);
+        options.activeUrl = Config.getUrlByIdFromString(
+          options.activeUrl, options.dossierUrls
+        );
 
         callback( {
           config: options,
@@ -279,16 +279,15 @@ var Background = function (window, chrome, $, std, undefined)
       } );
     };
 
-    var onGetExtensionWindow_ = function (request, sender, callback)
+    methods.getExtensionWindow = function (request, sender, callback)
     {
       if(!std.is_fn(callback)) return;
       callback(window_.extension);
     };
 
-    var onEmbeddableActive_ = function (request, sender)
+    methods.embeddableActive = function (request, sender)
     {
-      if(!sender.tab || !sender.tab.hasOwnProperty('id'))
-        return;
+      if(!sender.tab || !sender.tab.hasOwnProperty('id')) return;
 
       chrome.browserAction.setIcon( {
         path: chrome.extension.getURL("shared/media/icons/icon_active_38.png"),
@@ -299,41 +298,33 @@ var Background = function (window, chrome, $, std, undefined)
         tabId: sender.tab.id } );
     };
 
-    var onConfigSaved_ = function ()
+    methods.configSaved = function ()
     {
       Config.load(function (options) {
-        if(!options.active)
-          close();
-        else if(window_.extension === null)
-          spawn();
+        if(!options.active)                 close();
+        else if(window_.extension === null) spawn();
       } );
     };
 
 
-    var self = this,
-        methods = {
-          "read-file": onReadFile_,
-          "get-meta": onGetMeta_,
-          "get-extension-window": onGetExtensionWindow_,
-          "embeddable-active": onEmbeddableActive_,
-          "config-saved": onConfigSaved_
-        };
-
     /* Handler of messages originating in content scripts. */
     chrome.runtime.onMessage.addListener(
       function (request, sender, callback) {
-        if(methods.hasOwnProperty(request.operation)) {
-          console.log("Invoking message handler [type="
-                      + request.operation + "]");
+        var method = request.operation.split('-')
+              .map(function (m, i) {
+                if(i === 0) return m;
+                return m.charAt(0).toUpperCase() + m.slice(1);
+              } )
+              .join('');
 
-          if(methods[request.operation].call(
-            self, request, sender, callback) === true) {
-            return true;
-          }
-        } else
+        if(!methods.hasOwnProperty(method)) {
           console.warn("Unhandled request received:", request);
+          return false;
+        }
 
-        return true;
+        console.log("Invoking message handler [" + request.operation + "]");
+        return methods[method].call(
+          window, request, sender, callback) === true;
       }
     );
 
@@ -346,7 +337,7 @@ var Background = function (window, chrome, $, std, undefined)
   /**
    * @class
    * */
-  var MessageHandlerTabs = (function () {
+  var tabs = (function () {
     return {
       broadcast: function (data, excludeTabId)
       {
