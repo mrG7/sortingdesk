@@ -260,33 +260,35 @@ var Main = (function (window, chrome, $, std, sq, sqc, sd, undefined) {
   /**
    * @class
    * */
-  var BackgroundListener = (function () {
+  var receiver = (function () {
 
-    /* Event handlers */
-    var onConfigSaved_ = function (request, sender)
+    /* Attributes */
+    var methods = { };
+
+
+    /* Message handlers */
+    methods.configSaved = function ()
     {
       console.info("Reloading extension window");
       window.location = window.location;
     };
 
 
-    /* Map message operations to handlers. */
-    var methods_ = {
-      "config-saved": onConfigSaved_
-    };
+    /* Message handling logic. */
+    chrome.runtime.onMessage.addListener(function (req, sen, cb) {
+      var method = req.operation
+            .split('-')
+            .map(function (m, i) {
+              if(i === 0) return m;
+              return m.charAt(0).toUpperCase() + m.slice(1);
+            } )
+            .join('');
 
-    /* Handle messages whose `operation´ is defined above in `methods_´. */
-    chrome.runtime.onMessage.addListener(
-      function (req, sen, cb) {
-        if(methods_.hasOwnProperty(req.operation)) {
-          console.log("Invoking message handler [type=" + req.operation + "]");
-
-          /* Invoke handler. */
-          if(methods_[req.operation].call(window, req, sen, cb) === true)
-            return true;
-        }
+      if(methods.hasOwnProperty(method)) {
+        console.log("Invoking message handler [" + req.operation + "]");
+        return methods[method](req, sen, cb) === true;
       }
-    );
+    } );
 
   } )();
 
@@ -513,5 +515,12 @@ var Main = (function (window, chrome, $, std, sq, sqc, sd, undefined) {
       } );
   } );
 
-} )(window, chrome, jQuery, SortingCommon, SortingQueue,
-    SortingQueueCustomisations, SortingDesk);
+} ) (
+  this,
+  this.chrome,
+  this.$,
+  this.SortingCommon,
+  this.SortingQueue,
+  this.SortingQueueCustomisations,
+  this.SortingDesk
+);
