@@ -498,6 +498,10 @@ var Main = (function (window, chrome, $, std, sq, sqc, sd, undefined) {
     /* For whatever reason, links that contain images won't work inside
      * sidebar/extension window and must therefore be dealt with manually. */
     $('H1 > A').click(function () { window.open("http://diffeo.com"); } );
+
+    $('[data-sd-scope="sorting-desk-toolbar-dragnet"]').click(function () {
+      window.open(chrome.runtime.getURL("/src/html/dragnet.html"));
+    } );
   };
 
 
