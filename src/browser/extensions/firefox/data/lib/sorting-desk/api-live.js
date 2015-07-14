@@ -29,7 +29,7 @@
 
 
   /* Interface */
-  var Api = function (sortingDesk, url)
+  var Api = function (url)
   {
     var module = this,
         api_ = new DossierJS.API(url || DEFAULT_DOSSIER_STACK_API_URL),
