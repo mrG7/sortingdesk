@@ -11,21 +11,19 @@
 /*jshint laxbreak:true */
 
 
-var Background = function (window, chrome, $, std, undefined)
+(function (window, chrome, $, std, undefined)
 {
   /* Constants */
   var TIMEOUT_SAVE = 1000,
       DEFAULT_EXTENSION_WIDTH = 350;
 
   /* Attributes */
-  var handlerTabs_ = null,
-      window_ = {
+  var window_ = {
         main: null,
         extension: null
       },
       content = {
         scripts: [ "lib/jquery-2.1.1.min.js",
-                   "shared/src/js/draggable_image_monitor.js",
                    "lib/sorting-common/sorting_common.js",
                    "src/js/embed.js" ]
       };
@@ -34,8 +32,6 @@ var Background = function (window, chrome, $, std, undefined)
   var initialize = function ()
   {
     console.log("Initialising background script");
-
-    handlerTabs_ = MessageHandlerTabs;
 
     Config.load(function (options) {
       /* Spawn the extension window if active in config. */
@@ -181,7 +177,7 @@ var Background = function (window, chrome, $, std, undefined)
     } );
   };
 
-  var forAllWindows = function (filter, callback)
+  var forAllWindows = function (filter, cb)
   {
     var result = null;
 
@@ -189,7 +185,7 @@ var Background = function (window, chrome, $, std, undefined)
       /* All windows: */
       windows.some(function (window) {
         if(filter(window) === true) {
-          callback(window);
+          cb(window);
           return true;
         }
 
@@ -198,7 +194,7 @@ var Background = function (window, chrome, $, std, undefined)
     } );
   };
 
-  var forAllTabs = function (filter, callback)
+  var forAllTabs = function (filter, cb)
   {
     if(!std.is_fn(filter))
       throw "Invalid or no filter function specified";
@@ -211,8 +207,8 @@ var Background = function (window, chrome, $, std, undefined)
           /* Call callback on every tab. */
           return tabs.some(function (tab) {
             if(filter(tab) === true) {
-              if(std.is_fn(callback))
-                callback(tab);
+              if(std.is_fn(cb))
+                cb(tab);
 
               return true;
             }
@@ -223,8 +219,8 @@ var Background = function (window, chrome, $, std, undefined)
       } );
     } );
 
-    if(result !== true && std.is_fn(callback))
-      callback(null);
+    if(result !== true && std.is_fn(cb))
+      cb(null);
   };
 
   var closeExtensionWindows = function ()
@@ -239,114 +235,110 @@ var Background = function (window, chrome, $, std, undefined)
     } );
   };
 
-  var findSuitableWindow = function (callback)
+  var findSuitableWindow = function (cb)
   {
     forAllWindows(function (window) {
       return window.type === 'normal';
-    }, callback);
+    }, cb);
   };
 
 
   /**
    * @class
    * */
-  var MessageHandler = (function () {
+  var receiver = (function () {
 
-    var onReadFile_ = function (request, sender, callback)
+    /* Attributes */
+    var methods = { };
+
+
+    /* Message handlers */
+    methods.readFile = function (req, sen, cb)
     {
       $.ajax( {
-        url: chrome.extension.getURL(request.identifier),
+        url: chrome.extension.getURL(req.identifier),
         dataType: "html",
         success: function () {
-          console.log("Successfully read file: " + request.identifier);
-          callback.apply(null, arguments);
+          console.log("Successfully read file: " + req.identifier);
+          cb.apply(null, arguments);
         }
       } );
+
+      return true;
     };
 
-    var onGetMeta_ = function (request, sender, callback)
+    methods.getMeta = function (req, sen, cb)
     {
-      if(!std.is_fn(callback)) return;
+      if(!std.is_fn(cb)) return;
 
       Config.load(function (options) {
-        options.activeUrl = Config.getUrlByIdFromString(options.activeUrl,
-                                                        options.dossierUrls);
+        options.activeUrl = Config.getUrlByIdFromString(
+          options.activeUrl, options.dossierUrls
+        );
 
-        callback( {
+        cb( {
           config: options,
-          tab: sender.tab
+          tab: sen.tab
         } );
       } );
+
+      return true;
     };
 
-    var onGetExtensionWindow_ = function (request, sender, callback)
+    methods.getExtensionWindow = function (req, sen, cb)
     {
-      if(!std.is_fn(callback)) return;
-      callback(window_.extension);
+      if(!std.is_fn(cb)) return;
+      cb(window_.extension);
     };
 
-    var onEmbeddableActive_ = function (request, sender)
+    methods.embeddableActive = function (req, sen)
     {
-      if(!sender.tab || !sender.tab.hasOwnProperty('id'))
-        return;
+      if(!sen.tab || !sen.tab.hasOwnProperty('id')) return;
 
       chrome.browserAction.setIcon( {
         path: chrome.extension.getURL("shared/media/icons/icon_active_38.png"),
-        tabId: sender.tab.id } );
+        tabId: sen.tab.id } );
 
       chrome.browserAction.setTitle( {
         title: "Sorting Desk is active on this page",
-        tabId: sender.tab.id } );
+        tabId: sen.tab.id } );
     };
 
-    var onConfigSaved_ = function ()
+    methods.configSaved = function ()
     {
       Config.load(function (options) {
-        if(!options.active)
-          close();
-        else if(window_.extension === null)
-          spawn();
+        if(!options.active)                 close();
+        else if(window_.extension === null) spawn();
       } );
     };
 
 
-    var self = this,
-        methods = {
-          "read-file": onReadFile_,
-          "get-meta": onGetMeta_,
-          "get-extension-window": onGetExtensionWindow_,
-          "embeddable-active": onEmbeddableActive_,
-          "config-saved": onConfigSaved_
-        };
+    /* Message handling logic. */
+    chrome.runtime.onMessage.addListener(function (req, sen, cb) {
+      var method = req.operation
+            .split('-')
+            .map(function (m, i) {
+              if(i === 0) return m;
+              return m.charAt(0).toUpperCase() + m.slice(1);
+            } )
+            .join('');
 
-    /* Handler of messages originating in content scripts. */
-    chrome.runtime.onMessage.addListener(
-      function (request, sender, callback) {
-        if(methods.hasOwnProperty(request.operation)) {
-          console.log("Invoking message handler [type="
-                      + request.operation + "]");
-
-          if(methods[request.operation].call(
-            self, request, sender, callback) === true) {
-            return true;
-          }
-        } else
-          console.warn("Unhandled request received:", request);
-
-        return true;
+      if(!methods.hasOwnProperty(method)) {
+        console.error("Unknown request received:", req);
+        return false;
       }
-    );
 
+      console.log("Invoking message handler [" + req.operation + "]");
+      return methods[method](req, sen, cb) === true;
+    } );
 
-    /* Public interface */
-    return { };
   })();
 
 
   /**
    * @class
    * */
-  var MessageHandlerTabs = (function () {
+  var tabs = (function () {
     return {
       broadcast: function (data, excludeTabId)
       {
@@ -372,4 +364,9 @@ var Background = function (window, chrome, $, std, undefined)
   /* Initialise instance. */
   initialize();
 
-}(window, chrome, $, SortingCommon);
+} ) (
+  this,
+  this.chrome,
+  this.$,
+  this.SortingCommon
+);

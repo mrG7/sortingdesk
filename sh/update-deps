@@ -93,6 +93,7 @@ mkdirx lib/bootstrap/css
 mkdirx lib/bootstrap/fonts
 mkdirx lib/bootstrap/js
 mkdirx lib/jstree/themes/default
+mkdirx lib/d3
 mkdirx shared
 
 # + Chrome browser extension
@@ -121,6 +122,7 @@ cpx "$dir_src/sorting-desk/ui/failure.js" lib/sorting-desk/ui/
 cpx "$dir_src/sorting-desk/openquery/controller.js" lib/sorting-desk/openquery/
 cpx "$dir_src/sorting-desk/openquery/processor.js" lib/sorting-desk/openquery/
 cpx "$dir_src/sorting-desk/api-live.js" lib/sorting-desk/
+cpxr "$dir_src/dragnet" lib/
 
 # dossier.js
 cpx "$dir_lib/dossier.js/Dossier.js" lib/dossier.js/
@@ -141,6 +143,9 @@ cpx "$dir_lib/jstree-3.0.9/dist/jstree.min.js" lib/jstree/
 cpxa "$dir_lib/jstree-3.0.9/dist/themes/default"/*.png lib/jstree/themes/default
 cpxa "$dir_lib/jstree-3.0.9/dist/themes/default"/*.gif lib/jstree/themes/default
 cpx "$dir_lib/jstree-3.0.9/dist/themes/default/style.min.css" lib/jstree/themes/default
+
+# D3
+cpx "$dir_lib/d3-3.5.5/d3.min.js" lib/d3/
 
 # Shared assets
 cpxr "$dir_ext/shared" ./
