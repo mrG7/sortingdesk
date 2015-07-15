@@ -916,7 +916,7 @@ A.sd-text-item-title {
 
 .dn-dragnet g.node text {
   font-size: 10px;
-  visibility: visible;
+  display: none;
   opacity: 0;
   transition: all .5s;
 }
@@ -930,6 +930,6 @@ A.sd-text-item-title {
 }
 
 .dn-dragnet g.node.show text {
-  visibility: visible;
+  display: block;
   opacity: .4;
 }
