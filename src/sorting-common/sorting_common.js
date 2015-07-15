@@ -448,14 +448,14 @@
   {
     var lastid = 0;
 
-    this.post = function (/* msg [, data], callback] */)
+    this.post = function (/* method [, data], callback] */)
     {
-      var msg, callback, args,
+      var method, callback, args,
           l = arguments.length,
           msgid = ++lastid;
 
       if(arguments.length === 0) throw "Invalid parameters";
-      msg = arguments[0];
+      method = arguments[0];
       if(l > 1) {
         l = arguments[1];       /* temporary assignment */
         /* Data is optional but, if given, expect it in second argument. */
@@ -468,13 +468,6 @@
         if(is_fn(arguments[l])) callback = arguments[l];
       }
 
-      window.postMessage( {
-        id:      msgid,
-        message: msg,
-        reply:   false,
-        args :   args
-      }, "*");
-
       var handler = function (ev) {
         var data = ev.data;
         if(!is_obj(data) || !data.reply || data.id !== msgid) return;
@@ -482,26 +475,40 @@
         callback(data.result);
       };
 
+      /* Attach listener to receive reply. */
       window.addEventListener("message", handler, false);
+
+      /* ... and post message. */
+      window.postMessage( {
+        id:     msgid,
+        method: method,
+        reply:  false,
+        args :  args
+      }, "*");
     };
 
-    this.on = function (msg, callback)
+    this.on = function (method, callback)
     {
       var handler = function (ev) {
+        /* We are supposed to process this message if it isn't a reply and is
+         * the method we're after. */
         var data = ev.data;
-        if(!is_obj(data) || data.reply !== false || data.message !== msg)
+        if(!is_obj(data) || data.reply !== false || data.method !== method)
           return;
 
+        /* Invoke method handler and allow for a response to be given
+         * asynchronously. */
         callback(function (result) {
           window.postMessage( {
-            id:      data.id,
-            message: msg,
-            reply:   true,
-            result:  result
+            id:     data.id,
+            method: method,
+            reply:  true,
+            result: result
           }, "*");
-        }, ev.data.args);
+        }, ev.data.args);       /* also passing message arguments. */
       };
 
+      /* Attach message listener. */
       window.addEventListener("message", handler, false);
     };
   }();
