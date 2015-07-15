@@ -66,15 +66,14 @@ this.Dragnet = (function (window, $, std, Api, dn, undefined) {
               api.listItems(subfolders[si]).then(function (items) {
                 var sc = subfolders[si];
 
-                /* The following attribute(s) is added by `Api` and is specific
-                 * to Sorting Desk (the extension). */
-                delete sc.exists;
-
                 if(!std.is_arr(items) || items.length === 0)
                   console.warn("Skipping subfolder: invalid or no items", sc);
                 else {
-                  sc.item = items[Math.floor(Math.random() * items.length)];
-                  cl.push(sc);
+                  /* Save class descriptor. */
+                  cl.push( {
+                    name: sc.name,
+                    item: items[Math.floor(Math.random() * items.length)]
+                  } );
                 }
 
                 nextSubfolder(++si);
