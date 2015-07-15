@@ -444,6 +444,72 @@
   /**
    * @class
    * */
+  this.messaging = new function ()
+  {
+    var lastid = 0;
+
+    this.post = function (/* msg [, data], callback] */)
+    {
+      var msg, callback, args,
+          l = arguments.length,
+          msgid = ++lastid;
+
+      if(arguments.length === 0) throw "Invalid parameters";
+      msg = arguments[0];
+      if(l > 1) {
+        l = arguments[1];       /* temporary assignment */
+        /* Data is optional but, if given, expect it in second argument. */
+        if(l !== undefined && !is_fn(l)) {
+          args = arguments[1];
+          l = 2;                /* callback must be in third argument  */
+        } else l = 1;           /* callback must be in second argument */
+
+        /* Assign callback if a function found in expected argument. */
+        if(is_fn(arguments[l])) callback = arguments[l];
+      }
+
+      window.postMessage( {
+        id:      msgid,
+        message: msg,
+        reply:   false,
+        args :   args
+      }, "*");
+
+      var handler = function (ev) {
+        var data = ev.data;
+        if(!is_obj(data) || !data.reply || data.id !== msgid) return;
+        window.removeEventListener("message", handler);
+        callback(data.result);
+      };
+
+      window.addEventListener("message", handler, false);
+    };
+
+    this.on = function (msg, callback)
+    {
+      var handler = function (ev) {
+        var data = ev.data;
+        if(!is_obj(data) || data.reply !== false || data.message !== msg)
+          return;
+
+        callback(function (result) {
+          window.postMessage( {
+            id:      data.id,
+            message: msg,
+            reply:   true,
+            result:  result
+          }, "*");
+        }, ev.data.args);
+      };
+
+      window.addEventListener("message", handler, false);
+    };
+  }();
+
+
+  /**
+   * @class
+   * */
   this.NodeFinder = NodeFinder;
   function NodeFinder(
     tag,    /* = "data-scope"  */
