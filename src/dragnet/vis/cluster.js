@@ -17,6 +17,12 @@ this.Dragnet = (function (window, $, std, d3, dn, undefined) {
   dn = dn || { };
 
 
+  /**
+   * @namespace
+   * */
+  var vis = dn.vis = dn.vis || { };
+
+
   /* Default options */
   var defaults = {
     container:      $(),
@@ -33,24 +39,16 @@ this.Dragnet = (function (window, $, std, d3, dn, undefined) {
   /**
    * @class
    * */
-  dn.Visualisation = function (options)
+  vis.Cluster = function (options)
   {
-    this.options = $.extend(true, { }, defaults, options);
-    this.dataset = null;
-    this.vis = null;console.log(this.options);
+    vis.Vis.call(this, options, defaults);
   };
 
-  dn.Visualisation.prototype.create = function (dataset)
-  {
-    if(this.vis) throw "Visualisation instance exists";
-    this.dataset = dataset;
-    this.refresh();
-  };
+  vis.Cluster.prototype = Object.create(vis.Vis.prototype);
 
-  dn.Visualisation.prototype.refresh = function ()
+  vis.Cluster.prototype.refresh = function ()
   {
-    var self = this,
-        opts = this.options,
+    var opts = this.options,
         dataset = this.dataset,
         w = opts.container.width(),
         h = opts.container.height();
@@ -101,7 +99,7 @@ this.Dragnet = (function (window, $, std, d3, dn, undefined) {
       } );
     }
 
-    // Move d to be adjacent to the cluster node.
+    /* Move `d` to be adjacent to the cluster node. */
     function cluster(alpha) {
       return function(d) {
         var cluster = dataset.clusters[d.cluster];
@@ -120,7 +118,7 @@ this.Dragnet = (function (window, $, std, d3, dn, undefined) {
       };
     }
 
-    // Resolves collisions between d and all other circles.
+    /* Resolve collisions between `d` and all other nodes. */
     function collide(alpha) {
       var quadtree = d3.geom.quadtree(dataset.nodes);
       return function(d) {
@@ -175,14 +173,6 @@ this.Dragnet = (function (window, $, std, d3, dn, undefined) {
     function onDoubleClick(d) {
       console.log("event: double click: ", d);
     }
-  };
-
-  dn.Visualisation.prototype.destroy = function ()
-  {
-    if(!this.vis) throw "No visualization instance";
-    this.vis.stop();
-    this.options.container.empty();
-    this.options = this.dataset = this.vis = null;
   };
 
 

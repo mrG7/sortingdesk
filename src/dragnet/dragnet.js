@@ -17,6 +17,9 @@ this.Dragnet = (function (window, $, std, dn, undefined) {
   dn = dn || { };
 
 
+  /* Constants */
+  var DEFAULT_VISUALISATION = "Cluster";
+
   /* Default options */
   var defaults = {
     container: "dn-vis"
@@ -40,20 +43,30 @@ this.Dragnet = (function (window, $, std, dn, undefined) {
     console.info("Dragnet instantiated");
   };
 
-  dn.Dragnet.prototype.create = function ()
+  dn.Dragnet.prototype.create = function (Vis)
+  {
+    if(this.vis) throw "Visualisation instance exists";
+    if(!std.is_fn(Vis)) Vis = dn.vis[DEFAULT_VISUALISATION];
+    return this.switch(Vis);
+  };
+
+  dn.Dragnet.prototype.switch = function (Vis)
   {
     var self = this;
 
-    if(this.vis) throw "Visualisation instance exists";
+    if(!std.is_fn(Vis)) throw "Invalid visualisation constructor";
+    if(this.vis) this.vis.destroy();
+
+    var end = function () { self.events.trigger("loadend"); };
 
     this.events.trigger("loadbegin");
     return this.api.getClasses().then(function (classes) {
       return self.api.computeWeights(classes);
-    } ).then(function (classes) {
-      self.vis = new dn.Visualisation(self.options);
+    }, end).then(function (classes) {
+      self.vis = new Vis(self.options);
       self.vis.create(new dn.Dataset(classes));
-      self.events.trigger("loadend");
-    } );
+      end();
+    }, end);
   };
 
   dn.Dragnet.prototype.destroy = function ()
