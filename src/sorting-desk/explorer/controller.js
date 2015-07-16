@@ -373,8 +373,11 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
     var next = function () {
       /* Detach listener previously attached below when adding the subfolder.
        * */
-      if(std.is_fn(this.off))
+      /* TODO: confirm this is actually being detached */
+      if(std.is_fn(this.off)) {
+        console.log("detaching");
         this.off('loading-end', next);
+      }
 
       if(index >= suggestions.length)
         return;
@@ -565,7 +568,10 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
     this.update_empty_state_();
   };
 
-  /* Private interface */
+  /* Private interface
+   * --
+   * TODO: re-assess: most of these private methods should probably go in a
+   * `util` namespace. */
   explorer.Controller.prototype.reset_query_ = function ()
   {
     this.api.getDossierJs().stop('API.search');
