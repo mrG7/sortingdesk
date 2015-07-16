@@ -39,6 +39,7 @@ this.SortingDesk = (function (window, $, djs, std, sd, undefined) {
       options:    { value: $.extend(true, { }, defaults_, options) }
     } );
 
+    this.processor = null;
     this.subfolder = null;
     this.status = null;
   };
@@ -70,9 +71,12 @@ this.SortingDesk = (function (window, $, djs, std, sd, undefined) {
     console.info("OpenQuery controller reset");
   };
 
+  openquery.Controller.prototype.processing = function ()
+  { return !!this.subfolder; };
+
   openquery.Controller.prototype.process = function (subfolder)
   {
-    if(this.subfolder !== null) return std.instareject();
+    if(this.processor) return std.instareject();
 
     this.subfolder = subfolder;
     this.status = new sd.explorer.Status("WAIT");

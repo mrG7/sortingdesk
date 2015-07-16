@@ -32,6 +32,7 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
         index = 0;
 
     return $.Deferred(function (d) {
+      self.subfolder.loading(true);
       self.api.fc.getAll(ids).then(function (fcs) {
         console.log(fcs);
 
@@ -63,7 +64,10 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
         };
         next();
 
-      }, function () { d.reject(); } );
+      }, function () { d.reject(); } )
+        .always(function () {
+          self.subfolder.loading(false);
+        } );
     } ).promise();
   };
 
