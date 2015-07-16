@@ -148,6 +148,13 @@
     return true;
   }
 
+  this.instareject = instareject;
+  function instareject() {
+    return $.Deferred(function (d) {
+      d.reject();
+    } ).promise();
+  }
+
 
   /**
    * @class
