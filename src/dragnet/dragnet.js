@@ -33,8 +33,12 @@ this.Dragnet = (function (window, $, std, dn, undefined) {
   {
     this.options = $.extend(true, { }, options, defaults);
     this.api = dn.api.construct(this.options.api);
-    this.vis = null;
-    this.events = new std.Events(this, [ "loadbegin", "loadend" ]);
+    this.vis = {
+      Type: null,
+      instance: null
+    };
+    this.data = null;
+    this.events = new std.Events(this, [ "loadbegin", "loadend", "select" ]);
 
     this.options.container = $(
       document.getElementById(this.options.container)
@@ -43,35 +47,56 @@ this.Dragnet = (function (window, $, std, dn, undefined) {
     console.info("Dragnet instantiated");
   };
 
-  dn.Dragnet.prototype.create = function (Vis)
+  dn.Dragnet.prototype.create = function (nc /* name-or-class */)
   {
-    if(this.vis) throw "Visualisation instance exists";
-    if(!std.is_fn(Vis)) Vis = dn.vis[DEFAULT_VISUALISATION];
-    return this.switch(Vis);
+    if(this.vis.instance) throw "Visualisation instance exists";
+    return this.switch(nc || DEFAULT_VISUALISATION);
   };
 
-  dn.Dragnet.prototype.switch = function (Vis)
+  dn.Dragnet.prototype.reload = function ()
   {
     var self = this;
 
-    if(!std.is_fn(Vis)) throw "Invalid visualisation constructor";
-    if(this.vis) this.vis.destroy();
-
-    var end = function () { self.events.trigger("loadend"); };
+    if(!this.vis.Type) throw "Visualisation type not set";
 
     this.events.trigger("loadbegin");
-    return this.api.getClasses().then(function (classes) {
-      return self.api.computeWeights(classes);
-    }, end).then(function (classes) {
-      self.vis = new Vis(self.options);
-      self.vis.create(new dn.Dataset(classes));
+    var end = function () { self.events.trigger("loadend"); };
+
+    return this.api.fetch().then(function (data) {
+      if(!std.is_arr(data)) console.error("Data invalid", data);
+      else {
+        self.data = data;
+        self.switch(self.vis.Type);
+      }
+
       end();
+
+      return self.data;
     }, end);
+
+  };
+
+  dn.Dragnet.prototype.switch = function (nc)
+  {
+    var self = this;
+    var instantiate = function () {
+      return (self.vis.instance = new self.vis.Type(self.data, self.options))
+        .on("select", function (c) { self.events.trigger("select", c); } )
+        .create();
+    };
+
+         if(std.is_str(nc)) nc = dn.vis[nc];
+    else if(!std.is_fn(nc)) nc = dn.vis[DEFAULT_VISUALISATION];
+    if(!std.is_fn(nc)) throw "Invalid visualisation specified";
+    this.vis.Type = nc;
+
+    if(this.vis.instance) this.vis.instance.destroy();
+    return this.data ? instantiate() : this.reload();
   };
 
   dn.Dragnet.prototype.destroy = function ()
   {
-    if(!this.vis) throw "No visualization instance";
+    if(!this.vis.instance) throw "No visualization instance";
     this.vis.destroy();
     this.options = this.api = this.vis = null;
   };

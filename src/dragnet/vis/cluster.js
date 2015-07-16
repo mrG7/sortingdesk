@@ -28,8 +28,8 @@ this.Dragnet = (function (window, $, std, d3, dn, undefined) {
     container:      $(),
     padding:        1.5,        /* between same-cluster circles */
     clusterPadding: 6,          /* between different-cluster circles */
-    minRadius:      2,
-    maxRadius:      12,
+    minRadius:      3,
+    maxRadius:      20,
     marginText:     5,
     gravity:        0.02,
     charge:         0
@@ -39,16 +39,81 @@ this.Dragnet = (function (window, $, std, d3, dn, undefined) {
   /**
    * @class
    * */
-  vis.Cluster = function (options)
+  var Dataset = function (classes, options)
+  {
+    if(!std.is_arr(classes) || classes.length === 0)
+      throw "Dataset empty";
+
+    options = $.extend(true, { }, options, defaults);
+    options.maxRadius -= options.minRadius;
+
+    var clusters = this.clusters = [ ],
+        nodes = this.nodes = [ ];
+
+    classes.forEach(function (cl) {
+      if(!std.is_arr(cl) || cl.length === 0)
+        throw "Invalid class";
+
+      var cluster = clusters.length,
+          max = 0;
+
+      /* Find maximum weight. */
+      cl.forEach(function (c) {
+        var w = c.weight;
+        if(w > max) max = w;
+      } );
+
+      /* Ensure root node has maximum weight at a minimum. */
+      cl.some(function (c) {
+        if(!c.parent) {
+          if(c.weight < max) {
+            console.warn("Root node's weight below maximum: fixing");
+            c.weight = max;
+          }
+
+          return true;
+        }
+      } );
+
+      /* Add default cluster descriptor. */
+      clusters.push( { radius: 0 } );
+
+      /* Ready to normalise weights. */
+      cl.forEach(function (c, i) {
+        var w = c.weight;
+        w = options.maxRadius * w / max + options.minRadius;
+        var d = {
+          cluster: cluster,
+          radius: w,
+          data: {
+            parent: c.parent,
+            caption: c.caption,
+            weight: c.weight
+          }
+        };
+
+        if(w > clusters[cluster].radius) clusters[cluster] = d;
+        nodes.push(d);
+      } );
+    } );
+  };
+
+
+  /**
+   * @class
+   * */
+  vis.Cluster = function (data, options)
   {
     vis.Vis.call(this, options, defaults);
+    this.dataset = new Dataset(data, options);
   };
 
   vis.Cluster.prototype = Object.create(vis.Vis.prototype);
 
   vis.Cluster.prototype.refresh = function ()
   {
-    var opts = this.options,
+    var self = this,
+        opts = this.options,
         dataset = this.dataset,
         w = opts.container.width(),
         h = opts.container.height();
@@ -62,9 +127,10 @@ this.Dragnet = (function (window, $, std, d3, dn, undefined) {
           .start();
 
     var color = d3.scale.category10()
-          .domain(d3.range(1));
+          .domain(d3.range(this.dataset.nodes.length));
 
-    var svg = d3.select(opts.container.get(0)).append("svg")
+    var svg = d3.select(opts.container.get(0))
+          .append("svg")
           .attr("width", w)
           .attr("height", h);
 
@@ -85,7 +151,7 @@ this.Dragnet = (function (window, $, std, d3, dn, undefined) {
     enter.append("text")
       .attr("x", function(d) { return d.radius + opts.marginText; })
 	    .attr("dy", ".35em")
-	    .text(function(d) { return d.name || "no-name"; });
+	    .text(function(d) { return d.data.caption || "no-name"; });
 
     function tick(e) {
       node
@@ -153,17 +219,20 @@ this.Dragnet = (function (window, $, std, d3, dn, undefined) {
     }
 
     function onMouseOver(d) {
-      node.sort(function (a, b) {
-        if(a !== d) return -1;
-        return 1;
-      } );
+      node
+        .sort(function (a, b) { return a !== d ? -1 : 1; })
+        .attr("class", function (e) {
+          if(e === d) return "node over show";
+          return "node";
+        } );
 
-      node.attr("class", function (e) {
-        var cl = [ "node" ];
-        if(e.cluster === d.cluster) cl.push("show");
-        if(e === d) cl.push("over");
-        return cl.join(" ");
-      } );
+      /* Following code shows all nodes in `d`'s cluster. */
+/*       node.attr("class", function (e) { */
+/*         var cl = [ "node" ]; */
+/*         if(e.cluster === d.cluster) cl.push("show"); */
+/*         if(e === d) cl.push("over"); */
+/*         return cl.join(" "); */
+/*       } ); */
     }
 
     function onMouseOut(d) {
@@ -171,7 +240,8 @@ this.Dragnet = (function (window, $, std, d3, dn, undefined) {
     }
 
     function onDoubleClick(d) {
-      console.log("event: double click: ", d);
+      console.log(d);
+      self.events.trigger("select", $.extend({ }, d.data));
     }
   };
 

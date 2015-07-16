@@ -31,14 +31,14 @@ this.Dragnet = (function (window, $, std, d3, dn, undefined) {
     this.options = $.extend(true, { }, defaults, options);
     this.dataset = null;
     this.vis = null;
+    this.events = new std.Events(this, [ "select" ]);
   };
 
   vis.Vis.prototype = Object.create(vis.Vis.prototype);
 
-  vis.Vis.prototype.create = function (dataset)
+  vis.Vis.prototype.create = function ()
   {
     if(this.vis) throw "Visualisation instance exists";
-    this.dataset = dataset;
     this.refresh();
   };
 
