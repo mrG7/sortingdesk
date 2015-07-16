@@ -46,6 +46,10 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
     else if(!item.parent) {
       console.info("Item is root node: ignoring");
       return false;
+    } else if(this.openquery.processing()) {
+      window.alert("Open Query is currently processing a request.  Please try"
+                   + " again when it finishes.");
+      return false;
     }
 
     var self = this,
@@ -63,7 +67,7 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
       this.api.foldering.nameToId(item.caption)
     );
 
-    if(subfolder && !(subfolder instanceof sd.explorer.Subfolder)) {
+    if(subfolder && subfolder instanceof sd.explorer.Subfolder) {
       console.error("Item exists but is NOT a subfolder", item, subfolder);
       window.alert("Unable to continue since the selected item exists but is"
                    + " NOT a subfolder.\n\nPlease contact the support team.");
