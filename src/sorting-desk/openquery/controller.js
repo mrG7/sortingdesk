@@ -43,6 +43,10 @@ this.SortingDesk = (function (window, $, djs, std, sd, undefined) {
     this.status = null;
   };
 
+  openquery.Controller.prototype = Object.create(
+    std.Controller.prototype
+  );
+
   openquery.Controller.prototype.initialise = function ()
   {
     var self = this;
@@ -66,6 +70,40 @@ this.SortingDesk = (function (window, $, djs, std, sd, undefined) {
     console.info("OpenQuery controller reset");
   };
 
+  openquery.Controller.prototype.process = function (subfolder)
+  {
+    if(this.subfolder !== null) return std.instareject();
+
+    this.subfolder = subfolder;
+    this.status = new sd.explorer.Status("WAIT");
+    subfolder.setStatus(this.status);
+
+    this.processor = new openquery.Processor(
+      this.api,
+      subfolder.owner.data,
+      subfolder.data,
+      this.options.delays.interval
+    );
+
+    this.options.button.addClass("disabled");
+
+    var self = this;
+    return $.Deferred(function (d) {
+      self.processor.on( {
+        done: function (result) {
+          self.cleanup_(result);
+          d.resolve(result);
+        },
+        failed: function () {
+          self.cleanup_();
+          window.alert("Unfortunately the OpenQuery request failed.\n\n"
+                       + "Please try again or contact the support team.");
+          d.reject();
+        }
+      } );
+    } ).promise();
+  };
+
   /* Private interface */
   openquery.Controller.prototype.onClick_ = function ()
   {
@@ -79,27 +117,8 @@ this.SortingDesk = (function (window, $, djs, std, sd, undefined) {
       return;
     }
 
-    this.options.button.addClass("disabled");
-
     if(sel instanceof sd.explorer.Item) sel = sel.owner;
-
-    this.subfolder = sel;
-    this.status = new sd.explorer.Status("WAIT");
-    sel.setStatus(this.status);
-
-    this.processor = new openquery.Processor(
-      this.api, sel.owner.data, sel.data, this.options.delays.interval
-    );
-
-    var self = this;
-    this.processor.on( {
-      failed: function () {
-        window.alert("Unfortunately the OpenQuery request failed.\n\n"
-                     + "Please try again or contact the support team.");
-        self.cleanup_();
-      },
-      done: this.cleanup_.bind(this)
-    } );
+    this.process(sel);
   };
 
   openquery.Controller.prototype.cleanup_ = function (result)
@@ -110,7 +129,7 @@ this.SortingDesk = (function (window, $, djs, std, sd, undefined) {
     }, this.options.delays.end);
 
     this.status.setContent(result && result.state.toUpperCase() || "FAIL");
-    this.subfolder = this.status = null;
+    this.processor = this.subfolder = this.status = null;
     this.options.button.removeClass("disabled");
   };
 
