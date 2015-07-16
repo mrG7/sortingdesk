@@ -442,6 +442,25 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
     } ) === true ? result : null;
   };
 
+  explorer.Controller.prototype.getAnyByOwnId = function (id)
+  {
+    var result = null,
+        search = function (coll, callback) {
+          return coll.some(function (i) {
+            if(i.data.id === id) {
+              result = i; return true;
+            } else if(callback)
+              return callback(i);
+          } );
+        };
+
+    return search(this.folders_, function (f) {
+      return search(f.subfolders, function (sb) {
+        return search(sb.items);
+      } );
+    } ) === true ? result : null;
+  };
+
   explorer.Controller.prototype.setActive = function (item)
   {
     /* Don't activate item if currently active already. */
