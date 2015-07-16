@@ -443,36 +443,31 @@
 
   /**
    * @class
+   * Support for Intra-Process Communication.
    * */
-  this.messaging = new function ()
+  this.ipc = new function ()
   {
     var lastid = 0;
 
-    this.post = function (/* method [, data], callback] */)
+    this.post = function (/* method [, arg0, .. , argn ] */)
     {
-      var method, callback, args,
+      var method, args,
           l = arguments.length,
-          msgid = ++lastid;
+          msgid = ++lastid,
+          deferred = $.Deferred();
 
       if(arguments.length === 0) throw "Invalid parameters";
       method = arguments[0];
-      if(l > 1) {
-        l = arguments[1];       /* temporary assignment */
-        /* Data is optional but, if given, expect it in second argument. */
-        if(l !== undefined && !is_fn(l)) {
-          args = arguments[1];
-          l = 2;                /* callback must be in third argument  */
-        } else l = 1;           /* callback must be in second argument */
+      if(!is_str(method)) throw "Invalid method name";
 
-        /* Assign callback if a function found in expected argument. */
-        if(is_fn(arguments[l])) callback = arguments[l];
-      }
+      if(l > 1) args = Array.prototype.slice.call(arguments, 1, l);
+      else      args = [ ];
 
       var handler = function (ev) {
         var data = ev.data;
         if(!is_obj(data) || !data.reply || data.id !== msgid) return;
         window.removeEventListener("message", handler);
-        callback(data.result);
+        deferred.resolve(data.result);
       };
 
       /* Attach listener to receive reply. */
@@ -485,6 +480,9 @@
         reply:  false,
         args :  args
       }, "*");
+
+      /* A response is returned in the following promise. */
+      return deferred.promise();
     };
 
     this.on = function (method, callback)
@@ -496,16 +494,20 @@
         if(!is_obj(data) || data.reply !== false || data.method !== method)
           return;
 
-        /* Invoke method handler and allow for a response to be given
-         * asynchronously. */
-        callback(function (result) {
+        var reply = function (result) {
           window.postMessage( {
             id:     data.id,
             method: method,
             reply:  true,
             result: result
           }, "*");
-        }, ev.data.args);       /* also passing message arguments. */
+        };
+
+        /* Invoke method handler and allow for a response to be given
+         * asynchronously. */
+        var r = callback.apply(window, ev.data.args);
+        if(r && is_fn(r.then)) r.then(reply);
+        else reply(r);
       };
 
       /* Attach message listener. */
