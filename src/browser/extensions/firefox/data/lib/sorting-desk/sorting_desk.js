@@ -115,6 +115,7 @@ this.SortingDesk = (function (window, $, std, sq, sd, Api, undefined) {
     explorer_: null,
     facets_: null,
     openquery_: null,
+    dragnet_: null,
 
     /* Getters */
     get sortingQueue ()  { return this.sortingQueue_; },
@@ -131,6 +132,7 @@ this.SortingDesk = (function (window, $, std, sq, sd, Api, undefined) {
     get explorer ()      { return this.explorer_; },
     get facets ()        { return this.facets_; },
     get openquery ()     { return this.openquery_; },
+    get dragnet ()       { return this.dragnet_; },
 
     /* Interface */
     initialise: function ()
@@ -229,11 +231,17 @@ this.SortingDesk = (function (window, $, std, sq, sd, Api, undefined) {
         } )
       ).initialise();
 
-      this.openquery_ = new sd.openquery.Controller(
+      (this.openquery_ = new sd.openquery.Controller(
         this.explorer_,
         this.api_, {
           button: els.toolbar.openquery
-      } ).initialise();
+      } )).initialise();
+
+      (this.dragnet_ = new sd.dragnet.Controller(
+        this.explorer_,
+        this.openquery_,
+        this.api_
+      )).initialise();
 
       this.initialised_ = true;
       console.info("Sorting Desk UI initialised");

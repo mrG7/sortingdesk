@@ -148,6 +148,13 @@
     return true;
   }
 
+  this.instareject = instareject;
+  function instareject() {
+    return $.Deferred(function (d) {
+      d.reject();
+    } ).promise();
+  }
+
 
   /**
    * @class
@@ -439,6 +446,81 @@
     };
 
   });
+
+
+  /**
+   * @class
+   * Support for Intra-Process Communication.
+   * */
+  this.ipc = new function ()
+  {
+    var lastid = 0;
+
+    this.post = function (/* method [, arg0, .. , argn ] */)
+    {
+      var method, args,
+          l = arguments.length,
+          msgid = ++lastid,
+          deferred = $.Deferred();
+
+      if(arguments.length === 0) throw "Invalid parameters";
+      method = arguments[0];
+      if(!is_str(method)) throw "Invalid method name";
+
+      if(l > 1) args = Array.prototype.slice.call(arguments, 1, l);
+      else      args = [ ];
+
+      var handler = function (ev) {
+        var data = ev.data;
+        if(!is_obj(data) || !data.reply || data.id !== msgid) return;
+        window.removeEventListener("message", handler);
+        deferred.resolve(data.result);
+      };
+
+      /* Attach listener to receive reply. */
+      window.addEventListener("message", handler, false);
+
+      /* ... and post message. */
+      window.postMessage( {
+        id:     msgid,
+        method: method,
+        reply:  false,
+        args :  args
+      }, "*");
+
+      /* A response is returned in the following promise. */
+      return deferred.promise();
+    };
+
+    this.on = function (method, callback)
+    {
+      var handler = function (ev) {
+        /* We are supposed to process this message if it isn't a reply and is
+         * the method we're after. */
+        var data = ev.data;
+        if(!is_obj(data) || data.reply !== false || data.method !== method)
+          return;
+
+        var reply = function (result) {
+          window.postMessage( {
+            id:     data.id,
+            method: method,
+            reply:  true,
+            result: result
+          }, "*");
+        };
+
+        /* Invoke method handler and allow for a response to be given
+         * asynchronously. */
+        var r = callback.apply(window, ev.data.args);
+        if(r && is_fn(r.then)) r.then(reply);
+        else reply(r);
+      };
+
+      /* Attach message listener. */
+      window.addEventListener("message", handler, false);
+    };
+  }();
 
 
   /**

@@ -152,7 +152,9 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
 
     hits.forEach(function (i) {
       self.explorer.api.fc.get(i.content_id).done(function (fc) {
-        links.push( { title: i.title, url: fc.raw.meta_url } );
+        /* Pick first title in the `i.title` map. */
+        for(var k in i.title) break;
+        links.push( { title: k, url: fc.raw.meta_url } );
       } ).always(function () {
         if(--count === 0) {
           preview.removeClass(sd.ui.Css.loading);

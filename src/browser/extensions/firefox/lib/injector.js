@@ -27,6 +27,8 @@ var Injector = (function () {
   };
 
   var attach_ = function (tab) {
+    if(!/^https?:\/\/.+/.test(tab.url)) return;
+
     var w = map[tab.id] = tab.attach( { contentScriptFile: scripts } );
     w.port.emit('initialise');
     console.log("embedded content script to tab: ", tab.id);

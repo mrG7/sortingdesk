@@ -50,7 +50,7 @@
     {
       "name": "active",
       "title": "Sorting Desk active",
-      "description": "Check to construct the Sorting Desk sidebar.",
+      "description": "Check to create the Sorting Desk sidebar.",
       "type": "bool",
       "value": true
     }

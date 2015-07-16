@@ -87,6 +87,8 @@ mkdirx lib/sorting-queue
 mkdirx lib/sorting-desk/explorer
 mkdirx lib/sorting-desk/ui
 mkdirx lib/sorting-desk/openquery
+mkdirx lib/dragnet/api
+mkdirx lib/dragnet/vis
 mkdirx lib/dossier.js
 mkdirx lib/CryptoJS
 mkdirx lib/bootstrap/css
@@ -121,8 +123,15 @@ cpx "$dir_src/sorting-desk/ui/css.js" lib/sorting-desk/ui/
 cpx "$dir_src/sorting-desk/ui/failure.js" lib/sorting-desk/ui/
 cpx "$dir_src/sorting-desk/openquery/controller.js" lib/sorting-desk/openquery/
 cpx "$dir_src/sorting-desk/openquery/processor.js" lib/sorting-desk/openquery/
+cpx "$dir_src/sorting-desk/dragnet.js" lib/sorting-desk/
 cpx "$dir_src/sorting-desk/api-live.js" lib/sorting-desk/
-cpxr "$dir_src/dragnet" lib/
+cpx "$dir_src/dragnet/api/api.js" lib/dragnet/api/
+cpx "$dir_src/dragnet/api/dossiermodels.js" lib/dragnet/api/
+cpx "$dir_src/dragnet/vis/vis.js" lib/dragnet/vis/
+cpx "$dir_src/dragnet/vis/cluster.js" lib/dragnet/vis/
+cpx "$dir_src/dragnet/vis/hbar.js" lib/dragnet/vis/
+cpx "$dir_src/dragnet/dragnet.js" lib/dragnet/
+cpx "$dir_src/dragnet/main.js" lib/dragnet/
 
 # dossier.js
 cpx "$dir_lib/dossier.js/Dossier.js" lib/dossier.js/

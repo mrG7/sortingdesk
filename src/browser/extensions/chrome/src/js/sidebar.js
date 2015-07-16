@@ -15,6 +15,7 @@ var Main = (function (window, chrome, $, std, sq, sqc, sd, undefined) {
   /* Module-wide variables */
   var nodes = { },
       active = null,
+      windowId,
       loading,
       sorter;
 
@@ -273,6 +274,18 @@ var Main = (function (window, chrome, $, std, sq, sqc, sd, undefined) {
       window.location = window.location;
     };
 
+    methods.dragnetSelect = function (req, sen)
+    {
+      console.info(
+        "Opening or creating subfolder corresponding to:",
+        req.item
+      );
+
+      /* Process request and focus extension window. */
+      sorter.dragnet.select(req.item);
+      chrome.windows.update(windowId, { focused: true } );
+    };
+
 
     /* Message handling logic. */
     chrome.runtime.onMessage.addListener(function (req, sen, cb) {
@@ -361,9 +374,11 @@ var Main = (function (window, chrome, $, std, sq, sqc, sd, undefined) {
 
 
   /* Private interface */
-  var initialise_ = function ()
+  var initialise_ = function (id)
   {
     console.log("Initialising main");
+
+    windowId = id;
 
     /* Initialisation sequence */
     loading = {
@@ -450,7 +465,7 @@ var Main = (function (window, chrome, $, std, sq, sqc, sd, undefined) {
         }
       } );
 
-    console.log("Initialised main");
+    console.log("Initialised main (@%d)", windowId);
   };
 
   var instantiate_ = function (meta)
@@ -495,6 +510,9 @@ var Main = (function (window, chrome, $, std, sq, sqc, sd, undefined) {
 
     setupSortingQueue_(sorter);
 
+    /* TODO: we need to specifically reference the element by id.  H1>A is
+     * dangerously too generic.
+     * -- */
     /* For whatever reason, links that contain images won't work inside
      * sidebar/extension window and must therefore be dealt with manually. */
     $('H1 > A').click(function () { window.open("http://diffeo.com"); } );
@@ -512,7 +530,7 @@ var Main = (function (window, chrome, $, std, sq, sqc, sd, undefined) {
       function (win) {
         chrome.windows.getCurrent(function (f) {
           if(win === null || f.id === win.id)
-            initialise_();
+            initialise_(win.id);
           else
             window.location.href = "about:blank";
         } );

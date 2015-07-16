@@ -29,17 +29,18 @@ this.Dragnet = (function (window, std, dn, undefined) {
 
   api.register = function (name, constructor)
   {
+    /* Don't allow an API to register twice. */
     if(name in registry) throw "API already registered: " + name;
     registry[name] = constructor;
   };
 
   api.construct = function (options)
   {
-    if(!std.is_obj(options) || !std.is_str(options.name))
+    if(!std.is_obj(options) || !std.is_str(options.backend))
       throw "Invalid options";
 
-    var Type = registry[options.name];
-    if(!Type) throw "API not found: " + options.name;
+    var Type = registry[options.backend];
+    if(!Type) throw "API not found: " + options.backend;
 
     return new Type(options);
   };

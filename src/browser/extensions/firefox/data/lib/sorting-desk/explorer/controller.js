@@ -130,6 +130,7 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
         }
 
         self.processing_.do(data.text.trim());
+        /* TODO: empty if-block. */
         if(data.text !== owner.options.folderNewCaption) {
         }
 
@@ -315,29 +316,45 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
 
   explorer.Controller.prototype.createFolder = function ()
   {
+    if(this.processing_) {
+      console.error("Deferred processing ongoing");
+      return std.instareject();
+    }
+
     this.update_empty_state_(true);
-    this.processing_ = new explorer.DeferredCreationFolder(
-      this, new explorer.FolderNew(this));
+    return (this.processing_ = new explorer.DeferredCreationFolder(
+      this, new explorer.FolderNew(this)
+    )).promise();
   };
 
   explorer.Controller.prototype.createSubfolder = function (
     folder, name, descriptor)
   {
-    this.processing_ = new explorer.DeferredCreationSubfolder(
-      this, folder, new explorer.SubfolderNew(folder, name), descriptor);
+    if(this.processing_) {
+      console.error("Deferred processing ongoing");
+      return std.instareject();
+    }
+
+    return (this.processing_ = new explorer.DeferredCreationSubfolder(
+      this, folder, new explorer.SubfolderNew(folder, name), descriptor
+    )).promise();
   };
 
   explorer.Controller.prototype.createItem = function (subfolder, name)
   {
-    if(subfolder === undefined)
+    if(this.processing_) {
+      console.error("Deferred processing ongoing");
+      return std.instareject();
+    } else if(subfolder === undefined)
       subfolder = this.selected_;
     if(!(subfolder instanceof explorer.Subfolder)) {
       console.error("Invalid or no subfolder");
-      return;
+      return std.instareject();
     }
 
-    this.processing_ = new explorer.DeferredCreationItem(
-      this, subfolder, new explorer.ItemNew(subfolder, name));
+    return (this.processing_ = new explorer.DeferredCreationItem(
+      this, subfolder, new explorer.ItemNew(subfolder, name)
+    )).promise();
   };
 
   explorer.Controller.prototype.onExport = function (item, type)
@@ -373,8 +390,11 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
     var next = function () {
       /* Detach listener previously attached below when adding the subfolder.
        * */
-      if(std.is_fn(this.off))
+      /* TODO: confirm this is actually being detached */
+      if(std.is_fn(this.off)) {
+        console.log("detaching");
         this.off('loading-end', next);
+      }
 
       if(index >= suggestions.length)
         return;
@@ -429,6 +449,25 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
         search = function (coll, callback) {
           return coll.some(function (i) {
             if(i.id === id) {
+              result = i; return true;
+            } else if(callback)
+              return callback(i);
+          } );
+        };
+
+    return search(this.folders_, function (f) {
+      return search(f.subfolders, function (sb) {
+        return search(sb.items);
+      } );
+    } ) === true ? result : null;
+  };
+
+  explorer.Controller.prototype.getAnyByOwnId = function (id)
+  {
+    var result = null,
+        search = function (coll, callback) {
+          return coll.some(function (i) {
+            if(i.data.id === id) {
               result = i; return true;
             } else if(callback)
               return callback(i);
@@ -546,7 +585,10 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
     this.update_empty_state_();
   };
 
-  /* Private interface */
+  /* Private interface
+   * --
+   * TODO: re-assess: most of these private methods should probably go in a
+   * `util` namespace. */
   explorer.Controller.prototype.reset_query_ = function ()
   {
     this.api.getDossierJs().stop('API.search');

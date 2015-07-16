@@ -25,13 +25,17 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
     std.Owned.call(this, ctrl);
 
     Object.defineProperties(this, {
-      api:    { value: ctrl.owner.api },
-      obj:    { value: obj }
+      api:      { value: ctrl.owner.api },
+      obj:      { value: obj },
+      deferred: { value: $.Deferred() }
     } );
   };
 
   explorer.DeferredProcessing.prototype = Object.create(std.Owned.prototype);
   explorer.DeferredProcessing.prototype.reset = function () { };
+
+  explorer.DeferredProcessing.prototype.promise = function ()
+  { return this.deferred.promise(); };
 
 
   /**
@@ -52,13 +56,15 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
   explorer.DeferredRename.prototype.do = function (name)
   {
     var self = this,
-        deferred = this.obj.rename(name);
+        promise = this.obj.rename(name);
 
-    if(deferred !== null) {
+    if(promise !== null) {
       this.owner_.updateToolbar();
-      deferred
+      promise
+        .done(function () { self.deferred.resolve(self.obj); })
         .fail(function () {
           self.owner.tree.rename_node(self.obj.id, self.old);
+          self.deferred.reject();
         } )
         .always(function () {
           self.owner_.updateToolbar();
@@ -111,9 +117,11 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
     f.loading(true);
 
     this.api.foldering.addFolder(f.data)
+      .done(function () { self.deferred.resolve(f); } )
       .fail(function () {
         self.owner.owner.networkFailure.incident(
           sd.ui.NetworkFailure.types.folder.add, f.data);
+        self.deferred.reject();
       } )
       .always(function () { f.loading(false); } );
 
@@ -148,6 +156,8 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
     f = this.parent.add(f);
     if(this.descriptor !== null)
       f.add(this.descriptor);
+
+    this.deferred.resolve(f);
   };
 
 
@@ -175,7 +185,9 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
         descriptor.subtopic_id = self.owner.generate_subtopic_id_(descriptor);
         if(descriptor.subtopic_id !== null)
           self.parent.add(descriptor);
-      } );
+        self.deferred.resolve(descriptor);
+      } )
+      .fail(function () { self.deferred.reject(); } );
   };
 
 
