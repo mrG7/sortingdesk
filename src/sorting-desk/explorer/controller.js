@@ -130,6 +130,7 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
         }
 
         self.processing_.do(data.text.trim());
+        /* TODO: empty if-block. */
         if(data.text !== owner.options.folderNewCaption) {
         }
 
@@ -315,29 +316,45 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
 
   explorer.Controller.prototype.createFolder = function ()
   {
+    if(this.processing_) {
+      console.error("Deferred processing ongoing");
+      return std.instareject();
+    }
+
     this.update_empty_state_(true);
-    this.processing_ = new explorer.DeferredCreationFolder(
-      this, new explorer.FolderNew(this));
+    return (this.processing_ = new explorer.DeferredCreationFolder(
+      this, new explorer.FolderNew(this)
+    )).promise();
   };
 
   explorer.Controller.prototype.createSubfolder = function (
     folder, name, descriptor)
   {
-    this.processing_ = new explorer.DeferredCreationSubfolder(
-      this, folder, new explorer.SubfolderNew(folder, name), descriptor);
+    if(this.processing_) {
+      console.error("Deferred processing ongoing");
+      return std.instareject();
+    }
+
+    return (this.processing_ = new explorer.DeferredCreationSubfolder(
+      this, folder, new explorer.SubfolderNew(folder, name), descriptor
+    )).promise();
   };
 
   explorer.Controller.prototype.createItem = function (subfolder, name)
   {
-    if(subfolder === undefined)
+    if(this.processing_) {
+      console.error("Deferred processing ongoing");
+      return std.instareject();
+    } else if(subfolder === undefined)
       subfolder = this.selected_;
     if(!(subfolder instanceof explorer.Subfolder)) {
       console.error("Invalid or no subfolder");
-      return;
+      return std.instareject();
     }
 
-    this.processing_ = new explorer.DeferredCreationItem(
-      this, subfolder, new explorer.ItemNew(subfolder, name));
+    return (this.processing_ = new explorer.DeferredCreationItem(
+      this, subfolder, new explorer.ItemNew(subfolder, name)
+    )).promise();
   };
 
   explorer.Controller.prototype.onExport = function (item, type)
