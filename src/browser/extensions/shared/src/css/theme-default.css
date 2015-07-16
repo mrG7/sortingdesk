@@ -851,6 +851,8 @@ A.sd-text-item-title {
   background: url('../../media/images/folder-sub.png') 0 0 no-repeat !important;
 }
 
+.jstree LI { position: relative; }
+
 .jstree LI.sd-active {
   border: 1px solid #ACDBB9;
 }
@@ -915,7 +917,8 @@ A.sd-text-item-title {
 }
 
 .dn-dragnet g.node text {
-  font-size: 10px;
+  font-size: 14px;
+  text-shadow: 2px 1px 2px #fff;
   display: none;
   opacity: 0;
   transition: all .5s;
