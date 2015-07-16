@@ -851,6 +851,8 @@ A.sd-text-item-title {
   background: url('../../media/images/folder-sub.png') 0 0 no-repeat !important;
 }
 
+.jstree LI { position: relative; }
+
 .jstree LI.sd-active {
   border: 1px solid #ACDBB9;
 }
@@ -915,7 +917,8 @@ A.sd-text-item-title {
 }
 
 .dn-dragnet g.node text {
-  font-size: 10px;
+  font-size: 14px;
+  text-shadow: 2px 1px 2px #fff;
   display: none;
   opacity: 0;
   transition: all .5s;
@@ -932,4 +935,51 @@ A.sd-text-item-title {
 .dn-dragnet g.node.show text {
   display: block;
   opacity: .4;
+}
+
+
+
+
+
+
+
+h2 {
+  font-size: .8em;
+  margin-left: 10px;
+}
+
+.chart {
+  background: #b0e0f8;
+  margin: 5px;
+}
+
+.chart rect {
+  stroke: white;
+  fill: steelblue;
+}
+
+.chart text {
+  fill: white;
+}
+
+.chart text.name {
+  fill: #000;
+}
+
+.chart line {
+  stroke: #c1c1c1;
+}
+
+.chart .rule {
+  fill: #000;
+}
+
+/* removed the while stroke as we don't need it anymore */
+#step-5 .chart rect {
+  stroke: none;
+}
+
+/* a bit of hovering effect for each bar */
+#step-5 .chart rect:hover {
+  fill: #64707D;
 }

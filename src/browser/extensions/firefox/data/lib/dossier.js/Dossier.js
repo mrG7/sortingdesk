@@ -43,7 +43,8 @@
     var API = function(url_prefix, api_versions) {
         this.api_versions = $.extend(true, {}, API_VERSION,
                                      api_versions || {});
-        this.xhr = new Xhr(url_prefix || '');
+        /* Remove any trailing slashes before passing URL in. */
+        this.xhr = new Xhr(url_prefix.replace(/\/+$/, "") || '');
         this.prefix = this.xhr.url;
     };
 
@@ -515,6 +516,15 @@
 
     API.prototype.stop = function () {
         return this.xhr.stop.apply(this.xhr, arguments);
+    };
+
+    API.prototype.dragnet = function () {
+        return this.xhr.ajax('API.dragnet', {
+            type: 'GET',
+            url: this.url('dragnet')
+        } ).fail(function () {
+            console.error('Dragnet request failed');
+        } );
     };
 
     // A convenience class for fetching labels.
