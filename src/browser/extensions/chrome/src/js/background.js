@@ -95,7 +95,7 @@
 
   var injectEmbeddableContentMaybe = function (tab)
   {
-    if(/^https?:/.test(tab.url)) {
+    if(/^https?:\/\/.+/.test(tab.url)) {
       console.log("Injecting content: %s", tab.url);
       injectEmbeddableContent(tab.id);
     } else
