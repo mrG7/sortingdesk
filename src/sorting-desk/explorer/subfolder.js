@@ -78,6 +78,8 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
       this.fake_ = null;
     }
 
+    this.focus();
+
     /* Retrieve all items for this subfolder, if not yet loaded. */
     if(!this.loaded_) {
       var self = this;

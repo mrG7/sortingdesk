@@ -77,6 +77,15 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
       this.opening_ = true;
       this.tree.open_node(this.id_);
     }
+
+    this.focus();
+  };
+
+  explorer.ItemBase.prototype.focus = function ()
+  {
+    try {
+      document.getElementById(this.id).scrollIntoView();
+    } catch(x) { std.on_exception(x); }
   };
 
   explorer.ItemBase.prototype.onAfterOpen = function ()

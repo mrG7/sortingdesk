@@ -67,10 +67,13 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
       this.api.foldering.nameToId(item.caption)
     );
 
-    if(subfolder && subfolder instanceof sd.explorer.Subfolder) {
+    if(subfolder && !(subfolder instanceof sd.explorer.Subfolder)) {
       console.error("Item exists but is NOT a subfolder", item, subfolder);
       window.alert("Unable to continue since the selected item exists but is"
                    + " NOT a subfolder.\n\nPlease contact the support team.");
+      return false;
+    } else if(subfolder instanceof sd.explorer.Subfolder) {
+      subfolder.open();
       return false;
     }
 
