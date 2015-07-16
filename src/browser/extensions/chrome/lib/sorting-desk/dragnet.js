@@ -42,9 +42,6 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
 
   dragnet.Controller.prototype.select = function (item)
   {
-    window.alert("Unavailable -- in active development");
-    return false;
-
     if(!std.is_obj(item)) throw "Invalid item";
     else if(!item.parent) {
       console.info("Item is root node: ignoring");
@@ -85,7 +82,7 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
             return;
           }
 
-          new sd.explorer.BatchInserter(self.explorer.sf)
+          new sd.explorer.BatchInserter(self.explorer, self.api, sf)
             .insert(result.content_ids)
             .fail(function () { sf.remove(); } );
         }, function () { sf.remove(); } );
