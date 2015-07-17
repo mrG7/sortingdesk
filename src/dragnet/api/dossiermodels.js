@@ -84,7 +84,12 @@ this.Dragnet = (function (window, $, std, djs, Api, dn, undefined) {
   {
     var self = this;
     dn.get().then(function (result) {
-      if(!std.is_obj(result)) throw "Invalid response received";
+      if(!std.is_obj(result)) {
+        console.error("Invalid response received", result);
+        d.reject();
+        return;
+      }
+
       console.log("GET:", result);
 
       if("clusters" in result) {

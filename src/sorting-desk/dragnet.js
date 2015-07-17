@@ -72,7 +72,9 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
       return false;
     }
 
-    var sf = new this.api.foldering.subfolderFromName(folder, item.caption);
+    var sf = new this.api.foldering.subfolderFromName(
+      folder.data, item.caption
+    );
     sf = folder.add(sf);
     sf.select(true);
 
