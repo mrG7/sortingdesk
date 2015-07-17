@@ -44,6 +44,27 @@ this.Dragnet = (function (window, $, std, dn, undefined) {
       document.getElementById(this.options.container)
     );
 
+    var self = this,
+        finder = new std.NodeFinder();
+
+    this.nodes = {
+      select: finder.find("visualisation"),
+      toolbar: {
+        refresh: finder.find("toolbar-refresh")
+      }
+    };
+
+    this.nodes.select.change(function () {
+      self.switch($(this).val());
+    } );
+
+    this.nodes.toolbar.refresh.click(function () {
+      var $this = $(this);
+      $this.addClass("disabled");
+      self.reload(true)
+        .always(function () { $this.removeClass("disabled"); } );
+    } );
+
     console.info("Dragnet instantiated");
   };
 
@@ -53,7 +74,7 @@ this.Dragnet = (function (window, $, std, dn, undefined) {
     return this.switch(nc || DEFAULT_VISUALISATION);
   };
 
-  dn.Dragnet.prototype.reload = function ()
+  dn.Dragnet.prototype.reload = function (recompute)
   {
     var self = this;
 
@@ -62,7 +83,7 @@ this.Dragnet = (function (window, $, std, dn, undefined) {
     this.events.trigger("loadbegin");
     var end = function () { self.events.trigger("loadend"); };
 
-    return this.api.fetch().then(function (data) {
+    return this.api.fetch(recompute).then(function (data) {
       if(!std.is_arr(data)) console.error("Data invalid", data);
       else {
         self.data = data;
@@ -72,7 +93,11 @@ this.Dragnet = (function (window, $, std, dn, undefined) {
       end();
 
       return self.data;
-    }, end);
+    }, function () {
+      window.alert("A problem occurred whilst attempting to retrieve data.\n\n"
+                   + "Please try again or contact the support team.");
+      end();
+    });
 
   };
 

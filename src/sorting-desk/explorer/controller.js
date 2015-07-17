@@ -140,25 +140,21 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
       },
       "before_open.jstree": function (ev, data) {
         var i = self.getAnyById(data.node.id);
-        if(i !== null)
-          i.open();
+        if(i !== null) i.open();
       },
       "after_open.jstree": function (ev, data) {
         var i = self.getAnyById(data.node.id);
-        if(i !== null)
-          i.onAfterOpen();
+        if(i !== null) i.onAfterOpen();
       },
       "dblclick.jstree": function (ev, data) {
         var i = self.getAnyById($(ev.target).closest("li").attr('id'));
-        if(!i.opening) {
-          if(i instanceof explorer.Subfolder) {
-            i.open();
+        if(i.opening) return;
 
-            if(i.items.length > 0)
-              self.setActive(i.items[0]);
-          } else if(i instanceof explorer.Item)
+        if(i instanceof explorer.Subfolder) {
+          i.open();
+          if(i.items.length > 0) self.setActive(i.items[0]);
+        } else if(i instanceof explorer.Item)
           self.setActive(i);
-        }
       },
       "select_node.jstree": function (ev, data) {
         var i = self.getAnyById(data.node.id);
@@ -294,10 +290,8 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
         self.refreshing_ = false;
         self.events_.trigger('refresh-end');
 
-        if(self.folders_.length > 0)
-          self.tree_.select_node(self.folders_[0].id);
-        else
-          self.updateToolbar();
+        if(self.folders_.length > 0) self.folders_[0].select();
+        else                         self.updateToolbar();
 
         console.log("Loaded folders:", self.folders_);
       } );
@@ -328,8 +322,8 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
   };
 
   explorer.Controller.prototype.createSubfolder = function (
-    folder, name, descriptor)
-  {
+    folder, name, descriptor
+  ) {
     if(this.processing_) {
       console.error("Deferred processing ongoing");
       return std.instareject();
@@ -390,14 +384,8 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
     var next = function () {
       /* Detach listener previously attached below when adding the subfolder.
        * */
-      /* TODO: confirm this is actually being detached */
-      if(std.is_fn(this.off)) {
-        console.log("detaching");
-        this.off('loading-end', next);
-      }
-
-      if(index >= suggestions.length)
-        return;
+      if(std.is_fn(this.off)) this.off('loading-end', next);
+      if(index >= suggestions.length) return;
 
       var s = suggestions[index],
           descriptor = {

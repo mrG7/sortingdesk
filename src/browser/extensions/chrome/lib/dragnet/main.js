@@ -36,8 +36,6 @@
         select:    function (c) { std.ipc.post("select", c);         }
       } )
       .create().then(function () { console.log("READY"); } );
-
-    return "OK1";
   } );
 
 } )(this,

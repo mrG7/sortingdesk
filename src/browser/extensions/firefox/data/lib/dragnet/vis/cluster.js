@@ -126,7 +126,7 @@ this.Dragnet = (function (window, $, std, d3, dn, undefined) {
           .on("tick", tick)
           .start();
 
-    var color = d3.scale.category10()
+    var color = d3.scale.category20()
           .domain(d3.range(this.dataset.nodes.length));
 
     var svg = d3.select(opts.container.get(0))
@@ -138,20 +138,34 @@ this.Dragnet = (function (window, $, std, d3, dn, undefined) {
           .data(this.dataset.nodes);
 
     var enter = node.enter().append("g")
-          .attr("class", "node")
+          .sort(function (a, b) { return !!a.data.parent ? -1 : 1; })
+          .attr("class", function (d) {
+            return !d.data.parent ? "node root show" : "node";
+          } )
           .on("mouseover", onMouseOver)
           .on("mouseout", onMouseOut)
           .on("dblclick", onDoubleClick)
           .call(force.drag);
 
     enter.append("svg:circle")
-      .attr("r", function(d) { return d.radius; })
+      .attr("r", function(d) { return 0; })
       .style("fill", function(d) { return color(d.cluster); });
 
     enter.append("text")
       .attr("x", function(d) { return d.radius + opts.marginText; })
 	    .attr("dy", ".35em")
+      .attr("fill-opacity", 0)
 	    .text(function(d) { return d.data.caption || "no-name"; });
+
+    node.selectAll("circle")
+      .transition()
+      .duration(1500)
+      .attr("r", function (d) { return d.radius; });
+
+    node.selectAll("text")
+      .transition()
+      .duration(1000)
+      .attr("fill-opacity", 1);
 
     function tick(e) {
       node
@@ -220,23 +234,23 @@ this.Dragnet = (function (window, $, std, d3, dn, undefined) {
 
     function onMouseOver(d) {
       node
-        .sort(function (a, b) { return a !== d ? -1 : 1; })
+        .sort(function (a, b) {
+               if(a === d)                   return 1;
+          else if(b === d && !a.data.parent) return -1;
+          return !a.data.parent ? 1 : -1;
+        })
         .attr("class", function (e) {
-          if(e === d) return "node over show";
-          return "node";
+          var c = [ "node" ];
+          if(!e.data.parent) c.push("root show");
+          if(e === d) c = c.concat(["over", "show"]);
+          return c.join(" ");
         } );
-
-      /* Following code shows all nodes in `d`'s cluster. */
-/*       node.attr("class", function (e) { */
-/*         var cl = [ "node" ]; */
-/*         if(e.cluster === d.cluster) cl.push("show"); */
-/*         if(e === d) cl.push("over"); */
-/*         return cl.join(" "); */
-/*       } ); */
     }
 
     function onMouseOut(d) {
-      node.attr("class", "node");
+      node.attr("class", function (d) {
+        return !d.data.parent ? "node root show" : "node";
+      });
     }
 
     function onDoubleClick(d) {

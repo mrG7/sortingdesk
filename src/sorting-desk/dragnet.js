@@ -47,7 +47,6 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
       console.info("Item is root node: ignoring");
       return false;
     }
-
     var self = this,
         folder = this.explorer.getAnyByOwnId(item.parent),
         subfolder;
@@ -68,28 +67,33 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
       window.alert("Unable to continue since the selected item exists but is"
                    + " NOT a subfolder.\n\nPlease contact the support team.");
       return false;
+    } else if(subfolder instanceof sd.explorer.Subfolder) {
+      subfolder.open(true);
+      return false;
     }
 
-    this.explorer.createSubfolder(folder, item.caption, null)
-      .then(function (sf) { window.setTimeout(function () {
-        self.openquery.process(sf).then(function (result) {
-          console.log("GOT: ", result);
+    var sf = new this.api.foldering.subfolderFromName(
+      folder.data, item.caption
+    );
+    sf = folder.add(sf);
+    sf.select(true);
 
-          if(result.content_ids.length === 0) {
-            sf.remove();
-            window.alert("Open Query did not return any results.  Removing"
-                         + " subfolder");
-            return;
-          }
+    window.setTimeout(function () {
+      self.openquery.process(sf).then(function (result) {
+        console.log("GOT: ", result);
 
-          new sd.explorer.BatchInserter(self.explorer, self.api, sf)
-            .insert(result.content_ids)
-            .fail(function () { sf.remove(); } );
-        }, function () { sf.remove(); } );
-      }, 250); }, function () {
-        window.alert("Unable to process request at this time.\n\nPlease"
-                     + " contact the support team.");
-      } );
+        if(result.content_ids.length === 0) {
+          sf.remove();
+          window.alert("Open Query did not return any results.  Removing"
+                       + " subfolder");
+          return;
+        }
+
+        new sd.explorer.BatchInserter(self.explorer, self.api, sf)
+          .insert(result.content_ids)
+          .fail(function () { sf.remove(); } );
+      }, function () { sf.remove(); } );
+    }, 250);
 
     return true;
   };

@@ -54,7 +54,7 @@ this.Dragnet = (function (window, $, std, d3, dn, undefined) {
         if(w > max) max = w;
 
         weights.push(w);
-        names.push(c.name);
+        names.push(c.caption);
       } );
     } );
 
@@ -78,15 +78,14 @@ this.Dragnet = (function (window, $, std, d3, dn, undefined) {
     var opts = this.options,
         weights = this.dataset.weights,
         names = this.dataset.names,
-        w = opts.container.width(),
-        h = opts.container.height();
+        w = opts.container.width();
 
     var margin = 20;
 
     var gap = 2, yRangeBand;
 
     var barHeight = 20,
-        leftWidth = 100;
+        leftWidth = 210;
 
     yRangeBand = barHeight + 2 * gap;
     var x = d3.scale.linear()
@@ -96,60 +95,77 @@ this.Dragnet = (function (window, $, std, d3, dn, undefined) {
     var y = function(i) { return yRangeBand * i; };
 
     var chart = this.vis = d3.select(opts.container.get(0))
-      .append('svg')
-      .attr('class', 'chart')
+          .append('svg')
+          .attr('class', 'chart')
           .attr('width', w - margin)
-      .attr('height', (barHeight + gap * 2) * names.length + 30)
-      .append("g")
+          .attr('height', (barHeight + gap * 2) * names.length + 30)
+          .append("g")
           .attr("transform", "translate(10, 20)");
 
-  chart.selectAll("line")
-    .data(x.ticks(d3.max(weights)))
-    .enter().append("line")
-    .attr("x1", function(d) { return x(d) + leftWidth; })
-    .attr("x2", function(d) { return x(d) + leftWidth; })
-    .attr("y1", 0)
-    .attr("y2", (barHeight + gap * 2) * names.length);
+    chart.selectAll("line")
+      .data(x.ticks(d3.max(weights)))
+      .enter().append("line")
+      .attr("x1", function(d) { return x(d) + leftWidth; })
+      .attr("x2", function(d) { return x(d) + leftWidth; })
+      .attr("y1", 0)
+      .attr("y2", (barHeight + gap * 2) * names.length);
 
-  chart.selectAll(".rule")
-    .data(x.ticks(d3.max(weights)))
-    .enter().append("text")
-    .attr("class", "rule")
-    .attr("x", function(d) { return x(d) + leftWidth; })
-    .attr("y", 0)
-    .attr("dy", -6)
-    .attr("text-anchor", "middle")
-    .attr("font-size", 10)
-    .text(String);
+    chart.selectAll(".rule")
+      .data(x.ticks(20))
+      .enter().append("text")
+      .attr("class", "rule")
+      .attr("x", function(d) { return x(d) + leftWidth; })
+      .attr("y", 0)
+      .attr("dy", -6)
+      .attr("text-anchor", "middle")
+      .attr("font-size", 10)
+      .text(String);
 
-  chart.selectAll("rect")
-    .data(weights)
-    .enter().append("rect")
-    .attr("x", leftWidth)
-    .attr("y", function(d, i) { return y(i) + gap; })
-    .attr("width", x)
-    .attr("height", barHeight);
+    chart.selectAll("rect.bar")
+      .data(weights)
+      .enter().append("rect")
+      .attr("class", "bar")
+      .attr("x", leftWidth)
+      .attr("y", function(d, i) { return y(i) + gap; })
+      .attr("width", 0)
+      .attr("height", barHeight);
 
-  chart.selectAll("text.score")
-    .data(weights)
-    .enter().append("text")
-    .attr("x", function(d) { return x(d) + leftWidth; })
-    .attr("y", function(d, i) { return y(i) + yRangeBand/2;})
-    .attr("dx", -5)
-    .attr("dy", ".36em")
-    .attr("text-anchor", "end")
-    .attr('class', 'score')
-    .text(String);
+    chart.selectAll("text.score")
+      .data(weights)
+      .enter().append("text")
+      .attr("x", function(d) { return x(d) + leftWidth; })
+      .attr("y", function(d, i) { return y(i) + yRangeBand/2;})
+      .attr("dx", -5)
+      .attr("dy", ".36em")
+      .attr("text-anchor", "end")
+      .attr('class', 'score')
+      .text(String);
 
-  chart.selectAll("text.name")
-    .data(names)
-    .enter().append("text")
-    .attr("x", leftWidth / 2)
-    .attr("y", function(d, i){ return y(i) + yRangeBand/2; } )
-    .attr("dy", ".36em")
-    .attr("text-anchor", "middle")
-    .attr('class', 'name')
-    .text(String);  };
+    chart.selectAll("text.name")
+      .data(names)
+      .enter().append("text")
+/*       .attr("x", leftWidth / 2) */
+      .attr("y", function(d, i){ return y(i) + yRangeBand/2; } )
+      .attr("dy", ".36em")
+/*       .attr("text-anchor", "middle") */
+      .attr('class', 'name')
+      .text(function (d) {
+        var text = d3.select(this),
+            words = String(d).split(/\s+/);
+
+        do {
+          var line = words.join(" ");
+          if(text.text(line).node().getComputedTextLength() < leftWidth)
+            return line;
+        } while(words.pop());
+      } );
+
+    chart.selectAll("rect.bar")
+			.data(weights)
+			.transition()
+			.duration(1000)
+			.attr("width", x);
+  };
 
 
   return dn;
