@@ -67,6 +67,7 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
     this.owner_.open();
   };
 
+  /* Note: overrides `ItemBase.open`. */
   explorer.Subfolder.prototype.open = function (focus /* = false */)
   {
     if(this.opening_) return;
