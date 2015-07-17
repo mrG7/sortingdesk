@@ -57,6 +57,7 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
       this,
       [ 'loading-start', 'loading-end', 'ready' ]
     );
+    this.processing_ = { };
 
     this.on( {
       "loading-end": ctrl.updateToolbar.bind(ctrl),
@@ -160,6 +161,27 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
     if(status !== null)        status.attach(this.node);
 
     this.status_ = status;
+  };
+
+  explorer.ItemBase.prototype.processing = function (name)
+  {
+    if(name === undefined) {
+      for(var k in this.processing_) return true;
+      return false;
+    } else if(!std.is_str(name))
+      throw "Invalid process name";
+
+    return name in this.processing_;
+  };
+
+  explorer.ItemBase.prototype.setProcessing = function (name, instance)
+  {
+    if(!std.is_str(name)) throw "Invalid process name";
+    else if(instance) {
+      if(name in this.processing_) throw "Already processing: " + name;
+      this.processing_[name] = instance;
+    } else
+      delete this.processing_[name];
   };
 
   /* Private interface */

@@ -322,8 +322,8 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
   };
 
   explorer.Controller.prototype.createSubfolder = function (
-    folder, name, descriptor)
-  {
+    folder, name, descriptor
+  ) {
     if(this.processing_) {
       console.error("Deferred processing ongoing");
       return std.instareject();
@@ -384,12 +384,8 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
     var next = function () {
       /* Detach listener previously attached below when adding the subfolder.
        * */
-      if(std.is_fn(this.off)) {
-        this.off('loading-end', next);
-      }
-
-      if(index >= suggestions.length)
-        return;
+      if(std.is_fn(this.off)) this.off('loading-end', next);
+      if(index >= suggestions.length) return;
 
       var s = suggestions[index],
           descriptor = {
