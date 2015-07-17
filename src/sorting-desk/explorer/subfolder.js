@@ -93,8 +93,11 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
             try {
               self.items_.push(explorer.Item.construct(self, i));
             } catch(x) { std.on_exception(x); }
+
           } );
 
+          /* TODO: currently NOT opening node because none exist inside the
+           * tree. */
           self.tree.open_node(self.id);
           self.loading(false);
           self.setLoaded(true);
@@ -107,7 +110,6 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
           self.controller.owner.networkFailure.incident(
             sd.ui.NetworkFailure.types.subfolder.load, self.subfolder_
           );
-
         } );
     } else
       this.tree.open_node(this.id);

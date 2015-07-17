@@ -140,25 +140,21 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
       },
       "before_open.jstree": function (ev, data) {
         var i = self.getAnyById(data.node.id);
-        if(i !== null)
-          i.open();
+        if(i !== null) i.open();
       },
       "after_open.jstree": function (ev, data) {
         var i = self.getAnyById(data.node.id);
-        if(i !== null)
-          i.onAfterOpen();
+        if(i !== null) i.onAfterOpen();
       },
       "dblclick.jstree": function (ev, data) {
         var i = self.getAnyById($(ev.target).closest("li").attr('id'));
-        if(!i.opening) {
-          if(i instanceof explorer.Subfolder) {
-            i.open();
+        if(i.opening) return;
 
-            if(i.items.length > 0)
-              self.setActive(i.items[0]);
-          } else if(i instanceof explorer.Item)
+        if(i instanceof explorer.Subfolder) {
+          i.open();
+          if(i.items.length > 0) self.setActive(i.items[0]);
+        } else if(i instanceof explorer.Item)
           self.setActive(i);
-        }
       },
       "select_node.jstree": function (ev, data) {
         var i = self.getAnyById(data.node.id);
