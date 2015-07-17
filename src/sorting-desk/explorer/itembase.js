@@ -45,9 +45,7 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
     var ctrl = owner;
     while(ctrl !== null && !(ctrl instanceof explorer.Controller))
       ctrl = ctrl.owner;
-
-    if(ctrl === null)
-      throw "Controller not found";
+    if(ctrl === null) throw "Controller not found";
 
     this.controller_ = ctrl;
     this.loading_ = 0;
@@ -57,15 +55,12 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
     this.loaded_ = false;
     this.events_ = new std.Events(
       this,
-      [ 'loading-start', 'loading-end', 'ready' ] );
+      [ 'loading-start', 'loading-end', 'ready' ]
+    );
 
     this.on( {
-      "loading-end": function () {
-        ctrl.updateToolbar();
-      },
-      "loaded": function () {
-        ctrl.updateToolbar();
-      }
+      "loading-end": ctrl.updateToolbar.bind(ctrl),
+      "loaded":      ctrl.updateToolbar.bind(ctrl)
     } );
   };
 
