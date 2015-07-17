@@ -148,13 +148,24 @@ this.Dragnet = (function (window, $, std, d3, dn, undefined) {
           .call(force.drag);
 
     enter.append("svg:circle")
-      .attr("r", function(d) { return d.radius; })
+      .attr("r", function(d) { return 0; })
       .style("fill", function(d) { return color(d.cluster); });
 
     enter.append("text")
       .attr("x", function(d) { return d.radius + opts.marginText; })
 	    .attr("dy", ".35em")
+      .attr("fill-opacity", 0)
 	    .text(function(d) { return d.data.caption || "no-name"; });
+
+    node.selectAll("circle")
+      .transition()
+      .duration(1500)
+      .attr("r", function (d) { return d.radius; });
+
+    node.selectAll("text")
+      .transition()
+      .duration(1000)
+      .attr("fill-opacity", 1);
 
     function tick(e) {
       node
