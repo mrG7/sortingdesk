@@ -43,8 +43,8 @@ this.Dragnet = (function (window, $, std, djs, Api, dn, undefined) {
 
     if(reload !== true) {
       return dn.get().then(function (data) {
-        if(data && "state" in data) {
-          return data.state === "pending"
+        if(!data || data && "state" in data) {
+          return data && data.state === "pending"
             ? $.Deferred(function (d) { self.resume_(d, dn); } )
             : self.reload_(dn);
         }
