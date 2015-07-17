@@ -61,7 +61,8 @@ this.Dragnet = (function (window, $, std, dn, undefined) {
     this.nodes.toolbar.refresh.click(function () {
       var $this = $(this);
       $this.addClass("disabled");
-      self.reload(true).then(function () { $this.removeClass("disabled"); } );
+      self.reload(true)
+        .always(function () { $this.removeClass("disabled"); } );
     } );
 
     console.info("Dragnet instantiated");
@@ -92,7 +93,11 @@ this.Dragnet = (function (window, $, std, dn, undefined) {
       end();
 
       return self.data;
-    }, end);
+    }, function () {
+      window.alert("A problem occurred whilst attempting to retrieve data.\n\n"
+                   + "Please try again or contact the support team.");
+      end();
+    });
 
   };
 

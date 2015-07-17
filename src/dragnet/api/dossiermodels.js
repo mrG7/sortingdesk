@@ -68,7 +68,7 @@ this.Dragnet = (function (window, $, std, djs, Api, dn, undefined) {
       dn.post().then(function (result) {
         console.log("POST:", result);
         self.schedule_(d, dn);
-      } );
+      }, function () { d.reject(); });
     } );
   };
 
