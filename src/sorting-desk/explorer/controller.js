@@ -384,9 +384,7 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
     var next = function () {
       /* Detach listener previously attached below when adding the subfolder.
        * */
-      /* TODO: confirm this is actually being detached */
       if(std.is_fn(this.off)) {
-        console.log("detaching");
         this.off('loading-end', next);
       }
 

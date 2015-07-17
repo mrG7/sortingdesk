@@ -34,8 +34,6 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
     return $.Deferred(function (d) {
       self.subfolder.loading(true);
       self.api.fc.getAll(ids).then(function (fcs) {
-        console.log(fcs);
-
         var next = function () {
           /* Detach listener previously attached below when adding the
            * subfolder. */
@@ -62,8 +60,8 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
             = self.explorer.generate_subtopic_id_(descriptor);
           self.subfolder.add(descriptor).on('loading-end', next);
         };
-        next();
 
+        next();
       }, function () { d.reject(); } )
         .always(function () {
           self.subfolder.loading(false);
