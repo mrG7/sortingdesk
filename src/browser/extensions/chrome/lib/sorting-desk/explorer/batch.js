@@ -34,8 +34,6 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
     return $.Deferred(function (d) {
       self.subfolder.loading(true);
       self.api.fc.getAll(ids).then(function (fcs) {
-        console.log(fcs);
-
         var next = function () {
           /* Detach listener previously attached below when adding the
            * subfolder. */
@@ -48,22 +46,22 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
 
           var fc = fcs[index];
           for(var title in fc.raw.title) break;
-          var s = fcs[index],
-              descriptor = {
-                id: (window.performance.now()*100000000000).toString(),
-                type: 'manual',
-                content_id: fc.content_id,
-                content: title
-              };
+          var descriptor = {
+            id: (window.performance.now()*100000000000).toString(),
+            type: 'text',
+            content_id: fc.content_id,
+            content: title
+          };
 
           ++index;
+
           /* TODO: `generate_subtopic_id_` needs to go in a `util` namespace. */
           descriptor.subtopic_id
             = self.explorer.generate_subtopic_id_(descriptor);
           self.subfolder.add(descriptor).on('loading-end', next);
         };
-        next();
 
+        next();
       }, function () { d.reject(); } )
         .always(function () {
           self.subfolder.loading(false);

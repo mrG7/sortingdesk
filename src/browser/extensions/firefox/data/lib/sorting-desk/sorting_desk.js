@@ -182,8 +182,7 @@ this.SortingDesk = (function (window, $, std, sq, sd, Api, undefined) {
         }
       };
 
-      finder = new std.TemplateFinder('text/sd-template',
-                                      'data-sd-scope');
+      finder = new std.TemplateFinder('text/sd-template', 'data-sd-scope');
       var templates = {
         empty: {
           items: finder.find('items-empty'),

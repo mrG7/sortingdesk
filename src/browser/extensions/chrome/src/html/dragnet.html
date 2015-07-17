@@ -5,7 +5,7 @@
 
   <link href="../../lib/bootstrap/css/bootstrap.min.css" type="text/css" rel="stylesheet">
   <link href="../../lib/bootstrap/css/bootstrap-theme.min.css" type="text/css" rel="stylesheet">
-  <link href="../../shared/src/css/theme-default.css" type="text/css" rel="stylesheet">
+  <link href="../../shared/src/css/theme-dragnet.css" type="text/css" rel="stylesheet">
 
   <!-- External dependencies -->
   <script src="../../lib/jquery-2.1.1.min.js"></script>
@@ -34,6 +34,17 @@
   <header>
     <img src="../../shared/media/images/logo.png">
     <h1>Dragnet</h1>
+    <select data-scope="visualisation">
+      <option value="Cluster">Cluster</option>
+      <option value="Hbar">Horizonal Bar</option>
+    </select>
+    <div class="btn-toolbar" role="toolbar" data-scope="toolbar">
+      <div class="btn-group btn-group-xs">
+          <button type="button" class="btn btn-default" data-toggle="tooltip" data-placement="left" title="Refresh data" data-scope="toolbar-refresh">
+            <span class="glyphicon glyphicon-refresh"></span>
+          </button>
+      </div>
+    </div>
   </header>
   <section>
     <div id="dn-vis" class="vis"></div>

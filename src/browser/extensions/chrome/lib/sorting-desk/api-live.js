@@ -517,21 +517,18 @@
       {
         if(typeof num !== 'number' || num <= 0)
           throw "Invalid number of items specified";
-
+_processing = true;
         if (_processing || !query_content_id) {
-          var deferred = $.Deferred();
-
-          window.setTimeout(function () {
+          return $.Deferred(function (d) {
             if(_processing) {
               console.warn('moreTexts in progress, ignoring new request');
-              deferred.reject( { error: "Request in progress" } );
-            } else {
-              console.error('Query content id not yet set');
-              deferred.reject( { error: "No query content id" } );
+              d.reject( { error: "Request in progress" } );
+              return;
             }
-          } );
 
-          return deferred.promise();
+            console.error('Query content id not yet set');
+            d.reject( { error: "No query content id" } );
+          }).promise();
         }
 
         _processing = true;

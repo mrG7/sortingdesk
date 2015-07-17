@@ -18,19 +18,44 @@ this.SortingDesk = (function (window, $, djs, std, sd, undefined) {
 
   /* Default options */
   var defaults_ = {
-    interval: 15000
+    delays: {
+      interval: 2000,
+      end: 5000
+    }
   };
+
+
+  /* Constants */
+  var STATES = [ "pending", "failed", "done" ],
+      STATUSES = {
+        pending: "WAIT",
+        failed: "FAIL",
+        done: "DONE"
+      }
 
 
   /**
    * @class
    * */
-  openquery.Processor = function (api, folder, subfolder, interval)
+  openquery.Processor = function (api, subfolder, options)
   {
-    var states = [ "pending", "failed", "done" ];
-    var events = new std.Events(this, states);
+    options = $.extend(true, { }, defaults_, options);
 
-    var oq = new djs.OpenQuery(api.getDossierJs(), folder, subfolder);
+    if(subfolder.processing("openquery"))
+      throw "Already processing OpenQuery request";
+
+    var events = new std.Events(this, STATES.concat([ "finish" ])),
+        status = new sd.explorer.Status(STATUSES.pending);
+
+    subfolder.setProcessing("openquery", this);
+    subfolder.setStatus(status);
+
+    var oq = new djs.OpenQuery(
+      api.getDossierJs(),
+      subfolder.owner.data,
+      subfolder.data
+    );
+
     oq.post().then( function (result) {
       console.log("POST: got result: ", result);
       schedule_();
@@ -43,7 +68,7 @@ this.SortingDesk = (function (window, $, djs, std, sd, undefined) {
     /* Private interface */
     var schedule_ = function ()
     {
-      window.setTimeout(function () { next_(); }, interval);
+      window.setTimeout(function () { next_(); }, options.delays.interval);
     };
 
     var next_ = function ()
@@ -53,11 +78,21 @@ this.SortingDesk = (function (window, $, djs, std, sd, undefined) {
 
         if(!std.is_str(result.state))
           throw "Invalid or no state in response";
-        else if(states.indexOf(result.state) === -1)
+        else if(STATES.indexOf(result.state) === -1)
           throw "Invalid state in response";
 
+        status = new sd.explorer.Status(STATUSES[result.state]);
+        subfolder.setStatus(status);
         events.trigger(result.state, result);
         if(result.state === "pending") schedule_();
+        else {
+          window.setTimeout(function () {
+            if(subfolder.status === status) subfolder.setStatus(null);
+          }, options.delays.end);
+
+          subfolder.setProcessing("openquery", null);
+          events.trigger("finish");
+        }
       } ).fail(function () { events.trigger("fail"); } );
     };
   };

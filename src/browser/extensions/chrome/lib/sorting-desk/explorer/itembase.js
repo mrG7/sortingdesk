@@ -45,9 +45,7 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
     var ctrl = owner;
     while(ctrl !== null && !(ctrl instanceof explorer.Controller))
       ctrl = ctrl.owner;
-
-    if(ctrl === null)
-      throw "Controller not found";
+    if(ctrl === null) throw "Controller not found";
 
     this.controller_ = ctrl;
     this.loading_ = 0;
@@ -57,19 +55,23 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
     this.loaded_ = false;
     this.events_ = new std.Events(
       this,
-      [ 'loading-start', 'loading-end', 'ready' ] );
+      [ 'loading-start', 'loading-end', 'ready' ]
+    );
+    this.processing_ = { };
 
     this.on( {
-      "loading-end": function () {
-        ctrl.updateToolbar();
-      },
-      "loaded": function () {
-        ctrl.updateToolbar();
-      }
+      "loading-end": ctrl.updateToolbar.bind(ctrl),
+      "loaded":      ctrl.updateToolbar.bind(ctrl)
     } );
   };
 
-  explorer.ItemBase.prototype.open = function ()
+  explorer.ItemBase.prototype.select = function (focus /* = false */)
+  {
+    this.tree.select_node(this.id);
+    if(focus === true) this.focus();
+  };
+
+  explorer.ItemBase.prototype.open = function (focus /* = false */)
   {
     /* Don't attempt to open if already opening as it will result in a stack
      * overflow error and catastrophic failure. */
@@ -77,6 +79,13 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
       this.opening_ = true;
       this.tree.open_node(this.id_);
     }
+
+    if(this.focus === true) this.select_node(true);
+  };
+
+  explorer.ItemBase.prototype.focus = function ()
+  {
+    this.tree.get_node(this.id, true).children(".jstree-anchor").focus();
   };
 
   explorer.ItemBase.prototype.onAfterOpen = function ()
@@ -152,6 +161,27 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
     if(status !== null)        status.attach(this.node);
 
     this.status_ = status;
+  };
+
+  explorer.ItemBase.prototype.processing = function (name)
+  {
+    if(name === undefined) {
+      for(var k in this.processing_) return true;
+      return false;
+    } else if(!std.is_str(name))
+      throw "Invalid process name";
+
+    return name in this.processing_;
+  };
+
+  explorer.ItemBase.prototype.setProcessing = function (name, instance)
+  {
+    if(!std.is_str(name)) throw "Invalid process name";
+    else if(instance) {
+      if(name in this.processing_) throw "Already processing: " + name;
+      this.processing_[name] = instance;
+    } else
+      delete this.processing_[name];
   };
 
   /* Private interface */

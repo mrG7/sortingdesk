@@ -38,10 +38,6 @@ this.SortingDesk = (function (window, $, djs, std, sd, undefined) {
       api:        { value: api },
       options:    { value: $.extend(true, { }, defaults_, options) }
     } );
-
-    this.processor = null;
-    this.subfolder = null;
-    this.status = null;
   };
 
   openquery.Controller.prototype = Object.create(
@@ -60,46 +56,24 @@ this.SortingDesk = (function (window, $, djs, std, sd, undefined) {
   {
     this.options.button.off();
 
-    if(this.subfolder !== null) {
-      if(this.subfolder.status === this.status)
-        this.subfolder.setStatus(null);
-      this.subfolder = this.status = null;
-    }
-
     this.explorer = this.options = null;
-
     console.info("OpenQuery controller reset");
   };
 
-  openquery.Controller.prototype.processing = function ()
-  { return !!this.subfolder; };
-
   openquery.Controller.prototype.process = function (subfolder)
   {
-    if(this.processor) return std.instareject();
+    try {
+      var processor = new openquery.Processor(
+        this.api,
+        subfolder,
+        this.options.delays
+      );
+    } catch (x) { return std.instareject(); }
 
-    this.subfolder = subfolder;
-    this.status = new sd.explorer.Status("WAIT");
-    subfolder.setStatus(this.status);
-
-    this.processor = new openquery.Processor(
-      this.api,
-      subfolder.owner.data,
-      subfolder.data,
-      this.options.delays.interval
-    );
-
-    this.options.button.addClass("disabled");
-
-    var self = this;
     return $.Deferred(function (d) {
-      self.processor.on( {
-        done: function (result) {
-          self.cleanup_(result);
-          d.resolve(result);
-        },
+      processor.on( {
+        done: function (result) { d.resolve(result); },
         failed: function () {
-          self.cleanup_();
           window.alert("Unfortunately the OpenQuery request failed.\n\n"
                        + "Please try again or contact the support team.");
           d.reject();
@@ -112,9 +86,7 @@ this.SortingDesk = (function (window, $, djs, std, sd, undefined) {
   openquery.Controller.prototype.onClick_ = function ()
   {
     var sel = this.explorer.selected;
-
-    if(this.subfolder !== null) return;
-    else if(!std.instanceany(sel, sd.explorer.Subfolder, sd.explorer.Item)) {
+    if(!std.instanceany(sel, sd.explorer.Subfolder, sd.explorer.Item)) {
       window.alert(
         'Please select a subfolder or item to conduct "OpenQuery" on.'
       );
@@ -122,19 +94,11 @@ this.SortingDesk = (function (window, $, djs, std, sd, undefined) {
     }
 
     if(sel instanceof sd.explorer.Item) sel = sel.owner;
-    this.process(sel);
-  };
-
-  openquery.Controller.prototype.cleanup_ = function (result)
-  {
-    var sf = this.subfolder, st = this.status;
-    window.setTimeout(function () {
-      if(sf.status === st) sf.setStatus(null);
-    }, this.options.delays.end);
-
-    this.status.setContent(result && result.state.toUpperCase() || "FAIL");
-    this.processor = this.subfolder = this.status = null;
-    this.options.button.removeClass("disabled");
+    if(sel.processing("openquery")) {
+      window.alert("An OpenQuery request is currently running on the selected"
+                   + " subfolder.");
+    } else
+      this.process(sel);
   };
 
 
