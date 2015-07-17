@@ -126,7 +126,7 @@ this.Dragnet = (function (window, $, std, d3, dn, undefined) {
           .on("tick", tick)
           .start();
 
-    var color = d3.scale.category10()
+    var color = d3.scale.category20()
           .domain(d3.range(this.dataset.nodes.length));
 
     var svg = d3.select(opts.container.get(0))
