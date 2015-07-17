@@ -46,12 +46,7 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
     else if(!item.parent) {
       console.info("Item is root node: ignoring");
       return false;
-    } else if(this.openquery.processing()) {
-      window.alert("Open Query is currently processing a request.  Please try"
-                   + " again when it finishes.");
-      return false;
     }
-
     var self = this,
         folder = this.explorer.getAnyByOwnId(item.parent),
         subfolder;
