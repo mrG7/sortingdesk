@@ -69,7 +69,13 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
     } );
   };
 
-  explorer.ItemBase.prototype.open = function ()
+  explorer.ItemBase.prototype.select = function (focus /* = false */)
+  {
+    this.tree.select_node(this.id);
+    if(focus === true) this.focus();
+  };
+
+  explorer.ItemBase.prototype.open = function (focus /* = false */)
   {
     /* Don't attempt to open if already opening as it will result in a stack
      * overflow error and catastrophic failure. */
@@ -78,14 +84,12 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
       this.tree.open_node(this.id_);
     }
 
-    this.focus();
+    if(this.focus === true) this.select_node(true);
   };
 
   explorer.ItemBase.prototype.focus = function ()
   {
-    try {
-      document.getElementById(this.id).scrollIntoView();
-    } catch(x) { std.on_exception(x); }
+    this.tree.get_node(this.id, true).children(".jstree-anchor").focus();
   };
 
   explorer.ItemBase.prototype.onAfterOpen = function ()

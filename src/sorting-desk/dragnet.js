@@ -73,7 +73,7 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
                    + " NOT a subfolder.\n\nPlease contact the support team.");
       return false;
     } else if(subfolder instanceof sd.explorer.Subfolder) {
-      subfolder.open();
+      subfolder.open(true);
       return false;
     }
 

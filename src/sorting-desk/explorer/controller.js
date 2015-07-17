@@ -294,10 +294,8 @@ this.SortingDesk = (function (window, $, std, sd, undefined) {
         self.refreshing_ = false;
         self.events_.trigger('refresh-end');
 
-        if(self.folders_.length > 0)
-          self.tree_.select_node(self.folders_[0].id);
-        else
-          self.updateToolbar();
+        if(self.folders_.length > 0) self.folders_[0].select();
+        else                         self.updateToolbar();
 
         console.log("Loaded folders:", self.folders_);
       } );
