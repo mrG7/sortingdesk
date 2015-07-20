@@ -131,6 +131,7 @@ this.Dragnet = (function (window, $, std, d3, dn, undefined) {
 
     var svg = d3.select(opts.container.get(0))
           .append("svg")
+          .attr("class", "cluster")
           .attr("width", w)
           .attr("height", h);
 
