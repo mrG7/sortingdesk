@@ -40,25 +40,33 @@ this.Dragnet = (function (window, $, std, d3, dn, undefined) {
     options = $.extend(true, { }, options, defaults);
     options.maxRadius -= options.minRadius;
 
-    var weights = this.weights = [ ],
-        names = this.names = [ ],
-        max = 0;
+    var self = this,
+        weights = this.weights = [ ],
+        names = this.names = [ ];
 
+    this.max = 0;
     classes.forEach(function (cl) {
       if(!std.is_arr(cl) || cl.length === 0)
         throw "Invalid class";
+
+      var max = 0;
 
       /* Find maximum weight. */
       cl.forEach(function (c) {
         var w = c.weight;
         if(w > max) max = w;
+      } );
 
-        weights.push(w);
-        names.push(c.caption);
+      if(max > self.max) self.max = max;
+
+      cl.forEach(function (c) {
+        weights.push(c.weight / max);
+        names.push({
+          parent: c.parent,
+          caption: c.caption
+        });
       } );
     } );
-
-    this.max = max;
   };
 
 
@@ -75,7 +83,8 @@ this.Dragnet = (function (window, $, std, d3, dn, undefined) {
 
   vis.Hbar.prototype.refresh = function ()
   {
-    var opts = this.options,
+    var self = this,
+        opts = this.options,
         weights = this.dataset.weights,
         names = this.dataset.names,
         w = opts.container.width();
@@ -87,23 +96,25 @@ this.Dragnet = (function (window, $, std, d3, dn, undefined) {
     var barHeight = 20,
         leftWidth = 210;
 
+    var format = d3.format(".3f");
+
     yRangeBand = barHeight + 2 * gap;
     var x = d3.scale.linear()
-          .domain([0, this.dataset.max])
+          .domain([0, 1])
           .range([0, w - leftWidth - margin * 2 - 10]);
 
     var y = function(i) { return yRangeBand * i; };
 
     var chart = this.vis = d3.select(opts.container.get(0))
           .append('svg')
-          .attr('class', 'chart')
+          .attr('class', 'hbar')
           .attr('width', w - margin)
           .attr('height', (barHeight + gap * 2) * names.length + 30)
           .append("g")
           .attr("transform", "translate(10, 20)");
 
     chart.selectAll("line")
-      .data(x.ticks(d3.max(weights)))
+      .data(x.ticks(1))
       .enter().append("line")
       .attr("x1", function(d) { return x(d) + leftWidth; })
       .attr("x2", function(d) { return x(d) + leftWidth; })
@@ -139,25 +150,30 @@ this.Dragnet = (function (window, $, std, d3, dn, undefined) {
       .attr("dy", ".36em")
       .attr("text-anchor", "end")
       .attr('class', 'score')
-      .text(String);
+      .text(format);
 
     chart.selectAll("text.name")
       .data(names)
       .enter().append("text")
-/*       .attr("x", leftWidth / 2) */
       .attr("y", function(d, i){ return y(i) + yRangeBand/2; } )
       .attr("dy", ".36em")
-/*       .attr("text-anchor", "middle") */
       .attr('class', 'name')
       .text(function (d) {
         var text = d3.select(this),
-            words = String(d).split(/\s+/);
+            words = d.caption.split(/\s+/);
 
         do {
           var line = words.join(" ");
           if(text.text(line).node().getComputedTextLength() < leftWidth)
             return line;
         } while(words.pop());
+      } )
+      .on("click", function (d, i) {
+        console.log($.extend({ }, { parent: d.parent }, d));
+        self.events.trigger(
+          "select",
+          $.extend({ }, { weight: weights[i] }, d)
+        );
       } );
 
     chart.selectAll("rect.bar")

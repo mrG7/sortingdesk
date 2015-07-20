@@ -823,6 +823,7 @@
     // `folder` must be an instance of `Folder`.
     Subfolder.from_name = function(folder, name) {
         assert_valid_folder_name(name);
+
         var sf = new Subfolder(folder);
         sf.name = name;
         sf.id = folder_name_to_id(sf.name);

@@ -517,7 +517,7 @@
       {
         if(typeof num !== 'number' || num <= 0)
           throw "Invalid number of items specified";
-_processing = true;
+
         if (_processing || !query_content_id) {
           return $.Deferred(function (d) {
             if(_processing) {

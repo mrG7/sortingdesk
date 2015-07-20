@@ -46,7 +46,8 @@ header > .btn-toolbar {
   box-shadow: 0 0 2px 2px rgba(0, 0, 0, 0.08);
 }
 
-g.node text {
+/* Cluster */
+svg.cluster g.node text {
   fill: #0b9dcc;
 /*   text-shadow: 1px 1px 1px white; */
   font-size: 14px;
@@ -55,68 +56,63 @@ g.node text {
   transition: all .5s;
 }
 
-g.node.root text {
+svg.cluster g.node.root text {
   fill: black;
   text-shadow: 2px 1px 2px #fff;
 }
 
-g.node.over {
+svg.cluster g.node.over {
   cursor: pointer;
 }
 
-g.node.show.over text,
-g.node.root text{
+svg.cluster g.node.show.over text,
+svg.cluster g.node.root text{
   opacity: 1 !important;
 }
 
-g.node.show text {
+svg.cluster g.node.show text {
   display: block;
   opacity: .4;
 }
 
-
-
-
-
-
-
-h2 {
-  font-size: .8em;
-  margin-left: 10px;
-}
-
-.chart {
-  background: #b0e0f8;
+/* Hbar */
+svg.hbar {
+  border: 1px solid #B3CCDD;
+  background: #d4ebf7;
   margin: 5px;
 }
 
-.chart rect.bar {
+svg.hbar rect.bar {
   stroke: white;
   fill: steelblue;
 }
 
-.chart text {
+svg.hbar text {
   fill: white;
 }
 
-.chart text.name {
+svg.hbar text.name {
   fill: #000;
 }
 
-.chart line {
-  stroke: #c1c1c1;
+svg.hbar text.name:hover {
+  fill: #1D96CB;
+  cursor: pointer;
+  text-shadow: 1px 1px 1px #A6DAFF;
 }
 
-.chart .rule {
+svg.hbar line {
+  stroke: #abd5df;
+}
+
+svg.hbar .rule {
   fill: #000;
 }
 
-/* removed the while stroke as we don't need it anymore */
-#step-5 .chart rect {
+svg.hbar rect {
   stroke: none;
 }
 
-/* a bit of hovering effect for each bar */
-#step-5 .chart rect:hover {
-  fill: #64707D;
+svg.hbar rect:hover {
+  fill: #23abe7;
 }

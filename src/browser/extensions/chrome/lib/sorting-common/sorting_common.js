@@ -151,7 +151,7 @@
   this.instareject = instareject;
   function instareject() {
     return $.Deferred(function (d) {
-      d.reject();
+      d.reject.apply(d, arguments);
     } ).promise();
   }
 
