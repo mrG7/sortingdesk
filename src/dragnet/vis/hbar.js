@@ -159,6 +159,7 @@ this.Dragnet = (function (window, $, std, d3, dn, undefined) {
       .attr("dy", ".36em")
       .attr('class', 'name')
       .text(function (d) {
+        /* TODO: use SVG path to clip text instead. */
         var text = d3.select(this),
             words = d.caption.split(/\s+/);
 
@@ -166,7 +167,10 @@ this.Dragnet = (function (window, $, std, d3, dn, undefined) {
           var line = words.join(" ");
           if(text.text(line).node().getComputedTextLength() < leftWidth)
             return line;
-        } while(words.pop());
+          words.pop();
+        } while(words.length > 0);
+
+        return d.caption.substr(0, leftWidth / 8);
       } )
       .on("click", function (d, i) {
         console.log($.extend({ }, { parent: d.parent }, d));
