@@ -1319,7 +1319,7 @@
   {
     var self = this;
 
-    if(!is_str(names))
+    if(!is_arr(names))
       throw "Invalid or no event array specified";
 
     names.forEach(function (e) {
