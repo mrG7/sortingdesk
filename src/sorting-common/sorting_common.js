@@ -1429,6 +1429,20 @@
       throw "Invalid event(s) descriptor";
   };
 
+  Events.prototype.route = function (source, events)
+  {
+    if(is_str(events)) events = [events];
+
+    var self = this;
+    events.forEach(function (e) {
+      source.on(e, function () {
+        var args = Array.prototype.slice.call(arguments);
+        args.unshift(e);
+        self.trigger.apply(self, args);
+      } );
+    } );
+  };
+
   /* Protected methods */
   Events.prototype.register_single_ = function (ev, fn)
   {
