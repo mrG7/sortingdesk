@@ -104,6 +104,21 @@
     return index === -1 || index >= coll.length ? null : coll[index + 1];
   }
 
+  this.copy = copy;
+  function copy(obj, key0 /*, .. keyn */)
+  {
+    if(!like_obj(obj))
+      throw "Invalid object reference specified";
+
+    var r = { }, key;
+    for(var i = 1; i < arguments.length; ++i) {
+      key = arguments[i];
+      r[key] = obj[key];
+    }
+
+    return r;
+  }
+
   this.chainize = chainize;
   function chainize(context, fn)
   {
@@ -1319,7 +1334,7 @@
   {
     var self = this;
 
-    if(!is_str(names))
+    if(!is_arr(names))
       throw "Invalid or no event array specified";
 
     names.forEach(function (e) {
@@ -1427,6 +1442,20 @@
       this.map_ = { };                    /* Unregister all.  */
     else
       throw "Invalid event(s) descriptor";
+  };
+
+  Events.prototype.route = function (source, events)
+  {
+    if(is_str(events)) events = [events];
+
+    var self = this;
+    events.forEach(function (e) {
+      source.on(e, function () {
+        var args = Array.prototype.slice.call(arguments);
+        args.unshift(e);
+        self.trigger.apply(self, args);
+      } );
+    } );
   };
 
   /* Protected methods */
