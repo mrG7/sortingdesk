@@ -22,6 +22,8 @@ To run the back end, you can:
     . ve/bin/activate
 
     for a in fc store web label models; do pip install dossier.$a; done;
+
+    screen   # so you can leave the following processes running
     
     coordinated -c config.yaml &> coordinated.log &
 
