@@ -17,8 +17,6 @@ To run the back end, you can:
  1. contact us to help you: support (at) diffeo.com
  1. checkout these five repos and run the four commands below:
 
-.. block-quote:: bash
-
     virtualenv ve
 
     . ve/bin/activate
