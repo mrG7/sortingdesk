@@ -11,6 +11,10 @@ And as a plugin in Firefox:
 
 https://addons.mozilla.org/en-US/firefox/addon/sorting-desk/
 
+
+![](https://github.com/dossier/sortingdesk/img/sortingdesk.png)
+
+
 To run the back end, you can:
 
  1. run the [container](https://github.com/dossier/dossier-stack), or
