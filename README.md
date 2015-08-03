@@ -12,7 +12,7 @@ And as a plugin in Firefox:
 https://addons.mozilla.org/en-US/firefox/addon/sorting-desk/
 
 
-![](https://github.com/dossier/sortingdesk/img/sortingdesk.png)
+![](https://github.com/dossier/sortingdesk/blob/master/img/sortingdesk.png)
 
 
 To run the back end, you can:
