@@ -104,6 +104,21 @@
     return index === -1 || index >= coll.length ? null : coll[index + 1];
   }
 
+  this.copy = copy;
+  function copy(obj, key0 /*, .. keyn */)
+  {
+    if(!like_obj(obj))
+      throw "Invalid object reference specified";
+
+    var r = { }, key;
+    for(var i = 1; i < arguments.length; ++i) {
+      key = arguments[i];
+      r[key] = obj[key];
+    }
+
+    return r;
+  }
+
   this.chainize = chainize;
   function chainize(context, fn)
   {
