@@ -91,8 +91,10 @@ this.Dragnet = (function (window, $, std, djs, Api, dn, undefined) {
       }
 
       console.log("GET:", result);
-
-      if("clusters" in result) {
+      if(result.state === "failed") {
+        d.reject();
+        return;
+      } else if("clusters" in result) {
         d.resolve(self.normalise_(result));
         return;
       }
