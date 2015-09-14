@@ -9,7 +9,7 @@
 /*jshint laxbreak:true */
 
 
-this.Dragnet = (function (window, $, std, djs, Api, dn, undefined) {
+this.Dragnet = (function (window, $, std, djs, dn, undefined) {
 
   /**
    * @namespace
@@ -20,7 +20,8 @@ this.Dragnet = (function (window, $, std, djs, Api, dn, undefined) {
 
   /* Default options */
   var defaults = {
-    dossierUrl: null
+    dossierUrl: null,
+    auth: null
   };
 
 
@@ -30,7 +31,7 @@ this.Dragnet = (function (window, $, std, djs, Api, dn, undefined) {
   api.DossierModels = function (options)
   {
     this.options = $.extend(true, { }, defaults, options);
-    this.api = new Api(options.dossierUrl);
+    this.api = new djs.API(options.dossierUrl);
 
     if(!this.options.dossierUrl)
       throw "Invalid or no dossier models URL specified";
@@ -39,7 +40,7 @@ this.Dragnet = (function (window, $, std, djs, Api, dn, undefined) {
   api.DossierModels.prototype.fetch = function (reload)
   {
     var self = this,
-        dn = new djs.Dragnet(this.api.getDossierJs());
+        dn = new djs.Dragnet(this.api, this.options.auth);
 
     if(reload !== true) {
       return dn.get().then(function (data) {
@@ -126,5 +127,4 @@ this.Dragnet = (function (window, $, std, djs, Api, dn, undefined) {
     this.$,
     this.SortingCommon,
     this.DossierJS,
-    this.Api,
     this.Dragnet);
