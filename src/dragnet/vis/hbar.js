@@ -158,16 +158,11 @@ this.Dragnet = (function (window, $, std, d3, dn, undefined) {
       .attr("y", function(d, i){ return y(i) + yRangeBand/2; } )
       .attr("dy", ".36em")
       .attr('class', 'name')
-      .text(function (d) {
-        var text = d3.select(this),
-            words = d.caption.split(/\s+/);
-
-        do {
-          var line = words.join(" ");
-          if(text.text(line).node().getComputedTextLength() < leftWidth)
-            return line;
-        } while(words.pop());
+      .text(clip)
+      .on("mouseover", function (d) {
+        d3.select(this).text(d.caption);
       } )
+      .on("mouseout", clip)
       .on("click", function (d, i) {
         console.log($.extend({ }, { parent: d.parent }, d));
         self.events.trigger(
@@ -175,6 +170,23 @@ this.Dragnet = (function (window, $, std, d3, dn, undefined) {
           $.extend({ }, { weight: weights[i] }, d)
         );
       } );
+
+
+    function clip(d) {
+      /* TODO: use SVG path to clip text instead. */
+      var text = d3.select(this),
+          words = d.caption.split(/\s+/);
+
+      do {
+        var line = words.join(" ");
+        if(text.text(line).node().getComputedTextLength() < leftWidth)
+          return line;
+        words.pop();
+      } while(words.length > 0);
+
+      return d.caption.substr(0, leftWidth / 8);
+    }
+
 
     chart.selectAll("rect.bar")
 			.data(weights)
